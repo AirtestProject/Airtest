@@ -4,5 +4,8 @@
 ## 常用指令
 
 	amstart(appname) # 启动一个应用
-	
+
+## TODO
+* Use aircv instead of air-opencv
+* Use adbclient instead of air-adb
 
