@@ -1,0 +1,3 @@
+[submodule "aircv"]
+	path = aircv
+	url = ssh://git@git-qa.gz.netease.com:32200/airtest-projects/aircv.git
