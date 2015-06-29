@@ -14,7 +14,8 @@ Script engine.
 __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile', 
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'type', 'wake',
-    'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script'
+    'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
+    'gevent_run'
     ]
 
 DEBUG = True
