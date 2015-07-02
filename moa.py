@@ -24,6 +24,7 @@ AIRCV = '10.246.13.180:7311' # master
 AIRCV = '10.246.13.180:7756' # dev
 #AIRCV = '10.246.13.180:5000' # test
 SERIALNO = ''
+ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
 LOG_FILE = ''
 LOG_FILE_FD = None
@@ -51,6 +52,11 @@ class MoaError(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
+
+def set_address((host, port)):
+    global ADDRESS
+    ADDRESS = (host, port)
+    # FIXME(ssx): need to verify
 
 def set_serialno(sn):
     ''' support filepath match patten '''
