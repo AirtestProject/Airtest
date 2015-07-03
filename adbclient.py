@@ -17,12 +17,14 @@ limitations under the License.
 @author: Diego Torres Milano
 '''
 
-__version__ = '10.3.4'
+__version__ = '0.0.1'
+__origin_version__ = '10.3.4'
 
 import sys
 import warnings
 import string
 import datetime
+import requests
 if sys.executable:
     if 'monkeyrunner' in sys.executable:
         warnings.warn(
@@ -38,6 +40,7 @@ import signal
 import os
 import types
 import platform
+import bunch
 
 
 DEBUG = False
@@ -133,35 +136,19 @@ class AdbClient:
         self.hostname = hostname
         self.port = port
 
-        self.reconnect = reconnect
-        self.__connect()
-
-        self.checkVersion(ignoreversioncheck)
 
         self.build = {}
         ''' Build properties '''
 
         self.__displayInfo = None
-        ''' Cached display info. Reset it to C{None} to force refetching display info '''
 
         self.display = {}
-        ''' The map containing the device's physical display properties: width, height and density '''
 
-        self.isTransportSet = False
         if settransport and serialno != None:
-            self.__setTransport()
             self.build[VERSION_SDK_PROPERTY] = int(self.__getProp(VERSION_SDK_PROPERTY))
             if initDisplayProp:
                 self.initDisplayProperties()
 
-    @staticmethod
-    def setAlarm(timeout):
-        osName = platform.system()
-        if osName.startswith('Windows'):  # alarm is not implemented in Windows
-            return
-        if DEBUG:
-            print >> sys.stderr, "setAlarm(%d)" % timeout
-        signal.alarm(timeout)
 
     def setSerialno(self, serialno):
         if self.isTransportSet:
@@ -170,205 +157,29 @@ class AdbClient:
         self.__setTransport()
         self.build[VERSION_SDK_PROPERTY] = int(self.__getProp(VERSION_SDK_PROPERTY))
 
-    def setReconnect(self, val):
-        self.reconnect = val
-
-    def __connect(self):
-        if DEBUG:
-            print >> sys.stderr, "__connect()"
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(TIMEOUT)
-        try:
-            self.socket.connect((self.hostname, self.port))
-        except socket.error, ex:
-            raise RuntimeError("ERROR: Connecting to %s:%d: %s.\nIs adb running on your computer?" % (self.hostname, self.port, repr(ex)))
-
-    def close(self):
-        if DEBUG:
-            print >> sys.stderr, "Closing socket...", self.socket
-        if self.socket:
-            self.socket.close()
-
-    def __del__(self):
-        try:
-            self.close()
-        except:
-            pass
-
-    def __send(self, msg, checkok=True, reconnect=False):
-        if DEBUG:
-            print >> sys.stderr, "__send(%s, checkok=%s, reconnect=%s)" % (msg, checkok, reconnect)
-        if not re.search('^host:', msg):
-            if not self.isTransportSet:
-                self.__setTransport()
-        else:
-            self.checkConnected()
-        b = bytearray(msg, 'utf-8')
-        self.socket.send('%04X%s' % (len(b), b))
-        if checkok:
-            self.__checkOk()
-        if reconnect:
-            if DEBUG:
-                print >> sys.stderr, "    __send: reconnecting"
-            self.__connect()
-            self.__setTransport()
-
-    def __receive(self, nob=None):
-        if DEBUG:
-            print >> sys.stderr, "__receive()"
-        self.checkConnected()
-        if nob is None:
-            nob = int(self.socket.recv(4), 16)
-        if DEBUG:
-            print >> sys.stderr, "    __receive: receiving", nob, "bytes"
-        recv = bytearray()
-        nr = 0
-        while nr < nob:
-            chunk = self.socket.recv(min((nob - nr), 4096))
-            if chunk == "":
-                raise RuntimeError("ERROR: adb server died when receiving")
-            recv.extend(chunk)
-            nr += len(chunk)
-        if DEBUG:
-            print >> sys.stderr, "    __receive: returning len=", len(recv)
-        return str(recv)
-
-    def __checkOk(self):
-        if DEBUG:
-            print >> sys.stderr, "__checkOk()"
-        self.checkConnected()
-        #self.setAlarm(TIMEOUT)
-        recv = self.socket.recv(4)
-        if DEBUG:
-            print >> sys.stderr, "    __checkOk: recv=", repr(recv)
-        try:
-            if recv != OKAY:
-                error = self.socket.recv(1024)
-                if error.startswith('0049'):
-                    raise RuntimeError("ERROR: This computer is unauthorized. Please check the confirmation dialog on your device.")
-                else:
-                    raise RuntimeError("ERROR: %s %s" % (repr(recv), error))
-        finally:
-            self.setAlarm(0)
-        if DEBUG:
-            print >> sys.stderr, "    __checkOk: returning True"
-        return True
-
-    def checkConnected(self):
-        if DEBUG:
-            print >> sys.stderr, "checkConnected()"
-        if not self.socket:
-            raise RuntimeError("ERROR: Not connected")
-        if DEBUG:
-            print >> sys.stderr, "    checkConnected: returning True"
-        return True
-
-    def checkVersion(self, ignoreversioncheck=False, reconnect=True):
-        if DEBUG:
-            print >> sys.stderr, "checkVersion(reconnect=%s)   ignoreversioncheck=%s" % (reconnect, ignoreversioncheck)
-        self.__send('host:version', reconnect=False)
-        # HACK: MSG_WAITALL not available on windows
-        #version = self.socket.recv(8, socket.MSG_WAITALL)
-        version = self.__readExactly(self.socket, 8)
-
-        VALID_ADB_VERSIONS = ["00040020", "0004001f"]
-
-        if not (version in VALID_ADB_VERSIONS) and not ignoreversioncheck:
-            raise RuntimeError("ERROR: Incorrect ADB server version %s (expecting one of %s)" % (version, VALID_ADB_VERSIONS))
-        if reconnect:
-            self.__connect()
-        self.isTransportSet = False # FIXED by ssx
-
-    def __setTransport(self):
-        if DEBUG:
-            print >> sys.stderr, "__setTransport()"
-        if not self.serialno:
-            raise ValueError("serialno not set, empty or None")
-        self.checkConnected()
-        serialnoRE = re.compile(self.serialno)
-        found = False
-        devices = self.getDevices()
-        if len(devices) == 0:
-            raise RuntimeError("ERROR: There are no connected devices")
-        for device in devices:
-            if serialnoRE.match(device.serialno):
-                found = True
-                break
-        if not found:
-            raise RuntimeError("ERROR: couldn't find device that matches '%s' in %s" % (self.serialno, devices))
-        self.serialno = device.serialno
-        msg = 'host:transport:%s' % self.serialno
-        if DEBUG:
-            print >> sys.stderr, "    __setTransport: msg=", msg
-        self.__send(msg, reconnect=False)
-        self.isTransportSet = True
-
-    def __checkTransport(self):
-        if not self.isTransportSet:
-            raise RuntimeError("ERROR: Transport is not set")
-    
-    def __readExactly(self, sock, size):
-        if DEBUG:
-            print >> sys.stderr, "__readExactly(socket=%s, size=%d)" % (socket, size)
-        _buffer = ''
-        while len(_buffer) < size:
-            data = sock.recv(size-len(_buffer))
-            if not data:
-                break
-            _buffer+=data
-        return _buffer
 
     def getDevices(self):
+        '''
+        Use adb devices to get device list
+        '''
         if DEBUG:
             print >> sys.stderr, "getDevices()"
         self.__send('host:devices-l', checkok=False)
         try:
-            self.__checkOk()
         except RuntimeError, ex:
             print >> sys.stderr, "**ERROR:", ex
             return None
         devices = []
         for line in self.__receive().splitlines():
             devices.append(Device.factory(line))
-        self.__connect()
         self.isTransportSet = False # FIXED by ssx
         return devices
 
-    def fixConnect(self):
-        self.close()
-        self.__connect()
-        self.__setTransport()
-
     def shell(self, cmd=None):
-        if DEBUG:
-            print >> sys.stderr, "shell(cmd=%s)" % cmd
-        self.__checkTransport()
-        if cmd:
-            self.__send('shell:%s' % cmd, checkok=True, reconnect=False)
-            out = ''
-            while True:
-                _str = None
-                try:
-                    _str = self.socket.recv(4096)
-                except Exception, ex:
-                    print >> sys.stderr, "ERROR:", ex
-                if not _str:
-                    break
-                out += _str
-            if self.reconnect:
-                if DEBUG:
-                    print >> sys.stderr, "Reconnecting..."
-                self.close()
-                self.__connect()
-                self.__setTransport()
-            return out
-        else:
-            self.__send('shell:')
-            # sin = self.socket.makefile("rw")
-            # sout = self.socket.makefile("r")
-            # return (sin, sin)
-            sout = self.socket.makefile("r")
-            return sout
+        r = requests.post('localhost:7001/api/shell', data={'command': cmd})
+        req = bunch.bunchify(r.json())
+        # req.exit_code
+        return req.output
 
     def __getRestrictedScreen(self):
         ''' Gets C{mRestrictedScreen} values from dumpsys. This is a method to obtain display dimensions '''
@@ -605,68 +416,8 @@ class AdbClient:
         '''
         Takes a snapshot of the device and return it as a PIL Image.
         '''
-
-        self.__checkTransport()
-        try:
-            from PIL import Image
-        except:
-            raise Exception("You have to install PIL to use takeSnapshot()")
-        self.__send('framebuffer:', checkok=True, reconnect=False)
-        import struct
-        # case 1: // version
-        #           return 12; // bpp, size, width, height, 4*(length, offset)
-        received = self.__receive(1 * 4 + 12 * 4)
-        (version, bpp, size, width, height, roffset, rlen, boffset, blen, goffset, glen, aoffset, alen) = struct.unpack('<' + 'L' * 13, received)
-        if DEBUG:
-            print >> sys.stderr, "    takeSnapshot:", (version, bpp, size, width, height, roffset, rlen, boffset, blen, goffset, glen, aoffset, alen)
-        offsets = {roffset:'R', goffset:'G', boffset:'B'}
-        if bpp == 32:
-            if alen != 0:
-                offsets[aoffset] = 'A'
-            else:
-                warnings.warn('''framebuffer is specified as 32bpp but alpha length is 0''')
-        argMode = ''.join([offsets[o] for o in sorted(offsets)])
-        if DEBUG:
-            print >> sys.stderr, "    takeSnapshot:", (version, bpp, size, width, height, roffset, rlen, boffset, blen, goffset, blen, aoffset, alen, argMode)
-        if argMode == 'BGRA':
-            argMode = 'RGBA'
-        if bpp == 16:
-            mode = 'RGB'
-            argMode += ';16'
-        else:
-            mode = argMode
-        self.__send('\0', checkok=False, reconnect=False)
-        if DEBUG:
-            print >> sys.stderr, "    takeSnapshot: reading %d bytes" % (size)
-        received = self.__receive(size)
-        if reconnect:
-            self.__connect()
-            self.__setTransport()
-        if DEBUG:
-            print >> sys.stderr, "    takeSnapshot: Image.frombuffer(%s, %s, %s, %s, %s, %s, %s)" % (mode, (width, height), 'data', 'raw', argMode, 0, 1)
-        image = Image.frombuffer(mode, (width, height), received, 'raw', argMode, 0, 1)
-        # Just in case let's get the real image size
-        (w, h) = image.size
-        if w == self.display['height'] and h == self.display['width']:
-            # FIXME: We are not catching the 180 degrees rotation here
-            if 'orientation' in self.display:
-                r = (0, 90, 180, -90)[self.display['orientation']]
-            else:
-                r = 90
-            image = image.rotate(r)
-        return image
-
-    def __transformPointByOrientation(self, (x, y), orientationOrig, orientationDest):
-        if orientationOrig != orientationDest:
-            if orientationDest == 1:
-                _x = x
-                x = self.display['width'] - y
-                y = _x
-            elif orientationDest == 3:
-                _x = x
-                x = y
-                y = self.display['height'] - _x
-        return (x, y)
+        # FIXME(ssx): again
+        pass
 
     def touch(self, x, y, orientation=-1, eventType=DOWN_AND_UP):
         if DEBUG_TOUCH:

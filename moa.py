@@ -46,12 +46,7 @@ import subprocess
 import signal
 import requests
 import ast
-
-class MoaError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
+from error import MoaError
 
 def set_address((host, port)):
     global ADDRESS

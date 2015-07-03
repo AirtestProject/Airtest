@@ -6,6 +6,9 @@
 
 import os
 import platform
+import fnmatch
+import warnings
+from error import MoaError
 
 def look_path(program):
     system = platform.system()
@@ -33,7 +36,7 @@ if not ADBPATH:
     raise RuntimeError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
 
-def adbrun(cmds, adbpath=None, host='127.0.0.1', port=5037, serialno=None):
+def adbrun(cmds, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
     if isinstance(cmds, basestring):
         cmds = list(shlex(cmds))
     else:
@@ -55,6 +58,98 @@ def safe_adbrun(*args, **kwargs):
         return False, e
 
 
+def ADB():
+    def __init__(self, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
+        self.adbpath = ADBPATH if not adbpath else adbpath
+        self.addr = addr
+        self.serialno = serialno
+        self.props = {}
+        self.props['ro.build.version.sdk'] = self.getprop('ro.build.version.sdk')
+        self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
+
+    def run(self, cmds):
+        return adbrun(cmds, adbpath=adbpath, addr=self.addr, serialno=self.serialno)
+
+    @property
+    def sdk_version(self):
+        return self.props['ro.build.version.sdk']
+
+    def safe_run(self, cmds):
+        try:
+            return True, adbrun(*args, **kwargs)
+        except Exception as e:
+            return False, e
+
+    def shell(self, cmds):
+        cmds = ['shell'] + cmds
+        return self.run(cmds)
+
+    def getprop(self, key, strip=True):
+        prop = self.shell(['getprop', key])
+        if strip:
+            prop = prop.rstrip('\r\n')
+        return prop
+
+    def is_locked(self):
+        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
+        m = lockScreenRE.search(self.shell('dumpsys window policy'))
+        if m:
+            return (m.group(1) == 'true')
+        raise MoaError("Couldn't determine screen lock state")
+
+    def unlock(self):
+        # REWRITE ME
+        self.shell('input keyevent MENU')
+        self.shell('input keyevent BACK')
+
+    def is_screenon(self):
+        screenOnRE = re.compile('mScreenOnFully=(true|false)')
+        m = screenOnRE.search(self.shell('dumpsys window policy'))
+        if m:
+            return (m.group(1) == 'true')
+        raise MoaError("Couldn't determine screen ON state")
+
+    def wake(self):
+        if not self.is_screenon():
+            self.shell('input keyevent POWER')
+
+    def touch(self, x, y):
+        self.shell('input tap %d %d' % (x, y))
+
+    def swipe(self, (x0, y0), (x1, y1), duration=0.5, steps=1):
+        version = self.sdk_version
+        if version < 15:
+            raise MoaError('swipe: API <= 15 not supported (version=%d)' % version)
+        elif version <= 17:
+            self.shell('input swipe %d %d %d %d' % (x0, y0, x1, y1))
+        else:
+            self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
+
+    def get_top_activity_name_and_pid(self):
+        dat = self.shell('dumpsys activity top')
+        lines = dat.splitlines()
+        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        m = activityRE.search(lines[1]) 
+        if m:
+            return (m.group(1), m.group(2), m.group(3))
+        else:
+            warnings.warn("NO MATCH:" + lines[1])
+            return None
+
+    def get_top_activity_name(self):
+        tanp = self.get_top_activity_name_and_pid()
+        if tanp:
+            return tanp[0] + '/' + tanp[1]
+        else:
+            return None
+
+    def is_keyboard_shown(self):
+        dim = self.shell('dumpsys input_method')
+        if dim:
+            return "mInputShown=true" in dim
+        return False
+
+
 def get_devices():
     ''' Get all device list '''
     patten = re.compile(r'^[\w\d]+\t[\w]+$')
@@ -65,3 +160,6 @@ def get_devices():
         serialno, state = line.split('\t')
         yield (serialno, state)
 
+
+if __name__ == '__main__':
+    print get_devices()
