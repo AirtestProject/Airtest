@@ -2,8 +2,8 @@
 
 import urllib
 import sys
-import moa
 import argparse
+import moa
 
 def new_argparser():
     parser = argparse.ArgumentParser(description='Tool to run and make moa script')

@@ -11,6 +11,7 @@ Moa = AIRADB + AIRCV + thisfile
 Script engine.
 """
 
+__version__ = '0.0.1'
 __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile', 
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'type', 'wake',
@@ -44,8 +45,8 @@ import functools
 import fnmatch
 import subprocess
 import signal
-import requests
 import ast
+import requests
 from error import MoaError
 
 def set_address((host, port)):
