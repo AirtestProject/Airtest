@@ -5,9 +5,12 @@
 # Created: 2015-07-02 19:56
 
 import os
+import re
 import platform
 import fnmatch
 import warnings
+import subprocess
+from shlex import shlex
 from error import MoaError
 
 def look_path(program):
@@ -45,10 +48,12 @@ def adbrun(cmds, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
     if not adbpath:
         adbpath = ADBPATH
 
+    host, port = addr
     prefix = [adbpath, '-H', host, '-P', str(port)]
     if serialno:
         prefix += ['-s', serialno]
     cmds = prefix + cmds
+    print ' '.join(cmds)
     return subprocess.check_output(cmds)
 
 def safe_adbrun(*args, **kwargs):
@@ -58,17 +63,17 @@ def safe_adbrun(*args, **kwargs):
         return False, e
 
 
-def ADB():
-    def __init__(self, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
+class ADB():
+    def __init__(self, serialno, adbpath=None, addr=('127.0.0.1', 5037)):
         self.adbpath = ADBPATH if not adbpath else adbpath
         self.addr = addr
         self.serialno = serialno
         self.props = {}
-        self.props['ro.build.version.sdk'] = self.getprop('ro.build.version.sdk')
+        self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
 
     def run(self, cmds):
-        return adbrun(cmds, adbpath=adbpath, addr=self.addr, serialno=self.serialno)
+        return adbrun(cmds, adbpath=self.adbpath, addr=self.addr, serialno=self.serialno)
 
     @property
     def sdk_version(self):
@@ -81,7 +86,10 @@ def ADB():
             return False, e
 
     def shell(self, cmds):
-        cmds = ['shell'] + cmds
+        if isinstance(cmds, basestring):
+            cmds = 'shell '+ cmds
+        else:
+            cmds = ['shell'] + list(cmds)
         return self.run(cmds)
 
     def getprop(self, key, strip=True):
@@ -99,8 +107,11 @@ def ADB():
 
     def unlock(self):
         # REWRITE ME
-        self.shell('input keyevent MENU')
-        self.shell('input keyevent BACK')
+        if self.serialno == 'cff039ebb31fa11':
+            self.swipe((360, 915), (370, 1203))
+        else:
+            self.shell('input keyevent MENU')
+            self.shell('input keyevent BACK')
 
     def is_screenon(self):
         screenOnRE = re.compile('mScreenOnFully=(true|false)')
@@ -116,9 +127,9 @@ def ADB():
     def touch(self, x, y):
         self.shell('input tap %d %d' % (x, y))
 
-    def swipe(self, (x0, y0), (x1, y1), duration=0.5, steps=1):
+    def swipe(self, (x0, y0), (x1, y1), duration=500, steps=1):
         version = self.sdk_version
-        if version < 15:
+        if version <= 15:
             raise MoaError('swipe: API <= 15 not supported (version=%d)' % version)
         elif version <= 17:
             self.shell('input swipe %d %d %d %d' % (x0, y0, x1, y1))
@@ -162,4 +173,11 @@ def get_devices():
 
 
 if __name__ == '__main__':
-    print get_devices()
+    #print get_devices()
+    adb = ADB('cff039ebb31fa11', addr=('10.240.186.236', 5037)) #'cff*')
+    print adb.get_top_activity_name()
+    print 'keyboard shown:', adb.is_keyboard_shown()
+    print 'screen on:', adb.is_screenon()
+    if not adb.is_screenon():
+        adb.wake()
+        adb.unlock()
