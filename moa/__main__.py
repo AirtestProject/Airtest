@@ -4,5 +4,8 @@
 # Author:  hzsunshx
 # Created: 2015-07-02 19:52
 
+from . import moatool
+
+
 if __name__ == '__main__':
-    print 'This is main script'
+    moatool.main()
