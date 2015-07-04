@@ -16,6 +16,8 @@ __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile', 
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'type', 'wake',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
+    'is_screenon', 'wake', 'get_devices', 'get_top_activity_name', 'get_top_activity_name_and_pid',
+    'is_keyboard_shown', 'unlock',
     'gevent_run'
     ]
 
@@ -39,7 +41,9 @@ ADB = None
 
 
 import os
+import re
 import sys
+import warnings
 import json
 import time
 import functools
@@ -48,8 +52,13 @@ import subprocess
 import signal
 import ast
 import requests
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 from error import MoaError
 import core
+
 
 def set_address((host, port)):
     global ADDRESS
@@ -100,6 +109,17 @@ def set_serialno(sn):
     #if status != 'device':
     #    raise MoaError("Device status not good: {}".format(status))
     #return SERIALNO
+
+def connect(url):
+    parsed = urlparse(url)
+    if parsed.scheme != 'moa':
+        raise MoaError("url should start with moa://")
+
+    host = parsed.hostname or '127.0.0.1'
+    port = parsed.port or 5037
+    sn = parsed.path[1:]
+    set_address((host, port))
+    set_serialno(sn)
 
 def set_basedir(base_dir):
     global BASE_DIR
@@ -253,18 +273,21 @@ def _loop_find(picfile, background=None, timeout=TIMEOUT):
 
         
 def shell(cmd, shell=True):
-    if not shell:
-        cmd = subprocess.list2cmdline(cmd)
+    if ADB is None:
+        raise MoaError("Should call set_serialno(...) at first")
     return ADB.shell(cmd)
-    r = requests.post('http://{0}/api/devices/{1}/shell'.format(AIRADB, SERIALNO), data={
-        'cmd': cmd
-    })
-    if r.status_code != 200:
-        raise MoaError("shell run error: " + r.text)
-    res = r.json()
-    if not res['success']:
-        raise MoaError("shell exec error: " + res.get('message'))
-    return res['output']
+    #if not shell:
+    #    cmd = subprocess.list2cmdline(cmd)
+
+    #r = requests.post('http://{0}/api/devices/{1}/shell'.format(AIRADB, SERIALNO), data={
+    #    'cmd': cmd
+    #})
+    #if r.status_code != 200:
+    #    raise MoaError("shell run error: " + r.text)
+    #res = r.json()
+    #if not res['success']:
+    #    raise MoaError("shell exec error: " + res.get('message'))
+    #return res['output']
 
 
 @logwrap
@@ -296,13 +319,15 @@ def snapshot(filename=None):
 
 @logwrap
 def wake():
-    r = requests.post("http://{0}/api/devices/{1}/wake".format(AIRADB, SERIALNO))
-    if r.status_code != 200:
-        raise MoaError(r.text)
+    ADB.wake()
+    #r = requests.post("http://{0}/api/devices/{1}/wake".format(AIRADB, SERIALNO))
+    #if r.status_code != 200:
+    #    raise MoaError(r.text)
 
 @logwrap
 def home():
-    _oper('keyevent', {'key': 'HOME'})
+    shell(["input", "keyevent", "HOME"])
+    #_oper('keyevent', {'key': 'HOME'})
 
 @logwrap
 def touch(v, rect=None, timeout=TIMEOUT):
@@ -330,7 +355,8 @@ def touch(v, rect=None, timeout=TIMEOUT):
     print 'touch pos:', pos
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     log('touchpos', pos)
-    _oper('touch', {'pos': pos})
+    ADB.touch(*pos)
+    #_oper('touch', {'pos': pos})
 
 @logwrap
 def swipe(v1, v2):
@@ -338,15 +364,18 @@ def swipe(v1, v2):
         pos1, pos2 = _loop_find(v1), _loop_find(v2)
     else:
         pos1, pos2 = v1, v2
-    _oper('swipe', {'from': pos1, 'to': pos2})
+    ADB.swipe(pos1, pos2)
+    #_oper('swipe', {'from': pos1, 'to': pos2})
 
 @logwrap
 def keyevent(keyname):
-    _oper('keyevent', {'key': keyname})
+    shell(["input", "keyevent", keyname])
+    #_oper('keyevent', {'key': keyname})
 
 @logwrap
 def type(text):
-    _oper('type', {'text': text})
+    shell(["input", "text", text])
+    #_oper('type', {'text': text})
 
 @logwrap
 def sleep(secs=1.0):
@@ -405,6 +434,69 @@ def exec_script(code):
     tree = ast.parse(code)
     exec(compile(tree, filename="<ast>", mode="exec"))
 
+def is_screenon():
+    screenOnRE = re.compile('mScreenOnFully=(true|false)')
+    m = screenOnRE.search(shell('dumpsys window policy'))
+    if m:
+        return (m.group(1) == 'true')
+    raise MoaError("Couldn't determine screen ON state")
+
+def wake():
+    if not is_screenon():
+        shell('input keyevent POWER')
+
+def get_top_activity_name_and_pid():
+    dat = shell('dumpsys activity top')
+    lines = dat.replace('\r', '').splitlines()
+    activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+    m = activityRE.search(lines[1]) 
+    if m:
+        return (m.group(1), m.group(2), m.group(3))
+    else:
+        warnings.warn("NO MATCH:" + lines[1])
+        return None
+
+def get_top_activity_name():
+    tanp = get_top_activity_name_and_pid()
+    if tanp:
+        return tanp[0] + '/' + tanp[1]
+    else:
+        return None
+
+def is_keyboard_shown():
+    dim = shell('dumpsys input_method')
+    if dim:
+        return "mInputShown=true" in dim
+    return False
+
+def is_locked():
+    lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
+    m = lockScreenRE.search(shell('dumpsys window policy'))
+    if m:
+        return (m.group(1) == 'true')
+    raise MoaError("Couldn't determine screen lock state")
+
+def unlock():
+    # REWRITE ME
+    if SERIALNO == 'cff039ebb31fa11':
+        ADB.swipe((360, 915), (370, 1203))
+    else:
+        shell('input keyevent MENU')
+        shell('input keyevent BACK')
+
+def get_devices(state=None, addr=None):
+    ''' Get all device list '''
+    if not addr:
+        addr = ADDRESS
+    patten = re.compile(r'^[\w\d]+\t[\w]+$')
+    for line in core.adbrun('devices', addr=addr).splitlines():
+        line = line.strip()
+        if not line or not patten.match(line):
+            continue
+        serialno, cstate = line.split('\t')
+        if state and cstate != state:
+            continue
+        yield (serialno, cstate)
 
 def test():
     set_serialno('9a4b171d')
