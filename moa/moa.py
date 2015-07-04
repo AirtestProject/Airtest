@@ -65,12 +65,26 @@ def set_address((host, port)):
     ADDRESS = (host, port)
     # FIXME(ssx): need to verify
 
+def get_devices(state=None, addr=None):
+    ''' Get all device list '''
+    if not addr:
+        addr = ADDRESS
+    patten = re.compile(r'^[\w\d]+\t[\w]+$')
+    for line in core.adbrun('devices', addr=addr).splitlines():
+        line = line.strip()
+        if not line or not patten.match(line):
+            continue
+        serialno, cstate = line.split('\t')
+        if state and cstate != state:
+            continue
+        yield (serialno, cstate)
+
 def set_serialno(sn):
     ''' support filepath match patten '''
     global SERIALNO
     global ADB
     if not sn:
-        devs = core.get_devices(state='device', addr=ADDRESS)
+        devs = get_devices(state='device', addr=ADDRESS)
         devs = list(devs)
         if len(devs) != 1:
             raise MoaError("SerialNo empty, Assert device count {} != 1".format(len(devs)))
@@ -78,7 +92,7 @@ def set_serialno(sn):
     else:
         exists = 0
         status = None
-        for (serialno, st) in core.get_devices(addr=ADDRESS):
+        for (serialno, st) in get_devices(addr=ADDRESS):
             if fnmatch.fnmatch(serialno, sn):
                 exists += 1
                 status = st
@@ -483,20 +497,6 @@ def unlock():
     else:
         shell('input keyevent MENU')
         shell('input keyevent BACK')
-
-def get_devices(state=None, addr=None):
-    ''' Get all device list '''
-    if not addr:
-        addr = ADDRESS
-    patten = re.compile(r'^[\w\d]+\t[\w]+$')
-    for line in core.adbrun('devices', addr=addr).splitlines():
-        line = line.strip()
-        if not line or not patten.match(line):
-            continue
-        serialno, cstate = line.split('\t')
-        if state and cstate != state:
-            continue
-        yield (serialno, cstate)
 
 def test():
     set_serialno('9a4b171d')
