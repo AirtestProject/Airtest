@@ -48,6 +48,7 @@ import signal
 import ast
 import requests
 from error import MoaError
+import core
 
 def set_address((host, port)):
     global ADDRESS
@@ -57,24 +58,46 @@ def set_address((host, port)):
 def set_serialno(sn):
     ''' support filepath match patten '''
     global SERIALNO
-    r = requests.get('http://{}/api/devices'.format(AIRADB))
-    exists = 0
-    status = None
-    for devinfo in r.json()['data']:
-        serialno = devinfo.get('serialno')
-        # if devinfo.get('serialno') == sn:
-        if fnmatch.fnmatch(serialno, sn):
-            exists += 1
-            status = devinfo.get('status')
-            SERIALNO = serialno
-    if exists == 0:
-        raise MoaError("Device[{}] not found in {}".format(sn, AIRADB))
-    if exists > 1:
-        SERIALNO = None
-        raise MoaError("too many devices found")
-    if status != 'device':
-        raise MoaError("Device status not good: {}".format(status))
-    return SERIALNO
+    if not sn:
+        devs = core.get_devices(state='device', addr=ADDRESS)
+        devs = list(devs)
+        if len(devs) != 1:
+            raise MoaError("SerialNo empty, Assert device count {} != 1".format(len(devs)))
+        SERIALNO = devs[1][0]
+        return SERIALNO
+    else:
+        exists = 0
+        status = None
+        for (serialno, st) in core.get_devices(addr=ADDRESS):
+            if fnmatch.fnmatch(serialno, sn):
+                exists += 1
+                status = st
+                SERIALNO = serialno
+        if exists == 0:
+            raise MoaError("Device[{}] not found in {}".format(sn, ADDRESS))
+        if exists > 1:
+            SERIALNO = None
+            raise MoaError("too many devices found")
+        if status != 'device':
+            raise MoaError("Device status not good: {}".format(status))
+        return SERIALNO
+
+    #r = requests.get('http://{}/api/devices'.format(AIRADB))
+    #for devinfo in r.json()['data']:
+    #    serialno = devinfo.get('serialno')
+    #    # if devinfo.get('serialno') == sn:
+    #    if fnmatch.fnmatch(serialno, sn):
+    #        exists += 1
+    #        status = devinfo.get('status')
+    #        SERIALNO = serialno
+    #if exists == 0:
+    #    raise MoaError("Device[{}] not found in {}".format(sn, AIRADB))
+    #if exists > 1:
+    #    SERIALNO = None
+    #    raise MoaError("too many devices found")
+    #if status != 'device':
+    #    raise MoaError("Device status not good: {}".format(status))
+    #return SERIALNO
 
 def set_basedir(base_dir):
     global BASE_DIR

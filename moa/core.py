@@ -161,15 +161,17 @@ class ADB():
         return False
 
 
-def get_devices():
+def get_devices(state=None, addr=('127.0.0.1', 5037)):
     ''' Get all device list '''
     patten = re.compile(r'^[\w\d]+\t[\w]+$')
-    for line in adbrun('devices').splitlines():
+    for line in adbrun('devices', addr=addr).splitlines():
         line = line.strip()
         if not line or not patten.match(line):
             continue
-        serialno, state = line.split('\t')
-        yield (serialno, state)
+        serialno, cstate = line.split('\t')
+        if state and cstate != state:
+            continue
+        yield (serialno, cstate)
 
 
 if __name__ == '__main__':

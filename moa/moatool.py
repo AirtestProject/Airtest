@@ -7,7 +7,7 @@ import moa
 
 def new_argparser():
     parser = argparse.ArgumentParser(description='Tool to run and make moa script')
-    parser.add_argument('-s', '--serialno', dest='serialno', type=str, required=True, help='Serial Number of device')
+    parser.add_argument('-s', '--serialno', dest='serialno', type=str, help='Serial Number of device')
 
     sub = parser.add_subparsers(dest='action')
     prun = sub.add_parser('run')
@@ -16,6 +16,7 @@ def new_argparser():
 
     pss = sub.add_parser('snapshot')
     pss.add_argument('-p', '--png', dest='png', type=str, help='Save output png file')
+    pver = sub.add_parser('version')
     return parser
     
 # exec_script(script.decode('string-escape'))
@@ -23,10 +24,12 @@ def main():
     parser = new_argparser()
     res = parser.parse_args(sys.argv[1:])
     #print res
-    moa.set_serialno(res.serialno)
+    if res.serialno:
+        moa.set_serialno(res.serialno)
     if res.action == 'run':
         moa.set_basedir(res.root)
         moa.exec_script(urllib.unquote(res.script))
+        return
 
     if res.action == 'snapshot':
         if res.png:
@@ -45,6 +48,11 @@ def main():
         #cv2.resizeWindow('dst_rt', window_width, window_height)
 
         cv2.destroyAllWindows()
+        return
+
+    if res.action == 'version':
+        print 'Moa version:', moa.__version__
+
     # serialno, base_dir, script = sys.argv[1: 4]
     # # # print sys.argv[1: 4]
     # moa.set_serialno(serialno)
