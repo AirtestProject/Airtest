@@ -35,6 +35,7 @@ GEVENT_RUNNING = False
 SCREEN = None
 GEVENT_DONE = [False]
 TOUCH_POINTS = {}
+ADB = None
 
 
 import os
@@ -58,13 +59,13 @@ def set_address((host, port)):
 def set_serialno(sn):
     ''' support filepath match patten '''
     global SERIALNO
+    global ADB
     if not sn:
         devs = core.get_devices(state='device', addr=ADDRESS)
         devs = list(devs)
         if len(devs) != 1:
             raise MoaError("SerialNo empty, Assert device count {} != 1".format(len(devs)))
         SERIALNO = devs[1][0]
-        return SERIALNO
     else:
         exists = 0
         status = None
@@ -80,7 +81,8 @@ def set_serialno(sn):
             raise MoaError("too many devices found")
         if status != 'device':
             raise MoaError("Device status not good: {}".format(status))
-        return SERIALNO
+    ADB = core.ADB(SERIALNO, addr=ADDRESS)
+    return SERIALNO
 
     #r = requests.get('http://{}/api/devices'.format(AIRADB))
     #for devinfo in r.json()['data']:
@@ -253,6 +255,7 @@ def _loop_find(picfile, background=None, timeout=TIMEOUT):
 def shell(cmd, shell=True):
     if not shell:
         cmd = subprocess.list2cmdline(cmd)
+    return ADB.shell(cmd)
     r = requests.post('http://{0}/api/devices/{1}/shell'.format(AIRADB, SERIALNO), data={
         'cmd': cmd
     })

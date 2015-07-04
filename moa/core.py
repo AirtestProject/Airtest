@@ -10,7 +10,7 @@ import platform
 import fnmatch
 import warnings
 import subprocess
-from shlex import shlex
+import shlex
 from error import MoaError
 
 def look_path(program):
@@ -41,7 +41,7 @@ if not ADBPATH:
 
 def adbrun(cmds, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
     if isinstance(cmds, basestring):
-        cmds = list(shlex(cmds))
+        cmds = shlex.split(cmds)
     else:
         cmds = list(cmds)
 
