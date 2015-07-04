@@ -92,37 +92,29 @@ class ADB():
             cmds = ['shell'] + list(cmds)
         return self.run(cmds)
 
+    def forward(self, local, remote, rebind=True):
+        cmds = ['forward']
+        if not rebind:
+            cmds += ['--no-rebind']
+        self.run(cmds + [local, remote])
+
+    def get_forwards(self):
+        out = self.run(['forward', '--list'])
+        for line in out.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            ss = line.split()
+            if len(ss) != 3:
+                continue
+            sn, local, remote = ss
+            yield sn, local, remote
+
     def getprop(self, key, strip=True):
         prop = self.shell(['getprop', key])
         if strip:
             prop = prop.rstrip('\r\n')
         return prop
-
-    def is_locked(self):
-        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
-        m = lockScreenRE.search(self.shell('dumpsys window policy'))
-        if m:
-            return (m.group(1) == 'true')
-        raise MoaError("Couldn't determine screen lock state")
-
-    def unlock(self):
-        # REWRITE ME
-        if self.serialno == 'cff039ebb31fa11':
-            self.swipe((360, 915), (370, 1203))
-        else:
-            self.shell('input keyevent MENU')
-            self.shell('input keyevent BACK')
-
-    def is_screenon(self):
-        screenOnRE = re.compile('mScreenOnFully=(true|false)')
-        m = screenOnRE.search(self.shell('dumpsys window policy'))
-        if m:
-            return (m.group(1) == 'true')
-        raise MoaError("Couldn't determine screen ON state")
-
-    def wake(self):
-        if not self.is_screenon():
-            self.shell('input keyevent POWER')
 
     def touch(self, x, y):
         self.shell('input tap %d %d' % (x, y))
@@ -136,50 +128,13 @@ class ADB():
         else:
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
-    def get_top_activity_name_and_pid(self):
-        dat = self.shell('dumpsys activity top')
-        lines = dat.replace('\r', '').splitlines()
-        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(lines[1]) 
-        if m:
-            return (m.group(1), m.group(2), m.group(3))
-        else:
-            warnings.warn("NO MATCH:" + lines[1])
-            return None
-
-    def get_top_activity_name(self):
-        tanp = self.get_top_activity_name_and_pid()
-        if tanp:
-            return tanp[0] + '/' + tanp[1]
-        else:
-            return None
-
-    def is_keyboard_shown(self):
-        dim = self.shell('dumpsys input_method')
-        if dim:
-            return "mInputShown=true" in dim
-        return False
-
-
-def get_devices(state=None, addr=('127.0.0.1', 5037)):
-    ''' Get all device list '''
-    patten = re.compile(r'^[\w\d]+\t[\w]+$')
-    for line in adbrun('devices', addr=addr).splitlines():
-        line = line.strip()
-        if not line or not patten.match(line):
-            continue
-        serialno, cstate = line.split('\t')
-        if state and cstate != state:
-            continue
-        yield (serialno, cstate)
-
 
 if __name__ == '__main__':
-    #print get_devices()
     adb = ADB('cff039ebb31fa11', addr=('10.240.186.236', 5037)) #'cff*')
-    print adb.get_top_activity_name()
-    print 'keyboard shown:', adb.is_keyboard_shown()
-    print 'screen on:', adb.is_screenon()
-    if not adb.is_screenon():
-        adb.wake()
-        adb.unlock()
+    print list(adb.get_forwards())
+    #print adb.get_top_activity_name()
+    #print 'keyboard shown:', adb.is_keyboard_shown()
+    #print 'screen on:', adb.is_screenon()
+    #if not adb.is_screenon():
+    #    adb.wake()
+    #    adb.unlock()
