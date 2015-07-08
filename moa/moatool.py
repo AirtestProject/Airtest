@@ -23,7 +23,6 @@ def new_argparser():
 def main():
     parser = new_argparser()
     res = parser.parse_args(sys.argv[1:])
-    #print res
     if res.serialno:
         moa.set_serialno(res.serialno)
     if res.action == 'run':

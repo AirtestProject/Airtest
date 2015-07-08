@@ -31,7 +31,7 @@ ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
 LOG_FILE = ''
 LOG_FILE_FD = None
-TIMEOUT = 5
+TIMEOUT = 10
 RUNTIME_STACK = []
 GEVENT_RUNNING = False
 SCREEN = None
@@ -254,7 +254,7 @@ def _show_screen(pngstr):
     except:
         pass
 
-def _pic2pos(picdata, background=None):
+def _pic2pos(picdata, background=None, rect=None):
     ''' background can be a function return encoded image '''
     if background is None:
         background = snapshot()
@@ -262,28 +262,41 @@ def _pic2pos(picdata, background=None):
         background = background()
     open('bg.png', 'wb').write(background)
     # return
+    screen = background
+    offsetx, offsety = (0,0)
+    if rect is not None and len(rect) == 4:
+        x0, y0, x1, y1 = rect
+        r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
+            files={'file': screen}, 
+            data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
+        if r.status_code != 200:
+            raise MoaError("Crop image use air-opencv error: " + r.text)
+        screen = r.content
+        (offsetx, offsety) = (x0, y0)
+
     r = requests.post('http://{0}/api/opencv/locate-element'.format(AIRCV), files={
-        'background': background,
+        'background': screen,
         'target': picdata,
         })
     data = r.json()
     if data.get('success'):
-        return data['data']['result'].get('point')
+        (x, y) = data['data']['result'].get('point')
+        return offsetx+x, offsety+y
 
-def _loop_find(picfile, background=None, timeout=TIMEOUT):
+def _loop_find(picfile, background=None, timeout=TIMEOUT, rect=None):
     pos = None
     left = max(1, int(timeout))
     picfile = os.path.join(BASE_DIR, picfile)
     picdata = open(picfile, 'rb').read()
     while left > 0:
-        pos = _pic2pos(picdata, background=background)
+        pos = _pic2pos(picdata, background=background, rect=rect)
         if pos is None:
             time.sleep(1)
             left -= 1
             continue
         return pos
     if pos is None:
-        raise MoaError('Touch picture %s not found' % picfile)
+        raise MoaError('Picture %s not found' % picfile)
 
         
 def shell(cmd, shell=True):
@@ -334,36 +347,32 @@ def snapshot(filename=None):
 @logwrap
 def wake():
     ADB.wake()
-    #r = requests.post("http://{0}/api/devices/{1}/wake".format(AIRADB, SERIALNO))
-    #if r.status_code != 200:
-    #    raise MoaError(r.text)
 
 @logwrap
 def home():
     shell(["input", "keyevent", "HOME"])
-    #_oper('keyevent', {'key': 'HOME'})
 
 @logwrap
 def touch(v, rect=None, timeout=TIMEOUT):
-    offset = (0, 0)
-    if rect is not None and len(rect) == 4:
-        x0, y0, x1, y1 = rect
-        def rect_snapshot():
-            screen = snapshot()
-            r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
-                files={'file': screen}, 
-                data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
-            if r.status_code != 200:
-                raise MoaError("Crop image use air-opencv error: " + r.text)
-            return r.content
-        _screen = rect_snapshot
-        offset = (x0, y0)
-    else:
-        _screen = None
+    #offset = (0, 0)
+    #if rect is not None and len(rect) == 4:
+    #    x0, y0, x1, y1 = rect
+    #    def rect_snapshot():
+    #        screen = snapshot()
+    #        r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
+    #            files={'file': screen}, 
+    #            data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
+    #        if r.status_code != 200:
+    #            raise MoaError("Crop image use air-opencv error: " + r.text)
+    #        return r.content
+    #    _screen = rect_snapshot
+    #    offset = (x0, y0)
+    #else:
+    #    _screen = None
         
     if _isstr(v):
-        pos = _loop_find(v, background=_screen, timeout=timeout)
-        pos = (offset[0]+pos[0], offset[1]+pos[1])
+        pos = _loop_find(v, timeout=timeout, rect=rect)
+        #pos = (offset[0]+pos[0], offset[1]+pos[1])
     else:
         pos = v
     print 'touch pos:', pos
@@ -384,12 +393,10 @@ def swipe(v1, v2):
 @logwrap
 def keyevent(keyname):
     shell(["input", "keyevent", keyname])
-    #_oper('keyevent', {'key': keyname})
 
 @logwrap
 def type(text):
     shell(["input", "text", text])
-    #_oper('type', {'text': text})
 
 @logwrap
 def sleep(secs=1.0):
@@ -412,17 +419,17 @@ def exists(v):
         return False
 
 @logwrap
-def assert_exists(v, msg="", timeout=1):
-    print "assert exists:", msg
+def assert_exists(v, msg="", timeout=TIMEOUT, rect=None):
+    print "assert exists:", v, msg
     try:
-        return _loop_find(v, timeout=1)
+        return _loop_find(v, timeout=timeout, rect=rect)
     except RuntimeError:
         raise AssertionError("%s does not exists" % v)
 
 @logwrap
 def assert_equal(first, second, msg=""):
     print "assert equal:", msg
-    result = first == second
+    result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
