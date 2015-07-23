@@ -38,6 +38,8 @@ SCREEN = None
 GEVENT_DONE = [False]
 TOUCH_POINTS = {}
 ADB = None
+KEEP_CAPTURE = False
+RECENT_CAPTURE = None
 
 
 import os
@@ -56,7 +58,7 @@ try:
     from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
-from error import MoaError
+from error import MoaError, MoaNotFoundError
 import core
 
 
@@ -170,7 +172,7 @@ def gevent_run(func, *args):
             h, w = img.shape[:2]
             now = time.time()
             for timetag, val in TOUCH_POINTS.items():
-                if now - timetag > 1.0:
+                if now - timetag > 2.0:
                     del(TOUCH_POINTS[timetag])
                     continue
                 if val['type'] == 'touch':
@@ -254,15 +256,12 @@ def _show_screen(pngstr):
     except:
         pass
 
-def _pic2pos(picdata, background=None, rect=None):
-    ''' background can be a function return encoded image '''
-    if background is None:
-        background = snapshot()
-    elif callable(background):
-        background = background()
-    open('bg.png', 'wb').write(background)
-    # return
-    screen = background
+def _pic2pos(picdata, rect=None):
+    ''' find picture position in screen '''
+    if KEEP_CAPTURE and RECENT_CAPTURE is not None:
+        screen = RECENT_CAPTURE
+    else:
+        screen = snapshot()
     offsetx, offsety = (0,0)
     if rect is not None and len(rect) == 4:
         x0, y0, x1, y1 = rect
@@ -289,14 +288,14 @@ def _loop_find(picfile, background=None, timeout=TIMEOUT, rect=None):
     picfile = os.path.join(BASE_DIR, picfile)
     picdata = open(picfile, 'rb').read()
     while left > 0:
-        pos = _pic2pos(picdata, background=background, rect=rect)
+        pos = _pic2pos(picdata, rect=rect)
         if pos is None:
             time.sleep(1)
             left -= 1
             continue
         return pos
     if pos is None:
-        raise MoaError('Picture %s not found' % picfile)
+        raise MoaNotFoundError('Picture %s not found' % picfile)
 
         
 def shell(cmd, shell=True):
@@ -334,6 +333,7 @@ def amclear(package):
 
 @logwrap
 def snapshot(filename=None):
+    global RECENT_CAPTURE
     r = requests.get('http://{0}/api/devices/{1}/screen'.format(AIRADB, SERIALNO))
     if r.status_code != 200:
         raise MoaError(r.text)
@@ -342,7 +342,12 @@ def snapshot(filename=None):
         open(filename, 'wb').write(r.content)
 
     _show_screen(r.content)
+    RECENT_CAPTURE = r.content # used for keep_capture()
     return r.content
+
+def keep_capture(flag=True):
+    global KEEP_CAPTURE
+    KEEP_CAPTURE = flag
 
 @logwrap
 def wake():
@@ -354,22 +359,6 @@ def home():
 
 @logwrap
 def touch(v, rect=None, timeout=TIMEOUT):
-    #offset = (0, 0)
-    #if rect is not None and len(rect) == 4:
-    #    x0, y0, x1, y1 = rect
-    #    def rect_snapshot():
-    #        screen = snapshot()
-    #        r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
-    #            files={'file': screen}, 
-    #            data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
-    #        if r.status_code != 200:
-    #            raise MoaError("Crop image use air-opencv error: " + r.text)
-    #        return r.content
-    #    _screen = rect_snapshot
-    #    offset = (x0, y0)
-    #else:
-    #    _screen = None
-        
     if _isstr(v):
         pos = _loop_find(v, timeout=timeout, rect=rect)
         #pos = (offset[0]+pos[0], offset[1]+pos[1])
@@ -412,10 +401,10 @@ def wait(v, timeout=10, safe=False):
         return None
 
 @logwrap
-def exists(v):
+def exists(v, rect=None):
     try:
-        return _loop_find(v, timeout=1)
-    except RuntimeError:
+        return _loop_find(v, timeout=1, rect=rect)
+    except MoaNotFoundError as e:
         return False
 
 @logwrap
@@ -509,7 +498,6 @@ def test():
     set_serialno('9a4b171d')
     set_basedir('../taskdata/1433820164')
     #wake()
-    #snapshot('screen.png')
     #touch('target.png')
     #touch([100, 200])
     #swipe([100, 500], [800, 600])

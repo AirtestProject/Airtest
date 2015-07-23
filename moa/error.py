@@ -14,3 +14,5 @@ class MoaError(Exception):
     def __str__(self):
         return repr(self.value)
 
+class MoaNotFoundError(MoaError):
+    pass
