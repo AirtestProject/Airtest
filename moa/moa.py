@@ -13,7 +13,7 @@ Script engine.
 
 __version__ = '0.0.1'
 __all__ = [
-    'set_serialno', 'set_basedir', 'set_logfile', 
+    'set_serialno', 'set_basedir', 'set_logfile',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'type', 'wake',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'is_screenon', 'wake', 'get_devices', 'get_top_activity_name', 'get_top_activity_name_and_pid',
@@ -69,6 +69,7 @@ def set_address((host, port)):
 
 def get_devices(state=None, addr=None):
     ''' Get all device list '''
+    core.init_adb()
     if not addr:
         addr = ADDRESS
     patten = re.compile(r'^[\w\d]+\t[\w]+$')
@@ -108,23 +109,6 @@ def set_serialno(sn):
             raise MoaError("Device status not good: {}".format(status))
     ADB = core.ADB(SERIALNO, addr=ADDRESS)
     return SERIALNO
-
-    #r = requests.get('http://{}/api/devices'.format(AIRADB))
-    #for devinfo in r.json()['data']:
-    #    serialno = devinfo.get('serialno')
-    #    # if devinfo.get('serialno') == sn:
-    #    if fnmatch.fnmatch(serialno, sn):
-    #        exists += 1
-    #        status = devinfo.get('status')
-    #        SERIALNO = serialno
-    #if exists == 0:
-    #    raise MoaError("Device[{}] not found in {}".format(sn, AIRADB))
-    #if exists > 1:
-    #    SERIALNO = None
-    #    raise MoaError("too many devices found")
-    #if status != 'device':
-    #    raise MoaError("Device status not good: {}".format(status))
-    #return SERIALNO
 
 def connect(url):
     parsed = urlparse(url)
@@ -167,7 +151,7 @@ def gevent_run(func, *args):
             if SCREEN is None:
                 gevent.sleep(0.5)
                 continue
-            
+
             img = SCREEN.copy()
             h, w = img.shape[:2]
             now = time.time()
@@ -228,7 +212,7 @@ def logwrap(f):
             RUNTIME_STACK.pop()
         return res
     return wrapper
-        
+
 def _oper(action, params):
     r = requests.post('http://{0}/api/devices/{1}/operation'.format(AIRADB, SERIALNO),
         data={'action': action, 'params': json.dumps(params)})
@@ -266,7 +250,7 @@ def _pic2pos(picdata, rect=None):
     if rect is not None and len(rect) == 4:
         x0, y0, x1, y1 = rect
         r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
-            files={'file': screen}, 
+            files={'file': screen},
             data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
         if r.status_code != 200:
             raise MoaError("Crop image use air-opencv error: " + r.text)
@@ -297,7 +281,7 @@ def _loop_find(picfile, background=None, timeout=TIMEOUT, rect=None):
     if pos is None:
         raise MoaNotFoundError('Picture %s not found' % picfile)
 
-        
+
 def shell(cmd, shell=True):
     if ADB is None:
         raise MoaError("Should call set_serialno(...) at first")
@@ -326,7 +310,7 @@ def amstart(package):
 @logwrap
 def amstop(package):
     shell(['am', 'force-stop', package], shell=False)
-    
+
 @logwrap
 def amclear(package):
     shell(['pm', 'clear', package], shell=False)
@@ -393,7 +377,7 @@ def sleep(secs=1.0):
 
 @logwrap
 def wait(v, timeout=10, safe=False):
-    try:    
+    try:
         return _loop_find(v, timeout=timeout)
     except RuntimeError:
         if not safe:
@@ -459,7 +443,7 @@ def get_top_activity_name_and_pid():
     dat = shell('dumpsys activity top')
     lines = dat.replace('\r', '').splitlines()
     activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-    m = activityRE.search(lines[1]) 
+    m = activityRE.search(lines[1])
     if m:
         return (m.group(1), m.group(2), m.group(3))
     else:
@@ -511,7 +495,7 @@ if __name__ == '__main__':
     # print sys.argv[1: 4]
     set_serialno('cff039ebb31fa11')
     # set_serialno('9a4b171d')
-    
+
     # set_basedir(base_dir)
     set_logfile('xx.log')
     touch('earth.png')

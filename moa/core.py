@@ -13,6 +13,9 @@ import subprocess
 import shlex
 from error import MoaError
 
+ADBPATH = None
+
+
 def look_path(program):
     system = platform.system()
 
@@ -33,12 +36,14 @@ def look_path(program):
                 return exe_file
     return None
 
-
-ADBPATH = look_path('adb')
-if not ADBPATH:
-    raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
-
-
+def init_adb():
+    global ADBPATH
+    if ADBPATH:
+        return
+    ADBPATH = look_path('adb')
+    if not ADBPATH:
+        raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
+    
 def adbrun(cmds, adbpath=None, addr=('127.0.0.1', 5037), serialno=None):
     if isinstance(cmds, basestring):
         cmds = shlex.split(cmds)
