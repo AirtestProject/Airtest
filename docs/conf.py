@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# peewee documentation build configuration file, created by
+# moa documentation build configuration file, created by
 # sphinx-quickstart on Fri Nov 26 11:05:15 2010.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -52,7 +52,7 @@ copyright = u'codeskyblue'
 # The short X.Y version.
 src_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, src_dir)
-from peewee import __version__
+from moa import __version__
 version = __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
@@ -101,9 +101,6 @@ html_theme = 'default'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {
-#    'index_logo': 'peewee-white.png'
-#}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = ['_themes']
