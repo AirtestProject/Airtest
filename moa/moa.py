@@ -54,6 +54,7 @@ import subprocess
 import signal
 import ast
 import requests
+import socket
 try:
     from urlparse import urlparse
 except ImportError:
@@ -286,18 +287,46 @@ def shell(cmd, shell=True):
     if ADB is None:
         raise MoaError("Should call set_serialno(...) at first")
     return ADB.shell(cmd)
-    #if not shell:
-    #    cmd = subprocess.list2cmdline(cmd)
 
-    #r = requests.post('http://{0}/api/devices/{1}/shell'.format(AIRADB, SERIALNO), data={
-    #    'cmd': cmd
-    #})
-    #if r.status_code != 200:
-    #    raise MoaError("shell run error: " + r.text)
-    #res = r.json()
-    #if not res['success']:
-    #    raise MoaError("shell exec error: " + res.get('message'))
-    #return res['output']
+def _get_free_port():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    for port in range(13000, 14000):
+        if s.connect_ex(('127.0.0.1', port)) != 0:
+            return port #('127.0.0.1', port)
+    raise MoaError("No free address avaliable")
+
+def _install_air_native():
+    upgrade = True
+    exists = "imhere" in ADB.shell("test -x /data/local/tmp/air-android-native && echo imhere")
+    print 'exists', exists
+    if exists:
+        if 'fixme: version' == ADB.shell('/data/local/tmp/air-android-native -version').strip():
+            upgrade = False
+    if upgrade:
+        # FIXME
+        print 'install air-native'
+
+
+def init_air_native():
+    forwarded = False
+    for (serialno, local, remote) in ADB.get_forwards():
+        if serialno == SERIALNO and remote == 'tcp:7037':
+            AIR_NATIVE_ADDR = ('127.0.0.1', int(local[4:]))
+            forwarded = True
+            break
+    if not forwarded:
+        port = _get_free_port()
+        ADB.forward('tcp:'+str(port), 'tcp:7037')
+        AIR_NATIVE_ADDR = ('127.0.0.1', port)
+
+    try:
+        req = requests.head('http://%s:%d/api/version' % AIR_NATIVE_ADDR)
+        if req.status_code != 200:
+            raise NameError("Status code != 200")
+    except (requests.ConnectionError, NameError) as e:
+        print 'detected', e
+        _install_air_native()
+
 
 
 @logwrap
