@@ -8,6 +8,11 @@
     git submodule init
     git submodule update
     
+文档目前都放在 docs 目录下.
+
+* 项目的github地址 <https://github.com/netease/moa>
+* 在线文档地址<http://air-moa.readthedocs.org/en/latest/>
+
 ## 常用指令
 
 	amstart(appname) # 启动一个应用
