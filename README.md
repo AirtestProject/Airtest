@@ -3,21 +3,32 @@
 
 该项目起源于[airtest](https://github.com/netease/airtest), 是一个通过图像识别技术，操作手机App的技术
 
+## 使用
+
+    git submodule init
+    git submodule update
+    
+文档目前都放在 docs 目录下.
+
+* 项目的github地址 <https://github.com/netease/moa>
+* 在线文档地址<http://air-moa.readthedocs.org/en/latest/>
+
 ## 常用指令
 
 	amstart(appname) # 启动一个应用
 
 ## TODO
 * Use aircv instead of air-opencv
-* Use adbclient instead of air-adb
+* [minitouch](https://github.com/openstf/minitouch) support
+* [minicap](https://github.com/openstf/minicap) support
 
 ## 接口说明
 
-- set_address((host, port))
+- set\_address((host, port))
 
 	设置adb的host和port
 
-- set_serialno(sn)
+- set\_serialno(sn)
 
 	设置手机的序列号, 支持*匹配,如果结果是多台手机的话，会报错MoaError
 
@@ -29,11 +40,11 @@
 
 		connect('moa://127.0.0.1:5037/cffab*')
 
-- set_basedir(base_dir)
+- set\_basedir(base\_dir)
 
 	设置你的工作目录，日志，图片都会以这个基准去查找
 
-- set_logfile(filename, inbase=True)
+- set\_logfile(filename, inbase=True)
 
 	设置日志文件的路径，如果inbase为true的话，日志会保存到basedir目录下
 
