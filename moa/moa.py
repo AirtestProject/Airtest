@@ -60,6 +60,7 @@ try:
 except ImportError:
     from urllib.parse import urlparse
 from error import MoaError, MoaNotFoundError
+from core import get_devices
 import core
 
 
@@ -68,20 +69,6 @@ def set_address((host, port)):
     ADDRESS = (host, port)
     # FIXME(ssx): need to verify
 
-def get_devices(state=None, addr=None):
-    ''' Get all device list '''
-    core.init_adb()
-    if not addr:
-        addr = ADDRESS
-    patten = re.compile(r'^[\w\d]+\t[\w]+$')
-    for line in core.adbrun('devices', addr=addr).splitlines():
-        line = line.strip()
-        if not line or not patten.match(line):
-            continue
-        serialno, cstate = line.split('\t')
-        if state and cstate != state:
-            continue
-        yield (serialno, cstate)
 
 def set_serialno(sn):
     ''' support filepath match patten '''
