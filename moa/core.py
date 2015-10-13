@@ -90,15 +90,16 @@ class ADB():
         self.addr = addr
         self.serialno = serialno
         self.props = {}
-        self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
-        self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
 
     def run(self, cmds, not_wait=False):
         return adbrun(cmds, adbpath=self.adbpath, addr=self.addr, serialno=self.serialno, not_wait=not_wait)
 
     @property
     def sdk_version(self):
-        return self.props['ro.build.version.sdk']
+        keyname = 'ro.build.version.sdk'
+        if keyname not in self.props:
+            self.props[keyname] = int(self.getprop(keyname))
+        return self.props[keyname]
 
     def safe_run(self, *args, **kwargs):
         try:
@@ -112,6 +113,12 @@ class ADB():
         else:
             cmds = ['shell'] + list(cmds)
         return self.run(cmds, not_wait=not_wait)
+
+    def getprop(self, key, strip=True):
+        prop = self.shell(['getprop', key])
+        if strip:
+            prop = prop.rstrip('\r\n')
+        return prop
 
     def forward(self, local, remote, rebind=True):
         cmds = ['forward']
@@ -131,69 +138,10 @@ class ADB():
             sn, local, remote = ss
             yield sn, local, remote
 
-    def getprop(self, key, strip=True):
-        prop = self.shell(['getprop', key])
-        if strip:
-            prop = prop.rstrip('\r\n')
-        return prop
+    def snapshot(self):
+        pass
 
-    def getPhysicalDisplayInfo(self):
-        ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
-        phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
-        m = phyDispRE.search(self.shell('wm size; wm density'))
-        if m:
-            displayInfo = {}
-            for prop in [ 'width', 'height' ]:
-                displayInfo[prop] = int(m.group(prop))
-            for prop in [ 'density' ]:
-                displayInfo[prop] = float(m.group(prop))
-            return displayInfo
-
-        phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
-        for line in self.shell('dumpsys display').splitlines():
-            m = phyDispRE.search(line, 0)
-            if m:
-                displayInfo = {}
-                for prop in [ 'width', 'height' ]:
-                    displayInfo[prop] = int(m.group(prop))
-                for prop in [ 'density' ]:
-                    # In mPhysicalDisplayInfo density is already a factor, no need to calculate
-                    displayInfo[prop] = float(m.group(prop))
-                return displayInfo
-
-        # This could also be mSystem or mOverscanScreen
-        phyDispRE = re.compile('\s*mUnrestrictedScreen=\((?P<x>\d+),(?P<y>\d+)\) (?P<width>\d+)x(?P<height>\d+)')
-        # This is known to work on older versions (i.e. API 10) where mrestrictedScreen is not available
-        dispWHRE = re.compile('\s*DisplayWidth=(?P<width>\d+) *DisplayHeight=(?P<height>\d+)')
-        for line in self.shell('dumpsys window').splitlines():
-            m = phyDispRE.search(line, 0)
-            if not m:
-                m = dispWHRE.search(line, 0)
-            if m:
-                displayInfo = {}
-                for prop in [ 'width', 'height' ]:
-                    displayInfo[prop] = int(m.group(prop))
-                for prop in [ 'density' ]:
-    
-                    d = self.__getDisplayDensity(None, strip=True)
-                    if d:
-                        displayInfo[prop] = d
-                    else:
-                        # No available density information
-                        displayInfo[prop] = -1.0
-                return displayInfo
-
-    def __getDisplayDensity(self, key, strip=True):
-        BASE_DPI = 160.0
-        d = self.getprop('ro.sf.lcd_density', strip)
-        if d:
-            return float(d)/BASE_DPI
-        d = self.getprop('qemu.sf.lcd_density', strip)
-        if d:
-            return float(d)/BASE_DPI
-        return -1.0
-
-    def touch(self, x, y):
+    def touch(self, (x, y)):
         self.shell('input tap %d %d' % (x, y))
 
     def swipe(self, (x0, y0), (x1, y1), duration=500, steps=1):
@@ -208,15 +156,17 @@ class ADB():
 
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, localport=1313):
+    def __init__(self, serialno, size, localport=1313):
         self.serialno = serialno
+        self.size = size
         self.localport = localport
         self.adb = ADB(serialno)
-        self.size = self.adb.getPhysicalDisplayInfo()
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:minicap")
-        self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P 720x1280@720x1280/0 &")
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0 &" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]), not_wait=True)
+        time.sleep(0.5)
+        p.kill()
 
     def get_header(self):
         pass
@@ -227,7 +177,7 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0 -s" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"],))
+        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0 -s" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]))
         jpg_data = raw_data.split("for JPG encoder\r\r\n")[-1].replace("\r\r\n", "\n")
         return jpg_data
 
@@ -267,7 +217,7 @@ class Minitouch(object):
         time.sleep(0.5)
         p.kill()
 
-    def touch(self, x, y, duration=0.01):
+    def touch(self, (x, y), duration=0.01):
         """
         d 0 10 10 50
         c
@@ -281,6 +231,7 @@ class Minitouch(object):
         s.send("d 0 %s %s 50\nc\n" % (x, y))
         time.sleep(duration)
         s.send("u 0\nc\n")
+        time.sleep(0.01) # wait send
         s.close()
 
     def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.3, steps=5):
@@ -312,6 +263,7 @@ class Minitouch(object):
         s.send("d 0 %s %s 50\nc\n" % (to_x, to_y))
         time.sleep(interval)
         s.send("u 0\nc\n")
+        time.sleep(0.01)
         s.close()
 
     def pinch(self):
@@ -344,31 +296,212 @@ class Minitouch(object):
         pass
 
 
-if __name__ == '__main__':
-    # adb = ADB('cff039ebb31fa11', addr=('10.240.186.236', 5037)) #'cff*')
-    # print list(adb.get_forwards())
-    #print adb.get_top_activity_name()
-    #print 'keyboard shown:', adb.is_keyboard_shown()
-    #print 'screen on:', adb.is_screenon()
-    #if not adb.is_screenon():
-    #    adb.wake()
-    #    adb.unlock()
-    serialno = adb_devices(state="device").next()[0]
-    # adb = ADB(serialno)
-    # adb.touch(100, 100)
-    # print adb.shell("dumpsys window")
-    # print adb.getPhysicalDisplayInfo()
-    # mi = Minicap(serialno)
-    # # frame = mi.get_frame()
-    # # with open("test.jpg", "wb") as f:
-    # #     f.write(frame)
-    # gen = mi.get_frames()
-    # print gen.next()
-    # print gen.next()
+class Android(object):
+    """Android Client"""
+    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False):
+        self.serialno = serialno or adb_devices(state="device").next()[0]
+        self.adb = ADB(self.serialno, addr=addr)
+        self.size = self.getPhysicalDisplayInfo()
+        self.minicap = Minicap(serialno, self.size) if minicap else None
+        self.minitouch = Minitouch(serialno) if minitouch else None
+        self.props = {}
+        self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
+        self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
+        
+    def amstart(self, package):
+        output = self.adb.shell(['pm', 'path', package])
+        if not output.startswith('package:'):
+            raise MoaError('amstart package not found')
+        self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+
+    def amstop(self, package):
+        self.adb.shell(['am', 'force-stop', package])
+
+    def amclear(self, package):
+        self.adb.shell(['pm', 'clear', package])
+
+    def snapshot(self, filename=None):
+        if self.minicap:
+            screen = self.minicap.get_frame()
+        else:
+            screen = self.adb.snapshot()
+        if filename:
+            with open(filename, "wb") as f:
+                f.write(screen)
+        return screen
+
+    def shell(self, *args):
+        return self.adb.shell(*args)
+
+    def keyevent(self, keyname):
+        self.adb.shell(["input", "keyevent", keyname])
+
+    def wake(self):
+        if not self.is_screenon():
+            self.keyevent("POWER")
+
+    def home(self):
+        self.keyevent("HOME")
+
+    def text(self, text):
+        self.adb.shell(["input", "text", text])
+
+    def touch(self, pos):
+        if self.minitouch:
+            self.minitouch.touch(pos)
+        else:
+            self.adb.touch(pos)
+
+    def swipe(self, p1, p2):
+        if self.minitouch:
+            self.minitouch.swipe(p1, p2)
+        else:
+            self.adb.swipe(p1, p2)
+
+    def get_top_activity_name_and_pid(self):
+        dat = self.adb.shell('dumpsys activity top')
+        lines = dat.replace('\r', '').splitlines()
+        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        m = activityRE.search(lines[1])
+        if m:
+            return (m.group(1), m.group(2), m.group(3))
+        else:
+            warnings.warn("NO MATCH:" + lines[1])
+            return None
+
+    def get_top_activity_name(self):
+        tanp = self.get_top_activity_name_and_pid()
+        if tanp:
+            return tanp[0] + '/' + tanp[1]
+        else:
+            return None
+
+    def is_keyboard_shown(self):
+        dim = self.adb.shell('dumpsys input_method')
+        if dim:
+            return "mInputShown=true" in dim
+        return False
+
+    def is_screenon(self):
+        screenOnRE = re.compile('mScreenOnFully=(true|false)')
+        m = screenOnRE.search(self.adb.shell('dumpsys window policy'))
+        if m:
+            return (m.group(1) == 'true')
+        raise MoaError("Couldn't determine screen ON state")
+
+    def is_locked(self):
+        """not work on xiaomi 2s"""
+        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
+        m = lockScreenRE.search(self.adb.shell('dumpsys window policy'))
+        if not m:
+            raise MoaError("Couldn't determine screen lock state")
+        return (m.group(1) == 'true')
+
+    def unlock(self):
+        """not work on many devices"""
+        self.adb.shell('input keyevent MENU')
+        self.adb.shell('input keyevent BACK')
+
+    def getprop(self, key, strip=True):
+        prop = self.adb.shell(['getprop', key])
+        if strip:
+            prop = prop.rstrip('\r\n')
+        return prop
+
+    def getPhysicalDisplayInfo(self):
+        ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
+        phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
+        m = phyDispRE.search(self.adb.shell('wm size; wm density'))
+        if m:
+            displayInfo = {}
+            for prop in [ 'width', 'height' ]:
+                displayInfo[prop] = int(m.group(prop))
+            for prop in [ 'density' ]:
+                displayInfo[prop] = float(m.group(prop))
+            return displayInfo
+
+        phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
+        for line in self.adb.shell('dumpsys display').splitlines():
+            m = phyDispRE.search(line, 0)
+            if m:
+                displayInfo = {}
+                for prop in [ 'width', 'height' ]:
+                    displayInfo[prop] = int(m.group(prop))
+                for prop in [ 'density' ]:
+                    # In mPhysicalDisplayInfo density is already a factor, no need to calculate
+                    displayInfo[prop] = float(m.group(prop))
+                return displayInfo
+
+        # This could also be mSystem or mOverscanScreen
+        phyDispRE = re.compile('\s*mUnrestrictedScreen=\((?P<x>\d+),(?P<y>\d+)\) (?P<width>\d+)x(?P<height>\d+)')
+        # This is known to work on older versions (i.e. API 10) where mrestrictedScreen is not available
+        dispWHRE = re.compile('\s*DisplayWidth=(?P<width>\d+) *DisplayHeight=(?P<height>\d+)')
+        for line in self.adb.shell('dumpsys window').splitlines():
+            m = phyDispRE.search(line, 0)
+            if not m:
+                m = dispWHRE.search(line, 0)
+            if m:
+                displayInfo = {}
+                for prop in [ 'width', 'height' ]:
+                    displayInfo[prop] = int(m.group(prop))
+                for prop in [ 'density' ]:
+    
+                    d = self.__getDisplayDensity(None, strip=True)
+                    if d:
+                        displayInfo[prop] = d
+                    else:
+                        # No available density information
+                        displayInfo[prop] = -1.0
+                return displayInfo
+
+    def __getDisplayDensity(self, key, strip=True):
+        BASE_DPI = 160.0
+        d = self.getprop('ro.sf.lcd_density', strip)
+        if d:
+            return float(d)/BASE_DPI
+        d = self.getprop('qemu.sf.lcd_density', strip)
+        if d:
+            return float(d)/BASE_DPI
+        return -1.0
+
+
+def test_minicap(serialno):
+    mi = Minicap(serialno, {"width": 720, "height": 1080})
+    frame = mi.get_frame()
+    with open("test.jpg", "wb") as f:
+        f.write(frame)
+    gen = mi.get_frames()
+    print gen.next()
+    print repr(gen.next())
+
+
+def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
-    # mi.touch(100, 100)
-    mi.swipe((100, 200), (1280, 200))
-    time.sleep(1)
-    mi.swipe((1080, 200), (0, 200))
+    mi.touch((100, 100))
+    # mi.swipe((100, 200), (1280, 200))
+    # time.sleep(1)
+    # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
+
+
+def test_android():
+    a = Android()
+    print a.size
+    print a.shell("ls")
+    a.wake()
+    return
+    print a.is_screenon()
+    a.keyevent("POWER")
+    print a.snapshot()
+    print a.get_top_activity_name()
+    print a.is_keyboard_shown()
+    # print a.is_locked()
+    # a.unlock()
+
+
+if __name__ == '__main__':
+    # print list(adb_devices(state="device"))
+    # test_minicap(serialno)
+    # test_minitouch(serialno)
+    test_android()
