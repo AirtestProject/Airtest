@@ -164,9 +164,9 @@ class Minicap(object):
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0 &" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]), not_wait=True)
-        time.sleep(0.5)
-        p.kill()
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]), not_wait=True)
+        time.sleep(1.0)
+        # p.kill()
 
     def get_header(self):
         pass
@@ -466,7 +466,7 @@ class Android(object):
 
 
 def test_minicap(serialno):
-    mi = Minicap(serialno, {"width": 720, "height": 1080})
+    mi = Minicap(serialno, {"width": 1080, "height": 1920})
     frame = mi.get_frame()
     with open("test.jpg", "wb") as f:
         f.write(frame)
@@ -501,7 +501,7 @@ def test_android():
 
 
 if __name__ == '__main__':
-    # print list(adb_devices(state="device"))
-    # test_minicap(serialno)
+    serialno = adb_devices(state="device").next()[0]
+    test_minicap(serialno)
     # test_minitouch(serialno)
-    test_android()
+    # test_android()

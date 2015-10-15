@@ -58,7 +58,7 @@ from error import MoaError, MoaNotFoundError
 from core import adb_devices
 import core
 sys.path.insert(0, "..")
-from aircv import aircv
+from aircv import aircv, textgen
 from utils import _isstr, _islist
 
 
@@ -181,54 +181,56 @@ def _show_screen(pngstr):
         pass
 
 
-def _pic2pos(picdata, rect=None):
+def _find_pic(picdata, rect=None):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
         screen = snapshot()
-    offsetx, offsety = (0,0)
-    # if rect is not None and len(rect) == 4:
-    #     x0, y0, x1, y1 = rect
-    #     r = requests.post('http://{}/api/opencv/crop'.format(AIRCV),
-    #         files={'file': screen},
-    #         data={'startx': x0, 'starty': y0, 'endx': x1, 'endy': y1})
-    #     if r.status_code != 200:
-    #         raise MoaError("Crop image use air-opencv error: " + r.text)
-    #     screen = r.content
-    #     (offsetx, offsety) = (x0, y0)
-
-    # r = requests.post('http://{0}/api/opencv/locate-element'.format(AIRCV), files={
-    #     'background': screen,
-    #     'target': picdata,
-    #     })
-    # data = r.json()
-    # if data.get('success'):
-    #     (x, y) = data['data']['result'].get('point')
-    #     return offsetx+x, offsety+y
-    ret = aircv.find(screen, picdata)
-    return ret
+    offsetx, offsety = 0, 0
+    if rect is not None and len(rect) == 4:
+        x0, y0, x1, y1 = rect
+        screen = aircv.crop(screen, (x0, y0), (x1, y1))
+        offsetx, offsety = x0, y0
+    ret = aircv.find_sift(screen, picdata)
+    if not ret:
+        return None
+    ret = ret["result"]
+    return ret[0] + offsetx, ret[1] + offsety
 
 
-def _loop_find(picfile, background=None, timeout=TIMEOUT, rect=None):
+def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None):
     pos = None
     left = max(1, int(timeout))
-    picfile = os.path.join(BASE_DIR, picfile)
-    picdata = aircv.imread(picfile)
+    if isinstance(pictarget, MoaText):
+        picdata = aircv.pil_2_cv2(pictarget.img)
+    else:
+        pictarget = os.path.join(BASE_DIR, pictarget)
+        picdata = aircv.imread(pictarget)
     while left > 0:
-        pos = _pic2pos(picdata, rect=rect)
+        pos = _find_pic(picdata, rect=rect)
         if pos is None:
             time.sleep(1)
             left -= 1
             continue
         return pos
     if pos is None:
-        raise MoaNotFoundError('Picture %s not found' % picfile)
+        raise MoaNotFoundError('Picture %s not found' % pictarget)
 
 
 def keep_capture(flag=True):
     global KEEP_CAPTURE
     KEEP_CAPTURE = flag
+
+
+class MoaText(object):
+    """autogen Text with aircv"""
+    def __init__(self, text, font=u"华康口袋版", size=28):
+        self.info = dict(text=text, font=font, size=size)
+        self.img = textgen.gen_text(text, font, size)
+
+    def __repr__(self):
+        return "MhText(%s)" % repr(self.info)
 
 
 """
@@ -279,7 +281,7 @@ def home():
 
 @logwrap
 def touch(v, rect=None, timeout=TIMEOUT):
-    if _isstr(v):
+    if _isstr(v) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, rect=rect)
     else:
         pos = v
@@ -290,7 +292,7 @@ def touch(v, rect=None, timeout=TIMEOUT):
 
 @logwrap
 def swipe(v1, v2):
-    if _isstr(v1) and _isstr(v2):
+    if (_isstr(v1) or isinstance(v, MoaText)) and (_isstr(v2) or isinstance(v, MoaText)):
         pos1 = _loop_find(v1)
         keep_capture()
         pos2 = _loop_find(v2)
@@ -462,10 +464,13 @@ if __name__ == '__main__':
     set_serialno()
     # set_basedir()
     # set_logfile('run.log')
-    # touch('weixin.jpg')
+    # touch('weixin.jpg', rect=(10, 10, 500, 500))
     # time.sleep(1)
     # home()
     # time.sleep(1)
     # swipe('weixin.jpg', 'qq.jpg')
     # time.sleep(1)
-    swipe('mail.jpg', 'cal.jpg')
+    # swipe('vp.jpg', 'cal.jpg')
+    # img = MoaText(u"你妹").img
+    # img.show()
+    touch(MoaText(u"副 本"))
