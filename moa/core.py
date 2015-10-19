@@ -18,6 +18,7 @@ from error import MoaError
 
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
+PROJECTIONRATE = 1.0
 
 
 def look_path(program):
@@ -143,6 +144,7 @@ class ADB():
 
     def touch(self, (x, y)):
         self.shell('input tap %d %d' % (x, y))
+        time.sleep(0.1)
 
     def swipe(self, (x0, y0), (x1, y1), duration=500, steps=1):
         version = self.sdk_version
@@ -164,7 +166,10 @@ class Minicap(object):
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0" % (self.size["width"], self.size["height"], self.size["width"]/2, self.size["height"]/2), not_wait=True)
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %dx%d@%dx%d/0" % (
+            self.size["width"], self.size["height"],
+            self.size["width"]*PROJECTIONRATE,
+            self.size["height"]*PROJECTIONRATE), not_wait=True)
         time.sleep(1.0)
         # p.kill()
 
@@ -177,7 +182,9 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0 -s" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]))
+        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %dx%d@%dx%d/0 -s" % (
+            self.size["width"], self.size["height"],
+            self.size["width"]*PROJECTIONRATE, self.size["height"]*PROJECTIONRATE))
         jpg_data = raw_data.split("for JPG encoder\r\r\n")[-1].replace("\r\r\n", "\n")
         return jpg_data
 
@@ -217,9 +224,9 @@ class Minitouch(object):
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:minitouch")
-        p = self.adb.shell("/data/local/tmp/minitouch &", not_wait=True)
+        p = self.adb.shell("/data/local/tmp/minitouch", not_wait=True)
         time.sleep(0.5)
-        p.kill()
+        # p.kill()
 
     def touch(self, (x, y), duration=0.01):
         """
@@ -232,7 +239,7 @@ class Minitouch(object):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", self.localport))
         # header = s.recv(4096)
-        s.send("d 0 %s %s 50\nc\n" % (x, y))
+        s.send("d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
         s.send("u 0\nc\n")
         time.sleep(0.01) # wait send
@@ -354,6 +361,8 @@ class Android(object):
         self.adb.shell(["input", "text", text])
 
     def touch(self, pos):
+        pos = map(lambda x: x/PROJECTIONRATE, pos)
+        print pos
         if self.minitouch:
             self.minitouch.touch(pos)
         else:

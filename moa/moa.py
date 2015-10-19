@@ -15,14 +15,13 @@ Script engine.
 __version__ = '0.0.2'
 __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile',
-    'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'type', 'wake',
+    'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
-    'is_screenon', 'wake', 'adb_devices', 'get_top_activity_name', 'get_top_activity_name_and_pid',
-    'is_keyboard_shown', 'unlock',
-    'gevent_run'
+    'wake', 'adb_devices',
+    'gevent_run', 'MoaText',
 ]
 
-DEBUG = True
+DEBUG = False
 SERIALNO = ''
 ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
@@ -37,6 +36,7 @@ TOUCH_POINTS = {}
 DEVICE = None
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
+
 
 import os
 import re
@@ -73,7 +73,7 @@ def set_address((host, port)):
     # FIXME(ssx): need to verify
 
 
-def set_serialno(sn=None):
+def set_serialno(sn=None, minitouch=True):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -101,7 +101,7 @@ def set_serialno(sn=None):
         if status != 'device':
             raise MoaError("Device status not good: {}".format(status))
     global DEVICE
-    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=False)
+    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
     return SERIALNO
 
 
@@ -137,6 +137,8 @@ Some utils
 
 def log(tag, data):
     ''' Not thread safe '''
+    if DEBUG:
+        print tag, data
     if LOG_FILE_FD is None:
         return
     LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': len(RUNTIME_STACK), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}) + '\n')
@@ -225,7 +227,7 @@ def keep_capture(flag=True):
 
 class MoaText(object):
     """autogen Text with aircv"""
-    def __init__(self, text, font=u"华康口袋版", size=28):
+    def __init__(self, text, font=u"微软雅黑", size=28):
         self.info = dict(text=text, font=font, size=size)
         self.img = textgen.gen_text(text, font, size)
 
@@ -280,14 +282,15 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT):
+def touch(v, rect=None, timeout=TIMEOUT, delay=0.1):
     if _isstr(v) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, rect=rect)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
-    log('touchpos', pos)
+    print ('touchpos', pos)
     DEVICE.touch(pos)
+    time.sleep(delay)
 
 
 @logwrap
@@ -473,4 +476,4 @@ if __name__ == '__main__':
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img
     # img.show()
-    touch(MoaText(u"副 本"))
+    touch(MoaText(u"副 本", font=u"华康唐风隶"))
