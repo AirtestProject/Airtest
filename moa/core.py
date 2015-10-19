@@ -164,7 +164,7 @@ class Minicap(object):
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0" % (self.size["width"], self.size["height"], self.size["width"], self.size["height"]), not_wait=True)
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %sx%s@%sx%s/0" % (self.size["width"], self.size["height"], self.size["width"]/2, self.size["height"]/2), not_wait=True)
         time.sleep(1.0)
         # p.kill()
 
@@ -193,9 +193,13 @@ class Minicap(object):
         cnt = 0
         while cnt <= max_cnt:
             cnt += 1
-            frame_size = struct.unpack("<I", s.recv(4))[0]
-            tmp_size = 0
+            # frame_size = struct.unpack("<I", s.recv(4))[0]
             trunk = ""
+            while len(trunk) < 4:
+                trunk += s.recv(4)
+            header, trunk = trunk[:4], trunk[4:]
+            frame_size = struct.unpack("<I", header)[0]
+
             while len(trunk) < frame_size:
                 trunk_size = min(4096, frame_size - len(trunk))
                 trunk += s.recv(trunk_size)
@@ -258,7 +262,10 @@ class Minitouch(object):
         s.send("d 0 %s %s 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            s.send("m 0 %s %s 50\nc\n" % (from_x+(to_x-from_x)*i/steps, from_y+(to_y-from_y)*i/steps))
+            s.send("m 0 %s %s 50\nc\n" % (
+                from_x+(to_x-from_x)*i/steps, 
+                from_y+(to_y-from_y)*i/steps)
+            )
             time.sleep(interval)
         s.send("d 0 %s %s 50\nc\n" % (to_x, to_y))
         time.sleep(interval)

@@ -10,7 +10,7 @@ print repr(t)
 print struct.unpack("<2B5I2B", t)
 
 cnt = 0
-while cnt < 300:
+while cnt < 3000:
     frame_size = struct.unpack("<I", s.recv(4))[0]
     print frame_size
     tmp_size = 0
