@@ -194,11 +194,11 @@ def _find_pic(picdata, rect=None, threshold=None):
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
     ret = aircv.find_sift(screen, picdata)
+    print ret
     if not ret:
         return None
     if threshold and ret["confidence"] < threshold:
         return None
-    print ret
     ret = ret["result"]
     return ret[0] + offsetx, ret[1] + offsety
 
