@@ -1,11 +1,10 @@
-from core import Android, adb_devices
+import core
 import sys
 import time
 
-# serialno = adb_devices(state="device").next()[0]
-# mi = Minicap(serialno, {"width": 2048, "height": 1536})
-a = Android()
-mi = a.minicap
+core.PROJECTIONRATE = 0.5
+device = core.Android()
+mi = device.minicap
 
 
 from flask import Flask, render_template, Response

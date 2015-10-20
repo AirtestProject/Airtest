@@ -36,7 +36,7 @@ TOUCH_POINTS = {}
 DEVICE = None
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
-
+OPDELAY = 0.1
 
 import os
 import re
@@ -57,7 +57,6 @@ except ImportError:
 from error import MoaError, MoaNotFoundError
 from core import adb_devices
 import core
-sys.path.insert(0, "..")
 from aircv import aircv, textgen
 from utils import _isstr, _islist
 
@@ -73,7 +72,7 @@ def set_address((host, port)):
     # FIXME(ssx): need to verify
 
 
-def set_serialno(sn=None, minitouch=True):
+def set_serialno(sn=None, minitouch=False):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -183,7 +182,7 @@ def _show_screen(pngstr):
         pass
 
 
-def _find_pic(picdata, rect=None):
+def _find_pic(picdata, rect=None, threshold=None):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -197,11 +196,14 @@ def _find_pic(picdata, rect=None):
     ret = aircv.find_sift(screen, picdata)
     if not ret:
         return None
+    if threshold and ret["confidence"] < threshold:
+        return None
+    print ret
     ret = ret["result"]
     return ret[0] + offsetx, ret[1] + offsety
 
 
-def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None):
+def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=None):
     pos = None
     left = max(1, int(timeout))
     if isinstance(pictarget, MoaText):
@@ -210,7 +212,7 @@ def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None):
         pictarget = os.path.join(BASE_DIR, pictarget)
         picdata = aircv.imread(pictarget)
     while left > 0:
-        pos = _find_pic(picdata, rect=rect)
+        pos = _find_pic(picdata, rect=rect, threshold=threshold)
         if pos is None:
             time.sleep(1)
             left -= 1
@@ -282,7 +284,7 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT, delay=0.1):
+def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY):
     if _isstr(v) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, rect=rect)
     else:
@@ -345,9 +347,9 @@ Assertions for result verification
 
 
 @logwrap
-def assert_exists(v, msg="", timeout=TIMEOUT, rect=None):
+def assert_exists(v, msg="", timeout=TIMEOUT, rect=None, threshold=0.5):
     try:
-        return _loop_find(v, timeout=timeout, rect=rect)
+        return _loop_find(v, timeout=timeout, rect=rect, threshold=threshold)
     except MoaNotFoundError:
         raise AssertionError("%s does not exists" % v)
 

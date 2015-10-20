@@ -40,4 +40,4 @@ def server_call(cmd, host=HOST, port=PORT, usernum=USERNUM):
 
 
 if __name__ == '__main__':
-    server_call("$at h")
+    server_call("$at g1/sday0 $id")
