@@ -482,7 +482,7 @@ class Android(object):
 
 
 def test_minicap(serialno):
-    mi = Minicap(serialno, {"width": 1080, "height": 1920})
+    mi = Minicap(serialno, {"width": 480, "height": 854})
     frame = mi.get_frame()
     with open("test.jpg", "wb") as f:
         f.write(frame)

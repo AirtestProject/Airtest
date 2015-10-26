@@ -19,6 +19,7 @@ __all__ = [
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'wake', 'adb_devices',
     'gevent_run', 'MoaText',
+    'assert_condition','assert_equal','assert_not_exists',
 ]
 
 DEBUG = False
@@ -387,6 +388,16 @@ def assert_equal(first, second, msg=""):
     result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
+
+@logwrap
+def assert_condition(v, msg=""):
+    ret = eval(v)
+    print "assert condition", v, msg
+    if ret:
+        pass
+    else:
+        raise AssertionError("%s condition not True"% (v))
+
 
 
 """

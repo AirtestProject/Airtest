@@ -14,7 +14,13 @@ def server_call(cmd):
 
 #$at g1/get1 $id var
 def get_var(varname):
-    return server_call('mobile_app/role_cache->get_var("$id@89","%s")' % varname)
+    ret = server_call('mobile_app/role_cache->get_var("$id@89","%s")' % varname)
+    try:
+        ret = int(ret)
+    except:
+        return ret
+
+    return ret
 
 #$at g1/set1 $id var
 def set_var(varname, value):
@@ -27,7 +33,14 @@ def set_var(varname, value):
 
 #$at g1/gday $id var
 def get_daycnt(varname):
-    return server_call('mobile_app/module/counter->get_counter("$id@89","day","%s")' % varname)
+    ret = server_call('mobile_app/module/counter->get_counter("$id@89","day","%s")' % varname)
+
+    try:
+        ret = int(ret)
+    except:
+        return ret
+
+    return ret
 
 #$at g1/sday $id var
 def set_daycnt(varname,value):
@@ -43,8 +56,8 @@ if __name__ == '__main__':
     server_call("$at h")
     print server_call("at/G1/sm/main->get_sm_leaf(\"$id@89\")")
 
-    print get_var('_gzj_true_pos')
-    print set_var('_gzj_true_pos',0 )
+    print type(get_var('_gzj_true_pos'))
+    print set_var('_gzj_true_pos',"abc" )
     print get_daycnt('im_private_task')
     print set_daycnt('im_private_task', 0)
 
