@@ -80,9 +80,10 @@ def set_serialno(sn=None, minitouch=False):
     global SERIALNO
     if not sn:
         devs = list(adb_devices(state='device', addr=ADDRESS))
-        if len(devs) != 1:
-            print devs
+        if len(devs) > 1:
             raise MoaError("more than one device, please specify serialno: set_serialno(sn)")
+        elif len(devs) == 0:
+            raise MoaError("no device, please check your adb connection")
         SERIALNO = devs[0][0]
     else:
         exists = 0
@@ -207,7 +208,10 @@ def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold
     pos = None
     left = max(1, int(timeout))
     if isinstance(pictarget, MoaText):
-        picdata = aircv.pil_2_cv2(pictarget.img)
+        # pil_2_cv2函数有问题，会变底色，后续修改
+        # picdata = aircv.pil_2_cv2(pictarget.img)
+        pictarget.img.save("text.png")
+        picdata = aircv.imread("text.png")
     else:
         pictarget = os.path.join(BASE_DIR, pictarget)
         picdata = aircv.imread(pictarget)
@@ -229,9 +233,10 @@ def keep_capture(flag=True):
 
 class MoaText(object):
     """autogen Text with aircv"""
-    def __init__(self, text, font=u"微软雅黑", size=28):
-        self.info = dict(text=text, font=font, size=size)
-        self.img = textgen.gen_text(text, font, size)
+    def __init__(self, text, font=u"微软雅黑", size=70, inverse=True):
+        self.info = dict(text=text, font=font, size=size, inverse=inverse)
+        self.img = textgen.gen_text(text, font, size, inverse)
+        # self.img.save("text.png")
 
     def __repr__(self):
         return "MhText(%s)" % repr(self.info)
@@ -297,7 +302,7 @@ def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY):
 
 @logwrap
 def swipe(v1, v2):
-    if (_isstr(v1) or isinstance(v, MoaText)) and (_isstr(v2) or isinstance(v, MoaText)):
+    if (_isstr(v1) or isinstance(v1, MoaText)) and (_isstr(v2) or isinstance(v2, MoaText)):
         pos1 = _loop_find(v1)
         keep_capture()
         pos2 = _loop_find(v2)
