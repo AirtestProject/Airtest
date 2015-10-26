@@ -72,7 +72,7 @@ def set_address((host, port)):
     # FIXME(ssx): need to verify
 
 
-def set_serialno(sn=None, minitouch=False):
+def set_serialno(sn=None, minitouch=True):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -284,13 +284,26 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY):
+def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None):
+    '''
+    @param offset: {'x':10,'y':10,'percent':True}
+    '''
     if _isstr(v) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, rect=rect)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     print ('touchpos', pos)
+
+    if offset:
+        if offset['percent']:
+            w, h = DEVICE.size['width'], DEVICE.size['height']
+            pos = (pos[0] + offset['x'] * w / 100, pos[1] + offset['y'] * h / 100)
+        else:
+            pos = (pos[0] + offset['x'], pos[1] + offset['y'])
+
+        print ('touchpos after offset', pos)
+
     DEVICE.touch(pos)
     time.sleep(delay)
 
