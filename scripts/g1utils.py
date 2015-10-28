@@ -13,5 +13,6 @@ def server_call(cmd):
 
 
 if __name__ == '__main__':
-    server_call("$at h")
+    # server_call("$at h")
     print server_call("at/G1/sm/main->get_sm_leaf(\"$id@89\")")
+    print server_call('at/G1/sm/main->check_sm($id, "$id@89", 5, 1, 0, 0)')

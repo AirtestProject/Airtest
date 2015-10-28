@@ -39,6 +39,7 @@ def fb():
 
 def shimen1001():
     clear_task()
+    leaf_before = server_call("at/G1/sm/main->get_sm_leaf(\"$id@89\")") 
     server_call("mobile_app/task/map_task/main->_X_Set_gQCTask(gUserRunner,\"1001\")")
     touch(MoaText(u"任务", font=u"隶书"))
     # touch(MoaText(u"师门"))
@@ -46,6 +47,7 @@ def shimen1001():
     touch(MoaText(u"领取任务"))
     touch(MoaText(u"前往"))
     assert_exists("1001finish.png", msg=u"师门1001完成", timeout=10)
+    leaf_check = server_call('at/G1/sm/main->check_sm($id, "$id@89", %s, 1, 0, 0)'%leaf_before)
 
 
 def shimen1002():
@@ -102,11 +104,13 @@ def dazuo():
     touch(MoaText(u"任务", font=u"隶书"))
     swipe((200, 600), (200, 200))
     touch("dazuo.png")
+    # touch(MoaText(u"打坐", inverse=True))
     touch(MoaText(u"开始打坐"))
     touch(MoaText(u"确定"))
     touch(MoaText(u"确定"))
     sleep(5)
     touch(MoaText(u"结束打坐"))
+    touch("main.png")
 
 
 def xiuxing():
@@ -123,9 +127,9 @@ def xiuxing():
 
 
 if __name__ == '__main__':
-    fb()
+    # fb()
     # shimen1001()
     # shimen1002()
     # shimen1003()
-    # dazuo()
+    dazuo()
     # xiuxing()
