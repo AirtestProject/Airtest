@@ -3,7 +3,7 @@
 # @Author: anchen
 # @Date:   2015-10-23 15:57:27
 # @Last Modified by:   anchen
-# @Last Modified time: 2015-10-26 20:11:12
+# @Last Modified time: 2015-10-28 16:16:11
 
 import sys
 sys.path.insert(0, "..")
@@ -32,9 +32,12 @@ def check_rew():
     active = get_daycnt("active")
     exp = get_var("exp")
 
-    assert_condition("%d == 995" % energy, u"答题成功消耗5精力")
-    assert_condition("%d > 0" % exp, u"答题成功后获得经验")
-    assert_condition("%d >= 5" % active, u"答题成功获得活跃度")
+    assert_equal(energy, 995, u"答题成功消耗5精力")
+    assert_equal(exp > 0 , True, u"答题成功后获得经验")
+    assert_equal(active >= 5, True, u"答题成功获得活跃度")
+    # assert_condition("%d == 995" % energy, u"答题成功消耗5精力")
+    # assert_condition("%d > 0" % exp, u"答题成功后获得经验")
+    # assert_condition("%d >= 5" % active, u"答题成功获得活跃度")
 
 def gzj_test():
     init()

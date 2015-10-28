@@ -389,16 +389,6 @@ def assert_equal(first, second, msg=""):
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
-@logwrap
-def assert_condition(v, msg=""):
-    ret = eval(v)
-    print "assert condition", v, msg
-    if ret:
-        pass
-    else:
-        raise AssertionError("%s condition not True"% (v))
-
-
 
 """
 Exececution & Debug
