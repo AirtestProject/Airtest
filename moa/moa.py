@@ -19,6 +19,7 @@ __all__ = [
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'wake', 'adb_devices',
     'gevent_run', 'MoaText',
+    'assert_condition','assert_equal','assert_not_exists',
 ]
 
 DEBUG = False
@@ -72,7 +73,7 @@ def set_address((host, port)):
     # FIXME(ssx): need to verify
 
 
-def set_serialno(sn=None, minitouch=False):
+def set_serialno(sn=None, minitouch=True):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -289,13 +290,26 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY):
+def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None):
+    '''
+    @param offset: {'x':10,'y':10,'percent':True}
+    '''
     if _isstr(v) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, rect=rect)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     print ('touchpos', pos)
+
+    if offset:
+        if offset['percent']:
+            w, h = DEVICE.size['width'], DEVICE.size['height']
+            pos = (pos[0] + offset['x'] * w / 100, pos[1] + offset['y'] * h / 100)
+        else:
+            pos = (pos[0] + offset['x'], pos[1] + offset['y'])
+
+        print ('touchpos after offset', pos)
+
     DEVICE.touch(pos)
     time.sleep(delay)
 
@@ -374,6 +388,16 @@ def assert_equal(first, second, msg=""):
     result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
+
+@logwrap
+def assert_condition(v, msg=""):
+    ret = eval(v)
+    print "assert condition", v, msg
+    if ret:
+        pass
+    else:
+        raise AssertionError("%s condition not True"% (v))
+
 
 
 """

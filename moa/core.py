@@ -163,10 +163,11 @@ class Minicap(object):
         self.size = size
         self.localport = localport
         self.adb = ADB(serialno)
+        # self._setup() #minicap不需要setup
 
     def _setup(self):
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %dx%d@%dx%d/0" % (
+        self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
             self.size["width"], self.size["height"],
             self.size["width"]*PROJECTIONRATE,
             self.size["height"]*PROJECTIONRATE), not_wait=True)
@@ -182,7 +183,7 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P %dx%d@%dx%d/0 -s" % (
+        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
             self.size["width"], self.size["height"],
             self.size["width"]*PROJECTIONRATE, self.size["height"]*PROJECTIONRATE))
         jpg_data = raw_data.split("for JPG encoder\r\r\n")[-1].replace("\r\r\n", "\n")
@@ -223,8 +224,8 @@ class Minitouch(object):
         self._setup()
 
     def _setup(self):
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:minitouch")
-        p = self.adb.shell("/data/local/tmp/minitouch", not_wait=True)
+        self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minitouch")
+        p = self.adb.shell("/data/local/tmp/minitouch -n 'moa_minitouch'", not_wait=True)
         time.sleep(0.5)
         # p.kill()
 
@@ -482,7 +483,7 @@ class Android(object):
 
 
 def test_minicap(serialno):
-    mi = Minicap(serialno, {"width": 1080, "height": 1920})
+    mi = Minicap(serialno, {"width": 480, "height": 854})
     frame = mi.get_frame()
     with open("test.jpg", "wb") as f:
         f.write(frame)
@@ -494,8 +495,8 @@ def test_minicap(serialno):
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
-    mi.touch((100, 100))
-    # mi.swipe((100, 200), (1280, 200))
+    # mi.touch((100, 100))
+    mi.swipe((100, 200), (1280, 200))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
@@ -518,6 +519,8 @@ def test_android():
 
 if __name__ == '__main__':
     serialno = adb_devices(state="device").next()[0]
-    test_minicap(serialno)
-    # test_minitouch(serialno)
+    adb = ADB(serialno)
+    print adb.getprop('ro.build.version.sdk')
+    # test_minicap(serialno)
+    test_minitouch(serialno)
     # test_android()
