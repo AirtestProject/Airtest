@@ -163,7 +163,7 @@ class Minicap(object):
         self.size = size
         self.localport = localport
         self.adb = ADB(serialno)
-        self._setup()
+        # self._setup() #minicap不需要setup
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
