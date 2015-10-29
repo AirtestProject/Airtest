@@ -19,7 +19,7 @@ __all__ = [
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'wake', 'adb_devices',
     'gevent_run', 'MoaText',
-    'assert_condition','assert_equal','assert_not_exists',
+    'assert_equal','assert_not_exists',
 ]
 
 DEBUG = False
