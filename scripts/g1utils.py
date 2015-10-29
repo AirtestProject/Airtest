@@ -1,4 +1,7 @@
+#coding:utf-8
 import requests
+import json
+import re
 HOST, PORT = "192.168.10.191", 17800
 HOST, PORT = "192.168.10.104", 27030 
 USERNUM = 31996757
@@ -51,6 +54,62 @@ def set_daycnt(varname,value):
 
     return get_var(varname)
 
+def multiple_replace(text, adict):
+     rx = re.compile('|'.join(map(re.escape, adict)))
+     def one_xlat(match):
+           return adict[match.group(0)]
+     return rx.sub(one_xlat, text)
+
+lpc_2_py_dict = {
+    "([":"{",
+    "])":"}",
+    "({":"[",
+    "})":"]",
+}
+
+last_comma = {
+    ",}":"}",
+    ",]":"]",
+}
+
+def lpc_mixed_2_py(mxvar):
+    """
+    将LPC的mixedload为python obj
+    """
+    def repl(matched):
+        tmp = matched.group()
+        for idx,x in enumerate(tmp):
+            if x in [" ",":"]:
+                return "\"%s\":"%tmp[:idx]
+
+    def json_hook(data):
+        if isinstance(data,dict):
+            rv={}
+            for key in data.keys():
+                try:
+                    tmpkey = int(key)
+                    rv[tmpkey] = json_hook(data[key])
+                    del data[key]
+                except:
+                    rv[key]=json_hook(data[key])
+            return rv
+        else:
+            return data
+
+    intkey = re.compile(r"(-)*(\d)+(\s)*\:")
+    value = mxvar
+    #lpc array/map --> python list/dict
+    value = multiple_replace(value,lpc_2_py_dict)
+    #int key --> string key
+    value = re.sub(intkey,repl,value)
+    #eliminate last , before } and ]
+    value = multiple_replace(value,last_comma)
+    #gbk-->unicode
+    if isinstance(value,str):
+        value = value.decode("gbk")
+    value = json.loads(value,object_hook=json_hook)
+
+    return value
 
 if __name__ == '__main__':
     # server_call("$at h")
@@ -59,4 +118,6 @@ if __name__ == '__main__':
     print type(get_var('_gzj_true_pos'))
     print set_var('_gzj_true_pos',"abc" )
     print get_daycnt('im_private_task')
-    print set_daycnt('im_private_task', 0)
+    # print set_daycnt('im_private_task', 0)
+
+    print lpc_mixed_2_py(get_daycnt('im_publice_task'))
