@@ -282,7 +282,7 @@ class Minitouch(object):
                 from_y+(to_y-from_y)*i/steps)
             )
             time.sleep(interval)
-        s.send("d 0 %s %s 50\nc\n" % (to_x, to_y))
+        s.send("m 0 %s %s 50\nc\n" % (to_x, to_y))
         time.sleep(interval)
         s.send("u 0\nc\n")
         time.sleep(0.01)
@@ -503,7 +503,7 @@ def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
     # mi.touch((100, 100))
-    mi.swipe((100, 200), (1280, 200))
+    mi.swipe((575, 1089), (575, 451))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
