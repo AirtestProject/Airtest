@@ -23,7 +23,7 @@ while cnt < 3000:
     import numpy as np
     def string_2_img(pngstr):
         nparr = np.fromstring(pngstr, np.uint8)
-        img = cv2.imdecode(nparr, cv2.CV_LOAD_IMAGE_COLOR)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         return img
     cv2.imshow("preview", string_2_img(trunk))
     key = cv2.waitKey(1)

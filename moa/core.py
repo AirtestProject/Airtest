@@ -91,6 +91,13 @@ class ADB():
         self.addr = addr
         self.serialno = serialno
         self.props = {}
+        self._setup()
+
+    def _setup(self):
+        # if remote devices, connect first
+        if ":" in self.serialno:
+            print adbrun("connect %s"%self.serialno)
+            time.sleep(1.0)
 
     def run(self, cmds, not_wait=False):
         return adbrun(cmds, adbpath=self.adbpath, addr=self.addr, serialno=self.serialno, not_wait=not_wait)
@@ -484,12 +491,12 @@ class Android(object):
 
 def test_minicap(serialno):
     mi = Minicap(serialno, {"width": 480, "height": 854})
-    frame = mi.get_frame()
-    with open("test.jpg", "wb") as f:
-        f.write(frame)
     gen = mi.get_frames()
     print gen.next()
     print repr(gen.next())
+    frame = mi.get_frame()
+    with open("test.jpg", "wb") as f:
+        f.write(frame)
 
 
 def test_minitouch(serialno):
@@ -519,8 +526,10 @@ def test_android():
 
 if __name__ == '__main__':
     serialno = adb_devices(state="device").next()[0]
-    adb = ADB(serialno)
-    print adb.getprop('ro.build.version.sdk')
+    print serialno
+    serialno = "192.168.40.111:7401"
+    # adb = ADB(serialno)
+    # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
     test_minitouch(serialno)
     # test_android()
