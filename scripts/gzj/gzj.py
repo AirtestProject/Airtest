@@ -3,7 +3,7 @@
 # @Author: anchen
 # @Date:   2015-10-23 15:57:27
 # @Last Modified by:   anchen
-# @Last Modified time: 2015-11-03 21:29:52
+# @Last Modified time: 2015-11-03 22:03:46
 
 import sys
 sys.path.insert(0, "..")
@@ -46,7 +46,7 @@ def gzj_test():
     pos_dict = {1:[-1,-1], 2:[1,-1], 3:[-1,1], 4:[1,1],}
 
     sc = get_var("gzj_score")
-    touch("gzj_tian_btn.png")
+    touch("gzj_tian_btn.png",delay=1.0)
     assert_equal(get_var("gzj_score"),sc + 2,u"使用天王令直接答对")
 
     sc = get_var("gzj_score")
