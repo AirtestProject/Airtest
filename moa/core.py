@@ -190,9 +190,15 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
+        if self.size["orientation"] in [0, 4]:
+            real_width = self.size["width"]
+            real_height = self.size["height"]
+        else:
+            real_width = self.size["height"]
+            real_height = self.size["width"]
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
-            self.size["width"], self.size["height"],
-            self.size["width"]*PROJECTIONRATE, self.size["height"]*PROJECTIONRATE))
+            real_width, real_height,
+            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE))
         os = platform.system()
         if os == "Windows":
             link_breaker = "\r\r\n"
@@ -329,6 +335,8 @@ class Android(object):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
+        self.size['orientation'] = self.__getDisplayOrientation()
+        print self.size
         self.minicap = Minicap(serialno, self.size) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
         self.props = {}
@@ -376,6 +384,7 @@ class Android(object):
     def touch(self, pos):
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         print pos
+        pos = self.__transformPointByOrientation(pos)
         if self.minitouch:
             self.minitouch.touch(pos)
         else:
@@ -492,6 +501,28 @@ class Android(object):
         if d:
             return float(d)/BASE_DPI
         return -1.0
+
+    def __getDisplayOrientation(self):
+        # Fallback method to obtain the orientation
+        # See https://github.com/dtmilano/AndroidViewClient/issues/128
+        surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
+        output = self.adb.shell('dumpsys input')
+        m = surfaceOrientationRE.search(output)
+        if m:
+            return int(m.group(1))
+        # We couldn't obtain the orientation
+        return -1
+
+    def __transformPointByOrientation(self, (x, y)):
+        if self.size["orientation"] == 1:
+            _x = x
+            x = self.size['width'] - y
+            y = _x
+        elif self.size["orientation"] == 3:
+            _x = x
+            x = y
+            y = self.size['height'] - _x
+        return x, y
 
 
 def test_minicap(serialno):
