@@ -14,7 +14,7 @@ Script engine.
 
 __version__ = '0.0.2'
 __all__ = [
-    'set_serialno', 'set_basedir', 'set_logfile',
+    'set_serialno', 'set_basedir', 'set_logfile', 'keep_capture',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'wake', 'adb_devices',
@@ -38,6 +38,7 @@ DEVICE = None
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
 OPDELAY = 0.1
+THRESHOLD = 0.6
 
 import os
 import re
@@ -184,7 +185,7 @@ def _show_screen(pngstr):
         pass
 
 
-def _find_pic(picdata, rect=None, threshold=None):
+def _find_pic(picdata, rect=None, threshold=THRESHOLD):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -192,10 +193,18 @@ def _find_pic(picdata, rect=None, threshold=None):
         screen = snapshot()
     offsetx, offsety = 0, 0
     if rect is not None and len(rect) == 4:
-        x0, y0, x1, y1 = rect
+        if len(filter(lambda x: (x<=1 and x>=0), rect)) == 4:
+            x0, y0, x1, y1 = rect[0] * DEVICE.size["width"], rect[1] * DEVICE.size["height"], rect[2] * DEVICE.size["width"], rect[3] * DEVICE.size["height"]
+        else:
+            x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
-    ret = aircv.find_sift(screen, picdata)
+    try:
+        ret = aircv.find_sift(screen, picdata)
+    # need to specify different exceptions
+    except Exception as err:
+        print err
+        ret = None
     print ret
     if not ret:
         return None
@@ -205,7 +214,7 @@ def _find_pic(picdata, rect=None, threshold=None):
     return ret[0] + offsetx, ret[1] + offsety
 
 
-def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=None):
+def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD):
     pos = None
     left = max(1, int(timeout))
     if isinstance(pictarget, MoaText):
