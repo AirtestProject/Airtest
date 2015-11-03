@@ -3,11 +3,12 @@
 # @Author: anchen
 # @Date:   2015-10-23 15:57:27
 # @Last Modified by:   anchen
-# @Last Modified time: 2015-10-29 15:23:20
+# @Last Modified time: 2015-11-03 21:40:09
 
 import sys
 sys.path.insert(0, "..")
 from g1utils import *
+sys.path.insert(0, "../..")
 from moa.moa import *
 from moa import * 
 
@@ -34,8 +35,9 @@ def check_rew():
 
 def gzj_test():
     init()
-    touch('renwu_btn.png', delay=3.0)#第一次打开界面要加载很久..
+    touch("renwu_btn.png", delay=3.0)#第一次打开界面要加载很久..
     touch("gzj_btn.png",delay=2.0)
+    assert_exists("gzj_start.png",u"弹出答题界面")
     touch("start_qs_btn.png",delay=2.0)
 
     score_goal = get_var('gzj_pass_score')
@@ -44,7 +46,7 @@ def gzj_test():
     pos_dict = {1:[-1,-1], 2:[1,-1], 3:[-1,1], 4:[1,1],}
 
     sc = get_var("gzj_score")
-    touch("gzj_tian_btn.png")
+    touch("gzj_tian_btn.png",delay=1.0)
     assert_equal(get_var("gzj_score"),sc + 2,u"使用天王令直接答对")
 
     sc = get_var("gzj_score")
@@ -57,7 +59,7 @@ def gzj_test():
     true_pos = (get_var("_gzj_true_pos") + 1) % 4
     touch("gzj_ren_btn.png")
     touch("answer_area.png", delay=1.0,offset={'x':18 * pos_dict[true_pos][0], 'y': 3 * pos_dict[true_pos][1], 'percent':True})
-    assert_equal(get_var("gzj_score"), sc - 2, u"使用仁王令答积分翻倍")
+    assert_equal(get_var("gzj_score"), sc - 2, u"使用仁王令答错积分翻倍")
 
 
     for i in range(times):
