@@ -193,7 +193,12 @@ class Minicap(object):
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
             self.size["width"], self.size["height"],
             self.size["width"]*PROJECTIONRATE, self.size["height"]*PROJECTIONRATE))
-        jpg_data = raw_data.split("for JPG encoder\r\r\n")[-1].replace("\r\r\n", "\n")
+        os = platform.system()
+        if os == "Windows":
+            link_breaker = "\r\r\n"
+        else:
+            link_breaker = "\r\n"
+        jpg_data = raw_data.split("for JPG encoder"+link_breaker)[-1].replace(link_breaker, "\n")
         return jpg_data
 
     def get_frames(self, max_cnt=10):
