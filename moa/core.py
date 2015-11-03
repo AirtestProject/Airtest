@@ -59,7 +59,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
         cmds = list(cmds)
     # start-server cannot assign -H -P -s
     if cmds == ["start-server"] and addr == LOCALADBADRR:
-        return subprocess.check_output("adb start-server")
+        return subprocess.check_output(["adb", "start-server"])
 
     host, port = addr
     prefix = [adbpath, '-H', host, '-P', str(port)]
@@ -193,7 +193,12 @@ class Minicap(object):
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
             self.size["width"], self.size["height"],
             self.size["width"]*PROJECTIONRATE, self.size["height"]*PROJECTIONRATE))
-        jpg_data = raw_data.split("for JPG encoder\r\r\n")[-1].replace("\r\r\n", "\n")
+        os = platform.system()
+        if os == "Windows":
+            link_breaker = "\r\r\n"
+        else:
+            link_breaker = "\r\n"
+        jpg_data = raw_data.split("for JPG encoder"+link_breaker)[-1].replace(link_breaker, "\n")
         return jpg_data
 
     def get_frames(self, max_cnt=10):
