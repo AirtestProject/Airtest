@@ -14,6 +14,7 @@ def server_call(cmd):
             "usernum": USERNUM,
             "content": cmd
         })
+    # print r.text
     return r.text
 
 #$at g1/get1 $id var
@@ -114,11 +115,15 @@ def lpc_mixed_2_py(mxvar):
 
 if __name__ == '__main__':
     # server_call("$at h")
-    print server_call("at/G1/sm/main->get_sm_leaf(\"$id@89\")")
-    print server_call('at/G1/sm/main->check_sm($id, "$id@89", 5, 1, 0, 0)')
-    print type(get_var('_gzj_true_pos'))
-    print set_var('_gzj_true_pos',"abc" )
-    print get_daycnt('im_private_task')
-    # print set_daycnt('im_private_task', 0)
-
-    print lpc_mixed_2_py(get_daycnt('im_publice_task'))
+    # print server_call("at/G1/sm/main->get_sm_leaf(\"$id@89\")")
+    # print server_call('at/G1/sm/main->check_sm($id, "$id@89", 5, 1, 0, 0)')
+    # print type(get_var('_gzj_true_pos'))
+    # print set_var('_gzj_true_pos',"abc" )
+    # print get_daycnt('im_private_task')
+    # # print set_daycnt('im_private_task', 0)
+    # print lpc_mixed_2_py(get_daycnt('im_publice_task'))
+    server_call("at g1/sday0 $id")
+    server_call("at g1/set1 $id mfb 0")
+    server_call("at/G1/atdriver->clear_all_task(\"$id@89\")")
+    server_call("mb task_event set gEventProb 0")
+    server_call("mb task_event set gEventFriend 88")
