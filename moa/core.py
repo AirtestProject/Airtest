@@ -3,6 +3,8 @@
 #
 # Author:  hzsunshx
 # Created: 2015-07-02 19:56
+# Modified: 2015-11 gzliuxin  add minitouch minicap
+
 
 import os
 import re
@@ -14,6 +16,8 @@ import subprocess
 import shlex
 import socket
 import struct
+import threading
+import Queue
 from error import MoaError
 
 ADBPATH = None
@@ -234,6 +238,9 @@ class Minitouch(object):
         self.localport = localport
         self.adb = ADB(serialno)
         self._setup()
+        self.op_queue = Queue.Queue()
+        self.op_sock = None
+        self.op_thread = None
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minitouch")
@@ -321,6 +328,23 @@ class Minitouch(object):
         c
         """
         pass
+
+    def setup_long_operate(self):
+        t = threading.Thread(target=self._operate_worker)
+        t.daemon = True
+        t.start()
+        self.op_thread = t
+
+    def _operate_worker(self):
+        self.op_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.op_sock.connect(("localhost", self.localport))
+        while True:
+            cmd = self.op_queue.get()
+            self.op_sock.send(cmd)
+        self.op_sock.close()
+
+    def operate(self, cmd):
+        self.op_queue.put(cmd)
 
 
 class Android(object):
@@ -508,10 +532,14 @@ def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
     # mi.touch((100, 100))
-    mi.swipe((575, 1089), (575, 451))
+    # mi.swipe((575, 1089), (575, 451))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
+    mi.setup_long_operate()
+    mi.operate("""d 0 100 100 50\nc\n""")
+    time.sleep(0.5)
+    mi.operate("""u 0\nc\n""")
 
 
 def test_android():
@@ -532,9 +560,10 @@ def test_android():
 if __name__ == '__main__':
     serialno = adb_devices(state="device").next()[0]
     print serialno
-    serialno = "192.168.40.111:7401"
+    # serialno = "192.168.40.111:7401"
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
     test_minitouch(serialno)
+    time.sleep(10)
     # test_android()
