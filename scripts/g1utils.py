@@ -4,7 +4,8 @@ import json
 import re
 HOST, PORT = "192.168.10.191", 17800
 HOST, PORT = "192.168.10.104", 27030 
-USERNUM = 31996708
+USERNUM = 31996757
+# USERNUM = 31996760
 
 def server_call(cmd):
     r = requests.post("http://192.168.11.243:8015/webcmd", data={
