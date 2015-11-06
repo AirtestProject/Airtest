@@ -19,7 +19,7 @@ import struct
 import threading
 import Queue
 from error import MoaError
-from utils import SafeSocket
+from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
 
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
@@ -73,7 +73,10 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
     cmds = prefix + cmds
     print ' '.join(cmds)
     if not_wait:
-        return subprocess.Popen(cmds)
+        return subprocess.Popen(cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
     return subprocess.check_output(cmds)
 
 def adb_devices(state=None, addr=LOCALADBADRR):
@@ -175,16 +178,29 @@ class Minicap(object):
         self.size = size
         self.localport = localport
         self.adb = ADB(serialno)
-        # self._setup() #minicap不需要setup
+        self.server_proc = None
+        # self._setup() #单帧截图minicap不需要setup
 
     def _setup(self):
+        # 可能需要改变参数重新setup，所以之前setup过的先关掉
+        if self.server_proc:
+            self.server_proc.kill()
+            self.server_proc = None
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
             self.size["width"], self.size["height"],
             self.size["width"]*PROJECTIONRATE,
             self.size["height"]*PROJECTIONRATE), not_wait=True)
-        time.sleep(1.0)
-        # p.kill()
+        nbsp = NonBlockingStreamReader(p.stdout)
+        info = nbsp.read(0.5)
+        print info
+        if p.poll() is not None:
+            # server setup error, may be already setup by others
+            # subprocess exit immediately
+            print "setup error"
+            return None
+        reg_cleanup(p.kill) 
+        self.server_proc = p
 
     def get_header(self):
         pass
@@ -240,7 +256,7 @@ class Minitouch(object):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
-        self._setup()
+        self.server_proc = self._setup()
         self.op_queue = None
         self.op_sock = None
         self.op_thread = None
@@ -249,8 +265,16 @@ class Minitouch(object):
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minitouch")
         p = self.adb.shell("/data/local/tmp/minitouch -n 'moa_minitouch'", not_wait=True)
-        time.sleep(0.5)
-        # p.kill()
+        nbsp = NonBlockingStreamReader(p.stdout)
+        info = nbsp.read(0.5)
+        print info
+        if p.poll() is not None:
+            # server setup error, may be already setup by others
+            # subprocess exit immediately
+            print "setup error"
+            return None
+        reg_cleanup(p.kill)
+        return p
 
     def touch(self, (x, y), duration=0.01):
         """
@@ -266,7 +290,7 @@ class Minitouch(object):
         s.send("d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
         s.send("u 0\nc\n")
-        time.sleep(0.01) # wait send
+        time.sleep(0.05) # wait send
         s.close()
 
     def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.3, steps=5):
@@ -579,12 +603,12 @@ def test_minitouch(serialno):
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
-    mi.setup_long_operate()
-    mi.operate("""d 0 100 100 50\nc\n""")
-    time.sleep(0.2)
-    mi.operate("""u 0\nc\n""")
-    time.sleep(0.5)
-    mi.teardown_long_operate()
+    # mi.setup_long_operate()
+    # mi.operate("""d 0 100 100 50\nc\n""")
+    # time.sleep(0.2)
+    # mi.operate("""u 0\nc\n""")
+    # time.sleep(0.5)
+    # mi.teardown_long_operate()
 
 
 def test_android():
@@ -609,8 +633,8 @@ if __name__ == '__main__':
     # serialno = "192.168.40.111:7401"
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
-    # test_minicap(serialno)
-    test_minitouch(serialno)
-    # time.sleep(10)
+    test_minicap(serialno)
+    # test_minitouch(serialno)
+    time.sleep(10)
     # test_android()
 
