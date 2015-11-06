@@ -2,8 +2,9 @@ import core
 import sys
 import time
 
-core.PROJECTIONRATE = 0.5
-device = core.Android()
+core.PROJECTIONRATE = 1
+sn = core.adb_devices(state="device").next()[0]
+device = core.Android(sn)
 mi = device.minicap
 
 

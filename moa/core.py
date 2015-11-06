@@ -19,6 +19,7 @@ import struct
 import threading
 import Queue
 from error import MoaError
+from utils import SafeSocket
 
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
@@ -214,26 +215,22 @@ class Minicap(object):
     def get_frames(self, max_cnt=10):
         """use adb forward and socket communicate"""
         self._setup()
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = SafeSocket()
         s.connect(("localhost", self.localport))
         t = s.recv(24)
-        # print repr(t)
         yield struct.unpack("<2B5I2B", t)
 
         cnt = 0
         while cnt <= max_cnt:
             cnt += 1
-            # frame_size = struct.unpack("<I", s.recv(4))[0]
-            trunk = ""
-            while len(trunk) < 4:
-                trunk += s.recv(4)
-            header, trunk = trunk[:4], trunk[4:]
+            # recv header, count frame_size
+            header = s.recv(4)
             frame_size = struct.unpack("<I", header)[0]
 
-            while len(trunk) < frame_size:
-                trunk_size = min(4096, frame_size - len(trunk))
-                trunk += s.recv(trunk_size)
-            yield trunk
+            # recv image data
+            one_frame = s.recv(frame_size)
+            yield one_frame
         s.close()
 
 
@@ -244,9 +241,10 @@ class Minitouch(object):
         self.localport = localport
         self.adb = ADB(serialno)
         self._setup()
-        self.op_queue = Queue.Queue()
+        self.op_queue = None
         self.op_sock = None
         self.op_thread = None
+        self._stop_long_op = None
 
     def _setup(self):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minitouch")
@@ -336,21 +334,30 @@ class Minitouch(object):
         pass
 
     def setup_long_operate(self):
+        self.op_queue = Queue.Queue()
+        self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
         t.daemon = True
         t.start()
         self.op_thread = t
 
     def _operate_worker(self):
-        self.op_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.op_sock = SafeSocket()
         self.op_sock.connect(("localhost", self.localport))
-        while True:
+        while not self._stop_long_op.isSet():
             cmd = self.op_queue.get()
             self.op_sock.send(cmd)
         self.op_sock.close()
 
     def operate(self, cmd):
         self.op_queue.put(cmd)
+
+    def teardown_long_operate(self):
+        self._stop_long_op.set()
+        self._stop_long_op = None
+        self.op_thread = None
+        self.op_queue = None
+        self.op_sock = None
 
 
 class Android(object):
@@ -550,7 +557,7 @@ class Android(object):
 
 
 def test_minicap(serialno):
-    mi = Minicap(serialno, {"width": 480, "height": 854})
+    mi = Minicap(serialno, {"width": 720, "height": 1280, "orientation": 0})
     gen = mi.get_frames()
     print gen.next()
     print repr(gen.next())
@@ -569,8 +576,10 @@ def test_minitouch(serialno):
     print time.time() - t
     mi.setup_long_operate()
     mi.operate("""d 0 100 100 50\nc\n""")
-    time.sleep(0.5)
+    time.sleep(0.2)
     mi.operate("""u 0\nc\n""")
+    time.sleep(0.5)
+    mi.teardown_long_operate()
 
 
 def test_android():
@@ -590,11 +599,11 @@ def test_android():
 
 if __name__ == '__main__':
     serialno = adb_devices(state="device").next()[0]
-    print serialno
+    # print serialno
     # serialno = "192.168.40.111:7401"
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
     test_minitouch(serialno)
-    time.sleep(10)
+    # time.sleep(10)
     # test_android()
