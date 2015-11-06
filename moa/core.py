@@ -362,7 +362,7 @@ class Minitouch(object):
 
 class Android(object):
     """Android Client"""
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False, use_frames=False):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
@@ -370,6 +370,9 @@ class Android(object):
         print self.size
         self.minicap = Minicap(serialno, self.size) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
+        self.gen = self.minicap.get_frames(max_cnt=10000000) if minicap and use_frames else None
+        if self.gen:
+            self.gen.next()
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
@@ -387,7 +390,9 @@ class Android(object):
         self.adb.shell(['pm', 'clear', package])
 
     def snapshot(self, filename=None):
-        if self.minicap:
+        if self.gen:
+            screen = self.gen.next()
+        elif self.minicap:
             screen = self.minicap.get_frame()
         else:
             screen = self.adb.snapshot()
@@ -583,16 +588,17 @@ def test_minitouch(serialno):
 
 
 def test_android():
-    a = Android()
-    print a.size
-    print a.shell("ls")
-    a.wake()
-    return
-    print a.is_screenon()
-    a.keyevent("POWER")
-    print a.snapshot()
-    print a.get_top_activity_name()
-    print a.is_keyboard_shown()
+    serialno = adb_devices(state="device").next()[0]
+    a = Android(serialno, use_frames=True)
+    # print a.size
+    # print a.shell("ls")
+    # a.wake()
+    # return
+    # print a.is_screenon()
+    # a.keyevent("POWER")
+    a.snapshot('test.jpg')
+    # print a.get_top_activity_name()
+    # print a.is_keyboard_shown()
     # print a.is_locked()
     # a.unlock()
 
@@ -607,3 +613,4 @@ if __name__ == '__main__':
     test_minitouch(serialno)
     # time.sleep(10)
     # test_android()
+
