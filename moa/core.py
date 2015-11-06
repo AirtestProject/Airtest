@@ -257,14 +257,16 @@ class Minitouch(object):
         self.localport = localport
         self.adb = ADB(serialno)
         self.server_proc = self._setup()
+        self.op_server_proc = None
         self.op_queue = None
         self.op_sock = None
         self.op_thread = None
         self._stop_long_op = None
 
-    def _setup(self):
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minitouch")
-        p = self.adb.shell("/data/local/tmp/minitouch -n 'moa_minitouch'", not_wait=True)
+    def _setup(self, adb_port=None, device_port='moa_minitouch'):
+        adb_port = adb_port or self.localport
+        self.adb.forward("tcp:%s"%adb_port, "localabstract:%s" % device_port)
+        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % device_port, not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
@@ -358,6 +360,7 @@ class Minitouch(object):
         pass
 
     def setup_long_operate(self):
+        self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
         self.op_queue = Queue.Queue()
         self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
@@ -379,6 +382,7 @@ class Minitouch(object):
     def teardown_long_operate(self):
         self._stop_long_op.set()
         self._stop_long_op = None
+        self.op_server_proc.kill()
         self.op_thread = None
         self.op_queue = None
         self.op_sock = None
@@ -598,17 +602,20 @@ def test_minicap(serialno):
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
-    # mi.touch((100, 100))
+    mi.touch((100, 100))
     # mi.swipe((575, 1089), (575, 451))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     print time.time() - t
-    # mi.setup_long_operate()
-    # mi.operate("""d 0 100 100 50\nc\n""")
-    # time.sleep(0.2)
-    # mi.operate("""u 0\nc\n""")
-    # time.sleep(0.5)
-    # mi.teardown_long_operate()
+    mi.setup_long_operate()
+    mi.operate("""d 0 100 100 50\nc\n""")
+    time.sleep(0.2)
+    mi.operate("""u 0\nc\n""")
+    time.sleep(0.5)
+    mi.teardown_long_operate()
+    time.sleep(5)
+
+    mi.touch((100, 100))
 
 
 def test_android():
@@ -633,8 +640,8 @@ if __name__ == '__main__':
     # serialno = "192.168.40.111:7401"
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
-    test_minicap(serialno)
-    # test_minitouch(serialno)
-    time.sleep(10)
+    # test_minicap(serialno)
+    test_minitouch(serialno)
+    # time.sleep(10)
     # test_android()
 

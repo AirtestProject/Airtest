@@ -1,4 +1,5 @@
 import socket
+import time
 
 
 class SafeSocket(object):
@@ -85,7 +86,7 @@ class UnexpectedEndOfStream(Exception):
 
 
 import atexit
-import time
+
 
 def reg_cleanup(func, *args, **kwargs):
     atexit.register(func, *args, **kwargs)
