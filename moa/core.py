@@ -23,7 +23,7 @@ from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
 
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
-PROJECTIONRATE = 1.0
+PROJECTIONRATE = 1
 
 
 def look_path(program):
@@ -186,11 +186,17 @@ class Minicap(object):
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
+        if self.size["orientation"] in [0, 4]:
+            real_width = self.size["width"]
+            real_height = self.size["height"]
+        else:
+            real_width = self.size["height"]
+            real_height = self.size["width"]
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
-            self.size["width"], self.size["height"],
-            self.size["width"]*PROJECTIONRATE,
-            self.size["height"]*PROJECTIONRATE), not_wait=True)
+            real_width, real_height,
+            real_width*PROJECTIONRATE,
+            real_height*PROJECTIONRATE), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
@@ -360,7 +366,7 @@ class Minitouch(object):
         pass
 
     def setup_long_operate(self):
-        self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
+        # self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
         self.op_queue = Queue.Queue()
         self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
@@ -382,7 +388,7 @@ class Minitouch(object):
     def teardown_long_operate(self):
         self._stop_long_op.set()
         self._stop_long_op = None
-        self.op_server_proc.kill()
+        # self.op_server_proc.kill()
         self.op_thread = None
         self.op_queue = None
         self.op_sock = None
@@ -590,13 +596,14 @@ class Android(object):
 
 
 def test_minicap(serialno):
-    mi = Minicap(serialno, {"width": 720, "height": 1280, "orientation": 0})
+    mi = Minicap(serialno, {"width": 854, "height": 480, "orientation": 0})
     gen = mi.get_frames()
+    print '-' * 72
     print gen.next()
-    print repr(gen.next())
+    # print repr(gen.next())
     frame = mi.get_frame()
     with open("test.jpg", "wb") as f:
-        f.write(frame)
+        f.write(gen.next())
 
 
 def test_minitouch(serialno):
@@ -628,6 +635,7 @@ def test_android():
     # print a.is_screenon()
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
+    a.snapshot('test1.jpg')
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
     # print a.is_locked()
@@ -641,7 +649,7 @@ if __name__ == '__main__':
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
-    test_minitouch(serialno)
+    # test_minitouch(serialno)
     # time.sleep(10)
-    # test_android()
+    test_android()
 
