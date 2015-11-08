@@ -366,7 +366,7 @@ class Minitouch(object):
         pass
 
     def setup_long_operate(self):
-        # self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
+        self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
         self.op_queue = Queue.Queue()
         self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
@@ -388,7 +388,7 @@ class Minitouch(object):
     def teardown_long_operate(self):
         self._stop_long_op.set()
         self._stop_long_op = None
-        # self.op_server_proc.kill()
+        self.op_server_proc.kill()
         self.op_thread = None
         self.op_queue = None
         self.op_sock = None
