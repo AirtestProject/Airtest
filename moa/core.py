@@ -186,12 +186,12 @@ class Minicap(object):
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
-        if self.size["orientation"] in [0, 4]:
-            real_width = self.size["width"]
-            real_height = self.size["height"]
-        else:
+        real_width = self.size["width"]
+        real_height = self.size["height"]
+        if self.size["orientation"] in [1, 3]:
             real_width = self.size["height"]
             real_height = self.size["width"]
+
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
             real_width, real_height,
@@ -217,10 +217,9 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        if self.size["orientation"] in [0, 4]:
-            real_width = self.size["width"]
-            real_height = self.size["height"]
-        else:
+        real_width = self.size["width"]
+        real_height = self.size["height"]
+        if self.size["orientation"] in [1, 3]:
             real_width = self.size["height"]
             real_height = self.size["width"]
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
