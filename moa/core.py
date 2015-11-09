@@ -24,7 +24,7 @@ from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
-MINICAPTIMEOUT = 0.1
+MINICAPTIMEOUT = None
 
 
 def look_path(program):
@@ -204,7 +204,7 @@ class Minicap(object):
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
-            print "setup error"
+            print "minicap setup error"
             return None
         reg_cleanup(p.kill) 
         self.server_proc = p
@@ -247,7 +247,10 @@ class Minicap(object):
         while cnt <= max_cnt:
             cnt += 1
             # recv header, count frame_size
-            header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            if MINICAPTIMEOUT is not None:
+                header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            else:
+                header = s.recv(4)
             if header is None:
                 # recv timeout, if not frame updated, maybe screen locked
                 yield None
