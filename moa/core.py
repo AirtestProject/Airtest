@@ -25,6 +25,8 @@ ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
+MINICAPTIMEOUT = 0.1
+
 
 def look_path(program):
     system = platform.system()
@@ -244,12 +246,15 @@ class Minicap(object):
         while cnt <= max_cnt:
             cnt += 1
             # recv header, count frame_size
-            header = s.recv(4)
-            frame_size = struct.unpack("<I", header)[0]
-
-            # recv image data
-            one_frame = s.recv(frame_size)
-            yield one_frame
+            header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            if header is None:
+                # recv timeout, if not frame updated, maybe screen locked
+                yield None
+            else:
+                frame_size = struct.unpack("<I", header)[0]
+                # recv image data
+                one_frame = s.recv(frame_size)
+                yield one_frame
         s.close()
 
 
@@ -682,4 +687,3 @@ if __name__ == '__main__':
     # test_minitouch(serialno)
     # time.sleep(10)
     test_android()
-
