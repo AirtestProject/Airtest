@@ -24,7 +24,7 @@ from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
-
+ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
 
 def look_path(program):
     system = platform.system()
@@ -188,15 +188,14 @@ class Minicap(object):
             self.server_proc = None
         real_width = self.size["width"]
         real_height = self.size["height"]
-        if self.size["orientation"] in [1, 3]:
-            real_width = self.size["height"]
-            real_height = self.size["width"]
+        real_orientation = ORIENTATION_MAP[self.size['orientation']]
+        print self.size, real_orientation
 
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
             real_width, real_height,
             real_width*PROJECTIONRATE,
-            real_height*PROJECTIONRATE), not_wait=True)
+            real_height*PROJECTIONRATE, real_orientation), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
@@ -219,12 +218,11 @@ class Minicap(object):
         """
         real_width = self.size["width"]
         real_height = self.size["height"]
-        if self.size["orientation"] in [1, 3]:
-            real_width = self.size["height"]
-            real_height = self.size["width"]
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
+        real_orientation = ORIENTATION_MAP[self.size['orientation']]
+
+        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
             real_width, real_height,
-            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE))
+            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE, real_orientation))
         os = platform.system()
         if os == "Windows":
             link_breaker = "\r\r\n"
@@ -399,17 +397,39 @@ class Android(object):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
-        self.size['orientation'] = self.__getDisplayOrientation()
+        self.size['orientation'] = self.getDisplayOrientation()
+       
+        if self.size['orientation'] == -1:#容错，不要出现-1的方向
+            self.size['orientation'] = 0 if self.size['height'] > self.size['width'] else 1
+
+        #注意，这里根据屏幕长短来确定width和height，短的一定是width，长的一定是height
+        w = min(self.size['width'], self.size['height'])
+        h = max(self.size['width'], self.size['height'])
+        self.size['width'],self.size['height'] = w,h
         print self.size
+        
         self.minicap = Minicap(serialno, self.size) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
         self.gen = self.minicap.get_frames(max_cnt=10000000) if minicap and use_frames else None
         if self.gen:
-            self.gen.next()
+            print self.gen.next()
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
-        
+
+
+        #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
+        self.sdk_version = self.props['ro.build.version.sdk']
+
+    def resetup_minicap(self):
+        ret = 0
+        if self.size['orientation'] != self.getDisplayOrientation():
+            ret = 1 
+        self.size['orientation'] = self.getDisplayOrientation()
+        self.minicap.size = self.size
+        return ret
+        # self.minicap._setup()
+
     def amstart(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if not output.startswith('package:'):
@@ -571,7 +591,7 @@ class Android(object):
             return float(d)/BASE_DPI
         return -1.0
 
-    def __getDisplayOrientation(self):
+    def getDisplayOrientation(self):
         # Fallback method to obtain the orientation
         # See https://github.com/dtmilano/AndroidViewClient/issues/128
         surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
@@ -604,6 +624,11 @@ def test_minicap(serialno):
     with open("test.jpg", "wb") as f:
         f.write(gen.next())
 
+    gen = mi.get_frames()
+    print gen.next()
+
+    with open("test.jpg", "wb") as f:
+        f.write(gen.next())
 
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
@@ -634,6 +659,12 @@ def test_android():
     # print a.is_screenon()
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
+    # a.snapshot('test1.jpg')
+    input()
+    a.resetup_minicap()
+    a.gen = a.minicap.get_frames()
+    print a.gen.next()
+    # a.snapshot('test.jpg')
     a.snapshot('test1.jpg')
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
