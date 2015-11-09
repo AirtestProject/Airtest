@@ -31,6 +31,16 @@ class SafeSocket(object):
         ret, self.buf = self.buf[:size], self.buf[size:]
         return ret
 
+    def recv_with_timeout(self, size, timeout=2):
+        self.sock.settimeout(timeout)
+        try:
+            ret = self.recv(size)
+        except socket.timeout:
+            ret = None
+        finally:
+            self.sock.settimeout(None)
+        return ret
+
     def close(self):
         self.sock.close()
 
@@ -58,7 +68,7 @@ class NonBlockingStreamReader:
                 if line:
                     queue.put(line)
                 else:
-                    raise UnexpectedEndOfStream
+                    raise EndOfStream
 
         self._t = Thread(target=_populateQueue, args=(self._s, self._q))
         self._t.daemon = True
@@ -81,7 +91,7 @@ class NonBlockingStreamReader:
         return "".join(lines)
 
 
-class UnexpectedEndOfStream(Exception):
+class EndOfStream(Exception):
     pass
 
 
