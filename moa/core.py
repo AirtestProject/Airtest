@@ -9,6 +9,7 @@
 import os
 import re
 import time
+import json
 import platform
 import fnmatch
 import warnings
@@ -218,6 +219,10 @@ class Minicap(object):
 
     def get_header(self):
         pass
+
+    def get_display_info(self):
+        info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
+        return json.loads(info)
 
     def get_frame(self):
         """
@@ -673,8 +678,8 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno, use_frames=True)
     # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netese.apk")
-    ret = a.adb.uninstall("com.example.netease")
-    print repr(ret)
+    # ret = a.adb.uninstall("com.example.netease")
+    # print repr(ret)
     # print a.size
     # print a.shell("ls")
     # a.wake()
@@ -688,6 +693,8 @@ def test_android():
     # print a.is_keyboard_shown()
     # print a.is_locked()
     # a.unlock()
+    print a.minicap.get_display_info()
+    # print a.getDisplayOrientation()
 
 
 if __name__ == '__main__':
