@@ -20,7 +20,7 @@ import struct
 import threading
 import Queue
 from error import MoaError
-from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
+from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist
 
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
@@ -184,12 +184,13 @@ class ADB():
 
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, size, localport=1313):
+    def __init__(self, serialno, projection=PROJECTIONRATE, localport=1313):
         self.serialno = serialno
-        self.size = size
         self.localport = localport
         self.adb = ADB(serialno)
         self.server_proc = None
+        self.size = self.get_display_info()
+        self.projection = projection
         # self._setup() #单帧截图minicap不需要setup
 
     def _setup(self):
@@ -199,18 +200,27 @@ class Minicap(object):
             self.server_proc = None
         real_width = self.size["width"]
         real_height = self.size["height"]
-        real_orientation = ORIENTATION_MAP[self.size['orientation']]
+        real_orientation = self.size["rotation"]
+        if _islist(self.projection):
+            proj_width, proj_height = self.projection
+        elif isinstance(self.projection, float):
+            proj_width = self.projection * real_width
+            proj_height = self.projection * real_height
+        else:
+            proj_width, proj_height = real_width, real_height
 
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
             real_width, real_height,
             real_width*PROJECTIONRATE,
-            real_height*PROJECTIONRATE, real_orientation), not_wait=True)
+            real_height*PROJECTIONRATE,
+            real_orientation), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
+
         if p.poll() is not None:
-            # server setup error, may be already setup by others
+            # minicap server setup error, may be already setup by others
             # subprocess exit immediately
             print "minicap setup error"
             return None
@@ -221,8 +231,10 @@ class Minicap(object):
         pass
 
     def get_display_info(self):
-        info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
-        return json.loads(info)
+        display_info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
+        display_info = json.loads(display_info)
+        self.size = display_info
+        return display_info
 
     def get_frame(self):
         """
@@ -232,7 +244,7 @@ class Minicap(object):
         """
         real_width = self.size["width"]
         real_height = self.size["height"]
-        real_orientation = ORIENTATION_MAP[self.size['orientation']]
+        real_orientation = self.size["rotation"]
 
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
             real_width, real_height,
@@ -245,13 +257,14 @@ class Minicap(object):
         jpg_data = raw_data.split("for JPG encoder"+link_breaker)[-1].replace(link_breaker, "\n")
         return jpg_data
 
-    def get_frames(self, max_cnt=10):
+    def get_frames(self, max_cnt=10000):
         """use adb forward and socket communicate"""
         self._setup()
         # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s = SafeSocket()
         s.connect(("localhost", self.localport))
         t = s.recv(24)
+        # minicap info
         yield struct.unpack("<2B5I2B", t)
 
         cnt = 0
@@ -417,18 +430,8 @@ class Android(object):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
-        self.size['orientation'] = self.getDisplayOrientation()
-       
-        if self.size['orientation'] == -1:#容错，不要出现-1的方向
-            self.size['orientation'] = 0 if self.size['height'] > self.size['width'] else 1
-
-        #注意，这里根据屏幕长短来确定width和height，短的一定是width，长的一定是height
-        w = min(self.size['width'], self.size['height'])
-        h = max(self.size['width'], self.size['height'])
-        self.size['width'],self.size['height'] = w,h
-        print self.size
         
-        self.minicap = Minicap(serialno, self.size) if minicap else None
+        self.minicap = Minicap(serialno) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
         self.gen = self.minicap.get_frames(max_cnt=10000000) if minicap and use_frames else None
         if self.gen:
@@ -437,22 +440,8 @@ class Android(object):
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
 
-
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
-
-    def try_resetup_minicap(self):
-        ret = 0
-        if self.size['orientation'] != self.getDisplayOrientation():
-            ret = 1 
-            self.size['orientation'] = self.getDisplayOrientation()
-            self.minicap.size = self.size
-        #发生过旋转就重新setup
-        if ret and self.gen:
-            self.gen = self.minicap.get_frames(max_cnt=10000000) 
-            self.gen.next()
-        return ret
-        # self.minicap._setup()
 
     def amstart(self, package):
         output = self.adb.shell(['pm', 'path', package])
@@ -686,14 +675,14 @@ def test_android():
     # return
     # print a.is_screenon()
     # a.keyevent("POWER")
-    # a.snapshot('test.jpg')
-    # a.snapshot('test1.jpg')
+    a.snapshot('test.jpg')
+    a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
     # print a.is_locked()
     # a.unlock()
-    print a.minicap.get_display_info()
+    # print a.minicap.get_display_info()
     # print a.getDisplayOrientation()
 
 
