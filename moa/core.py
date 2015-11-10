@@ -191,7 +191,6 @@ class Minicap(object):
         real_width = self.size["width"]
         real_height = self.size["height"]
         real_orientation = ORIENTATION_MAP[self.size['orientation']]
-        print self.size, real_orientation
 
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
@@ -429,12 +428,16 @@ class Android(object):
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
 
-    def resetup_minicap(self):
+    def try_resetup_minicap(self):
         ret = 0
         if self.size['orientation'] != self.getDisplayOrientation():
             ret = 1 
-        self.size['orientation'] = self.getDisplayOrientation()
-        self.minicap.size = self.size
+            self.size['orientation'] = self.getDisplayOrientation()
+            self.minicap.size = self.size
+        #发生过旋转就重新setup
+        if ret and self.gen:
+            self.gen = self.minicap.get_frames(max_cnt=10000000) 
+            self.gen.next()
         return ret
         # self.minicap._setup()
 
@@ -632,12 +635,7 @@ def test_minicap(serialno):
     with open("test.jpg", "wb") as f:
         f.write(gen.next())
 
-    gen = mi.get_frames()
-    print gen.next()
-
-    with open("test.jpg", "wb") as f:
-        f.write(gen.next())
-
+    
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
@@ -668,12 +666,7 @@ def test_android():
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
     # a.snapshot('test1.jpg')
-    input()
-    a.resetup_minicap()
-    a.gen = a.minicap.get_frames()
-    print a.gen.next()
-    # a.snapshot('test.jpg')
-    a.snapshot('test1.jpg')
+        
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
     # print a.is_locked()
