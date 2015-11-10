@@ -156,6 +156,14 @@ class ADB():
             sn, local, remote = ss
             yield sn, local, remote
 
+    def install(self, filepath):
+        if not os.path.isfile(filepath):
+            raise RuntimeError("%s is not valid file" % filepath)
+        return self.run(['install', filepath])
+
+    def uninstall(self, package):
+        return self.run(['uninstall', package])
+
     def snapshot(self):
         pass
 
@@ -453,6 +461,12 @@ class Android(object):
     def amclear(self, package):
         self.adb.shell(['pm', 'clear', package])
 
+    def install(self, filepath):
+        return self.adb.install(filepath)
+
+    def uninstall(self, package):
+        return self.adb.uninstall(package)
+
     def snapshot(self, filename=None):
         if self.gen:
             screen = self.gen.next()
@@ -658,13 +672,16 @@ def test_minitouch(serialno):
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno, use_frames=True)
+    # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netese.apk")
+    ret = a.adb.uninstall("com.example.netease")
+    print repr(ret)
     # print a.size
     # print a.shell("ls")
     # a.wake()
     # return
     # print a.is_screenon()
     # a.keyevent("POWER")
-    a.snapshot('test.jpg')
+    # a.snapshot('test.jpg')
     # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()

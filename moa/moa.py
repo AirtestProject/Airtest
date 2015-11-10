@@ -277,6 +277,16 @@ def amclear(package):
 
 
 @logwrap
+def install(filepath):
+    return DEVICE.install(filepath)
+
+
+@logwrap
+def uninstall(package):
+    return DEVICE.uninstall(package)
+
+
+@logwrap
 def snapshot(filename="screen.jpg"):
     global RECENT_CAPTURE
     screen = DEVICE.snapshot()
@@ -506,4 +516,6 @@ if __name__ == '__main__':
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img
     # img.show()
-    touch(MoaText(u"副 本", font=u"华康唐风隶"))
+    # touch(MoaText(u"副 本", font=u"华康唐风隶"))
+    install(r"C:\Users\game-netease\Desktop\netease.apk")
+    uninstall("com.example.netease")
