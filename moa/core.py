@@ -24,6 +24,8 @@ from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup
 ADBPATH = None
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
+MINICAPTIMEOUT = None
+ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
 
 
 def look_path(program):
@@ -188,22 +190,20 @@ class Minicap(object):
             self.server_proc = None
         real_width = self.size["width"]
         real_height = self.size["height"]
-        if self.size["orientation"] in [1, 3]:
-            real_width = self.size["height"]
-            real_height = self.size["width"]
+        real_orientation = ORIENTATION_MAP[self.size['orientation']]
 
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0" % (
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
             real_width, real_height,
             real_width*PROJECTIONRATE,
-            real_height*PROJECTIONRATE), not_wait=True)
+            real_height*PROJECTIONRATE, real_orientation), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
-            print "setup error"
+            print "minicap setup error"
             return None
         reg_cleanup(p.kill) 
         self.server_proc = p
@@ -219,12 +219,11 @@ class Minicap(object):
         """
         real_width = self.size["width"]
         real_height = self.size["height"]
-        if self.size["orientation"] in [1, 3]:
-            real_width = self.size["height"]
-            real_height = self.size["width"]
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/0 -s" % (
+        real_orientation = ORIENTATION_MAP[self.size['orientation']]
+
+        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
             real_width, real_height,
-            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE))
+            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE, real_orientation))
         os = platform.system()
         if os == "Windows":
             link_breaker = "\r\r\n"
@@ -246,12 +245,18 @@ class Minicap(object):
         while cnt <= max_cnt:
             cnt += 1
             # recv header, count frame_size
-            header = s.recv(4)
-            frame_size = struct.unpack("<I", header)[0]
-
-            # recv image data
-            one_frame = s.recv(frame_size)
-            yield one_frame
+            if MINICAPTIMEOUT is not None:
+                header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            else:
+                header = s.recv(4)
+            if header is None:
+                # recv timeout, if not frame updated, maybe screen locked
+                yield None
+            else:
+                frame_size = struct.unpack("<I", header)[0]
+                # recv image data
+                one_frame = s.recv(frame_size)
+                yield one_frame
         s.close()
 
 
@@ -399,17 +404,43 @@ class Android(object):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
-        self.size['orientation'] = self.__getDisplayOrientation()
+        self.size['orientation'] = self.getDisplayOrientation()
+       
+        if self.size['orientation'] == -1:#容错，不要出现-1的方向
+            self.size['orientation'] = 0 if self.size['height'] > self.size['width'] else 1
+
+        #注意，这里根据屏幕长短来确定width和height，短的一定是width，长的一定是height
+        w = min(self.size['width'], self.size['height'])
+        h = max(self.size['width'], self.size['height'])
+        self.size['width'],self.size['height'] = w,h
         print self.size
+        
         self.minicap = Minicap(serialno, self.size) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
         self.gen = self.minicap.get_frames(max_cnt=10000000) if minicap and use_frames else None
         if self.gen:
-            self.gen.next()
+            print self.gen.next()
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
-        
+
+
+        #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
+        self.sdk_version = self.props['ro.build.version.sdk']
+
+    def try_resetup_minicap(self):
+        ret = 0
+        if self.size['orientation'] != self.getDisplayOrientation():
+            ret = 1 
+            self.size['orientation'] = self.getDisplayOrientation()
+            self.minicap.size = self.size
+        #发生过旋转就重新setup
+        if ret and self.gen:
+            self.gen = self.minicap.get_frames(max_cnt=10000000) 
+            self.gen.next()
+        return ret
+        # self.minicap._setup()
+
     def amstart(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if not output.startswith('package:'):
@@ -571,7 +602,7 @@ class Android(object):
             return float(d)/BASE_DPI
         return -1.0
 
-    def __getDisplayOrientation(self):
+    def getDisplayOrientation(self):
         # Fallback method to obtain the orientation
         # See https://github.com/dtmilano/AndroidViewClient/issues/128
         surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
@@ -604,7 +635,7 @@ def test_minicap(serialno):
     with open("test.jpg", "wb") as f:
         f.write(gen.next())
 
-
+    
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
@@ -634,7 +665,8 @@ def test_android():
     # print a.is_screenon()
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
-    a.snapshot('test1.jpg')
+    # a.snapshot('test1.jpg')
+        
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
     # print a.is_locked()
@@ -651,4 +683,3 @@ if __name__ == '__main__':
     # test_minitouch(serialno)
     # time.sleep(10)
     test_android()
-
