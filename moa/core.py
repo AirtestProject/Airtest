@@ -233,6 +233,8 @@ class Minicap(object):
     def get_display_info(self):
         display_info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
         display_info = json.loads(display_info)
+        if display_info['width'] > display_info['height']:
+            display_info['width'],display_info['height'] = display_info['height'],display_info['width']
         self.size = display_info
         return display_info
 
@@ -676,7 +678,7 @@ def test_android():
     # print a.is_screenon()
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
-    a.snapshot('test1.jpg')
+    # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
