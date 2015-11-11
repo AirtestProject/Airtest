@@ -212,8 +212,7 @@ class Minicap(object):
         self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
             real_width, real_height,
-            real_width*PROJECTIONRATE,
-            real_height*PROJECTIONRATE,
+            proj_width,proj_height,
             real_orientation), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
@@ -234,6 +233,8 @@ class Minicap(object):
     def get_display_info(self):
         display_info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
         display_info = json.loads(display_info)
+        if display_info['width'] > display_info['height']:
+            display_info['width'],display_info['height'] = display_info['height'],display_info['width']
         self.size = display_info
         return display_info
 
@@ -428,16 +429,13 @@ class Minitouch(object):
 
 class Android(object):
     """Android Client"""
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False, use_frames=False):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
         
         self.minicap = Minicap(serialno) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
-        self.gen = self.minicap.get_frames(max_cnt=10000000) if minicap and use_frames else None
-        if self.gen:
-            print self.gen.next()
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
@@ -464,9 +462,7 @@ class Android(object):
         return self.adb.uninstall(package)
 
     def snapshot(self, filename=None):
-        if self.gen:
-            screen = self.gen.next()
-        elif self.minicap:
+        if self.minicap:
             screen = self.minicap.get_frame()
         else:
             screen = self.adb.snapshot()
@@ -667,7 +663,7 @@ def test_minitouch(serialno):
 
 def test_android():
     serialno = adb_devices(state="device").next()[0]
-    a = Android(serialno, use_frames=True)
+    a = Android(serialno)
     # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netese.apk")
     # ret = a.adb.uninstall("com.example.netease")
     # print repr(ret)
@@ -678,7 +674,7 @@ def test_android():
     # print a.is_screenon()
     # a.keyevent("POWER")
     a.snapshot('test.jpg')
-    a.snapshot('test1.jpg')
+    # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()
     # print a.is_keyboard_shown()
