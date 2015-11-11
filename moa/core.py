@@ -429,10 +429,11 @@ class Minitouch(object):
 
 class Android(object):
     """Android Client"""
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=False):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
+        self.size["orientation"] = self.getDisplayOrientation()
         
         self.minicap = Minicap(serialno) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
@@ -617,7 +618,8 @@ class Android(object):
         if m:
             return int(m.group(1))
         # We couldn't obtain the orientation
-        return -1
+        # return -1
+        return 0 if self.size["height"] > self.size['width'] else 1
 
     def __transformPointByOrientation(self, (x, y)):
         if self.size["orientation"] == 1:
@@ -673,7 +675,7 @@ def test_android():
     # return
     # print a.is_screenon()
     # a.keyevent("POWER")
-    a.snapshot('test.jpg')
+    # a.snapshot('test.jpg')
     # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()
@@ -682,6 +684,7 @@ def test_android():
     # a.unlock()
     # print a.minicap.get_display_info()
     # print a.getDisplayOrientation()
+    a.touch((100, 100))
 
 
 if __name__ == '__main__':
