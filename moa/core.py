@@ -218,13 +218,14 @@ class Minicap(object):
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
+        nbsp.kill()
 
         if p.poll() is not None:
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
             print "minicap setup error"
             return None
-        reg_cleanup(p.kill) 
+        reg_cleanup(p.kill)
         self.server_proc = p
 
     def get_header(self):
@@ -306,6 +307,7 @@ class Minitouch(object):
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
         print info
+        nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
