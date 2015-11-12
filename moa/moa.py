@@ -59,7 +59,7 @@ except ImportError:
 from error import MoaError, MoaNotFoundError
 from core import adb_devices
 import core
-from aircv import aircv, textgen
+from ..aircv import aircv, textgen
 from utils import _isstr, _islist
 
 
