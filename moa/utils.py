@@ -51,10 +51,12 @@ from Queue import Queue, Empty
 
 class NonBlockingStreamReader:
 
-    def __init__(self, stream):
+    def __init__(self, stream, raise_EOF=False):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
+        raise_EOF: if True, raise an UnexpectedEndOfStream 
+                when stream is EOF before kill
         '''
         self._s = stream
         self._q = Queue()
@@ -67,8 +69,13 @@ class NonBlockingStreamReader:
                 line = stream.readline()
                 if line:
                     queue.put(line)
-                else:
+                elif kill_event.is_set():
+                    break
+                elif raise_EOF:
                     raise UnexpectedEndOfStream
+                else:
+                    print "EndOfStream"
+                    break
 
         self._kill_event = Event()
         self._t = Thread(target=_populateQueue, args=(self._s, self._q, self._kill_event))

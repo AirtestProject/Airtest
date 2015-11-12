@@ -27,6 +27,7 @@ LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
 ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
+DEBUG = True
 
 
 def look_path(program):
@@ -74,7 +75,8 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
     if serialno:
         prefix += ['-s', serialno]
     cmds = prefix + cmds
-    print ' '.join(cmds)
+    if DEBUG:
+        print ' '.join(cmds)
     if not_wait:
         return subprocess.Popen(cmds,
             stdout=subprocess.PIPE,
@@ -299,6 +301,7 @@ class Minitouch(object):
         self.op_queue = None
         self.op_sock = None
         self.op_thread = None
+        self.op_adbport = 1112
         self._stop_long_op = None
 
     def _setup(self, adb_port=None, device_port='moa_minitouch'):
@@ -399,7 +402,7 @@ class Minitouch(object):
         pass
 
     def setup_long_operate(self):
-        self.op_server_proc = self._setup(adb_port=1112, device_port='moa_minitouch_l')
+        self.op_server_proc = self._setup(adb_port=self.op_adbport, device_port='moa_minitouch_l')
         self.op_queue = Queue.Queue()
         self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
@@ -409,7 +412,7 @@ class Minitouch(object):
 
     def _operate_worker(self):
         self.op_sock = SafeSocket()
-        self.op_sock.connect(("localhost", self.localport))
+        self.op_sock.connect(("localhost", self.op_adbport))
         while not self._stop_long_op.isSet():
             cmd = self.op_queue.get()
             self.op_sock.send(cmd)
@@ -647,7 +650,7 @@ def test_minicap(serialno):
 def test_minitouch(serialno):
     mi = Minitouch(serialno)
     t =time.time()
-    mi.touch((100, 100))
+    # mi.touch((100, 100))
     # mi.swipe((575, 1089), (575, 451))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))

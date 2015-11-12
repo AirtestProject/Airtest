@@ -507,7 +507,7 @@ if __name__ == '__main__':
     set_serialno()
     # set_basedir()
     # set_logfile('run.log')
-    # touch('weixin.jpg', rect=(10, 10, 500, 500))
+    touch('weixin.jpg', rect=(10, 10, 500, 500))
     # time.sleep(1)
     # home()
     # time.sleep(1)
@@ -517,5 +517,5 @@ if __name__ == '__main__':
     # img = MoaText(u"你妹").img
     # img.show()
     # touch(MoaText(u"副 本", font=u"华康唐风隶"))
-    install(r"C:\Users\game-netease\Desktop\netease.apk")
-    uninstall("com.example.netease")
+    # install(r"C:\Users\game-netease\Desktop\netease.apk")
+    # uninstall("com.example.netease")
