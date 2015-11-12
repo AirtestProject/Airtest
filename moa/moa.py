@@ -185,7 +185,7 @@ def _show_screen(pngstr):
         pass
 
 
-def _find_pic(picdata, rect=None, threshold=THRESHOLD):
+def _find_pic(picdata, rect=None, threshold=THRESHOLD, press_pos=[], sch_pixel=[], src_pixl=[]):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -200,7 +200,14 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD):
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
     try:
-        ret = aircv.find_sift(screen, picdata)
+        #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
+        #如果调用时三个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
+        if (press_pos[0]==[] or sch_pixel==[] or src_pixl==[]):
+            ret = aircv.find_sift(screen, picdata)
+        #三个要求的参数均有输入时，加入区域预测部分：
+        else:
+            predictor = aircv.Prediction(press_pos, sch_pixel, src_pixl)
+            ret = predictor.SIFTbyPre(screen, picdata, press_pos[0], press_pos[1])
     # need to specify different exceptions
     except Exception as err:
         print err
