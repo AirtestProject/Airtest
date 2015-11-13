@@ -202,7 +202,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, press_pos=[], sch_pixel=[
     try:
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时三个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
-        if (press_pos[0]==[] or sch_pixel==[] or src_pixl==[]):
+        if not (press_pos and sch_pixel and src_pixl):
             ret = aircv.find_sift(screen, picdata)
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
@@ -514,7 +514,7 @@ if __name__ == '__main__':
     set_serialno()
     # set_basedir()
     # set_logfile('run.log')
-    touch('weixin.jpg', rect=(10, 10, 500, 500))
+    touch('fb.png', rect=(10, 10, 500, 500))
     # time.sleep(1)
     # home()
     # time.sleep(1)
