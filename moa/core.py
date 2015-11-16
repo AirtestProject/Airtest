@@ -235,7 +235,7 @@ class Minicap(object):
     def get_display_info(self):
         display_info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
         display_info = json.loads(display_info)
-        if display_info['width'] > display_info['height']:
+        if display_info['width'] > display_info['height'] and display_info['rotation'] in [90,270]:
             display_info['width'],display_info['height'] = display_info['height'],display_info['width']
         self.size = display_info
         return display_info
@@ -306,11 +306,15 @@ class Minitouch(object):
         self.size = size
 
 
-    def transform_xy(self, x, y):
+    def __transform_xy(self, x, y):
         if not self.size:
+            return x, y
+        elif not self.size['max_x'] or not self.size['max_y']:#容错
             return x, y
         else:
             width ,height = self.size['width'], self.size['height']
+            if width > height and self.size['orientation'] in [1,3]:
+                width, height = height, width
             max_x , max_y = self.size['max_x'], self.size['max_y']
             # print width, height, max_x, max_y
             nx = x * max_x / width
@@ -343,7 +347,7 @@ class Minitouch(object):
         u 0
         c
         """
-        x, y = self.transform_xy(x, y)
+        x, y = self.__transform_xy(x, y)
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", self.localport))
@@ -371,8 +375,8 @@ class Minitouch(object):
         u 0
         c
         """
-        from_x, from_y = self.transform_xy(from_x, from_y)
-        to_x, to_y = self.transform_xy(to_x, to_y)
+        from_x, from_y = self.__transform_xy(from_x, from_y)
+        to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration)/(steps+1)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -441,10 +445,10 @@ class Minitouch(object):
     def operate(self, args):
         cmd = ""
         if args["type"] == "down":
-            x, y = self.transform_xy(args["x"], args["y"])
+            x, y = self.__transform_xy(args["x"], args["y"])
             cmd = "d 0 %d %d\nc\n" % (x, y)
         elif args["type"] == "move":
-            x, y = self.transform_xy(args["x"], args["y"])
+            x, y = self.__transform_xy(args["x"], args["y"])
             cmd = "m 0 %d %d\nc\n" % (x, y)
         elif args["type"] == "up":
             cmd = "u 0\nc\n"
