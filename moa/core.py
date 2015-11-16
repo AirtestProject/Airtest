@@ -358,15 +358,15 @@ class Minitouch(object):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", self.localport))
         # header = s.recv(4096)
-        s.send("d 0 %s %s 50\nc\n" % (from_x, from_y))
+        s.send("d 0 %d %d 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            s.send("m 0 %s %s 50\nc\n" % (
+            s.send("m 0 %d %d 50\nc\n" % (
                 from_x+(to_x-from_x)*i/steps, 
                 from_y+(to_y-from_y)*i/steps)
             )
             time.sleep(interval)
-        s.send("m 0 %s %s 50\nc\n" % (to_x, to_y))
+        s.send("m 0 %d %d 50\nc\n" % (to_x, to_y))
         time.sleep(interval)
         s.send("u 0\nc\n")
         time.sleep(0.01)
@@ -437,7 +437,6 @@ class Android(object):
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
         self.size["orientation"] = self.getDisplayOrientation()
-        
         self.minicap = Minicap(serialno) if minicap else None
         self.minitouch = Minitouch(serialno) if minitouch else None
         self.props = {}
@@ -501,6 +500,8 @@ class Android(object):
             self.adb.touch(pos)
 
     def swipe(self, p1, p2):
+        p1 = self.__transformPointByOrientation(p1)
+        p2 = self.__transformPointByOrientation(p2)
         if self.minitouch:
             self.minitouch.swipe(p1, p2)
         else:

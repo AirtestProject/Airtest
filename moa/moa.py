@@ -294,13 +294,15 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename="screen.jpg"):
+def snapshot(filename="screen.jpg", ensure_orientation=True):
     global RECENT_CAPTURE
     screen = DEVICE.snapshot()
     # to be fixed, screen.jpg is used for debug 
     open(filename, 'wb').write(screen)
     screen = aircv.imread(filename)
     # _show_screen(screen)
+    if DEVICE.sdk_version <=16 and ensure_orientation and DEVICE.size["orientation"]:
+        aircv.rotate(screen, DEVICE.size["orientation"]*90, clockwise=False)
     RECENT_CAPTURE = screen # used for keep_capture()
     return screen
 
@@ -341,14 +343,25 @@ def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None):
 
 
 @logwrap
-def swipe(v1, v2):
-    if (_isstr(v1) or isinstance(v1, MoaText)) and (_isstr(v2) or isinstance(v2, MoaText)):
+def swipe(v1, v2=None, vector=None):
+    if _isstr(v1) or isinstance(v1, MoaText):
         pos1 = _loop_find(v1)
-        keep_capture()
-        pos2 = _loop_find(v2)
-        keep_capture(False)
     else:
-        pos1, pos2 = v1, v2
+        pos1 = v1
+
+    if v2:
+        if (_isstr(v2) or isinstance(v2, MoaText)):
+            keep_capture()
+            pos2 = _loop_find(v2)
+            keep_capture(False)
+        else:
+            pos2 = v2
+    elif vector:
+        if (vector[0] <= 1 and vector[1] <= 1):
+            vector = (vector[0] * DEVICE.size["width"], vector[1] * DEVICE.size["height"])
+        pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])    
+    else:
+        raise Exception("no enouph params for swipe") 
     print pos1, pos2
     DEVICE.swipe(pos1, pos2)
 
@@ -512,13 +525,14 @@ def test():
 
 if __name__ == '__main__':
     set_serialno()
+    # snapshot()
     # set_basedir()
     # set_logfile('run.log')
-    touch('fb.png', rect=(10, 10, 500, 500))
+    # touch('fb.png', rect=(10, 10, 500, 500))
     # time.sleep(1)
     # home()
     # time.sleep(1)
-    # swipe('weixin.jpg', 'qq.jpg')
+    swipe('sm.png', vector=(0, 0.3))
     # time.sleep(1)
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img

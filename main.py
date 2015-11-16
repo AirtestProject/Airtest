@@ -1,4 +1,4 @@
-from moa.moa import exec_script
+from airtest.moa.moa import exec_script
 import sys
 filename = sys.argv[1]
 with open(filename) as f:
