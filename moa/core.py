@@ -292,7 +292,7 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=1111):
+    def __init__(self, serialno, localport=1111, size=None):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
@@ -303,6 +303,21 @@ class Minitouch(object):
         self.op_thread = None
         self.op_adbport = 1112
         self._stop_long_op = None
+        self.size = size
+
+
+    def transform_xy(self, x, y):
+        if not self.size:
+            return x, y
+        else:
+            width ,height = self.size['width'], self.size['height']
+            max_x , max_y = self.size['max_x'], self.size['max_y']
+            # print width, height, max_x, max_y
+            nx = x * max_x / width
+            ny = y * max_y / height
+
+            return nx, ny
+
 
     def _setup(self, adb_port=None, device_port='moa_minitouch'):
         adb_port = adb_port or self.localport
@@ -328,6 +343,8 @@ class Minitouch(object):
         u 0
         c
         """
+        x, y = self.transform_xy(x, y)
+
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", self.localport))
         # header = s.recv(4096)
@@ -354,6 +371,9 @@ class Minitouch(object):
         u 0
         c
         """
+        from_x, from_y = self.transform_xy(from_x, from_y)
+        to_x, to_y = self.transform_xy(to_x, to_y)
+
         interval = float(duration)/(steps+1)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", self.localport))
@@ -418,7 +438,20 @@ class Minitouch(object):
             self.op_sock.send(cmd)
         self.op_sock.close()
 
-    def operate(self, cmd):
+    def operate(self, args):
+        cmd = ""
+        if args["type"] == "down":
+            x, y = self.transform_xy(args["x"], args["y"])
+            cmd = "d 0 %d %d\nc\n" % (x, y)
+        elif args["type"] == "move":
+            x, y = self.transform_xy(args["x"], args["y"])
+            cmd = "m 0 %d %d\nc\n" % (x, y)
+        elif args["type"] == "up":
+            cmd = "u 0\nc\n"
+        else:
+            return#no process
+
+
         self.op_queue.put(cmd)
 
     def teardown_long_operate(self):
@@ -437,8 +470,9 @@ class Android(object):
         self.adb = ADB(self.serialno, addr=addr)
         self.size = self.getPhysicalDisplayInfo()
         self.size["orientation"] = self.getDisplayOrientation()
+        self.size["max_x"], self.size["max_y"] = self.getEventInfo()
         self.minicap = Minicap(serialno) if minicap else None
-        self.minitouch = Minitouch(serialno) if minitouch else None
+        self.minitouch = Minitouch(serialno, size=self.size) if minitouch else None
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
@@ -557,6 +591,23 @@ class Android(object):
             prop = prop.rstrip('\r\n')
         return prop
 
+    def getEventInfo(self):
+        ret = self.adb.shell('getevent -p').split('\n')
+        max_x, max_y = None, None
+        for i in ret:
+            if i.find("0035") != -1:
+                patten = re.compile(r'max [0-9]+')
+                ret = patten.search(i)
+                if ret:
+                    max_x = int(ret.group(0).split()[1])
+
+            if i.find("0036") != -1:
+                patten = re.compile(r'max [0-9]+')
+                ret = patten.search(i)
+                if ret:
+                    max_y = int(ret.group(0).split()[1])
+        return max_x, max_y
+
     def getPhysicalDisplayInfo(self):
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
         phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
@@ -655,16 +706,17 @@ def test_minitouch(serialno):
     # mi.swipe((575, 1089), (575, 451))
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
-    print time.time() - t
-    mi.setup_long_operate()
-    mi.operate("""d 0 100 100 50\nc\n""")
-    time.sleep(0.2)
-    mi.operate("""u 0\nc\n""")
-    time.sleep(0.5)
-    mi.teardown_long_operate()
-    time.sleep(5)
+    # print time.time() - t
+    # mi.setup_long_operate()
+    # mi.operate("""d 0 100 100 50\nc\n""")
+    # time.sleep(0.2)
+    # mi.operate("""u 0\nc\n""")
+    # time.sleep(0.5)
+    # mi.teardown_long_operate()
+    # time.sleep(5)
 
-    mi.touch((100, 100))
+    # mi.touch((100, 100))
+    # print mi.transform_xy(100,100)
 
 
 def test_android():
@@ -688,7 +740,8 @@ def test_android():
     # a.unlock()
     # print a.minicap.get_display_info()
     # print a.getDisplayOrientation()
-    a.touch((100, 100))
+    a.touch((837, 972))
+    # print a.minitouch.transform_xy(100,100)
 
 
 if __name__ == '__main__':
