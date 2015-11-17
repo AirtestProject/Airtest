@@ -328,13 +328,13 @@ class Minitouch(object):
         self.adb.forward("tcp:%s"%adb_port, "localabstract:%s" % device_port)
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % device_port, not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
-        info = nbsp.read(0.5)
-        print info
+        info = nbsp.read(1.0)
+        print "minitouch _setup", info
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
-            print "setup error"
+            print "minitouch setup error"
             return None
         reg_cleanup(p.kill)
         return p
@@ -437,19 +437,21 @@ class Minitouch(object):
     def _operate_worker(self):
         self.op_sock = SafeSocket()
         self.op_sock.connect(("localhost", self.op_adbport))
+        print "recv", repr(self.op_sock.sock.recv(4096))
         while not self._stop_long_op.isSet():
             cmd = self.op_queue.get()
             self.op_sock.send(cmd)
+            time.sleep(0.01)
         self.op_sock.close()
 
     def operate(self, args):
         cmd = ""
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
-            cmd = "d 0 %d %d\nc\n" % (x, y)
+            cmd = "d 0 %d %d 50\nc\n" % (x, y)
         elif args["type"] == "move":
             x, y = self.__transform_xy(args["x"], args["y"])
-            cmd = "m 0 %d %d\nc\n" % (x, y)
+            cmd = "m 0 %d %d 50\nc\n" % (x, y)
         elif args["type"] == "up":
             cmd = "u 0\nc\n"
         else:
@@ -711,13 +713,22 @@ def test_minitouch(serialno):
     # time.sleep(1)
     # mi.swipe((1080, 200), (0, 200))
     # print time.time() - t
-    # mi.setup_long_operate()
-    # mi.operate("""d 0 100 100 50\nc\n""")
-    # time.sleep(0.2)
-    # mi.operate("""u 0\nc\n""")
-    # time.sleep(0.5)
-    # mi.teardown_long_operate()
-    # time.sleep(5)
+    mi.setup_long_operate()
+    delay = 0.1
+    mi.operate({"type":"down", "x":100, "y":1394})
+    time.sleep(delay)
+    mi.operate({"type": "up"})
+    time.sleep(3)
+    return
+    mi.operate({"type":"down", "x":100, "y":999})
+    time.sleep(delay)
+    mi.operate({"type": "up"})
+    time.sleep(3)
+    mi.operate({"type":"down", "x":100, "y":1000})
+    time.sleep(delay)
+    mi.operate({"type": "up"})
+    time.sleep(1)
+    mi.teardown_long_operate()
 
     # mi.touch((100, 100))
     # print mi.transform_xy(100,100)
@@ -744,7 +755,7 @@ def test_android():
     # a.unlock()
     # print a.minicap.get_display_info()
     # print a.getDisplayOrientation()
-    a.touch((837, 972))
+    a.touch((100, 100))
     # print a.minitouch.transform_xy(100,100)
 
 
@@ -755,6 +766,6 @@ if __name__ == '__main__':
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
-    # test_minitouch(serialno)
+    test_minitouch(serialno)
     # time.sleep(10)
-    test_android()
+    # test_android()
