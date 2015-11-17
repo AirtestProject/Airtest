@@ -329,7 +329,7 @@ class Minitouch(object):
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % device_port, not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(1.0)
-        print "minitouch _setup", info
+        # print "minitouch _setup", info
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -441,7 +441,6 @@ class Minitouch(object):
         while not self._stop_long_op.isSet():
             cmd = self.op_queue.get()
             self.op_sock.send(cmd)
-            time.sleep(0.01)
         self.op_sock.close()
 
     def operate(self, args):
