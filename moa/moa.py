@@ -220,6 +220,41 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, press_pos=[], sch_pixel=[
     ret = ret["result"]
     return ret[0] + offsetx, ret[1] + offsety
 
+#王扉添加：基于坐标预测的SIFT
+def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, press_pos=[], _dResolution=[], _rResolution=[], _pResolution=[]):
+    ''' find picture position in screen '''
+    if KEEP_CAPTURE and RECENT_CAPTURE is not None:
+        screen = RECENT_CAPTURE
+    else:
+        screen = snapshot()
+    offsetx, offsety = 0, 0
+    if rect is not None and len(rect) == 4:
+        if len(filter(lambda x: (x<=1 and x>=0), rect)) == 4:
+            x0, y0, x1, y1 = rect[0] * DEVICE.size["width"], rect[1] * DEVICE.size["height"], rect[2] * DEVICE.size["width"], rect[3] * DEVICE.size["height"]
+        else:
+            x0, y0, x1, y1 = rect
+        screen = aircv.crop(screen, (x0, y0), (x1, y1))
+        offsetx, offsety = x0, y0
+    try:
+        #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
+        #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
+        if press_pos == [] or _dResolution == [] or _rResolution == [] or _pResolution == []:
+            ret = aircv.find_sift(screen, picdata)
+        #三个要求的参数均有输入时，加入区域预测部分：
+        else:
+            predictor = aircv.Prediction(_dResolution, _rResolution, _pResolution)
+            ret = predictor.SIFTbyPre(screen, picdata, press_pos[0], press_pos[1])
+    # need to specify different exceptions
+    except Exception as err:
+        print err
+        ret = None
+    print ret
+    if not ret:
+        return None
+    if threshold and ret["confidence"] < threshold:
+        return None
+    ret = ret["result"]
+    return ret[0] + offsetx, ret[1] + offsety
 
 def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD):
     pos = None
