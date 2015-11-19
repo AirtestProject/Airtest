@@ -10,45 +10,27 @@ import os
 import re
 import time
 import json
-import platform
-import fnmatch
 import warnings
 import subprocess
 import shlex
 import socket
 import struct
 import threading
+import platform
 import Queue
 from error import MoaError
-from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist
+from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, look_path
 
+
+THISPATH = os.path.dirname(os.path.realpath(__file__))
 ADBPATH = None
+STFLIB = os.path.join(THISPATH, "libs")
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
 ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
 DEBUG = True
 
-
-def look_path(program):
-    system = platform.system()
-
-    def is_exe(fpath):
-        if system.startswith('Windows') and not fpath.lower().endswith('.exe'):
-            fpath += '.exe'
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-    return None
 
 def init_adb():
     global ADBPATH
@@ -190,10 +172,36 @@ class Minicap(object):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
+        self.install()
         self.server_proc = None
         self.size = self.get_display_info()
         self.projection = projection
         # self._setup() #单帧截图minicap不需要setup
+
+    def install(self, reinstall=False):
+        output = self.adb.shell("ls /data/local/tmp")
+        if not reinstall and "minicap\r" in output:
+            print "setup_minicap skipped"
+            return
+
+        abi = self.adb.getprop("ro.product.cpu.abi")
+        sdk = int(self.adb.getprop("ro.build.version.sdk"))
+        rel = self.adb.getprop("ro.build.version.release")
+        # print abi, sdk, rel
+        if sdk >= 16:
+            binfile = "minicap"
+        else:
+            binfile = "minicap-nopie"
+
+        device_dir = "/data/local/tmp"
+        path = os.path.join(STFLIB, abi,binfile).replace("\\", r"\\")
+        self.adb.run("push %s %s/minicap" % (path, device_dir)) 
+        self.adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
+
+        path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
+            % (sdk, abi)).replace("\\", r"\\")
+        self.adb.run("push %s %s" % (path, device_dir))    
+        print "setup_minicap finished"
 
     def _setup(self):
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
@@ -296,6 +304,7 @@ class Minitouch(object):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
+        self.install()
         self.server_proc = self._setup()
         self.op_server_proc = None
         self.op_queue = None
@@ -305,6 +314,25 @@ class Minitouch(object):
         self._stop_long_op = None
         self.size = size
 
+    def install(self, reinstall=False):
+        output = self.adb.shell("ls /data/local/tmp")
+        if not reinstall and "minitouch\r" in output:
+            print "setup_minitouch skipped"
+            return
+
+        abi = self.adb.getprop("ro.product.cpu.abi")
+        sdk = int(self.adb.getprop("ro.build.version.sdk"))
+
+        if sdk >= 16:
+            binfile = "minitouch"
+        else:
+            binfile = "minitouch-nopie"
+
+        device_dir = "/data/local/tmp"
+        path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
+        self.adb.run(r"push %s %s/minitouch" % (path, device_dir)) 
+        self.adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
+        print "setup_minitouch finished"
 
     def __transform_xy(self, x, y):
         if not self.size:
@@ -714,7 +742,7 @@ def test_minitouch(serialno):
     # print time.time() - t
     mi.setup_long_operate()
     delay = 0.1
-    mi.operate({"type":"down", "x":100, "y":1394})
+    mi.operate({"type":"down", "x":100, "y":100})
     time.sleep(delay)
     mi.operate({"type": "up"})
     time.sleep(3)

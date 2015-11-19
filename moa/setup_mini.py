@@ -10,8 +10,15 @@ import sys
 import os
 
 ROOT = os.path.dirname(os.path.abspath(sys.argv[0]))
-def setup_minitouch(sno):
+
+def setup_minitouch(sno, reinstall=False):
     adb =  core.ADB(sno)
+
+    output = adb.shell("ls /data/local/tmp")
+    if not reinstall and "minitouch" in output:
+        print "setup_minitouch skipped"
+        return
+
     abi = adb.getprop("ro.product.cpu.abi")
     sdk = int(adb.getprop("ro.build.version.sdk"))
 
@@ -20,14 +27,20 @@ def setup_minitouch(sno):
     else:
         binfile = "minitouch-nopie"
 
-    dir = "/data/local/tmp"
-    path = os.path.join(ROOT, 'libs\\%s\\%s' % (abi,binfile)).replace('\\', '/')
-    print path
-    adb.run("push %s %s/minitouch" % (path, dir)) 
-    adb.shell("chmod 777 %s/%s" % (dir, binfile))
+    device_dir = "/data/local/tmp"
+    path = os.path.join(ROOT, 'libs', abi,binfile).replace("\\", r"\\")
+    adb.run(r"push %s %s/minitouch" % (path, device_dir)) 
+    adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
+    print "setup_minitouch finished"
 
-def setup_minicap(sno):
-    adb =  core.ADB(sno)
+def setup_minicap(sno, reinstall=False):
+    adb = core.ADB(sno)
+
+    output = adb.shell("ls /data/local/tmp")
+    if not reinstall and "minicap" in output:
+        print "setup_minicap skipped"
+        return
+
     abi = adb.getprop("ro.product.cpu.abi")
     sdk = int(adb.getprop("ro.build.version.sdk"))
     rel = adb.getprop("ro.build.version.release")
@@ -38,18 +51,18 @@ def setup_minicap(sno):
     else:
         binfile = "minicap-nopie"
 
-    dir = "/data/local/tmp"
-    
-    path = os.path.join(ROOT, 'libs\\%s\\%s' % (abi,binfile)).replace('\\', '/')
-    adb.run("push %s %s/minicap" % (path, dir)) 
-    adb.shell("chmod 777 %s/%s" % (dir, binfile))
+    device_dir = "/data/local/tmp"
+    path = os.path.join(ROOT, 'libs', abi,binfile).replace("\\", r"\\")
+    adb.run("push %s %s/minicap" % (path, device_dir)) 
+    adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
 
-    path = os.path.join(ROOT, 'libs/minicap-shared/aosp/libs/android-%d/%s/minicap.so' % (sdk, abi)).replace('\\','/')
-    adb.run("push %s %s" % (path, dir))    
+    path = os.path.join(ROOT, 'libs/minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
+        % (sdk, abi)).replace("\\", r"\\")
+    adb.run("push %s %s" % (path, device_dir))    
+    print "setup_minicap finished"
         
-
 
 if __name__ == '__main__':
     serialno = core.adb_devices(state="device").next()[0]
     setup_minitouch(serialno)
-    setup_minicap(serialno)
+    # setup_minicap(serialno)
