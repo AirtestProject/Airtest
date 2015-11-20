@@ -50,7 +50,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
         cmds = list(cmds)
     # start-server cannot assign -H -P -s
     if cmds == ["start-server"] and addr == LOCALADBADRR:
-        return subprocess.check_output(["adb", "start-server"])
+        return subprocess.check_output([adbpath, "start-server"])
 
     host, port = addr
     prefix = [adbpath, '-H', host, '-P', str(port)]
