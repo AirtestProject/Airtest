@@ -196,7 +196,7 @@ class Minicap(object):
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi,binfile).replace("\\", r"\\")
         self.adb.run("push %s %s/minicap" % (path, device_dir)) 
-        self.adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
+        self.adb.shell("chmod 777 %s/minicap" % (device_dir))
 
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
             % (sdk, abi)).replace("\\", r"\\")
@@ -331,7 +331,7 @@ class Minitouch(object):
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
         self.adb.run(r"push %s %s/minitouch" % (path, device_dir)) 
-        self.adb.shell("chmod 777 %s/%s" % (device_dir, binfile))
+        self.adb.shell("chmod 777 %s/minitouch" % (device_dir))
         print "setup_minitouch finished"
 
     def __transform_xy(self, x, y):
