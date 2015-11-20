@@ -23,7 +23,7 @@ from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, loo
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
-ADBPATH = None
+ADBPATH = os.path.join(THISPATH, "adb", "windows", "adb.exe")
 STFLIB = os.path.join(THISPATH, "libs")
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
