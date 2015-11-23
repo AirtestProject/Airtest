@@ -39,6 +39,9 @@ KEEP_CAPTURE = False
 RECENT_CAPTURE = None
 OPDELAY = 0.1
 THRESHOLD = 0.6
+DESIGNRES = [640, 960]
+RECORDRES = []
+PLAYRES = []
 
 import os
 import re
@@ -104,6 +107,8 @@ def set_serialno(sn=None, minitouch=True):
             raise MoaError("Device status not good: {}".format(status))
     global DEVICE
     DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
+    global PLAYRES
+    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return SERIALNO
 
 
@@ -130,6 +135,11 @@ def set_logfile(filename, inbase=True):
     if inbase:
         LOG_FILE = os.path.join(BASE_DIR, filename)
     LOG_FILE_FD = open(LOG_FILE, 'wb')
+
+
+def set_record_res(record_res):
+    global RECORDRES
+    RECORDRES = record_res
 
 
 """
@@ -221,8 +231,12 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, press_pos=[], sch_pixel=[
     return ret[0] + offsetx, ret[1] + offsety
 
 #王扉添加：基于坐标预测的SIFT
-def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, press_pos=[], _dResolution=[], _rResolution=[], _pResolution=[]):
+def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[]):
     ''' find picture position in screen '''
+    global DESIGNRES, RECORDRES, PLAYRES
+    _dResolution=DESIGNRES
+    _rResolution=RECORDRES
+    _pResolution=PLAYRES
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
@@ -238,12 +252,15 @@ def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, press_pos=[], _dRe
     try:
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
-        if press_pos == [] or _dResolution == [] or _rResolution == [] or _pResolution == []:
+        print record_pos, _dResolution, _pResolution, _rResolution
+        if not (record_pos and _dResolution and _rResolution and _pResolution):
             ret = aircv.find_sift(screen, picdata)
+            print "nopre"
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
             predictor = aircv.Prediction(_dResolution, _rResolution, _pResolution)
-            ret = predictor.SIFTbyPre(screen, picdata, press_pos[0], press_pos[1])
+            ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
+            print "pre"
     # need to specify different exceptions
     except Exception as err:
         print err
@@ -256,7 +273,7 @@ def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, press_pos=[], _dRe
     ret = ret["result"]
     return ret[0] + offsetx, ret[1] + offsety
 
-def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD):
+def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD, record_pos=None):
     pos = None
     left = max(1, int(timeout))
     if isinstance(pictarget, MoaText):
@@ -268,7 +285,7 @@ def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold
         pictarget = os.path.join(BASE_DIR, pictarget)
         picdata = aircv.imread(pictarget)
     while left > 0:
-        pos = _find_pic(picdata, rect=rect, threshold=threshold)
+        pos = _find_pic_by_pre(picdata, rect=rect, threshold=threshold, record_pos=record_pos)
         if pos is None:
             time.sleep(1)
             left -= 1
@@ -353,12 +370,12 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None):
+def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None, record_pos=None):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if _isstr(v) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout, rect=rect)
+        pos = _loop_find(v, timeout=timeout, rect=rect, record_pos=record_pos)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
