@@ -555,7 +555,7 @@ class Android(object):
 
     def touch(self, pos):
         pos = map(lambda x: x/PROJECTIONRATE, pos)
-        pos = self.__transformPointByOrientation(pos)
+        pos = self._transformPointByOrientation(pos)
         print pos
         if self.minitouch:
             self.minitouch.touch(pos)
@@ -563,8 +563,8 @@ class Android(object):
             self.adb.touch(pos)
 
     def swipe(self, p1, p2):
-        p1 = self.__transformPointByOrientation(p1)
-        p2 = self.__transformPointByOrientation(p2)
+        p1 = self._transformPointByOrientation(p1)
+        p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
             self.minitouch.swipe(p1, p2)
         else:
@@ -637,13 +637,19 @@ class Android(object):
                     max_y = int(ret.group(0).split()[1])
         return max_x, max_y
 
+    def getCurrentScreenResolution(self):
+        w, h = self.size["width"], self.size["height"]
+        if self.size["orientation"] in [1, 3]:
+            w, h = h, w
+        return w, h
+
     def getPhysicalDisplayInfo(self):
         # 不同sdk版本规则不一样，这里保证height>width
         info = self._getPhysicalDisplayInfo()
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]
         return info
-        
+
     def _getPhysicalDisplayInfo(self):
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
         phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
@@ -712,13 +718,16 @@ class Android(object):
         # return -1
         return 0 if self.size["height"] > self.size['width'] else 1
 
-    def __transformPointByOrientation(self, (x, y)):
+    def _transformPointByOrientation(self, (x, y)):
         x, y = XYTransformer.up_2_ori(
             (x, y),
             (self.size["width"], self.size["height"]),
             self.size["orientation"]
         )
         return x, y
+
+    def refreshOrientationInfo(self):
+        self.size["orientation"] = self.getDisplayOrientation()
 
 
 class XYTransformer(object):
@@ -741,7 +750,7 @@ class XYTransformer(object):
             x, y = y, w - x
         elif orientation == 3:
             x, y = h - y, x
-        return x, y        
+        return x, y
 
 
 def test_minicap(serialno):
