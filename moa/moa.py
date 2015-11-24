@@ -240,29 +240,15 @@ def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[], r
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
-    # 如果指定了record_pos，先初始化一些相关分辨率的值
-    if record_pos:
-        global PLAYRES
-        _pResolution=PLAYRES
-        # 横屏情况下转换分辨率
-        if DEVICE.size["orientation"] in [1, 3]:
-            def exchangeXY(item):
-                if isinstance(item, list):
-                    return [item[1], item[0]]
-                elif isinstance(item, tuple):
-                    return (item[1], item[0])
-                else:
-                    raise
-            _pResolution = exchangeXY(_pResolution)
     try:
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
-        print record_pos, _pResolution
-        if not (record_pos and _pResolution):
+        if not record_pos:
             ret = aircv.find_sift(screen, picdata)
             print "nopre"
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
+            _pResolution = DEVICE.getCurrentScreenResolution()
             predictor = aircv.Prediction(_pResolution)
             ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
             print "pre"
@@ -291,6 +277,9 @@ def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold
         picdata = aircv.imread(pictarget)
     while left > 0:
         pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, record_pos=record_pos)
+        # 在预测区域没有找到，则退回全局查找
+        if pos is None:
+            pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold)
         if pos is None:
             time.sleep(interval)
             left -= 1
