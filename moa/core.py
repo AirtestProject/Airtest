@@ -335,21 +335,18 @@ class Minitouch(object):
         print "setup_minitouch finished"
 
     def __transform_xy(self, x, y):
-        if not self.size:
+        # 根据设备方向、长宽来转换xy值
+        if not (self.size and self.size['max_x'] and self.size['max_y']):
             return x, y
-        elif not self.size['max_x'] or not self.size['max_y']:#容错
-            return x, y
-        else:
-            width ,height = self.size['width'], self.size['height']
-            if width > height and self.size['orientation'] in [1,3]:
-                width, height = height, width
-            max_x , max_y = self.size['max_x'], self.size['max_y']
-            # print width, height, max_x, max_y
-            nx = x * max_x / width
-            ny = y * max_y / height
 
-            return nx, ny
-
+        width ,height = self.size['width'], self.size['height']
+        if width > height and self.size['orientation'] in [1,3]:
+            width, height = height, width
+        max_x , max_y = self.size['max_x'], self.size['max_y']
+        # print width, height, max_x, max_y
+        nx = x * max_x / width
+        ny = y * max_y / height
+        return nx, ny
 
     def _setup(self, adb_port=None, device_port='moa_minitouch'):
         adb_port = adb_port or self.localport
@@ -484,7 +481,6 @@ class Minitouch(object):
         else:
             return#no process
 
-
         self.op_queue.put(cmd)
 
     def teardown_long_operate(self):
@@ -559,8 +555,8 @@ class Android(object):
 
     def touch(self, pos):
         pos = map(lambda x: x/PROJECTIONRATE, pos)
-        print pos
         pos = self.__transformPointByOrientation(pos)
+        print pos
         if self.minitouch:
             self.minitouch.touch(pos)
         else:
@@ -642,6 +638,13 @@ class Android(object):
         return max_x, max_y
 
     def getPhysicalDisplayInfo(self):
+        # 不同sdk版本规则不一样，这里保证height>width
+        info = self._getPhysicalDisplayInfo()
+        if info["width"] > info["height"]:
+            info["height"], info["width"] = info["width"], info["height"]
+        return info
+        
+    def _getPhysicalDisplayInfo(self):
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
         phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
         m = phyDispRE.search(self.adb.shell('wm size; wm density'))
@@ -710,15 +713,35 @@ class Android(object):
         return 0 if self.size["height"] > self.size['width'] else 1
 
     def __transformPointByOrientation(self, (x, y)):
-        if self.size["orientation"] == 1:
-            _x = x
-            x = self.size['width'] - y
-            y = _x
-        elif self.size["orientation"] == 3:
-            _x = x
-            x = y
-            y = self.size['height'] - _x
+        x, y = XYTransformer.up_2_ori(
+            (x, y),
+            (self.size["width"], self.size["height"]),
+            self.size["orientation"]
+        )
         return x, y
+
+
+class XYTransformer(object):
+    """
+    transform xy by orientation
+    upright<-->original
+    """
+    @staticmethod
+    def up_2_ori((x, y), (w, h), orientation):
+        if orientation == 1:
+            x, y = w - y, x
+        elif orientation == 3:
+            x, y = y, h - x
+        return x, y
+
+    @staticmethod
+    def ori_2_up((x, y), (w, h), orientation):
+        print (x,y), (w,h), orientation
+        if orientation == 1:
+            x, y = y, w - x
+        elif orientation == 3:
+            x, y = h - y, x
+        return x, y        
 
 
 def test_minicap(serialno):
@@ -742,7 +765,7 @@ def test_minitouch(serialno):
     # print time.time() - t
     mi.setup_long_operate()
     delay = 0.1
-    mi.operate({"type":"down", "x":100, "y":100})
+    mi.operate({"type":"down", "x":44, "y":139})
     time.sleep(delay)
     mi.operate({"type": "up"})
     time.sleep(3)

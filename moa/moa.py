@@ -231,12 +231,8 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, press_pos=[], sch_pixel=[
     return ret[0] + offsetx, ret[1] + offsety
 
 #王扉添加：基于坐标预测的SIFT
-def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[]):
+def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[], record_ori=1):
     ''' find picture position in screen '''
-    global DESIGNRES, RECORDRES, PLAYRES
-    _dResolution=DESIGNRES
-    _rResolution=RECORDRES
-    _pResolution=PLAYRES
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
@@ -249,6 +245,23 @@ def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[]):
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
+    # 如果指定了record_pos，先初始化一些相关分辨率的值
+    if record_pos:
+        global DESIGNRES, RECORDRES, PLAYRES
+        _dResolution=DESIGNRES
+        _rResolution=RECORDRES
+        _pResolution=PLAYRES
+        # 横屏情况下转换分辨率
+        if DEVICE.size["orientation"] in [1, 3]:
+            def exchangeXY(item):
+                if isinstance(item, list):
+                    return [item[1], item[0]]
+                elif isinstance(item, tuple):
+                    return (item[1], item[0])
+                else:
+                    raise
+            _pResolution = exchangeXY(_pResolution)
+            _rResolution = exchangeXY(_rResolution)
     try:
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
@@ -258,8 +271,10 @@ def _find_pic_by_pre(picdata, rect=None, threshold=THRESHOLD, record_pos=[]):
             print "nopre"
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
+            rec_x, rec_y = core.XYTransformer.ori_2_up(record_pos, (DEVICE.size["width"], DEVICE.size["height"]), record_ori)
+            print rec_x, rec_y, "rec after transform"
             predictor = aircv.Prediction(_dResolution, _rResolution, _pResolution)
-            ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
+            ret = predictor.SIFTbyPre(screen, picdata, rec_x, rec_y)
             print "pre"
     # need to specify different exceptions
     except Exception as err:
@@ -354,7 +369,7 @@ def snapshot(filename="screen.jpg", ensure_orientation=True):
     screen = aircv.imread(filename)
     # _show_screen(screen)
     if DEVICE.sdk_version <=16 and ensure_orientation and DEVICE.size["orientation"]:
-        aircv.rotate(screen, DEVICE.size["orientation"]*90, clockwise=False)
+        screen = aircv.rotate(screen, DEVICE.size["orientation"]*90, clockwise=False)
     RECENT_CAPTURE = screen # used for keep_capture()
     return screen
 
