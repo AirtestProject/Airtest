@@ -85,7 +85,7 @@ def set_serialno(sn=None, minitouch=True):
     if not sn:
         devs = list(adb_devices(state='device', addr=ADDRESS))
         if len(devs) > 1:
-            raise MoaError("more than one device, please specify serialno: set_serialno(sn)")
+            print ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
         elif len(devs) == 0:
             raise MoaError("no device, please check your adb connection")
         SERIALNO = devs[0][0]
