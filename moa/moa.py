@@ -468,7 +468,6 @@ def assert_not_exists(v, msg="", timeout=TIMEOUT, rect=None):
 
 @logwrap
 def assert_equal(first, second, msg=""):
-    print "assert equal:", msg
     result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
