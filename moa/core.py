@@ -305,7 +305,8 @@ class Minitouch(object):
         self.localport = localport
         self.adb = ADB(serialno)
         self.install()
-        self.server_proc = self._setup()
+        self.server_proc = None
+        self._setup()
         self.op_server_proc = None
         self.op_queue = None
         self.op_sock = None
@@ -349,6 +350,9 @@ class Minitouch(object):
         return nx, ny
 
     def _setup(self, adb_port=None, device_port='moa_minitouch'):
+        if self.server_proc:
+            self.server_proc.kill()
+            self.server_proc = None
         adb_port = adb_port or self.localport
         self.adb.forward("tcp:%s"%adb_port, "localabstract:%s" % device_port)
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % device_port, not_wait=True)
@@ -362,6 +366,7 @@ class Minitouch(object):
             print "minitouch setup error"
             return None
         reg_cleanup(p.kill)
+        self.server_proc = p
         return p
 
     def touch(self, (x, y), duration=0.01):
@@ -508,6 +513,13 @@ class Android(object):
 
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
+
+    def check_status(self):
+        dev_list = list(adb_devices())
+        for dev, status in dev_list:
+            if dev == self.serialno:
+                return status
+        return None
 
     def amstart(self, package):
         output = self.adb.shell(['pm', 'path', package])
@@ -814,7 +826,7 @@ def test_android():
     # a.unlock()
     # print a.minicap.get_display_info()
     # print a.getDisplayOrientation()
-    a.touch((100, 100))
+    # a.touch((100, 100))
     # print a.minitouch.transform_xy(100,100)
 
 
@@ -825,6 +837,6 @@ if __name__ == '__main__':
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
-    test_minitouch(serialno)
+    # test_minitouch(serialno)
     # time.sleep(10)
-    # test_android()
+    test_android()
