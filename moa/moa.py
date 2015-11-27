@@ -16,6 +16,7 @@ __version__ = '0.0.2'
 __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile', 'keep_capture',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
+    'amstart', 'amstop',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
     'wake', 'adb_devices',
     'gevent_run', 'MoaText',
