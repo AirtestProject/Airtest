@@ -14,7 +14,7 @@ Script engine.
 
 __version__ = '0.0.2'
 __all__ = [
-    'set_serialno', 'set_basedir', 'set_logfile', 'keep_capture',
+    'set_serialno', 'set_basedir', 'set_logfile', 'keep_capture', 'refresh_device',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
     'amstart', 'amstop',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
@@ -135,6 +135,10 @@ def set_logfile(filename, inbase=True):
     if inbase:
         LOG_FILE = os.path.join(BASE_DIR, filename)
     LOG_FILE_FD = open(LOG_FILE, 'wb')
+
+
+def refresh_device():
+    DEVICE.refreshOrientationInfo()
 
 
 """
