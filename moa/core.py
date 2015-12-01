@@ -20,6 +20,7 @@ import platform
 import Queue
 from error import MoaError
 from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, look_path
+from ..aircv import aircv
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -539,14 +540,21 @@ class Android(object):
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
-    def snapshot(self, filename=None):
+    def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
             screen = self.minicap.get_frame()
         else:
             screen = self.adb.snapshot()
-        if filename:
-            with open(filename, "wb") as f:
-                f.write(screen)
+        # 输出cv2对象
+        # screen = aircv.string_2_img(screen)
+        if True: # filename:  # 这里图像格式不对，要写+读才对，to be fixed
+            open(filename, "wb").write(screen)
+            screen = aircv.cv2.imread(filename) 
+        # 保证方向是正的
+        if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
+            h, w = screen.shape[:2] #cv2的shape是高度在前面!!!!
+            if w < h: #当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+                screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
         return screen
 
     def shell(self, *args):
@@ -738,8 +746,14 @@ class Android(object):
         )
         return x, y
 
-    def refreshOrientationInfo(self):
-        self.size["orientation"] = self.getDisplayOrientation()
+    def refreshOrientationInfo(self, ori=None):
+        """
+        update dev orientation
+        if ori is assigned, set to it(useful when running a orientation monitor outside)
+        """
+        if ori is None:
+            ori = self.getDisplayOrientation()
+        self.size["orientation"] = ori
 
 
 class XYTransformer(object):
@@ -751,15 +765,18 @@ class XYTransformer(object):
     def up_2_ori((x, y), (w, h), orientation):
         if orientation == 1:
             x, y = w - y, x
+        elif orientation == 2:
+            x, y = w - x, h - y
         elif orientation == 3:
             x, y = y, h - x
         return x, y
 
     @staticmethod
     def ori_2_up((x, y), (w, h), orientation):
-        print (x,y), (w,h), orientation
         if orientation == 1:
             x, y = y, w - x
+        elif orientation == 2:
+            x, y = w - x, h - y
         elif orientation == 3:
             x, y = h - y, x
         return x, y

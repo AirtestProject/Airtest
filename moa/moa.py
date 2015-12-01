@@ -29,7 +29,7 @@ ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
 LOG_FILE = ''
 LOG_FILE_FD = None
-TIMEOUT = 10
+TIMEOUT = 5
 RUNTIME_STACK = []
 GEVENT_RUNNING = False
 SCREEN = None
@@ -345,15 +345,15 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename="screen.jpg", ensure_orientation=True):
+def snapshot(filename="screen.png"):
     global RECENT_CAPTURE
-    screen = DEVICE.snapshot()
+    screen = DEVICE.snapshot(filename)
+    screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
     # to be fixed, screen.jpg is used for debug 
-    open(filename, 'wb').write(screen)
-    screen = aircv.imread(filename)
+    # open(filename, 'wb').write(screen)
+    # screen = aircv.imread(filename)
     # _show_screen(screen)
-    if DEVICE.sdk_version <=16 and ensure_orientation and DEVICE.size["orientation"]:
-        screen = aircv.rotate(screen, DEVICE.size["orientation"]*90, clockwise=False)
+    # aircv.show(screen)
     RECENT_CAPTURE = screen # used for keep_capture()
     return screen
 
@@ -574,14 +574,14 @@ def test():
 
 if __name__ == '__main__':
     set_serialno()
-    # snapshot()
+    snapshot()
     # set_basedir()
     # set_logfile('run.log')
     # touch('fb.png', rect=(10, 10, 500, 500))
     # time.sleep(1)
     # home()
     # time.sleep(1)
-    swipe('sm.png', vector=(0, 0.3))
+    # swipe('sm.png', vector=(0, 0.3))
     # time.sleep(1)
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img
