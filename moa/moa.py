@@ -14,7 +14,8 @@ Script engine.
 
 __version__ = '0.0.2'
 __all__ = [
-    'set_serialno', 'set_basedir', 'set_logfile', 'keep_capture', 'refresh_device',
+    'set_serialno', 'set_basedir', 'set_logfile', 'set_screendir',
+    'keep_capture', 'refresh_device',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
     'amstart', 'amstop',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
@@ -42,6 +43,7 @@ OPDELAY = 0.1
 THRESHOLD = 0.6
 PLAYRES = []
 CVINTERVAL = 0.5
+SAVE_SCREEN = None
 
 import os
 import re
@@ -135,6 +137,11 @@ def set_logfile(filename, inbase=True):
     if inbase:
         LOG_FILE = os.path.join(BASE_DIR, filename)
     LOG_FILE_FD = open(LOG_FILE, 'wb')
+
+
+def set_screendir(dirpath):
+    global SAVE_SCREEN
+    SAVE_SCREEN = dirpath
 
 
 def refresh_device():
@@ -346,7 +353,10 @@ def uninstall(package):
 
 @logwrap
 def snapshot(filename="screen.png"):
-    global RECENT_CAPTURE
+    global RECENT_CAPTURE, SAVE_SCREEN
+    if SAVE_SCREEN:
+        filename = "%s.jpg" % int(time.time())
+        filename = os.path.join(SAVE_SCREEN, filename)
     screen = DEVICE.snapshot(filename)
     screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
     # to be fixed, screen.jpg is used for debug 
@@ -463,9 +473,9 @@ def assert_exists(v, msg="", timeout=TIMEOUT, rect=None, threshold=0.5):
 
 
 @logwrap
-def assert_not_exists(v, msg="", timeout=TIMEOUT, rect=None):
+def assert_not_exists(v, msg="", timeout=2, rect=None):
     try:
-        pos = _loop_find(v, timeout=timeout, rect=rect)
+        pos = _loop_find(v, timeout=timeout, rect=rect, threshold=0.7)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         pass
