@@ -169,7 +169,7 @@ class ADB():
 
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, projection=PROJECTIONRATE, localport=1313):
+    def __init__(self, serialno, projection=PROJECTIONRATE, localport=11313):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
@@ -301,7 +301,7 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=1111, size=None):
+    def __init__(self, serialno, localport=11111, size=None):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
@@ -312,7 +312,7 @@ class Minitouch(object):
         self.op_queue = None
         self.op_sock = None
         self.op_thread = None
-        self.op_adbport = 1112
+        self.op_adbport = 11112
         self._stop_long_op = None
         self.size = size
 
@@ -576,7 +576,6 @@ class Android(object):
     def touch(self, pos):
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
-        print pos
         if self.minitouch:
             self.minitouch.touch(pos)
         else:
