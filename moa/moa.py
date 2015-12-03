@@ -57,6 +57,7 @@ import subprocess
 import signal
 import ast
 import socket
+import traceback
 try:
     from urlparse import urlparse
 except ImportError:
@@ -243,7 +244,7 @@ class TargetPos(object):
 
 
 #王扉添加：基于坐标预测的SIFT
-def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], record_ori=1):
+def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -258,20 +259,25 @@ def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=Targe
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
     try:
+        if templateMatch is True:
+            print "matchtpl"
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=DEVICE.getCurrentScreenResolution(), design_resolution=[960, 640])
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
-        if not record_pos:
+        elif not record_pos:
+            print "siftnopre"
             ret = aircv.find_sift(screen, picdata)
-            print "nopre"
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
+            print "siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
             predictor = aircv.Prediction(_pResolution)
             ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
-            print "pre"
     # need to specify different exceptions
+    except aircv.Error:
+        ret = None
     except Exception as err:
-        print err
+        traceback.print_exc()
         ret = None
     print ret
     if not ret:
@@ -281,7 +287,7 @@ def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=Targe
     pos = TargetPos().getXY(ret, target_pos)
     return pos[0] + offsetx, pos[1] + offsety
 
-def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, interval=CVINTERVAL):
+def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, interval=CVINTERVAL, resolution=[]):
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
@@ -298,6 +304,9 @@ def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold
         # 在预测区域没有找到，则退回全局查找
         if pos is None:
             pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, target_pos=target_pos)
+        # 再用缩放后的模板匹配来找
+        if pos is None:
+            pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, target_pos=target_pos, sch_resolution=resolution, templateMatch=True)
         if pos is None:
             time.sleep(interval)
             left -= 1
@@ -390,7 +399,7 @@ def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None, target_pos=
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if _isstr(v) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout, rect=rect, target_pos=target_pos, record_pos=record_pos)
+        pos = _loop_find(v, timeout=timeout, rect=rect, target_pos=target_pos, record_pos=record_pos, resolution=resolution)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
