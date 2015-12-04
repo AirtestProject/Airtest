@@ -189,6 +189,24 @@ def logwrap(f):
     return wrapper
 
 
+def transparam(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if not _isstr(args[0]):
+            return f(*args, **kwargs)
+        picname = args[0]
+        picargs = {}
+        opargs = {}
+        for k, v in kwargs.iteritems():
+            if k in ["rect", "threshold", "target_pos", "record_pos", "resolution"]:
+                picargs[k] = v
+            else:
+                opargs[k] = v
+        pictarget = MoaPic(picname, **picargs)
+        return f(pictarget, *args[1:], **opargs)
+    return wrapper
+
+
 def _show_screen(pngstr):
     if not GEVENT_RUNNING:
         return
@@ -244,7 +262,7 @@ class TargetPos(object):
 
 
 #王扉添加：基于坐标预测的SIFT
-def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
+def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
     ''' find picture position in screen '''
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -287,26 +305,36 @@ def _find_pic_with_pre(picdata, rect=None, threshold=THRESHOLD, target_pos=Targe
     pos = TargetPos().getXY(ret, target_pos)
     return pos[0] + offsetx, pos[1] + offsety
 
-def _loop_find(pictarget, background=None, timeout=TIMEOUT, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, interval=CVINTERVAL, resolution=[]):
+
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
     if isinstance(pictarget, MoaText):
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别吧
         # pil_2_cv2函数有问题，会变底色，后续修改
         # picdata = aircv.pil_2_cv2(pictarget.img)
         pictarget.img.save("text.png")
         picdata = aircv.imread("text.png")
+    elif isinstance(pictarget, MoaPic):
+        picpath = os.path.join(BASE_DIR, pictarget.filename)
+        picdata = aircv.imread(picpath)
     else:
-        pictarget = os.path.join(BASE_DIR, pictarget)
-        picdata = aircv.imread(pictarget)
+        pictarget = MoaPic(pictarget)
+        picpath = os.path.join(BASE_DIR, pictarget)
+        picdata = aircv.imread(picpath)
     while left > 0:
-        pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, target_pos=target_pos, record_pos=record_pos)
+        pos = None
+        # 阈值优先取函数传进来的，比如assert_exists，再取图片里设置的
+        threshold = threshold or getattr(pictarget, "threshold", THRESHOLD) 
+        if getattr(pictarget, "record_pos"):
+            pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
         # 在预测区域没有找到，则退回全局查找
         if pos is None:
-            pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, target_pos=target_pos)
+            pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos)
         # 再用缩放后的模板匹配来找
-        if pos is None:
-            pos = _find_pic_with_pre(picdata, rect=rect, threshold=threshold, target_pos=target_pos, sch_resolution=resolution, templateMatch=True)
+        if pos is None and getattr(pictarget, "resolution"):
+            pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
         if pos is None:
             time.sleep(interval)
             left -= 1
@@ -327,9 +355,32 @@ class MoaText(object):
         self.info = dict(text=text, font=font, size=size, inverse=inverse)
         self.img = textgen.gen_text(text, font, size, inverse)
         # self.img.save("text.png")
+        self.threshold = THRESHOLD
+        self.target_pos = TargetPos.mid
 
     def __repr__(self):
         return "MhText(%s)" % repr(self.info)
+
+
+class MoaPic(object):
+    """
+    picture as touch/swipe/wait/exists target and extra info for cv match
+    filename: pic filename
+    rect: find pic in rect of screen
+    target_pos: ret which pos in the pic
+    record_pos: pos in screen when recording
+    resolution: screen resolution when recording
+    """
+    def __init__(self, filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[]):
+        self.filename = filename
+        self.rect = rect
+        self.threshold = threshold
+        self.target_pos = target_pos
+        self.record_pos = record_pos
+        self.resolution = resolution
+
+    def __repr__(self):
+        return self.filename
 
 
 """
@@ -394,12 +445,13 @@ def home():
 
 
 @logwrap
-def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None, target_pos=TargetPos.MID, record_pos=None, resolution=None):
+@transparam
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
-    if _isstr(v) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout, rect=rect, target_pos=target_pos, record_pos=record_pos, resolution=resolution)
+    if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+        pos = _loop_find(v, timeout=timeout)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
@@ -418,6 +470,7 @@ def touch(v, rect=None, timeout=TIMEOUT, delay=OPDELAY, offset=None, target_pos=
 
 
 @logwrap
+@transparam
 def swipe(v1, v2=None, vector=None):
     if _isstr(v1) or isinstance(v1, MoaText):
         pos1 = _loop_find(v1)
@@ -457,6 +510,7 @@ def sleep(secs=1.0):
 
 
 @logwrap
+@transparam
 def wait(v, timeout=10, safe=False):
     try:
         return _loop_find(v, timeout=timeout)
@@ -467,9 +521,10 @@ def wait(v, timeout=10, safe=False):
 
 
 @logwrap
-def exists(v, rect=None):
+@transparam
+def exists(v, timeout=1):
     try:
-        return _loop_find(v, timeout=1, rect=rect)
+        return _loop_find(v, timeout=timeout)
     except MoaNotFoundError as e:
         return False
 
@@ -480,17 +535,19 @@ Assertions for result verification
 
 
 @logwrap
-def assert_exists(v, msg="", timeout=TIMEOUT, rect=None, threshold=0.5):
+@transparam
+def assert_exists(v, msg="", timeout=TIMEOUT, threshold=0.7):
     try:
-        return _loop_find(v, timeout=timeout, rect=rect, threshold=threshold)
+        return _loop_find(v, timeout=timeout, threshold=threshold)
     except MoaNotFoundError:
         raise AssertionError("%s does not exists" % v)
 
 
 @logwrap
-def assert_not_exists(v, msg="", timeout=2, rect=None):
+@transparam
+def assert_not_exists(v, msg="", timeout=2, threshold=0.7):
     try:
-        pos = _loop_find(v, timeout=timeout, rect=rect, threshold=0.7)
+        pos = _loop_find(v, timeout=timeout, threshold=threshold)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         pass
