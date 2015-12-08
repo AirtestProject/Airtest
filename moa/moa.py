@@ -30,7 +30,7 @@ ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
 LOG_FILE = ''
 LOG_FILE_FD = None
-TIMEOUT = 5
+TIMEOUT = 10
 RUNTIME_STACK = []
 GEVENT_RUNNING = False
 SCREEN = None
@@ -325,8 +325,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
         picdata = aircv.imread(picpath)
     while left > 0:
         pos = None
-        # 阈值优先取函数传进来的，比如assert_exists，再取图片里设置的
-        threshold = threshold or getattr(pictarget, "threshold", THRESHOLD) 
+        # 阈值全部优先取自定义设置的
+        threshold = getattr(pictarget, "threshold", THRESHOLD) 
         if getattr(pictarget, "record_pos"):
             pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
         # 在预测区域没有找到，则退回全局查找
@@ -472,7 +472,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
 @logwrap
 @transparam
 def swipe(v1, v2=None, vector=None):
-    if _isstr(v1) or isinstance(v1, MoaText):
+    if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
         pos1 = _loop_find(v1)
     else:
         pos1 = v1
@@ -536,18 +536,18 @@ Assertions for result verification
 
 @logwrap
 @transparam
-def assert_exists(v, msg="", timeout=TIMEOUT, threshold=0.7):
+def assert_exists(v, msg="", timeout=TIMEOUT):
     try:
-        return _loop_find(v, timeout=timeout, threshold=threshold)
+        return _loop_find(v, timeout=timeout)
     except MoaNotFoundError:
         raise AssertionError("%s does not exists" % v)
 
 
 @logwrap
 @transparam
-def assert_not_exists(v, msg="", timeout=2, threshold=0.7):
+def assert_not_exists(v, msg="", timeout=2):
     try:
-        pos = _loop_find(v, timeout=timeout, threshold=threshold)
+        pos = _loop_find(v, timeout=timeout)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         pass
