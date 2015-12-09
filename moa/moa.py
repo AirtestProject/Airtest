@@ -32,6 +32,7 @@ LOG_FILE = ''
 LOG_FILE_FD = None
 TIMEOUT = 10
 RUNTIME_STACK = []
+EXTRA_LOG = {}
 GEVENT_RUNNING = False
 SCREEN = None
 GEVENT_DONE = [False]
@@ -132,7 +133,7 @@ def set_basedir(base_dir):
     BASE_DIR = base_dir
 
 
-def set_logfile(filename, inbase=True):
+def set_logfile(filename="log.txt", inbase=True):
     global LOG_FILE, LOG_FILE_FD
     LOG_FILE = filename
     if inbase:
@@ -140,8 +141,10 @@ def set_logfile(filename, inbase=True):
     LOG_FILE_FD = open(LOG_FILE, 'wb')
 
 
-def set_screendir(dirpath):
+def set_screendir(dirpath="img_record"):
     global SAVE_SCREEN
+    if not os.path.isdir(dirpath):
+        os.mkdir(dirpath)
     SAVE_SCREEN = dirpath
 
 
@@ -160,31 +163,43 @@ def log(tag, data):
         print tag, data
     if LOG_FILE_FD is None:
         return
-    LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': len(RUNTIME_STACK), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}) + '\n')
+    def dumper(obj):
+        try:
+            return obj.__dict__
+        except:
+            return None
+    LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': len(RUNTIME_STACK), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=dumper) + '\n')
     LOG_FILE_FD.flush()
 
 
 def logwrap(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
+        global RUNTIME_STACK, EXTRA_LOG
         RUNTIME_STACK.append(f)
         start = time.time()
         fndata = {'name': f.__name__, 'args': args, 'kwargs': kwargs}
         try:
             res = f(*args, **kwargs)
-        except MoaError as e:
-            data = {"message": e.value, "time_used": time.time()-start}
-            data.update(fndata)
-            log("error", data)
-            print "Program terminated:", e.value
+        except MoaError, Exception:
+            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
+            fndata.update(data)
+            fndata.update(EXTRA_LOG)
+            log("error", fndata)
+            # traceback.print_exc()
             # Exit when meet MoaError
-            raise SystemExit(1)
+            # raise SystemExit(1)
+            raise
         else:
-            print '>'*len(RUNTIME_STACK), 'Time used:', f.__name__, time.time() - start
+            time_used = time.time() - start
+            print '>'*len(RUNTIME_STACK), 'Time used:', f.__name__, time_used
             sys.stdout.flush()
-            log('function', {'name': f.__name__, 'args': args, 'kwargs': kwargs, 'time_used': time.time()-start})
+            fndata.update({'time_used': time_used, 'ret': res})
+            fndata.update(EXTRA_LOG)
+            log('function', fndata)
         finally:
             RUNTIME_STACK.pop()
+            EXTRA_LOG = {}
         return res
     return wrapper
 
@@ -261,13 +276,14 @@ class TargetPos(object):
             return cvret["result"]
 
 
-#王扉添加：基于坐标预测的SIFT
 def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
     ''' find picture position in screen '''
+    # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
         screen = snapshot()
+    # 在rect矩形区域内查找，有record_pos之后，基本上没用了
     offsetx, offsety = 0, 0
     if rect is not None and len(rect) == 4:
         if len(filter(lambda x: (x<=1 and x>=0), rect)) == 4:
@@ -276,6 +292,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
+    # 三种不同的匹配算法
     try:
         if templateMatch is True:
             print "matchtpl"
@@ -291,7 +308,6 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
             _pResolution = DEVICE.getCurrentScreenResolution()
             predictor = aircv.Prediction(_pResolution)
             ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
-    # need to specify different exceptions
     except aircv.Error:
         ret = None
     except Exception as err:
@@ -306,6 +322,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     return pos[0] + offsetx, pos[1] + offsety
 
 
+@logwrap
 def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
     print "try finding %s" % pictarget
     pos = None
@@ -356,7 +373,7 @@ class MoaText(object):
         self.img = textgen.gen_text(text, font, size, inverse)
         # self.img.save("text.png")
         self.threshold = THRESHOLD
-        self.target_pos = TargetPos.mid
+        self.target_pos = TargetPos.MID
 
     def __repr__(self):
         return "MhText(%s)" % repr(self.info)
@@ -419,17 +436,13 @@ def uninstall(package):
 
 @logwrap
 def snapshot(filename="screen.png"):
-    global RECENT_CAPTURE, SAVE_SCREEN
+    global RECENT_CAPTURE, SAVE_SCREEN, EXTRA_LOG
     if SAVE_SCREEN:
-        filename = "%s.jpg" % int(time.time())
+        filename = "%s.jpg" % int(time.time()*1000)
         filename = os.path.join(SAVE_SCREEN, filename)
+        EXTRA_LOG.update({"screen": filename})
     screen = DEVICE.snapshot(filename)
     screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
-    # to be fixed, screen.jpg is used for debug 
-    # open(filename, 'wb').write(screen)
-    # screen = aircv.imread(filename)
-    # _show_screen(screen)
-    # aircv.show(screen)
     RECENT_CAPTURE = screen # used for keep_capture()
     return screen
 
