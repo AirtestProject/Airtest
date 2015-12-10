@@ -59,6 +59,7 @@ import signal
 import ast
 import socket
 import traceback
+import atexit
 try:
     from urlparse import urlparse
 except ImportError:
@@ -172,6 +173,17 @@ def log(tag, data):
     LOG_FILE_FD.flush()
 
 
+def handle_stacked_log():
+    # 处理stack中的log
+    while RUNTIME_STACK:
+        # 先取最后一个，记了log之后再pop，避免depth错误
+        log_stacked = RUNTIME_STACK[-1]
+        log("function", fndata)
+        RUNTIME_STACK.pop()
+
+atexit.register(handle_stacked_log)
+
+
 def logwrap(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
@@ -185,18 +197,7 @@ def logwrap(f):
             data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
             fndata.update(data)
             fndata.update(EXTRA_LOG)
-            # 处理stack中的log
-            cnt = 0
-            while RUNTIME_STACK:
-                # 先取最后一个，记了log之后再pop，避免depth错误
-                log_stacked = RUNTIME_STACK[-1]
-                if cnt > 0:
-                    log("function", log_stacked)
-                # 第一个取到的是报错函数的log，记error
-                else:
-                    log("error", fndata)
-                RUNTIME_STACK.pop()
-                cnt += 1
+            log("error", fndata)
             # traceback.print_exc()
             # Exit when meet MoaError
             # raise SystemExit(1)
@@ -208,9 +209,9 @@ def logwrap(f):
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(EXTRA_LOG)
             log('function', fndata)
-            RUNTIME_STACK.pop()
         finally:
             EXTRA_LOG = {}
+            RUNTIME_STACK.pop()
         return res
     return wrapper
 
