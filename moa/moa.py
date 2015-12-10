@@ -176,20 +176,31 @@ def logwrap(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         global RUNTIME_STACK, EXTRA_LOG
-        RUNTIME_STACK.append(f)
         start = time.time()
         fndata = {'name': f.__name__, 'args': args, 'kwargs': kwargs}
+        RUNTIME_STACK.append(fndata)
         try:
             res = f(*args, **kwargs)
-        except MoaError, Exception:
+        except (MoaError, Exception) as err:
             data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
             fndata.update(data)
             fndata.update(EXTRA_LOG)
-            log("error", fndata)
+            # 处理stack中的log
+            cnt = 0
+            while RUNTIME_STACK:
+                # 先取最后一个，记了log之后再pop，避免depth错误
+                log_stacked = RUNTIME_STACK[-1]
+                if cnt > 0:
+                    log("function", log_stacked)
+                # 第一个取到的是报错函数的log，记error
+                else:
+                    log("error", fndata)
+                RUNTIME_STACK.pop()
+                cnt += 1
             # traceback.print_exc()
             # Exit when meet MoaError
             # raise SystemExit(1)
-            raise
+            raise err
         else:
             time_used = time.time() - start
             print '>'*len(RUNTIME_STACK), 'Time used:', f.__name__, time_used
@@ -197,8 +208,8 @@ def logwrap(f):
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(EXTRA_LOG)
             log('function', fndata)
-        finally:
             RUNTIME_STACK.pop()
+        finally:
             EXTRA_LOG = {}
         return res
     return wrapper

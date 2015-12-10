@@ -546,15 +546,15 @@ class Android(object):
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
-        # screen = aircv.string_2_img(screen)
-        if True: # filename:  # 这里图像格式不对，要写+读才对，to be fixed
-            open(filename, "wb").write(screen)
-            screen = aircv.cv2.imread(filename) 
+        screen = aircv.string_2_img(screen)
         # 保证方向是正的
         if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
             h, w = screen.shape[:2] #cv2的shape是高度在前面!!!!
             if w < h: #当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                 screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
+        if filename:  # 这里图像格式不对，要写+读才对，to be fixed
+            # open(filename, "wb").write(screen)
+            aircv.imwrite(filename, screen)
         return screen
 
     def shell(self, *args):
