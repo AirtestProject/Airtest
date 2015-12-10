@@ -201,7 +201,7 @@ def logwrap(f):
             # traceback.print_exc()
             # Exit when meet MoaError
             # raise SystemExit(1)
-            raise err
+            raise
         else:
             time_used = time.time() - start
             print '>'*len(RUNTIME_STACK), 'Time used:', f.__name__, time_used
@@ -318,8 +318,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         else:
             print "siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
-            predictor = aircv.Prediction(_pResolution)
-            ret = predictor.SIFTbyPre(screen, picdata, record_pos[0], record_pos[1])
+            ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
         ret = None
     except Exception as err:
