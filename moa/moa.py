@@ -15,7 +15,7 @@ Script engine.
 __version__ = '0.0.2'
 __all__ = [
     'set_serialno', 'set_basedir', 'set_logfile', 'set_screendir',
-    'keep_capture', 'refresh_device',
+    'keep_capture', 'refresh_device', 'logwrap',
     'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
     'amstart', 'amstop',
     'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
