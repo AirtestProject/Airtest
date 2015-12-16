@@ -49,6 +49,7 @@ SAVE_SCREEN = None
 import os
 import re
 import sys
+import shutil
 import warnings
 import json
 import time
@@ -144,6 +145,8 @@ def set_logfile(filename="log.txt", inbase=True):
 
 def set_screendir(dirpath="img_record"):
     global SAVE_SCREEN
+    # force clear dir
+    shutil.rmtree(dirpath, ignore_errors=True)
     if not os.path.isdir(dirpath):
         os.mkdir(dirpath)
     SAVE_SCREEN = dirpath
