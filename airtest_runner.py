@@ -20,7 +20,7 @@ def main():
         if os.path.isfile(args.utilfile):
             print "try loading:", args.utilfile
             utilcontent = open(args.utilfile).read()
-            exec(utilcontent)
+            exec(utilcontent) in globals()
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
