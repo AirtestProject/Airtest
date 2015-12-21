@@ -1,3 +1,6 @@
 [submodule "aircv"]
 	path = aircv
 	url = ssh://git@git-qa.gz.netease.com:32200/airtest-projects/aircv.git
+[submodule "report"]
+	path = report
+	url = ssh://git@git-qa.gz.netease.com:32200/qiujinxing/moa-log-report.git
