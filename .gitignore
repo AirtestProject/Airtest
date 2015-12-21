@@ -41,3 +41,4 @@ _site
 apps
 _build/
 screen.jpg
+*.spec

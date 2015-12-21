@@ -1,41 +1,47 @@
-from airtest.moa.moa import *
 import os
-import sys
 import argparse
 # import here to build dependent modules
-import g1utils
-import g18utils
-ap = argparse.ArgumentParser()
-ap.add_argument("script", help="script filename")
-ap.add_argument("libdir", help="utils libdir")
-ap.add_argument("--setsn", help="auto set serialno", action="store_true")
-ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
-ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
-args = ap.parse_args()
+from moa.moa import *
 
-# reading code from file
-code = open(args.script).read()
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("script", help="script filename")
+    ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
+    ap.add_argument("--setsn", help="auto set serialno", action="store_true")
+    ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
+    ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
+    args = ap.parse_args()
 
-# loading extra libs
-utilfile = os.path.join(args.libdir, "utils.py")
-if os.path.isfile(utilfile):
-    print "try loading:", utilfile
-    utilcontent = open(utilfile).read()
-    exec(utilcontent)
-else:
-    print "file does not exist:", os.path.abspath(utilfile)
+    # reading code from file
+    code = open(args.script).read()
 
-if args.setsn:
-    print "auto set_serialno"
-    set_serialno()
+    # loading util file
+    if args.utilfile:
+        if os.path.isfile(args.utilfile):
+            print "try loading:", args.utilfile
+            utilcontent = open(args.utilfile).read()
+            exec(utilcontent)
+        else:
+            print "file does not exist:", os.path.abspath(args.utilfile)
 
-if args.log:
-    print "save log in", args.log
-    set_logfile(args.log)
+    # cd script dir
+    os.chdir(os.path.dirname(args.script))
 
-if args.screen:
-    print "save img in", args.screen
-    set_screendir(args.screen)
+    if args.setsn:
+        print "auto set_serialno"
+        set_serialno()
 
-# execute code
-exec(code)
+    if args.log:
+        print "save log in", args.log
+        set_logfile(args.log)
+
+    if args.screen:
+        print "save img in", args.screen
+        set_screendir(args.screen)
+
+    # execute code
+    exec(code)
+
+
+if __name__ == '__main__':
+    main()
