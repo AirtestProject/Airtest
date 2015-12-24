@@ -419,7 +419,7 @@ Device operation & flow control
 """
 
 @logwrap
-def shell(cmd, shell=True):
+def shell(cmd):
     return DEVICE.shell(cmd)
 
 
