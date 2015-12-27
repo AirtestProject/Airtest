@@ -22,6 +22,7 @@ __all__ = [
     'wake', 'adb_devices',
     'gevent_run', 'MoaText',
     'assert_equal','assert_not_exists',
+    'EXTRA_LOG'
 ]
 
 DEBUG = False
