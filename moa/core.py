@@ -69,7 +69,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
 
 def adb_devices(state=None, addr=LOCALADBADRR):
     ''' Get all device list '''
-    patten = re.compile(r'^[\w\d-]+\t[\w]+$')
+    patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
     adbrun('start-server')
     for line in adbrun('devices', addr=addr).splitlines():
         line = line.strip()
