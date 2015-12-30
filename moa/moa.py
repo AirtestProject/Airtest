@@ -46,6 +46,7 @@ THRESHOLD = 0.6
 PLAYRES = []
 CVINTERVAL = 0.5
 SAVE_SCREEN = None
+REFRESH_SCREEN_DELAY = 1 
 
 import os
 import re
@@ -154,6 +155,7 @@ def set_screendir(dirpath="img_record"):
 
 
 def refresh_device():
+    time.sleep(REFRESH_SCREEN_DELAY)
     DEVICE.refreshOrientationInfo()
 
 
@@ -427,11 +429,13 @@ def shell(cmd):
 @logwrap
 def amstart(package):
     DEVICE.amstart(package)
+    refresh_device()
 
 
 @logwrap
 def amstop(package):
     DEVICE.amstop(package)
+    refresh_device()
 
 
 @logwrap
@@ -470,6 +474,7 @@ def wake():
 @logwrap
 def home():
     DEVICE.home()
+    refresh_device()
 
 
 @logwrap

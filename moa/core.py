@@ -175,7 +175,7 @@ class Minicap(object):
         self.adb = ADB(serialno)
         self.install()
         self.server_proc = None
-        self.size = self.get_display_info()
+        self.get_display_info()
         self.projection = projection
         # self._setup() #单帧截图minicap不需要setup
 
@@ -753,6 +753,8 @@ class Android(object):
         if ori is None:
             ori = self.getDisplayOrientation()
         self.size["orientation"] = ori
+        if self.minicap:
+            self.minicap.get_display_info()
 
 
 class XYTransformer(object):
