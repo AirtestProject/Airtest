@@ -63,6 +63,7 @@ import ast
 import socket
 import traceback
 import atexit
+import uiautomator
 try:
     from urlparse import urlparse
 except ImportError:
