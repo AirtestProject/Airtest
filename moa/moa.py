@@ -13,17 +13,7 @@ Script engine.
 """
 
 __version__ = '0.0.2'
-__all__ = [
-    'set_serialno', 'set_basedir', 'set_logfile', 'set_screendir',
-    'keep_capture', 'refresh_device', 'logwrap',
-    'snapshot', 'touch', 'swipe', 'home', 'keyevent', 'text', 'wake',
-    'amstart', 'amstop',
-    'log', 'wait', 'exists', 'sleep', 'assert_exists', 'exec_string', 'exec_script',
-    'wake', 'adb_devices',
-    'gevent_run', 'MoaText',
-    'assert_equal','assert_not_exists',
-    'EXTRA_LOG'
-]
+
 
 DEBUG = False
 SERIALNO = ''
@@ -376,7 +366,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
             continue
         return pos
     if pos is None:
-        raise MoaNotFoundError('Picture %s not found' % pictarget)
+        raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
 
 
 def keep_capture(flag=True):
@@ -520,12 +510,41 @@ def swipe(v1, v2=None, vector=None):
             pos2 = v2
     elif vector:
         if (vector[0] <= 1 and vector[1] <= 1):
-            vector = (vector[0] * DEVICE.size["width"], vector[1] * DEVICE.size["height"])
+            w, h = DEVICE.getCurrentScreenResolution()
+            vector = (vector[0] * w, vector[1] * h)
         pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])    
     else:
         raise Exception("no enouph params for swipe") 
     print pos1, pos2
     DEVICE.swipe(pos1, pos2)
+
+
+@logwrap
+@transparam
+def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
+    '''
+    @param offset: {'x':10,'y':10,'percent':True}
+    '''
+    if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+        pos = _loop_find(v, timeout=timeout)
+    else:
+        pos = v
+    TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
+    print ('downpos', pos)
+
+    adbport = DEVICE.minitouch.op_adbport + 1 
+    deviceport = "minitouch_op"
+    DEVICE.minitouch.setup_long_operate(adbport, deviceport)
+    DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
+    for vector in route:
+        if (vector[0] <= 1 and vector[1] <= 1):
+            w, h = DEVICE.getCurrentScreenResolution()
+            vector = (vector[0] * w, vector[1] * h)
+        pos2 = (pos[0] + vector[0], pos[1] + vector[1])
+        DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
+        time.sleep(0.01)
+    DEVICE.operate({"type": "up"})
+    time.sleep(delay)
 
 
 @logwrap

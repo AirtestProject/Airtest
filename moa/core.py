@@ -456,8 +456,10 @@ class Minitouch(object):
         """
         pass
 
-    def setup_long_operate(self):
-        self.op_server_proc = self._setup(adb_port=self.op_adbport, device_port='moa_minitouch_l')
+    def setup_long_operate(self, adb_port=None, device_port="moa_minitouch_l"):
+        if adb_port:
+            self.op_adbport = adb_port
+        self.op_server_proc = self._setup(adb_port=self.op_adbport, device_port=device_port)
         self.op_queue = Queue.Queue()
         self._stop_long_op = threading.Event()
         t = threading.Thread(target=self._operate_worker)
@@ -588,6 +590,14 @@ class Android(object):
             self.minitouch.swipe(p1, p2)
         else:
             self.adb.swipe(p1, p2)
+
+    def operate(self, tar):
+        x, y = tar.get("x"), tar.get("y")
+        if (x, y) != (None, None):
+            x, y = self._transformPointByOrientation((x, y))
+            tar.update({"x": x, "y": y})
+        self.minitouch.operate(tar)
+
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
