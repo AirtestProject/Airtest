@@ -331,7 +331,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
@@ -363,6 +363,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None):
         if pos is None:
             time.sleep(interval)
             left -= 1
+            if intervalfunc is not None:
+                intervalfunc()
             continue
         return pos
     if pos is None:
@@ -564,9 +566,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @transparam
-def wait(v, timeout=10, safe=False):
+def wait(v, timeout=10, safe=False, intervalfunc=None):
     try:
-        return _loop_find(v, timeout=timeout)
+        return _loop_find(v, timeout=timeout, intervalfunc=intervalfunc)
     except MoaNotFoundError:
         if not safe:
             raise
