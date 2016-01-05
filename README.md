@@ -117,7 +117,7 @@
 
 	等待时间
 
-### wait(v, timeout=10, safe=False, intervalfunc=None)
+### wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None)
 
 	等待目标出现
 
@@ -126,6 +126,8 @@
 		timeout 超时时间
 
 		safe 超时是否继续，默认为False即会报错
+
+		interval 等待目标的间隔时间
 
 		intervalfunc 等待目标的间隔中的回调函数
 
@@ -150,3 +152,15 @@
 ### assert_equal(first, second, msg="")
 	
 	断言first和second相等，不等则抛出AssertionError
+
+
+
+### MoaPic(filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[])
+	
+	一个隐藏的类，所有图片目标在moa中都会转换为MoaPic实例，参数如下：
+		filename	图片名
+		rect		所在区域(x0, y0, x1, y1)，默认全屏，不建议给这个参数
+		threshold	识别阈值，默认阈值为0.6，较低，可以按需修改
+		target_pos	目标图片的点击位置，默认点击目标中点，可以填1-9表示不同位置，小键盘排布
+		record_pos	记录下的录制坐标，用于辅助图像识别
+		resolution	记录下的屏幕分辨率，用于辅助图像识别

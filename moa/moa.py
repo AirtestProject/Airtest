@@ -252,11 +252,11 @@ class TargetPos(object):
     7 8 9
     """
     LEFTUP, UP, RIGHTUP = 1, 2, 3
-    LEFT, MID, RIGHT = 4, 0, 6
+    LEFT, MID, RIGHT = 4, 5, 6
     LEFTDOWN, DOWN, RIGHTDOWN = 7, 8, 9
 
     def getXY(self, cvret, pos):
-        if pos == self.MID:
+        if pos == 0 or pos == self.MID:
             return cvret["result"]
         rect = cvret.get("rectangle") 
         if not rect:
@@ -566,9 +566,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @transparam
-def wait(v, timeout=10, safe=False, intervalfunc=None):
+def wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None):
     try:
-        return _loop_find(v, timeout=timeout, intervalfunc=intervalfunc)
+        return _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     except MoaNotFoundError:
         if not safe:
             raise
