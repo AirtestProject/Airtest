@@ -315,7 +315,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         else:
             print "siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
+            ret = aircv.find_sift_by_pre(screen, picdata, threshold=0.6 , _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
         ret = None
     except Exception as err:
