@@ -305,7 +305,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     try:
         if templateMatch is True:
             print "matchtpl"
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=DEVICE.getCurrentScreenResolution(), design_resolution=[960, 640])
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=DEVICE.getCurrentScreenResolution(), design_resolution=[960, 640], threshold=0.6)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
@@ -315,7 +315,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         else:
             print "siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_sift_by_pre(screen, picdata, threshold=0.6 , _pResolution, record_pos[0], record_pos[1])
+            ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
         ret = None
     except Exception as err:
