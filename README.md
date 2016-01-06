@@ -164,3 +164,7 @@
 		target_pos	目标图片的点击位置，默认点击目标中点，可以填1-9表示不同位置，小键盘排布
 		record_pos	记录下的录制坐标，用于辅助图像识别
 		resolution	记录下的屏幕分辨率，用于辅助图像识别
+
+
+## TODO
+	to be continued...

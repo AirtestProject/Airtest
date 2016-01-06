@@ -2,6 +2,8 @@ import os
 import argparse
 # import here to build dependent modules
 from moa.moa import *
+import sdkautomator
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -40,7 +42,7 @@ def main():
         set_screendir(args.screen)
 
     # execute code
-    exec(code)
+    exec(code) in globals()
 
 
 if __name__ == '__main__':
