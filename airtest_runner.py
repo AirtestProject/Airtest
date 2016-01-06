@@ -1,4 +1,5 @@
 import os
+import json
 import argparse
 # import here to build dependent modules
 from moa.moa import *
@@ -12,6 +13,7 @@ def main():
     ap.add_argument("--setsn", help="auto set serialno", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
+    ap.add_argument("--kwargs", help="extra kwargs")
     args = ap.parse_args()
 
     # reading code from file
@@ -40,6 +42,14 @@ def main():
     if args.screen:
         print "save img in", args.screen
         set_screendir(args.screen)
+
+    if args.kwargs:
+        print "load kwargs", repr(args.kwargs)
+        for kv in args.kwargs.split(","):
+            k, v = kv.split("=")
+            globals()[k] = v
+
+
 
     # execute code
     exec(code) in globals()
