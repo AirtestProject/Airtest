@@ -18,8 +18,8 @@ while cnt < 3000:
     while len(trunk) < frame_size:
         trunk_size = min(4096, frame_size - len(trunk))
         trunk += s.recv(trunk_size)
-    # with open("%s.jpg" % cnt, "wb") as f:
-    #     f.write(trunk)
+    with open("img/%s.jpg" % cnt, "wb") as f:
+        f.write(trunk)
     import numpy as np
     def string_2_img(pngstr):
         nparr = np.fromstring(pngstr, np.uint8)
