@@ -111,6 +111,12 @@ def set_serialno(sn=None, minitouch=True):
     return SERIALNO
 
 
+def set_windows():
+    import win
+    global DEVICE
+    DEVICE = win.Windows()
+
+
 def connect(url):
     parsed = urlparse(url)
     if parsed.scheme != 'moa':
@@ -691,7 +697,7 @@ def gevent_run(func, *args):
     ])
 
 
-def test():
+def test_android():
     set_serialno('9a4b171d')
     set_basedir('../taskdata/1433820164')
     #wake()
@@ -707,9 +713,6 @@ def test():
     # set_serialno(serialno)
     # set_basedir(base_dir)
     # exec_script(urllib.unquote(script))
-
-
-if __name__ == '__main__':
     set_serialno()
     snapshot()
     # set_basedir()
@@ -726,3 +729,11 @@ if __name__ == '__main__':
     # touch(MoaText(u"副 本", font=u"华康唐风隶"))
     # install(r"C:\Users\game-netease\Desktop\netease.apk")
     # uninstall("com.example.netease")
+
+
+def test_win():
+    set_windows()
+    touch("win.png")
+
+if __name__ == '__main__':
+    test_win()
