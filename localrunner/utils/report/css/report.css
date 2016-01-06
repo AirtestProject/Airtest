@@ -1,0 +1,329 @@
+nav {
+  position: fixed;
+  background-color: white;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 999;
+}
+
+nav header {
+  background-color: white;
+}
+
+.main {
+  padding-top: 65px;
+}
+
+/**  左边的菜单栏 **/
+.left-bar {
+  position: fixed;
+  left:0;
+  top: 0;
+
+  border-right: 1px solid #CCC;
+  background: #EFEFEF;
+  height: 100%;
+  
+  color: #2c3e50;
+  padding-top: 79px;
+  overflow: auto;
+}
+
+/*   ul   */
+.left-bar ul.ul-menu, ul.ul-menu ul {
+  list-style: none;
+  font-size: 18px;
+  line-height: 30px;
+}
+
+.left-bar ul.ul-menu i {
+  margin-right: 7px;
+}
+
+.left-bar ul.ul-menu li {
+  margin: 10px 0px;
+  cursor: pointer;
+  border-radius: 3px 3px;
+}
+
+.left-bar ul.ul-menu a {
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  display: inline-block;
+}
+
+.left-bar ul.ul-menu a:hover {
+  text-decoration: none;
+}
+
+/*  一级菜单 title  */
+.left-bar ul a.mtitle {
+  margin-bottom: 5px;
+  display: inline-block;
+  font-weight: bolder;
+
+}
+
+.left-bar ul.pub a {
+  
+}
+
+.left-bar ul.sub {
+  margin-left: 20px;
+}
+
+.left-bar ul.sub a {
+  font-weight: normal;
+}
+
+.left-bar ul.sub li {
+  padding-left: 7px;
+}
+
+.left-bar ul.sub li:hover {
+  background-color: #CCC;
+}
+
+.left-bar ul.sub li.active {
+  /*background-color: #f39c12;*/
+  background-color: #e74c3c;
+  color:white !important;
+  border: 1px solid #DDD;
+}
+
+
+/* 分隔线 */
+ul.ul-menu .spliter {
+  margin-top: 30px;
+  border-top: 1px solid #CCC;
+  margin-bottom: 10px;
+}
+
+/* 通用页面元素 */
+.material {
+  width: 100%;
+
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom:20px;
+  line-height: 20px;
+
+  background: white;
+  color: #2c3e50;
+  
+  border-radius: 4px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  z-index: 999;
+  /* 如果内部有超过外框的absolute元素，不显示出来*/ 
+  overflow: hidden;
+
+}
+
+.material header {
+  border-bottom: 1px solid #DEDEDE;
+  margin-bottom: 20px;
+  font-size: 16px;
+  padding: 10px 0;
+}
+
+.material .content:after {
+  content: '';
+  display: block;
+  clear: both;
+  height: 0;  
+  visibility: hidden;
+}
+
+.strong {
+  font-weight: bolder;
+}
+
+.tab {
+  margin-top: 20px;
+}
+
+/*************** info  ********************************/
+.material.info {
+
+}
+
+.info .img-cell {
+  float: left;
+  padding: 5px 0px;
+  margin-right: 40px;
+  min-height: 60px;
+}
+
+.info .img-cell img {
+  max-width: 60px;
+  border-radius: 5px 5px;
+}
+
+.info .cell {
+  float: left;
+  min-width: 180px;
+  width: 20%;
+  padding: 5px 0px;
+
+}
+
+.info .cell .title-cell {
+  display: inline-block;
+  min-width: 75px;
+}
+
+.info .cell .content-cell {
+  display: inline-block;
+  min-width: 100px;
+}
+
+.pass {
+  color:#1abc9c;
+}
+
+.fail {
+  color:#e74c3c;
+}
+
+.block {
+  color:#f1c40f;
+}
+
+/*************** basic概况  ********************************/
+
+.material.basic {
+
+}
+
+.material .circle-wrap {
+  float: left;
+  width: 33%;
+  text-align: center;  
+  padding: 50px 0;
+}
+
+.material .circle {
+  text-align: center;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+.material.basic .circle {
+  background: #1abc9c;
+  color: white;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  padding-top: 50px;
+  vertical-align: middle;
+}
+
+span.big {
+  font-size: 40px;
+}
+
+/*****************  详细列表 ***********************/
+
+.sift {
+  margin-bottom: 20px;
+}
+
+.devices .result {
+  font-weight: bolder;
+}
+
+/**********************  chart  *******************/
+
+.chart {
+  height: 500px; 
+  float: left;
+}
+
+.chart-half {
+  width: 50%;
+}
+
+.chart-full {
+  width: 100%;
+}
+
+/*****************   log **********/
+
+div.log pre {
+  padding: 0;
+}
+
+/***************    table        ******************/
+
+table.table.adjust-width th {
+  min-width: 200px;
+}
+
+.material table td,th {
+  vertical-align: middle !important;
+}
+
+table th.vcenter {
+  vertical-align: middle !important;
+  text-align: center;
+}
+
+.break {
+  word-break: break-all;
+}
+
+/**  gallery **/
+
+.gallery div.float {
+  float: left !important;
+  border: 0px solid #95a5a6;
+  margin-bottom: 100px;
+}
+
+div.gallery-cell img {
+  max-height:300px;
+  margin-bottom: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.gallery {
+  overflow: hidden;
+  width: 100%;
+  text-align: center;
+  height:350px;
+  padding-left: 80px;
+  padding-right: 30px;
+}
+
+.gallery .image-border {
+  width: 126%;
+}
+
+.gallery-button {
+  display: block;
+  position: absolute;
+  top:35%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.gallery-button:hover {
+  opacity: 1;
+}
+
+.gallery-left {
+  left:0;
+  margin-left: 30px;
+  background-image: url('/static/image/left.png')
+}
+
+.gallery-right {
+  right:0;
+  margin-right: 50px;
+  background-image: url('/static/image/right.png');
+}

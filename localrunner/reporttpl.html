@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+    <title>
+      moa测试结果
+    </title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href="{{data['report_root']}}/css/bootstrap.min.css" rel="stylesheet">    
+    <link href="{{data['report_root']}}/css/main.css" rel="stylesheet">
+    <link href="{{data['report_root']}}/css/report.css" rel="stylesheet">
+
+  </head>
+
+  <style>
+    div.container-fluid {
+      max-width:1400px;
+    }
+
+  </style>
+
+  <body>
+  
+
+  <div class="container-fluid" >
+    <div class="row">
+      <div class="main">
+
+        <div class="material">
+          <header>成功率</header>
+          <div class="content">
+            <p>{{data["success"]}}/{{data["count"]}}</p>
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" role="progressbar"  aria-valuemin="0" aria-valuemax="100" style="width: {{data['rate']}}%">
+                <span class="">{{data["rate"]}}%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>  
+
+        <div class="material">
+          <header>脚本列表</header>
+          <div class="content">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>脚本名称</th>
+                  <th>执行结果</th>
+                  <th>__</th>
+                </tr>
+              </thead> 
+              <tbody>
+                {% for i in data["logdata"] %}
+                  <tr>
+                    <td>{{data["logdata"][i]["name"]}}</td>
+                    {% if data["logdata"][i]["success"] %}
+                      <td class="green">成功</td>
+                    {% else %}
+                      <td class="red">失败</td>
+                    {% endif %}
+                    <td><a class="btn btn-info" href="{{data['logdata'][i]['path']}}">详情</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>               
+          </div>
+        </div> 
+
+      </div>
+    </div>
+  </div>    
+
+  
+  <script src="js/jquery-1.10.2.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  
+  </body>
+</html>
+
+
+

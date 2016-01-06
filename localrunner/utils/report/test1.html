@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+    <title>
+    test1.owl脚本运行报告
+    </title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+
+    <link href="css/report.css" rel="stylesheet">
+    <link href="css/jquery.fancybox.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+
+    <style>
+    h2.header {
+      background-color: #3498db;
+      color:white;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 25px;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    div.screen_holder {
+      /*position: relative;*/
+      position: absolute;
+      margin-top: 10px;
+    }
+
+    div.screen_holder img {
+      /*max-height: 600px;*/
+    }
+
+    img.crop_image {
+      display: block;
+    }
+
+    img.spot {
+      position: absolute;
+      width:50px;
+      height:50px;
+      margin-left: -25px;
+      margin-top: -25px;
+    }
+
+    p.desc {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .moa label {
+      font-size: 16px;
+    }
+
+    .moa .point {
+      font-size: 20px;
+      padding: 10px;
+      display: inline-block;
+    }
+
+    pre {
+      background-color: #23241f;
+    }
+
+    img.error-img {
+      max-width: 70px !important;
+    }
+
+    .ztree span.glyphicon {
+      color: red;
+    }
+
+    .scale {
+      transform-origin:top left;
+    }
+
+    #main {
+      min-height: 600px;
+    }
+
+    .fast-nav-step {
+      position: fixed;
+      right: 30px;
+      bottom: 10px;
+      z-index: 10;
+      padding: 10px 20px;
+      background: rgba(222,222,222,0.8);
+    }
+
+    .fast-nav-step label {
+      display: block;
+      border-bottom: 1px solid #7f8c8d;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      color: #34495e;
+    }
+
+    .a-circle {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 25px;
+
+      padding-top: 4px;
+
+      text-align: center;
+      color: white; 
+      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    }
+    
+    .fast-nav-step .a-circle:hover {
+      opacity: 0.9;
+      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);    
+    }
+
+    div.assert {
+      padding-left: 20px;
+    }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="container-fluid" style="max-width:1400px;">
+      <div class="row">
+        <div id="main" class="main col-md-12">
+
+          
+
+          <div class="material moa" >
+            <h2>测试用例 test1.owl            
+              
+              <label class="green">[测试成功]</label>
+              
+            </h2>
+
+            <h4>2015-12-21 22:49:44 -- 2015-12-21 22:49:48</h4>
+
+            <h2 class="header">Assert 测试点汇总</h2>
+            <hr>
+            <div class="row">
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+            </div>
+          </div>
+
+          
+          <div class="material moa" data-trace="False" id="1">
+
+            <h2 class="header">Step 1 <span class="step_title">点击</span> <span class="step_title">[2015-12-21 22:49:44]</span></h2>
+            <hr>
+            
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>目标图片</label>
+              </div>
+              <div class="col-xs-9">
+                <img class="crop_image" src="../..\.\test1.owl/tpl1450704821726.png" title="../..\.\test1.owl/tpl1450704821726.png">
+              </div>
+            </div>
+            <div class="row">  
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>运行时屏幕截图</label>
+              </div>
+              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+              <div class="col-xs-9">
+                <div class="screen_holder">
+                  <img class="fancybox scale" src="../..\.\test1.owl/img_record\1450709384080.jpg" title="../..\.\test1.owl/img_record\1450709384080.jpg">
+                  
+                  <img class="spot animated infinite rubberBand" src="image/target.png" data-top="219.0" data-left="42.0" style="top:219.0px;left:42.0px;">
+                  
+                </div>
+                <div class="screen_place"></div>
+              </div>  
+            </div> 
+            <p class="desc"><span class="point glyphicon glyphicon-play"></span>寻找目标图片，触摸屏幕坐标[42, 219]</p>
+            
+
+                        
+            <div class="alert alert-success">
+              <span class="glyphicon glyphicon-ok"></span>
+              执行成功
+            </div>
+            
+          </div>
+          
+          <div class="material moa" data-trace="False" id="2">
+
+            <h2 class="header">Step 2 <span class="step_title">点击</span> <span class="step_title">[2015-12-21 22:49:45]</span></h2>
+            <hr>
+            
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>目标图片</label>
+              </div>
+              <div class="col-xs-9">
+                <img class="crop_image" src="../..\.\test1.owl/tpl1450704823380.png" title="../..\.\test1.owl/tpl1450704823380.png">
+              </div>
+            </div>
+            <div class="row">  
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>运行时屏幕截图</label>
+              </div>
+              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+              <div class="col-xs-9">
+                <div class="screen_holder">
+                  <img class="fancybox scale" src="../..\.\test1.owl/img_record\1450709385515.jpg" title="../..\.\test1.owl/img_record\1450709385515.jpg">
+                  
+                  <img class="spot animated infinite rubberBand" src="image/target.png" data-top="201.0" data-left="263.0" style="top:201.0px;left:263.0px;">
+                  
+                </div>
+                <div class="screen_place"></div>
+              </div>  
+            </div> 
+            <p class="desc"><span class="point glyphicon glyphicon-play"></span>寻找目标图片，触摸屏幕坐标[263, 201]</p>
+            
+
+                        
+            <div class="alert alert-success">
+              <span class="glyphicon glyphicon-ok"></span>
+              执行成功
+            </div>
+            
+          </div>
+          
+          <div class="material moa" data-trace="False" id="3">
+
+            <h2 class="header">Step 3 <span class="step_title">点击</span> <span class="step_title">[2015-12-21 22:49:47]</span></h2>
+            <hr>
+            
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>目标图片</label>
+              </div>
+              <div class="col-xs-9">
+                <img class="crop_image" src="../..\.\test1.owl/tpl1450704824522.png" title="../..\.\test1.owl/tpl1450704824522.png">
+              </div>
+            </div>
+            <div class="row">  
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>运行时屏幕截图</label>
+              </div>
+              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+              <div class="col-xs-9">
+                <div class="screen_holder">
+                  <img class="fancybox scale" src="../..\.\test1.owl/img_record\1450709386775.jpg" title="../..\.\test1.owl/img_record\1450709386775.jpg">
+                  
+                  <img class="spot animated infinite rubberBand" src="image/target.png" data-top="110.0" data-left="467.0" style="top:110.0px;left:467.0px;">
+                  
+                </div>
+                <div class="screen_place"></div>
+              </div>  
+            </div> 
+            <p class="desc"><span class="point glyphicon glyphicon-play"></span>寻找目标图片，触摸屏幕坐标[467, 110]</p>
+            
+
+                        
+            <div class="alert alert-success">
+              <span class="glyphicon glyphicon-ok"></span>
+              执行成功
+            </div>
+            
+          </div>
+          
+          <div class="material moa" data-trace="False" id="4">
+
+            <h2 class="header">Step 4 <span class="step_title">点击</span> <span class="step_title">[2015-12-21 22:49:47]</span></h2>
+            <hr>
+            
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>目标图片</label>
+              </div>
+              <div class="col-xs-9">
+                <img class="crop_image" src="../..\.\test1.owl/tpl1450704825674.png" title="../..\.\test1.owl/tpl1450704825674.png">
+              </div>
+            </div>
+            <div class="row">  
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>运行时屏幕截图</label>
+              </div>
+              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+              <div class="col-xs-9">
+                <div class="screen_holder">
+                  <img class="fancybox scale" src="../..\.\test1.owl/img_record\1450709387512.jpg" title="../..\.\test1.owl/img_record\1450709387512.jpg">
+                  
+                  <img class="spot animated infinite rubberBand" src="image/target.png" data-top="101.0" data-left="252.0" style="top:101.0px;left:252.0px;">
+                  
+                </div>
+                <div class="screen_place"></div>
+              </div>  
+            </div> 
+            <p class="desc"><span class="point glyphicon glyphicon-play"></span>寻找目标图片，触摸屏幕坐标[252, 101]</p>
+            
+
+                        
+            <div class="alert alert-success">
+              <span class="glyphicon glyphicon-ok"></span>
+              执行成功
+            </div>
+            
+          </div>
+          
+          <div class="material moa" data-trace="False" id="5">
+
+            <h2 class="header">Step 5 <span class="step_title">点击</span> <span class="step_title">[2015-12-21 22:49:48]</span></h2>
+            <hr>
+            
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>目标图片</label>
+              </div>
+              <div class="col-xs-9">
+                <img class="crop_image" src="../..\.\test1.owl/tpl1450704826908.png" title="../..\.\test1.owl/tpl1450704826908.png">
+              </div>
+            </div>
+            <div class="row">  
+              <div class="col-xs-3">
+                <div class="point">
+                  <span class="glyphicon glyphicon-play"></span>
+                </div>
+                <label>运行时屏幕截图</label>
+              </div>
+              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+              <div class="col-xs-9">
+                <div class="screen_holder">
+                  <img class="fancybox scale" src="../..\.\test1.owl/img_record\1450709388166.jpg" title="../..\.\test1.owl/img_record\1450709388166.jpg">
+                  
+                  <img class="spot animated infinite rubberBand" src="image/target.png" data-top="49.0" data-left="1097.0" style="top:49.0px;left:1097.0px;">
+                  
+                </div>
+                <div class="screen_place"></div>
+              </div>  
+            </div> 
+            <p class="desc"><span class="point glyphicon glyphicon-play"></span>寻找目标图片，触摸屏幕坐标[1097, 49]</p>
+            
+
+                        
+            <div class="alert alert-success">
+              <span class="glyphicon glyphicon-ok"></span>
+              执行成功
+            </div>
+            
+          </div>
+          
+
+          <!-- 导航栏 -->
+          <div class="fast-nav-step">
+            <label>步骤导航</label>
+            
+              
+              <a class="a-circle bg-green" href="#1">1</a>
+              
+            
+              
+              <a class="a-circle bg-green" href="#2">2</a>
+              
+            
+              
+              <a class="a-circle bg-green" href="#3">3</a>
+              
+            
+              
+              <a class="a-circle bg-green" href="#4">4</a>
+              
+            
+              
+              <a class="a-circle bg-green" href="#5">5</a>
+              
+            
+            <a class="a-circle bg-green" href="#">Top</a>
+          </div>
+
+
+        </div>
+      </div>  
+    </div>
+  
+    
+    <div class="footer">
+      相关信息
+    </div> 
+    
+  
+  <script src="js/jquery-1.10.2.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+  <!-- hightlight js -->
+  <link href="css/monokai_sublime.min.css" rel="stylesheet">  
+  <script src="js/highlight.min.js"></script>  
+  <script >hljs.initHighlightingOnLoad();</script>
+
+  <script>
+
+  $(function(){
+    var scale = 0.5;
+
+    $("img").error(function () {
+      var orsrc = $(this).attr("src")
+      if(!orsrc){ return }
+
+      $(this).unbind("error")
+      .addClass('error-img')
+      .attr("src", "image/broken.png")
+      .attr("orgin-src", orsrc);
+    });
+
+    $(".screen_holder").find("img.fancybox").load(function(e){
+      scale_img(scale);
+    })
+
+    function scale_img(i){
+      $(".screen_holder").find("img.fancybox").each(function(e){
+        var h = $(this).height();
+        var sc = 'scale('+ i +','+ i +')';
+        
+        $(this).css({
+          '-ms-transform': sc,
+          '-webkit-transform': sc,
+          '-moz-transform': sc,
+          'transform': sc,
+        })
+
+        var sp = $(this).siblings('img.spot');
+        var top = sp.data('top');
+        var left = sp.data('left');
+
+        sp.css({
+          'top':top*i,
+          'left':left*i,
+        })
+
+        $(this).parents('.screen_holder').siblings('.screen_place').height(h*i);
+      });
+    }
+    //resize img
+    scale_img(scale);
+
+    $(window).resize(function() {
+      var ww = $('body').width();
+      if (ww < 900){
+        scale = 0.25;
+      }
+      else if (ww < 1100 ){
+        scale = 0.3;
+      }
+      else if( ww < 1300){
+        scale = 0.4;  
+      }else{
+        scale = 0.5;
+      }
+      scale_img(scale)
+    });
+    $(window).resize();
+  });
+  </script>
+
+  <script>
+  $(window).resize();
+  </script>
+
+  </body>
+</html>
+
+
