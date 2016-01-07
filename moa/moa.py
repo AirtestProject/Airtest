@@ -21,7 +21,7 @@ ADDRESS = ('127.0.0.1', 5037)
 BASE_DIR = ''
 LOG_FILE = ''
 LOG_FILE_FD = None
-TIMEOUT = 10
+TIMEOUT = 20
 RUNTIME_STACK = []
 EXTRA_LOG = {}
 GEVENT_RUNNING = False
@@ -611,7 +611,7 @@ def sleep(secs=1.0):
 
 @logwrap
 @transparam
-def wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None):
+def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None):
     try:
         return _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     except MoaNotFoundError:
