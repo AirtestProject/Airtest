@@ -363,6 +363,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
+    start_time = time.time()
     if isinstance(pictarget, MoaText):
         # moaText暂时没用了，截图太方便了，以后再考虑文字识别吧
         # pil_2_cv2函数有问题，会变底色，后续修改
@@ -376,7 +377,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         pictarget = MoaPic(pictarget)
         picpath = os.path.join(BASE_DIR, pictarget)
         picdata = aircv.imread(picpath)
-    while left > 0:
+    while True:
         pos = None
         # 阈值全部优先取自定义设置的
         threshold = getattr(pictarget, "threshold", THRESHOLD) 
@@ -389,14 +390,15 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         if pos is None and getattr(pictarget, "resolution"):
             pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
         if pos is None:
-            time.sleep(interval)
-            left -= 1
+            # 如果没找到，调用用户指定的intervalfunc
             if intervalfunc is not None:
                 intervalfunc()
+            # 超时则抛出异常
+            if (time.time() - start_time) > timeout:
+                raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
+            time.sleep(interval)
             continue
         return pos
-    if pos is None:
-        raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
 
 
 def keep_capture(flag=True):
