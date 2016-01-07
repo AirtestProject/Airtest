@@ -399,6 +399,11 @@ def get_screen_shot(output="screenshot.png"):
         myPilImage.frombytes( myWxImage.GetData() )
         return myPilImage
 
+def get_resolution():
+    w = win32api.GetSystemMetrics(0)
+    h = win32api.GetSystemMetrics(1)
+    return w, h
+
 
 if __name__ == "__main__":
     """
@@ -413,4 +418,5 @@ if __name__ == "__main__":
     mouse_click(duration=2.0)
     print get_window_pos(u"梦幻西游2 ONLINE.*")
     """
-    mouse_click(630, 260)
+    # mouse_click(630, 260)
+    print get_resolution()

@@ -1,4 +1,6 @@
-from winutils import mouse_click, mouse_drag, get_screen_shot, key_input, WindowMgr
+# _*_ coding:UTF-8 _*_
+from winutils import mouse_click, mouse_drag, get_screen_shot, \
+    key_input, WindowMgr, get_resolution
 from ..aircv import aircv
 
 
@@ -45,6 +47,9 @@ class Windows(object):
 
     def set_window_pos(self, (x, y)):
         self.winmgr.set_window_pos(x, y)
+
+    def getCurrentScreenResolution(self):
+        return get_resolution()
 
 
 if __name__ == '__main__':

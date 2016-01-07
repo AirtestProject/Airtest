@@ -63,6 +63,11 @@ from core import adb_devices
 import core
 from ..aircv import aircv, textgen
 from utils import _isstr, _islist
+try:
+    import win
+except ImportError:
+    win = None
+    print "win module import error" 
 
 
 """
@@ -112,7 +117,8 @@ def set_serialno(sn=None, minitouch=True):
 
 
 def set_windows():
-    import win
+    if win is None:
+        raise RuntimeError("win module is not available")
     global DEVICE
     DEVICE = win.Windows()
 
@@ -235,6 +241,22 @@ def transparam(f):
         pictarget = MoaPic(picname, **picargs)
         return f(pictarget, *args[1:], **opargs)
     return wrapper
+
+
+def platform(on=["Android"]):
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            name_dict = {
+                core.Android: "Android",
+                win.Windows: "Windows"
+            }
+            if name_dict.get(DEVICE.__class__) not in on:
+                raise NotImplementedError()
+            r = f(*args, **kwargs)
+            return r
+        return wrapper
+    return decorator
 
 
 def _show_screen(pngstr):
@@ -421,38 +443,45 @@ Device operation & flow control
 """
 
 @logwrap
+@platform(on=["Android"])
 def shell(cmd):
     return DEVICE.shell(cmd)
 
 
 @logwrap
+@platform(on=["Android"])
 def amstart(package):
     DEVICE.amstart(package)
     refresh_device()
 
 
 @logwrap
+@platform(on=["Android"])
 def amstop(package):
     DEVICE.amstop(package)
     refresh_device()
 
 
 @logwrap
+@platform(on=["Android"])
 def amclear(package):
     DEVICE.amclear(package)
 
 
 @logwrap
+@platform(on=["Android"])
 def install(filepath):
     return DEVICE.install(filepath)
 
 
 @logwrap
+@platform(on=["Android"])
 def uninstall(package):
     return DEVICE.uninstall(package)
 
 
 @logwrap
+@platform(on=["Android", "Windows"])
 def snapshot(filename="screen.png"):
     global RECENT_CAPTURE, SAVE_SCREEN, EXTRA_LOG
     if SAVE_SCREEN:
@@ -466,11 +495,13 @@ def snapshot(filename="screen.png"):
 
 
 @logwrap
+@platform(on=["Android"])
 def wake():
     DEVICE.wake()
 
 
 @logwrap
+@platform(on=["Android"])
 def home():
     DEVICE.home()
     refresh_device()
@@ -478,6 +509,7 @@ def home():
 
 @logwrap
 @transparam
+@platform(on=["Android", "Windows"])
 def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
@@ -503,6 +535,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
 
 @logwrap
 @transparam
+@platform(on=["Android", "Windows"])
 def swipe(v1, v2=None, vector=None):
     if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
         pos1 = _loop_find(v1)
@@ -519,7 +552,7 @@ def swipe(v1, v2=None, vector=None):
     elif vector:
         if (vector[0] <= 1 and vector[1] <= 1):
             w, h = DEVICE.getCurrentScreenResolution()
-            vector = (vector[0] * w, vector[1] * h)
+            vector = (int(vector[0] * w), int(vector[1] * h))
         pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])    
     else:
         raise Exception("no enouph params for swipe") 
@@ -529,6 +562,7 @@ def swipe(v1, v2=None, vector=None):
 
 @logwrap
 @transparam
+@platform(on=["Android"])
 def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
@@ -556,16 +590,19 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
 
 
 @logwrap
+@platform(on=["Android", "Windows"])
 def keyevent(keyname):
     DEVICE.keyevent(keyname)
 
 
 @logwrap
+@platform(on=["Android", "Windows"])
 def text(text):
     DEVICE.text(text)
 
 
 @logwrap
+@platform(on=["Android", "Windows"])
 def sleep(secs=1.0):
     time.sleep(secs)
 
@@ -733,6 +770,9 @@ def test_android():
 
 def test_win():
     set_windows()
+    swipe("win.png", (300, 300))
+    sleep(1.0)
+    swipe("win.png", vector=(0.3, 0.3))
     touch("win.png")
 
 if __name__ == '__main__':
