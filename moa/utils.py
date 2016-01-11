@@ -27,6 +27,22 @@ def look_path(program):
     return None
 
 
+def get_adb_path():
+    system = platform.system()
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    moa_adb_path = {
+        "Windows": os.path.join("adb", "windows", "adb.exe"),
+        "Darwin": os.path.join("adb", "mac", "adb"),
+        "Linux": os.path.join("adb", "linux", "adb")
+    }
+    moa_adb = os.path.join(base_path, moa_adb_path[system])
+    # overwrite uiautomator adb
+    if "ANDROID_HOME" in os.environ:
+        del os.environ["ANDROID_HOME"]
+    os.environ["PATH"] = os.path.dirname(moa_adb) + os.pathsep + os.environ["PATH"]
+
+    return moa_adb
+
 
 class SafeSocket(object):
     """safe and exact recv & send"""
