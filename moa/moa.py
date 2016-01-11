@@ -380,7 +380,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         picdata = aircv.imread(picpath)
     else:
         pictarget = MoaPic(pictarget)
-        picpath = os.path.join(BASE_DIR, pictarget)
+        picpath = os.path.join(BASE_DIR, pictarget.filename)
         picdata = aircv.imread(picpath)
     while True:
         pos = None
