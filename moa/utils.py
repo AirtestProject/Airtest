@@ -83,6 +83,22 @@ class SafeSocket(object):
             self.sock.settimeout(None)
         return ret
 
+    def recv_nonblocking(self, size):
+        self.sock.settimeout(0)
+        try:
+            ret = self.recv(size)
+        except socket.error, e:
+            #10035 no data when nonblocking
+            if e.args[0] == 10035: #errno.EWOULDBLOCK: 尼玛errno似乎不一致
+                ret = None
+            #10053 connection abort by client
+            #10054 connection reset by peer
+            elif e.args[0] in [10053, 10054]: #errno.ECONNABORTED:
+                raise
+            else:
+                raise
+        return ret
+
     def close(self):
         self.sock.close()
 
