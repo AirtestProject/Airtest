@@ -177,14 +177,16 @@ class Minicap(object):
         self.server_proc = None
         self.get_display_info()
         self.projection = projection
+        self.speedygen = None
         # self._setup() #单帧截图minicap不需要setup
 
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
-        if not reinstall and "minicap\r" in output:
-            print "setup_minicap skipped"
+        if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
+            print "install_minicap skipped"
             return
 
+        self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
         rel = self.adb.getprop("ro.build.version.release")
@@ -197,14 +199,15 @@ class Minicap(object):
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi,binfile).replace("\\", r"\\")
         self.adb.run("push %s %s/minicap" % (path, device_dir)) 
-        self.adb.shell("chmod 777 %s/minicap" % (device_dir))
+        self.adb.shell("chmod 755 %s/minicap" % (device_dir))
 
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
             % (sdk, abi)).replace("\\", r"\\")
         self.adb.run("push %s %s" % (path, device_dir))    
-        print "setup_minicap finished"
+        self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
+        print "install_minicap finished"
 
-    def _setup(self):
+    def _setup(self, adb_port=None):
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
             self.server_proc.kill()
@@ -220,8 +223,11 @@ class Minicap(object):
         else:
             proj_width, proj_height = real_width, real_height
 
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:moa_minicap")
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d" % (
+        adb_port = adb_port or self.localport
+        minicap_port = "moa_minicap_%s" % adb_port
+        self.adb.forward("tcp:%s"%adb_port, "localabstract:%s"%minicap_port)
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d" % (
+            minicap_port,
             real_width, real_height,
             proj_width,proj_height,
             real_orientation), not_wait=True)
@@ -270,12 +276,19 @@ class Minicap(object):
         jpg_data = raw_data.split("for JPG encoder"+link_breaker)[-1].replace(link_breaker, "\n")
         return jpg_data
 
-    def get_frames(self, max_cnt=10000):
+    def get_frame_speedy(self):
+        if not self.speedygen:
+            self.speedygen = self.get_frames(adb_port=self.localport+1)
+            print self.speedygen.next()
+        return self.speedygen.next()
+
+    def get_frames(self, max_cnt=100000, adb_port=None):
         """use adb forward and socket communicate"""
-        self._setup()
+        self._setup(adb_port)
         # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s = SafeSocket()
-        s.connect(("localhost", self.localport))
+        adb_port = adb_port or self.localport
+        s.connect(("localhost", adb_port))
         t = s.recv(24)
         # minicap info
         yield struct.unpack("<2B5I2B", t)
@@ -319,7 +332,7 @@ class Minitouch(object):
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minitouch\r" in output:
-            print "setup_minitouch skipped"
+            print "install_minitouch skipped"
             return
 
         abi = self.adb.getprop("ro.product.cpu.abi")
@@ -333,8 +346,8 @@ class Minitouch(object):
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
         self.adb.run(r"push %s %s/minitouch" % (path, device_dir)) 
-        self.adb.shell("chmod 777 %s/minitouch" % (device_dir))
-        print "setup_minitouch finished"
+        self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
+        print "install_minitouch finished"
 
     def __transform_xy(self, x, y):
         # 根据设备方向、长宽来转换xy值
@@ -544,7 +557,10 @@ class Android(object):
 
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
-            screen = self.minicap.get_frame()
+            if self.minicap.speedygen:
+                screen = self.minicap.get_frame_speedy()
+            else:
+                screen = self.minicap.get_frame()
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
@@ -836,6 +852,13 @@ def test_minitouch(serialno):
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno)
+    print len(a.minicap.get_frame_speedy())
+    print len(a.minicap.get_frame_speedy())
+    print len(a.minicap.get_frame_speedy())
+    print len(a.minicap.get_frame_speedy())
+    # gen = a.minicap.get_frames(adb_port=11314)
+    # print gen.next()
+    # print len(gen.next())
     # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netese.apk")
     # ret = a.adb.uninstall("com.example.netease")
     # print repr(ret)

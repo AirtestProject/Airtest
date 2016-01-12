@@ -3,8 +3,9 @@ import json
 import argparse
 # import here to build dependent modules
 from moa.moa import *
-# import sdkautomator
 import g1utils
+import g18utils
+import sdkautomator
 
 
 def main():
