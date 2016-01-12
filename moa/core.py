@@ -19,12 +19,12 @@ import threading
 import platform
 import Queue
 from error import MoaError
-from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, look_path
+from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path
 from ..aircv import aircv
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
-ADBPATH = os.path.join(THISPATH, "adb", "windows", "adb.exe")
+ADBPATH = get_adb_path()
 STFLIB = os.path.join(THISPATH, "libs")
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
@@ -37,7 +37,7 @@ def init_adb():
     global ADBPATH
     if ADBPATH:
         return
-    ADBPATH = look_path('adb')
+    ADBPATH = get_adb_path()
     if not ADBPATH:
         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 

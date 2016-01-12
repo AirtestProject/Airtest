@@ -255,10 +255,15 @@ def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            name_dict = {
-                core.Android: "Android",
-                win.Windows: "Windows"
-            }
+            if win:
+                name_dict = {
+                    core.Android: "Android",
+                    win.Windows: "Windows"
+                }
+            else:
+                name_dict = {
+                    core.Android: "Android"
+                }
             if name_dict.get(DEVICE.__class__) not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
@@ -383,7 +388,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
         picdata = aircv.imread(picpath)
     else:
         pictarget = MoaPic(pictarget)
-        picpath = os.path.join(BASE_DIR, pictarget)
+        picpath = os.path.join(BASE_DIR, pictarget.filename)
         picdata = aircv.imread(picpath)
     while True:
         pos = None
