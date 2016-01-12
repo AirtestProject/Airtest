@@ -557,10 +557,7 @@ class Android(object):
 
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
-            if self.minicap.speedygen:
-                screen = self.minicap.get_frame_speedy()
-            else:
-                screen = self.minicap.get_frame()
+            screen = self.minicap.get_frame()
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象

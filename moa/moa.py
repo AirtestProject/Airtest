@@ -111,7 +111,6 @@ def set_serialno(sn=None, minitouch=True):
             raise MoaError("Device status not good: {}".format(status))
     global DEVICE
     DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
-    # DEVICE.minicap.get_frame_speedy()
     global PLAYRES
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return SERIALNO
