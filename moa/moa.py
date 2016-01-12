@@ -111,6 +111,7 @@ def set_serialno(sn=None, minitouch=True):
             raise MoaError("Device status not good: {}".format(status))
     global DEVICE
     DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
+    # DEVICE.minicap.get_frame_speedy()
     global PLAYRES
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return SERIALNO
@@ -155,6 +156,13 @@ def set_screendir(dirpath="img_record"):
     if not os.path.isdir(dirpath):
         os.mkdir(dirpath)
     SAVE_SCREEN = dirpath
+
+
+def set_threshold(value):
+    global THRESHOLD
+    if value > 1 or value < 0:
+        raise RuntimeError("invalid threshold: %s"%value)
+    THRESHOLD = value
 
 
 def refresh_device():
@@ -359,7 +367,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESHOLD, intervalfunc=None):
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
@@ -380,7 +388,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     while True:
         pos = None
         # 阈值全部优先取自定义设置的
-        threshold = getattr(pictarget, "threshold", THRESHOLD) 
+        threshold = getattr(pictarget, "threshold", threshold)
         if getattr(pictarget, "record_pos"):
             pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
         # 在预测区域没有找到，则退回全局查找
@@ -428,10 +436,10 @@ class MoaPic(object):
     record_pos: pos in screen when recording
     resolution: screen resolution when recording
     """
-    def __init__(self, filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[]):
+    def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[]):
         self.filename = filename
         self.rect = rect
-        self.threshold = threshold
+        self.threshold = threshold if threshold is not None else THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
