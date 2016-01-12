@@ -358,6 +358,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         traceback.print_exc()
         ret = None
     print ret
+    EXTRA_LOG.update({"cv": ret})
     if not ret:
         return None
     if threshold and ret["confidence"] < threshold:
