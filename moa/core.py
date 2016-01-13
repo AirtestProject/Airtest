@@ -402,7 +402,7 @@ class Minitouch(object):
         time.sleep(0.05) # wait send
         s.close()
 
-    def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.3, steps=5):
+    def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.8, steps=5):
         """
         d 0 0 0 50
         c
