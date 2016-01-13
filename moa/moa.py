@@ -36,7 +36,10 @@ THRESHOLD = 0.6
 PLAYRES = []
 CVINTERVAL = 0.5
 SAVE_SCREEN = None
-REFRESH_SCREEN_DELAY = 1 
+REFRESH_SCREEN_DELAY = 1
+SRC_RESOLUTION = []
+CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+
 
 import os
 import re
@@ -121,6 +124,9 @@ def set_windows():
         raise RuntimeError("win module is not available")
     global DEVICE
     DEVICE = win.Windows()
+    global SRC_RESOLUTION, CVSTRATEGY
+    SRC_RESOLUTION = [1024, 768]
+    CVSTRATEGY = ["siftpre", "tpl", "siftnopre"]
 
 
 def connect(url):
@@ -346,7 +352,8 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     try:
         if templateMatch is True:
             print "matchtpl"
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=DEVICE.getCurrentScreenResolution(), design_resolution=[960, 640], threshold=0.6)
+            device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
@@ -369,7 +376,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     if threshold and ret["confidence"] < threshold:
         return None
     pos = TargetPos().getXY(ret, target_pos)
-    return pos[0] + offsetx, pos[1] + offsety
+    return int(pos[0] + offsetx), int(pos[1] + offsety)
 
 
 @logwrap
@@ -392,17 +399,26 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
         picpath = os.path.join(BASE_DIR, pictarget.filename)
         picdata = aircv.imread(picpath)
     while True:
-        pos = None
         # 阈值全部优先取自定义设置的
         threshold = getattr(pictarget, "threshold", threshold)
-        if getattr(pictarget, "record_pos"):
-            pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
-        # 在预测区域没有找到，则退回全局查找
-        if pos is None:
-            pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos)
-        # 再用缩放后的模板匹配来找
-        if pos is None and getattr(pictarget, "resolution"):
-            pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+        def find_pic_by_strategy():
+            pos = None
+            for st in CVSTRATEGY:
+                if st == "siftpre" and getattr(pictarget, "record_pos"):
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+                elif st == "siftnopre":
+                    # 在预测区域没有找到，则退回全局查找
+                    pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos)
+                elif st == "tpl" and getattr(pictarget, "resolution"):
+                    # 再用缩放后的模板匹配来找
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+                else:
+                    raise RuntimeError("invalid CVSTRATEGY:%s"%st)
+                # 找到一个就返回
+                if pos is not None:
+                    return pos
+            return pos
+        pos = find_pic_by_strategy()
         if pos is None:
             # 如果没找到，调用用户指定的intervalfunc
             if intervalfunc is not None:
@@ -654,7 +670,7 @@ def assert_exists(v, msg="", timeout=TIMEOUT):
     try:
         return _loop_find(v, timeout=timeout)
     except MoaNotFoundError:
-        raise AssertionError("%s does not exists" % v)
+        raise AssertionError("%s does not exist in screen" % v)
 
 
 @logwrap
