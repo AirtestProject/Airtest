@@ -532,7 +532,7 @@ def snapshot(filename="screen.png"):
         EXTRA_LOG.update({"screen": filename})
     screen = DEVICE.snapshot(filename)
     # 如果截屏失败，直接返回None
-    if screen:
+    if screen.any():
         # screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
         RECENT_CAPTURE = screen # used for keep_capture()
         return screen
