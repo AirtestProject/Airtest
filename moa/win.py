@@ -27,7 +27,7 @@ class Windows(object):
         mouse_click(pos)
 
     def swipe(self, p1, p2):
-        mouse_drag(p1, p2)
+        mouse_drag(p1, p2, duration=0.8)
 
     def find_window(self, wildcard):
         """
