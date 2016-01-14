@@ -339,6 +339,16 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         screen = RECENT_CAPTURE
     else:
         screen = snapshot()
+
+    # 如果截屏失败，则screen为空，打印提示后，识别结果直接返回None
+    if screen==None:
+        print "SCREEN captured Fail : SCREEN is None !"
+        return None
+    # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
+    # 改进思路：(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
+    aircv.cv2.imwrite("screen.jpg", screen)
+    screen = aircv.imread("screen.jpg")
+
     # 在rect矩形区域内查找，有record_pos之后，基本上没用了
     offsetx, offsety = 0, 0
     if rect is not None and len(rect) == 4:
@@ -521,9 +531,13 @@ def snapshot(filename="screen.png"):
         filename = os.path.join(SAVE_SCREEN, filename)
         EXTRA_LOG.update({"screen": filename})
     screen = DEVICE.snapshot(filename)
-    screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
-    RECENT_CAPTURE = screen # used for keep_capture()
-    return screen
+    # 如果截屏失败，直接返回None
+    if screen:
+        # screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
+        RECENT_CAPTURE = screen # used for keep_capture()
+        return screen
+    else:
+        return None
 
 
 @logwrap
