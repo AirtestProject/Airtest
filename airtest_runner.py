@@ -13,6 +13,7 @@ def main():
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--setsn", help="auto set serialno", action="store_true")
+    ap.add_argument("--setwin", help="auto set windows", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
@@ -51,6 +52,10 @@ def main():
     if args.setsn:
         print "auto set_serialno"
         set_serialno()
+
+    if args.setwin:
+        print "auto set_windows"
+        set_windows()
 
     if args.log:
         print "save log in", args.log

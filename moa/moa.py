@@ -126,7 +126,7 @@ def set_windows():
     DEVICE = win.Windows()
     global SRC_RESOLUTION, CVSTRATEGY
     SRC_RESOLUTION = [1024, 768]
-    CVSTRATEGY = ["siftpre", "tpl", "siftnopre"]
+    CVSTRATEGY = ["tpl", "siftnopre"]
 
 
 def connect(url):
