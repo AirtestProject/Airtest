@@ -169,15 +169,18 @@ class ADB():
 
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, projection=PROJECTIONRATE, localport=11313):
+    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=11313):
         self.serialno = serialno
         self.localport = localport
         self.adb = ADB(serialno)
         self.install()
         self.server_proc = None
-        self.get_display_info()
         self.projection = projection
         self.speedygen = None
+        # get_display_info may segfault, so use size info from adb dumpsys
+        self.size = size
+        if not size:
+            self.get_display_info()
         # self._setup() #单帧截图minicap不需要setup
 
     def install(self, reinstall=False):
@@ -302,6 +305,7 @@ class Minicap(object):
             else:
                 header = s.recv(4)
             if header is None:
+                print "header is None"
                 # recv timeout, if not frame updated, maybe screen locked
                 yield None
             else:
@@ -518,10 +522,8 @@ class Android(object):
     def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
-        self.size = self.getPhysicalDisplayInfo()
-        self.size["orientation"] = self.getDisplayOrientation()
-        self.size["max_x"], self.size["max_y"] = self.getEventInfo()
-        self.minicap = Minicap(serialno) if minicap else None
+        self.get_display_info()
+        self.minicap = Minicap(serialno, size=self.size) if minicap else None
         self.minitouch = Minitouch(serialno, size=self.size) if minitouch else None
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
@@ -662,6 +664,13 @@ class Android(object):
             prop = prop.rstrip('\r\n')
         return prop
 
+    def get_display_info(self):
+        self.size = self.getPhysicalDisplayInfo()
+        self.size["orientation"] = self.getDisplayOrientation()
+        self.size["rotation"] = self.size["orientation"] * 90
+        self.size["max_x"], self.size["max_y"] = self.getEventInfo()
+        return self.size
+
     def getEventInfo(self):
         ret = self.adb.shell('getevent -p').split('\n')
         max_x, max_y = None, None
@@ -756,6 +765,14 @@ class Android(object):
         m = surfaceOrientationRE.search(output)
         if m:
             return int(m.group(1))
+
+        # another way to get orientation, for old sumsung device(sdk version 15) from xiaoma
+        SurfaceFlingerRE = re.compile('orientation=(\d+)')
+        output = self.adb.shell('dumpsys SurfaceFlinger')
+        m = SurfaceFlingerRE.search(output)
+        if m:
+            return int(m.group(1))
+
         # We couldn't obtain the orientation
         # return -1
         return 0 if self.size["height"] > self.size['width'] else 1
@@ -777,7 +794,8 @@ class Android(object):
             ori = self.getDisplayOrientation()
         self.size["orientation"] = ori
         if self.minicap:
-            self.minicap.get_display_info()
+            # self.minicap.get_display_info()
+            self.minicap.size["rotation"] = ori * 90 
 
 
 class XYTransformer(object):
@@ -849,10 +867,13 @@ def test_minitouch(serialno):
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno)
-    print len(a.minicap.get_frame_speedy())
-    print len(a.minicap.get_frame_speedy())
-    print len(a.minicap.get_frame_speedy())
-    print len(a.minicap.get_frame_speedy())
+    import time
+    t = time.time()
+    print a.getDisplayOrientation()
+    print time.time() - t
+    print a.minicap.get_display_info()
+    print time.time() - t
+    # print len(a.minicap.get_frame_speedy())
     # gen = a.minicap.get_frames(adb_port=11314)
     # print gen.next()
     # print len(gen.next())
