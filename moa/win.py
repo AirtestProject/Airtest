@@ -1,6 +1,7 @@
 # _*_ coding:UTF-8 _*_
 from winutils import mouse_click, mouse_drag, get_screen_shot, \
     key_input, WindowMgr, get_resolution
+from winsendkey import SendKeys
 from ..aircv import aircv
 
 
@@ -21,7 +22,7 @@ class Windows(object):
         key_input(keystr, alt, escape)
 
     def text(self, text):
-        self.keyevent(text)
+        SendKeys(text)
 
     def touch(self, pos):
         mouse_click(pos)
