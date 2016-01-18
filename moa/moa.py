@@ -423,7 +423,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
                     # 再用缩放后的模板匹配来找
                     pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
                 else:
-                    raise RuntimeError("invalid CVSTRATEGY:%s"%st)
+                    print "skip CVSTRATEGY:%s"%st
                 # 找到一个就返回
                 if pos is not None:
                     return pos
