@@ -720,8 +720,8 @@ def exec_script(scriptpath, scriptext=".owl", scope=None):
     if not os.path.isabs(scriptpath):
         scripthome = SCRIPTHOME or ".."
         scriptpath = os.path.join(scripthome, scriptpath)
-    log("exec", {"path":scriptpath})
-    print scriptpath, "exec"
+    log("exec", {"path":scriptpath, "step": "start"})
+    print "exec_script", scriptpath
     os.chdir(scriptpath)
     filename = os.path.basename(scriptpath).replace(scriptext, ".py")
     code = open(filename).read()
@@ -730,6 +730,7 @@ def exec_script(scriptpath, scriptext=".owl", scope=None):
     else:
         exec(code) in globals()
     os.chdir(ori_dir)
+    log("exec", {"path":scriptpath, "step": "end"})
     return scriptpath
 
 
