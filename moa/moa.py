@@ -39,6 +39,7 @@ SAVE_SCREEN = None
 REFRESH_SCREEN_DELAY = 1
 SRC_RESOLUTION = []
 CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+SCRIPTHOME = None
 
 
 import os
@@ -168,6 +169,11 @@ def set_threshold(value):
     if value > 1 or value < 0:
         raise RuntimeError("invalid threshold: %s"%value)
     THRESHOLD = value
+
+
+def set_scripthome(dirpath):
+    global SCRIPTHOME
+    SCRIPTHOME = dirpath
 
 
 def refresh_device():
@@ -708,26 +714,23 @@ def assert_equal(first, second, msg=""):
 Exececution & Debug
 """
 
-def exec_script(code):
-    """secure matter to be fixed"""
-    #print "in moa", repr(code)
-    tree = ast.parse(code)
-    exec(compile(tree, filename="<ast>", mode="exec"))
 
-
-def exec_string(code):
-    '''
-    Refs:
-    https://greentreesnakes.readthedocs.org/en/latest/nodes.html#expressions
-    '''
-    st = ast.parse(code)
-    assert len(st.body) == 1, "run one line"
-    assert isinstance(st.body[0], ast.Expr), "invalid Expr"
-    expr = st.body[0]
-    assert isinstance(expr.value, ast.Call), "invalid Call"
-    func = expr.value.func.id
-    assert func in __all__, "invalid func name"
-    return eval(code)
+def exec_script(scriptpath, scriptext=".owl", scope=None):
+    ori_dir = os.getcwd()
+    if not os.path.isabs(scriptpath):
+        scripthome = SCRIPTHOME or ".."
+        scriptpath = os.path.join(scripthome, scriptpath)
+    log("exec", {"path":scriptpath})
+    print scriptpath, "exec"
+    os.chdir(scriptpath)
+    filename = os.path.basename(scriptpath).replace(scriptext, ".py")
+    code = open(filename).read()
+    if scope:
+        exec(code, scope, scope)
+    else:
+        exec(code) in globals()
+    os.chdir(ori_dir)
+    return scriptpath
 
 
 def gevent_run(func, *args):
@@ -787,15 +790,12 @@ def test_android():
     #touch('target.png')
     #touch([100, 200])
     #swipe([100, 500], [800, 600])
-    #exec_string('touch("target.png", timeout=3)')
-    exec_script('touch("target.png", timeout=3)\nhome()')
     # exec_script(script.decode('string-escape'))
     # import urllib
     # serialno, base_dir, script = sys.argv[1: 4]
     # # print sys.argv[1: 4]
     # set_serialno(serialno)
     # set_basedir(base_dir)
-    # exec_script(urllib.unquote(script))
     set_serialno()
     snapshot()
     # set_basedir()

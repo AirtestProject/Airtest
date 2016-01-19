@@ -34,8 +34,6 @@ def main():
                 exit(0)
             pass
 
-    # reading code from file
-    code = open(args.script).read()
 
     # loading util file
     if args.utilfile:
@@ -47,7 +45,7 @@ def main():
             print "file does not exist:", os.path.abspath(args.utilfile)
 
     # cd script dir
-    os.chdir(os.path.dirname(args.script))
+    os.chdir(args.script)
 
     if args.setsn:
         print "auto set_serialno"
@@ -72,7 +70,7 @@ def main():
             globals()[k] = v
 
     # execute code
-    exec(code) in globals()
+    exec_script(args.script, scope=globals())
 
 
 if __name__ == '__main__':

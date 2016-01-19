@@ -22,7 +22,7 @@ class Windows(object):
         key_input(keystr, alt, escape)
 
     def text(self, text):
-        SendKeys(text)
+        SendKeys(text.decode("utf-8"))
 
     def touch(self, pos):
         mouse_click(pos)
