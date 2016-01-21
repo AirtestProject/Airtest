@@ -60,12 +60,20 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
     cmds = prefix + cmds
     if DEBUG:
         print ' '.join(cmds)
+    proc = subprocess.Popen(cmds,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
     if not_wait:
-        return subprocess.Popen(cmds,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-    return subprocess.check_output(cmds)
+        return proc
+    # return subprocess.check_output(cmds)
+    stdout, stderr = proc.communicate()
+    if proc.returncode:
+        print "adb run stdout:\n", stdout
+        print "adb run stderr:\n", stderr
+        raise RuntimeError("Adb Error")
+    return stdout
+
 
 def adb_devices(state=None, addr=LOCALADBADRR):
     ''' Get all device list '''
@@ -539,16 +547,21 @@ class Android(object):
                 return status
         return None
 
-    def amstart(self, package):
+    def amcheck(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if not output.startswith('package:'):
             raise MoaError('amstart package not found')
+
+    def amstart(self, package):
+        self.amcheck(package)
         self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
 
     def amstop(self, package):
+        self.amcheck(package)
         self.adb.shell(['am', 'force-stop', package])
 
     def amclear(self, package):
+        self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
     def install(self, filepath):

@@ -12,7 +12,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
-    ap.add_argument("--setsn", help="auto set serialno", action="store_true")
+    ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
     ap.add_argument("--setwin", help="auto set windows", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
@@ -48,8 +48,10 @@ def main():
     os.chdir(args.script)
 
     if args.setsn:
-        print "auto set_serialno"
-        set_serialno()
+        print "auto set_serialno", args.setsn
+        # if setsn==True, but not specified, auto choose one
+        sn = args.setsn if isinstance(args.setsn, str) else None
+        set_serialno(sn)
 
     if args.setwin:
         print "auto set_windows"
