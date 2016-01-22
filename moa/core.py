@@ -286,6 +286,7 @@ class Minicap(object):
         return jpg_data
 
     def get_frame_speedy(self):
+        """unfinished: get frame from server, return None immediately if blocked"""
         if not self.speedygen:
             self.speedygen = self.get_frames(adb_port=self.localport+1)
             print self.speedygen.next()
@@ -323,20 +324,22 @@ class Minicap(object):
 
 
 class Minitouch(object):
+    LOCALPORT = 11111
+
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=11111, size=None):
+    def __init__(self, serialno, localport=LOCALPORT, deviceport="moa_minitouch",size=None, backend=False):
         self.serialno = serialno
         self.localport = localport
+        self.deviceport = deviceport
         self.adb = ADB(serialno)
         self.install()
         self.server_proc = None
-        self._setup()
-        self.op_server_proc = None
-        self.op_queue = None
-        self.op_sock = None
-        self.op_thread = None
-        self.op_adbport = 11112
-        self._stop_long_op = None
+        self.client = None
+        self.setup_server()
+        if backend:
+            self.setup_client_backend()
+        else:
+            self.setup_client()
         self.size = size
 
     def install(self, reinstall=False):
@@ -373,16 +376,20 @@ class Minitouch(object):
         ny = y * max_y / height
         return nx, ny
 
-    def _setup(self, adb_port=None, device_port='moa_minitouch'):
+    def setup_server(self, adb_port=None, device_port=None):
+        """set up minitouch server and adb forward"""
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
-        adb_port = adb_port or self.localport
-        self.adb.forward("tcp:%s"%adb_port, "localabstract:%s" % device_port)
-        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % device_port, not_wait=True)
+        if adb_port:
+            self.localport = adb_port
+        if device_port:
+            self.deviceport = device_port
+        self.adb.forward("tcp:%s"%self.localport, "localabstract:%s" % self.deviceport)
+        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % self.deviceport, not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(1.0)
-        # print "minitouch _setup", info
+        print "minitouch _setup", info
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -394,23 +401,10 @@ class Minitouch(object):
         return p
 
     def touch(self, (x, y), duration=0.01):
-        """
-        d 0 10 10 50
-        c
-        <wait in your own code>
-        u 0
-        c
-        """
         x, y = self.__transform_xy(x, y)
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", self.localport))
-        # header = s.recv(4096)
-        s.send("d 0 %d %d 50\nc\n" % (x, y))
+        self.handle("d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
-        s.send("u 0\nc\n")
-        time.sleep(0.05) # wait send
-        s.close()
+        self.handle("u 0\nc\n")
 
     def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.8, steps=5):
         """
@@ -433,22 +427,17 @@ class Minitouch(object):
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration)/(steps+1)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", self.localport))
-        # header = s.recv(4096)
-        s.send("d 0 %d %d 50\nc\n" % (from_x, from_y))
+        self.handle("d 0 %d %d 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            s.send("m 0 %d %d 50\nc\n" % (
+            self.handle("m 0 %d %d 50\nc\n" % (
                 from_x+(to_x-from_x)*i/steps, 
                 from_y+(to_y-from_y)*i/steps)
             )
             time.sleep(interval)
-        s.send("m 0 %d %d 50\nc\n" % (to_x, to_y))
+        self.handle("m 0 %d %d 50\nc\n" % (to_x, to_y))
         time.sleep(interval)
-        s.send("u 0\nc\n")
-        time.sleep(0.01)
-        s.close()
+        self.handle("u 0\nc\n")
 
     def pinch(self):
         """
@@ -479,26 +468,6 @@ class Minitouch(object):
         """
         pass
 
-    def setup_long_operate(self, adb_port=None, device_port="moa_minitouch_l"):
-        if adb_port:
-            self.op_adbport = adb_port
-        self.op_server_proc = self._setup(adb_port=self.op_adbport, device_port=device_port)
-        self.op_queue = Queue.Queue()
-        self._stop_long_op = threading.Event()
-        t = threading.Thread(target=self._operate_worker)
-        t.daemon = True
-        t.start()
-        self.op_thread = t
-
-    def _operate_worker(self):
-        self.op_sock = SafeSocket()
-        self.op_sock.connect(("localhost", self.op_adbport))
-        print "recv", repr(self.op_sock.sock.recv(4096))
-        while not self._stop_long_op.isSet():
-            cmd = self.op_queue.get()
-            self.op_sock.send(cmd)
-        self.op_sock.close()
-
     def operate(self, args):
         cmd = ""
         if args["type"] == "down":
@@ -510,17 +479,39 @@ class Minitouch(object):
         elif args["type"] == "up":
             cmd = "u 0\nc\n"
         else:
-            return#no process
+            raise RuntimeError("invalid operate args: %s"%args)
+        self.handle(cmd)
 
-        self.op_queue.put(cmd)
+    def _backend_worker(self):
+        while not self.backend_stop_event.isSet():
+            cmd = self.backend_queue.get()
+            self.client.send(cmd)
 
-    def teardown_long_operate(self):
-        self._stop_long_op.set()
-        self._stop_long_op = None
-        self.op_server_proc.kill()
-        self.op_thread = None
-        self.op_queue = None
-        self.op_sock = None
+    def setup_client_backend(self):
+        self.backend_queue = Queue.Queue()
+        self.backend_stop_event = threading.Event()
+        self.setup_client()
+        t = threading.Thread(target=self._backend_worker)
+        t.daemon = True
+        t.start()
+        self.backend_thread = t
+        self.handle = self.backend_queue.put
+
+    def setup_client(self):
+        # if not self.server_proc:
+        #     raise RuntimeError("please setup_server first")
+        s = SafeSocket()
+        s.connect(("localhost", self.localport))
+        header = s.sock.recv(4096) # size is not strict, so use raw socket.recv
+        print repr(header)
+        self.client = s
+        self.handle = self.client.send
+
+    def teardown(self):
+        if hasattr(self, "backend_stop_event"):
+            self.backend_stop_event.set()
+        self.client.close()
+        self.server_proc.kill()
 
 
 class Android(object):
@@ -623,7 +614,6 @@ class Android(object):
             x, y = self._transformPointByOrientation((x, y))
             tar.update({"x": x, "y": y})
         self.minitouch.operate(tar)
-
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
@@ -847,43 +837,30 @@ def test_minicap(serialno):
 
     
 def test_minitouch(serialno):
-    mi = Minitouch(serialno)
-    t =time.time()
-    # mi.touch((100, 100))
-    # mi.swipe((575, 1089), (575, 451))
+    size = Android(serialno, minitouch=False, minicap=False).size
+    mi = Minitouch(serialno, size=size, backend=False)
+    # mi.touch((100,100))
     # time.sleep(1)
-    # mi.swipe((1080, 200), (0, 200))
-    # print time.time() - t
-    mi.setup_long_operate()
-    delay = 0.1
-    mi.operate({"type":"down", "x":44, "y":139})
-    time.sleep(delay)
-    mi.operate({"type": "up"})
-    time.sleep(3)
-    return
-    mi.operate({"type":"down", "x":100, "y":999})
-    time.sleep(delay)
-    mi.operate({"type": "up"})
-    time.sleep(3)
-    mi.operate({"type":"down", "x":100, "y":1000})
-    time.sleep(delay)
+    # mi.swipe((100, 100), (1000, 100))
+    # time.sleep(1)
+    mi.operate({"type":"down", "x":100, "y":100})
+    time.sleep(1)
     mi.operate({"type": "up"})
     time.sleep(1)
-    mi.teardown_long_operate()
 
-    # mi.touch((100, 100))
-    # print mi.transform_xy(100,100)
+    mi.teardown()
 
 
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno)
-    import time
-    t = time.time()
-    print a.getDisplayOrientation()
-    print time.time() - t
-    print a.minicap.get_display_info()
-    print time.time() - t
+    a.touch((100, 100))
+    # import time
+    # t = time.time()
+    # print a.getDisplayOrientation()
+    # print time.time() - t
+    # print a.minicap.get_display_info()
+    # print time.time() - t
     # print len(a.minicap.get_frame_speedy())
     # gen = a.minicap.get_frames(adb_port=11314)
     # print gen.next()
@@ -917,6 +894,6 @@ if __name__ == '__main__':
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
-    # test_minitouch(serialno)
+    test_minitouch(serialno)
     # time.sleep(10)
-    test_android()
+    # test_android()

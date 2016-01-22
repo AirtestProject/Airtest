@@ -11,8 +11,10 @@ error classes
 class MoaError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class MoaNotFoundError(MoaError):
     pass
@@ -24,4 +26,4 @@ class AdbError(Exception):
         self.stderr = stderr
 
     def __str__(self):
-        return "stdout:%s stderr:%s" % (self.stdout, self.stderr)
+        return "stdout[%s] stderr[%s]" % (self.stdout, self.stderr)
