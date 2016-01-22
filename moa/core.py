@@ -18,7 +18,7 @@ import struct
 import threading
 import platform
 import Queue
-from error import MoaError
+from error import MoaError, AdbError
 from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path
 from ..aircv import aircv
 
@@ -69,9 +69,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
     # return subprocess.check_output(cmds)
     stdout, stderr = proc.communicate()
     if proc.returncode:
-        print "adb run stdout:\n", stdout
-        print "adb run stderr:\n", stderr
-        raise RuntimeError("Adb Error")
+        raise AdbError(stdout, stderr)
     return stdout
 
 

@@ -5,7 +5,7 @@
 # Created: 2015-07-03 14:55
 
 """
-error class
+error classes
 """
 
 class MoaError(Exception):
@@ -16,3 +16,12 @@ class MoaError(Exception):
 
 class MoaNotFoundError(MoaError):
     pass
+
+
+class AdbError(Exception):
+    def __init__(self, stdout, stderr):
+        self.stdout = stdout
+        self.stderr = stderr
+
+    def __str__(self):
+        return "stdout:%s stderr:%s" % (self.stdout, self.stderr)
