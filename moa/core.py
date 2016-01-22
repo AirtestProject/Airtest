@@ -401,6 +401,13 @@ class Minitouch(object):
         return p
 
     def touch(self, (x, y), duration=0.01):
+        """
+        d 0 10 10 50
+        c 
+        <wait in your own code>  
+        u 0 
+        c 
+        """
         x, y = self.__transform_xy(x, y)
         self.handle("d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
