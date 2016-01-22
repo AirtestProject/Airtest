@@ -18,7 +18,7 @@ __version__ = '0.0.2'
 DEBUG = False
 SERIALNO = ''
 ADDRESS = ('127.0.0.1', 5037)
-BASE_DIR = ''
+BASE_DIR = '.'
 LOG_FILE = ''
 LOG_FILE_FD = None
 TIMEOUT = 20
@@ -72,113 +72,6 @@ try:
 except ImportError:
     win = None
     print "win module import error" 
-
-
-"""
-Script initialization
-"""
-
-
-def set_address((host, port)):
-    global ADDRESS
-    ADDRESS = (host, port)
-    # FIXME(ssx): need to verify
-
-
-def set_serialno(sn=None, minitouch=True):
-    '''
-    auto set if only one device
-    support filepath match patten, eg: c123*
-    '''
-    global SERIALNO
-    if not sn:
-        devs = list(adb_devices(state='device', addr=ADDRESS))
-        if len(devs) > 1:
-            print ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
-        elif len(devs) == 0:
-            raise MoaError("no device, please check your adb connection")
-        SERIALNO = devs[0][0]
-    else:
-        exists = 0
-        status = None
-        for (serialno, st) in adb_devices(addr=ADDRESS):
-            if fnmatch.fnmatch(serialno, sn):
-                exists += 1
-                status = st
-                SERIALNO = serialno
-        if exists == 0:
-            raise MoaError("Device[{}] not found in {}".format(sn, ADDRESS))
-        if exists > 1:
-            SERIALNO = None
-            raise MoaError("too many devices found")
-        if status != 'device':
-            raise MoaError("Device status not good: {}".format(status))
-    global DEVICE
-    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
-    global PLAYRES
-    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
-    return SERIALNO
-
-
-def set_windows():
-    if win is None:
-        raise RuntimeError("win module is not available")
-    global DEVICE
-    DEVICE = win.Windows()
-    global SRC_RESOLUTION, CVSTRATEGY
-    SRC_RESOLUTION = [1024, 768]
-    CVSTRATEGY = ["tpl", "siftnopre"]
-
-
-def connect(url):
-    parsed = urlparse(url)
-    if parsed.scheme != 'moa':
-        raise MoaError("url should start with moa://")
-
-    host = parsed.hostname or '127.0.0.1'
-    port = parsed.port or 5037
-    sn = parsed.path[1:]
-    set_address((host, port))
-    set_serialno(sn)
-
-
-def set_basedir(base_dir):
-    global BASE_DIR
-    BASE_DIR = base_dir
-
-
-def set_logfile(filename="log.txt", inbase=True):
-    global LOG_FILE, LOG_FILE_FD
-    LOG_FILE = filename
-    if inbase:
-        LOG_FILE = os.path.join(BASE_DIR, filename)
-    LOG_FILE_FD = open(LOG_FILE, 'wb')
-
-
-def set_screendir(dirpath="img_record"):
-    global SAVE_SCREEN
-    # force clear dir
-    shutil.rmtree(dirpath, ignore_errors=True)
-    if not os.path.isdir(dirpath):
-        os.mkdir(dirpath)
-    SAVE_SCREEN = dirpath
-
-
-def set_threshold(value):
-    global THRESHOLD
-    if value > 1 or value < 0:
-        raise RuntimeError("invalid threshold: %s"%value)
-    THRESHOLD = value
-
-
-def set_scripthome(dirpath):
-    global SCRIPTHOME
-    SCRIPTHOME = dirpath
-
-
-def refresh_device():
-    time.sleep(REFRESH_SCREEN_DELAY)
-    DEVICE.refreshOrientationInfo()
 
 
 """
@@ -297,6 +190,113 @@ def _show_screen(pngstr):
         pass
 
 
+"""
+Script initialization
+"""
+
+
+def set_address((host, port)):
+    global ADDRESS
+    ADDRESS = (host, port)
+    # FIXME(ssx): need to verify
+
+
+def set_serialno(sn=None, minitouch=True):
+    '''
+    auto set if only one device
+    support filepath match patten, eg: c123*
+    '''
+    global SERIALNO
+    if not sn:
+        devs = list(adb_devices(state='device', addr=ADDRESS))
+        if len(devs) > 1:
+            print ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+        elif len(devs) == 0:
+            raise MoaError("no device, please check your adb connection")
+        SERIALNO = devs[0][0]
+    else:
+        exists = 0
+        status = None
+        for (serialno, st) in adb_devices(addr=ADDRESS):
+            if fnmatch.fnmatch(serialno, sn):
+                exists += 1
+                status = st
+                SERIALNO = serialno
+        if exists == 0:
+            raise MoaError("Device[{}] not found in {}".format(sn, ADDRESS))
+        if exists > 1:
+            SERIALNO = None
+            raise MoaError("too many devices found")
+        if status != 'device':
+            raise MoaError("Device status not good: {}".format(status))
+    global DEVICE
+    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
+    global PLAYRES
+    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
+    return SERIALNO
+
+
+def set_windows():
+    if win is None:
+        raise RuntimeError("win module is not available")
+    global DEVICE
+    DEVICE = win.Windows()
+    global SRC_RESOLUTION, CVSTRATEGY
+    SRC_RESOLUTION = [1024, 768]
+    CVSTRATEGY = ["tpl", "siftnopre"]
+
+
+def connect(url):
+    parsed = urlparse(url)
+    if parsed.scheme != 'moa':
+        raise MoaError("url should start with moa://")
+
+    host = parsed.hostname or '127.0.0.1'
+    port = parsed.port or 5037
+    sn = parsed.path[1:]
+    set_address((host, port))
+    set_serialno(sn)
+
+
+def set_basedir(base_dir):
+    global BASE_DIR
+    BASE_DIR = base_dir
+
+
+def set_logfile(filename="log.txt", inbase=True):
+    global LOG_FILE, LOG_FILE_FD
+    LOG_FILE = filename
+    if inbase:
+        LOG_FILE = os.path.join(BASE_DIR, filename)
+    LOG_FILE_FD = open(LOG_FILE, 'wb')
+
+
+def set_screendir(dirpath="img_record"):
+    global SAVE_SCREEN
+    # force clear dir
+    shutil.rmtree(dirpath, ignore_errors=True)
+    if not os.path.isdir(dirpath):
+        os.mkdir(dirpath)
+    SAVE_SCREEN = dirpath
+
+
+def set_threshold(value):
+    global THRESHOLD
+    if value > 1 or value < 0:
+        raise RuntimeError("invalid threshold: %s"%value)
+    THRESHOLD = value
+
+
+def set_scripthome(dirpath):
+    global SCRIPTHOME
+    SCRIPTHOME = dirpath
+
+
+def refresh_device():
+    time.sleep(REFRESH_SCREEN_DELAY)
+    DEVICE.refreshOrientationInfo()
+
+
 class TargetPos(object):
     """
     点击目标图片的不同位置，默认为中心点0
@@ -408,12 +408,10 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
         pictarget.img.save("text.png")
         picdata = aircv.imread("text.png")
     elif isinstance(pictarget, MoaPic):
-        picpath = os.path.join(BASE_DIR, pictarget.filename)
-        picdata = aircv.imread(picpath)
+        picdata = aircv.imread(pictarget.filepath)
     else:
         pictarget = MoaPic(pictarget)
-        picpath = os.path.join(BASE_DIR, pictarget.filename)
-        picdata = aircv.imread(picpath)
+        picdata = aircv.imread(pictarget.filepath)
     while True:
         # 阈值全部优先取自定义设置的
         threshold = getattr(pictarget, "threshold", threshold)
@@ -481,9 +479,10 @@ class MoaPic(object):
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
+        self.filepath = os.path.join(BASE_DIR, filename)
 
     def __repr__(self):
-        return self.filename
+        return self.filepath
 
 
 """
@@ -566,7 +565,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
-    if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+    if _isstr(v) or isinstance(v, (MoaPic, MoaText)):
         pos = _loop_find(v, timeout=timeout)
     else:
         pos = v
@@ -708,80 +707,6 @@ def assert_equal(first, second, msg=""):
     result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
-
-
-"""
-Exececution & Debug
-"""
-
-
-def exec_script(scriptpath, scriptext=".owl", scope=None):
-    ori_dir = os.getcwd()
-    if not os.path.isabs(scriptpath):
-        scripthome = SCRIPTHOME or ".."
-        scriptpath = os.path.join(scripthome, scriptpath)
-    log("exec", {"path":scriptpath, "step": "start"})
-    print "exec_script", scriptpath
-    os.chdir(scriptpath)
-    filename = os.path.basename(scriptpath).replace(scriptext, ".py")
-    code = open(filename).read()
-    if scope:
-        exec(code, scope, scope)
-    else:
-        exec(code) in globals()
-    os.chdir(ori_dir)
-    log("exec", {"path":scriptpath, "step": "end"})
-    return scriptpath
-
-
-def gevent_run(func, *args):
-    global GEVENT_RUNNING
-    import gevent
-    import gevent.monkey
-    import cv2
-    import numpy as np
-
-    GEVENT_RUNNING = True
-    gevent.monkey.patch_all()
-    #gevent.signal(signal.SIGQUIT, gevent.shutdown)
-    cv2.namedWindow('screen', cv2.WINDOW_NORMAL)
-
-    def run_forever():
-        while 1:
-            if GEVENT_DONE[0]:
-                return
-            if SCREEN is None:
-                gevent.sleep(0.5)
-                continue
-
-            img = SCREEN.copy()
-            h, w = img.shape[:2]
-            now = time.time()
-            for timetag, val in TOUCH_POINTS.items():
-                if now - timetag > 2.0:
-                    del(TOUCH_POINTS[timetag])
-                    continue
-                if val['type'] == 'touch':
-                    x, y = val['value']
-                    cv2.line(img, (x,0), (x,h), (0,255,255), 3)
-                    cv2.line(img, (0,y), (w,y), (0,255,255), 3)
-            cv2.resizeWindow('screen', w/2, h/2)
-            cv2.imshow('screen', img)
-            cv2.waitKey(1)
-            gevent.sleep(0.5)
-
-    def moa_func():
-        try:
-            func(*args)
-        except:
-            raise
-        finally:
-            GEVENT_DONE[0] = True
-
-    gevent.joinall([
-        gevent.spawn(run_forever),
-        gevent.spawn(moa_func),
-    ])
 
 
 def test_android():
