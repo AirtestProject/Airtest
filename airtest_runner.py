@@ -51,7 +51,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if scope:
-        exec(code, scope, scope)
+        exec(code) in scope
     else:
         exec(code) in globals()
     # set_basedir back
