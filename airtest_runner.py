@@ -8,7 +8,7 @@ import g18utils
 import sdkautomator
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False):
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
     """
     execute script: original or submodule
     1. cd to original dir
@@ -19,11 +19,14 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         2.3 exec sub script
         2.4 set_basedir(ori_dir)
     """
-    if os.path.isabs(scriptname):
-        scriptpath = scriptname
-    else:
-        scripthome = SCRIPTHOME or ".."
+    if not original and not os.path.isabs(scriptname):
+        scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
+    elif original:
+        scriptpath = "."
+    else:
+        scriptpath = scriptname
+
     def copy_script(src, dst):
         for f in os.listdir(src):
             srcfile = os.path.join(src, f)
@@ -47,14 +50,17 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
-    pyfilename = os.path.basename(scriptpath).replace(scriptext, ".py")
+    if not pyfilename:
+        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+    print pyfilename
     pyfilepath = os.path.join(scriptpath, pyfilename)
+    print os.path.abspath(pyfilepath)
     code = open(pyfilepath).read()
     if scope:
         exec(code) in scope
     else:
         exec(code) in globals()
-    # set_basedir back
+    # set_basedir back to original dir
     if ori_dir:
         set_basedir(ori_dir)
     log("function", {"name": "exec_script", "step": "end"})
@@ -65,6 +71,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
+    ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
     ap.add_argument("--setwin", help="auto set windows", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
@@ -72,21 +79,6 @@ def main():
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
     args = ap.parse_args()
-
-
-    if args.forever:
-        f = open("tmp", "w")
-        while True:
-            print "wait for stdin..."
-            line = sys.stdin.readline()
-            f.write(line)
-            f.flush()
-            exec(line) in globals()
-            if line == "":
-                print "end of stdin"
-                exit(0)
-            pass
-
 
     # loading util file
     if args.utilfile:
@@ -124,8 +116,19 @@ def main():
             k, v = kv.split("=")
             globals()[k] = v
 
+    if args.forever:
+        while True:
+            print "wait for stdin..."
+            sys.stdout.flush()
+            line = sys.stdin.readline()
+            exec(line) in globals()
+            if line == "":
+                print "end of stdin"
+                exit(0)
+            pass
+
     # execute code
-    exec_script(args.script, scope=globals(), original=True)
+    exec_script(args.script, scope=globals(), original=True, pyfilename=args.pyfile)
 
 
 if __name__ == '__main__':
