@@ -52,9 +52,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     print "exec_script", scriptpath
     if not pyfilename:
         pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
-    print pyfilename
     pyfilepath = os.path.join(scriptpath, pyfilename)
-    print os.path.abspath(pyfilepath)
     code = open(pyfilepath).read()
     if scope:
         exec(code) in scope
