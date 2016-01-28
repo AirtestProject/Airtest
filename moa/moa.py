@@ -66,7 +66,8 @@ except ImportError:
 from error import MoaError, MoaNotFoundError
 from core import adb_devices
 import core
-from ..aircv import aircv, textgen
+from ..aircv import aircv
+from ..aircv import generate_character_img as textgen
 from utils import _isstr, _islist
 try:
     import win
