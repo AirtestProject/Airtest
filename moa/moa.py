@@ -33,6 +33,7 @@ KEEP_CAPTURE = False
 RECENT_CAPTURE = None
 OPDELAY = 0.1
 THRESHOLD = 0.6
+THRESHOLD_STRICT = 0.7
 PLAYRES = []
 CVINTERVAL = 0.5
 SAVE_SCREEN = None
@@ -413,8 +414,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
         pictarget = MoaPic(pictarget)
         picdata = aircv.imread(pictarget.filepath)
     while True:
-        # 阈值全部优先取自定义设置的
-        threshold = getattr(pictarget, "threshold", threshold)
+        # 阈值优先取自定义设置的，再取函数传入的
+        threshold = getattr(pictarget, "threshold") or threshold
         def find_pic_by_strategy():
             pos = None
             for st in CVSTRATEGY:
@@ -475,7 +476,7 @@ class MoaPic(object):
     def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[]):
         self.filename = filename
         self.rect = rect
-        self.threshold = threshold if threshold is not None else THRESHOLD
+        self.threshold = threshold # if threshold is not None else THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
@@ -687,7 +688,7 @@ Assertions for result verification
 @transparam
 def assert_exists(v, msg="", timeout=TIMEOUT):
     try:
-        return _loop_find(v, timeout=timeout)
+        return _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT)
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
 

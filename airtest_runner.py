@@ -44,9 +44,9 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         ori_dir = BASE_DIR
         sub_dir = get_sub_dir_name(scriptname)
         set_basedir(sub_dir)
-        if not os.path.isdir(BASE_DIR):
-            os.mkdir(BASE_DIR)
-        copy_script(scriptpath, BASE_DIR)
+        if not os.path.isdir(sub_dir):
+            os.mkdir(sub_dir)
+        copy_script(scriptpath, sub_dir)
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
