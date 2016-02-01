@@ -20,6 +20,8 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         2.4 set_basedir(ori_dir)
     """
     if not original and not os.path.isabs(scriptname):
+        if not SCRIPTHOME:
+            raise RuntimeError("SCRIPTHOME not set, please set_scripthome first")
         scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
     elif original:
