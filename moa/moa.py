@@ -349,7 +349,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         screen = snapshot()
 
     # 如果截屏失败，则screen为空，打印提示后，识别结果直接返回None
-    if screen==None:
+    if screen is None:
         print "SCREEN captured Fail : SCREEN is None !"
         return None
     # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
