@@ -41,6 +41,7 @@ REFRESH_SCREEN_DELAY = 1
 SRC_RESOLUTION = []
 CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
 SCRIPTHOME = None
+RESIZE_METHOD = None
 
 
 import os
@@ -243,8 +244,7 @@ def set_windows():
         raise RuntimeError("win module is not available")
     global DEVICE
     DEVICE = win.Windows()
-    global SRC_RESOLUTION, CVSTRATEGY
-    SRC_RESOLUTION = [1024, 768]
+    global CVSTRATEGY
     CVSTRATEGY = ["tpl", "siftnopre"]
 
 
@@ -292,6 +292,10 @@ def set_threshold(value):
 def set_scripthome(dirpath):
     global SCRIPTHOME
     SCRIPTHOME = dirpath
+
+
+def set_globals(key, value):
+    globals()[key] = value
 
 
 def refresh_device():
@@ -371,7 +375,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         if templateMatch is True:
             print "matchtpl"
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6)
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
@@ -398,7 +402,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESHOLD, intervalfunc=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
@@ -416,7 +420,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=THRESH
         picdata = aircv.imread(pictarget.filepath)
     while True:
         # 阈值优先取自定义设置的，再取函数传入的
-        threshold = getattr(pictarget, "threshold") or threshold
+        threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
         def find_pic_by_strategy():
             pos = None
             for st in CVSTRATEGY:

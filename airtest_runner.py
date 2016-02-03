@@ -1,10 +1,12 @@
 import os
 import json
 import argparse
-# import here to build dependent modules
 from moa.moa import *
-import g1utils
-import g18utils
+# import here to build dependent modules
+import requests
+import re
+import urllib2
+import time
 import sdkautomator
 
 
