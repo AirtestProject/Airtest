@@ -621,9 +621,6 @@ def swipe(v1, v2=None, vector=None):
 @transparam
 @platform(on=["Android"])
 def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
-    '''
-    @param offset: {'x':10,'y':10,'percent':True}
-    '''
     if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout)
     else:
@@ -631,9 +628,6 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     print ('downpos', pos)
 
-    adbport = DEVICE.minitouch.op_adbport + 1 
-    deviceport = "minitouch_op"
-    DEVICE.minitouch.setup_long_operate(adbport, deviceport)
     DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
     for vector in route:
         if (vector[0] <= 1 and vector[1] <= 1):
