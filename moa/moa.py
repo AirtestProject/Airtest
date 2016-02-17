@@ -567,12 +567,17 @@ def home():
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if _isstr(v) or isinstance(v, (MoaPic, MoaText)):
-        pos = _loop_find(v, timeout=timeout)
+        try:
+            pos = _loop_find(v, timeout=timeout)
+        except MoaNotFoundError:
+            if safe:
+                return False
+            raise
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
