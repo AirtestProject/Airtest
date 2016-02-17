@@ -357,11 +357,11 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         print "SCREEN captured Fail : SCREEN is None !"
         return None
     # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
-    # 改进思路�?(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
+    # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
     aircv.cv2.imwrite("screen.jpg", screen)
     screen = aircv.imread("screen.jpg")
 
-    # 在rect矩形区域内查找，有record_pos之后，基本上没用�?
+    # 在rect矩形区域内查找，有record_pos之后，基本上没用
     offsetx, offsety = 0, 0
     if rect is not None and len(rect) == 4:
         if len(filter(lambda x: (x<=1 and x>=0), rect)) == 4:
@@ -370,7 +370,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
-    # 三种不同的匹配算�?
+    # 三种不同的匹配算
     try:
         if templateMatch is True:
             print "matchtpl"
@@ -408,8 +408,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     left = max(1, int(timeout))
     start_time = time.time()
     if isinstance(pictarget, MoaText):
-        # moaText暂时没用了，截图太方便了，以后再考虑文字识别�?
-        # pil_2_cv2函数有问题，会变底色，后续修�?
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别
+        # pil_2_cv2函数有问题，会变底色，后续修
         # picdata = aircv.pil_2_cv2(pictarget.img)
         pictarget.img.save("text.png")
         picdata = aircv.imread("text.png")
@@ -443,7 +443,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # 如果没找到，调用用户指定的intervalfunc
             if intervalfunc is not None:
                 intervalfunc()
-            # 超时则抛出异�?
+            # 超时则抛出异常
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
@@ -735,7 +735,6 @@ def test_android():
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img
     # img.show()
-    # touch(MoaText(u"�? �?", font=u"华康唐风�?"))
     # install(r"C:\Users\game-netease\Desktop\netease.apk")
     # uninstall("com.example.netease")
 
