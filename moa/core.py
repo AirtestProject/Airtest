@@ -216,22 +216,28 @@ class Minicap(object):
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
         print "install_minicap finished"
 
-    def _setup(self, adb_port=None):
-        # 可能需要改变参数重新setup，所以之前setup过的先关掉
-        if self.server_proc:
-            self.server_proc.kill()
-            self.server_proc = None
+    def _get_params(self, use_ori_size=False):
         real_width = self.size["width"]
         real_height = self.size["height"]
         real_orientation = self.size["rotation"]
-        if _islist(self.projection):
+        if use_ori_size or not self.projection:
+            proj_width, proj_height = real_width, real_height
+        elif _islist(self.projection):
             proj_width, proj_height = self.projection
         elif isinstance(self.projection, float):
             proj_width = self.projection * real_width
             proj_height = self.projection * real_height
         else:
-            proj_width, proj_height = real_width, real_height
+            raise RuntimeError("invalid projection type")
+        return real_width, real_height, proj_width, proj_height, real_orientation
 
+    def _setup(self, adb_port=None):
+        # 可能需要改变参数重新setup，所以之前setup过的先关掉
+        if self.server_proc:
+            self.server_proc.kill()
+            self.server_proc = None
+
+        real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
         adb_port = adb_port or self.localport
         minicap_port = "moa_minicap_%s" % adb_port
         self.adb.forward("tcp:%s"%adb_port, "localabstract:%s"%minicap_port)
@@ -264,19 +270,16 @@ class Minicap(object):
         self.size = display_info
         return display_info
 
-    def get_frame(self):
+    def get_frame(self, use_ori_size=True):
         """
         1. shell cmd
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        real_width = self.size["width"]
-        real_height = self.size["height"]
-        real_orientation = self.size["rotation"]
+        real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
-            real_width, real_height,
-            real_width*PROJECTIONRATE, real_height*PROJECTIONRATE, real_orientation))
+            real_width, real_height, proj_width, proj_height, real_orientation))
         os = platform.system()
         if os == "Windows":
             link_breaker = "\r\r\n"
