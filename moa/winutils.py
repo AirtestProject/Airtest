@@ -200,6 +200,23 @@ def mouse_click(pos=None, right_click=False, duration=0.0, shift=False):
         time.sleep(0.5)
         win32api.keybd_event(VK_CODE["shift"],0,win32con.KEYEVENTF_KEYUP,0)
 
+def mouse_down(pos=None,right_click=False):
+    if pos and len(pos) == 2:
+        mouse_move(pos[0],pos[1])
+    if not right_click:
+        key_down, key_up = win32con.MOUSEEVENTF_LEFTDOWN, win32con.MOUSEEVENTF_LEFTUP
+    else:
+        key_down, key_up = win32con.MOUSEEVENTF_RIGHTDOWN, win32con.MOUSEEVENTF_RIGHTUP
+    win32api.mouse_event(key_down,0,0,0,0)
+
+def mouse_up(right_click=False):
+    if not right_click:
+        key_down, key_up = win32con.MOUSEEVENTF_LEFTDOWN, win32con.MOUSEEVENTF_LEFTUP
+    else:
+        key_down, key_up = win32con.MOUSEEVENTF_RIGHTDOWN, win32con.MOUSEEVENTF_RIGHTUP
+    win32api.mouse_event(key_up,0,0,0,0)
+
+
 def mouse_dclick(x=None,y=None):
     if not x is None and not y is None:
         mouse_move(x,y)
@@ -270,13 +287,13 @@ HOTKEY = {
     ("alt","d"): 23,
     ("tab",): 24,
 
-    #表情占段，待补充 
+    #表情占段，待补充
 
     ("alt","n"): 36,
     ("alt","r"): 37,
     ("alt","u"): 38,
 
-    #快捷技能占段，待补充
+    #快捷技能占段，待补�?
 
     ("alt","h"): 49,
     ("alt","v"): 50,
@@ -371,7 +388,7 @@ class WindowMgr:
         return win32gui.GetWindowRect(self._handle)
 
     def set_window_pos(self,x,y):
-        rec = self.get_window_pos() 
+        rec = self.get_window_pos()
         return win32gui.SetWindowPos(self._handle,win32con.HWND_TOP,x,y,rec[2]-rec[0],rec[3]-rec[1],0)
 
     def get_window_title(self):

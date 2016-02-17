@@ -74,7 +74,7 @@ try:
     import win
 except ImportError:
     win = None
-    print "win module import error" 
+    print "win module import error"
 
 
 """
@@ -306,7 +306,7 @@ def refresh_device():
 class TargetPos(object):
     """
     点击目标图片的不同位置，默认为中心点0
-    1 2 3 
+    1 2 3
     4 0 6
     7 8 9
     """
@@ -317,7 +317,7 @@ class TargetPos(object):
     def getXY(self, cvret, pos):
         if pos == 0 or pos == self.MID:
             return cvret["result"]
-        rect = cvret.get("rectangle") 
+        rect = cvret.get("rectangle")
         if not rect:
             print "could not get rectangle, use mid point instead"
             return cvret["result"]
@@ -357,11 +357,11 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         print "SCREEN captured Fail : SCREEN is None !"
         return None
     # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
-    # 改进思路：(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
+    # 改进思路�?(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
     aircv.cv2.imwrite("screen.jpg", screen)
     screen = aircv.imread("screen.jpg")
 
-    # 在rect矩形区域内查找，有record_pos之后，基本上没用了
+    # 在rect矩形区域内查找，有record_pos之后，基本上没用�?
     offsetx, offsety = 0, 0
     if rect is not None and len(rect) == 4:
         if len(filter(lambda x: (x<=1 and x>=0), rect)) == 4:
@@ -370,7 +370,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
-    # 三种不同的匹配算法
+    # 三种不同的匹配算�?
     try:
         if templateMatch is True:
             print "matchtpl"
@@ -408,8 +408,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     left = max(1, int(timeout))
     start_time = time.time()
     if isinstance(pictarget, MoaText):
-        # moaText暂时没用了，截图太方便了，以后再考虑文字识别吧
-        # pil_2_cv2函数有问题，会变底色，后续修改
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别�?
+        # pil_2_cv2函数有问题，会变底色，后续修�?
         # picdata = aircv.pil_2_cv2(pictarget.img)
         pictarget.img.save("text.png")
         picdata = aircv.imread("text.png")
@@ -443,7 +443,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # 如果没找到，调用用户指定的intervalfunc
             if intervalfunc is not None:
                 intervalfunc()
-            # 超时则抛出异常
+            # 超时则抛出异�?
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
@@ -610,16 +610,16 @@ def swipe(v1, v2=None, vector=None):
         if (vector[0] <= 1 and vector[1] <= 1):
             w, h = DEVICE.getCurrentScreenResolution()
             vector = (int(vector[0] * w), int(vector[1] * h))
-        pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])    
+        pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
     else:
-        raise Exception("no enouph params for swipe") 
+        raise Exception("no enouph params for swipe")
     print pos1, pos2
     DEVICE.swipe(pos1, pos2)
 
 
 @logwrap
 @transparam
-@platform(on=["Android"])
+@platform(on=["Android","Windows"])
 def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
     if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout)
@@ -631,11 +631,11 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
     DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
     for vector in route:
         if (vector[0] <= 1 and vector[1] <= 1):
-            w, h = DEVICE.getCurrentScreenResolution()
-            vector = (vector[0] * w, vector[1] * h)
+            w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+            vector = [vector[0] * w, vector[1] * h, vector[2]]
         pos2 = (pos[0] + vector[0], pos[1] + vector[1])
         DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
-        time.sleep(0.01)
+        time.sleep(vector[2])
     DEVICE.operate({"type": "up"})
     time.sleep(delay)
 
@@ -735,7 +735,7 @@ def test_android():
     # swipe('vp.jpg', 'cal.jpg')
     # img = MoaText(u"你妹").img
     # img.show()
-    # touch(MoaText(u"副 本", font=u"华康唐风隶"))
+    # touch(MoaText(u"�? �?", font=u"华康唐风�?"))
     # install(r"C:\Users\game-netease\Desktop\netease.apk")
     # uninstall("com.example.netease")
 

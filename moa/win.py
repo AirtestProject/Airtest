@@ -1,6 +1,6 @@
 # _*_ coding:UTF-8 _*_
 from winutils import mouse_click, mouse_drag, get_screen_shot, \
-    key_input, WindowMgr, get_resolution
+    key_input, WindowMgr, get_resolution,mouse_down,mouse_up,mouse_move
 from winsendkey import SendKeys
 from ..aircv import aircv
 
@@ -51,6 +51,16 @@ class Windows(object):
 
     def getCurrentScreenResolution(self):
         return get_resolution()
+
+    def operate(self,args):
+        if args["type"] == "down":
+            mouse_down(pos=(args['x'],args['y']))
+        elif args["type"] == "move":
+            mouse_move(int(args['x']),int(args['y']))
+        elif args["type"] == "up":
+            mouse_up()
+        else:
+            raise RuntimeError("invalid operate args: %s"%args)
 
 
 if __name__ == '__main__':
