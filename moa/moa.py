@@ -567,7 +567,7 @@ def home():
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
@@ -591,7 +591,8 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False):
             pos = (pos[0] + offset['x'], pos[1] + offset['y'])
         print ('touchpos after offset', pos)
 
-    DEVICE.touch(pos)
+    for i in range(times):
+        DEVICE.touch(pos)
     time.sleep(delay)
 
 

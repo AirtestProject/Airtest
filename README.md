@@ -30,6 +30,13 @@
 
 	设置日志文件的路径，如果inbase为true的话，日志会保存到basedir目录下
 
+### set_scripthome(dirpath)
+	
+	设置脚本根目录，用于exec_script
+
+### set_globals(key, value)
+	设置moa里面的一些全局变量
+
 ### ~~gevent_run(func)~~
 
 	~~用于windows或mac上的调试功能~~
@@ -45,43 +52,60 @@
 		print shell('echo hello')
 		# output: hello
 
-### amstart(package)
+### amstart(package)	
+>*android only*
 
 	am: android manager的简称
 
 		amstart('com.netease.moa') # 启动应用
 
 ### amstop(package)
+>*android only*
 
 	强制停止应用，等同于`am force-stop <package>`
 
 ### amclear(package)
+>*android only*
 
 	清空应用中的数据，等同于`pm clear <package>`
+
+### install(filepath)
+>*android only*
+
+	安装apk
+
+### uninstall(package)
+>*android only*
+
+	卸载apk
 
 ### snapshot(filename="screen.png")
 
 	保存手机上的截图到filename这个文件。然后返回图像的二进制内容
 
 ### wake()
+>*android only*
 
 	点亮手机屏幕
 
 ### home()
+>*android only*
 
 	点击手机home键
 
-### touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None)
+### touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False)
 
 	点击屏幕中的目标，参数如下：
 
-		v 目标，有三种形态：坐标、图片、文字，详见MoaTarget
+		v 目标，有三种形态：坐标、图片、文字，详见MoaPic
 
 		timeout 超时时间
 
 		delay 操作后延迟时间
 
 		offset 点击坐标偏移，可以是坐标或者是屏幕百分比。offset={"percent": True, "x": 20, "y": 20}
+
+		safe 没找到图片是否忽略错误，默认False，会报MoaError
 
 ### swipe(v1, v2=None, vector=None)
 
@@ -97,7 +121,7 @@
 
 		v 起点目标
 
-		route 滑动线路 [vector1, vector2, vector3...] vector与swipe参数相同
+		route 滑动线路 [(dx1, dy1, dt1), (dx2, dy2, dt2), (dx3, dy3, dt3)...]  其中(dx, dy)与swipe参数vector相同
 		
 		timeout 同上
 		
@@ -105,13 +129,17 @@
 
 ### keyevent(keyname)
 	
-	安卓按键
+	按键输入
 
-		keyname 参考：http://developer.android.com/reference/android/view/KeyEvent.html
+		keyname 安卓参考：http://developer.android.com/reference/android/view/KeyEvent.html
+
+	注意：windows按键和android按键不同
 
 ### text(text)
 	
 	文字输入
+
+	注意：windows可以输入中文，android暂时不行
 
 ### sleep(secs=1.0)
 
