@@ -18,8 +18,8 @@ class Windows(object):
             aircv.imwrite(filename, screen)
         return screen
 
-    def keyevent(self, keystr, alt=False, escape=False):
-        key_input(keystr, alt, escape)
+    def keyevent(self, keyname, escape=False, combine=None):
+        key_input(keyname, escape, combine)
 
     def text(self, text):
         SendKeys(text.decode("utf-8"))

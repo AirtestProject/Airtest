@@ -158,21 +158,24 @@ def transparam(f):
     return wrapper
 
 
+def get_platform():
+    if win:
+        name_dict = {
+            core.Android: "Android",
+            win.Windows: "Windows"
+        }
+    else:
+        name_dict = {
+            core.Android: "Android"
+        }
+    return name_dict.get(DEVICE.__class__)
+
+
 def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            if win:
-                name_dict = {
-                    core.Android: "Android",
-                    win.Windows: "Windows"
-                }
-            else:
-                name_dict = {
-                    core.Android: "Android"
-                }
-
-            if name_dict.get(DEVICE.__class__) not in on:
+            if get_platform() not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
             return r
@@ -648,8 +651,11 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def keyevent(keyname):
-    DEVICE.keyevent(keyname)
+def keyevent(keyname, escape=False, combine=None):
+    if get_platform() == "Windows":
+        DEVICE.keyevent(keyname, escape, combine)
+    else:
+        DEVICE.keyevent(keyname)
 
 
 @logwrap

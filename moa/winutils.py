@@ -255,10 +255,10 @@ def _key_input(str='', alt=False):
         else:
             one_key_input(VK_CODE[c])
 
-def key_input(msg='', alt=False, escape=False):
+def key_input(msg='', escape=False, combine=None):
     #如果有alt，就先按住alt
-    if alt:
-        win32api.keybd_event(VK_CODE["alt"],0,0,0)
+    if combine:
+        win32api.keybd_event(VK_CODE[combine],0,0,0)
     #如果没有转义，直接输入每个字
     if not escape:
         _key_input(msg)
@@ -266,8 +266,8 @@ def key_input(msg='', alt=False, escape=False):
     else:
         one_key_input(VK_CODE[msg])
     #如果有alt，就在这里释放alt
-    if alt:
-        win32api.keybd_event(VK_CODE["alt"],0,win32con.KEYEVENTF_KEYUP,0)
+    if combine:
+        win32api.keybd_event(VK_CODE[combine],0,win32con.KEYEVENTF_KEYUP,0)
 
 #win8/10下面不能用alt
 HOTKEY = {
