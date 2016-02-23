@@ -548,12 +548,15 @@ class Android(object):
 
     def amcheck(self, package):
         output = self.adb.shell(['pm', 'path', package])
-        if not output.startswith('package:'):
-            raise MoaError('amstart package not found')
+        if 'package:' not in output:
+            raise MoaError('package not found, output:[%s]'%output)
 
-    def amstart(self, package):
+    def amstart(self, package, activity=None):
         self.amcheck(package)
-        self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+        if not activity:
+            self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+        else:
+            self.adb.shell(['am', 'start', '-n', '%s/%s.%s'%(package, package, activity)])
 
     def amstop(self, package):
         self.amcheck(package)
@@ -864,7 +867,8 @@ def test_minitouch(serialno):
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     a = Android(serialno)
-    a.touch((100, 100))
+    # a.touch((100, 100))
+    a.amstart("com.netease.my", "AppActivity")
     # import time
     # t = time.time()
     # print a.getDisplayOrientation()
@@ -875,7 +879,7 @@ def test_android():
     # gen = a.minicap.get_frames(adb_port=11314)
     # print gen.next()
     # print len(gen.next())
-    # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netese.apk")
+    # ret = a.adb.install(r"C:\Users\game-netease\Desktop\netease.apk")
     # ret = a.adb.uninstall("com.example.netease")
     # print repr(ret)
     # print a.size
@@ -898,12 +902,12 @@ def test_android():
 
 
 if __name__ == '__main__':
-    serialno = adb_devices(state="device").next()[0]
+    # serialno = adb_devices(state="device").next()[0]
     # print serialno
     # serialno = "192.168.40.111:7401"
     # adb = ADB(serialno)
     # print adb.getprop('ro.build.version.sdk')
     # test_minicap(serialno)
-    test_minitouch(serialno)
+    # test_minitouch(serialno)
     # time.sleep(10)
-    # test_android()
+    test_android()

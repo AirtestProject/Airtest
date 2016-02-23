@@ -506,8 +506,8 @@ def shell(cmd):
 
 @logwrap
 @platform(on=["Android"])
-def amstart(package):
-    DEVICE.amstart(package)
+def amstart(package, activity=None):
+    DEVICE.amstart(package, activity)
     refresh_device()
 
 
@@ -722,8 +722,9 @@ def assert_equal(first, second, msg=""):
 
 
 def test_android():
-    set_serialno('9a4b171d')
-    set_basedir('../taskdata/1433820164')
+    set_serialno()
+    # set_serialno('9ab171d')
+    # set_basedir('../taskdata/1433820164')
     #wake()
     #touch('target.png')
     #touch([100, 200])
@@ -734,8 +735,8 @@ def test_android():
     # # print sys.argv[1: 4]
     # set_serialno(serialno)
     # set_basedir(base_dir)
-    set_serialno()
-    snapshot()
+    # set_serialno()
+    # snapshot()
     # set_basedir()
     # set_logfile('run.log')
     # touch('fb.png', rect=(10, 10, 500, 500))
@@ -749,6 +750,8 @@ def test_android():
     # img.show()
     # install(r"C:\Users\game-netease\Desktop\netease.apk")
     # uninstall("com.example.netease")
+    # amstart("com.netease.my", "AppActivity")
+    amstart("com.netease.my")
 
 
 def test_win():
@@ -759,4 +762,4 @@ def test_win():
     touch("win.png")
 
 if __name__ == '__main__':
-    test_win()
+    test_android()
