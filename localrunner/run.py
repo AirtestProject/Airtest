@@ -6,7 +6,7 @@ from pprint import pprint
 
 
 RUNDATA = "result.json"
-AIRTEST_RUNNER = "../../dist/airtest_runner/airtest_runner.exe"
+AIRTEST_RUNNER = "../../dist/AirtestIDE/AirtestIDE.exe"
 AIRTEST_REPORTER = "utils/report/report_one.py"
 PRESCRIPT = "utils/clear.owl"
 POSTSCRIPT = None
@@ -24,10 +24,9 @@ def list_all_dirs(root_dir, exclude=["dist", "utils"]):
                 yield path
 
 def run_one(path):
-    filename = os.path.basename(path).replace(".owl", ".py")
-    path = os.path.join(path, filename)
     cmd = [
         AIRTEST_RUNNER,
+        "runner",
         path,
         "--utilfile", UTILFILE,
         "--log",
