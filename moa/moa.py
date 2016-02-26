@@ -249,6 +249,10 @@ def set_windows():
     DEVICE = win.Windows()
     global CVSTRATEGY
     CVSTRATEGY = ["tpl", "siftnopre"]
+    # set no resize on windows as default
+    global RESIZE_METHOD
+    if not RESIZE_METHOD:
+        RESIZE_METHOD = aircv.no_resize
 
 
 def connect(url):
