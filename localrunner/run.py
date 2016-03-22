@@ -28,6 +28,7 @@ def run_one(path):
         AIRTEST_RUNNER,
         "runner",
         path,
+        "--setsn",
         "--utilfile", UTILFILE,
         "--log",
         "--screen"

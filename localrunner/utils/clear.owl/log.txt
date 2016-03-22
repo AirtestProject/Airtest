@@ -1,4 +1,6 @@
-{"depth": 1, "tag": "function", "data": {"time_used": 0.012000083923339844, "args": ["fight kill"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2015-12-21 22:49:54"}
-{"depth": 1, "tag": "function", "data": {"time_used": 0.006999969482421875, "args": ["call at/hai/close_all_pop->close_all_pop(110353)"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2015-12-21 22:49:54"}
-{"depth": 1, "tag": "function", "data": {"time_used": 0.007999897003173828, "args": ["call cmd/wizcmd->com_goto(110353,\"101,90,66\")"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2015-12-21 22:49:54"}
-{"depth": 1, "tag": "function", "data": {"time_used": 0.006999969482421875, "args": ["call task/task_mgr->_X_clearall(110353)"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2015-12-21 22:49:54"}
+{"depth": 0, "tag": "function", "data": {"step": "start", "name": "exec_script"}, "time": "2016-02-24 15:27:31"}
+{"depth": 1, "tag": "function", "data": {"time_used": 0.01100015640258789, "args": ["fight kill"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2016-02-24 15:27:34"}
+{"depth": 1, "tag": "function", "data": {"time_used": 0.007999897003173828, "args": ["call at/hai/close_all_pop->close_all_pop(110353)"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2016-02-24 15:27:34"}
+{"depth": 1, "tag": "function", "data": {"time_used": 0.007999897003173828, "args": ["call cmd/wizcmd->com_goto(110353,\"101,90,66\")"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2016-02-24 15:27:34"}
+{"depth": 1, "tag": "function", "data": {"time_used": 0.00800013542175293, "args": ["call task/task_mgr->_X_clearall(110353)"], "name": "server_call", "ret": null, "kwargs": {}}, "time": "2016-02-24 15:27:34"}
+{"depth": 0, "tag": "function", "data": {"step": "end", "name": "exec_script"}, "time": "2016-02-24 15:27:34"}

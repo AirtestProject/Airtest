@@ -42,3 +42,6 @@ apps
 _build/
 screen.jpg
 *.spec
+localrunner/test1.owl
+localrunner/other
+log.txt

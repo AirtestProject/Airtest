@@ -157,7 +157,12 @@ class ADB():
         return self.run(['uninstall', package])
 
     def snapshot(self):
-        pass
+        raw = self.shell(['screencap', '-p'])
+        if platform.system() == "Windows":
+            link_breaker = "\r\r\n"
+        else:
+            link_breaker = "\r\n"
+        return raw.replace(link_breaker, "\n")
 
     def touch(self, (x, y)):
         self.shell('input tap %d %d' % (x, y))
@@ -866,9 +871,12 @@ def test_minitouch(serialno):
 
 def test_android():
     serialno = adb_devices(state="device").next()[0]
-    a = Android(serialno)
+    a = Android(serialno, minicap=False)
+    # screen = a.adb.snapshot()
+    # with open("screen.png", "wb") as f:
+    #     f.write(screen)
     # a.touch((100, 100))
-    a.amstart("com.netease.my", "AppActivity")
+    # a.amstart("com.netease.my", "AppActivity")
     # import time
     # t = time.time()
     # print a.getDisplayOrientation()
@@ -888,7 +896,7 @@ def test_android():
     # return
     # print a.is_screenon()
     # a.keyevent("POWER")
-    # a.snapshot('test.jpg')
+    a.snapshot('test.jpg')
     # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()
