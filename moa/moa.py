@@ -606,26 +606,35 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1):
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, vector=None):
-    if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
-        pos1 = _loop_find(v1)
-    else:
-        pos1 = v1
-
-    if v2:
-        if (_isstr(v2) or isinstance(v2, MoaText)):
-            keep_capture()
-            pos2 = _loop_find(v2)
-            keep_capture(False)
+def swipe(v1, v2=None, vector=None, target_poses=None):
+    if target_poses:
+        if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
+            v1.target_pos = target_poses[0]
+            pos1 = _loop_find(v1)
+            v1.target_pos = target_poses[1]
+            pos2 = _loop_find(v1)
         else:
-            pos2 = v2
-    elif vector:
-        if (vector[0] <= 1 and vector[1] <= 1):
-            w, h = DEVICE.getCurrentScreenResolution()
-            vector = (int(vector[0] * w), int(vector[1] * h))
-        pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
+            raise Exception("invalid params for swipe")
     else:
-        raise Exception("no enouph params for swipe")
+        if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
+            pos1 = _loop_find(v1)
+        else:
+            pos1 = v1
+
+        if v2:
+            if (_isstr(v2) or isinstance(v2, MoaText)):
+                keep_capture()
+                pos2 = _loop_find(v2)
+                keep_capture(False)
+            else:
+                pos2 = v2
+        elif vector:
+            if (vector[0] <= 1 and vector[1] <= 1):
+                w, h = DEVICE.getCurrentScreenResolution()
+                vector = (int(vector[0] * w), int(vector[1] * h))
+            pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
+        else:
+            raise Exception("no enouph params for swipe")
     print pos1, pos2
     DEVICE.swipe(pos1, pos2)
 
