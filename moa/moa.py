@@ -639,8 +639,9 @@ def swipe(v1, v2=None, vector=None, target_poses=None):
             else:
                 pos2 = v2
         elif vector:
+            print SRC_RESOLUTION
             if (vector[0] <= 1 and vector[1] <= 1):
-                w, h = DEVICE.getCurrentScreenResolution()
+                w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
                 vector = (int(vector[0] * w), int(vector[1] * h))
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
