@@ -4,6 +4,7 @@ from winutils import mouse_click, mouse_drag, get_screen_shot, \
 from winsendkey import SendKeys
 from ..aircv import aircv
 
+from PIL import ImageGrab
 
 class Windows(object):
     """Windows Client"""
@@ -11,7 +12,10 @@ class Windows(object):
         self.winmgr = WindowMgr()
 
     def snapshot(self, filename="tmp.png"):
+        # 将回放脚本时的截图方式，换成ImageGrab()
         screen = get_screen_shot(output=None)
+        # screen = ImageGrab.grab()
+
         screen = aircv.pil_2_cv2(screen)
         # aircv.show(screen)
         if filename:
@@ -24,8 +28,8 @@ class Windows(object):
     def text(self, text):
         SendKeys(text.decode("utf-8"))
 
-    def touch(self, pos):
-        mouse_click(pos)
+    def touch(self, pos, right_click=False):
+        mouse_click(pos, right_click)
 
     def swipe(self, p1, p2):
         mouse_drag(p1, p2, duration=0.8)
@@ -70,7 +74,7 @@ if __name__ == '__main__':
     # w.text("nimei")
     # w.touch((10, 10))
     # w.swipe((10,10), (200,200))
-    print w.find_window(u".*梦幻.*")
-    # w.set_foreground()
-    # print w.get_window_pos()
-    # w.set_window_pos((0, 0))
+    print w.find_window(".*Sublime.*")
+    w.set_foreground()
+    print w.get_window_pos()
+    w.set_window_pos((0, 0))

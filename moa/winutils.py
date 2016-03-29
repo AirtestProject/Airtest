@@ -398,6 +398,10 @@ import wx
 
 #windows获取屏幕截图
 def get_screen_shot(output="screenshot.png"):
+    # # 改用PIL的ImageGrab.grab()作为截屏工具了..
+    # # 这个函数不再被调用
+    # print "nima, coming from winutils.py get_screen_shot(), never use this function ! ..."
+    # pass
     app = wx.App()
     s = wx.ScreenDC()
     w, h = s.Size.Get()
