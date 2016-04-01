@@ -39,7 +39,7 @@ CVINTERVAL = 0.5
 SAVE_SCREEN = None
 REFRESH_SCREEN_DELAY = 1
 SRC_RESOLUTION = []
-CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+CVSTRATEGY = None
 SCRIPTHOME = None
 RESIZE_METHOD = None
 
@@ -207,7 +207,7 @@ def set_address((host, port)):
     # FIXME(ssx): need to verify
 
 
-def set_serialno(sn=None, minitouch=True):
+def set_serialno(sn=None, minicap=True, minitouch=True):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -235,8 +235,10 @@ def set_serialno(sn=None, minitouch=True):
             raise MoaError("too many devices found")
         if status != 'device':
             raise MoaError("Device status not good: {}".format(status))
+    global CVSTRATEGY
+    CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
     global DEVICE
-    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minitouch=minitouch)
+    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minicap=minicap, minitouch=minitouch)
     global PLAYRES
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return SERIALNO
@@ -248,7 +250,8 @@ def set_windows():
     global DEVICE
     DEVICE = win.Windows()
     global CVSTRATEGY
-    CVSTRATEGY = ["tpl", "siftnopre"]
+    if not CVSTRATEGY:
+        CVSTRATEGY = ["tpl", "siftnopre"]
     # set no resize on windows as default
     global RESIZE_METHOD
     if not RESIZE_METHOD:
@@ -630,7 +633,7 @@ def swipe(v1, v2=None, vector=None, target_poses=None):
                 pos2 = v2
         elif vector:
             if (vector[0] <= 1 and vector[1] <= 1):
-                w, h = DEVICE.getCurrentScreenResolution()
+                w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
                 vector = (int(vector[0] * w), int(vector[1] * h))
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
