@@ -82,7 +82,7 @@ Some utils
 """
 
 
-def log(tag, data):
+def log(tag, data, exec_script_fail=False):
     ''' Not thread safe '''
     if DEBUG:
         print tag, data
@@ -93,6 +93,13 @@ def log(tag, data):
             return obj.__dict__
         except:
             return None
+
+    # 调度脚本失败时，单独记入log中：
+    if exec_script_fail==True:
+        LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': 1, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=dumper) + '\n')
+        LOG_FILE_FD.flush()
+        return
+
     LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': len(RUNTIME_STACK), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=dumper) + '\n')
     LOG_FILE_FD.flush()
 
@@ -577,7 +584,7 @@ def home():
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, right_click=False):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
@@ -602,7 +609,10 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1):
         print ('touchpos after offset', pos)
 
     for i in range(times):
-        DEVICE.touch(pos)
+        if right_click:
+            DEVICE.touch(pos, right_click=True)
+        else:
+            DEVICE.touch(pos)
     time.sleep(delay)
 
 
@@ -632,6 +642,7 @@ def swipe(v1, v2=None, vector=None, target_poses=None):
             else:
                 pos2 = v2
         elif vector:
+            print SRC_RESOLUTION
             if (vector[0] <= 1 and vector[1] <= 1):
                 w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
                 vector = (int(vector[0] * w), int(vector[1] * h))
@@ -677,6 +688,18 @@ def keyevent(keyname, escape=False, combine=None):
 @logwrap
 @platform(on=["Android", "Windows"])
 def text(text):
+    # 如果文本是“-delete”，那么判定为删除一个字符：
+    text_temp = text.lower()
+    if text_temp=="-delete":
+        if get_platform()=="Windows":
+            # 执行一次‘backspace’删除操作：
+            key_str='backspace'
+            keyevent(key_str,escape=True)
+            return 
+        else:
+            # print "do sth in android device."
+            DEVICE.keyevent('KEYCODE_DEL')
+            return
     DEVICE.text(text)
 
 
