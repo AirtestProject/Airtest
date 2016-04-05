@@ -380,9 +380,9 @@ class Minitouch(object):
             width, height = height, width
         # max_x , max_y = self.size['max_x'], self.size['max_y']
         # print width, height, max_x, max_y
-        max_x , max_y = self.max_x, self.max_y
+        # max_x , max_y = self.max_x, self.max_y
         try:
-            max_x, max_y = float(max_x), float(max_y)  # 如果提取出错，那么仍然使用之前的..
+            max_x, max_y = float(self.max_x), float(self.max_y)  # 如果提取出错，那么仍然使用之前的..
         except:
             max_x , max_y = self.size['max_x'], self.size['max_y']
 
@@ -406,17 +406,17 @@ class Minitouch(object):
         print "minitouch _setup", info
 
         # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽
-        import re
         # print type(info)
         # match = re.search(r"'(.*?)'", r'\1', info)
         match = re.search(r"\((.*?)\)", info)
         # print match.group(0)
-        out = match.group(0)
-        out = out.split(' ')[0]
-        # print out
-        self.max_x = out.split('x')[0][1:]
-        self.max_y = out.split('x')[1]
-        print "minitouch max_x, max_y : ", self.max_x, self.max_y
+        if match is not None:
+            out = match.group(0)
+            out = out.split(' ')[0]
+            # print out
+            self.max_x = out.split('x')[0][1:]
+            self.max_y = out.split('x')[1]
+            print "minitouch max_x, max_y : ", self.max_x, self.max_y
 
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:

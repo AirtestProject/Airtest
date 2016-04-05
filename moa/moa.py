@@ -785,6 +785,13 @@ def assert_equal(first, second, msg=""):
         raise AssertionError("%s and %s are not equal" % (first, second))
 
 
+@logwrap
+def assert_not_equal(first, second, msg=""):
+    result = False if first==second else True
+    if not result:
+        raise AssertionError("%s and %s are equal" % (first, second))
+
+
 def test_android():
     set_serialno()
     # set_serialno('9ab171d')
