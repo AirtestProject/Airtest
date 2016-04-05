@@ -352,7 +352,7 @@ def get_window_pos(window_title):
     return pos
 
 
-import win32gui
+import win32gui, win32ui, win32con, win32api
 import re
 
 class WindowMgr:
@@ -396,29 +396,79 @@ class WindowMgr:
 
 import wx
 
-#windows获取屏幕截图
+# #windows获取屏幕截图
+# def get_screen_shot(output="screenshot.png"):
+#     # # 改用PIL的ImageGrab.grab()作为截屏工具了..
+#     # # 这个函数不再被调用
+#     # print "nima, coming from winutils.py get_screen_shot(), never use this function ! ..."
+#     # pass
+#     app = wx.App()
+#     s = wx.ScreenDC()
+#     w, h = s.Size.Get()
+#     b = wx.EmptyBitmap(w, h)
+#     m = wx.MemoryDCFromDC(s)
+#     m.SelectObject(b)
+#     m.Blit(0, 0, w, h, s, 0, 0)
+#     m.SelectObject(wx.NullBitmap)
+#     if output:
+#         b.SaveFile(output, wx.BITMAP_TYPE_PNG)
+#         return output
+#     else:
+#         from PIL import Image
+#         myWxImage = b.ConvertToImage()
+#         myPilImage = Image.new( 'RGB', (myWxImage.GetWidth(), myWxImage.GetHeight()) )
+#         myPilImage.frombytes( myWxImage.GetData() )
+#         return myPilImage
+        
+import cv2
+# windows双屏-单屏的截图支持
 def get_screen_shot(output="screenshot.png"):
-    # # 改用PIL的ImageGrab.grab()作为截屏工具了..
-    # # 这个函数不再被调用
-    # print "nima, coming from winutils.py get_screen_shot(), never use this function ! ..."
-    # pass
-    app = wx.App()
-    s = wx.ScreenDC()
-    w, h = s.Size.Get()
-    b = wx.EmptyBitmap(w, h)
-    m = wx.MemoryDCFromDC(s)
-    m.SelectObject(b)
-    m.Blit(0, 0, w, h, s, 0, 0)
-    m.SelectObject(wx.NullBitmap)
-    if output:
-        b.SaveFile(output, wx.BITMAP_TYPE_PNG)
-        return output
-    else:
-        from PIL import Image
-        myWxImage = b.ConvertToImage()
-        myPilImage = Image.new( 'RGB', (myWxImage.GetWidth(), myWxImage.GetHeight()) )
-        myPilImage.frombytes( myWxImage.GetData() )
-        return myPilImage
+    hwnd = win32gui.GetDesktopWindow()
+    # print hwnd
+
+    # you can use this to capture only a specific window
+    #l, t, r, b = win32gui.GetWindowRect(hwnd)
+    #w = r - l
+    #h = b - t
+
+    # get complete virtual screen including all monitors
+    SM_XVIRTUALSCREEN = 76
+    SM_YVIRTUALSCREEN = 77
+    SM_CXVIRTUALSCREEN = 78
+    SM_CYVIRTUALSCREEN = 79
+    w = vscreenwidth = win32api.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+    h = vscreenheigth = win32api.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+    l = vscreenx = win32api.GetSystemMetrics(SM_XVIRTUALSCREEN)
+    t = vscreeny = win32api.GetSystemMetrics(SM_YVIRTUALSCREEN)
+    r = l + w
+    b = t + h
+     
+    # print l, t, r, b, ' -> ', w, h
+     
+    hwndDC = win32gui.GetWindowDC(hwnd)
+    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+    saveDC = mfcDC.CreateCompatibleDC()
+     
+    saveBitMap = win32ui.CreateBitmap()
+    saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
+    saveDC.SelectObject(saveBitMap)
+    saveDC.BitBlt((0, 0), (w, h),  mfcDC,  (l, t),  win32con.SRCCOPY)
+    saveBitMap.SaveBitmapFile(saveDC,  'screencapture.bmp')
+
+    img = cv2.imread("screencapture.bmp")
+    # cv2.imshow("123", img)
+    # cv2.waitKey(0)
+    
+    return img
+
+
+
+
+
+
+
+
+
 
 def get_resolution():
     w = win32api.GetSystemMetrics(0)

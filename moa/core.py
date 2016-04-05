@@ -378,8 +378,14 @@ class Minitouch(object):
         width ,height = self.size['width'], self.size['height']
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
-        max_x , max_y = self.size['max_x'], self.size['max_y']
+        # max_x , max_y = self.size['max_x'], self.size['max_y']
         # print width, height, max_x, max_y
+        max_x , max_y = self.max_x, self.max_y
+        try:
+            max_x, max_y = float(max_x), float(max_y)  # 如果提取出错，那么仍然使用之前的..
+        except:
+            max_x , max_y = self.size['max_x'], self.size['max_y']
+
         nx = x * max_x / width
         ny = y * max_y / height
         return nx, ny
@@ -398,6 +404,20 @@ class Minitouch(object):
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(1.0)
         print "minitouch _setup", info
+
+        # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽
+        import re
+        # print type(info)
+        # match = re.search(r"'(.*?)'", r'\1', info)
+        match = re.search(r"\((.*?)\)", info)
+        # print match.group(0)
+        out = match.group(0)
+        out = out.split(' ')[0]
+        # print out
+        self.max_x = out.split('x')[0][1:]
+        self.max_y = out.split('x')[1]
+        print "minitouch max_x, max_y : ", self.max_x, self.max_y
+
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -526,7 +546,9 @@ class Minitouch(object):
         if hasattr(self, "backend_stop_event"):
             self.backend_stop_event.set()
         self.client.close()
-        self.server_proc.kill()
+        # 添加判断，防止报错NoneType
+        if self.server_proc:
+            self.server_proc.kill()
 
 
 class Android(object):

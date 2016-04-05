@@ -43,6 +43,8 @@ CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
 SCRIPTHOME = None
 RESIZE_METHOD = None
 
+MASK_RECT = None # windows运行时，将当前的IDE窗口屏蔽掉，防止识别为脚本中的图片
+
 
 import os
 import re
@@ -358,8 +360,22 @@ class TargetPos(object):
             return cvret["result"]
 
 
+def set_mask_rect(mask_rect=None):
+    if mask_rect:
+        str_rect = mask_rect.split(',')
+        mask_rect = []
+        for i in str_rect:
+            mask_rect.append(max(int(i), 0)) # 如果有负数，就用0 代替
+        global MASK_RECT
+        MASK_RECT = mask_rect
+        print 'MASK_RECT in moa changed : ', MASK_RECT
+    else:
+        print "pass wrong IDE rect into moa.MASK_RECT."
+
+
 def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
     ''' find picture position in screen '''
+    '''mask_rect: 原图像中被黑化的东西'''
     # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -374,6 +390,15 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
     aircv.cv2.imwrite("screen.jpg", screen)
     screen = aircv.imread("screen.jpg")
+
+    # -----建军添加：进行IDE区域的遮挡：
+    global MASK_RECT
+    print "----------- MASK_RECT :", MASK_RECT
+    if MASK_RECT:
+        # screen = aircv.cv2.rectangle(screen, (200,50), (500,800), (0,255,0), -1)
+        screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
+        # aircv.cv2.imshow("check_mask_rect", screen)
+        # aircv.cv2.waitKey(0)
 
     # 在rect矩形区域内查找，有record_pos之后，基本上没用
     offsetx, offsety = 0, 0

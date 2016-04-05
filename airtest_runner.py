@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import json
 import argparse
@@ -86,6 +88,9 @@ def main():
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
+    # 建军添加：设置运行进程中moa的参数，将maskrect设置为
+    ap.add_argument("--maskrect", help="set IDE rect tobe a moa mask, during windows running.")
+
     args = ap.parse_args()
 
     # loading util file
@@ -99,6 +104,11 @@ def main():
 
     # cd script dir
     os.chdir(args.script)
+
+    # 建军添加2016-4-1：
+    if args.maskrect:
+        print "auto set mask_rect : ", args.maskrect
+        set_mask_rect(args.maskrect)
 
     if args.setsn:
         print "auto set_serialno", args.setsn

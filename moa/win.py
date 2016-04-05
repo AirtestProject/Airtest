@@ -12,11 +12,13 @@ class Windows(object):
         self.winmgr = WindowMgr()
 
     def snapshot(self, filename="tmp.png"):
-        # 将回放脚本时的截图方式，换成ImageGrab()
-        screen = get_screen_shot(output=None)
-        # screen = ImageGrab.grab()
+        # # 将回放脚本时的截图方式，换成ImageGrab()
+        # screen = get_screen_shot(output=None)
+        # # screen = ImageGrab.grab()
+        # screen = aircv.pil_2_cv2(screen)
 
-        screen = aircv.pil_2_cv2(screen)
+        screen = get_screen_shot()
+
         # aircv.show(screen)
         if filename:
             aircv.imwrite(filename, screen)
