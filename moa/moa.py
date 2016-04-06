@@ -644,7 +644,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, vector=None, target_poses=None):
+def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
@@ -677,6 +677,8 @@ def swipe(v1, v2=None, vector=None, target_poses=None):
     print pos1, pos2
     DEVICE.swipe(pos1, pos2)
 
+    time.sleep(delay)
+
 
 @logwrap
 @transparam
@@ -703,16 +705,18 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def keyevent(keyname, escape=False, combine=None):
+def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
     if get_platform() == "Windows":
         DEVICE.keyevent(keyname, escape, combine)
     else:
         DEVICE.keyevent(keyname)
 
+    time.sleep(delay)
+
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text):
+def text(text, delay=OPDELAY):
     # 如果文本是“-delete”，那么判定为删除一个字符：
     text_temp = text.lower()
     if text_temp=="-delete":
@@ -727,6 +731,8 @@ def text(text):
             return
     DEVICE.text(text)
 
+    time.sleep(delay)
+
 
 @logwrap
 @platform(on=["Android", "Windows"])
@@ -738,7 +744,8 @@ def sleep(secs=1.0):
 @transparam
 def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None):
     try:
-        return _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
+        pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
+        return pos
     except MoaNotFoundError:
         if not safe:
             raise
@@ -749,7 +756,8 @@ def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None)
 @transparam
 def exists(v, timeout=1):
     try:
-        return _loop_find(v, timeout=timeout)
+        pos = _loop_find(v, timeout=timeout)
+        return pos
     except MoaNotFoundError as e:
         return False
 
@@ -763,33 +771,41 @@ Assertions for result verification
 @transparam
 def assert_exists(v, msg="", timeout=TIMEOUT):
     try:
-        return _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT)
+        pos = _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT)
+        return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
 
 
 @logwrap
 @transparam
-def assert_not_exists(v, msg="", timeout=2):
+def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY):
     try:
         pos = _loop_find(v, timeout=timeout)
+        time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
+        # 本语句成功执行后，睡眠delay时间后，再执行下一行语句：
+        time.sleep(delay)
         pass
 
 
 @logwrap
-def assert_equal(first, second, msg=""):
+def assert_equal(first, second, msg="", delay=OPDELAY):
     result = (first == second)
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
+    time.sleep(delay)
+
 
 @logwrap
-def assert_not_equal(first, second, msg=""):
+def assert_not_equal(first, second, msg="", delay=OPDELAY):
     result = False if first==second else True
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
+
+    time.sleep(delay)
 
 
 def test_android():

@@ -264,7 +264,10 @@ def key_input(msg='', escape=False, combine=None):
         _key_input(msg)
     #如果有转义，
     else:
-        one_key_input(VK_CODE[msg.lower()])
+        if (msg.startswith('f') or msg.startswith('F')) and len(msg)>1:
+            one_key_input(VK_CODE[msg.upper()]) # 针对F1-F12
+        else:
+            one_key_input(VK_CODE[msg.lower()])
     #如果有alt，就在这里释放alt
     if combine:
         win32api.keybd_event(VK_CODE[combine],0,win32con.KEYEVENTF_KEYUP,0)
