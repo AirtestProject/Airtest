@@ -42,6 +42,7 @@ SRC_RESOLUTION = []
 CVSTRATEGY = None
 SCRIPTHOME = None
 RESIZE_METHOD = None
+RECONNECT_TIMES = 5
 
 MASK_RECT = None # windows运行时，将当前的IDE窗口屏蔽掉，防止识别为脚本中的图片
 
@@ -635,11 +636,12 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
 
     for i in range(times):
         if right_click:
-            DEVICE.touch(pos, right_click=True)
+            # DEVICE.touch(pos, right_click=True)
+            device_touch(right_click=True,pos=pos)
         else:
-            DEVICE.touch(pos)
+            # DEVICE.touch(pos)
+            device_touch(right_click=False,pos=pos)
     time.sleep(delay)
-
 
 @logwrap
 @transparam
@@ -675,7 +677,8 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None):
         else:
             raise Exception("no enouph params for swipe")
     print pos1, pos2
-    DEVICE.swipe(pos1, pos2)
+    # DEVICE.swipe(pos1, pos2)
+    device_swipe(pos1=pos1, pos2=pos2)
 
     time.sleep(delay)
 
@@ -691,15 +694,19 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     print ('downpos', pos)
 
-    DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
+    device_operate(action="down",pos=pos)
+    # DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
     for vector in route:
         if (vector[0] <= 1 and vector[1] <= 1):
             w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             vector = [vector[0] * w, vector[1] * h, vector[2]]
         pos2 = (pos[0] + vector[0], pos[1] + vector[1])
-        DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
+        device_operate(action="move",pos=pos2)
+        # DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
         time.sleep(vector[2])
-    DEVICE.operate({"type": "up"})
+
+    device_operate(action="up")
+    # DEVICE.operate({"type": "up"})
     time.sleep(delay)
 
 
@@ -847,6 +854,51 @@ def test_win():
     sleep(1.0)
     swipe("win.png", vector=(0.3, 0.3))
     touch("win.png")
+
+#  touch,swipe,operate操作在有TB的情况下，默认重连之后再操作，最多重连次数是5次
+def device_touch(right_click,pos,try_times=1):
+    try:
+        if right_click:
+            DEVICE.touch(pos, right_click=True)
+        else:
+            DEVICE.touch(pos)
+    except Exception, e:
+        print 'touch exception:',e
+        if try_times==RECONNECT_TIMES:
+            raise MoaError("device action error!")
+        else:
+            DEVICE.reconnect()
+            device_touch(right_click,pos,try_times+1)
+
+def device_swipe(pos1,pos2,try_times=1):
+    try:
+        DEVICE.swipe(pos1, pos2)
+    except Exception, e:
+        print 'swipe exception:',e
+        if try_times==RECONNECT_TIMES:
+            raise MoaError("device action error!")
+        else:
+            DEVICE.reconnect()
+            device_swipe(pos1,pos2,try_times+1)
+
+def device_operate(action,pos=[0,0],try_times=1):
+    try:
+        if action=="down":
+            DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
+        elif action=="up":
+            DEVICE.operate({"type": "up"})
+        elif action=="move":
+            DEVICE.operate({"type": "move", "x": pos[0], "y": pos[1]})
+    except Exception, e:
+        print 'operate exception:',e
+        if action=="move":
+            raise MoaError("device action error!")
+
+        if try_times==RECONNECT_TIMES:
+            raise MoaError("device action error!")
+        else:
+            DEVICE.reconnect()
+            device_operate(action,pos,try_times+1)
 
 if __name__ == '__main__':
     test_android()

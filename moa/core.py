@@ -42,35 +42,38 @@ def init_adb():
         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
 def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
-    if adbpath is None:
-        init_adb()
-        adbpath = ADBPATH
-    if isinstance(cmds, basestring):
-        cmds = shlex.split(cmds)
-    else:
-        cmds = list(cmds)
-    # start-server cannot assign -H -P -s
-    if cmds == ["start-server"] and addr == LOCALADBADRR:
-        return subprocess.check_output([adbpath, "start-server"])
+    try:
+        if adbpath is None:
+            init_adb()
+            adbpath = ADBPATH
+        if isinstance(cmds, basestring):
+            cmds = shlex.split(cmds)
+        else:
+            cmds = list(cmds)
+        # start-server cannot assign -H -P -s
+        if cmds == ["start-server"] and addr == LOCALADBADRR:
+            return subprocess.check_output([adbpath, "start-server"])
 
-    host, port = addr
-    prefix = [adbpath, '-H', host, '-P', str(port)]
-    if serialno:
-        prefix += ['-s', serialno]
-    cmds = prefix + cmds
-    if DEBUG:
-        print ' '.join(cmds)
-    proc = subprocess.Popen(cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    if not_wait:
-        return proc
-    # return subprocess.check_output(cmds)
-    stdout, stderr = proc.communicate()
-    if proc.returncode:
-        raise AdbError(stdout, stderr)
-    return stdout
+        host, port = addr
+        prefix = [adbpath, '-H', host, '-P', str(port)]
+        if serialno:
+            prefix += ['-s', serialno]
+        cmds = prefix + cmds
+        if DEBUG:
+            print ' '.join(cmds)
+        proc = subprocess.Popen(cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        if not_wait:
+            return proc
+        # return subprocess.check_output(cmds)
+        stdout, stderr = proc.communicate()
+        if proc.returncode:
+            raise AdbError(stdout, stderr)
+        return stdout
+    except Exception, e:
+        raise MoaError("adb error!")
 
 
 def adb_devices(state=None, addr=LOCALADBADRR):
@@ -99,6 +102,11 @@ class ADB():
         # if remote devices, connect first
         if ":" in self.serialno:
             print adbrun("connect %s"%self.serialno)
+            time.sleep(1.0)
+
+    def disconnect(self):
+        if ":" in self.serialno:
+            adbrun("disconnect %s"%self.serialno)
             time.sleep(1.0)
 
     def run(self, cmds, not_wait=False):
@@ -344,6 +352,7 @@ class Minitouch(object):
         self.server_proc = None
         self.client = None
         self.setup_server()
+        self.backend=backend
         if backend:
             self.setup_client_backend()
         else:
@@ -565,6 +574,15 @@ class Android(object):
 
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
+
+    def reconnect(self):
+        self.adb.disconnect()
+        self.adb._setup()
+        self.minitouch.setup_server()
+        if self.minitouch.backend:
+            self.minitouch.setup_client_backend()
+        else:
+            self.minitouch.setup_client()
 
     def check_status(self):
         dev_list = list(adb_devices())
