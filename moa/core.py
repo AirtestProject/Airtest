@@ -18,8 +18,9 @@ import struct
 import threading
 import platform
 import Queue
+import traceback
 from error import MoaError, AdbError
-from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path
+from utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
 from ..aircv import aircv
 
 
@@ -41,39 +42,37 @@ def init_adb():
     if not ADBPATH:
         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
-def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
-    try:
-        if adbpath is None:
-            init_adb()
-            adbpath = ADBPATH
-        if isinstance(cmds, basestring):
-            cmds = shlex.split(cmds)
-        else:
-            cmds = list(cmds)
-        # start-server cannot assign -H -P -s
-        if cmds == ["start-server"] and addr == LOCALADBADRR:
-            return subprocess.check_output([adbpath, "start-server"])
 
-        host, port = addr
-        prefix = [adbpath, '-H', host, '-P', str(port)]
-        if serialno:
-            prefix += ['-s', serialno]
-        cmds = prefix + cmds
-        if DEBUG:
-            print ' '.join(cmds)
-        proc = subprocess.Popen(cmds,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        if not_wait:
-            return proc
-        # return subprocess.check_output(cmds)
-        stdout, stderr = proc.communicate()
-        if proc.returncode:
-            raise AdbError(stdout, stderr)
-        return stdout
-    except Exception, e:
-        raise MoaError("adb error!")
+def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
+    if adbpath is None:
+        init_adb()
+        adbpath = ADBPATH
+    if isinstance(cmds, basestring):
+        cmds = shlex.split(cmds)
+    else:
+        cmds = list(cmds)
+    # start-server cannot assign -H -P -s
+    if cmds == ["start-server"] and addr == LOCALADBADRR:
+        return subprocess.check_output([adbpath, "start-server"])
+
+    host, port = addr
+    prefix = [adbpath, '-H', host, '-P', str(port)]
+    if serialno:
+        prefix += ['-s', serialno]
+    cmds = prefix + cmds
+    if DEBUG:
+        print ' '.join(cmds)
+    proc = subprocess.Popen(cmds,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    if not_wait:
+        return proc
+    # return subprocess.check_output(cmds)
+    stdout, stderr = proc.communicate()
+    if proc.returncode:
+        raise AdbError(stdout, stderr)
+    return stdout
 
 
 def adb_devices(state=None, addr=LOCALADBADRR):
@@ -560,6 +559,25 @@ class Minitouch(object):
             self.server_proc.kill()
 
 
+def autoretry(func):
+    def f(self, *args, **kwargs):
+        def fail_hook(tries_remaining, e, mydelay):
+            print "autoretry", tries_remaining, repr(e), mydelay
+            try:
+                self.reconnect()
+            except:
+                traceback.print_exc()
+
+        @retries(5, hook=fail_hook)
+        def f_with_retries(self, *args, **kwargs):
+            print self, args, kwargs
+            return func(self, *args, **kwargs)
+
+        ret = f_with_retries(self, *args)#, **kwargs)
+        return ret
+    return f
+
+
 class Android(object):
     """Android Client"""
     def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True):
@@ -574,15 +592,6 @@ class Android(object):
 
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
-
-    def reconnect(self):
-        self.adb.disconnect()
-        self.adb._setup()
-        self.minitouch.setup_server()
-        if self.minitouch.backend:
-            self.minitouch.setup_client_backend()
-        else:
-            self.minitouch.setup_client()
 
     def check_status(self):
         dev_list = list(adb_devices())
@@ -617,6 +626,7 @@ class Android(object):
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
+    @autoretry
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
             screen = self.minicap.get_frame()
@@ -650,7 +660,9 @@ class Android(object):
     def text(self, text):
         self.adb.shell(["input", "text", text])
 
+    @autoretry
     def touch(self, pos):
+        print "touch...........", pos
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         if self.minitouch:
@@ -658,6 +670,7 @@ class Android(object):
         else:
             self.adb.touch(pos)
 
+    @autoretry
     def swipe(self, p1, p2):
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
@@ -666,6 +679,7 @@ class Android(object):
         else:
             self.adb.swipe(p1, p2)
 
+    @autoretry
     def operate(self, tar):
         x, y = tar.get("x"), tar.get("y")
         if (x, y) != (None, None):
@@ -854,7 +868,16 @@ class Android(object):
         self.size["orientation"] = ori
         if self.minicap:
             # self.minicap.get_display_info()
-            self.minicap.size["rotation"] = ori * 90 
+            self.minicap.size["rotation"] = ori * 90
+
+    def reconnect(self):
+        self.adb.disconnect()
+        self.adb._setup()
+        self.minitouch.setup_server()
+        if self.minitouch.backend:
+            self.minitouch.setup_client_backend()
+        else:
+            self.minitouch.setup_client()
 
 
 class XYTransformer(object):
