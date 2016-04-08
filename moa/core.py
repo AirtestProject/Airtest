@@ -413,18 +413,29 @@ class Minitouch(object):
         info = nbsp.read(1.0)
         print "minitouch _setup", info
 
-        # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽
-        # print type(info)
-        # match = re.search(r"'(.*?)'", r'\1', info)
-        match = re.search(r"\((.*?)\)", info)
-        # print match.group(0)
-        if match is not None:
-            out = match.group(0)
-            out = out.split(' ')[0]
+        # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽: info的多行输出中，提取出(1079x1919 with 12 contacts)格式的语句
+        try:
+            data_list = []
+            a = info.split('\n')
+            # print len(a)
+            for i in a:
+                match = re.search(r"\((.*?)\)", i)
+                if match:
+                    data_list.append(match.group(0))
+        
+            for i in data_list:
+                if i.endswith(' contacts)') and i.find(" with "):
+                    data_origin = i
+        
+            print data_origin
+
+            out = data_origin.split(' ')[0]
             # print out
             self.max_x = out.split('x')[0][1:]
             self.max_y = out.split('x')[1]
             print "minitouch max_x, max_y : ", self.max_x, self.max_y
+        except:
+            print "when establish minitouch, cannot get valid maxX and maxY ..."
 
         nbsp.kill() # kill掉stdout的reader，目前后面不会再读了
         if p.poll() is not None:
@@ -434,6 +445,7 @@ class Minitouch(object):
             return None
         reg_cleanup(p.kill)
         self.server_proc = p
+
         return p
 
     def touch(self, (x, y), duration=0.01):
@@ -661,12 +673,12 @@ class Android(object):
         self.adb.shell(["input", "text", text])
 
     @autoretry
-    def touch(self, pos):
+    def touch(self, pos, duration=0.01):
         print "touch...........", pos
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         if self.minitouch:
-            self.minitouch.touch(pos)
+            self.minitouch.touch(pos, duration=duration)
         else:
             self.adb.touch(pos)
 

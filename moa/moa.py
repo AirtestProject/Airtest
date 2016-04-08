@@ -366,20 +366,26 @@ class TargetPos(object):
 
 def set_mask_rect(mask_rect=None):
     if mask_rect:
+        global MASK_RECT
+
         str_rect = mask_rect.split(',')
         mask_rect = []
         for i in str_rect:
-            mask_rect.append(max(int(i), 0)) # 如果有负数，就用0 代替
-        global MASK_RECT
+            try:
+                mask_rect.append(max(int(i), 0)) # 如果有负数，就用0 代替
+            except:
+                MASK_RECT = None
+                return
+        # global MASK_RECT
         MASK_RECT = mask_rect
         print 'MASK_RECT in moa changed : ', MASK_RECT
     else:
         print "pass wrong IDE rect into moa.MASK_RECT."
 
 
-def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
+def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False, find_in=None):
     ''' find picture position in screen '''
-    '''mask_rect: 原图像中被黑化的东西'''
+    '''mask_rect: 原图像中需要被白色化的区域——IDE的所在区域.'''
     # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -403,6 +409,21 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
         # aircv.cv2.imshow("check_mask_rect", screen)
         # aircv.cv2.waitKey(0)
+
+    # 如果在左半边寻找，那么截取左半边屏幕作为源图像；如果在右半边寻找，那么截取右半边屏幕作为源图像。
+    if find_in=="left":
+        h, w = screen.shape[:2]
+        # screen = screen[0:h, 0:w/2]
+        screen = aircv.cv2.rectangle(screen, (w/2, 0), (w, h), (255,255,255), -1)
+        # aircv.cv2.imshow("left", screen)
+        # aircv.cv2.waitKey(0)
+    elif find_in=="right":
+        h, w = screen.shape[:2]
+        # screen = screen[0:h, w/2:w]
+        screen = aircv.cv2.rectangle(screen, (0, 0), (w/2,h), (255,255,255), -1)
+        # aircv.cv2.imshow("right", screen)
+        # aircv.cv2.waitKey(0)
+
 
     # 在rect矩形区域内查找，有record_pos之后，基本上没用
     offsetx, offsety = 0, 0
@@ -445,7 +466,12 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_in=None):
+    '''
+    find_in: 用于windows的测试时双开，
+            find_in="left"时，只在左半边屏幕中寻找(双屏幕的话只在左屏幕中寻找)
+            find_in="left"时，只在右半边屏幕中寻找(双屏幕的话只在右屏幕中寻找)
+    '''
     print "try finding %s" % pictarget
     pos = None
     left = max(1, int(timeout))
@@ -468,13 +494,13 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             pos = None
             for st in CVSTRATEGY:
                 if st == "siftpre" and getattr(pictarget, "record_pos"):
-                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, find_in=find_in)
                 elif st == "siftnopre":
                     # 在预测区域没有找到，则退回全局查找
-                    pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos)
+                    pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos, find_in=find_in)
                 elif st == "tpl" and getattr(pictarget, "resolution"):
                     # 再用缩放后的模板匹配来找
-                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True, find_in=find_in)
                 else:
                     print "skip CVSTRATEGY:%s"%st
                 # 找到一个就返回
@@ -610,13 +636,13 @@ def home():
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, right_click=False):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, right_click=False, duration=0.01, find_in=None):
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if _isstr(v) or isinstance(v, (MoaPic, MoaText)):
         try:
-            pos = _loop_find(v, timeout=timeout)
+            pos = _loop_find(v, timeout=timeout, find_in=find_in)
         except MoaNotFoundError:
             if safe:
                 return False
@@ -638,31 +664,32 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
         if right_click:
             DEVICE.touch(pos, right_click=True)
         else:
-            DEVICE.touch(pos)
+            DEVICE.touch(pos, duration=duration)
     time.sleep(delay)
+
 
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None):
+def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=None):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
-            pos1 = _loop_find(v1)
+            pos1 = _loop_find(v1, find_in=find_in)
             v1.target_pos = target_poses[1]
-            pos2 = _loop_find(v1)
+            pos2 = _loop_find(v1, find_in=find_in)
         else:
             raise Exception("invalid params for swipe")
     else:
         if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
-            pos1 = _loop_find(v1)
+            pos1 = _loop_find(v1, find_in=find_in)
         else:
             pos1 = v1
 
         if v2:
             if (_isstr(v2) or isinstance(v2, MoaText)):
                 keep_capture()
-                pos2 = _loop_find(v2)
+                pos2 = _loop_find(v2, find_in=find_in)
                 keep_capture(False)
             else:
                 pos2 = v2
@@ -683,9 +710,9 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None):
 @logwrap
 @transparam
 @platform(on=["Android","Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
+def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_in=None):
     if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout)
+        pos = _loop_find(v, timeout=timeout, find_in=find_in)
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
@@ -699,7 +726,6 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
         pos2 = (pos[0] + vector[0], pos[1] + vector[1])
         DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
         time.sleep(vector[2])
-
     DEVICE.operate({"type": "up"})
     time.sleep(delay)
 
@@ -743,9 +769,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @transparam
-def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None):
+def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
+        pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_in=find_in)
         return pos
     except MoaNotFoundError:
         if not safe:
@@ -755,9 +781,9 @@ def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None)
 
 @logwrap
 @transparam
-def exists(v, timeout=1):
+def exists(v, timeout=1, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout)
+        pos = _loop_find(v, timeout=timeout, find_in=find_in)
         return pos
     except MoaNotFoundError as e:
         return False
@@ -770,9 +796,9 @@ Assertions for result verification
 
 @logwrap
 @transparam
-def assert_exists(v, msg="", timeout=TIMEOUT):
+def assert_exists(v, msg="", timeout=TIMEOUT, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT)
+        pos = _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT, find_in=find_in)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
@@ -780,9 +806,9 @@ def assert_exists(v, msg="", timeout=TIMEOUT):
 
 @logwrap
 @transparam
-def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY):
+def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout)
+        pos = _loop_find(v, timeout=timeout, find_in=find_in)
         time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:

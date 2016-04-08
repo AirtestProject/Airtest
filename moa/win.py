@@ -30,7 +30,7 @@ class Windows(object):
     def text(self, text):
         SendKeys(text.decode("utf-8"))
 
-    def touch(self, pos, right_click=False):
+    def touch(self, pos, right_click=False, duration=None): # 暂时添加了duration接口，但是并无对应的响应
         mouse_click(pos, right_click)
 
     def swipe(self, p1, p2):

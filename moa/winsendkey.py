@@ -9,6 +9,9 @@ is useful!
 import time
 import ctypes
 
+# 为了支持括号的输入：
+import win
+
 __all__ = ['KeySequenceError', 'SendKeys']
 
 try:
@@ -564,11 +567,17 @@ def parse_keys(string,
             end_pos = string.find(")", index)
             if end_pos == -1:
                 raise KeySequenceError('`)` not found')
+
+            keys.append("(")
+
             keys.extend(
                 parse_keys(string[index:end_pos], modifiers = modifiers))
+
+            keys.append(")")
+
             index = end_pos + 1
 
-        # Escape or named key
+        # Escape or named key     “{ xxxx }”是特殊的key名
         elif c == "{":
             end_pos = string.find("}", index)
             if end_pos == -1:
@@ -576,6 +585,7 @@ def parse_keys(string,
 
             code = string[index:end_pos]
             index = end_pos + 1
+
             keys.extend(handle_code(code))
 
         # unmatched ")"
@@ -619,6 +629,8 @@ def parse_keys(string,
     while modifiers:
         keys.append(VirtualKeyAction(modifiers.pop(), down = False))
 
+    # print keys
+
     return keys
 
 def LoByte(val):
@@ -638,8 +650,17 @@ def SendKeys(keys,
     "Parse the keys and type them"
     keys = parse_keys(keys, with_spaces, with_tabs, with_newlines)
 
-    for k in keys:
-        k.Run()
+    for k in keys: # 若为(){}则通过进行模拟按键来都实现...
+        if k=="(":
+            win.key_input("(")
+        elif k==")":
+            win.key_input(")")
+        elif k=="{":
+            win.key_input("{")
+        elif k=="}":
+            win.key_input("}")
+        else:
+            k.Run()
         time.sleep(pause)
 
 
@@ -697,5 +718,7 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    SendKeys(u"你妹")
-    SendKeys("^f")
+    # SendKeys(u"你妹")
+    # SendKeys("^f")
+    
+    SendKeys("$ni(hehe)")
