@@ -9,8 +9,6 @@ is useful!
 import time
 import ctypes
 
-# 为了支持括号的输入：
-import win
 
 __all__ = ['KeySequenceError', 'SendKeys']
 
@@ -652,13 +650,17 @@ def SendKeys(keys,
 
     for k in keys: # 若为(){}则通过进行模拟按键来都实现...
         if k=="(":
-            win.key_input("(")
+            x_key = KeyAction("(")
+            x_key.Run()
         elif k==")":
-            win.key_input(")")
+            x_key = KeyAction(")")
+            x_key.Run()
         elif k=="{":
-            win.key_input("{")
+            x_key = KeyAction("{")
+            x_key.Run()
         elif k=="}":
-            win.key_input("}")
+            x_key = KeyAction("}")
+            x_key.Run()
         else:
             k.Run()
         time.sleep(pause)
