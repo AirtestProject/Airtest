@@ -403,7 +403,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
     # -----建军添加：进行IDE区域的遮挡：
     global MASK_RECT
-    print "----------- MASK_RECT :", MASK_RECT
+    print "-- IDE MASK_RECT :", MASK_RECT
     if MASK_RECT:
         # screen = aircv.cv2.rectangle(screen, (200,50), (500,800), (0,255,0), -1)
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
@@ -664,6 +664,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
         if right_click:
             DEVICE.touch(pos, right_click=True)
         else:
+            # print "in moa , duration is:", duration
             DEVICE.touch(pos, duration=duration)
     time.sleep(delay)
 
@@ -671,7 +672,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=None):
+def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
@@ -702,7 +703,7 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=No
         else:
             raise Exception("no enouph params for swipe")
     print pos1, pos2
-    DEVICE.swipe(pos1, pos2)
+    DEVICE.swipe(pos1, pos2, duration=duration)
 
     time.sleep(delay)
 

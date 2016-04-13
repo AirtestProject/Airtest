@@ -585,7 +585,7 @@ def autoretry(func):
             print self, args, kwargs
             return func(self, *args, **kwargs)
 
-        ret = f_with_retries(self, *args)#, **kwargs)
+        ret = f_with_retries(self, *args, **kwargs)
         return ret
     return f
 
@@ -660,6 +660,7 @@ class Android(object):
         return self.adb.shell(*args)
 
     def keyevent(self, keyname):
+        keyname = keyname.upper()
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
@@ -674,7 +675,7 @@ class Android(object):
 
     @autoretry
     def touch(self, pos, duration=0.01):
-        print "touch...........", pos
+        # print "touch...........", pos
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         if self.minitouch:
@@ -683,13 +684,14 @@ class Android(object):
             self.adb.touch(pos)
 
     @autoretry
-    def swipe(self, p1, p2):
+    def swipe(self, p1, p2, duration=0.5):
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
-            self.minitouch.swipe(p1, p2)
+            self.minitouch.swipe(p1, p2, duration=duration)
         else:
-            self.adb.swipe(p1, p2)
+            duration = duration*1000 # adb的swipe操作时间是以毫秒为单位的。
+            self.adb.swipe(p1, p2, duration=duration)
 
     @autoretry
     def operate(self, tar):
@@ -843,20 +845,21 @@ class Android(object):
         return -1.0
 
     def getDisplayOrientation(self):
-        # Fallback method to obtain the orientation
-        # See https://github.com/dtmilano/AndroidViewClient/issues/128
-        surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
-        output = self.adb.shell('dumpsys input')
-        m = surfaceOrientationRE.search(output)
-        if m:
-            return int(m.group(1))
-
+        
         # another way to get orientation, for old sumsung device(sdk version 15) from xiaoma
         SurfaceFlingerRE = re.compile('orientation=(\d+)')
         output = self.adb.shell('dumpsys SurfaceFlinger')
         m = SurfaceFlingerRE.search(output)
         if m:
             return int(m.group(1))
+
+        # Fallback method to obtain the orientation
+        # See https://github.com/dtmilano/AndroidViewClient/issues/128
+        surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
+        output = self.adb.shell('dumpsys input')
+        m = surfaceOrientationRE.search(output)
+        if m:
+            return int(m.group(1))        
 
         # We couldn't obtain the orientation
         # return -1
