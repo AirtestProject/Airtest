@@ -33,8 +33,8 @@ class Windows(object):
     def touch(self, pos, right_click=False, duration=None): # 暂时添加了duration接口，但是并无对应的响应
         mouse_click(pos, right_click)
 
-    def swipe(self, p1, p2):
-        mouse_drag(p1, p2, duration=0.8)
+    def swipe(self, p1, p2, duration=0.8):
+        mouse_drag(p1, p2, duration=0.8)  # windows拖拽时间固定为0.8s
 
     def find_window(self, wildcard):
         """
