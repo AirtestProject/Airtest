@@ -820,7 +820,11 @@ def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_in=None):
 
 @logwrap
 def assert_equal(first, second, msg="", delay=OPDELAY):
-    result = (first == second)
+    if isinstance(second, unicode) or isinstance(first, unicode):
+        result = (unicode(first) == unicode(second))
+    elif type(first)==type(second):
+        result = (first == second)
+
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
@@ -829,7 +833,11 @@ def assert_equal(first, second, msg="", delay=OPDELAY):
 
 @logwrap
 def assert_not_equal(first, second, msg="", delay=OPDELAY):
-    result = False if first==second else True
+    if isinstance(second, unicode) or isinstance(first, unicode):
+        result = (unicode(first) == unicode(second))
+    elif type(first)==type(second):
+        result = False if first==second else True
+
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
 

@@ -288,6 +288,7 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
+        self.get_display_info() # 更新当前设备朝向
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
@@ -646,6 +647,7 @@ class Android(object):
             screen = self.adb.snapshot()
         # 输出cv2对象
         screen = aircv.string_2_img(screen)
+
         # 保证方向是正的
         if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
             h, w = screen.shape[:2] #cv2的shape是高度在前面!!!!
