@@ -394,7 +394,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
     # 如果截屏失败，则screen为空，打印提示后，识别结果直接返回None
     if screen is None:
-        print "SCREEN captured Fail : SCREEN is None !"
+        print "Cannot captured SCREEN : SCREEN is None !"
         return None
     # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
     # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
@@ -403,7 +403,6 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
 
     # -----建军添加：进行IDE区域的遮挡：
     global MASK_RECT
-    print "-- IDE MASK_RECT :", MASK_RECT
     if MASK_RECT:
         # screen = aircv.cv2.rectangle(screen, (200,50), (500,800), (0,255,0), -1)
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
@@ -434,20 +433,20 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
             x0, y0, x1, y1 = rect
         screen = aircv.crop(screen, (x0, y0), (x1, y1))
         offsetx, offsety = x0, y0
-    # 三种不同的匹配算
+    # 三种不同的匹配算法：
     try:
         if templateMatch is True:
-            print "matchtpl"
+            print "method_1: matchtpl"
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
-            print "siftnopre"
+            print "method_2: siftnopre"
             ret = aircv.find_sift(screen, picdata)
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
-            print "siftpre"
+            print "method_3: siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
             ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
@@ -455,7 +454,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     except Exception as err:
         traceback.print_exc()
         ret = None
-    print ret
+    # print ret
     EXTRA_LOG.update({"cv": ret})
     if not ret:
         return None
@@ -502,7 +501,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                     # 再用缩放后的模板匹配来找
                     pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True, find_in=find_in)
                 else:
-                    print "skip CVSTRATEGY:%s"%st
+                    print "skip CV_STRATEGY:%s"%st
                 # 找到一个就返回
                 if pos is not None:
                     return pos
@@ -650,7 +649,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
-    print ('touchpos', pos)
+    # print ('touchpos', pos)
 
     if offset:
         if offset['percent']:
@@ -659,6 +658,8 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
         else:
             pos = (pos[0] + offset['x'], pos[1] + offset['y'])
         print ('touchpos after offset', pos)
+    else:
+        print ('touchpos', pos)
 
     for i in range(times):
         if right_click:
@@ -695,14 +696,14 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=No
             else:
                 pos2 = v2
         elif vector:
-            print SRC_RESOLUTION
+            # print SRC_RESOLUTION
             if (vector[0] <= 1 and vector[1] <= 1):
                 w, h = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
                 vector = (int(vector[0] * w), int(vector[1] * h))
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
             raise Exception("no enouph params for swipe")
-    print pos1, pos2
+    # print pos1, pos2
     DEVICE.swipe(pos1, pos2, duration=duration)
 
     time.sleep(delay)
