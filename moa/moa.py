@@ -246,7 +246,8 @@ def set_serialno(sn=None, minicap=True, minitouch=True):
         if status != 'device':
             raise MoaError("Device status not good: {}".format(status))
     global CVSTRATEGY
-    CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+    if not CVSTRATEGY:
+        CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
     global DEVICE
     DEVICE = core.Android(SERIALNO, addr=ADDRESS, minicap=minicap, minitouch=minitouch)
     global PLAYRES
