@@ -260,7 +260,7 @@ class Minicap(object):
             real_orientation), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
-        print info
+        # print info
         nbsp.kill()
 
         if p.poll() is not None:
@@ -288,7 +288,7 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        self.get_display_info() # 更新当前设备朝向
+        # self.get_display_info() # 设备的朝向发生更改时，由脚本层进行负责更新朝向并进行更新。
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
         raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
@@ -387,11 +387,9 @@ class Minitouch(object):
         width ,height = self.size['width'], self.size['height']
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
-        # max_x , max_y = self.size['max_x'], self.size['max_y']
-        # print width, height, max_x, max_y
-        # max_x , max_y = self.max_x, self.max_y
+
         try:
-            max_x, max_y = float(self.max_x), float(self.max_y)  # 如果提取出错，那么仍然使用之前的..
+            max_x, max_y = float(self.max_x), float(self.max_y)  # 如果提取出错，那么仍然使用之前的获取方法。
         except:
             max_x , max_y = self.size['max_x'], self.size['max_y']
 
@@ -415,23 +413,17 @@ class Minitouch(object):
         print "minitouch _setup", info
 
         # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽: info的多行输出中，提取出(1079x1919 with 12 contacts)格式的语句
+        data_list = []
+        a = info.split('\n')
+        for i in a:
+            match = re.search(r"\((.*?)\)", i)
+            if match:
+                data_list.append(match.group(0))        
+        for i in data_list:
+            if i.endswith(' contacts)') and i.find(" with "):
+                data_origin = i
         try:
-            data_list = []
-            a = info.split('\n')
-            # print len(a)
-            for i in a:
-                match = re.search(r"\((.*?)\)", i)
-                if match:
-                    data_list.append(match.group(0))
-        
-            for i in data_list:
-                if i.endswith(' contacts)') and i.find(" with "):
-                    data_origin = i
-        
-            print data_origin
-
             out = data_origin.split(' ')[0]
-            # print out
             self.max_x = out.split('x')[0][1:]
             self.max_y = out.split('x')[1]
             print "minitouch max_x, max_y : ", self.max_x, self.max_y
@@ -575,7 +567,7 @@ class Minitouch(object):
 def autoretry(func):
     def f(self, *args, **kwargs):
         def fail_hook(tries_remaining, e, mydelay):
-            print "autoretry", tries_remaining, repr(e), mydelay
+            # print "autoretry", tries_remaining, repr(e), mydelay
             try:
                 self.reconnect()
             except:
@@ -583,7 +575,7 @@ def autoretry(func):
 
         @retries(5, hook=fail_hook)
         def f_with_retries(self, *args, **kwargs):
-            print self, args, kwargs
+            # print self, args, kwargs
             return func(self, *args, **kwargs)
 
         ret = f_with_retries(self, *args, **kwargs)

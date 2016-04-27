@@ -246,7 +246,8 @@ def set_serialno(sn=None, minicap=True, minitouch=True):
         if status != 'device':
             raise MoaError("Device status not good: {}".format(status))
     global CVSTRATEGY
-    CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+    if not CVSTRATEGY:
+        CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
     global DEVICE
     DEVICE = core.Android(SERIALNO, addr=ADDRESS, minicap=minicap, minitouch=minitouch)
     global PLAYRES
@@ -398,31 +399,22 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         return None
     # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
     # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
-    aircv.cv2.imwrite("screen.jpg", screen)
-    screen = aircv.imread("screen.jpg")
+    aircv.cv2.imwrite("screen.png", screen)
+    screen = aircv.imread("screen.png")
 
-    # -----建军添加：进行IDE区域的遮挡：
+    # 建军添加：进行IDE区域的遮挡：
     global MASK_RECT
     if MASK_RECT:
-        # screen = aircv.cv2.rectangle(screen, (200,50), (500,800), (0,255,0), -1)
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
-        # aircv.cv2.imshow("check_mask_rect", screen)
-        # aircv.cv2.waitKey(0)
 
-    # 如果在左半边寻找，那么截取左半边屏幕作为源图像；如果在右半边寻找，那么截取右半边屏幕作为源图像。
+    #---------------稍后再aircv内实现，遮住图像某一半，达到指定左右对半区域的查找：
+    # 如果在左半边寻找，遮住右半边图像；如果在右半边寻找，遮住左半边图像。
     if find_in=="left":
         h, w = screen.shape[:2]
-        # screen = screen[0:h, 0:w/2]
         screen = aircv.cv2.rectangle(screen, (w/2, 0), (w, h), (255,255,255), -1)
-        # aircv.cv2.imshow("left", screen)
-        # aircv.cv2.waitKey(0)
     elif find_in=="right":
         h, w = screen.shape[:2]
-        # screen = screen[0:h, w/2:w]
         screen = aircv.cv2.rectangle(screen, (0, 0), (w/2,h), (255,255,255), -1)
-        # aircv.cv2.imshow("right", screen)
-        # aircv.cv2.waitKey(0)
-
 
     # 在rect矩形区域内查找，有record_pos之后，基本上没用
     offsetx, offsety = 0, 0
@@ -436,17 +428,17 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     # 三种不同的匹配算法：
     try:
         if templateMatch is True:
-            print "method_1: matchtpl"
+            print "method: matchtpl"
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
-            print "method_2: siftnopre"
+            print "method: siftnopre"
             ret = aircv.find_sift(screen, picdata)
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
-            print "method_3: siftpre"
+            print "method: siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
             ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
@@ -471,7 +463,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             find_in="left"时，只在左半边屏幕中寻找(双屏幕的话只在左屏幕中寻找)
             find_in="left"时，只在右半边屏幕中寻找(双屏幕的话只在右屏幕中寻找)
     '''
-    print "try finding %s" % pictarget
+    print "\nTry finding:\n %s" % pictarget
     pos = None
     left = max(1, int(timeout))
     start_time = time.time()
@@ -649,7 +641,6 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
     else:
         pos = v
     TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
-    # print ('touchpos', pos)
 
     if offset:
         if offset['percent']:
@@ -659,7 +650,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
             pos = (pos[0] + offset['x'], pos[1] + offset['y'])
         print ('touchpos after offset', pos)
     else:
-        print ('touchpos', pos)
+        print 'touchpos:', pos
 
     for i in range(times):
         if right_click:
