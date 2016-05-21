@@ -13,14 +13,12 @@ adb = ADB(SERIALNO)
 
 
 @logwrap
-@platform(on=['Android', 'IOS'])
 def rm_installer(filename):
     if os.path.exists(filename):
         os.remove(filename)
         
 
 @logwrap
-@platform(on=['Android', 'IOS'])
 def download_installer(app_url, appname):
     r = requests.get(app_url, stream=True)
     if r.status_code == 200:
