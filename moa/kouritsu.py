@@ -13,18 +13,18 @@ adb = ADB(SERIALNO)
 
 
 @logwrap
-@platform(on=['Android'])
-def rm_apk(apkname):
-    if os.path.exists(apkname):
-        os.remove(apkname)
+@platform(on=['Android', 'IOS'])
+def rm_installer(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
         
 
 @logwrap
-@platform(on=['Android'])
-def download_apk(apk_url, apkname):
-    r = requests.get(apk_url, stream=True)
+@platform(on=['Android', 'IOS'])
+def download_installer(app_url, appname):
+    r = requests.get(app_url, stream=True)
     if r.status_code == 200:
-        with open(apkname, 'wb') as f:
+        with open(appname, 'wb') as f:
             for chunk in r.iter_content(65536):
                 f.write(chunk)
         return True
@@ -33,7 +33,7 @@ def download_apk(apk_url, apkname):
 
 @logwrap
 @platform(on=['Android'])
-def install_apk(apkname, pkgname):
+def kinstall(appname, pkgname):
     wake()
     keyevent("HOME")
     adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
@@ -42,7 +42,7 @@ def install_apk(apkname, pkgname):
         amstop(pkgname)
     except:
         pass
-    install(apkname)
+    install(appname)
     amclear(pkgname)
 
 
