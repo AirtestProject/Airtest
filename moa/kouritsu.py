@@ -5,7 +5,7 @@ __author__ = 'lxn3032'
 import re
 import os
 import requests
-from .moa import SERIALNO, logwrap, platform, wake, keyevent, amstop, install, amclear
+from .moa import SERIALNO, logwrap, platform, wake, keyevent, amstop, install, amclear, get_platform
 from .core import ADB
 
 
@@ -45,8 +45,11 @@ def kinstall(appname, pkgname):
 
 
 @logwrap
-@platform(on=['Android'])
+@platform(on=['Android','IOS'])
 def get_wlanip():
+    if get_platform() == 'IOS': # temporary: using hardcode ip address for ios device
+        return "10.254.140.145"
+
     netcfg = adb.shell('netcfg')
     for l in netcfg.split('\n'):
         if 'wlan' in l:
