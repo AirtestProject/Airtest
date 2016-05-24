@@ -5,12 +5,23 @@ __author__ = 'lxn3032'
 import re
 import os
 import requests
-from .moa import SERIALNO, logwrap, platform, wake, keyevent, amstop, install, amclear, get_platform
+import plistlib
+from .moa import SERIALNO, logwrap, platform, wake, keyevent, amstop, install, uninstall, amclear, get_platform
 from .core import ADB
 
 
 adb = ADB(SERIALNO)
 
+@logwrap
+def plist_parse(plist_url):
+    """analyse plist file, get ipa download link"""
+
+    response = requests.get(plist_url,stream=True)
+    if response.status_code == 200:
+        plistStr = response.text
+        plistRoot = plistlib.readPlistFromString(plistStr)
+        ipa_url = plistRoot['items'][0]['assets'][0]['url']
+        return ipa_url
 
 @logwrap
 def rm_installer(filename):
@@ -30,8 +41,13 @@ def download_installer(app_url, appname):
 
 
 @logwrap
-@platform(on=['Android'])
+@platform(on=['Android','IOS'])
 def kinstall(appname, pkgname):
+    if get_platform() == 'IOS':
+        uninstall(pkgname)
+        install(appname)
+        return
+        
     wake()
     keyevent("HOME")
     adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
@@ -59,7 +75,7 @@ def get_wlanip():
 
 
 @logwrap
-@platform(on=['Android'])
+@platform(on=['Android','IOS'])
 def get_hunter_devid(process):
     wlanip = get_wlanip()
     if not wlanip:
