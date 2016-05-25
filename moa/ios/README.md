@@ -17,12 +17,21 @@
 
 floatsign.sh的git库：[https://github.com/nanonation/floatsign/](https://github.com/nanonation/floatsign/)
 
-### 4. resign-directory
+### 4. certificate_config.py
+
+certificate_config.py中存储了开发者账号的全称，包括名称和序列号。例如：
+
+```
+CERTIFICATE = "iPhone Developer: Shaobin Pan (XXXXXXXXXX)"
+```
+该文件不放入git库中，移植者需要自己生成。
+
+### 5. resign-directory
 
 resign目录中存放了重签所需的provision和entitlements文件。
 
 
-### 5. DeviceSupport-directory 
+### 6. DeviceSupport-directory 
 
 DeviceSupport目录存放了在使用imobiledevice库启动ios设备上的app时需要先在设备上挂载的DeveloperDiskImage。
 
