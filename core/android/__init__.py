@@ -1,1 +1,1 @@
-from android import ADB, adb_devices, Android
+from android import adb_devices, ADB, Minicap, Minitouch, Android
