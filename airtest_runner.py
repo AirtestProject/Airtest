@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import json
 import argparse
-from moa.moa import *
+from core.main import *
 # import here to build dependent modules
 import requests
 import re
 import urllib2
 import time
-import sdkautomator
+# import sdkautomator
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
@@ -106,9 +107,8 @@ def main():
     # cd script dir
     os.chdir(args.script)
 
-    # 建军添加2016-4-1：
     if args.maskrect:
-        print "auto set mask_rect : ", args.maskrect
+        print "set mask_rect : ", args.maskrect
         set_mask_rect(args.maskrect)
 
     if args.setsn:
