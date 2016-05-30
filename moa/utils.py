@@ -217,3 +217,121 @@ def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
                     break
         return f2
     return dec
+
+
+import json
+import sys
+import traceback
+
+class MoaLogger(object):
+    """logger """
+    def __init__(self, logfile, basedir="", debug=True):
+        super(MoaLogger, self).__init__()
+        self.set_logfile(logfile, basedir)
+        self.debug = debug
+        self.running_stack = []
+        self.extra_log = {}
+        atexit.register(self.handle_stacked_log)
+
+    def set_logfile(self, logfile=None, basedir=""):
+        if logfile:
+            self.logfile = os.path.join(basedir, logfile)
+        self.logfd = open(self.logfile, "w")
+
+    @staticmethod
+    def _dumper(obj):
+        try:
+            return obj.__dict__
+        except:
+            return None
+
+    def log(self, tag, data, in_stack=True):
+        ''' Not thread safe '''
+        if self.debug:
+            print tag, data
+        if in_stack:
+            depth = len(self.running_stack)
+        else:
+            depth = 1
+        self.logfd.writeline(json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper) + '\n')
+        self.logfd.flush()
+
+    def handle_stacked_log(self):
+        # 处理stack中的log
+        while self.running_stack:
+            # 先取最后一个，记了log之后再pop，避免depth错误
+            log_stacked = self.running_stack[-1]
+            self.log("function", log_stacked)
+            self.running_stack.pop()
+
+
+def Logwrap(f, logger):
+    LOGGER = logger
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        fndata = {'name': f.__name__, 'args': args, 'kwargs': kwargs}
+        LOGGER.running_stack.append(fndata)
+        try:
+            res = f(*args, **kwargs)
+        except Exception:
+            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
+            fndata.update(data)
+            fndata.update(LOGGER.extra_log)
+            LOGGER.log("error", fndata)
+            raise
+        else:
+            time_used = time.time() - start
+            print '>'*len(LOGGER.running_stack), 'Time used:', f.__name__, time_used
+            sys.stdout.flush()
+            fndata.update({'time_used': time_used, 'ret': res})
+            fndata.update(LOGGER.extra_log)
+            LOGGER.log('function', fndata)
+        finally:
+            LOGGER.extra_log = {}
+            LOGGER.running_stack.pop()
+        return res
+    return wrapper
+
+
+
+
+class TargetPos(object):
+    """
+    点击目标图片的不同位置，默认为中心点0
+    1 2 3
+    4 0 6
+    7 8 9
+    """
+    LEFTUP, UP, RIGHTUP = 1, 2, 3
+    LEFT, MID, RIGHT = 4, 5, 6
+    LEFTDOWN, DOWN, RIGHTDOWN = 7, 8, 9
+
+    def getXY(self, cvret, pos):
+        if pos == 0 or pos == self.MID:
+            return cvret["result"]
+        rect = cvret.get("rectangle")
+        if not rect:
+            print "could not get rectangle, use mid point instead"
+            return cvret["result"]
+        w = rect[2][0] - rect[0][0]
+        h = rect[2][1] - rect[0][1]
+        if pos == self.LEFTUP:
+            return rect[0]
+        elif pos == self.LEFTDOWN:
+            return rect[1]
+        elif pos == self.RIGHTDOWN:
+            return rect[2]
+        elif pos == self.RIGHTUP:
+            return rect[3]
+        elif pos == self.LEFT:
+            return rect[0][0], rect[0][1] + h / 2
+        elif pos == self.UP:
+            return rect[0][0] + w / 2, rect[0][1]
+        elif pos == self.RIGHT:
+            return rect[2][0], rect[2][1] - h / 2
+        elif pos == self.DOWN:
+            return rect[2][0] - w / 2, rect[2][1]
+        else:
+            print "invalid target_pos:%s, use mid point instead" % pos
+            return cvret["result"]

@@ -4,75 +4,43 @@
 # Author:  hzsunshx gzliuxin
 # Created: 2015-05-17 20:30
 # Modified: 2015-06-09
-# Modified: 2015-10-13 ver 0.0.2
+# Modified: 2015-10-13 ver 0.0.2 gzliuxin
+# Modified: 2016-04-28 ver 0.0.3 gzliuxin
 
 """
-Moa = ADB + AIRCV + MINICAP + MINITOUCH
-
+Moa for Android/Windows
+Moa Android = ADB + AIRCV + MINICAP + MINITOUCH
 Script engine.
 """
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 
-DEBUG = False
-SERIALNO = ''
-ADDRESS = ('127.0.0.1', 5037)
-BASE_DIR = '.'
-LOG_FILE = ''
-LOG_FILE_FD = None
-TIMEOUT = 20
-RUNTIME_STACK = []
-EXTRA_LOG = {}
-GEVENT_RUNNING = False
+LOGGER = None
 SCREEN = None
-GEVENT_DONE = [False]
-TOUCH_POINTS = {}
 DEVICE = None
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
-OPDELAY = 0.1
-THRESHOLD = 0.6
-THRESHOLD_STRICT = 0.7
-PLAYRES = []
-CVINTERVAL = 0.5
 SAVE_SCREEN = None
-REFRESH_SCREEN_DELAY = 5 # 设备发生屏幕旋转时，需要等待5s左右才能确定旋转完毕(大部分设备)
-SRC_RESOLUTION = []
 CVSTRATEGY = None
-SCRIPTHOME = None
-RESIZE_METHOD = None
-RECONNECT_TIMES = 5
-
-MASK_RECT = None # windows运行时，将当前的IDE窗口屏蔽掉，防止识别为脚本中的图片
+BASE_DIR = '.'
+MASK_RECT = None
 
 
 import os
-import re
 import sys
 import shutil
-import warnings
-import json
 import time
 import functools
 import fnmatch
-import subprocess
-import signal
-import ast
-import socket
 import traceback
-import atexit
 import uiautomator
-try:
-    from urlparse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
-from error import MoaError, MoaNotFoundError
-from core import adb_devices
-import core
-from ..aircv import aircv
-from ..aircv import generate_character_img as textgen
-from utils import _isstr, _islist
+from airtest.aircv import aircv
+from airtest.aircv import generate_character_img as textgen
+from airtest.moa import core
+from airtest.moa.error import MoaError, MoaNotFoundError
+from airtest.moa.utils import _isstr, _islist, MoaLogger, Logwrap, TargetPos
+from airtest.moa.settings import *
 try:
     import win
 except ImportError:
@@ -85,72 +53,17 @@ Some utils
 """
 
 
-def log(tag, data, exec_script_fail=False):
-    ''' Not thread safe '''
-    if DEBUG:
-        print tag, data
-    if LOG_FILE_FD is None:
-        return
-    def dumper(obj):
-        try:
-            return obj.__dict__
-        except:
-            return None
-
-    # 调度脚本失败时，单独记入log中：
-    if exec_script_fail==True:
-        LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': 1, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=dumper) + '\n')
-        LOG_FILE_FD.flush()
-        return
-
-    LOG_FILE_FD.write(json.dumps({'tag': tag, 'depth': len(RUNTIME_STACK), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=dumper) + '\n')
-    LOG_FILE_FD.flush()
-
-
-def handle_stacked_log():
-    # 处理stack中的log
-    while RUNTIME_STACK:
-        # 先取最后一个，记了log之后再pop，避免depth错误
-        log_stacked = RUNTIME_STACK[-1]
-        log("function", fndata)
-        RUNTIME_STACK.pop()
-
-atexit.register(handle_stacked_log)
+def log(tag, data, in_stack=True):
+    LOGGER.log(tag, data, in_stack)
 
 
 def logwrap(f):
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        global RUNTIME_STACK, EXTRA_LOG
-        start = time.time()
-        fndata = {'name': f.__name__, 'args': args, 'kwargs': kwargs}
-        RUNTIME_STACK.append(fndata)
-        try:
-            res = f(*args, **kwargs)
-        except (MoaError, Exception) as err:
-            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
-            fndata.update(data)
-            fndata.update(EXTRA_LOG)
-            log("error", fndata)
-            # traceback.print_exc()
-            # Exit when meet MoaError
-            # raise SystemExit(1)
-            raise
-        else:
-            time_used = time.time() - start
-            print '>'*len(RUNTIME_STACK), 'Time used:', f.__name__, time_used
-            sys.stdout.flush()
-            fndata.update({'time_used': time_used, 'ret': res})
-            fndata.update(EXTRA_LOG)
-            log('function', fndata)
-        finally:
-            EXTRA_LOG = {}
-            RUNTIME_STACK.pop()
-        return res
-    return wrapper
+    return Logwrap(f, LOGGER)
 
 
 def transparam(f):
+    """put pic & related cv params into MoaPic object
+    """
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         if not _isstr(args[0]):
@@ -193,92 +106,50 @@ def platform(on=["Android"]):
     return decorator
 
 
-def _show_screen(pngstr):
-    if not GEVENT_RUNNING:
-        return
-    try:
-        import cv2
-        import numpy as np
-        global SCREEN
-        nparr = np.fromstring(pngstr, np.uint8)
-        SCREEN = cv2.imdecode(nparr, cv2.CV_LOAD_IMAGE_COLOR)
-    except:
-        pass
-
-
 """
-Script initialization
+Environment initialization
 """
 
 
-def set_address((host, port)):
-    global ADDRESS
-    ADDRESS = (host, port)
-    # FIXME(ssx): need to verify
-
-
-def set_serialno(sn=None, minicap=True, minitouch=True):
+def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
+    addr = addr or ADDRESS
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
     '''
-    global SERIALNO
     if not sn:
-        devs = list(adb_devices(state='device', addr=ADDRESS))
+        devs = list(core.adb_devices(state='device', addr=addr))
         if len(devs) > 1:
             print ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
         elif len(devs) == 0:
             raise MoaError("no device, please check your adb connection")
-        SERIALNO = devs[0][0]
+        sn = devs[0][0]
     else:
         exists = 0
         status = None
-        for (serialno, st) in adb_devices(addr=ADDRESS):
-            if fnmatch.fnmatch(serialno, sn):
-                exists += 1
-                status = st
-                SERIALNO = serialno
-        if exists == 0:
-            raise MoaError("Device[{}] not found in {}".format(sn, ADDRESS))
-        if exists > 1:
-            SERIALNO = None
-            raise MoaError("too many devices found")
-        if status != 'device':
-            raise MoaError("Device status not good: {}".format(status))
-    global CVSTRATEGY
-    if not CVSTRATEGY:
-        CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
-    global DEVICE
-    DEVICE = core.Android(SERIALNO, addr=ADDRESS, minicap=minicap, minitouch=minitouch)
-    global PLAYRES
+        for (serialno, st) in core.adb_devices(addr=addr):
+            if not fnmatch.fnmatch(serialno, sn):
+                continue
+            if not status != 'device':
+                raise MoaError("Device status not good: %s" % (status,))
+            sn = serialno
+            break
+        raise MoaError("Device[%s] not found in %s" % (sn, addr))
+    global CVSTRATEGY, DEVICE, PLAYRES
+    CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
+    DEVICE = core.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
-    return SERIALNO
+    return sn
 
 
 def set_windows():
     if win is None:
         raise RuntimeError("win module is not available")
-    global DEVICE
+    global DEVICE, CVSTRATEGY, RESIZE_METHOD
     DEVICE = win.Windows()
-    global CVSTRATEGY
-    if not CVSTRATEGY:
-        CVSTRATEGY = ["tpl", "siftnopre"]
+    CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_WINDOWS
     # set no resize on windows as default
-    global RESIZE_METHOD
-    if not RESIZE_METHOD:
-        RESIZE_METHOD = aircv.no_resize
-
-
-def connect(url):
-    parsed = urlparse(url)
-    if parsed.scheme != 'moa':
-        raise MoaError("url should start with moa://")
-
-    host = parsed.hostname or '127.0.0.1'
-    port = parsed.port or 5037
-    sn = parsed.path[1:]
-    set_address((host, port))
-    set_serialno(sn)
+    RESIZE_METHOD = RESIZE_METHOD or aircv.no_resize
 
 
 def set_basedir(base_dir):
@@ -286,15 +157,13 @@ def set_basedir(base_dir):
     BASE_DIR = base_dir
 
 
-def set_logfile(filename="log.txt", inbase=True):
-    global LOG_FILE, LOG_FILE_FD
-    LOG_FILE = filename
-    if inbase:
-        LOG_FILE = os.path.join(BASE_DIR, filename)
-    LOG_FILE_FD = open(LOG_FILE, 'wb')
+def set_logfile(filename=LOGFILE, inbase=True):
+    global LOGGER
+    basedir = BASE_DIR if inbase else ""
+    LOGGER = MoaLogger(filename, basedir)
 
 
-def set_screendir(dirpath="img_record"):
+def set_screendir(dirpath=SCREEN_DIR):
     global SAVE_SCREEN
     # force clear dir
     shutil.rmtree(dirpath, ignore_errors=True)
@@ -306,7 +175,7 @@ def set_screendir(dirpath="img_record"):
 def set_threshold(value):
     global THRESHOLD
     if value > 1 or value < 0:
-        raise RuntimeError("invalid threshold: %s"%value)
+        raise MoaError("invalid threshold: %s"%value)
     THRESHOLD = value
 
 
@@ -317,52 +186,6 @@ def set_scripthome(dirpath):
 
 def set_globals(key, value):
     globals()[key] = value
-
-
-def refresh_device():
-    time.sleep(REFRESH_SCREEN_DELAY)
-    DEVICE.refreshOrientationInfo()
-
-
-class TargetPos(object):
-    """
-    点击目标图片的不同位置，默认为中心点0
-    1 2 3
-    4 0 6
-    7 8 9
-    """
-    LEFTUP, UP, RIGHTUP = 1, 2, 3
-    LEFT, MID, RIGHT = 4, 5, 6
-    LEFTDOWN, DOWN, RIGHTDOWN = 7, 8, 9
-
-    def getXY(self, cvret, pos):
-        if pos == 0 or pos == self.MID:
-            return cvret["result"]
-        rect = cvret.get("rectangle")
-        if not rect:
-            print "could not get rectangle, use mid point instead"
-            return cvret["result"]
-        w = rect[2][0] - rect[0][0]
-        h = rect[2][1] - rect[0][1]
-        if pos == self.LEFTUP:
-            return rect[0]
-        elif pos == self.LEFTDOWN:
-            return rect[1]
-        elif pos == self.RIGHTDOWN:
-            return rect[2]
-        elif pos == self.RIGHTUP:
-            return rect[3]
-        elif pos == self.LEFT:
-            return rect[0][0], rect[0][1] + h / 2
-        elif pos == self.UP:
-            return rect[0][0] + w / 2, rect[0][1]
-        elif pos == self.RIGHT:
-            return rect[2][0], rect[2][1] - h / 2
-        elif pos == self.DOWN:
-            return rect[2][0] - w / 2, rect[2][1]
-        else:
-            print "invalid target_pos:%s, use mid point instead" % pos
-            return cvret["result"]
 
 
 def set_mask_rect(mask_rect=None):
@@ -447,7 +270,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
         traceback.print_exc()
         ret = None
     # print ret
-    EXTRA_LOG.update({"cv": ret})
+    LOGGER.extra_log.update({"cv": ret})
     if not ret:
         return None
     if threshold and ret["confidence"] < threshold:
@@ -596,11 +419,11 @@ def uninstall(package):
 @logwrap
 @platform(on=["Android", "Windows"])
 def snapshot(filename="screen.png"):
-    global RECENT_CAPTURE, SAVE_SCREEN, EXTRA_LOG
+    global RECENT_CAPTURE, SAVE_SCREEN
     if SAVE_SCREEN:
         filename = "%s.jpg" % int(time.time()*1000)
         filename = os.path.join(SAVE_SCREEN, filename)
-        EXTRA_LOG.update({"screen": filename})
+        LOGGER.extra_log.update({"screen": filename})
     screen = DEVICE.snapshot(filename)
     # 如果截屏失败，直接返回None
     if screen is not None and screen.any():
@@ -624,6 +447,12 @@ def home():
     refresh_device()
 
 
+@platform(on=["Android"])
+def refresh_device():
+    time.sleep(REFRESH_SCREEN_DELAY)
+    DEVICE.refreshOrientationInfo()
+
+
 @logwrap
 @transparam
 @platform(on=["Android", "Windows"])
@@ -640,7 +469,6 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
             raise
     else:
         pos = v
-    TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
 
     if offset:
         if offset['percent']:
@@ -708,7 +536,6 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_in=None):
         pos = _loop_find(v, timeout=timeout, find_in=find_in)
     else:
         pos = v
-    TOUCH_POINTS[time.time()] = {'type': 'touch', 'value': pos}
     print ('downpos', pos)
 
     DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
@@ -866,7 +693,7 @@ def test_android():
     # install(r"C:\Users\game-netease\Desktop\netease.apk")
     # uninstall("com.example.netease")
     # amstart("com.netease.my", "AppActivity")
-    amstart("com.netease.my")
+    # amstart("com.netease.my")
 
 
 def test_win():

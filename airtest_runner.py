@@ -56,7 +56,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         try:
             copy_script(scriptpath, sub_dir)
         except:
-            log("error", {"name": "exec_script", "step": "fail","args": ["   "+scriptpath+ "   "], "traceback": "Fail to find this child script.."}, exec_script_fail=True)
+            log("error", {"name": "exec_script", "step": "fail","args": ["   "+scriptpath+ "   "], "traceback": "Fail to find this child script.."}, False)
             return scriptpath
 
     # start to exec

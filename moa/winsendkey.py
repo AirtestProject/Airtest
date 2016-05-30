@@ -722,5 +722,4 @@ if __name__ == "__main__":
     # main()
     # SendKeys(u"你妹")
     # SendKeys("^f")
-    
-    SendKeys("$ni(hehe)")
+    SendKeys("ni('hehe')")
