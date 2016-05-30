@@ -15,6 +15,12 @@
 	设置手机的序列号, 支持*匹配。如果adb连接了多台手机，默认取第一台
 
 		set_serialno('cff*')
+		
+### set\_ios\_udid(udid=None)
+
+	设置ios device的序列号, 支持*匹配。如果usb连接了多台手机，默认取第一台
+
+		set_ios_udid('cff*')
 
 ### connect(url)
 
@@ -53,14 +59,14 @@
 		# output: hello
 
 ### amstart(package)	
->*android only*
+>*android only( add adaptation for ios device, package is appid)*
 
 	am: android manager的简称
 
 		amstart('com.netease.moa') # 启动应用
 
 ### amstop(package)
->*android only*
+>*android only( add adaptation for ios device, package is appid)*
 
 	强制停止应用，等同于`am force-stop <package>`
 
@@ -70,12 +76,12 @@
 	清空应用中的数据，等同于`pm clear <package>`
 
 ### install(filepath)
->*android only*
+>*android only( add adaptation for ios device)*
 
 	安装apk
 
 ### uninstall(package)
->*android only*
+>*android only( add adaptation for ios device)*
 
 	卸载apk
 

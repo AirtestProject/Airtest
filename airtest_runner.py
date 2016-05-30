@@ -83,6 +83,7 @@ def main():
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
+    ap.add_argument("--setudid", help="auto set ios device udid", nargs="?", const=True)
     ap.add_argument("--setwin", help="auto set windows", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
@@ -115,6 +116,11 @@ def main():
         # if setsn==True, but not specified, auto choose one
         sn = args.setsn if isinstance(args.setsn, str) else None
         set_serialno(sn)
+
+    if args.setudid:  # modified by gzlongqiumeng
+        print "auto set_ios_udid", args.setudid
+        udid = args.setudid if isinstance(args.setudid,str) else None
+        set_ios_udid(udid)
 
     if args.setwin:
         print "auto set_windows"

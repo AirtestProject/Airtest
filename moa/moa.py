@@ -47,6 +47,12 @@ except ImportError:
     win = None
     print "win module import error"
 
+try:
+    import ios
+except ImportError, e:
+    ios = None
+    print "ios module import error: %s" %str(e)
+
 
 """
 Some utils
@@ -91,6 +97,9 @@ def get_platform():
         name_dict = {
             core.Android: "Android"
         }
+
+    if ios:
+        name_dict[ios.client.IOS] = "IOS"
     return name_dict.get(DEVICE.__class__)
 
 
@@ -140,6 +149,51 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     DEVICE = core.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
+
+def set_ios_udid(udid=None):
+    '''
+    auto set if only one device
+    support filepath match patten, eg: c123*
+    '''
+
+    global IOSUDID
+    udids = ios.utils.list_all_udid()
+    if not udid:
+        if len(udids) > 1:
+            print ("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
+        elif len(udids) == 0:
+            raise MoaError("no device, please check your connection")
+        IOSUDID = udids[0]
+    else:
+        exists = 0
+        for id in udids:
+            if fnmatch.fnmatch(id,udid):
+                exists += 1
+                IOSUDID = id
+        if exists == 0:
+            raise MoaError("Device[{}] not found".format(udid))
+        if exists > 1:
+            IOSUDID = ''
+            raise MoaError("too many devices found")
+    global CVSTRATEGY
+    if not CVSTRATEGY:
+        CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
+    global DEVICE
+    DEVICE = ios.client.IOS(IOSUDID)
+    global PLAYRES
+    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
+    return IOSUDID
+
+def resign(ipaname):
+    """resign an app, only valid on Mac"""
+
+    import platform
+    os_name = platform.system()
+    if os_name != "Darwin":  # Mac os name
+        raise MoaError("can't resign ipa on %s OS" %os_name)
+
+    new_ipaname = ios.resign.sign(ipaname)
+    return new_ipaname
 
 
 def set_windows():
@@ -385,15 +439,22 @@ def shell(cmd):
 
 
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android","IOS"])
 def amstart(package, activity=None):
+    if get_platform() == "IOS":
+        DEVICE.launch_app(package) # package = appid
+        return
+
     DEVICE.amstart(package, activity)
     refresh_device()
 
-
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android","IOS"])
 def amstop(package):
+    if get_platform() == "IOS": # package = appid
+        DEVICE.stop_app(package)
+        return
+
     DEVICE.amstop(package)
     refresh_device()
 
@@ -403,21 +464,20 @@ def amstop(package):
 def amclear(package):
     DEVICE.amclear(package)
 
-
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android","IOS"])
 def install(filepath):
     return DEVICE.install(filepath)
 
 
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android","IOS"])
 def uninstall(package):
     return DEVICE.uninstall(package)
 
 
 @logwrap
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def snapshot(filename="screen.png"):
     global RECENT_CAPTURE, SAVE_SCREEN
     if SAVE_SCREEN:
@@ -582,7 +642,6 @@ def text(text, delay=OPDELAY):
 
 
 @logwrap
-@platform(on=["Android", "Windows"])
 def sleep(secs=1.0):
     time.sleep(secs)
 
@@ -703,6 +762,19 @@ def test_win():
     swipe("win.png", vector=(0.3, 0.3))
     touch("win.png")
 
+def test_ios():
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    new_ipaname = resign(os.path.join(basedir,"ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
+    print new_ipaname
+    udid = set_ios_udid()
+    print udid
+    install(new_ipaname)
+    # amstart("com.netease.devtest")
+    # screen_filename = os.path.join(basedir,'tmp.png')
+    # snapshot(screen_filename)
+    # uninstall("com.netease.devtest")
+
 
 if __name__ == '__main__':
-    test_android()
+    # test_android()
+    test_ios()
