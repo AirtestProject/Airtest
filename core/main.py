@@ -456,15 +456,12 @@ def amstop(package):
 def amclear(package):
     DEVICE.amclear(package)
 
-@logwrap
-@platform(on=["Android","IOS"])
-def install(filepath, clean=False, **kwargs):
-    return DEVICE.install(filepath)
 
 @logwrap
-@platform(on=["Android", "IOS"])
-def reinstall(filepath, package):
-    return DEVICE.reinstall(filepath, package)
+@platform(on=["Android","IOS"])
+def install(filepath, reinstall=False, package=None):
+    return DEVICE.install(filepath, reinstall, package)
+
 
 @logwrap
 @platform(on=["Android","IOS"])
