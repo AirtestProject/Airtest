@@ -630,6 +630,14 @@ class Android(object):
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
+    def reinstall(self, filepath, package):
+        self.wake()
+        self.keyevent("HOME")
+        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
+        self.adb.shell('settings put secure accessibility_enabled 1')
+        self.uninstall(package)
+        return self.install(filepath)
+
     @autoretry
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
