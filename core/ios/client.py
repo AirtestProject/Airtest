@@ -37,6 +37,10 @@ class IOS(object):
 
         utils.uninstall_app(appid, self.udid)
 
+    def reinstall(self, ipa_name, appid):
+        self.unistall(appid)
+        return self.install(ipa_name)
+
     def snapshot(self, filename="tmp.png"):
         """
         take snapshot
