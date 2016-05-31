@@ -4,3 +4,6 @@
 [submodule "report"]
 	path = report
 	url = ssh://git@git-qa.gz.netease.com:32200/qiujinxing/moa-log-report.git
+[submodule "plugins/sdkautomator"]
+	path = plugins/sdkautomator
+	url = ssh://git@git-qa.gz.netease.com:32200/hongyifan/sdkautomator.git

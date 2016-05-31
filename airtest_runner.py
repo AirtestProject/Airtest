@@ -10,7 +10,7 @@ import requests
 import re
 import urllib2
 import time
-# import sdkautomator
+from plugins import sdkautomator
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
