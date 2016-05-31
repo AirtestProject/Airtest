@@ -4,9 +4,9 @@
 # import sys
 # sys.path.append("..")
 # from error import MoaError
-from ..error import MoaError
+from moa.core.error import MoaError
 import utils
-from ...aircv import aircv
+from moa.aircv import aircv
 
 class IOS(object):
     """ios client"""
