@@ -9,10 +9,7 @@ import subprocess
 import plist
 import imobiledevice
 
-from ..error import MoaError, ICmdError
-# import sys
-# sys.path.append("..")
-# from error import MoaError, ICmdError
+from moa.core.error import MoaError, ICmdError
 
 LOCAL_IMAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),"DeviceSupport")
 AFC_UPLOAD_PATH_PREFIX = "/private/var/mobile/Media"
