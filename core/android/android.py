@@ -624,19 +624,17 @@ class Android(object):
         self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
-    def install(self, filepath):
-        return self.adb.install(filepath)
-
-    def uninstall(self, package):
-        return self.adb.uninstall(package)
-
-    def reinstall(self, filepath, package):
+    def install(self, filepath, reinstall=False, package=None):
         self.wake()
         self.keyevent("HOME")
         self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
         self.adb.shell('settings put secure accessibility_enabled 1')
-        self.uninstall(package)
-        return self.install(filepath)
+        if reinstall and package:
+            self.uninstall(package)
+        return self.adb.install(filepath)
+
+    def uninstall(self, package):
+        return self.adb.uninstall(package)
 
     @autoretry
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
