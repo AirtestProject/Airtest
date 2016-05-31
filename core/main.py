@@ -461,10 +461,28 @@ def amstop(package):
 def amclear(package):
     DEVICE.amclear(package)
 
+
 @logwrap
 @platform(on=["Android","IOS"])
-def install(filepath):
-    return DEVICE.install(filepath)
+def install(filepath, clean=False, **kwargs):
+    if clean:
+        pkgname = kwargs['pkgname']
+        if get_platform() == 'IOS':
+            uninstall(pkgname)
+            return DEVICE.install(filepath)
+        else:
+            wake()
+            keyevent("HOME")
+            DEVICE.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
+            DEVICE.adb.shell('settings put secure accessibility_enabled 1')
+            try:
+                amstop(pkgname)
+            except:
+                pass
+            install(filepath)
+            amclear(pkgname)
+    else:    
+        return DEVICE.install(filepath)
 
 
 @logwrap
