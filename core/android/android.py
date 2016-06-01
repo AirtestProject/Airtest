@@ -121,7 +121,7 @@ class ADB(object):
 
     def safe_run(self, *args, **kwargs):
         try:
-            return True, adbrun(*args, **kwargs)
+            return True, self.run(*args, **kwargs)
         except Exception as e:
             return False, e
 
@@ -143,6 +143,7 @@ class ADB(object):
         if not rebind:
             cmds += ['--no-rebind']
         self.run(cmds + [local, remote])
+        reg_cleanup(self.remove_forward, local)
 
     def get_forwards(self):
         out = self.run(['forward', '--list'])
@@ -169,18 +170,18 @@ class ADB(object):
         """
         forwards = self.get_forwards()
         localports = [i[1] for i in forwards]
-        port_range = 100
+        port_range = 10000
         for i in range(port_range):
             port = self._get_forward_local()
             if "tcp:%s"%port not in localports:
                 return port
         raise RuntimeError("No available adb forward local %s-%s" % (port-port_range+1, port))
 
-    def remove_forward(self, local=None, ):
+    def remove_forward(self, local=None):
         if local:
-            self.run(["forward", "--remove", local])
+            self.safe_run(["forward", "--remove", local])
         else:
-            self.run(["forward", "--remove-all"])
+            self.safe_run(["forward", "--remove-all"])
 
     def install(self, filepath):
         if not os.path.isfile(filepath):
