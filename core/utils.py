@@ -109,12 +109,13 @@ from Queue import Queue, Empty
 
 class NonBlockingStreamReader:
 
-    def __init__(self, stream, raise_EOF=False):
+    def __init__(self, stream, raise_EOF=False, print_output=True):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
         raise_EOF: if True, raise an UnexpectedEndOfStream 
                 when stream is EOF before kill
+        print_output: if True, print when readline
         '''
         self._s = stream
         self._q = Queue()
@@ -127,6 +128,8 @@ class NonBlockingStreamReader:
                 line = stream.readline()
                 if line:
                     queue.put(line)
+                    if print_output:
+                        print line.strip()
                 elif kill_event.is_set():
                     break
                 elif raise_EOF:
