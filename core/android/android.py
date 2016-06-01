@@ -216,16 +216,16 @@ class ADB(object):
 
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None):
+    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None):
         self.serialno = serialno
-        self.adb = ADB(serialno)
         self.localport = localport
-        self.install()
         self.server_proc = None
         self.projection = projection
         self.speedygen = None
+        self.adb = adb or ADB(serialno)
         # get_display_info may segfault, so use size info from adb dumpsys
         self.size = size or self.get_display_info()
+        self.install()
         # self._setup() #单帧截图minicap不需要setup
 
     def install(self, reinstall=False):
@@ -368,20 +368,21 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, size=None, backend=False):
+    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None):
         self.serialno = serialno
-        self.adb = ADB(serialno)
-        self.localport = localport or self.adb.get_available_forward_local()
-        self.install()
         self.server_proc = None
         self.client = None
+        self.max_x, self.max_y = None, None
+        self.size = size
+        self.adb = adb or ADB(serialno)
+        self.localport = localport or self.adb.get_available_forward_local()
+        self.install()
         self.setup_server()
         self.backend=backend
         if backend:
             self.setup_client_backend()
         else:
             self.setup_client()
-        self.size = size
 
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
@@ -578,7 +579,7 @@ def autoretry(func):
             except:
                 traceback.print_exc()
 
-        @retries(5, hook=fail_hook)
+        @retries(1, hook=fail_hook)
         def f_with_retries(self, *args, **kwargs):
             # print self, args, kwargs
             return func(self, *args, **kwargs)
@@ -596,8 +597,8 @@ class Android(object):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self.get_display_info()
-        self.minicap = Minicap(serialno, size=self.size) if minicap else None
-        self.minitouch = Minitouch(serialno, size=self.size) if minitouch else None
+        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
+        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
