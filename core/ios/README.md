@@ -22,6 +22,7 @@ floatsign.sh的git库：[https://github.com/nanonation/floatsign/](https://githu
 certificate_config.py中存储了开发者账号的全称，包括名称和序列号。例如：
 
 ```
+TEAM_ID = "XXXXXXXXXX"
 CERTIFICATE = "iPhone Developer: Shaobin Pan (XXXXXXXXXX)"
 ```
 该文件不放入git库中，移植者需要自己生成。
@@ -93,7 +94,8 @@ ios设备的控制需要依赖libimobiledevice库，这个库有两种安装办�
 	在这一行之前添加
 
 	```
-	if (status_cb == NULL)        async = INSTPROXY_COMMAND_TYPE_SYNC;
+	if (status_cb == NULL)
+        async = INSTPROXY_COMMAND_TYPE_SYNC;
 	```
 
 	其作用是保证使用imobiledevice库进行app安装时使用的是同步运行方案。
@@ -108,7 +110,12 @@ ios设备的控制需要依赖libimobiledevice库，这个库有两种安装办�
 	- 代码开头添加枚举定义
 	
 	```
-	ctypedef enum sbservices_interface_orientation_t:        SBSERVICES_INTERFACE_ORIENTATION_UNKNOWN                = 0        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT               = 1        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT_UPSIDE_DOWN   = 2        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_RIGHT        = 3        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_LEFT         = 4
+	ctypedef enum sbservices_interface_orientation_t:
+        SBSERVICES_INTERFACE_ORIENTATION_UNKNOWN                = 0
+        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT               = 1
+        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT_UPSIDE_DOWN   = 2
+        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_RIGHT        = 3
+        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_LEFT         = 4
 	```
 	
 	- 添加引用函数说明
@@ -120,7 +127,17 @@ ios设备的控制需要依赖libimobiledevice库，这个库有两种安装办�
 	- 添加函数定义
 	
 	```
-	cpdef int get_orientation(self):        cdef:            sbservices_interface_orientation_t interface_orientation            sbservices_error_t err        err = sbservices_get_interface_orientation(self._c_client, &interface_orientation)        try:            self.handle_error(err)        except BaseError, e:            raise        else:            return interface_orientation
+	cpdef int get_orientation(self):
+        cdef:
+            sbservices_interface_orientation_t interface_orientation
+            sbservices_error_t err
+        err = sbservices_get_interface_orientation(self._c_client, &interface_orientation)
+        try:
+            self.handle_error(err)
+        except BaseError, e:
+            raise
+        else:
+            return interface_orientation
 	```
 	
 	修改后的效果时，可以使用SpringboardServicesClient的get_orientation函数获取屏幕的朝向

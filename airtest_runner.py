@@ -118,9 +118,9 @@ def main():
         set_serialno(sn)
 
     if args.setudid:  # modified by gzlongqiumeng
-        print "auto set_ios_udid", args.setudid
+        print "auto set_udid", args.setudid
         udid = args.setudid if isinstance(args.setudid,str) else None
-        set_ios_udid(udid)
+        set_udid(udid)
 
     if args.setwin:
         print "auto set_windows"

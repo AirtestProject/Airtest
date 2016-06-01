@@ -7,10 +7,9 @@ import sys
 from ..error import MoaError, ICmdError
 from utils import run_cmd
 import plistlib
-from certificate_config import CERTIFICATE
+from certificate_config import CERTIFICATE, TEAM_ID
 
 basedir = os.path.dirname(os.path.abspath(__file__))
-TEAM_ID = "L894CK4886"
 PROVISION = os.path.join(basedir,"resign/development_test.mobileprovision")
 ENTITLEMENTS = os.path.join(basedir,"resign/entitlements.plist")
 

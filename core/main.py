@@ -147,38 +147,33 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
 
-def set_ios_udid(udid=None):
+def set_udid(udid=None):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
     '''
-    global IOSUDID
+
     udids = ios.utils.list_all_udid()
     if not udid:
         if len(udids) > 1:
-            print ("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
+            print ("more than one device, auto choose one, to specify serialno: set_udid(udid)")
         elif len(udids) == 0:
             raise MoaError("no device, please check your connection")
-        IOSUDID = udids[0]
+        udid = udids[0]
     else:
-        exists = 0
         for id in udids:
-            if fnmatch.fnmatch(id,udid):
-                exists += 1
-                IOSUDID = id
-        if exists == 0:
-            raise MoaError("Device[{}] not found".format(udid))
-        if exists > 1:
-            IOSUDID = ''
-            raise MoaError("too many devices found")
-    global CVSTRATEGY
+            if not fnmatch.fnmatch(id,udid):
+                continue
+            udid = id
+        if udid is None:
+            raise MoaError("Device[%s] not found" % udid)
+        
+    global CVSTRATEGY,DEVICE,PLAYRES
     if not CVSTRATEGY:
         CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
-    global DEVICE
-    DEVICE = ios.client.IOS(IOSUDID)
-    global PLAYRES
+    DEVICE = ios.client.IOS(udid)
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
-    return IOSUDID
+    return udid
 
 def resign(ipaname):
     """resign an app, only valid on Mac"""
@@ -210,7 +205,7 @@ def set_basedir(base_dir):
 def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
-    filepath = os.path.join(filename, basedir)
+    filepath = os.path.join(basedir, filename)
     LOGGER.set_logfile(filepath)
 
 
@@ -764,7 +759,7 @@ def test_ios():
     basedir = os.path.dirname(os.path.abspath(__file__))
     new_ipaname = resign(os.path.join(basedir,"ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
     print new_ipaname
-    udid = set_ios_udid()
+    udid = set_udid()
     print udid
     install(new_ipaname)
     # amstart("com.netease.devtest")
