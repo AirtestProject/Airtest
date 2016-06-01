@@ -88,7 +88,11 @@ def adb_devices(state=None, addr=LOCALADBADRR):
         yield (serialno, cstate)
 
 
-class ADB():
+class ADB(object):
+    """adb client for one serialno"""
+
+    _forward_local = 11111
+
     def __init__(self, serialno, adbpath=None, addr=('127.0.0.1', 5037)):
         self.adbpath = ADBPATH if not adbpath else adbpath
         self.addr = addr
@@ -100,12 +104,10 @@ class ADB():
         # if remote devices, connect first
         if ":" in self.serialno:
             print adbrun("connect %s"%self.serialno)
-            time.sleep(1.0)
 
     def disconnect(self):
         if ":" in self.serialno:
             adbrun("disconnect %s"%self.serialno)
-            time.sleep(1.0)
 
     def run(self, cmds, not_wait=False):
         return adbrun(cmds, adbpath=self.adbpath, addr=self.addr, serialno=self.serialno, not_wait=not_wait)
@@ -154,6 +156,32 @@ class ADB():
             sn, local, remote = ss
             yield sn, local, remote
 
+    @classmethod
+    def _get_forward_local(cls):
+        port = cls._forward_local
+        cls._forward_local += 1
+        return port
+
+    def get_available_forward_local(self):
+        """
+        1. do not repeat in different process, by check forward list(latency when setting up)
+        2. do not repeat in one process, by cls._forward_local
+        """
+        forwards = self.get_forwards()
+        localports = [i[1] for i in forwards]
+        port_range = 100
+        for i in range(port_range):
+            port = self._get_forward_local()
+            if "tcp:%s"%port not in localports:
+                return port
+        raise RuntimeError("No available adb forward local %s-%s" % (port-port_range+1, port))
+
+    def remove_forward(self, local=None, ):
+        if local:
+            self.run(["forward", "--remove", local])
+        else:
+            self.run(["forward", "--remove-all"])
+
     def install(self, filepath):
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
@@ -184,20 +212,19 @@ class ADB():
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
 
+
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
-    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=11313):
+    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None):
         self.serialno = serialno
-        self.localport = localport
         self.adb = ADB(serialno)
+        self.localport = localport
         self.install()
         self.server_proc = None
         self.projection = projection
         self.speedygen = None
         # get_display_info may segfault, so use size info from adb dumpsys
-        self.size = size
-        if not size:
-            self.get_display_info()
+        self.size = size or self.get_display_info()
         # self._setup() #单帧截图minicap不需要setup
 
     def install(self, reinstall=False):
@@ -249,11 +276,11 @@ class Minicap(object):
             self.server_proc = None
 
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
-        adb_port = adb_port or self.localport
-        minicap_port = "moa_minicap_%s" % adb_port
-        self.adb.forward("tcp:%s"%adb_port, "localabstract:%s"%minicap_port)
+        self.localport = adb_port or self.localport or self.adb.get_available_forward_local()
+        device_port = "moa_minicap_%s" % self.localport
+        self.adb.forward("tcp:%s"%self.localport, "localabstract:%s"%device_port)
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d" % (
-            minicap_port,
+            device_port,
             real_width, real_height,
             proj_width,proj_height,
             real_orientation), not_wait=True)
@@ -339,14 +366,11 @@ class Minicap(object):
 
 
 class Minitouch(object):
-    LOCALPORT = 11111
-
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=LOCALPORT, deviceport="moa_minitouch",size=None, backend=False):
+    def __init__(self, serialno, localport=None, size=None, backend=False):
         self.serialno = serialno
-        self.localport = localport
-        self.deviceport = deviceport
         self.adb = ADB(serialno)
+        self.localport = localport or self.adb.get_available_forward_local()
         self.install()
         self.server_proc = None
         self.client = None
@@ -396,19 +420,18 @@ class Minitouch(object):
         ny = y * max_y / height
         return nx, ny
 
-    def setup_server(self, adb_port=None, device_port=None):
+    def setup_server(self, adb_port=None):
         """set up minitouch server and adb forward"""
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
         if adb_port:
             self.localport = adb_port
-        if device_port:
-            self.deviceport = device_port
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:%s" % self.deviceport)
-        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % self.deviceport, not_wait=True)
+        deviceport = "minitouch_%s" % self.localport
+        self.adb.forward("tcp:%s" % self.localport, "localabstract:%s" % deviceport)
+        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % deviceport, not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
-        info = nbsp.read(1.0)
+        info = nbsp.read(1.0)  # to be put into backend
         print "minitouch _setup", info
 
         # 建军添加：从输出中提取当前设备的点击传感器阵列的横宽: info的多行输出中，提取出(1079x1919 with 12 contacts)格式的语句
@@ -437,7 +460,6 @@ class Minitouch(object):
             return None
         reg_cleanup(p.kill)
         self.server_proc = p
-
         return p
 
     def touch(self, (x, y), duration=0.01):
@@ -583,7 +605,9 @@ def autoretry(func):
 
 
 class Android(object):
+
     """Android Client"""
+
     def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
@@ -593,7 +617,6 @@ class Android(object):
         self.props = {}
         self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
         self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
-
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props['ro.build.version.sdk']
 
@@ -627,8 +650,9 @@ class Android(object):
     def install(self, filepath, reinstall=False, package=None):
         self.wake()
         self.keyevent("HOME")
-        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
+        # need to add install if necessary
         self.adb.shell('settings put secure accessibility_enabled 1')
+        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
         if reinstall and package:
             self.uninstall(package)
         return self.adb.install(filepath)
@@ -892,6 +916,7 @@ class Android(object):
             self.minitouch.setup_client_backend()
         else:
             self.minitouch.setup_client()
+
 
 
 class XYTransformer(object):
