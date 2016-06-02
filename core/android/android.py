@@ -213,7 +213,6 @@ class ADB(object):
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
 
-
 class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None):
@@ -338,7 +337,6 @@ class Minicap(object):
     def get_frames(self, max_cnt=100000, adb_port=None):
         """use adb forward and socket communicate"""
         self._setup(adb_port)
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s = SafeSocket()
         adb_port = adb_port or self.localport
         s.connect(("localhost", adb_port))
@@ -593,17 +591,39 @@ class Android(object):
 
     """Android Client"""
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True, props={}):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
-        self.get_display_info()
+        # read props from outside or cached source, to save init time
+        self.props = props or self._load_props()
+        if "display_info" in self.props:
+            self.size = self.props["display_info"]
+            self.refreshOrientationInfo()
+        else:
+            self.get_display_info()
         self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
         self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
-        self.props = {}
-        self.props['ro.build.version.sdk'] = int(self.getprop('ro.build.version.sdk'))
-        self.props['ro.build.version.release'] = self.getprop('ro.build.version.release')
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
-        self.sdk_version = self.props['ro.build.version.sdk']
+        self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
+        self._dump_props()
+
+    def _load_props(self):
+        try:
+            props = self.adb.shell("cat /data/local/tmp/moa_props.tmp")
+            props = json.loads(props)
+        except ValueError as err:
+            # traceback.print_exc()
+            print "load props failed:", err.message
+            props = {}
+        return props
+
+    def _dump_props(self):
+        data = {
+            "display_info": self.size,
+            "sdk_version": self.sdk_version,
+        }
+        data = json.dumps(data).replace(r'"', r'\"')
+        self.adb.shell("echo %s > /data/local/tmp/moa_props.tmp" % data)
 
     def check_status(self):
         dev_list = list(adb_devices())
@@ -754,10 +774,7 @@ class Android(object):
         self.adb.shell('input keyevent BACK')
 
     def getprop(self, key, strip=True):
-        prop = self.adb.shell(['getprop', key])
-        if strip:
-            prop = prop.rstrip('\r\n')
-        return prop
+        return self.adb.getprop(key, strip)
 
     def get_display_info(self):
         self.size = self.getPhysicalDisplayInfo()
@@ -853,7 +870,6 @@ class Android(object):
         return -1.0
 
     def getDisplayOrientation(self):
-        
         # another way to get orientation, for old sumsung device(sdk version 15) from xiaoma
         SurfaceFlingerRE = re.compile('orientation=(\d+)')
         output = self.adb.shell('dumpsys SurfaceFlinger')
@@ -889,7 +905,7 @@ class Android(object):
         if ori is None:
             ori = self.getDisplayOrientation()
         self.size["orientation"] = ori
-        if self.minicap:
+        if getattr(self, "minicap", None) and self.minicap:
             # self.minicap.get_display_info()
             self.minicap.size["rotation"] = ori * 90
 
@@ -958,7 +974,16 @@ def test_minitouch(serialno):
 
 def test_android():
     serialno = adb_devices(state="device").next()[0]
-    a = Android(serialno, minicap=False)
+    # serialno = "10.250.210.118:57217"
+    t = time.clock()
+    import json
+    a = Android(serialno, minicap=True, minitouch=True)
+    print time.clock() - t, "111"
+    print a.dump_props()
+    print time.clock() - t, "222"
+    from pprint import pprint
+    pprint(a.load_props())
+    print time.clock() - t, "323"
     # screen = a.adb.snapshot()
     # with open("screen.png", "wb") as f:
     #     f.write(screen)
@@ -983,7 +1008,7 @@ def test_android():
     # return
     # print a.is_screenon()
     # a.keyevent("POWER")
-    a.snapshot('test.jpg')
+    # a.snapshot('test.jpg')
     # a.snapshot('test1.jpg')
         
     # print a.get_top_activity_name()

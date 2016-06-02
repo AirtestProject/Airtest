@@ -104,7 +104,6 @@ def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            print get_platform(), on
             if get_platform() not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
@@ -315,7 +314,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     except Exception as err:
         traceback.print_exc()
         ret = None
-    # print ret
+    print ret
     _log_in_func({"cv": ret})
     if not ret:
         return None
