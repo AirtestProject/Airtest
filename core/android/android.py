@@ -7,11 +7,13 @@
 
 
 import os
+import sys
 import re
 import time
 import json
 import warnings
 import subprocess
+import socket
 import shlex
 import struct
 import threading
@@ -52,7 +54,8 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
         cmds = list(cmds)
     # start-server cannot assign -H -P -s
     if cmds == ["start-server"] and addr == LOCALADBADRR:
-        return subprocess.check_output([adbpath, "start-server"])
+        subprocess.check_call([adbpath, "start-server"])
+        return
 
     host, port = addr
     prefix = [adbpath, '-H', host, '-P', str(port)]
@@ -61,6 +64,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
     cmds = prefix + cmds
     if DEBUG:
         print ' '.join(cmds)
+        sys.stdout.flush()
     proc = subprocess.Popen(cmds,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
@@ -98,12 +102,18 @@ class ADB(object):
         self.addr = addr
         self.serialno = serialno
         self.props = {}
-        self._setup()
+        self.connect()
 
-    def _setup(self):
+    def connect(self, force=False):
         # if remote devices, connect first
-        if ":" in self.serialno:
+        if ":" in self.serialno and (force or self.get_status() != "device"):
             print adbrun("connect %s"%self.serialno)
+
+    def get_status(self):
+        for dev, status in adb_devices():
+            if dev == self.serialno:
+                return status
+        return None
 
     def disconnect(self):
         if ":" in self.serialno:
@@ -138,9 +148,9 @@ class ADB(object):
             prop = prop.rstrip('\r\n')
         return prop
 
-    def forward(self, local, remote, rebind=True):
+    def forward(self, local, remote, no_rebind=True):
         cmds = ['forward']
-        if not rebind:
+        if no_rebind:
             cmds += ['--no-rebind']
         self.run(cmds + [local, remote])
         reg_cleanup(self.remove_forward, local)
@@ -276,9 +286,15 @@ class Minicap(object):
             self.server_proc = None
 
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
-        self.localport = adb_port or self.localport or self.adb.get_available_forward_local()
-        device_port = "moa_minicap_%s" % self.localport
-        self.adb.forward("tcp:%s"%self.localport, "localabstract:%s"%device_port)
+
+        @retries(3)
+        def set_up_forward():
+            localport = adb_port or self.localport or self.adb.get_available_forward_local()
+            device_port = "moa_minicap_%s" % localport
+            self.adb.forward("tcp:%s"%localport, "localabstract:%s"%device_port)
+            return localport, device_port
+
+        self.localport, device_port = set_up_forward()
         p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d" % (
             device_port,
             real_width, real_height,
@@ -373,7 +389,7 @@ class Minitouch(object):
         self.max_x, self.max_y = None, None
         self.size = size
         self.adb = adb or ADB(serialno)
-        self.localport = localport or self.adb.get_available_forward_local()
+        self.localport = localport
         self.install()
         self.setup_server()
         self.backend=backend
@@ -420,10 +436,15 @@ class Minitouch(object):
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
-        if adb_port:
-            self.localport = adb_port
-        deviceport = "minitouch_%s" % self.localport
-        self.adb.forward("tcp:%s" % self.localport, "localabstract:%s" % deviceport)
+
+        @retries(3)
+        def set_up_forward():
+            localport = adb_port or self.localport or self.adb.get_available_forward_local()
+            deviceport = "minitouch_%s" % localport
+            self.adb.forward("tcp:%s" % localport, "localabstract:%s" % deviceport)
+            return localport, deviceport
+
+        self.localport, deviceport  = set_up_forward()
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % deviceport, not_wait=True)
         self.nbsp = NonBlockingStreamReader(p.stdout)
         while True:
@@ -550,12 +571,26 @@ class Minitouch(object):
         self.handle = self.backend_queue.put
 
     def setup_client(self):
-        # if not self.server_proc:
-        #     raise RuntimeError("please setup_server first")
+        """
+        1. connect to server
+        2. recv header
+            v <version>
+            ^ <max-contacts> <max-x> <max-y> <max-pressure>
+            $ <pid>
+        3. prepare to send
+        """
         s = SafeSocket()
         s.connect(("localhost", self.localport))
-        header = s.sock.recv(4096) # size is not strict, so use raw socket.recv
-        print repr(header)
+        s.sock.settimeout(2)
+        header = ""
+        while True:
+            try:
+                header += s.sock.recv(4096) # size is not strict, so use raw socket.recv
+            except socket.timeout:
+                raise RuntimeError("minitouch setup client error")
+            if header.count('\n') >= 3:
+                break
+        print "minitouch header:", repr(header)
         self.client = s
         self.handle = self.client.send
 
@@ -587,13 +622,34 @@ def autoretry(func):
     return f
 
 
+def retry_adb_status(func):
+    def f(self, *args, **kwargs):
+        def fail_hook(tries_remaining, e, mydelay):
+            # print "autoretry", tries_remaining, repr(e), mydelay
+            try:
+                self.adb.connect(True)
+            except:
+                traceback.print_exc()
+
+        @retries(5, delay=0.5, hook=fail_hook)
+        def f_with_retries(self, *args, **kwargs):
+            # print self, args, kwargs
+            return func(self, *args, **kwargs)
+
+        ret = f_with_retries(self, *args, **kwargs)
+        return ret
+    return f
+
+
 class Android(object):
 
     """Android Client"""
+    _props_tmp = "/data/local/tmp/moa_props.tmp"
 
     def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True, props={}):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
+        self._check_status()
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
@@ -609,7 +665,8 @@ class Android(object):
 
     def _load_props(self):
         try:
-            props = self.adb.shell("cat /data/local/tmp/moa_props.tmp")
+            props = self.adb.shell("cat %s" % self._props_tmp)
+            print "load props:\n", props
             props = json.loads(props)
         except ValueError as err:
             # traceback.print_exc()
@@ -623,14 +680,13 @@ class Android(object):
             "sdk_version": self.sdk_version,
         }
         data = json.dumps(data).replace(r'"', r'\"')
-        self.adb.shell("echo %s > /data/local/tmp/moa_props.tmp" % data)
+        self.adb.shell("echo %s > %s" % (data, self._props_tmp))
 
-    def check_status(self):
-        dev_list = list(adb_devices())
-        for dev, status in dev_list:
-            if dev == self.serialno:
-                return status
-        return None
+    @retry_adb_status
+    def _check_status(self):
+        status = self.adb.get_status()
+        if status != "device":
+            raise MoaError("device status error:%s %s"%(self.serialno, status))
 
     def amcheck(self, package):
         output = self.adb.shell(['pm', 'path', package])
@@ -976,14 +1032,8 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     t = time.clock()
-    import json
     a = Android(serialno, minicap=True, minitouch=True)
     print time.clock() - t, "111"
-    print a.dump_props()
-    print time.clock() - t, "222"
-    from pprint import pprint
-    pprint(a.load_props())
-    print time.clock() - t, "323"
     # screen = a.adb.snapshot()
     # with open("screen.png", "wb") as f:
     #     f.write(screen)
