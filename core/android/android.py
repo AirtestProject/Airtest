@@ -622,25 +622,6 @@ def autoretry(func):
     return f
 
 
-def retry_adb_status(func):
-    def f(self, *args, **kwargs):
-        def fail_hook(tries_remaining, e, mydelay):
-            # print "autoretry", tries_remaining, repr(e), mydelay
-            try:
-                self.adb.connect(True)
-            except:
-                traceback.print_exc()
-
-        @retries(5, delay=0.5, hook=fail_hook)
-        def f_with_retries(self, *args, **kwargs):
-            # print self, args, kwargs
-            return func(self, *args, **kwargs)
-
-        ret = f_with_retries(self, *args, **kwargs)
-        return ret
-    return f
-
-
 class Android(object):
 
     """Android Client"""
@@ -682,7 +663,7 @@ class Android(object):
         data = json.dumps(data).replace(r'"', r'\"')
         self.adb.shell("echo %s > %s" % (data, self._props_tmp))
 
-    @retry_adb_status
+    @retries(5, delay=0.5)
     def _check_status(self):
         status = self.adb.get_status()
         if status != "device":
