@@ -19,6 +19,7 @@ import struct
 import threading
 import platform
 import Queue
+import random
 import traceback
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
@@ -49,7 +50,8 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
         init_adb()
         adbpath = ADBPATH
     if isinstance(cmds, basestring):
-        cmds = shlex.split(cmds)
+        # cmds = shlex.split(cmds)  # disable auto removing \
+        cmds = cmds.split()
     else:
         cmds = list(cmds)
     # start-server cannot assign -H -P -s
@@ -170,7 +172,7 @@ class ADB(object):
     @classmethod
     def _get_forward_local(cls):
         port = cls._forward_local
-        cls._forward_local += 1
+        cls._forward_local += random.randint(1, 100)
         return port
 
     def get_available_forward_local(self):
@@ -180,12 +182,12 @@ class ADB(object):
         """
         forwards = self.get_forwards()
         localports = [i[1] for i in forwards]
-        port_range = 10000
-        for i in range(port_range):
+        times = 100
+        for i in range(times):
             port = self._get_forward_local()
             if "tcp:%s"%port not in localports:
                 return port
-        raise RuntimeError("No available adb forward local %s-%s" % (port-port_range+1, port))
+        raise RuntimeError("No available adb forward local port for %s times" % (times))
 
     def remove_forward(self, local=None):
         if local:
@@ -661,7 +663,8 @@ class Android(object):
             "sdk_version": self.sdk_version,
         }
         data = json.dumps(data).replace(r'"', r'\"')
-        self.adb.shell("echo %s > %s" % (data, self._props_tmp))
+        print data
+        self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
 
     @retries(5, delay=0.5)
     def _check_status(self):
