@@ -286,6 +286,7 @@ class Minicap(object):
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
+            self.adb.remove_forward("tcp:%s" % self.localport)
 
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
 
@@ -945,9 +946,10 @@ class Android(object):
         if ori is None:
             ori = self.getDisplayOrientation()
         self.size["orientation"] = ori
+        self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
             # self.minicap.get_display_info()
-            self.minicap.size["rotation"] = ori * 90
+            self.minicap.size["rotation"] = self.size["rotation"]
 
     def reconnect(self):
         self.adb.disconnect()
