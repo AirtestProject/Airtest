@@ -81,7 +81,7 @@ def join_group(serial):
     data = {"serial": serial}
 
     res = requests.post(url, data=json.dumps(data), headers=headers)
-    print 'joinGroup ', res.json()
+    # print 'joinGroup ', res.json()
     return res.json()
 
 # 释放设备
@@ -103,7 +103,7 @@ def remote_connect(serial):
     }
 
     res = requests.post(url, headers=headers)
-    print 'remoteConnect ', res.json()
+    # print 'remoteConnect ', res.json()
     return res.json()
 
 # 结束远程设备连接
