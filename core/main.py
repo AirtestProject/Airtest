@@ -144,6 +144,7 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
     DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
+    DEVICE.wake()
     return sn
 
 def set_udid(udid=None):
