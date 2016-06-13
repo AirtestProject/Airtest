@@ -58,7 +58,8 @@ def install(addr, apk):
 
 def startapp(addr, package):
     """打开app"""
-    pass
+    a = Android(addr, minicap=False, minitouch=False)
+    a.amstart(package)
 
 
 def run(addr, moa_script):

@@ -779,7 +779,7 @@ class Android(object):
         p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
-        # print info
+        print info
         nbsp.kill()
         if p.poll() is not None:
             print "start_recording error:", p.communicate()
