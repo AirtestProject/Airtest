@@ -21,6 +21,7 @@ import platform
 import Queue
 import random
 import traceback
+import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
 from moa.aircv import aircv
@@ -679,6 +680,10 @@ class Android(object):
         if status != "device":
             raise MoaError("device status error:%s %s"%(self.serialno, status))
 
+    def amlist(self):
+        packages = self.adb.shell(["pm", "list", "packages"])
+        return packages
+
     def amcheck(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
@@ -699,12 +704,23 @@ class Android(object):
         self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
-    def install(self, filepath, reinstall=False, package=None):
+    def install(self, filepath, reinstall=False):
         self.wake()
         self.keyevent("HOME")
-        
-        if reinstall and package:
-            self.uninstall(package)
+
+        # 预装accessibility的apk，用于自动点掉各种弹框
+        packages = self.amlist()
+        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
+            self.adb.install(ACCESSIBILITYSERVICE_APK)
+        self.adb.shell('settings put secure accessibility_enabled 1')
+        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+
+        # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
+        if reinstall:
+            apk = apkparser.APK(filepath)
+            apk_package = apk.get_package()
+            if apk_package in packages:
+                self.uninstall(apk_package)
         return self.adb.install(filepath)
 
     def uninstall(self, package):
@@ -738,14 +754,8 @@ class Android(object):
 
     def wake(self):
         #check and install accessibility service and release lock app
-        packages = self.adb.shell(["pm", "list", "packages"])
+        packages = self.amlist()
 
-        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
-            self.adb.install(ACCESSIBILITYSERVICE_APK)
-
-        self.adb.shell('settings put secure accessibility_enabled 1')
-        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
-        
         if RELEASELOCK_PACKAGE not in packages:
             self.adb.install(RELEASELOCK_APK)
         #start release lock app
@@ -1059,10 +1069,12 @@ def test_android():
     # serialno = "10.250.210.118:57217"
     t = time.clock()
     a = Android(serialno, minicap=True, minitouch=True)
-    print time.clock() - t, "111"
-    a.start_recording(max_time=3)
-    time.sleep(5)
-    a.stop_recording()
+    a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
+    # a.uninstall("com.netease.com")
+    # print time.clock() - t, "111"
+    # a.start_recording(max_time=3)
+    # time.sleep(5)
+    # a.stop_recording()
     # screen = a.adb.snapshot()
     # with open("screen.png", "wb") as f:
     #     f.write(screen)
