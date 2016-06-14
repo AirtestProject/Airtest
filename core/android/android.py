@@ -153,6 +153,9 @@ class ADB(object):
             prop = prop.rstrip('\r\n')
         return prop
 
+    def pull(self, remote, local):
+        self.run(["pull", remote, local])
+
     def forward(self, local, remote, no_rebind=True):
         cmds = ['forward']
         if no_rebind:
@@ -786,6 +789,27 @@ class Android(object):
             tar.update({"x": x, "y": y})
         self.minitouch.operate(tar)
 
+    def start_recording(self, max_time=180, savefile="/sdcard/screen.mp4"):
+        if getattr(self, "recording_proc", None):
+            raise MoaError("recording_proc has already started")
+        p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
+        nbsp = NonBlockingStreamReader(p.stdout)
+        info = nbsp.read(0.5)
+        print info
+        nbsp.kill()
+        if p.poll() is not None:
+            print "start_recording error:", p.communicate()
+            return
+        self.recording_proc = p
+        self.recording_file = savefile
+
+    def stop_recording(self, output="screen.mp4"):
+        if not getattr(self, "recording_proc", None):
+            raise MoaError("start_recording first")
+        self.recording_proc.kill()
+        self.recording_proc = None
+        self.adb.pull(self.recording_file, output)
+
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
         lines = dat.replace('\r', '').splitlines()
@@ -1036,6 +1060,9 @@ def test_android():
     t = time.clock()
     a = Android(serialno, minicap=True, minitouch=True)
     print time.clock() - t, "111"
+    a.start_recording(max_time=3)
+    time.sleep(5)
+    a.stop_recording()
     # screen = a.adb.snapshot()
     # with open("screen.png", "wb") as f:
     #     f.write(screen)
