@@ -292,7 +292,6 @@ def _find_pic(screen, picdata, rect=None, threshold=THRESHOLD, target_pos=Target
         ret = None
     except Exception as err:
         traceback.print_exc()
-        aircv.show(screen)
         ret = None
     print ret
     _log_in_func({"cv": ret})
