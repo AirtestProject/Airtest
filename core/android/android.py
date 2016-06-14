@@ -704,7 +704,7 @@ class Android(object):
         self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
-    def install(self, filepath, reinstall=False):
+    def install(self, filepath, reinstall=False, check=True):
         self.wake()
         self.keyevent("HOME")
 
@@ -716,12 +716,14 @@ class Android(object):
         self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
 
         # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
+        apk = apkparser.APK(filepath)
+        apk_package = apk.get_package()
         if reinstall:
-            apk = apkparser.APK(filepath)
-            apk_package = apk.get_package()
             if apk_package in packages:
                 self.uninstall(apk_package)
-        return self.adb.install(filepath)
+        self.adb.install(filepath)
+        if check:
+            self.amcheck(apk_package)
 
     def uninstall(self, package):
         return self.adb.uninstall(package)

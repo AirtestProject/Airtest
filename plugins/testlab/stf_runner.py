@@ -53,7 +53,7 @@ def setdns(addr, dns):
 def install(addr, apk):
     """安装apk"""
     a = Android(addr, minicap=False, minitouch=False)
-    a.install(apk, reinstall=True)
+    a.install(apk, reinstall=True, check=True)
 
 
 def startapp(addr, package):
