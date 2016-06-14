@@ -761,9 +761,14 @@ class Android(object):
         #start release lock app
         self.amstop(RELEASELOCK_PACKAGE)
         self.amstart(RELEASELOCK_PACKAGE)
-        
+
+        # todo:
+        # 1. 还需要按power键吗？
+        # 2. 如果非锁屏状态，上面步骤可以省略
         if not self.is_screenon():
             self.keyevent("POWER")
+
+        self.keyevent("HOME")
 
     def home(self):
         self.keyevent("HOME")
@@ -1069,7 +1074,10 @@ def test_android():
     # serialno = "10.250.210.118:57217"
     t = time.clock()
     a = Android(serialno, minicap=True, minitouch=True)
-    a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
+    # a.uninstall(RELEASELOCK_PACKAGE)
+    # a.wake()
+    a.amstart(RELEASELOCK_PACKAGE)
+    # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
     # a.uninstall("com.netease.com")
     # print time.clock() - t, "111"
     # a.start_recording(max_time=3)
