@@ -34,7 +34,10 @@ PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
 ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
 DEBUG = True
-
+RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
+RELEASELOCK_PACKAGE = "com.netease.releaselock"
+ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
+ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 
 def init_adb():
     global ADBPATH
@@ -696,9 +699,7 @@ class Android(object):
     def install(self, filepath, reinstall=False, package=None):
         self.wake()
         self.keyevent("HOME")
-        # need to add install if necessary
-        self.adb.shell('settings put secure accessibility_enabled 1')
-        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+        
         if reinstall and package:
             self.uninstall(package)
         return self.adb.install(filepath)
@@ -733,6 +734,21 @@ class Android(object):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
+        #check and install accessibility service and release lock app
+        packages = self.adb.shell(["pm", "list", "packages"])
+
+        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
+            self.adb.install(ACCESSIBILITYSERVICE_APK)
+
+        self.adb.shell('settings put secure accessibility_enabled 1')
+        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+        
+        if RELEASELOCK_PACKAGE not in packages:
+            self.adb.install(RELEASELOCK_APK)
+        #start release lock app
+        self.amstop(RELEASELOCK_PACKAGE)
+        self.amstart(RELEASELOCK_PACKAGE)
+        
         if not self.is_screenon():
             self.keyevent("POWER")
 
