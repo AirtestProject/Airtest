@@ -293,7 +293,7 @@ def Logwrap(f, logger):
             raise
         else:
             time_used = time.time() - start
-            print '>'*len(LOGGER.running_stack), 'Time used:', f.__name__, time_used
+            print '>'*len(LOGGER.running_stack), f.__name__, 'Time used:', "%.3f" % time_used, "s"
             sys.stdout.flush()
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(LOGGER.extra_log)
