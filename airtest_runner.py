@@ -95,6 +95,7 @@ def main():
     # 建军添加：设置运行进程中moa的参数，将maskrect设置为
     ap.add_argument("--maskrect", help="set IDE rect tobe a moa mask, during windows running.")
 
+    global args
     args = ap.parse_args()
 
     # loading util file

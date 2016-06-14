@@ -21,6 +21,7 @@ import platform
 import Queue
 import random
 import traceback
+import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
 from moa.aircv import aircv
@@ -34,7 +35,10 @@ PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
 ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
 DEBUG = True
-
+RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
+RELEASELOCK_PACKAGE = "com.netease.releaselock"
+ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
+ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 
 def init_adb():
     global ADBPATH
@@ -149,6 +153,9 @@ class ADB(object):
         if strip:
             prop = prop.rstrip('\r\n')
         return prop
+
+    def pull(self, remote, local):
+        self.run(["pull", remote, local])
 
     def forward(self, local, remote, no_rebind=True):
         cmds = ['forward']
@@ -673,6 +680,10 @@ class Android(object):
         if status != "device":
             raise MoaError("device status error:%s %s"%(self.serialno, status))
 
+    def amlist(self):
+        packages = self.adb.shell(["pm", "list", "packages"])
+        return packages
+
     def amcheck(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
@@ -693,15 +704,26 @@ class Android(object):
         self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
-    def install(self, filepath, reinstall=False, package=None):
+    def install(self, filepath, reinstall=False, check=True):
         self.wake()
         self.keyevent("HOME")
-        # need to add install if necessary
+
+        # 预装accessibility的apk，用于自动点掉各种弹框
+        packages = self.amlist()
+        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
+            self.adb.install(ACCESSIBILITYSERVICE_APK)
         self.adb.shell('settings put secure accessibility_enabled 1')
         self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
-        if reinstall and package:
-            self.uninstall(package)
-        return self.adb.install(filepath)
+
+        # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
+        apk = apkparser.APK(filepath)
+        apk_package = apk.get_package()
+        if reinstall:
+            if apk_package in packages:
+                self.uninstall(apk_package)
+        self.adb.install(filepath)
+        if check:
+            self.amcheck(apk_package)
 
     def uninstall(self, package):
         return self.adb.uninstall(package)
@@ -733,8 +755,22 @@ class Android(object):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
+        #check and install accessibility service and release lock app
+        packages = self.amlist()
+
+        if RELEASELOCK_PACKAGE not in packages:
+            self.adb.install(RELEASELOCK_APK)
+        #start release lock app
+        self.amstop(RELEASELOCK_PACKAGE)
+        self.amstart(RELEASELOCK_PACKAGE)
+
+        # todo:
+        # 1. 还需要按power键吗？
+        # 2. 如果非锁屏状态，上面步骤可以省略
         if not self.is_screenon():
             self.keyevent("POWER")
+
+        self.keyevent("HOME")
 
     def home(self):
         self.keyevent("HOME")
@@ -769,6 +805,27 @@ class Android(object):
             x, y = self._transformPointByOrientation((x, y))
             tar.update({"x": x, "y": y})
         self.minitouch.operate(tar)
+
+    def start_recording(self, max_time=180, savefile="/sdcard/screen.mp4"):
+        if getattr(self, "recording_proc", None):
+            raise MoaError("recording_proc has already started")
+        p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
+        nbsp = NonBlockingStreamReader(p.stdout)
+        info = nbsp.read(0.5)
+        print info
+        nbsp.kill()
+        if p.poll() is not None:
+            print "start_recording error:", p.communicate()
+            return
+        self.recording_proc = p
+        self.recording_file = savefile
+
+    def stop_recording(self, output="screen.mp4"):
+        if not getattr(self, "recording_proc", None):
+            raise MoaError("start_recording first")
+        self.recording_proc.kill()
+        self.recording_proc = None
+        self.adb.pull(self.recording_file, output)
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
@@ -1019,7 +1076,15 @@ def test_android():
     # serialno = "10.250.210.118:57217"
     t = time.clock()
     a = Android(serialno, minicap=True, minitouch=True)
-    print time.clock() - t, "111"
+    # a.uninstall(RELEASELOCK_PACKAGE)
+    # a.wake()
+    a.amstart(RELEASELOCK_PACKAGE)
+    # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
+    # a.uninstall("com.netease.com")
+    # print time.clock() - t, "111"
+    # a.start_recording(max_time=3)
+    # time.sleep(5)
+    # a.stop_recording()
     # screen = a.adb.snapshot()
     # with open("screen.png", "wb") as f:
     #     f.write(screen)
