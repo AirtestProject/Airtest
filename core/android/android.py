@@ -205,7 +205,9 @@ class ADB(object):
     def install(self, filepath):
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
-        return self.run(['install', filepath])
+        p = self.run(['install', filepath], not_wait=True)
+        nbsp = NonBlockingStreamReader(p.stdout)
+        p.wait()
 
     def uninstall(self, package):
         return self.run(['uninstall', package])
@@ -680,8 +682,25 @@ class Android(object):
         if status != "device":
             raise MoaError("device status error:%s %s"%(self.serialno, status))
 
-    def amlist(self):
-        packages = self.adb.shell(["pm", "list", "packages"])
+    def amlist(self, third_only=False):
+        """
+        pm list packages: prints all packages, optionally only
+          those whose package name contains the text in FILTER.  Options:
+            -f: see their associated file.
+            -d: filter to only show disbled packages.
+            -e: filter to only show enabled packages.
+            -s: filter to only show system packages.
+            -3: filter to only show third party packages.
+            -i: see the installer for the packages.
+            -u: also include uninstalled packages.
+        """
+        cmd = ["pm", "list", "packages"]
+        if third_only:
+            cmd.append("-3")
+        output = self.adb.shell(cmd)
+        packages = output.splitlines()
+        # remove all ""; "package:xxx" -> "xxx"
+        packages = [p.split(":")[1] for p in packages if p]
         return packages
 
     def amcheck(self, package):
@@ -704,6 +723,12 @@ class Android(object):
         self.amcheck(package)
         self.adb.shell(['pm', 'clear', package])
 
+    def amuninstall(self, package, keepdata=False):
+        cmd = ['pm', 'uninstall', package]
+        if keepdata:
+            cmd.append('-k')
+        self.adb.shell(cmd)
+
     def install(self, filepath, reinstall=False, check=True):
         self.wake()
         self.keyevent("HOME")
@@ -721,6 +746,8 @@ class Android(object):
         if reinstall:
             if apk_package in packages:
                 self.uninstall(apk_package)
+        # rm all apks in /data/local/tmp to get enouph space
+        self.adb.shell("rm /data/local/tmp/*.apk")
         self.adb.install(filepath)
         if check:
             self.amcheck(apk_package)
@@ -1075,10 +1102,12 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     t = time.clock()
-    a = Android(serialno, minicap=True, minitouch=True)
+    a = Android(serialno, minicap=False, minitouch=False)
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
-    a.amstart(RELEASELOCK_PACKAGE)
+    a.amstart("com.netease.wscs.mi")
+    # print a.amlist()
+    # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
     # a.uninstall("com.netease.com")
     # print time.clock() - t, "111"
