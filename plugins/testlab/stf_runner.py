@@ -53,6 +53,7 @@ def test(addr):
 
 
 def setdns(sn, addr, dns):
+    """设置dns"""
     from moa.plugins.dns_setter import DnsSetter
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()

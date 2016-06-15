@@ -2,7 +2,7 @@
 __author__ = 'lxn3032'
 
 
-from ..fnslots import FnSlots
+from moa.plugins.dns_setter.fnslots import FnSlots
 
 
 try:

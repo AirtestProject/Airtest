@@ -14,6 +14,7 @@ from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
+from moa.plugins.ime_helper import UiautomatorIme
 
 
 COOLPAD = ('8d260bf7', )
@@ -50,7 +51,7 @@ class DefaultDnsSetter(object):
         time.sleep(1)
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
-        success = self.uiutil.wait_any({'textMatches': ur'已连接|已連線|connected'}, timeout=10000)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=10000)
         if not success:
             raise Exception('cannot connect to netease_game. network not available.')
 
@@ -121,23 +122,24 @@ class DefaultDnsSetter(object):
 
     def set_dns(self, dns1):
         # change STATIC mode and dns
-        self.enter_wlan_settings()
-        self.enter_wlan_advanced_settings()
-        self.use_static_ip()
+        with UiautomatorIme(self.adb):
+            self.enter_wlan_settings()
+            self.enter_wlan_advanced_settings()
+            self.use_static_ip()
 
-        SHOULD_PRESS_BACK_AFTER_TEXTING = [
-            '55466646', 'AVY9KA95A2106482', '473fd2a2', '7N2MYN155S029228', 'c0e82f5f', '4f1496f5', '1453b839',
-            '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
-            'DU2TAN158M041444',
-        ]
-        # QLXBBBA5B1137702 使用其他输入法后，这个就去掉
-        self.modify_wlan_settings_fields(dns1, self.sn in SHOULD_PRESS_BACK_AFTER_TEXTING)
+            SHOULD_PRESS_BACK_AFTER_TEXTING = [
+                '55466646', 'AVY9KA95A2106482', '473fd2a2', '7N2MYN155S029228', 'c0e82f5f', '4f1496f5', '1453b839',
+                '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
+                'DU2TAN158M041444',
+            ]
+            # QLXBBBA5B1137702 使用其他输入法后，这个就去掉
+            self.modify_wlan_settings_fields(dns1, self.sn in SHOULD_PRESS_BACK_AFTER_TEXTING)
 
-        # reconnect
-        time.sleep(2)
-        self.d.press.back()
-        self.enter_wlan_list()
-        self.connect_netease_game()
+            # reconnect
+            time.sleep(2)
+            self.d.press.back()
+            self.enter_wlan_list()
+            self.connect_netease_game()
         return self.test_dns(dns1)
 
 
@@ -169,6 +171,7 @@ PASS_LIST = (
     'T3Q4C15B04019605',     # 华为 荣耀畅玩5X（移动版）（GIH-PHO-663）
     'QLXBBBA5B1137702',     # 华为 畅享5S 全网通
     'F8UDU15505001428',     # 华为 荣耀6 Plus 移动版（PE-TL20）
+    '69T7N15925010489',     # 华为 荣耀 7i
     'G2W7N15930015071',     # MT7-CL00
     'ZTAMDU49ZT59TOAE',     # vivo X6D
     'CQ556955VKOV5T4D',     # vivo X6Plus
