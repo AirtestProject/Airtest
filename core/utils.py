@@ -109,7 +109,7 @@ from Queue import Queue, Empty
 
 class NonBlockingStreamReader:
 
-    def __init__(self, stream, raise_EOF=False, print_output=True):
+    def __init__(self, stream, raise_EOF=False, print_output=True, print_new_line=True):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
@@ -119,6 +119,7 @@ class NonBlockingStreamReader:
         '''
         self._s = stream
         self._q = Queue()
+        self._lastline = None
 
         def _populateQueue(stream, queue, kill_event):
             '''
@@ -129,7 +130,12 @@ class NonBlockingStreamReader:
                 if line:
                     queue.put(line)
                     if print_output:
+                        # print only new line 
+                        if print_new_line and line == self._lastline:
+                            continue
+                        self._lastline = line
                         print line.strip()
+                        sys.stdout.flush()
                 elif kill_event.is_set():
                     break
                 elif raise_EOF:

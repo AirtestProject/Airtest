@@ -205,7 +205,9 @@ class ADB(object):
     def install(self, filepath):
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
-        return self.run(['install', filepath])
+        p = self.run(['install', filepath], not_wait=True)
+        nbsp = NonBlockingStreamReader(p.stdout)
+        p.wait()
 
     def uninstall(self, package):
         return self.run(['uninstall', package])
@@ -721,6 +723,8 @@ class Android(object):
         if reinstall:
             if apk_package in packages:
                 self.uninstall(apk_package)
+        # rm all apks in /data/local/tmp to get enouph space
+        self.adb.shell("rm /data/local/tmp/*.apk")
         self.adb.install(filepath)
         if check:
             self.amcheck(apk_package)
