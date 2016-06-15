@@ -337,8 +337,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         else:
             screen = snapshot()
         if screen is None:
-            print "Cannot captured SCREEN : SCREEN is None !"
-            return None
+            raise MoaError("Cannot captured SCREEN : SCREEN is None !")
         # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
         # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
         aircv.cv2.imwrite("screen.png", screen)
