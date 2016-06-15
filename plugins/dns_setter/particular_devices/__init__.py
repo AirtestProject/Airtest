@@ -2,7 +2,10 @@
 __author__ = 'lxn3032'
 
 
-from fnslots import FnSlots
+from ..fnslots import FnSlots
 
 
-particular_case = FnSlots()
+try:
+    _ = particular_case
+except NameError:
+    particular_case = FnSlots()

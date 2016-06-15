@@ -45,9 +45,14 @@ def test(addr):
     # a.amstart("com.netease.thdmx")
 
 
-def setdns(addr, dns):
-    """设置dns"""
-    pass
+def setdns(sn, addr, dns):
+    from moa.plugins.dns_setter import DnsSetter
+    dsetter = DnsSetter(addr, sn)
+    dsetter.network_prepare()
+    if dns != '-1':
+        success = dsetter.set_dns(dns)
+        if not success:
+            raise Exception("dns check fail with `getprop net.dns1`.")
 
 
 def install(addr, apk):

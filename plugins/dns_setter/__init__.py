@@ -106,12 +106,21 @@ class DefaultDnsSetter(object):
             self.uiutil.replace_text(uiobj, dns1, back_after_texting)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
-    def set_dns(self, dns1):
-        # change STATIC mode and dns
+    def test_dns(self, dns1):
+        test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
+        if dns1 in test_getdns:
+            print 'success !!'
+            return True
+        return False
+
+    def network_prepare(self):
         self.d.screen.on()
         self.d.press('home')
         self.enter_wlan_list()
         self.connect_netease_game()
+
+    def set_dns(self, dns1):
+        # change STATIC mode and dns
         self.enter_wlan_settings()
         self.enter_wlan_advanced_settings()
         self.use_static_ip()
@@ -119,6 +128,7 @@ class DefaultDnsSetter(object):
         SHOULD_PRESS_BACK_AFTER_TEXTING = [
             '55466646', 'AVY9KA95A2106482', '473fd2a2', '7N2MYN155S029228', 'c0e82f5f', '4f1496f5', '1453b839',
             '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
+            'DU2TAN158M041444',
         ]
         # QLXBBBA5B1137702 使用其他输入法后，这个就去掉
         self.modify_wlan_settings_fields(dns1, self.sn in SHOULD_PRESS_BACK_AFTER_TEXTING)
@@ -128,10 +138,7 @@ class DefaultDnsSetter(object):
         self.d.press.back()
         self.enter_wlan_list()
         self.connect_netease_game()
-
-        test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
-        if dns1 in test_getdns:
-            print 'success !!'
+        return self.test_dns(dns1)
 
 
 class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, MX4, MX3, MeiLanNote, Galaxy):
@@ -253,6 +260,7 @@ if __name__ == '__main__':
             try:
                 dns_setter = DnsSetter(rsn, sn)
                 dns1 = '192.168.229.227'
+                dns_setter.network_prepare()
                 dns_setter.set_dns(dns1)
             except:
                 traceback.print_exc()
