@@ -87,7 +87,7 @@ def run(addr, moa_script):
     import subprocess
     filename = os.path.basename(moa_script)
     shutil.copytree(moa_script, filename)
-    p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename, 
+    p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen"
     ])
     p.wait()
