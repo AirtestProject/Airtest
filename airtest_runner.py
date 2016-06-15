@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+
+import time
 import os
 import sys
 import json
@@ -9,8 +11,8 @@ from core.main import *
 import requests
 import re
 import urllib2
-import time
-from plugins import sdkautomator
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
+import sdkautomator
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
@@ -93,6 +95,7 @@ def main():
     # 建军添加：设置运行进程中moa的参数，将maskrect设置为
     ap.add_argument("--maskrect", help="set IDE rect tobe a moa mask, during windows running.")
 
+    global args
     args = ap.parse_args()
 
     # loading util file

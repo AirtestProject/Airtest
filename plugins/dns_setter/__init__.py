@@ -249,8 +249,7 @@ if __name__ == '__main__':
     for d in stf.get_device_list_rest(None):
         sn = d['serial']
         if sn not in PASS_LIST:
-            stf_runner.join(sn)
-            rsn = stf_runner.run(sn)
+            rsn = stf_runner.join(sn)
             try:
                 dns_setter = DnsSetter(rsn, sn)
                 dns1 = '192.168.229.227'
