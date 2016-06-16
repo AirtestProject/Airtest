@@ -1071,17 +1071,20 @@ class Android(object):
                 line = self.ow_proc.stdout.readline()
                 if not line:
                     print "orientationWatcher has ended"
+                    if getattr(self, "ow_callback", None):
+                        self.ow_callback(None, *self.ow_callback_args)
                     break
                 ori = int(line) / 90
                 self.refreshOrientationInfo(ori)
                 if getattr(self, "ow_callback", None):
                     self.ow_callback(ori, *self.ow_callback_args)
+
         self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
         self._t.daemon = True
         self._t.start()
 
     def reg_ow_callback(self, ow_callback, *ow_callback_args):
-        """方向变化的时候的回调函数"""
+        """方向变化的时候的回调函数，第一个参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback = ow_callback
         self.ow_callback_args = ow_callback_args
 
