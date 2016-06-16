@@ -4,6 +4,7 @@
 # Author:  hzsunshx
 # Created: 2015-07-02 19:56
 # Modified: 2015-11 gzliuxin  add minitouch minicap
+# Modified: 2016-06 gzliuxin  testlab support
 
 
 import os
@@ -40,6 +41,9 @@ RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
 ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
 ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
+ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
+ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
+
 
 def init_adb():
     global ADBPATH
@@ -648,9 +652,10 @@ class Android(object):
         self.props = props or self._load_props()
         if "display_info" in self.props:
             self.size = self.props["display_info"]
-            self.refreshOrientationInfo()
+            # self.refreshOrientationInfo()
         else:
             self.get_display_info()
+        self.orientationWatcher()
         self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
         self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
@@ -709,6 +714,7 @@ class Android(object):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]'%output)
+        return output.split(":")[1].strip()
 
     def amstart(self, package, activity=None):
         self.amcheck(package)
@@ -984,7 +990,7 @@ class Android(object):
                 for prop in [ 'width', 'height' ]:
                     displayInfo[prop] = int(m.group(prop))
                 for prop in [ 'density' ]:
-    
+
                     d = self.__getDisplayDensity(None, strip=True)
                     if d:
                         displayInfo[prop] = d
@@ -1017,7 +1023,7 @@ class Android(object):
         output = self.adb.shell('dumpsys input')
         m = surfaceOrientationRE.search(output)
         if m:
-            return int(m.group(1))        
+            return int(m.group(1))
 
         # We couldn't obtain the orientation
         # return -1
@@ -1038,11 +1044,35 @@ class Android(object):
         """
         if ori is None:
             ori = self.getDisplayOrientation()
+        print "refreshOrientationInfo:", ori
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
             # self.minicap.get_display_info()
             self.minicap.size["rotation"] = self.size["rotation"]
+
+    def _initOrientationWatcher(self):
+        try:
+            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+        except MoaError:
+            self.adb.install(ROTATIONWATCHER_APK)
+            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+        p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
+        if p.poll() is not None:
+            raise RuntimeError("orientationWatcher setup error")
+        return p
+
+    def orientationWatcher(self):
+        self.ow_proc = self._initOrientationWatcher()
+
+        def _refresh_orientation(self):
+            while True:
+                line = self.ow_proc.stdout.readline()
+                ori = int(line) / 90
+                self.refreshOrientationInfo(ori)
+        self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
+        self._t.daemon = True
+        self._t.start()
 
     def reconnect(self):
         self.adb.disconnect()
@@ -1052,7 +1082,6 @@ class Android(object):
             self.minitouch.setup_client_backend()
         else:
             self.minitouch.setup_client()
-
 
 
 class XYTransformer(object):
@@ -1114,7 +1143,8 @@ def test_android():
     a = Android(serialno, minicap=False, minitouch=False)
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
-    a.amstart("com.netease.wscs.mi")
+    a.amstart("com.netease.my")
+    time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
