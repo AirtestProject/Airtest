@@ -55,6 +55,8 @@ def test(addr):
 def setdns(sn, addr, dns):
     """设置dns"""
     from moa.plugins.dns_setter import DnsSetter
+    a = Android(addr, minicap=False, minitouch=False)
+    a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
     if dns != '-1':

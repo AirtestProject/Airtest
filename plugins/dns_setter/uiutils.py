@@ -79,6 +79,7 @@ class UIUtil(object):
         current_len = len(uiobj.text)
         if idx2 < len(result):
             # 一定要先归位到最左，不然往右移光标时会移出到控件外面的
+            uiobj.click.bottomright()
             for _ in range(current_len):
                 self.d.press('left')
             for _ in range(current_len):
