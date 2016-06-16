@@ -25,6 +25,7 @@ import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
 from moa.aircv import aircv
+from moa.core.android.ime_helper import UiautomatorIme
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -655,6 +656,7 @@ class Android(object):
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
+        self.ime = UiautomatorIme(self.adb)
 
     def _load_props(self):
         try:
@@ -804,6 +806,13 @@ class Android(object):
 
     def text(self, text):
         self.adb.shell(["input", "text", text])
+
+    def toggle_shell_ime(self, on=True):
+        """切换到shell的输入法，用于text"""
+        if on:
+            self.ime.start()
+        else:
+            self.ime.end()
 
     @autoretry
     def touch(self, pos, duration=0.01):
