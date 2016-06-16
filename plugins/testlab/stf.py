@@ -146,20 +146,20 @@ if __name__ == "__main__":
     req = ""
     listDevices = get_device_list_rest(req)
     print "Available devices:", len(listDevices) 
-    pprint(listDevices)
+    # pprint(listDevices)
 
-    for i in range(2):
-        serial = listDevices[i]['serial']
-        print serial
-        pprint(listDevices[i])
+    # for i in range(2):
+    #     serial = listDevices[i]['serial']
+    #     print serial
+    #     pprint(listDevices[i])
 
-        join_group(serial)
-        remote_connect(serial)
+    #     join_group(serial)
+    #     remote_connect(serial)
 
-        time.sleep(10)
+    #     time.sleep(10)
 
-        remote_disconnect(serial)
-        leave_group(serial)
+    #     remote_disconnect(serial)
+    #     leave_group(serial)
 
     # listFields = get_device_list_fields(req, fields)
     # print ''

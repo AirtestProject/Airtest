@@ -145,7 +145,6 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
     DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
-    DEVICE.wake()
     return sn
 
 def set_udid(udid=None):
@@ -442,7 +441,7 @@ def amstart(package, activity=None):
         return
 
     DEVICE.amstart(package, activity)
-    refresh_device()
+    # refresh_device()
 
 @logwrap
 @platform(on=["Android","IOS"])
@@ -452,7 +451,7 @@ def amstop(package):
         return
 
     DEVICE.amstop(package)
-    refresh_device()
+    # refresh_device()
 
 
 @logwrap
@@ -501,7 +500,7 @@ def wake():
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-    refresh_device()
+    # refresh_device()
 
 
 @platform(on=["Android"])
@@ -636,6 +635,12 @@ def text(text, delay=OPDELAY):
     DEVICE.text(text)
 
     time.sleep(delay)
+
+
+@logwrap
+@platform(on=["Android"])
+def toggle_shell_ime(on=True):
+    DEVICE.toggle_shell_ime(on)
 
 
 @logwrap

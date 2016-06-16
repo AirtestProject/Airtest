@@ -15,9 +15,9 @@ from particular_devices.samsung import Galaxy
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
 from moa.plugins.ime_helper import UiautomatorIme
+from moa.core.android.android import Android
 
 
-COOLPAD = ('8d260bf7', )
 SONY_XPERIA = ('CB5A1NW8WK', )
 
 
@@ -27,7 +27,8 @@ class DefaultDnsSetter(object):
         self.rsn = rsn
         self.sn = sn
         self.d = Device(rsn)
-        self.adb = ADB(rsn)
+        self.android = Android(rsn)
+        self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
 
     @particular_case.specified(['2053d814'])
@@ -37,6 +38,22 @@ class DefaultDnsSetter(object):
     @particular_case.default_call
     def enter_wlan_list(self):
         self.adb.shell('am start -a "android.net.wifi.PICK_WIFI_NETWORK" --activity-clear-top')
+
+    @particular_case.specified(['296eea5d'])
+    def connect_netease_game(self):
+        # X6SPlus D
+        uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
+        uiobj.click()
+        time.sleep(1)
+        self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
+        time.sleep(5)
+        netease_game = self.d(text='netease_game')
+        netease_game.click()
+        time.sleep(0.5)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=10000)
+        if not success:
+            raise Exception('cannot connect to netease_game. network not available.')
+        self.uiutil.click_any({'textMatches': ur'取消'})
 
     @particular_case.default_call
     def connect_netease_game(self):
@@ -59,7 +76,13 @@ class DefaultDnsSetter(object):
     def enter_wlan_settings(self):
         self.d(text='netease_game').long_click()
         time.sleep(0.5)
-        self.uiutil.click_any({'textMatches': ur'^.*(修改|設定)(網|网)(路|絡|络).*$'}, {'textMatches': ur'^.*(網|网)(路|絡|络)(修改|設定).*$'})
+        self.uiutil.click_any({'textMatches': ur'^.*(修改|設定)(網|网)(路|絡|络).*$'}, {'textMatches': ur'^.*(網|网)(路|絡|络)(修改|設定|设置).*$'})
+
+    @particular_case.specified(['57b8a250'])
+    def enter_wlan_settings(self):
+        self.d(text='netease_game').long_click()
+        time.sleep(0.5)
+        self.uiutil.click_any({'text': u'管理网络设置'})
 
     @particular_case.default_call
     def enter_wlan_settings(self):
@@ -89,23 +112,27 @@ class DefaultDnsSetter(object):
 
     @particular_case.default_call
     def use_static_ip(self):
-        self.uiutil.scroll_to_click_any({'resourceId': 'com.android.settings:id/ip_settings'}, {'resourceId': 'com.android.settings.wifi:id/ip_settings'})
+        self.uiutil.scroll_to_click_any(
+            {'resourceId': 'com.android.settings:id/ip_settings'},
+            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
+            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
+        )
         self.uiutil.click_any({'textMatches': ur'静态|static|STATIC|靜態|静止'})
-
-    @particular_case.specified(COOLPAD)
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
-        uiobj = self.uiutil.scroll_to_click_any({'resourceId': 'com.android.settings.wifi:id/dns2'})
-        if uiobj:
-            uiobj.clear_text()
-            uiobj.set_text(dns1)
-        self.uiutil.click_any({'text': u'保存'})
 
     @particular_case.default_call
     def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
-        uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'}, {'resourceId': 'com.android.settings.wifi:id/dns1'})
+        uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'},
+                                        {'resourceId': 'com.android.settings.wifi:id/dns1'},
+                                        {'resourceId': 'com.lge.wifisettings:id/dns1'},
+                                        )
         if uiobj:
             self.uiutil.replace_text(uiobj, dns1, back_after_texting)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+
+    def test_unlock_success(self):
+        time.sleep(1)
+        if not self.d(textContains='netease').exists:
+            raise Exception('device unlock fail. cannot get ui hierarchy.')
 
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
@@ -118,21 +145,22 @@ class DefaultDnsSetter(object):
         self.d.screen.on()
         self.d.press('home')
         self.enter_wlan_list()
+        self.test_unlock_success()
         self.connect_netease_game()
 
     def set_dns(self, dns1):
         # change STATIC mode and dns
-        with UiautomatorIme(self.adb):
+        with self.android.ime:
             self.enter_wlan_settings()
             self.enter_wlan_advanced_settings()
             self.use_static_ip()
 
             SHOULD_PRESS_BACK_AFTER_TEXTING = [
-                '55466646', 'AVY9KA95A2106482', '473fd2a2', '7N2MYN155S029228', 'c0e82f5f', '4f1496f5', '1453b839',
-                '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
-                'DU2TAN158M041444',
+                # '55466646', 'AVY9KA95A2106482', '473fd2a2', '', 'c0e82f5f', '4f1496f5', '1453b839',
+                # '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
+                # 'DU2TAN158M041444',
             ]
-            # QLXBBBA5B1137702 使用其他输入法后，这个就去掉
+            # QLXBBBA5B1137702 7N2MYN155S029228 使用其他输入法后，这个就去掉
             self.modify_wlan_settings_fields(dns1, self.sn in SHOULD_PRESS_BACK_AFTER_TEXTING)
 
             # reconnect
@@ -152,6 +180,7 @@ PASS_LIST = (
     '55466646',             # 小米 2
     '4a139669',             # 小米 2s
     '1197d597',             # 小米 2s 电信版 (需要测试)
+    '96528427',             # 小米 2s 标准版
     '7220be4f',             # 小米 Note 顶配版
     'c0e82f5f',             # MI 2
     '4e49701b',             # 小米 3 移动版
@@ -162,6 +191,7 @@ PASS_LIST = (
     'JJDMSSUSFAGEZ5OF',     # 红米 Note 2 移动版
     '473fd2a2',             # HM NOTE 1S (输入法有问题，点变句号)
     '7C5906B60221',         # 红米 2A 增强版
+    '28e7fdab7ce3',         # 红米 3（全网通）
     'AVY9KA95A2106482',     # 华为 畅享5 全网通
     '7N2MYN155S029228',     # 华为 Ascend P7 联通4G
     'DU2SSE15CA048623',     # 华为 荣耀6 移动4G版
@@ -172,6 +202,9 @@ PASS_LIST = (
     'QLXBBBA5B1137702',     # 华为 畅享5S 全网通
     'F8UDU15505001428',     # 华为 荣耀6 Plus 移动版（PE-TL20）
     '69T7N15925010489',     # 华为 荣耀 7i
+    'G2W7N15303019507',     # 华为 Ascend Mate 7（MT7-CL00）
+    'DU2TAN158M041444',     # 华为 荣耀6 联通4G版
+    'JTJ4C15710038858',     # 华为 荣耀4A（SCL-TL00H）
     'G2W7N15930015071',     # MT7-CL00
     'ZTAMDU49ZT59TOAE',     # vivo X6D
     'CQ556955VKOV5T4D',     # vivo X6Plus
@@ -182,6 +215,7 @@ PASS_LIST = (
     '71MBBLA238NH',         # 魅族 魅蓝 Note
     '045BBI2H9F9B',         # 魅族 MX2
     '351BBJPZ8F27',         # 魅族 MX3 M351
+    '351BBJPTHLR2',         # 魅族 MX3 M351
     '76UBBLR2264A',         # 魅族 MX4 Pro
     '850ABM4YR6UW',         # 魅族 MX5
     '4f1496f5',             # 三星 Galaxy S5 联通版（G9006W）
@@ -190,6 +224,7 @@ PASS_LIST = (
     '3230dd49644a10ad',     # 三星 GT-I9300（S3）
     '93758e81',             # 三星 Galaxy S5 G9008W
     'eebcdab5',             # 三星 Galaxy Note Edge（SM-N9150）
+    '0b43bc90',             # 三星 Galaxy Note 3 N9008S
     'FA61CBD01664',         # HTC One M9+（台版）
     'LC53ZYH00485',         # HTC One M9+（E9pw）
     '521249b9',             # OPPO R3 R7007 移动4G
@@ -198,35 +233,37 @@ PASS_LIST = (
     'TA9921AVZE',           # Moto X二代 XT1096
     'T3Q6T16520001043',     # KIW-TL00H
     'CB5A21QQEN',           # 索尼 Xperia Z3 联通版
-
-    # 屏幕无响应
-    '351BBJP8D4SW',         # 魅族 MX3
-
-    # 无法安装uiautomator
-    '67a144be',             # OPPO R7 Plus 全网通
+    'BH904FXV16',           # 索尼 Xperia Z2 D6503
+    'IRCASKZDHAYLVCP7',     # 360 F4（标准版/移动版）
     'GYZL4H556HCUH6RK',     # 联想 S898t+
-
-    # 未知原因连接中断或连接不稳定
-    '33005092392ab243',     # 三星 Galaxy A5 2016（A5108/移动4G）
-    'de89a5bd',             # OPPO Find 5
-    '57a7821b',             # 小米 3 联通版
     'LGH818a5b8c3ae',       # LG G4 H818 国际版
 
+    # 屏幕无响应
+    #'351BBJP8D4SW',         # 魅族 MX3
+
+    # 无法安装uiautomator
+    #'67a144be',             # OPPO R7 Plus 全网通
+
+    # 未知原因连接中断或连接不稳定
+    #'33005092392ab243',     # 三星 Galaxy A5 2016（A5108/移动4G）
+    #'de89a5bd',             # OPPO Find 5
+    #'57a7821b',             # 小米 3 联通版
+
     # 太卡了
-    'XJC6R15619009477',     # 华为 荣耀 X2 标准版
-    'MYVDU15713005533',     # 华为 荣耀 7 移动4G版（TL01H）
-    'MXF5T15831007688',     # 华为 MATE S
+    #'XJC6R15619009477',     # 华为 荣耀 X2 标准版
+    #'MYVDU15713005533',     # 华为 荣耀 7 移动4G版（TL01H）
+    #'MXF5T15831007688',     # 华为 MATE S
+    #'X2P0215508002471',     # 华为 P8 移动4G标配版（GRA-TL00）
 
     # 修改配置需要重新输入密码才能保存
     '8d260bf7',             # 酷派 大神 X7
     'fdcbcc83',             # 酷派 锋尚Max
 
     # 无法连接netease_game
-    '38d6d441',             # 步步高 vivo X5M
-    '351BBJPTHLR2',         # 魅族 MX3 M351
+    #'38d6d441',             # 步步高 vivo X5M
 
     # 输入法有问题，无法顺利输入，会乱序
-    '351BBJPYF7PF',         # 魅族 MX3 M351
+    #'351BBJPYF7PF',         # 魅族 MX3 M351
 
     # 卡在某个界面无法继续下去
     '4df74f4b47e33081',     # 三星 Galaxy Note 2 N7100
@@ -234,11 +271,18 @@ PASS_LIST = (
     # uiautomator自动帮我点确定问题
     '4c6a4cf2',             # 小米 4s（GIH-PHO-625）
 
+    # uiautomator 识别有问题
+    '57b8a250',             # 三星 Galaxy A9（A9000/全网通）
+
+    # 私人手机
+    '139db80c',             # 中兴 AXON天机 A2015
+
     # 暂时跳过
 )
 
 if __name__ == '__main__':
-    # from uiautomator import device as d
+    # from uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
     # print d.dump()
     # print d(text='已连接到 netease_game').exists
 

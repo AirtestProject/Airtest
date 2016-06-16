@@ -23,11 +23,17 @@ class UiautomatorIme(object):
         return m
 
     def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.end()
+
+    def start(self):
         if "jp.jun_nama.test.utf7ime/.Utf7ImeService" not in self.ime_list:
             self.adb.run("install -r " + IME_PATH)
         self.adb.shell("ime enable jp.jun_nama.test.utf7ime/.Utf7ImeService")
         self.adb.shell("ime set jp.jun_nama.test.utf7ime/.Utf7ImeService")
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def end(self):
         self.adb.shell("ime disable jp.jun_nama.test.utf7ime/.Utf7ImeService")
         self.adb.shell("ime set " + self.default_ime)

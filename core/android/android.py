@@ -4,6 +4,7 @@
 # Author:  hzsunshx
 # Created: 2015-07-02 19:56
 # Modified: 2015-11 gzliuxin  add minitouch minicap
+# Modified: 2016-06 gzliuxin  testlab support
 
 
 import os
@@ -25,6 +26,7 @@ import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
 from moa.aircv import aircv
+from moa.core.android.ime_helper import UiautomatorIme
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -39,6 +41,9 @@ RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
 ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
 ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
+ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
+ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
+
 
 def init_adb():
     global ADBPATH
@@ -670,14 +675,16 @@ class Android(object):
         self.props = props or self._load_props()
         if "display_info" in self.props:
             self.size = self.props["display_info"]
-            self.refreshOrientationInfo()
+            # self.refreshOrientationInfo()
         else:
             self.get_display_info()
+        self.orientationWatcher()
         self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
         self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
+        self.ime = UiautomatorIme(self.adb)
 
     def _load_props(self):
         try:
@@ -730,6 +737,7 @@ class Android(object):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]'%output)
+        return output.split(":")[1].strip()
 
     def amstart(self, package, activity=None):
         self.amcheck(package)
@@ -827,6 +835,13 @@ class Android(object):
 
     def text(self, text):
         self.adb.shell(["input", "text", text])
+
+    def toggle_shell_ime(self, on=True):
+        """切换到shell的输入法，用于text"""
+        if on:
+            self.ime.start()
+        else:
+            self.ime.end()
 
     @autoretry
     def touch(self, pos, duration=0.01):
@@ -998,7 +1013,7 @@ class Android(object):
                 for prop in [ 'width', 'height' ]:
                     displayInfo[prop] = int(m.group(prop))
                 for prop in [ 'density' ]:
-    
+
                     d = self.__getDisplayDensity(None, strip=True)
                     if d:
                         displayInfo[prop] = d
@@ -1031,7 +1046,7 @@ class Android(object):
         output = self.adb.shell('dumpsys input')
         m = surfaceOrientationRE.search(output)
         if m:
-            return int(m.group(1))        
+            return int(m.group(1))
 
         # We couldn't obtain the orientation
         # return -1
@@ -1052,11 +1067,49 @@ class Android(object):
         """
         if ori is None:
             ori = self.getDisplayOrientation()
+        print "refreshOrientationInfo:", ori
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
             # self.minicap.get_display_info()
             self.minicap.size["rotation"] = self.size["rotation"]
+
+    def _initOrientationWatcher(self):
+        try:
+            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+        except MoaError:
+            self.adb.install(ROTATIONWATCHER_APK)
+            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+        p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
+        if p.poll() is not None:
+            raise RuntimeError("orientationWatcher setup error")
+        return p
+
+    def orientationWatcher(self):
+        self.ow_proc = self._initOrientationWatcher()
+        reg_cleanup(self.ow_proc.kill)
+
+        def _refresh_orientation(self):
+            while True:
+                line = self.ow_proc.stdout.readline()
+                if not line:
+                    print "orientationWatcher has ended"
+                    if getattr(self, "ow_callback", None):
+                        self.ow_callback(None, *self.ow_callback_args)
+                    break
+                ori = int(line) / 90
+                self.refreshOrientationInfo(ori)
+                if getattr(self, "ow_callback", None):
+                    self.ow_callback(ori, *self.ow_callback_args)
+
+        self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
+        self._t.daemon = True
+        self._t.start()
+
+    def reg_ow_callback(self, ow_callback, *ow_callback_args):
+        """方向变化的时候的回调函数，第一个参数一定是ori，如果断掉了，ori传None"""
+        self.ow_callback = ow_callback
+        self.ow_callback_args = ow_callback_args
 
     def reconnect(self):
         self.adb.disconnect()
@@ -1066,7 +1119,6 @@ class Android(object):
             self.minitouch.setup_client_backend()
         else:
             self.minitouch.setup_client()
-
 
 
 class XYTransformer(object):
@@ -1128,7 +1180,11 @@ def test_android():
     a = Android(serialno, minicap=False, minitouch=False)
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
-    a.amstart("com.netease.wscs.mi")
+    a.amstart("com.netease.my")
+    def heihei(ori, nimei):
+        print ori, nimei
+    a.reg_ow_callback(heihei, ({1: 2}, ))
+    time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
