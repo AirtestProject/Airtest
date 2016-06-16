@@ -1064,15 +1064,26 @@ class Android(object):
 
     def orientationWatcher(self):
         self.ow_proc = self._initOrientationWatcher()
+        reg_cleanup(self.ow_proc.kill)
 
         def _refresh_orientation(self):
             while True:
                 line = self.ow_proc.stdout.readline()
+                if not line:
+                    print "orientationWatcher has ended"
+                    break
                 ori = int(line) / 90
                 self.refreshOrientationInfo(ori)
+                if getattr(self, "ow_callback", None):
+                    self.ow_callback(ori, *self.ow_callback_args)
         self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
         self._t.daemon = True
         self._t.start()
+
+    def reg_ow_callback(self, ow_callback, *ow_callback_args):
+        """方向变化的时候的回调函数"""
+        self.ow_callback = ow_callback
+        self.ow_callback_args = ow_callback_args
 
     def reconnect(self):
         self.adb.disconnect()
@@ -1144,6 +1155,9 @@ def test_android():
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
     a.amstart("com.netease.my")
+    def heihei(ori, nimei):
+        print ori, nimei
+    a.reg_ow_callback(heihei, ({1: 2}, ))
     time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
