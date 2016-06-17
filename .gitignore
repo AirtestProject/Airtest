@@ -44,6 +44,8 @@ screen.jpg
 log.txt
 localrunner/test1.owl/img_record
 localrunner/other/test2.owl/img_record
-moa/ios/certificate_config.py
+core/ios/certificate_config.py
+plugins/testlab/user_config.py
 
 .idea/
+
