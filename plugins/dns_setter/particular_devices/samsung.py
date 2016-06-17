@@ -25,7 +25,7 @@ class Galaxy(object):
         time.sleep(1)
 
     @particular_case.specified(GALAXY)
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
+    def modify_wlan_settings_fields(self, dns1):
         for _ in range(5):
             self.uiutil.get_scrollable().scroll.forward(steps=10)
 
@@ -36,5 +36,5 @@ class Galaxy(object):
             dns_title = self.d(text="DNS 1")
 
         uiobj = dns_title.down(className="android.widget.EditText")
-        self.uiutil.replace_text(uiobj, dns1, back_after_texting)
+        self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})

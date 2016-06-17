@@ -28,23 +28,25 @@ class UIUtil(object):
 
     def scroll_find(self, *pattern):
         for p in pattern:
+            uiobj = None
             try:
-                self.get_scrollable().scroll.to(**p)
+                uiobj = self.d(**p)
+                if not uiobj or not uiobj.exists:
+                    self.get_scrollable().scroll.to(**p)
+                    uiobj = self.d(**p)
             except:
                 # in some cases ListView is not scrollable, just skip that
                 pass
-            uiobj = self.d(**p)
-            if uiobj.exists:
+            if uiobj and uiobj.exists:
                 return uiobj
         return None
 
     def scroll_to_click_any(self, *pattern):
-        for p in pattern:
-            self.get_scrollable().scroll.to(**p)
-            uiobj = self.click_any(p)
-            if uiobj:
-                return uiobj
-        return None
+        uiobj = self.scroll_find(*pattern)
+        if uiobj:
+            uiobj.click()
+            time.sleep(0.6)
+        return uiobj
 
     def wait_any(self, *pattern, **kwargs):
         if 'timeout' in kwargs:
@@ -57,7 +59,7 @@ class UIUtil(object):
                 return True
         return False
 
-    def replace_text(self, uiobj, text, back_after_texting=False):
+    def replace_text(self, uiobj, text):
         uiobj.click.bottomright()
         time.sleep(1)
         uiobj.clear_text()
@@ -86,5 +88,3 @@ class UIUtil(object):
                 self.d.press('right')
             for _ in range(current_len - idx2):
                 self.d.press('del')
-        if back_after_texting:
-            self.d.press.back()

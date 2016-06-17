@@ -27,9 +27,9 @@ class MI2(MIx):
         time.sleep(0.5)
 
     @particular_case.specified(MI_2)
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
+    def modify_wlan_settings_fields(self, dns1):
         for _ in range(5):
             self.uiutil.get_scrollable().scroll.vert.forward(steps=50)
         uiobj = self.d(text=u'域名 1').right(className='android.widget.EditText')
-        self.uiutil.replace_text(uiobj, dns1, back_after_texting)
+        self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'text': u'确定'})
