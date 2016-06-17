@@ -54,29 +54,6 @@ def init_adb():
         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
 
-def check_adb(host="127.0.0.1", port=os.getenv('ANDROID_ADB_SERVER_PORT') or "5037"):
-    '''检查端口占用情况，如果被占用且杀不掉，return False+进程信息'''
-    # 判断当前端口有木有被占用：
-    pid_on_port_cmdline = "netstat -ano | findstr " + port + " | findstr  LISTENING"
-    pid_info = os.popen(pid_on_port_cmdline).read().split()
-    # 如果端口没有被占用，则求取的pid_info为[]
-    if pid_info:
-        # 只有端口被进程占用，且杀不死进程时，才需要警告，并停止正常启动..
-        pid = pid_info[-1]
-        task_info_cmdline = "tasklist|findstr " + pid
-        task_result = os.popen(task_info_cmdline).read()
-        task_info = task_result.split()
-        # 如果占用进程是"adb.exe"，则没关系，IDE中的adb.exe可以自动覆盖：
-        if task_info[0]!="adb.exe":
-            # 尝试关闭进程，如果没关掉，应该是流氓软件提示手动关闭！关掉了就可以正常启动..
-            os.system("taskkill /F /PID %s" %pid)
-            if os.popen(pid_on_port_cmdline).read().split():
-                # msg = "进程关闭失败，请手动关闭！\n\n名称：\t %s \n PID: \t %s \n 占用内存: \t %s" %(task_info[0], pid, task_info[-2] + task_info[-1])
-                msg = [task_info[0], pid, task_info[-2] + task_info[-1]]
-                return False, msg
-    # 有进程占用，但是被正常杀死；或者没有进程占用，则直接return True，执行正常启动：
-    return True, None    
-
 def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
     if adbpath is None:
         init_adb()
@@ -830,8 +807,11 @@ class Android(object):
         # todo:
         # 1. 还需要按power键吗？
         # 2. 如果非锁屏状态，上面步骤可以省略
-        if not self.is_screenon():
-            self.keyevent("POWER")
+
+        # 1. release apk里面有，不需要按电源键了，
+        # 2. is_screenon有些设备不起效
+        # if not self.is_screenon():
+        #     self.keyevent("POWER")
 
         self.keyevent("HOME")
 
