@@ -276,7 +276,7 @@ def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID,
     aircv.cv2.imwrite("screen.png", screen)
     screen = aircv.imread("screen.png")
 
-    # 建军添加：进行IDE区域的遮挡：
+    # 进行IDE区域的遮挡：在windows桌面执行，需要对IDE区域进行屏蔽（截屏时会把IDE脚本边界区的图片截进去..）
     global MASK_RECT
     if MASK_RECT:
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)

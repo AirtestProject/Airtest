@@ -46,8 +46,8 @@ class VivoY27(object):
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
         # success = self.uiutil.wait_any({'text': u'已连接到 netease_game'}, timeout=10000)
-        for i in range(10):
-            if self.d(text=u'已连接到 netease_game').exists:
+        for i in range(30):
+            if self.d(textMatches=ur'已连接到\s*netease_game').exists:
                 return
             time.sleep(1)
         raise Exception('cannot connect to netease_game. network not available.')
