@@ -644,10 +644,18 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True, props={}):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props={}, minicap=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
+        if init_display:
+            self._init_display(props)
+        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
+        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+        if init_ime:
+            self.ime = UiautomatorIme(self.adb)
+
+    def _init_display(self, props={}):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
@@ -656,12 +664,9 @@ class Android(object):
         else:
             self.get_display_info()
         self.orientationWatcher()
-        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
-        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
-        self.ime = UiautomatorIme(self.adb)
 
     def _load_props(self):
         try:
@@ -1154,14 +1159,14 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     t = time.clock()
-    a = Android(serialno, minicap=False, minitouch=False)
+    a = Android(serialno, init_display=False, minicap=False, minitouch=False, init_ime=False)
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
     a.amstart("com.netease.my")
-    def heihei(ori, nimei):
-        print ori, nimei
-    a.reg_ow_callback(heihei, ({1: 2}, ))
-    time.sleep(100)
+    # def heihei(ori, nimei):
+    #     print ori, nimei
+    # a.reg_ow_callback(heihei, ({1: 2}, ))
+    # time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
