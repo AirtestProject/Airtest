@@ -807,8 +807,11 @@ class Android(object):
         # todo:
         # 1. 还需要按power键吗？
         # 2. 如果非锁屏状态，上面步骤可以省略
-        if not self.is_screenon():
-            self.keyevent("POWER")
+
+        # 1. release apk里面有，不需要按电源键了，
+        # 2. is_screenon有些设备不起效
+        # if not self.is_screenon():
+        #     self.keyevent("POWER")
 
         self.keyevent("HOME")
 
