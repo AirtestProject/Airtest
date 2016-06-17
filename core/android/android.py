@@ -69,7 +69,7 @@ def check_adb(host="127.0.0.1", port=os.getenv('ANDROID_ADB_SERVER_PORT') or "50
         # 如果占用进程是"adb.exe"，则没关系，IDE中的adb.exe可以自动覆盖：
         if task_info[0]!="adb.exe":
             # 尝试关闭进程，如果没关掉，应该是流氓软件提示手动关闭！关掉了就可以正常启动..
-            os.system("taskkill /IM /F /PID %s" %pid)
+            os.system("taskkill /F /PID %s" %pid)
             if os.popen(pid_on_port_cmdline).read().split():
                 # msg = "进程关闭失败，请手动关闭！\n\n名称：\t %s \n PID: \t %s \n 占用内存: \t %s" %(task_info[0], pid, task_info[-2] + task_info[-1])
                 msg = [task_info[0], pid, task_info[-2] + task_info[-1]]
