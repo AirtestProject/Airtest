@@ -90,7 +90,7 @@ class MeiLanNote(object):
         if not netease_game:
             raise Exception('AP netease_game not found')
 
-        for i in range(10):
+        for i in range(30):
             connected_flag = netease_game.sibling(className="android.widget.TextView")
             if not connected_flag:
                 netease_game.click()

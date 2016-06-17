@@ -4,6 +4,7 @@ __author__ = 'lxn3032'
 
 import time
 import traceback
+import re
 import os
 import uiutils
 
@@ -59,7 +60,7 @@ class DefaultDnsSetter(object):
         netease_game = self.d(text='netease_game')
         netease_game.click()
         time.sleep(0.5)
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if not success:
             raise Exception('cannot connect to netease_game. network not available.')
         self.uiutil.click_any({'textMatches': ur'取消'})
@@ -68,10 +69,11 @@ class DefaultDnsSetter(object):
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
         if not uiobj.exists:
-            for i in range(3):
+            for i in range(5):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
+                time.sleep(2)
         if not uiobj or not uiobj.exists:
             raise Exception('AP netease_game not found')
         uiobj.click()
@@ -79,7 +81,7 @@ class DefaultDnsSetter(object):
 
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
-        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
+        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if strict:
             self.test_netease_game_connected()
 
@@ -148,43 +150,72 @@ class DefaultDnsSetter(object):
             self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
+    def get_current_ssid(self):
+        netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
+        matcher = re.search(r'networkId="(.*?)"', netinfo)
+        if matcher:
+            return matcher.group(1)
+        return None
+
     def test_unlock_success(self):
         time.sleep(1)
         if not self.d(textMatches='^.*(netease|WLAN|Wi-Fi|WiFi|Wifi).*$').exists:
             raise Exception('device unlock fail or stuck. cannot get ui hierarchy.')
 
     def test_netease_game_connected(self):
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
-        if not success:
-            raise Exception('cannot connect to netease_game. network not available.')
+        ssid = self.get_current_ssid()
+        if ssid is None:
+            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+            if not success:
+                raise Exception('cannot connect to netease_game. network not available.')
+        elif ssid != 'netease_game':
+            raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
         if dns1 in test_getdns:
-            print 'success !!'
             return True
         return False
 
     def network_prepare(self):
         self.d.screen.on()
         self.d.press('home')
+        print '[DNS SETTER] launch wlan list actiity'
         self.enter_wlan_list()
+        print '[DNS SETTER] test device unlock status'
         self.test_unlock_success()
-        self.connect_netease_game()
+        print '[DNS SETTER] connecting to netease_game'
+        ssid = self.get_current_ssid()
+        if ssid != 'netease_game':
+            print '[first connect] current ssid is {}. connecting netease_game.'.format(ssid)
+            self.connect_netease_game()
 
     def set_dns(self, dns1):
+        # skip if dns already satisfied
+        if self.test_dns(dns1):
+            return True
+
         # change STATIC mode and dns
         with self.android.ime:
+            print '[DNS SETTER] enter wlan config page'
             self.enter_wlan_settings()
+            print '[DNS SETTER] enable wlan advanced settings'
             self.enter_wlan_advanced_settings()
+            print '[DNS SETTER] use static IP mode'
             self.use_static_ip()
+            print '[DNS SETTER] change dns1'
             self.modify_wlan_settings_fields(dns1)
 
             # reconnect
             time.sleep(2)
             self.d.press.back()
+            print '[DNS SETTER] back to wlan list to check whether connected to netease_game'
             self.enter_wlan_list()
-            self.connect_netease_game(strict=False)
+            ssid = self.get_current_ssid()
+            if ssid != 'netease_game':
+                print '[final connect] current ssid is {}. connecting netease_game.'.format(ssid)
+                self.connect_netease_game(strict=False)
+        print '[DNS SETTER] check current dns1'
         return self.test_dns(dns1)
 
 
@@ -317,4 +348,5 @@ if __name__ == '__main__':
     #         stf_runner.cleanup(sn)
     #         print 'finish!'
     #         time.sleep(40)
+
 
