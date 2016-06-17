@@ -112,7 +112,7 @@ def main():
     os.chdir(args.script)
 
     if args.maskrect:
-        print "set mask_rect : ", args.maskrect
+        # print "set mask_rect : ", args.maskrect
         set_mask_rect(args.maskrect)
 
     if args.setsn:
@@ -131,15 +131,15 @@ def main():
         set_udid(udid)
 
     if args.setwin:
-        print "auto set_windows"
+        # print "auto set_windows"
         set_windows()
 
     if args.log:
-        print "save log in", args.log
+        print "save log in", "'%s'" %args.log
         set_logfile(args.log)
 
     if args.screen:
-        print "save img in", args.screen
+        print "save img in", "'%s'" %args.screen
         set_screendir(args.screen)
 
     if args.kwargs:
