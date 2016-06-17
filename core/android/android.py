@@ -768,7 +768,7 @@ class Android(object):
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
-    @autoretry
+    # @autoretry
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
             screen = self.minicap.get_frame()
