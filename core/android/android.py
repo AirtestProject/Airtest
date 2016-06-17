@@ -399,13 +399,13 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, addr, localport=None, size=None, backend=False, adb=None):
+    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None, adb_addr=LOCALADBADRR):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
         self.max_x, self.max_y = None, None
         self.size = size
-        self.adb = adb or ADB(serialno, addr=addr)
+        self.adb = adb or ADB(serialno, addr=adb_addr)
         self.localport = localport
         self.install()
         self.setup_server()
