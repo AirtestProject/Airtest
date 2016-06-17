@@ -4,6 +4,7 @@ __author__ = 'lxn3032'
 
 import time
 import traceback
+import re
 import os
 import uiutils
 
@@ -148,6 +149,13 @@ class DefaultDnsSetter(object):
             self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
+    def get_current_ssid(self):
+        netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
+        matcher = re.search(r'networkId="(.*?)"', netinfo)
+        if matcher:
+            return matcher.group(0)
+        return None
+
     def test_unlock_success(self):
         time.sleep(1)
         if not self.d(textMatches='^.*(netease|WLAN|Wi-Fi|WiFi|Wifi).*$').exists:
@@ -170,7 +178,10 @@ class DefaultDnsSetter(object):
         self.d.press('home')
         self.enter_wlan_list()
         self.test_unlock_success()
-        self.connect_netease_game()
+        ssid = self.get_current_ssid()
+        if ssid != 'netease_game':
+            print '[first connect] current ssid is {}. connecting netease_game.'.format(ssid)
+            self.connect_netease_game()
 
     def set_dns(self, dns1):
         # change STATIC mode and dns
@@ -184,7 +195,10 @@ class DefaultDnsSetter(object):
             time.sleep(2)
             self.d.press.back()
             self.enter_wlan_list()
-            self.connect_netease_game(strict=False)
+            ssid = self.get_current_ssid()
+            if ssid != 'netease_game':
+                print '[final connect] current ssid is {}. connecting netease_game.'.format(ssid)
+                self.connect_netease_game(strict=False)
         return self.test_dns(dns1)
 
 

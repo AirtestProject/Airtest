@@ -60,7 +60,7 @@ def setdns(sn, addr, dns):
         return
 
     # skip device too slow
-    if sn in ('KVAM59CYHYWOS8V8', 'f565e08', '296eea5d', 'f565e08', 'AVY9KA95A2106482', '3230dd49644a10ad', 'X2P0215508002471', 'MXF5T15831007688', 'EMW8BYLJHANZCIBM', 'NX513J'):
+    if sn in ('KVAM59CYHYWOS8V8', 'f565e08', '296eea5d', 'f565e08', 'AVY9KA95A2106482', '3230dd49644a10ad', 'X2P0215508002471', 'MXF5T15831007688', 'EMW8BYLJHANZCIBM', 'NX513J', 'JAEDU15A16007444'):
         return
 
     # cannot not auto install apk
@@ -88,6 +88,7 @@ def setdns(sn, addr, dns):
         success = dsetter.set_dns(dns)
         if not success:
             raise Exception("dns check fail with `getprop net.dns1`.")
+    a.home()
 
 
 def clearapk(addr):
