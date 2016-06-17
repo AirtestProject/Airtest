@@ -29,7 +29,7 @@ class DefaultDnsSetter(object):
         self.rsn = rsn
         self.sn = sn
         self.d = Device(rsn)
-        self.android = Android(rsn)
+        self.android = Android(rsn, init_display=False, minicap=False, minitouch=False, init_ime=True)
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
 

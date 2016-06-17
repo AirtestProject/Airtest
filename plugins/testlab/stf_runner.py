@@ -80,7 +80,7 @@ def setdns(sn, addr, dns):
         return
 
     from moa.plugins.dns_setter import DnsSetter
-    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=True)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
