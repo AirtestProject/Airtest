@@ -17,11 +17,11 @@ class Vivo(object):
         pass
 
     @particular_case.specified(VIVO_SERIALS)
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
+    def modify_wlan_settings_fields(self, dns1):
         self.d(text='DNS 1').click()
         time.sleep(0.5)
         uiobj = self.uiutil.scroll_find({'resourceId': 'android:id/edit'})
-        self.uiutil.replace_text(uiobj, dns1, back_after_texting)
+        self.uiutil.replace_text(uiobj, dns1)
         self.d(text=u'确定').click()
         time.sleep(0.5)
         self.d.press.back()
@@ -37,7 +37,7 @@ class VivoY27(object):
             time.sleep(0.5)
 
     @particular_case.specified(Y27)
-    def connect_netease_game(self):
+    def connect_netease_game(self, strict=True):
         uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
         if not uiobj:
             raise Exception('AP netease_game not found')
@@ -59,11 +59,11 @@ class VivoY27(object):
         time.sleep(0.5)
 
     @particular_case.specified(Y27)
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
+    def modify_wlan_settings_fields(self, dns1):
         self.d(text='主域名服务器').click()
         time.sleep(0.5)
         uiobj = self.uiutil.scroll_find({'resourceId': 'android:id/edit'})
-        self.uiutil.replace_text(uiobj, dns1, back_after_texting)
+        self.uiutil.replace_text(uiobj, dns1)
         self.d(text=u'确定').click()
         time.sleep(0.5)
         self.d.press.back()

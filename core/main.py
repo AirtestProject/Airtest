@@ -22,7 +22,6 @@ import functools
 import fnmatch
 import traceback
 from moa.aircv import aircv
-from moa.aircv.aircv_tool_func import find_in_area
 from moa.aircv import generate_character_img as textgen
 from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.utils import _isstr, MoaLogger, Logwrap, TargetPos
@@ -105,6 +104,7 @@ def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
+            print get_platform(), on
             if get_platform() not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
@@ -147,33 +147,38 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
 
-def set_udid(udid=None):
+def set_ios_udid(udid=None):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
     '''
-
+    global IOSUDID
     udids = ios.utils.list_all_udid()
     if not udid:
         if len(udids) > 1:
-            print ("more than one device, auto choose one, to specify serialno: set_udid(udid)")
+            print ("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
         elif len(udids) == 0:
             raise MoaError("no device, please check your connection")
-        udid = udids[0]
+        IOSUDID = udids[0]
     else:
+        exists = 0
         for id in udids:
-            if not fnmatch.fnmatch(id,udid):
-                continue
-            udid = id
-        if udid is None:
-            raise MoaError("Device[%s] not found" % udid)
-        
-    global CVSTRATEGY,DEVICE,PLAYRES
+            if fnmatch.fnmatch(id,udid):
+                exists += 1
+                IOSUDID = id
+        if exists == 0:
+            raise MoaError("Device[{}] not found".format(udid))
+        if exists > 1:
+            IOSUDID = ''
+            raise MoaError("too many devices found")
+    global CVSTRATEGY
     if not CVSTRATEGY:
         CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
-    DEVICE = ios.client.IOS(udid)
+    global DEVICE
+    DEVICE = ios.client.IOS(IOSUDID)
+    global PLAYRES
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
-    return udid
+    return IOSUDID
 
 def resign(ipaname):
     """resign an app, only valid on Mac"""
@@ -205,7 +210,7 @@ def set_basedir(base_dir):
 def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
-    filepath = os.path.join(basedir, filename)
+    filepath = os.path.join(filename, basedir)
     LOGGER.set_logfile(filepath)
 
 
@@ -254,14 +259,37 @@ def set_mask_rect(mask_rect=None):
         print "pass wrong IDE rect into moa.MASK_RECT."
 
 
-def _find_pic(screen, picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
-    ''' find picture position in screen 
-        mask_rect: 原图像中需要被白色化的区域——IDE的所在区域.
-    '''
+def _find_pic(picdata, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False, find_in=None):
+    ''' find picture position in screen '''
+    '''mask_rect: 原图像中需要被白色化的区域——IDE的所在区域.'''
+    # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
+    if KEEP_CAPTURE and RECENT_CAPTURE is not None:
+        screen = RECENT_CAPTURE
+    else:
+        screen = snapshot()
+
+    # 如果截屏失败，则screen为空，打印提示后，识别结果直接返回None
+    if screen is None:
+        print "Cannot captured SCREEN : SCREEN is None !"
+        return None
+    # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
+    # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
+    aircv.cv2.imwrite("screen.png", screen)
+    screen = aircv.imread("screen.png")
+
     # 建军添加：进行IDE区域的遮挡：
     global MASK_RECT
     if MASK_RECT:
         screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
+
+    #---------------稍后再aircv内实现，遮住图像某一半，达到指定左右对半区域的查找：
+    # 如果在左半边寻找，遮住右半边图像；如果在右半边寻找，遮住左半边图像。
+    if find_in=="left":
+        h, w = screen.shape[:2]
+        screen = aircv.cv2.rectangle(screen, (w/2, 0), (w, h), (255,255,255), -1)
+    elif find_in=="right":
+        h, w = screen.shape[:2]
+        screen = aircv.cv2.rectangle(screen, (0, 0), (w/2,h), (255,255,255), -1)
 
     # 在rect矩形区域内查找，有record_pos之后，基本上没用
     offsetx, offsety = 0, 0
@@ -275,17 +303,17 @@ def _find_pic(screen, picdata, rect=None, threshold=THRESHOLD, target_pos=Target
     # 三种不同的匹配算法：
     try:
         if templateMatch is True:
-            print "method: template match.."
+            print "method: matchtpl"
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
-            print "method: sift in whole screen.."
+            print "method: siftnopre"
             ret = aircv.find_sift(screen, picdata)
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
-            print "method: sift in predicted area.."
+            print "method: siftpre"
             _pResolution = DEVICE.getCurrentScreenResolution()
             ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
@@ -293,7 +321,7 @@ def _find_pic(screen, picdata, rect=None, threshold=THRESHOLD, target_pos=Target
     except Exception as err:
         traceback.print_exc()
         ret = None
-    print ret
+    # print ret
     _log_in_func({"cv": ret})
     if not ret:
         return None
@@ -306,17 +334,14 @@ def _find_pic(screen, picdata, rect=None, threshold=THRESHOLD, target_pos=Target
 @logwrap
 def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_in=None):
     '''
-    find_in: 用于指定区域的图片位置定位，
+    find_in: 用于windows的测试时双开，
             find_in="left"时，只在左半边屏幕中寻找(双屏幕的话只在左屏幕中寻找)
             find_in="left"时，只在右半边屏幕中寻找(双屏幕的话只在右屏幕中寻找)
-            find_in=[x, y, w, h]时，进行一次截图寻找
-
     '''
     print "\nTry finding:\n %s" % pictarget
     pos = None
     left = max(1, int(timeout))
     start_time = time.time()
-    # --------------------------------获取 “ 截图 ” (picdata):
     if isinstance(pictarget, MoaText):
         # moaText暂时没用了，截图太方便了，以后再考虑文字识别
         # pil_2_cv2函数有问题，会变底色，后续修
@@ -328,37 +353,20 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     else:
         pictarget = MoaPic(pictarget)
         picdata = aircv.imread(pictarget.filepath)
-
     while True:
-        # --------------------------------每次loop获取一次 “ 截屏 ”
-        # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
-        if KEEP_CAPTURE and RECENT_CAPTURE is not None:
-            screen = RECENT_CAPTURE
-        else:
-            screen = snapshot()
-        if screen is None:
-            raise MoaError("Cannot captured SCREEN : SCREEN is None !")
-        # 临时措施：将屏幕文件写出后，再使用OpenCV方法读出来：
-        # 改进思路:(core.py中的snapshot()函数调用了aircv.string_2_img(screen))
-        aircv.cv2.imwrite("screen.png", screen)
-        screen = aircv.imread("screen.png")
-
-        # 获取指定区域：指定区域图像+指定区域坐标偏移
-        screen, bias = find_in_area(screen, find_in)
-
         # 阈值优先取自定义设置的，再取函数传入的
         threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
         def find_pic_by_strategy():
             pos = None
             for st in CVSTRATEGY:
                 if st == "siftpre" and getattr(pictarget, "record_pos"):
-                    pos = _find_pic(screen, picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, find_in=find_in)
                 elif st == "siftnopre":
                     # 在预测区域没有找到，则退回全局查找
-                    pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
+                    pos = _find_pic(picdata, threshold=threshold, target_pos=pictarget.target_pos, find_in=find_in)
                 elif st == "tpl" and getattr(pictarget, "resolution"):
                     # 再用缩放后的模板匹配来找
-                    pos = _find_pic(screen, picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+                    pos = _find_pic(picdata, threshold=threshold, rect=pictarget.rect, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True, find_in=find_in)
                 else:
                     print "skip CV_STRATEGY:%s"%st
                 # 找到一个就返回
@@ -375,8 +383,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
             continue
-
-        return tuple(map(lambda x: x[0]+x[1], zip(pos, bias))) # 两个tuple的对应元素相加
+        return pos
 
 
 def keep_capture(flag=True):
@@ -437,7 +444,7 @@ def amstart(package, activity=None):
         return
 
     DEVICE.amstart(package, activity)
-    # refresh_device()
+    refresh_device()
 
 @logwrap
 @platform(on=["Android","IOS"])
@@ -447,7 +454,7 @@ def amstop(package):
         return
 
     DEVICE.amstop(package)
-    # refresh_device()
+    refresh_device()
 
 
 @logwrap
@@ -458,8 +465,25 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android","IOS"])
-def install(filepath, reinstall=False, package=None):
-    return DEVICE.install(filepath, reinstall, package)
+def install(filepath, clean=False, **kwargs):
+    if clean:
+        pkgname = kwargs['pkgname']
+        if get_platform() == 'IOS':
+            uninstall(pkgname)
+            return DEVICE.install(filepath)
+        else:
+            wake()
+            keyevent("HOME")
+            DEVICE.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
+            DEVICE.adb.shell('settings put secure accessibility_enabled 1')
+            try:
+                amstop(pkgname)
+            except:
+                pass
+            install(filepath)
+            amclear(pkgname)
+    else:    
+        return DEVICE.install(filepath)
 
 
 @logwrap
@@ -496,7 +520,7 @@ def wake():
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-    # refresh_device()
+    refresh_device()
 
 
 @platform(on=["Android"])
@@ -634,12 +658,6 @@ def text(text, delay=OPDELAY):
 
 
 @logwrap
-@platform(on=["Android"])
-def toggle_shell_ime(on=True):
-    DEVICE.toggle_shell_ime(on)
-
-
-@logwrap
 def sleep(secs=1.0):
     time.sleep(secs)
 
@@ -764,7 +782,7 @@ def test_ios():
     basedir = os.path.dirname(os.path.abspath(__file__))
     new_ipaname = resign(os.path.join(basedir,"ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
     print new_ipaname
-    udid = set_udid()
+    udid = set_ios_udid()
     print udid
     install(new_ipaname)
     # amstart("com.netease.devtest")
