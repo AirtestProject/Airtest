@@ -14,7 +14,6 @@ class UiautomatorIme(object):
         super(UiautomatorIme, self).__init__()
         self.adb = adb
         self.default_ime = self.adb.shell("settings get secure default_input_method")
-        print self.default_ime
         self.ime_list = self._get_ime_list()
 
     def _get_ime_list(self):

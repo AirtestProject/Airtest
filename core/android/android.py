@@ -54,6 +54,29 @@ def init_adb():
         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
 
+def check_adb(host="127.0.0.1", port=os.getenv('ANDROID_ADB_SERVER_PORT') or "5037"):
+    '''检查端口占用情况，如果被占用且杀不掉，return False+进程信息'''
+    # 判断当前端口有木有被占用：
+    pid_on_port_cmdline = "netstat -ano | findstr " + port + " | findstr  LISTENING"
+    pid_info = os.popen(pid_on_port_cmdline).read().split()
+    # 如果端口没有被占用，则求取的pid_info为[]
+    if pid_info:
+        # 只有端口被进程占用，且杀不死进程时，才需要警告，并停止正常启动..
+        pid = pid_info[-1]
+        task_info_cmdline = "tasklist|findstr " + pid
+        task_result = os.popen(task_info_cmdline).read()
+        task_info = task_result.split()
+        # 如果占用进程是"adb.exe"，则没关系，IDE中的adb.exe可以自动覆盖：
+        if task_info[0]!="adb.exe":
+            # 尝试关闭进程，如果没关掉，应该是流氓软件提示手动关闭！关掉了就可以正常启动..
+            os.system("taskkill /F /PID %s" %pid)
+            if os.popen(pid_on_port_cmdline).read().split():
+                # msg = "进程关闭失败，请手动关闭！\n\n名称：\t %s \n PID: \t %s \n 占用内存: \t %s" %(task_info[0], pid, task_info[-2] + task_info[-1])
+                msg = [task_info[0], pid, task_info[-2] + task_info[-1]]
+                return False, msg
+    # 有进程占用，但是被正常杀死；或者没有进程占用，则直接return True，执行正常启动：
+    return True, None    
+
 def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
     if adbpath is None:
         init_adb()
@@ -121,7 +144,7 @@ class ADB(object):
             print adbrun("connect %s"%self.serialno)
 
     def get_status(self):
-        for dev, status in adb_devices():
+        for dev, status in adb_devices(addr=self.addr):
             if dev == self.serialno:
                 return status
         return None
@@ -399,13 +422,13 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None):
+    def __init__(self, serialno, addr, localport=None, size=None, backend=False, adb=None):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
         self.max_x, self.max_y = None, None
         self.size = size
-        self.adb = adb or ADB(serialno)
+        self.adb = adb or ADB(serialno, addr=addr)
         self.localport = localport
         self.install()
         self.setup_server()
@@ -644,10 +667,18 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True, props={}):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props={}, minicap=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
+        if init_display:
+            self._init_display(props)
+        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
+        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+        if init_ime:
+            self.ime = UiautomatorIme(self.adb)
+
+    def _init_display(self, props={}):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
@@ -656,12 +687,9 @@ class Android(object):
         else:
             self.get_display_info()
         self.orientationWatcher()
-        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
-        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
-        self.ime = UiautomatorIme(self.adb)
 
     def _load_props(self):
         try:
@@ -1154,14 +1182,14 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     t = time.clock()
-    a = Android(serialno, minicap=False, minitouch=False)
+    a = Android(serialno, init_display=False, minicap=False, minitouch=False, init_ime=False)
     # a.uninstall(RELEASELOCK_PACKAGE)
     # a.wake()
     a.amstart("com.netease.my")
-    def heihei(ori, nimei):
-        print ori, nimei
-    a.reg_ow_callback(heihei, ({1: 2}, ))
-    time.sleep(100)
+    # def heihei(ori, nimei):
+    #     print ori, nimei
+    # a.reg_ow_callback(heihei, ({1: 2}, ))
+    # time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
