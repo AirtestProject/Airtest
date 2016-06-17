@@ -211,15 +211,11 @@ def set_logfile(filename=LOGFILE, inbase=True):
 
 def set_screendir(dirpath=SCREEN_DIR):
     global SAVE_SCREEN
-    # 强制删除dirpath (文件目录树)
+    # 强制删除dirpath (文件目录树)，新建截屏文件夹ditpath:
+    # windows系统下：如果资源管理器中打开了dirpath，再运行脚本时会有WindowsError[5]出现。
     shutil.rmtree(dirpath, ignore_errors=True)
-    # 如果已经在资源管理器中打开则会出现WindowsError，因此添加try except
     if not os.path.isdir(dirpath):
-        try:
-            os.mkdir(dirpath)
-        except:
-            print "MOA cannot create folder: img_record ."
-            traceback.print_exc()
+        os.mkdir(dirpath)
     SAVE_SCREEN = dirpath
 
 
