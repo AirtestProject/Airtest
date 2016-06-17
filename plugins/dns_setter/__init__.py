@@ -60,7 +60,7 @@ class DefaultDnsSetter(object):
         netease_game = self.d(text='netease_game')
         netease_game.click()
         time.sleep(0.5)
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if not success:
             raise Exception('cannot connect to netease_game. network not available.')
         self.uiutil.click_any({'textMatches': ur'取消'})
@@ -81,7 +81,7 @@ class DefaultDnsSetter(object):
 
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
-        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
+        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if strict:
             self.test_netease_game_connected()
 
@@ -165,7 +165,7 @@ class DefaultDnsSetter(object):
     def test_netease_game_connected(self):
         ssid = self.get_current_ssid()
         if ssid is None:
-            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=20000)
+            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
             if not success:
                 raise Exception('cannot connect to netease_game. network not available.')
         elif ssid != 'netease_game':
@@ -191,6 +191,10 @@ class DefaultDnsSetter(object):
             self.connect_netease_game()
 
     def set_dns(self, dns1):
+        # skip if dns already satisfied
+        if self.test_dns(dns1):
+            return True
+
         # change STATIC mode and dns
         with self.android.ime:
             print '[DNS SETTER] enter wlan config page'
@@ -344,4 +348,5 @@ if __name__ == '__main__':
     #         stf_runner.cleanup(sn)
     #         print 'finish!'
     #         time.sleep(40)
+
 

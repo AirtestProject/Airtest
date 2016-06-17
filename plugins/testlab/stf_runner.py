@@ -78,10 +78,11 @@ def setdns(sn, addr, dns):
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
-    if dns != '-1':
-        success = dsetter.set_dns(dns)
-        if not success:
-            raise Exception("dns check fail with `getprop net.dns1`.")
+    if dns == '-1':
+        dns = '10.0.1.13'  # default available dns
+    success = dsetter.set_dns(dns)
+    if not success:
+        raise Exception("dns check fail with `getprop net.dns1`.")
     a.home()
 
 
