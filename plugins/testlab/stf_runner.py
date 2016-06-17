@@ -55,7 +55,7 @@ def test(addr):
 def setdns(sn, addr, dns):
     """设置dns"""
     from moa.plugins.dns_setter import DnsSetter
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=True)
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
@@ -67,7 +67,7 @@ def setdns(sn, addr, dns):
 
 def clearapk(addr):
     """清理设备，以留出足够的空间"""
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     pkgs = a.amlist(third_only=True)
     pkgs = [i for i in pkgs if i.startswith("com.netease.")]
     for i in (set(pkgs) - set(PKG_NOT_REMOVE)):
@@ -79,13 +79,13 @@ def clearapk(addr):
 def install(addr, apk):
     """安装apk"""
     clearapk(addr)
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.install(apk, reinstall=True, check=True)
 
 
 def startapp(addr, package):
     """打开app"""
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.amstart(package)
 
 
