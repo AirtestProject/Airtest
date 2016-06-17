@@ -750,8 +750,11 @@ class Android(object):
         packages = self.amlist()
         if ACCESSIBILITYSERVICE_PACKAGE not in packages:
             self.adb.install(ACCESSIBILITYSERVICE_APK)
-        self.adb.shell('settings put secure accessibility_enabled 1')
+        # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
+        # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
+        # by liuxin 2016.6.17
         self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+        self.adb.shell('settings put secure accessibility_enabled 1')
 
         # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
         apk = apkparser.APK(filepath)

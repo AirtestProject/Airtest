@@ -104,7 +104,6 @@ def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            print get_platform(), on
             if get_platform() not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
