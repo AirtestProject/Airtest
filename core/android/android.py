@@ -390,7 +390,8 @@ class Minicap(object):
 
         cnt = 0
         while cnt <= max_cnt:
-            s.send("1")
+            if lazy:
+                s.send("1")
             cnt += 1
             # recv header, count frame_size
             if MINICAPTIMEOUT is not None:
