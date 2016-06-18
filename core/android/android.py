@@ -240,6 +240,7 @@ class ADB(object):
 
 
 class Minicap(object):
+    VERSION = 3
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None):
         self.serialno = serialno
@@ -256,8 +257,16 @@ class Minicap(object):
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
-            print "install_minicap skipped"
-            return
+            output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
+            if 'invalid option' in output:##old version
+                print 'old version minicap, reinstall'
+                pass
+            elif "version" in output and int(output.split(":")[1]) < self.VERSION:
+                print 'minicap curversion small than VERSION, reinstall'
+                pass
+            else:
+                print 'minicap install skipped'
+                return
 
         self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
@@ -288,14 +297,14 @@ class Minicap(object):
             proj_width, proj_height = real_width, real_height
         elif _islist(self.projection):
             proj_width, proj_height = self.projection
-        elif isinstance(self.projection, float):
+        elif isinstance(self.projection, (int, float)):
             proj_width = self.projection * real_width
             proj_height = self.projection * real_height
         else:
-            raise RuntimeError("invalid projection type")
+            raise RuntimeError("invalid projection type: %s"%repr(self.projection))
         return real_width, real_height, proj_width, proj_height, real_orientation
 
-    def _setup(self, adb_port=None):
+    def _setup(self, adb_port=None,lazy=False):
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
             self.server_proc.kill()
@@ -307,17 +316,19 @@ class Minicap(object):
         @retries(3)
         def set_up_forward():
             localport = adb_port or self.localport or self.adb.get_available_forward_local()
+            # localport = 11154
             device_port = "moa_minicap_%s" % localport
             self.adb.forward("tcp:%s"%localport, "localabstract:%s"%device_port)
             return localport, device_port
 
         self.localport, device_port = set_up_forward()
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d" % (
+        other_opt = "-l" if lazy else ""
+        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s" % (
             device_port,
             real_width, real_height,
             proj_width,proj_height,
-            real_orientation), not_wait=True)
-        nbsp = NonBlockingStreamReader(p.stdout)
+            real_orientation,other_opt), not_wait=True)
+        nbsp = NonBlockingStreamReader(p.stdout,print_output=True)
         info = nbsp.read(0.5)
         # print info
         nbsp.kill()
@@ -367,9 +378,9 @@ class Minicap(object):
             print self.speedygen.next()
         return self.speedygen.next()
 
-    def get_frames(self, max_cnt=100000, adb_port=None):
+    def get_frames(self, max_cnt=1000000000, adb_port=None,lazy=False):
         """use adb forward and socket communicate"""
-        self._setup(adb_port)
+        self._setup(adb_port,lazy=lazy)
         s = SafeSocket()
         adb_port = adb_port or self.localport
         s.connect(("localhost", adb_port))
@@ -379,6 +390,7 @@ class Minicap(object):
 
         cnt = 0
         while cnt <= max_cnt:
+            s.send("1")
             cnt += 1
             # recv header, count frame_size
             if MINICAPTIMEOUT is not None:
@@ -391,6 +403,7 @@ class Minicap(object):
                 yield None
             else:
                 frame_size = struct.unpack("<I", header)[0]
+                # print 'frame_size',frame_size
                 # recv image data
                 one_frame = s.recv(frame_size)
                 yield one_frame
@@ -1153,15 +1166,20 @@ def test_minitouch(serialno):
 def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
-    t = time.clock()
-    a = Android(serialno, minicap=False, minitouch=False)
-    # a.uninstall(RELEASELOCK_PACKAGE)
-    # a.wake()
-    a.amstart("com.netease.my")
-    def heihei(ori, nimei):
-        print ori, nimei
-    a.reg_ow_callback(heihei, ({1: 2}, ))
-    time.sleep(100)
+    # t = time.clock()
+    a = Android(serialno)
+    gen = a.minicap.get_frames()
+    for i in range(100):
+        print "get next frame"
+        gen.next()
+        time.sleep(1)
+    # # a.uninstall(RELEASELOCK_PACKAGE)
+    # # a.wake()
+    # a.amstart("com.netease.my")
+    # def heihei(ori, nimei):
+    #     print ori, nimei
+    # a.reg_ow_callback(heihei, ({1: 2}, ))
+    # time.sleep(100)
     # print a.amlist()
     # a.amuninstall("com.netease.kittycraft")
     # a.install(r"I:\init\moaworkspace\apk\g18\g18_netease_baidu_pc_pz_dev_1.79.0.apk", reinstall=True)
