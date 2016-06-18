@@ -1,30 +1,24 @@
 # encoding=utf-8
 from moa.core.android.android import Android
-# from moa import airtest_runner
+from config import PKG_NOT_REMOVE, TEST_DEVICE_LIST
 from pprint import pprint
 import stf
 import sys
 import os
 
 
-PKG_NOT_REMOVE = [
-    "com.netease.accessibility",
-    "com.netease.releaselock",
-    "com.tencent.mm",
-]
-
-
 def devices():
     listDevices = stf.get_device_list_rest("")
     for i in listDevices:
-        serialno = i['serial']
-        print serialno
+        if i['serial'] in TEST_DEVICE_LIST:
+            serialno = i['serial']
+            print serialno
 
 
 def join(serialno):
     """
     占用stf设备，通过设备号获取connect的地址
-    注意，这里不能print addr作为输出，一定不要print其他信息(坑爹的jenkins pipeline)
+    注意，这里将print addr作为输出，一定不要print其他信息(坑爹的jenkins pipeline)
     """
     join = stf.join_group(serialno)
     if not join['success']:
@@ -54,20 +48,47 @@ def test(addr):
 
 def setdns(sn, addr, dns):
     """设置dns"""
+
+    # these two device cannot connect to netease_game
+    if sn in ('351BBJPTHLR2', '045BBI2H9F9B'):
+        return
+    #
+    # # skip device too slow
+    # if sn in ('KVAM59CYHYWOS8V8', 'f565e08', '296eea5d', 'f565e08', 'AVY9KA95A2106482', '3230dd49644a10ad', 'X2P0215508002471', 'MXF5T15831007688', 'EMW8BYLJHANZCIBM', 'NX513J', 'JAEDU15A16007444'):
+    #     return
+    #
+    # # cannot not auto install apk
+    # if sn in ('JTJ4C15710038858', 'CQ556955VKOV5T4D', 'GYZL4H556HCUH6RK', 'cc9de083'):
+    #     return
+    #
+    # personal device, ignore
+    if sn in ('139db80c', ):
+        return
+
+    # connot save dns settings
+    if sn in ('fdcbcc83', '8d260bf7'):
+        return
+    #
+    # # 手机有问题，桌面黑黑的
+    # if sn in ('TA9921AVZE', ):
+    #     return
+
     from moa.plugins.dns_setter import DnsSetter
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
-    if dns != '-1':
-        success = dsetter.set_dns(dns)
-        if not success:
-            raise Exception("dns check fail with `getprop net.dns1`.")
+    if dns == '-1':
+        dns = '10.0.1.13'  # default available dns
+    success = dsetter.set_dns(dns)
+    if not success:
+        raise Exception("dns check fail with `getprop net.dns1`.")
+    a.home()
 
 
 def clearapk(addr):
     """清理设备，以留出足够的空间"""
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     pkgs = a.amlist(third_only=True)
     pkgs = [i for i in pkgs if i.startswith("com.netease.")]
     for i in (set(pkgs) - set(PKG_NOT_REMOVE)):
@@ -79,13 +100,13 @@ def clearapk(addr):
 def install(addr, apk):
     """安装apk"""
     clearapk(addr)
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.install(apk, reinstall=True, check=True)
 
 
 def startapp(addr, package):
     """打开app"""
-    a = Android(addr, minicap=False, minitouch=False)
+    a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.amstart(package)
 
 

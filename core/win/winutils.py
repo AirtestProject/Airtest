@@ -141,7 +141,8 @@ VK_CODE = {
     'play_key':0xFA,
     'zoom_key':0xFB,
     'clear_key':0xFE,
-    '+':0xBB,
+    '=':0xBB,
+    # '+':0xBB,
     ',':0xBC,
     '-':0xBD,
     '.':0xBE,
@@ -168,9 +169,18 @@ SHIFT_KCODE = {
     "(": "9",
     ")": "0",
     "_": "-",
-    "+": "="
+    "+": "=",
 
+    "{": "[",
+    "}": "]",
+    "|": "\\",
+    ":": ";",
+    "?": "/",
+    "<": ",",
+    ">": ".",
+    '"': "'"
 }
+
 class POINT(Structure):
     _fields_ = [("x", c_ulong),("y", c_ulong)]
 def get_mouse_point():
@@ -253,7 +263,12 @@ def _key_input(str='', alt=False):
             one_key_input(VK_CODE[SHIFT_KCODE[c]])
             win32api.keybd_event(VK_CODE["shift"],0,win32con.KEYEVENTF_KEYUP,0)
         else:
-            one_key_input(VK_CODE[c])
+            if c.isalpha() and c.isupper(): # 如果是大写字母，按下shift同时按下字母按键
+                win32api.keybd_event(VK_CODE["shift"],0,0,0)
+                one_key_input(VK_CODE[c.lower()])
+                win32api.keybd_event(VK_CODE["shift"],0,win32con.KEYEVENTF_KEYUP,0)
+            else:
+                one_key_input(VK_CODE[c])
 
 def key_input(msg='', escape=False, combine=None):
     #如果有alt，就先按住alt

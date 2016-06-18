@@ -86,6 +86,7 @@ def main():
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
+    ap.add_argument("--setadb", help="auto set adb ip and port, default 127.0.0.1:5037 .")
     ap.add_argument("--setudid", help="auto set ios device udid", nargs="?", const=True)
     ap.add_argument("--setwin", help="auto set windows", action="store_true")
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
@@ -111,14 +112,18 @@ def main():
     os.chdir(args.script)
 
     if args.maskrect:
-        print "set mask_rect : ", args.maskrect
+        # print "set mask_rect : ", args.maskrect
         set_mask_rect(args.maskrect)
 
     if args.setsn:
         print "auto set_serialno", args.setsn
         # if setsn==True, but not specified, auto choose one
         sn = args.setsn if isinstance(args.setsn, str) else None
-        set_serialno(sn)
+        if args.setadb:
+            addr = args.setadb.split(":")
+            set_serialno(sn, addr=addr)
+        else:
+            set_serialno(sn)
 
     if args.setudid:  # modified by gzlongqiumeng
         print "auto set_udid", args.setudid
@@ -126,15 +131,15 @@ def main():
         set_udid(udid)
 
     if args.setwin:
-        print "auto set_windows"
+        # print "auto set_windows"
         set_windows()
 
     if args.log:
-        print "save log in", args.log
+        print "save log in", "'%s'" %args.log
         set_logfile(args.log)
 
     if args.screen:
-        print "save img in", args.screen
+        print "save img in", "'%s'" %args.screen
         set_screendir(args.screen)
 
     if args.kwargs:

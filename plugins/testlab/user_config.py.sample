@@ -1,0 +1,9 @@
+# encoding=utf-8
+"""
+put user specified config here
+do not push to git
+"""
+
+# 在stf-web个人设置页的“Setting UI”——“密钥”——“访问令牌”生成的，需要自行纪录一下
+# 密钥和节点是一一对应的，用别人的密钥会导致连接不上设备
+STF_TOKEN_ID = '1234567'

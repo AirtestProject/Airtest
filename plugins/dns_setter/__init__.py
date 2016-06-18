@@ -4,6 +4,8 @@ __author__ = 'lxn3032'
 
 import time
 import traceback
+import re
+import os
 import uiutils
 
 from uiautomator import Device
@@ -14,10 +16,11 @@ from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
-from moa.plugins.ime_helper import UiautomatorIme
 from moa.core.android.android import Android
 
 
+UIAUTOMATOR_PACKAGE = 'com.github.uiautomator'
+UIAUTOMATOR_APK_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], "libs")
 SONY_XPERIA = ('CB5A1NW8WK', )
 
 
@@ -27,9 +30,16 @@ class DefaultDnsSetter(object):
         self.rsn = rsn
         self.sn = sn
         self.d = Device(rsn)
-        self.android = Android(rsn)
+        self.android = Android(rsn, init_display=False, minicap=False, minitouch=False, init_ime=True)
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
+
+        # install uiautomator
+        packages = self.android.amlist()
+        if UIAUTOMATOR_PACKAGE not in packages:
+            for apk in os.listdir(UIAUTOMATOR_APK_PATH):
+                if apk.endswith('.apk'):
+                    self.adb.run('install -t ' + os.path.join(UIAUTOMATOR_APK_PATH, apk))
 
     @particular_case.specified(['2053d814'])
     def enter_wlan_list(self):
@@ -40,8 +50,8 @@ class DefaultDnsSetter(object):
         self.adb.shell('am start -a "android.net.wifi.PICK_WIFI_NETWORK" --activity-clear-top')
 
     @particular_case.specified(['296eea5d'])
-    def connect_netease_game(self):
-        # X6SPlus D
+    def connect_netease_game(self, strict=True):
+        # vivo X6S Plus（全网通）
         uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
         uiobj.click()
         time.sleep(1)
@@ -50,27 +60,30 @@ class DefaultDnsSetter(object):
         netease_game = self.d(text='netease_game')
         netease_game.click()
         time.sleep(0.5)
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=10000)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if not success:
             raise Exception('cannot connect to netease_game. network not available.')
         self.uiutil.click_any({'textMatches': ur'取消'})
 
     @particular_case.default_call
-    def connect_netease_game(self):
-        uiobj = None
-        for i in range(3):
-            uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
-            if uiobj:
-                break
-        if not uiobj:
+    def connect_netease_game(self, strict=True):
+        uiobj = self.d(text='netease_game')
+        if not uiobj.exists:
+            for i in range(5):
+                uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
+                if uiobj:
+                    break
+                time.sleep(2)
+        if not uiobj or not uiobj.exists:
             raise Exception('AP netease_game not found')
         uiobj.click()
         time.sleep(1)
+
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=10000)
-        if not success:
-            raise Exception('cannot connect to netease_game. network not available.')
+        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+        if strict:
+            self.test_netease_game_connected()
 
     @particular_case.specified(SONY_XPERIA)
     def enter_wlan_settings(self):
@@ -99,6 +112,14 @@ class DefaultDnsSetter(object):
     def enter_wlan_advanced_settings(self):
         pass
 
+    @particular_case.specified(['LC53ZYH00485'])
+    def enter_wlan_advanced_settings(self):
+        # HTC one E9+
+        uiobj = self.uiutil.scroll_find({'resourceId': "com.android.settings:id/wifi_advanced_togglebox"})
+        if uiobj and not uiobj.checked:
+            uiobj.click()
+            time.sleep(0.5)
+
     @particular_case.default_call
     def enter_wlan_advanced_settings(self):
         uiobj = self.uiutil.scroll_find({'textContains': u'高级选项'}, {'resourceId': 'com.android.settings:id/wifi_advanced_togglebox'})
@@ -120,54 +141,81 @@ class DefaultDnsSetter(object):
         self.uiutil.click_any({'textMatches': ur'静态|static|STATIC|靜態|静止'})
 
     @particular_case.default_call
-    def modify_wlan_settings_fields(self, dns1, back_after_texting=False):
+    def modify_wlan_settings_fields(self, dns1):
         uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'},
                                         {'resourceId': 'com.android.settings.wifi:id/dns1'},
                                         {'resourceId': 'com.lge.wifisettings:id/dns1'},
                                         )
         if uiobj:
-            self.uiutil.replace_text(uiobj, dns1, back_after_texting)
+            self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+
+    def get_current_ssid(self):
+        netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
+        matcher = re.search(r'networkId="(.*?)"', netinfo)
+        if matcher:
+            return matcher.group(1)
+        return None
 
     def test_unlock_success(self):
         time.sleep(1)
-        if not self.d(textContains='netease').exists:
-            raise Exception('device unlock fail. cannot get ui hierarchy.')
+        if not self.d(textMatches='^.*(netease|WLAN|Wi-Fi|WiFi|Wifi).*$').exists:
+            raise Exception('device unlock fail or stuck. cannot get ui hierarchy.')
+
+    def test_netease_game_connected(self):
+        ssid = self.get_current_ssid()
+        if ssid is None:
+            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+            if not success:
+                raise Exception('cannot connect to netease_game. network not available.')
+        elif ssid != 'netease_game':
+            raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
         if dns1 in test_getdns:
-            print 'success !!'
             return True
         return False
 
     def network_prepare(self):
         self.d.screen.on()
         self.d.press('home')
+        print '[DNS SETTER] launch wlan list actiity'
         self.enter_wlan_list()
+        print '[DNS SETTER] test device unlock status'
         self.test_unlock_success()
-        self.connect_netease_game()
+        print '[DNS SETTER] connecting to netease_game'
+        ssid = self.get_current_ssid()
+        if ssid != 'netease_game':
+            print '[first connect] current ssid is {}. connecting netease_game.'.format(ssid)
+            self.connect_netease_game()
 
     def set_dns(self, dns1):
+        # skip if dns already satisfied
+        if self.test_dns(dns1):
+            return True
+
         # change STATIC mode and dns
         with self.android.ime:
+            print '[DNS SETTER] enter wlan config page'
             self.enter_wlan_settings()
+            print '[DNS SETTER] enable wlan advanced settings'
             self.enter_wlan_advanced_settings()
+            print '[DNS SETTER] use static IP mode'
             self.use_static_ip()
-
-            SHOULD_PRESS_BACK_AFTER_TEXTING = [
-                # '55466646', 'AVY9KA95A2106482', '473fd2a2', '', 'c0e82f5f', '4f1496f5', '1453b839',
-                # '7220be4f', '6407413e', 'TA9921AVZE', '7C5906B60221', 'T3Q6T16520001043', 'QLXBBBA5B1137702',
-                # 'DU2TAN158M041444',
-            ]
-            # QLXBBBA5B1137702 7N2MYN155S029228 使用其他输入法后，这个就去掉
-            self.modify_wlan_settings_fields(dns1, self.sn in SHOULD_PRESS_BACK_AFTER_TEXTING)
+            print '[DNS SETTER] change dns1'
+            self.modify_wlan_settings_fields(dns1)
 
             # reconnect
             time.sleep(2)
             self.d.press.back()
+            print '[DNS SETTER] back to wlan list to check whether connected to netease_game'
             self.enter_wlan_list()
-            self.connect_netease_game()
+            ssid = self.get_current_ssid()
+            if ssid != 'netease_game':
+                print '[final connect] current ssid is {}. connecting netease_game.'.format(ssid)
+                self.connect_netease_game(strict=False)
+        print '[DNS SETTER] check current dns1'
         return self.test_dns(dns1)
 
 
@@ -281,36 +329,24 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
-    # print d(text='已连接到 netease_game').exists
+    from uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
 
-    # d(text='netease_game').long_click()
-    # dns = '192.168.229.227'
-    # res = d(resourceId='com.android.settings:id/dns1').text
-    # current_len = len(res)
-    # idx2 = res.index(dns) + len(dns)
-    # print res.index(dns) + len(dns)
-    # print len(res) - (res.index(dns) + len(dns))
-    # for _ in range(current_len):
-    #     d.press.left()
-    # for _ in range(current_len):
-    #     d.press.right()
-    # for _ in range(current_len - idx2):
-    #     d.press('del')
 
-    for d in stf.get_device_list_rest(None):
-        sn = d['serial']
-        if sn not in PASS_LIST:
-            rsn = stf_runner.join(sn)
-            try:
-                dns_setter = DnsSetter(rsn, sn)
-                dns1 = '192.168.229.227'
-                dns_setter.network_prepare()
-                dns_setter.set_dns(dns1)
-            except:
-                traceback.print_exc()
-            stf_runner.cleanup(sn)
-            print 'finish!'
-            time.sleep(40)
+    # for d in stf.get_device_list_rest(None):
+    #     sn = d['serial']
+    #     if sn not in PASS_LIST:
+    #         rsn = stf_runner.join(sn)
+    #         try:
+    #             dns_setter = DnsSetter(rsn, sn)
+    #             dns1 = '192.168.229.227'
+    #             dns_setter.network_prepare()
+    #             dns_setter.set_dns(dns1)
+    #         except:
+    #             traceback.print_exc()
+    #         stf_runner.cleanup(sn)
+    #         print 'finish!'
+    #         time.sleep(40)
+
+

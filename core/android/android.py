@@ -121,7 +121,7 @@ class ADB(object):
             print adbrun("connect %s"%self.serialno)
 
     def get_status(self):
-        for dev, status in adb_devices():
+        for dev, status in adb_devices(addr=self.addr):
             if dev == self.serialno:
                 return status
         return None
@@ -412,13 +412,13 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None):
+    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None, adb_addr=LOCALADBADRR):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
         self.max_x, self.max_y = None, None
         self.size = size
-        self.adb = adb or ADB(serialno)
+        self.adb = adb or ADB(serialno, addr=adb_addr)
         self.localport = localport
         self.install()
         self.setup_server()
@@ -657,10 +657,18 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, minicap=True, minitouch=True, props={}):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props={}, minicap=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
+        if init_display:
+            self._init_display(props)
+        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
+        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+        if init_ime:
+            self.ime = UiautomatorIme(self.adb)
+
+    def _init_display(self, props={}):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
@@ -669,12 +677,9 @@ class Android(object):
         else:
             self.get_display_info()
         self.orientationWatcher()
-        self.minicap = Minicap(serialno, size=self.size, adb=self.adb) if minicap else None
-        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
-        self.ime = UiautomatorIme(self.adb)
 
     def _load_props(self):
         try:
@@ -776,7 +781,7 @@ class Android(object):
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
-    @autoretry
+    # @autoretry
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
         if self.minicap:
             screen = self.minicap.get_frame()
@@ -815,8 +820,11 @@ class Android(object):
         # todo:
         # 1. 还需要按power键吗？
         # 2. 如果非锁屏状态，上面步骤可以省略
-        if not self.is_screenon():
-            self.keyevent("POWER")
+
+        # 1. release apk里面有，不需要按电源键了，
+        # 2. is_screenon有些设备不起效
+        # if not self.is_screenon():
+        #     self.keyevent("POWER")
 
         self.keyevent("HOME")
 
@@ -1068,7 +1076,7 @@ class Android(object):
         try:
             apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
         except MoaError:
-            self.adb.install(ROTATIONWATCHER_APK)
+            self.install(ROTATIONWATCHER_APK)
             apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
         p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
         if p.poll() is not None:
@@ -1173,6 +1181,11 @@ def test_android():
         print "get next frame"
         gen.next()
         time.sleep(1)
+    # # a.uninstall(RELEASELOCK_PACKAGE)
+    # # a.wake()
+    # a.amstart("com.netease.my")
+    # t = time.clock()
+    # a = Android(serialno, init_display=False, minicap=False, minitouch=False, init_ime=False)
     # # a.uninstall(RELEASELOCK_PACKAGE)
     # # a.wake()
     # a.amstart("com.netease.my")
