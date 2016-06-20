@@ -421,9 +421,9 @@ class AutomatorServer(object):
         test_exists = self.adb.cmd('shell', 'ls /data/local/tmp')
         stdout, stderr = test_exists.communicate()
         filelist = [f for f in stdout.splitlines() if f]
-        for jar, url in self.__jar_files.items():
-            filename = os.path.join(base_dir, url)
+        for jar, rpath in self.__jar_files.items():
             if jar not in filelist:
+                filename = os.path.join(base_dir, rpath)
                 self.adb.cmd("push", filename, "/data/local/tmp/").wait()
         return list(self.__jar_files.keys())
 
