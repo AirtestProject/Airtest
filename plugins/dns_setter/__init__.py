@@ -8,12 +8,12 @@ import re
 import os
 import uiutils
 
-from uiautomator import Device
+from moa.core.android.uiautomator import Device
 from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27
 from particular_devices.meizu import MX4, MX3, MeiLanNote
-from particular_devices.samsung import Galaxy
+from particular_devices.samsung import Galaxy, GalaxyNoet2
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
 from moa.core.android.android import Android
@@ -127,9 +127,15 @@ class DefaultDnsSetter(object):
             uiobj.click()
             time.sleep(0.5)
 
-    @particular_case.specified(SONY_XPERIA)
-    def use_static_ip(self):
-        pass
+    @particular_case.default_call
+    def use_dhcp(self):
+        self.uiutil.scroll_to_click_any(
+            {'resourceId': 'com.android.settings:id/ip_settings'},
+            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
+            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
+        )
+        self.uiutil.click_any({'textMatches': ur'DHCP|dhcp|自动'})
+        self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
     @particular_case.default_call
     def use_static_ip(self):
@@ -152,9 +158,9 @@ class DefaultDnsSetter(object):
 
     def get_current_ssid(self):
         netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
-        matcher = re.search(r'networkId="(.*?)"', netinfo)
+        matcher = re.search(r'networkId=(.*?)\]\]', netinfo)
         if matcher:
-            return matcher.group(1)
+            return matcher.group(1).strip('"')
         return None
 
     def test_unlock_success(self):
@@ -171,6 +177,11 @@ class DefaultDnsSetter(object):
         elif ssid != 'netease_game':
             raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
+    def test_ping_baidu(self):
+        result = self.adb.shell('ping -c2 www.baidu.com')
+        matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
+        return matcher and matcher.group(1) != '0'
+
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
         if dns1 in test_getdns:
@@ -180,7 +191,7 @@ class DefaultDnsSetter(object):
     def network_prepare(self):
         self.d.screen.on()
         self.d.press('home')
-        print '[DNS SETTER] launch wlan list actiity'
+        print '[DNS SETTER] launch wlan list activity'
         self.enter_wlan_list()
         print '[DNS SETTER] test device unlock status'
         self.test_unlock_success()
@@ -188,7 +199,11 @@ class DefaultDnsSetter(object):
         ssid = self.get_current_ssid()
         if ssid != 'netease_game':
             print '[first connect] current ssid is {}. connecting netease_game.'.format(ssid)
-            self.connect_netease_game()
+            try:
+                self.connect_netease_game()
+            except:
+                print '[final connect] try second times to connect to netease_game.'
+                self.connect_netease_game()
 
     def set_dns(self, dns1):
         # skip if dns already satisfied
@@ -201,10 +216,14 @@ class DefaultDnsSetter(object):
             self.enter_wlan_settings()
             print '[DNS SETTER] enable wlan advanced settings'
             self.enter_wlan_advanced_settings()
-            print '[DNS SETTER] use static IP mode'
-            self.use_static_ip()
-            print '[DNS SETTER] change dns1'
-            self.modify_wlan_settings_fields(dns1)
+            if dns1 != '-1':
+                print '[DNS SETTER] use static IP mode'
+                self.use_static_ip()
+                print '[DNS SETTER] change dns1'
+                self.modify_wlan_settings_fields(dns1)
+            else:
+                print '[DNS SETTER] use dhcp mode'
+                self.use_dhcp()
 
             # reconnect
             time.sleep(2)
@@ -214,12 +233,21 @@ class DefaultDnsSetter(object):
             ssid = self.get_current_ssid()
             if ssid != 'netease_game':
                 print '[final connect] current ssid is {}. connecting netease_game.'.format(ssid)
-                self.connect_netease_game(strict=False)
-        print '[DNS SETTER] check current dns1'
-        return self.test_dns(dns1)
+                try:
+                    self.connect_netease_game()
+                except:
+                    print '[final connect] try second times to connect to netease_game.'
+                    self.connect_netease_game()
+
+        if dns1 != '-1':
+            print '[DNS SETTER] check current dns1'
+            return self.test_dns(dns1)
+        else:
+            print '[DNS SETTER] validate network connection'
+            return self.test_ping_baidu()
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, MX4, MX3, MeiLanNote, Galaxy):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, MX4, MX3, MeiLanNote, Galaxy, GalaxyNoet2):
     pass
 
 
@@ -329,7 +357,7 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from uiautomator import AutomatorDevice
+    from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
 
@@ -349,4 +377,29 @@ if __name__ == '__main__':
     #         print 'finish!'
     #         time.sleep(40)
 
-
+    # import requests
+    #
+    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ2ODgxOTE2OSwiaWF0IjoxNDY2MjI3MTY5fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.YKUOtcoBRgoMr1LDNAl5UbXlZx9lceTD_KXKy3lZOro'
+    # def create_instruction(tokenid, data, **kwargs):
+    #     data.update(kwargs)
+    #     r = requests.post('http://hunter.nie.netease.com/api/instruction', headers={'tokenid': tokenid}, data=data)
+    #     if r.status_code == 201:
+    #         try:
+    #             return r.json()
+    #         except:
+    #             pass
+    #     else:
+    #         print '======================================================================\n'
+    #         print 'r.status_code=', r.status_code
+    #         print 'data=', data
+    #         print 'message=', r.json()['message']
+    #         print '======================================================================\n'
+    #     return None
+    #
+    # instruction = {
+    #     'name': 'fun1(a, b)',
+    #     'code': 'print a, b',
+    #     'process': 'safaia',
+    #     'category': '中文',
+    # }
+    # print create_instruction(tokenid, instruction)

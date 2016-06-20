@@ -50,8 +50,13 @@ def setdns(sn, addr, dns):
     """设置dns"""
 
     # these two device cannot connect to netease_game
-    if sn in ('351BBJPTHLR2', '045BBI2H9F9B'):
+    if sn in ('045BBI2H9F9B', ):
         return
+
+    # # stuck with uiautomator
+    # if sn in ('4df74f4b47e33081', ):
+    #     return
+
     #
     # # skip device too slow
     # if sn in ('KVAM59CYHYWOS8V8', 'f565e08', '296eea5d', 'f565e08', 'AVY9KA95A2106482', '3230dd49644a10ad', 'X2P0215508002471', 'MXF5T15831007688', 'EMW8BYLJHANZCIBM', 'NX513J', 'JAEDU15A16007444'):
@@ -78,8 +83,6 @@ def setdns(sn, addr, dns):
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
-    if dns == '-1':
-        dns = '10.0.1.13'  # default available dns
     success = dsetter.set_dns(dns)
     if not success:
         raise Exception("dns check fail with `getprop net.dns1`.")

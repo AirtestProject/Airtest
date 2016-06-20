@@ -16,6 +16,11 @@ class MIx(object):
         pass
 
     @particular_case.specified(MI_SERIALS)
+    def use_dhcp(self):
+        # TODO 等手机在线了再测
+        pass
+
+    @particular_case.specified(MI_SERIALS)
     def use_static_ip(self):
         pass
 

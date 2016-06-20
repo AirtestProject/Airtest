@@ -105,7 +105,6 @@ def platform(on=["Android"]):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            print get_platform(), on
             if get_platform() not in on:
                 raise NotImplementedError()
             r = f(*args, **kwargs)
@@ -437,7 +436,7 @@ def amstart(package, activity=None):
         return
 
     DEVICE.amstart(package, activity)
-    refresh_device()
+    # refresh_device()
 
 @logwrap
 @platform(on=["Android","IOS"])
@@ -447,7 +446,7 @@ def amstop(package):
         return
 
     DEVICE.amstop(package)
-    refresh_device()
+    # refresh_device()
 
 
 @logwrap
@@ -513,7 +512,7 @@ def wake():
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-    refresh_device()
+    # refresh_device()
 
 
 @platform(on=["Android"])

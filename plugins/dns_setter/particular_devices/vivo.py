@@ -10,10 +10,15 @@ Y27 = ('1042dc55', )
 VIVO_SERIALS = ('ZTAMDU49ZT59TOAE', 'CQ556955VKOV5T4D', 'JBRSCYZTS8JN7HZD', '38d6d441')
 
 
-
 class Vivo(object):
     @particular_case.specified(VIVO_SERIALS)
+    def use_dhcp(self):
+        # TODO
+        pass
+
+    @particular_case.specified(VIVO_SERIALS)
     def use_static_ip(self):
+        # TODO
         pass
 
     @particular_case.specified(VIVO_SERIALS)
@@ -28,6 +33,16 @@ class Vivo(object):
 
 
 class VivoY27(object):
+    @particular_case.specified(Y27)
+    def use_dhcp(self):
+        switch = self.d(text=u"使用静态 IP").right(resourceId="android:id/checkbox")
+        dnsfield = self.d(text=u'主域名服务器')
+        if dnsfield.enabled:
+            switch.click()
+            time.sleep(0.5)
+        self.uiutil.click_any({'text': u'确定'})
+        self.d.press.back()
+
     @particular_case.specified(Y27)
     def use_static_ip(self):
         switch = self.d(text=u"使用静态 IP").right(resourceId="android:id/checkbox")
@@ -64,6 +79,5 @@ class VivoY27(object):
         time.sleep(0.5)
         uiobj = self.uiutil.scroll_find({'resourceId': 'android:id/edit'})
         self.uiutil.replace_text(uiobj, dns1)
-        self.d(text=u'确定').click()
-        time.sleep(0.5)
+        self.uiutil.click_any({'text': u'确定'})
         self.d.press.back()
