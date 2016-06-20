@@ -113,15 +113,13 @@ class DefaultDnsSetter(object):
             {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
             {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
         )
-        print ipsettings.info
         if ipsettings and ipsettings.exists:
             if ipsettings.text in ['DHCP', 'dhcp', '自动']:
                 return True
             else:
-                ipsettings = ipsettings.child(className="android.widget.TextView")
-                print ipsettings.info
+                ipsettings = ipsettings.child(textMatches=ur'DHCP|dhcp|自动', className="android.widget.TextView")
                 if ipsettings and ipsettings.exists:
-                    return ipsettings.text in ['DHCP', 'dhcp', '自动']
+                    return True
         return False
 
     @particular_case.default_call
@@ -393,6 +391,9 @@ if __name__ == '__main__':
     from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
+    outter = d(resourceId="com.android.settings:id/ip_settings")
+    print outter.child(textMatches=u'静态|DHCP', className="android.widget.TextView").exists
+
 
 
     # for d in stf.get_device_list_rest(None):
