@@ -19,6 +19,15 @@ class Galaxy(object):
 
     @particular_case.specified(GALAXY_NOTE2)
     @particular_case.specified(GALAXY)
+    def is_dhcp_mode(self):
+        ipsetting = self.uiutil.scroll_find({'text': "IP 设定"})
+        ipsetting_field = ipsetting.down(className="android.widget.Spinner")
+        if not ipsetting_field:
+            raise Exception("cannot find ip settings field.")
+        return ipsetting_field.text == 'DHCP'
+
+    @particular_case.specified(GALAXY_NOTE2)
+    @particular_case.specified(GALAXY)
     def use_dhcp(self):
         ipsetting = self.uiutil.scroll_find({'text': "IP 设定"})
         ipsetting.down(className="android.widget.Spinner").click()
@@ -37,7 +46,7 @@ class Galaxy(object):
         time.sleep(1)
 
     @particular_case.specified(GALAXY)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         for _ in range(5):
             self.uiutil.get_scrollable().scroll.forward(steps=10)
 
@@ -87,7 +96,7 @@ class GalaxyNoet2(object):
             time.sleep(0.5)
 
     @particular_case.specified(GALAXY_NOTE2)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         dnstitle = self.uiutil.scroll_find({'text': "DNS 1"})
         dnsfield = dnstitle.down(className="android.widget.EditText")
         if dnsfield:

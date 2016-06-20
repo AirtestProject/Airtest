@@ -7,10 +7,16 @@ from . import particular_case
 
 
 Y27 = ('1042dc55', )
+X6S = ('296eea5d', )
 VIVO_SERIALS = ('ZTAMDU49ZT59TOAE', 'CQ556955VKOV5T4D', 'JBRSCYZTS8JN7HZD', '38d6d441')
 
 
 class Vivo(object):
+    @particular_case.specified(VIVO_SERIALS)
+    def is_dhcp_mode(self):
+        # TODO
+        pass
+
     @particular_case.specified(VIVO_SERIALS)
     def use_dhcp(self):
         # TODO
@@ -22,7 +28,7 @@ class Vivo(object):
         pass
 
     @particular_case.specified(VIVO_SERIALS)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         self.d(text='DNS 1').click()
         time.sleep(0.5)
         uiobj = self.uiutil.scroll_find({'resourceId': 'android:id/edit'})
@@ -33,6 +39,11 @@ class Vivo(object):
 
 
 class VivoY27(object):
+    @particular_case.specified(Y27)
+    def is_dhcp_mode(self):
+        dnsfield = self.d(text=u'主域名服务器')
+        return not dnsfield.enabled
+
     @particular_case.specified(Y27)
     def use_dhcp(self):
         switch = self.d(text=u"使用静态 IP").right(resourceId="android:id/checkbox")
@@ -74,10 +85,28 @@ class VivoY27(object):
         time.sleep(0.5)
 
     @particular_case.specified(Y27)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         self.d(text='主域名服务器').click()
         time.sleep(0.5)
         uiobj = self.uiutil.scroll_find({'resourceId': 'android:id/edit'})
         self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'text': u'确定'})
         self.d.press.back()
+
+
+class VivoX6S(object):
+    @particular_case.specified(X6S)
+    def connect_netease_game(self, strict=True):
+        # vivo X6S Plus（全网通）
+        uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
+        uiobj.click()
+        time.sleep(1)
+        self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
+        time.sleep(5)
+        netease_game = self.d(text='netease_game')
+        netease_game.click()
+        time.sleep(0.5)
+        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+        if not success:
+            raise Exception('cannot connect to netease_game. network not available.')
+        self.uiutil.click_any({'textMatches': ur'取消'})

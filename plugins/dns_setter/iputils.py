@@ -54,4 +54,5 @@ def get_subnet_mask_len(adb):
         return matcher.group(2)
     else:
         # 获取不到网段长度就默认取17
+        print '[iputils WARNING] fail to get subnet mask len. use 17 as default.'
         return '17'

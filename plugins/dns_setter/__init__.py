@@ -8,15 +8,17 @@ import re
 import os
 import uiutils
 
-from moa.core.android.uiautomator import Device
 from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
-from particular_devices.vivo import Vivo, VivoY27
+from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy, GalaxyNoet2
+
+from moa.core.android.android import Android
+from moa.core.android.uiautomator import Device
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
-from moa.core.android.android import Android
+from moa.plugins.dns_setter import iputils
 
 
 UIAUTOMATOR_PACKAGE = 'com.github.uiautomator'
@@ -49,22 +51,6 @@ class DefaultDnsSetter(object):
     def enter_wlan_list(self):
         self.adb.shell('am start -a "android.net.wifi.PICK_WIFI_NETWORK" --activity-clear-top')
 
-    @particular_case.specified(['296eea5d'])
-    def connect_netease_game(self, strict=True):
-        # vivo X6S Plus（全网通）
-        uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
-        uiobj.click()
-        time.sleep(1)
-        self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
-        time.sleep(5)
-        netease_game = self.d(text='netease_game')
-        netease_game.click()
-        time.sleep(0.5)
-        success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
-        if not success:
-            raise Exception('cannot connect to netease_game. network not available.')
-        self.uiutil.click_any({'textMatches': ur'取消'})
-
     @particular_case.default_call
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
@@ -73,6 +59,8 @@ class DefaultDnsSetter(object):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
+                else:
+                    self.uiutil.click_any({'text': '刷新'})
                 time.sleep(2)
         if not uiobj or not uiobj.exists:
             raise Exception('AP netease_game not found')
@@ -128,6 +116,22 @@ class DefaultDnsSetter(object):
             time.sleep(0.5)
 
     @particular_case.default_call
+    def is_dhcp_mode(self):
+        ipsettings = self.uiutil.scroll_find(
+            {'resourceId': 'com.android.settings:id/ip_settings'},
+            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
+            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
+        )
+        if ipsettings and ipsettings.exists:
+            if ipsettings.text in ['DHCP', 'dhcp', '自动']:
+                return True
+            else:
+                ipsettings = ipsettings.child(className="android.widget.TextView")
+                if ipsettings and ipsettings.exists:
+                    return ipsettings.text in ['DHCP', 'dhcp', '自动']
+        return False
+
+    @particular_case.default_call
     def use_dhcp(self):
         self.uiutil.scroll_to_click_any(
             {'resourceId': 'com.android.settings:id/ip_settings'},
@@ -147,15 +151,37 @@ class DefaultDnsSetter(object):
         self.uiutil.click_any({'textMatches': ur'静态|static|STATIC|靜態|静止'})
 
     @particular_case.default_call
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'},
                                         {'resourceId': 'com.android.settings.wifi:id/dns1'},
                                         {'resourceId': 'com.lge.wifisettings:id/dns1'},
                                         )
         if uiobj:
             self.uiutil.replace_text(uiobj, dns1)
+        if ip_addr is not None:
+            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/ipaddress'},
+                                            {'resourceId': 'com.android.settings.wifi:id/ipaddress'},
+                                            {'resourceId': 'com.lge.wifisettings:id/ipaddress'},
+                                            )
+            if uiobj:
+                self.uiutil.replace_text(uiobj, ip_addr)
+        if gateway is not None:
+            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/gateway'},
+                                            {'resourceId': 'com.android.settings.wifi:id/gateway'},
+                                            {'resourceId': 'com.lge.wifisettings:id/gateway'},
+                                            )
+            if uiobj:
+                self.uiutil.replace_text(uiobj, gateway)
+        if masklen is not None:
+            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/network_prefix_length'},
+                                            {'resourceId': 'com.android.settings.wifi:id/network_prefix_length'},
+                                            {'resourceId': 'com.lge.wifisettings:id/network_prefix_length'},
+                                            )
+            if uiobj:
+                self.uiutil.replace_text(uiobj, masklen)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
+    @particular_case.default_call
     def get_current_ssid(self):
         netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
         matcher = re.search(r'networkId=(.*?)\]\]', netinfo)
@@ -177,16 +203,16 @@ class DefaultDnsSetter(object):
         elif ssid != 'netease_game':
             raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
-    def test_ping_baidu(self):
-        result = self.adb.shell('ping -c2 www.baidu.com')
+    def test_ping(self, server):
+        result = self.adb.shell('ping -c2 {}'.format(server))
         matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
-        return matcher and matcher.group(1) != '0'
+        if not matcher or matcher.group(1) == '0':
+            raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
 
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
-        if dns1 in test_getdns:
-            return True
-        return False
+        if dns1 not in test_getdns:
+             raise Exception('set dns failed. current dns is {}'.format(test_getdns))
 
     def network_prepare(self):
         self.d.screen.on()
@@ -207,7 +233,8 @@ class DefaultDnsSetter(object):
 
     def set_dns(self, dns1):
         # skip if dns already satisfied
-        if self.test_dns(dns1):
+        if dns1 in self.adb.shell('getprop net.dns1'):
+            print '[DNS SETTER] skip, dns already satisfied.'
             return True
 
         # change STATIC mode and dns
@@ -217,10 +244,21 @@ class DefaultDnsSetter(object):
             print '[DNS SETTER] enable wlan advanced settings'
             self.enter_wlan_advanced_settings()
             if dns1 != '-1':
-                print '[DNS SETTER] use static IP mode'
-                self.use_static_ip()
-                print '[DNS SETTER] change dns1'
-                self.modify_wlan_settings_fields(dns1)
+                if self.is_dhcp_mode():
+                    # get ip, gateway, mask_len first
+                    # fix above field if not matched
+                    # otherwise, those field should be correct
+                    ip_addr = iputils.get_ip_address(self.adb)
+                    gateway = iputils.get_gateway_address(self.adb)
+                    masklen = iputils.get_subnet_mask_len(self.adb)
+                    print '[DNS SETTER] ip:{}  gateway:{}  mask len:{}'.format(ip_addr, gateway, masklen)
+                    print '[DNS SETTER] switch to static IP mode'
+                    self.use_static_ip()
+                    print '[DNS SETTER] change dns1 and fix ipaddress'
+                    self.modify_wlan_settings_fields(dns1, ip_addr, gateway, masklen)
+                else:
+                    print '[DNS SETTER] change dns1'
+                    self.modify_wlan_settings_fields(dns1)
             else:
                 print '[DNS SETTER] use dhcp mode'
                 self.use_dhcp()
@@ -239,15 +277,17 @@ class DefaultDnsSetter(object):
                     print '[final connect] try second times to connect to netease_game.'
                     self.connect_netease_game()
 
+        time.sleep(0.5)
         if dns1 != '-1':
             print '[DNS SETTER] check current dns1'
-            return self.test_dns(dns1)
+            self.test_dns(dns1)
+            self.test_ping('192.168.40.111')
         else:
             print '[DNS SETTER] validate network connection'
-            return self.test_ping_baidu()
+            self.test_ping('www.baidu.com')
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, MX4, MX3, MeiLanNote, Galaxy, GalaxyNoet2):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNoet2):
     pass
 
 

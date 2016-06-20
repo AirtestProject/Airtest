@@ -374,7 +374,11 @@ class AutomatorServer(object):
         "uiautomator-stub.jar": "libs/uiautomator-stub.jar"
     }
 
-    __apk_files = ["libs/app-uiautomator.apk", "libs/app-uiautomator-test.apk"]
+    # __apk_files = ["libs/app-uiautomator.apk", "libs/app-uiautomator-test.apk"]
+    __apk_files = {
+             "com.github.uiautomator": "libs/app-uiautomator.apk",
+             "com.github.uiautomator.test": "libs/app-uiautomator-test.apk"
+             }
 
     __sdk = 0
 
@@ -401,16 +405,26 @@ class AutomatorServer(object):
         base_dir = os.path.dirname(__file__)
         for jar, url in self.__jar_files.items():
             filename = os.path.join(base_dir, url)
-            test_exists = self.adb.cmd('shell', 'if [ -e "/data/local/tmp/{}" ]; then echo 1; else echo 0; fi'.format(filename))
+            test_exists = self.adb.cmd('shell', 'ls /data/local/tmp')
             test_exists.wait()
-            if test_exists.stdout.read().strip() == '0':
+            stdout, _ = test_exists.communicate()
+            if filename not in stdout.splitlines():
                 self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+            else:
+                raise Exception('should not get here. uiautomator push jar files.')
         return list(self.__jar_files.keys())
 
     def install(self):
         base_dir = os.path.dirname(__file__)
-        for apk in self.__apk_files:
-            self.adb.cmd("install", "-rt", os.path.join(base_dir, apk)).wait()
+        for package, apk in self.__apk_files.items():
+            p = self.adb.cmd("shell", "pm", "list", "packages", package)
+            p.wait()
+            stdoutput, _ = p.communicate()
+            packages = stdoutput.splitlines()
+            if all(not item.strip().endswith(package) for item in packages):
+                self.adb.cmd("install", "-t", os.path.join(base_dir, apk)).wait()
+            else:
+                raise Exception('should not get here. uiautomator install uiautomator apks.')
 
     @property
     def jsonrpc(self):
