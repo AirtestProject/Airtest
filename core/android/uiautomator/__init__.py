@@ -15,6 +15,7 @@ import re
 import collections
 import xml.dom.minidom
 
+
 DEVICE_PORT = int(os.environ.get('UIAUTOMATOR_DEVICE_PORT', '9008'))
 LOCAL_PORT = int(os.environ.get('UIAUTOMATOR_LOCAL_PORT', '9008'))
 
@@ -35,8 +36,12 @@ try:
 except:  # to fix python setup error on Windows.
     pass
 
-__author__ = "Xiaocong He"
+__author__ = "Xiaocong He, Codeskyblue"
 __all__ = ["device", "Device", "rect", "point", "Selector", "JsonRPCError"]
+
+
+def _is_windows():
+    return os.name == "nt"
 
 
 def U(x):
@@ -248,16 +253,16 @@ class Adb(object):
         self.default_serial = serial if serial else os.environ.get("ANDROID_SERIAL", None)
         self.adb_server_host = str(adb_server_host if adb_server_host else 'localhost')
         self.adb_server_port = str(adb_server_port if adb_server_port else '5037')
-        self.adbHostPortOptions = []
+        self.adb_host_port_options = []
         if self.adb_server_host not in ['localhost', '127.0.0.1']:
-            self.adbHostPortOptions += ["-H", self.adb_server_host]
+            self.adb_host_port_options += ["-H", self.adb_server_host]
         if self.adb_server_port != '5037':
-            self.adbHostPortOptions += ["-P", self.adb_server_port]
+            self.adb_host_port_options += ["-P", self.adb_server_port]
 
     def adb(self):
         if self.__adb_cmd is None:
             if "ANDROID_HOME" in os.environ:
-                filename = "adb.exe" if os.name == 'nt' else "adb"
+                filename = "adb.exe" if _is_windows() else "adb"
                 adb_cmd = os.path.join(os.environ["ANDROID_HOME"], "platform-tools", filename)
                 if not os.path.exists(adb_cmd):
                     raise EnvironmentError(
@@ -286,8 +291,8 @@ class Adb(object):
 
     def raw_cmd(self, *args):
         '''adb command. return the subprocess.Popen object.'''
-        cmd_line = [self.adb()] + self.adbHostPortOptions + list(args)
-        if os.name != "nt":
+        cmd_line = [self.adb()] + self.adb_host_port_options + list(args)
+        if not _is_windows():
             cmd_line = [" ".join(cmd_line)]
         return subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -333,10 +338,10 @@ class Adb(object):
 _init_local_port = LOCAL_PORT - 1
 
 
-def next_local_port(adbHost=None):
+def next_local_port(adb_host=None):
     def is_port_listening(port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = s.connect_ex((str(adbHost) if adbHost else '127.0.0.1', port))
+        result = s.connect_ex((str(adb_host) if adb_host else '127.0.0.1', port))
         s.close()
         return result == 0
     global _init_local_port
@@ -396,7 +401,10 @@ class AutomatorServer(object):
         base_dir = os.path.dirname(__file__)
         for jar, url in self.__jar_files.items():
             filename = os.path.join(base_dir, url)
-            self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+            test_exists = self.adb.cmd('shell', 'if [ -e "/data/local/tmp/{}" ]; then echo 1; else echo 0; fi'.format(filename))
+            test_exists.wait()
+            if test_exists.stdout.read().strip() == '0':
+                self.adb.cmd("push", filename, "/data/local/tmp/").wait()
         return list(self.__jar_files.keys())
 
     def install(self):
@@ -410,16 +418,16 @@ class AutomatorServer(object):
 
     def jsonrpc_wrap(self, timeout):
         server = self
-        ERROR_CODE_BASE = -32000
+        error_code_base = -32000
 
         def _JsonRPCMethod(url, method, timeout, restart=True):
             _method_obj = JsonRPCMethod(url, method, timeout)
+            _URLError = urllib3.exceptions.HTTPError if _is_windows() else urllib2.URLError
 
             def wrapper(*args, **kwargs):
-                URLError = urllib3.exceptions.HTTPError if os.name == "nt" else urllib2.URLError
                 try:
                     return _method_obj(*args, **kwargs)
-                except (URLError, socket.error, HTTPException) as e:
+                except (_URLError, socket.error, HTTPException) as e:
                     if restart:
                         server.stop()
                         server.start(timeout=30)
@@ -427,11 +435,11 @@ class AutomatorServer(object):
                     else:
                         raise
                 except JsonRPCError as e:
-                    if e.code >= ERROR_CODE_BASE - 1:
+                    if e.code >= error_code_base - 1:
                         server.stop()
                         server.start()
                         return _method_obj(*args, **kwargs)
-                    elif e.code == ERROR_CODE_BASE - 2 and self.handlers['on']:  # Not Found
+                    elif e.code == error_code_base - 2 and self.handlers['on']:  # Not Found
                         try:
                             self.handlers['on'] = False
                             # any handler returns True will break the left handlers
@@ -460,7 +468,7 @@ class AutomatorServer(object):
 
     def start(self, timeout=5):
         if self.sdk_version() < 18:
-            files = self.push()
+            files = self.push()  # automatically check whether jar file exists
             cmd = list(itertools.chain(
                 ["shell", "uiautomator", "runtest"],
                 files,
@@ -1238,14 +1246,14 @@ class AutomatorDeviceObject(AutomatorDeviceUiObject):
         d().scroll.vert.toEnd(steps=100)
         d().scroll.horiz.to(text="Clock")
         '''
-        def __scroll(vertical, forward, steps=100):
+        def __scroll(vertical, forward, steps=50):
             method = self.jsonrpc.scrollForward if forward else self.jsonrpc.scrollBackward
             return method(self.selector, vertical, steps)
 
-        def __scroll_to_beginning(vertical, steps=100, max_swipes=1000):
+        def __scroll_to_beginning(vertical, steps=20, max_swipes=200):
             return self.jsonrpc.scrollToBeginning(self.selector, vertical, max_swipes, steps)
 
-        def __scroll_to_end(vertical, steps=100, max_swipes=1000):
+        def __scroll_to_end(vertical, steps=20, max_swipes=500):
             return self.jsonrpc.scrollToEnd(self.selector, vertical, max_swipes, steps)
 
         def __scroll_to(vertical, **kwargs):
