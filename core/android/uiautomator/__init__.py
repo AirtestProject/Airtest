@@ -431,9 +431,7 @@ class AutomatorServer(object):
     def install(self):
         base_dir = os.path.dirname(__file__)
         for package, apk in self.__apk_files.items():
-            p = self.adb.cmd("shell", "pm", "list", "packages", package)
-            p.wait()
-            stdoutput, _ = p.communicate()
+            stdoutput, _ = self.adb.cmd("shell", "pm", "list", "packages", package).communicate()
             packages = stdoutput.splitlines()
             if all(not item.strip().endswith(package) for item in packages):
                 self.adb.cmd("install", "-t", os.path.join(base_dir, apk)).wait()
