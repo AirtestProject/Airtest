@@ -262,13 +262,16 @@ class Minicap(object):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
-            if 'invalid option' in output:##old version
-                print "no minicap version info, upgrade to lastest version:", self.VERSION
-            elif "version" in output and int(output.split(":")[1]) < self.VERSION:
-                print 'minicap upgrade to lastest version:', self.VERSION
-            else:
+            try:
+                version = int(output.split(":")[1])
+            except (ValueError, IndexError):
+                version = -1
+            if version >= self.VERSION:
                 print 'minicap install skipped'
                 return
+            else:
+                print output
+                print 'upgrading minicap to lastest version:', self.VERSION
 
         self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
