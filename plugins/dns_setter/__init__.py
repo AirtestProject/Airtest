@@ -8,7 +8,7 @@ import re
 import os
 import uiutils
 
-from uiautomator import Device
+from moa.core.android.uiautomator import Device
 from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27
@@ -357,7 +357,7 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from uiautomator import AutomatorDevice
+    from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
 
