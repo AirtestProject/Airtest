@@ -296,6 +296,7 @@ class Adb(object):
         cmd_line = [self.adb()] + self.adb_host_port_options + list(args)
         if not _is_windows():
             cmd_line = [" ".join(cmd_line)]
+        print cmd_line
         return subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     def device_serial(self):
@@ -417,15 +418,13 @@ class AutomatorServer(object):
 
     def push(self):
         base_dir = os.path.dirname(__file__)
+        test_exists = self.adb.cmd('shell', 'ls /data/local/tmp')
+        stdout, stderr = test_exists.communicate()
+        filelist = [f for f in stdout.splitlines() if f]
         for jar, url in self.__jar_files.items():
             filename = os.path.join(base_dir, url)
-            test_exists = self.adb.cmd('shell', 'ls /data/local/tmp')
-            test_exists.wait()
-            stdout, _ = test_exists.communicate()
-            if filename not in stdout.splitlines():
+            if jar not in filelist:
                 self.adb.cmd("push", filename, "/data/local/tmp/").wait()
-            else:
-                raise Exception('should not get here. uiautomator push jar files.')
         return list(self.__jar_files.keys())
 
     def install(self):
