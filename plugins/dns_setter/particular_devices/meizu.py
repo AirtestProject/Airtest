@@ -6,8 +6,8 @@ import time
 from . import particular_case
 
 
-MX_MEILAN = ('88MFBM72H9SN', )
-MX_MEILAN_NOTE = ('71MBBLA238NH', '810EBM535P6F')
+MX_MEILAN = ('88MFBM72H9SN', '810EBM535P6F')
+MX_MEILAN_NOTE = ('71MBBLA238NH', )  # 这台很特殊
 MX5_ALL = ('850ABM4YR6UW', )
 MX4_ALL = ('76UBBLR2264A', '75UBBLE226QD')
 MX3_ALL = ('351BBJPYF7PF', '351BBJPTHLR2', '351BBJPZ8F27')
@@ -27,6 +27,16 @@ class MX4(object):
     @particular_case.specified(MX5_ALL)
     def enter_wlan_advanced_settings(self):
         pass
+
+    @particular_case.specified(MX_MEILAN)
+    @particular_case.specified(MX4_ALL)
+    @particular_case.specified(MX5_ALL)
+    def use_dhcp(self):
+        switch = self.d(text="静态IP", resourceId="android:id/title").right(className="com.meizu.common.widget.Switch")
+        if switch.checked:
+            switch.click()
+            time.sleep(0.5)
+        self.uiutil.click_any({'text': u'保存'})
 
     @particular_case.specified(MX_MEILAN)
     @particular_case.specified(MX4_ALL)
@@ -64,9 +74,17 @@ class MX3(object):
         pass
 
     @particular_case.specified(MX3_ALL)
+    def use_dhcp(self):
+        switch = self.d(className="android.widget.Switch", text=u'打开')
+        if switch and switch.exists:
+            switch.click()
+            time.sleep(0.5)
+        self.uiutil.click_any({'text': u'保存'})
+
+    @particular_case.specified(MX3_ALL)
     def use_static_ip(self):
         switch = self.d(className="android.widget.Switch", text=u'关闭')
-        if switch:
+        if switch and switch.exists:
             switch.click()
             time.sleep(0.5)
 
@@ -101,13 +119,22 @@ class MeiLanNote(object):
 
     @particular_case.specified(MX_MEILAN_NOTE)
     def enter_wlan_settings(self):
-        self.d(text='netease_game').long_click()
-        time.sleep(0.5)
+        # 这台机就是这么特殊
+        self.d(text='netease_game').click()
+        time.sleep(1)
         self.uiutil.click_any({'textMatches': u'静态\s*IP'})
 
     @particular_case.specified(MX_MEILAN_NOTE)
     def enter_wlan_advanced_settings(self):
         pass
+
+    @particular_case.specified(MX_MEILAN_NOTE)
+    def use_dhcp(self):
+        switch = self.d(className="com.meizu.common.widget.Switch")
+        if switch.exists and switch.checked:
+            switch.click()
+            time.sleep(0.5)
+        self.uiutil.click_any({'text': u'保存'})
 
     @particular_case.specified(MX_MEILAN_NOTE)
     def use_static_ip(self):
