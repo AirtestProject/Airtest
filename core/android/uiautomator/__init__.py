@@ -437,8 +437,6 @@ class AutomatorServer(object):
             packages = stdoutput.splitlines()
             if all(not item.strip().endswith(package) for item in packages):
                 self.adb.cmd("install", "-t", os.path.join(base_dir, apk)).wait()
-            else:
-                raise Exception('should not get here. uiautomator install uiautomator apks.')
 
     @property
     def jsonrpc(self):
