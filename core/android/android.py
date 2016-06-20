@@ -4,7 +4,7 @@
 # Author:  hzsunshx
 # Created: 2015-07-02 19:56
 # Modified: 2015-11 gzliuxin  add minitouch minicap
-# Modified: 2016-06 gzliuxin  testlab support
+# Modified: 2016-06 gzliuxin  add testlab support
 
 
 import os
