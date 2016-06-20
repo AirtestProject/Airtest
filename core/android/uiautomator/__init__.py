@@ -14,6 +14,7 @@ import socket
 import re
 import collections
 import xml.dom.minidom
+import traceback
 
 
 DEVICE_PORT = int(os.environ.get('UIAUTOMATOR_DEVICE_PORT', '9008'))
@@ -319,7 +320,7 @@ class Adb(object):
 
     def forward(self, local_port, device_port):
         '''adb port forward. return 0 if success, else non-zero.'''
-        return self.cmd("forward", "tcp:%d" % local_port, "tcp:%d" % device_port).wait()
+        return self.cmd("forward", "--no-rebind", "tcp:%d" % local_port, "tcp:%d" % device_port).wait()
 
     def forward_list(self):
         '''adb forward --list'''
@@ -384,18 +385,31 @@ class AutomatorServer(object):
         self.uiautomator_process = None
         self.adb = Adb(serial=serial, adb_server_host=adb_server_host, adb_server_port=adb_server_port)
         self.device_port = int(device_port) if device_port else DEVICE_PORT
+        self.setup(local_port)
+
+    def setup(self, local_port):
         if local_port:
             self.local_port = local_port
         else:
-            try:  # first we will try to use the local port already adb forwarded
-                for s, lp, rp in self.adb.forward_list():
-                    if s == self.adb.device_serial() and rp == 'tcp:%d' % self.device_port:
-                        self.local_port = int(lp[4:])
+            # first we will try to use the local port already adb forwarded
+            for s, lp, rp in self.adb.forward_list():
+                if s == self.adb.device_serial() and rp == 'tcp:%d' % self.device_port:
+                    self.local_port = int(lp[4:])
+                    break
+            # then we try forward no-rebind for 10 times, till success
+            else:
+                for i in range(10):
+                    global _init_local_port
+                    _init_local_port += 1
+                    returncode = self.adb.forward(_init_local_port, self.device_port)
+                    if returncode == 0:
+                        self.local_port = _init_local_port
                         break
                 else:
-                    self.local_port = next_local_port(adb_server_host)
-            except:
-                self.local_port = next_local_port(adb_server_host)
+                    raise EnvironmentError("No available forward port")
+        # stop & start, starting server twice will cause jsonrpc error
+        self.stop()
+        self.start()
 
     def push(self):
         base_dir = os.path.dirname(__file__)
@@ -428,6 +442,7 @@ class AutomatorServer(object):
                 try:
                     return _method_obj(*args, **kwargs)
                 except (_URLError, socket.error, HTTPException) as e:
+                    traceback.print_exc()
                     if restart:
                         server.stop()
                         server.start(timeout=30)
@@ -435,6 +450,7 @@ class AutomatorServer(object):
                     else:
                         raise
                 except JsonRPCError as e:
+                    traceback.print_exc()
                     if e.code >= error_code_base - 1:
                         server.stop()
                         server.start()
@@ -468,7 +484,8 @@ class AutomatorServer(object):
 
     def start(self, timeout=5):
         if self.sdk_version() < 18:
-            files = self.push()  # automatically check whether jar file exists
+            # files = self.push()  # automatically check whether jar file exists
+            files = list(self.__jar_files.keys())
             cmd = list(itertools.chain(
                 ["shell", "uiautomator", "runtest"],
                 files,
@@ -480,7 +497,6 @@ class AutomatorServer(object):
                    "com.github.uiautomator.test/android.support.test.runner.AndroidJUnitRunner"]
 
         self.uiautomator_process = self.adb.cmd(*cmd)
-        self.adb.forward(self.local_port, self.device_port)
 
         while not self.alive and timeout > 0:
             time.sleep(0.1)
