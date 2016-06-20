@@ -674,7 +674,7 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props={}, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
@@ -685,7 +685,7 @@ class Android(object):
         if init_ime:
             self.ime = UiautomatorIme(self.adb)
 
-    def _init_display(self, props={}):
+    def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
