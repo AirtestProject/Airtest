@@ -15,6 +15,7 @@ import re
 import collections
 import xml.dom.minidom
 import traceback
+import atexit
 
 
 DEVICE_PORT = int(os.environ.get('UIAUTOMATOR_DEVICE_PORT', '9008'))
@@ -407,9 +408,8 @@ class AutomatorServer(object):
                         break
                 else:
                     raise EnvironmentError("No available forward port")
-        # stop & start, starting server twice will cause jsonrpc error
-        self.stop()
         self.start()
+        atexit.register(self.stop)
 
     def push(self):
         base_dir = os.path.dirname(__file__)
