@@ -262,13 +262,16 @@ class Minicap(object):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
-            if 'invalid option' in output:##old version
-                print "no minicap version info, upgrade to lastest version:", self.VERSION
-            elif "version" in output and int(output.split(":")[1]) < self.VERSION:
-                print 'minicap upgrade to lastest version:', self.VERSION
-            else:
+            try:
+                version = int(output.split(":")[1])
+            except (ValueError, IndexError):
+                version = -1
+            if version >= self.VERSION:
                 print 'minicap install skipped'
                 return
+            else:
+                print output
+                print 'upgrading minicap to lastest version:', self.VERSION
 
         self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
@@ -671,7 +674,7 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props={}, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
@@ -682,7 +685,7 @@ class Android(object):
         if init_ime:
             self.ime = UiautomatorIme(self.adb)
 
-    def _init_display(self, props={}):
+    def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
         if "display_info" in self.props:
