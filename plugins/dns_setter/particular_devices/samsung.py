@@ -24,7 +24,8 @@ class Galaxy(object):
         ipsetting_field = ipsetting.down(className="android.widget.Spinner")
         if not ipsetting_field:
             raise Exception("cannot find ip settings field.")
-        return ipsetting_field.text == 'DHCP'
+        dhcp = ipsetting_field.child(text='DHCP', className='android.widget.TextView')
+        return dhcp and dhcp.exists
 
     @particular_case.specified(GALAXY_NOTE2)
     @particular_case.specified(GALAXY)
