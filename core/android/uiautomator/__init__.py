@@ -484,8 +484,7 @@ class AutomatorServer(object):
 
     def start(self, timeout=5):
         if self.sdk_version() < 18:
-            # files = self.push()  # automatically check whether jar file exists
-            files = list(self.__jar_files.keys())
+            files = self.push()  # automatically check whether jar file exists
             cmd = list(itertools.chain(
                 ["shell", "uiautomator", "runtest"],
                 files,
