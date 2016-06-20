@@ -489,7 +489,7 @@ class AutomatorServer(object):
                 ["-c", "com.github.uiautomatorstub.Stub"]
             ))
         else:
-            # self.install()
+            self.install()
             cmd = ["shell", "am", "instrument", "-w",
                    "com.github.uiautomator.test/android.support.test.runner.AndroidJUnitRunner"]
 

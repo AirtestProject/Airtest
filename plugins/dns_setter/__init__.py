@@ -21,8 +21,6 @@ from moa.plugins.testlab import stf, stf_runner
 from moa.plugins.dns_setter import iputils
 
 
-UIAUTOMATOR_PACKAGE = 'com.github.uiautomator'
-UIAUTOMATOR_APK_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], "libs")
 SONY_XPERIA = ('CB5A1NW8WK', )
 
 
@@ -35,13 +33,6 @@ class DefaultDnsSetter(object):
         self.android = Android(rsn, init_display=False, minicap=False, minitouch=False, init_ime=True)
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
-
-        # install uiautomator
-        packages = self.android.amlist()
-        if UIAUTOMATOR_PACKAGE not in packages:
-            for apk in os.listdir(UIAUTOMATOR_APK_PATH):
-                if apk.endswith('.apk'):
-                    self.adb.run('install -t ' + os.path.join(UIAUTOMATOR_APK_PATH, apk))
 
     @particular_case.specified(['2053d814'])
     def enter_wlan_list(self):
@@ -122,11 +113,13 @@ class DefaultDnsSetter(object):
             {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
             {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
         )
+        print ipsettings.info
         if ipsettings and ipsettings.exists:
             if ipsettings.text in ['DHCP', 'dhcp', '自动']:
                 return True
             else:
                 ipsettings = ipsettings.child(className="android.widget.TextView")
+                print ipsettings.info
                 if ipsettings and ipsettings.exists:
                     return ipsettings.text in ['DHCP', 'dhcp', '自动']
         return False
