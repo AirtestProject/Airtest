@@ -60,6 +60,9 @@ class UIUtil(object):
         return False
 
     def replace_text(self, uiobj, text):
+        if uiobj.text == text:
+            return
+
         uiobj.click.bottomright()
         time.sleep(1)
         uiobj.clear_text()
