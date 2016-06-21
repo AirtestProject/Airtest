@@ -674,7 +674,7 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=False, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
@@ -793,7 +793,7 @@ class Android(object):
             if apk_package in packages:
                 self.uninstall(apk_package)
         # rm all apks in /data/local/tmp to get enouph space
-        self.adb.shell("rm /data/local/tmp/*.apk")
+        self.adb.shell("rm -f /data/local/tmp/*.apk")
         self.adb.install(filepath)
         if check:
             self.amcheck(apk_package)
@@ -1198,11 +1198,17 @@ def test_android():
     # t = time.clock()
     a = Android(serialno)
     # gen = a.minicap.get_frames()
-    for i in range(100):
+    a.home()
+    a.amclear("com.netease.my")
+    frame = a.snapshot()
+    a.amstart("com.netease.my")
+    for i in range(1000):
         print "get next frame"
         # frame = gen.next()
         frame = a.snapshot()
-        time.sleep(1)
+        if frame is None or not frame.any():
+            raise
+        time.sleep(0.2)
     # # a.uninstall(RELEASELOCK_PACKAGE)
     # # a.wake()
     # a.amstart("com.netease.my")

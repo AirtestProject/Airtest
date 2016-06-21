@@ -144,6 +144,7 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     global CVSTRATEGY, DEVICE, PLAYRES
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
     DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    DEVICE.wake()
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
 
@@ -328,45 +329,44 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             screen = RECENT_CAPTURE
         else:
             screen = snapshot()
-        if screen is None:
-            raise MoaError("Failed to capture SCREEN !")
-            return None
-
-        # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
-        global MASK_RECT
-        if MASK_RECT:
-            screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
-
-        # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
-        if pictarget.rect and not find_in:
-            rect = pictarget.rect
-            find_in = [rect[0], rect[1], rect[2]-rect[0], rect[3]-rect[1]]
-        # 获取指定区域：指定区域图像+指定区域坐标偏移
-        screen, bias = find_in_area(screen, find_in)
-        # aircv.show(screen)
-
-        # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
-        threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
-        def find_pic_by_strategy():
-            pos = None
-            for st in CVSTRATEGY:
-                if st == "siftpre" and getattr(pictarget, "record_pos"):
-                    pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
-                elif st == "siftnopre":
-                    # 在预测区域没有找到，则退回全局查找
-                    pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
-                elif st == "tpl" and getattr(pictarget, "resolution"):
-                    # 再用缩放后的模板匹配来找
-                    pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
-                else:
-                    print "skip CV_STRATEGY:%s"%st
-                # 找到一个就返回
-                if pos is not None:
-                    return pos
-            return pos
-        pos = find_pic_by_strategy()
-        if pos is None:
-            # 如果没找到，调用用户指定的intervalfunc
+        # 如果屏幕全黑，跳过这次匹配，并打印一条提示信息
+        if not screen.any():
+            print "Whole screen is black, skip cv matching"
+            ret_pos = None
+        # 进行图像匹配
+        else:
+            # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
+            global MASK_RECT
+            if MASK_RECT:
+                screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
+            # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
+            if pictarget.rect and not find_in:
+                rect = pictarget.rect
+                find_in = [rect[0], rect[1], rect[2]-rect[0], rect[3]-rect[1]]
+            # 获取指定区域：指定区域图像+指定区域坐标偏移
+            screen, bias = find_in_area(screen, find_in)
+            # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
+            threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
+            def find_pic_by_strategy():
+                pos = None
+                for st in CVSTRATEGY:
+                    if st == "siftpre" and getattr(pictarget, "record_pos"):
+                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+                    elif st == "siftnopre":
+                        # 在预测区域没有找到，则退回全局查找
+                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
+                    elif st == "tpl" and getattr(pictarget, "resolution"):
+                        # 再用缩放后的模板匹配来找
+                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+                    else:
+                        print "skip CV_STRATEGY:%s"%st
+                    # 找到一个就返回
+                    if pos is not None:
+                        return pos
+                return pos
+            ret_pos = find_pic_by_strategy()
+        # 如果没找到，调用用户指定的intervalfunc
+        if ret_pos is None:
             if intervalfunc is not None:
                 intervalfunc()
             # 超时则抛出异常
@@ -374,8 +374,9 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
             continue
-
-        return tuple(map(lambda x: x[0]+x[1], zip(pos, bias))) # 两个tuple的对应元素相加
+        # 找到了就直接返回
+        else:
+            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, bias))) # 两个tuple的对应元素相加
 
 
 def keep_capture(flag=True):
@@ -493,13 +494,10 @@ def snapshot(filename="screen.png"):
         filename = os.path.join(SAVE_SCREEN, filename)
         _log_in_func({"screen": filename})
     screen = DEVICE.snapshot(filename)
-    # 如果截屏失败，直接返回None
-    if screen is not None and screen.any():
-        # screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
-        RECENT_CAPTURE = screen # used for keep_capture()
-        return screen
-    else:
-        return None
+    # 如果屏幕全黑，则screen.any()返回false
+    # 实际上手机可能正好是全黑，不做特殊处理了
+    RECENT_CAPTURE = screen # used for keep_capture()
+    return screen
 
 
 @logwrap
