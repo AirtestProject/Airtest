@@ -66,9 +66,6 @@ def setdns(sn, addr, dns):
     # if sn in ('JTJ4C15710038858', 'CQ556955VKOV5T4D', 'GYZL4H556HCUH6RK', 'cc9de083'):
     #     return
     #
-    # personal device, ignore
-    if sn in ('139db80c', ):
-        return
 
     # connot save dns settings
     if sn in ('fdcbcc83', '8d260bf7'):
@@ -83,9 +80,7 @@ def setdns(sn, addr, dns):
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
-    success = dsetter.set_dns(dns)
-    if not success:
-        raise Exception("dns check fail with `getprop net.dns1`.")
+    dsetter.set_dns(dns)
     a.home()
 
 
@@ -93,7 +88,8 @@ def clearapk(addr):
     """清理设备，以留出足够的空间"""
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     pkgs = a.amlist(third_only=True)
-    pkgs = [i for i in pkgs if i.startswith("com.netease.")]
+    # pkgs = [i for i in pkgs if i.startswith("com.netease.")] 
+    # 本来想只删除netease的，后来发现空间还是不够，除了白名单里面的全删了
     for i in (set(pkgs) - set(PKG_NOT_REMOVE)):
         print "clear app:", i
         a.amclear(i)

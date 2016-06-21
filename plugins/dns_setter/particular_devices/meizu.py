@@ -31,6 +31,13 @@ class MX4(object):
     @particular_case.specified(MX_MEILAN)
     @particular_case.specified(MX4_ALL)
     @particular_case.specified(MX5_ALL)
+    def is_dhcp_mode(self):
+        switch = self.d(text="静态IP", resourceId="android:id/title").right(className="com.meizu.common.widget.Switch")
+        return not switch.checked
+
+    @particular_case.specified(MX_MEILAN)
+    @particular_case.specified(MX4_ALL)
+    @particular_case.specified(MX5_ALL)
     def use_dhcp(self):
         switch = self.d(text="静态IP", resourceId="android:id/title").right(className="com.meizu.common.widget.Switch")
         if switch.checked:
@@ -50,7 +57,7 @@ class MX4(object):
     @particular_case.specified(MX_MEILAN)
     @particular_case.specified(MX4_ALL)
     @particular_case.specified(MX5_ALL)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -74,6 +81,11 @@ class MX3(object):
         pass
 
     @particular_case.specified(MX3_ALL)
+    def is_dhcp_mode(self):
+        switch = self.d(className="android.widget.Switch", text=u'关闭')
+        return switch and switch.exists
+
+    @particular_case.specified(MX3_ALL)
     def use_dhcp(self):
         switch = self.d(className="android.widget.Switch", text=u'打开')
         if switch and switch.exists:
@@ -89,7 +101,7 @@ class MX3(object):
             time.sleep(0.5)
 
     @particular_case.specified(MX3_ALL)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -129,6 +141,11 @@ class MeiLanNote(object):
         pass
 
     @particular_case.specified(MX_MEILAN_NOTE)
+    def is_dhcp_mode(self):
+        switch = self.d(className="com.meizu.common.widget.Switch")
+        return switch.exists and not switch.checked
+
+    @particular_case.specified(MX_MEILAN_NOTE)
     def use_dhcp(self):
         switch = self.d(className="com.meizu.common.widget.Switch")
         if switch.exists and switch.checked:
@@ -144,7 +161,7 @@ class MeiLanNote(object):
             time.sleep(0.5)
 
     @particular_case.specified(MX_MEILAN_NOTE)
-    def modify_wlan_settings_fields(self, dns1):
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         uiobj = self.d(textMatches=ur'(DNS\s*1|域名\s*1)').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 

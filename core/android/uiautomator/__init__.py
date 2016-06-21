@@ -14,6 +14,8 @@ import socket
 import re
 import collections
 import xml.dom.minidom
+import traceback
+import atexit
 
 
 DEVICE_PORT = int(os.environ.get('UIAUTOMATOR_DEVICE_PORT', '9008'))
@@ -294,6 +296,7 @@ class Adb(object):
         cmd_line = [self.adb()] + self.adb_host_port_options + list(args)
         if not _is_windows():
             cmd_line = [" ".join(cmd_line)]
+        print cmd_line
         return subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     def device_serial(self):
@@ -319,7 +322,7 @@ class Adb(object):
 
     def forward(self, local_port, device_port):
         '''adb port forward. return 0 if success, else non-zero.'''
-        return self.cmd("forward", "tcp:%d" % local_port, "tcp:%d" % device_port).wait()
+        return self.cmd("forward", "--no-rebind", "tcp:%d" % local_port, "tcp:%d" % device_port).wait()
 
     def forward_list(self):
         '''adb forward --list'''
@@ -374,7 +377,11 @@ class AutomatorServer(object):
         "uiautomator-stub.jar": "libs/uiautomator-stub.jar"
     }
 
-    __apk_files = ["libs/app-uiautomator.apk", "libs/app-uiautomator-test.apk"]
+    # __apk_files = ["libs/app-uiautomator.apk", "libs/app-uiautomator-test.apk"]
+    __apk_files = {
+             "com.github.uiautomator": "libs/app-uiautomator.apk",
+             "com.github.uiautomator.test": "libs/app-uiautomator-test.apk"
+             }
 
     __sdk = 0
 
@@ -384,33 +391,49 @@ class AutomatorServer(object):
         self.uiautomator_process = None
         self.adb = Adb(serial=serial, adb_server_host=adb_server_host, adb_server_port=adb_server_port)
         self.device_port = int(device_port) if device_port else DEVICE_PORT
+        self.setup(local_port)
+
+    def setup(self, local_port):
         if local_port:
             self.local_port = local_port
         else:
-            try:  # first we will try to use the local port already adb forwarded
-                for s, lp, rp in self.adb.forward_list():
-                    if s == self.adb.device_serial() and rp == 'tcp:%d' % self.device_port:
-                        self.local_port = int(lp[4:])
+            # first we will try to use the local port already adb forwarded
+            for s, lp, rp in self.adb.forward_list():
+                if s == self.adb.device_serial() and rp == 'tcp:%d' % self.device_port:
+                    self.local_port = int(lp[4:])
+                    break
+            # then we try forward no-rebind for 10 times, till success
+            else:
+                for i in range(10):
+                    global _init_local_port
+                    _init_local_port += 1
+                    returncode = self.adb.forward(_init_local_port, self.device_port)
+                    if returncode == 0:
+                        self.local_port = _init_local_port
                         break
                 else:
-                    self.local_port = next_local_port(adb_server_host)
-            except:
-                self.local_port = next_local_port(adb_server_host)
+                    raise EnvironmentError("No available forward port")
+        self.start()
+        atexit.register(self.stop)
 
     def push(self):
         base_dir = os.path.dirname(__file__)
-        for jar, url in self.__jar_files.items():
-            filename = os.path.join(base_dir, url)
-            test_exists = self.adb.cmd('shell', 'if [ -e "/data/local/tmp/{}" ]; then echo 1; else echo 0; fi'.format(filename))
-            test_exists.wait()
-            if test_exists.stdout.read().strip() == '0':
+        test_exists = self.adb.cmd('shell', 'ls /data/local/tmp')
+        stdout, stderr = test_exists.communicate()
+        filelist = [f for f in stdout.splitlines() if f]
+        for jar, rpath in self.__jar_files.items():
+            if jar not in filelist:
+                filename = os.path.join(base_dir, rpath)
                 self.adb.cmd("push", filename, "/data/local/tmp/").wait()
         return list(self.__jar_files.keys())
 
     def install(self):
         base_dir = os.path.dirname(__file__)
-        for apk in self.__apk_files:
-            self.adb.cmd("install", "-rt", os.path.join(base_dir, apk)).wait()
+        for package, apk in self.__apk_files.items():
+            stdoutput, _ = self.adb.cmd("shell", "pm", "list", "packages", package).communicate()
+            packages = stdoutput.splitlines()
+            if all(not item.strip().endswith(package) for item in packages):
+                self.adb.cmd("install", "-t", os.path.join(base_dir, apk)).wait()
 
     @property
     def jsonrpc(self):
@@ -428,6 +451,7 @@ class AutomatorServer(object):
                 try:
                     return _method_obj(*args, **kwargs)
                 except (_URLError, socket.error, HTTPException) as e:
+                    traceback.print_exc()
                     if restart:
                         server.stop()
                         server.start(timeout=30)
@@ -435,6 +459,7 @@ class AutomatorServer(object):
                     else:
                         raise
                 except JsonRPCError as e:
+                    traceback.print_exc()
                     if e.code >= error_code_base - 1:
                         server.stop()
                         server.start()
@@ -475,12 +500,11 @@ class AutomatorServer(object):
                 ["-c", "com.github.uiautomatorstub.Stub"]
             ))
         else:
-            # self.install()
+            self.install()
             cmd = ["shell", "am", "instrument", "-w",
                    "com.github.uiautomator.test/android.support.test.runner.AndroidJUnitRunner"]
 
         self.uiautomator_process = self.adb.cmd(*cmd)
-        self.adb.forward(self.local_port, self.device_port)
 
         while not self.alive and timeout > 0:
             time.sleep(0.1)

@@ -5,9 +5,18 @@ from user_config import STF_TOKEN_ID
 # 安装之前会先清掉第三方应用
 # 这里是不清掉的列表
 PKG_NOT_REMOVE = [
-    "com.netease.accessibility",
-    "com.netease.releaselock",
+    # mtl保留应用
+    "com.zj.deviceinfo",
     "com.tencent.mm",
+    "com.finalwire.aida64",
+    # testlab保留应用
+    "com.netease.releaselock",
+    "com.netease.accessibility",
+    "com.github.uiautomator.test",
+    "com.github.uiautomator",
+    "jp.co.cyberagent.stf.rotationwatcher",
+    "jp.co.cyberagent.stf",
+    "jp.jun_nama.test.utf7ime",
 ]
 
 

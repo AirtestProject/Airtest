@@ -59,7 +59,7 @@ class UIUtil(object):
                 return True
         return False
 
-    def replace_text(self, uiobj, text):
+    def replace_text(self, uiobj, text, autocheck=True):
         if uiobj.text == text:
             return
 
@@ -68,26 +68,28 @@ class UIUtil(object):
         uiobj.clear_text()
         uiobj.set_text(text)
         time.sleep(0.5)
-        result = uiobj.text
-        try:
-            idx1 = result.index(text)
-        except ValueError:
-            raise Exception('{} \n\ninput dns field failed.'.format(traceback.format_exc()))
-        idx2 = idx1 + len(text)
-        if idx1 > 0:
-            # 光标移到最左边，往右移动idx1，删掉前面那部分
-            for _ in range(len(result)):
-                self.d.press('left')
-            for _ in range(idx1):
-                self.d.press('right')
-                self.d.press('del')
-        current_len = len(uiobj.text)
-        if idx2 < len(result):
-            # 一定要先归位到最左，不然往右移光标时会移出到控件外面的
-            uiobj.click.bottomright()
-            for _ in range(current_len):
-                self.d.press('left')
-            for _ in range(current_len):
-                self.d.press('right')
-            for _ in range(current_len - idx2):
-                self.d.press('del')
+
+        if autocheck:
+            result = uiobj.text
+            try:
+                idx1 = result.index(text)
+            except ValueError:
+                raise Exception('{}\ntext field input failed.'.format(traceback.format_exc()))
+            idx2 = idx1 + len(text)
+            if idx1 > 0:
+                # 光标移到最左边，往右移动idx1，删掉前面那部分
+                for _ in range(len(result)):
+                    self.d.press('left')
+                for _ in range(idx1):
+                    self.d.press('right')
+                    self.d.press('del')
+            current_len = len(uiobj.text)
+            if idx2 < len(result):
+                # 一定要先归位到最左，不然往右移光标时会移出到控件外面的
+                uiobj.click.bottomright()
+                for _ in range(current_len):
+                    self.d.press('left')
+                for _ in range(current_len):
+                    self.d.press('right')
+                for _ in range(current_len - idx2):
+                    self.d.press('del')
