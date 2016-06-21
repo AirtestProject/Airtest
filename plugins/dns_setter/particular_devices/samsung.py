@@ -11,10 +11,16 @@ GALAXY_NOTE2 = ('4df74f4b47e33081', )
 
 
 class Galaxy(object):
+    @particular_case.specified(GALAXY_NOTE2)
     @particular_case.specified(GALAXY)
     def enter_wlan_settings(self):
         self.d(text='netease_game').long_click()
         time.sleep(1)
+        if not self.d(text=u'修改网络配置').exists:
+            if not self.d(text='netease_game').exists:
+                self.d.press.back()
+            self.d(text='netease_game').long_click()
+            time.sleep(1)
         self.uiutil.click_any({'text': u'修改网络配置'})
 
     @particular_case.specified(GALAXY_NOTE2)
@@ -82,12 +88,6 @@ class GalaxyNoet2(object):
         self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if strict:
             self.test_netease_game_connected()
-
-    @particular_case.specified(GALAXY_NOTE2)
-    def enter_wlan_settings(self):
-        self.d(text='netease_game').long_click()
-        time.sleep(1)
-        self.uiutil.click_any({'text': u'修改网络配置'})
 
     @particular_case.specified(GALAXY_NOTE2)
     def enter_wlan_advanced_settings(self):

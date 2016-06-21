@@ -228,6 +228,14 @@ class DefaultDnsSetter(object):
             print '[DNS SETTER] skip, dns already satisfied.'
             return True
 
+        if dns1 == '-1':
+            try:
+                self.test_ping('www.baidu.com')
+                print '[DNS SETTER] skip switching to dhcp mode. network is available.'
+                return True
+            except:
+                pass
+
         # change STATIC mode and dns
         with self.android.ime:
             print '[DNS SETTER] enter wlan config page'
@@ -388,13 +396,16 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    outter = d(resourceId="com.android.settings:id/ip_settings")
-    print outter.child(textMatches=u'静态|DHCP', className="android.widget.TextView").exists
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
+    # d(className="android.widget.Button", resourceIdMatches=".*:id/netease_mpay__login_login$").click()
 
-
+    import xml.etree.ElementTree
+    import chardet.chardetect
+    with open(r'C:\Users\lxn3032\Downloads\xxx.tmp') as f:
+        # root = xml.etree.ElementTree.ElementTree(f.read())
+        print chardet.detect(f.read())
 
     # for d in stf.get_device_list_rest(None):
     #     sn = d['serial']
