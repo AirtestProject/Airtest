@@ -396,16 +396,16 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
-    # d(className="android.widget.Button", resourceIdMatches=".*:id/netease_mpay__login_login$").click()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    print d(text='IP 设定').down(className="android.widget.Spinner").click()
 
-    import xml.etree.ElementTree
-    import chardet.chardetect
-    with open(r'C:\Users\lxn3032\Downloads\xxx.tmp') as f:
-        # root = xml.etree.ElementTree.ElementTree(f.read())
-        print chardet.detect(f.read())
+    # import xml.etree.ElementTree
+    # import chardet.chardetect
+    # with open(r'C:\Users\lxn3032\Downloads\xxx.tmp') as f:
+    #     # root = xml.etree.ElementTree.ElementTree(f.read())
+    #     print chardet.detect(f.read())
 
     # for d in stf.get_device_list_rest(None):
     #     sn = d['serial']
