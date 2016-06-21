@@ -88,7 +88,8 @@ def clearapk(addr):
     """清理设备，以留出足够的空间"""
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     pkgs = a.amlist(third_only=True)
-    pkgs = [i for i in pkgs if i.startswith("com.netease.")]
+    # pkgs = [i for i in pkgs if i.startswith("com.netease.")] 
+    # 本来想只删除netease的，后来发现空间还是不够，除了白名单里面的全删了
     for i in (set(pkgs) - set(PKG_NOT_REMOVE)):
         print "clear app:", i
         a.amclear(i)
