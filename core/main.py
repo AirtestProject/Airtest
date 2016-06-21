@@ -265,26 +265,28 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     # 三种不同的匹配算法：
     try:
         if templateMatch is True:
-            print "method: template match.."
+            # print "method: template match.."
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
+            print "method: template match.  result: ", ret
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
-            print "method: sift in whole screen.."
+            # print "method: sift in whole screen.."
             ret = aircv.find_sift(screen, picdata)
+            print "method: sift in whole screen.  result: ", ret
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
-            print "method: sift  predicted area.."
+            # print "method: sift in predicted area.."
             _pResolution = DEVICE.getCurrentScreenResolution()
             ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
+            print "method: sift in predicted area.  result: ", ret
     except aircv.Error:
         ret = None
     except Exception as err:
         traceback.print_exc()
-        # aircv.show(screen)
         ret = None
-    # print ret
+
     _log_in_func({"cv": ret})
     if not ret:
         return None
@@ -328,6 +330,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             screen = RECENT_CAPTURE
         else:
             screen = snapshot()
+
         if screen is None:
             raise MoaError("Failed to capture SCREEN !")
             return None
@@ -342,7 +345,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             rect = pictarget.rect
             find_in = [rect[0], rect[1], rect[2]-rect[0], rect[3]-rect[1]]
         # 获取指定区域：指定区域图像+指定区域坐标偏移
-        screen, bias = find_in_area(screen, find_in)
+        screen, offset = find_in_area(screen, find_in)
         # aircv.show(screen)
 
         # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
@@ -375,7 +378,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             time.sleep(interval)
             continue
 
-        return tuple(map(lambda x: x[0]+x[1], zip(pos, bias))) # 两个tuple的对应元素相加
+        return tuple(map(lambda x: x[0]+x[1], zip(pos, offset))) # 两个tuple的对应元素相加
 
 
 def keep_capture(flag=True):
@@ -493,6 +496,7 @@ def snapshot(filename="screen.png"):
         filename = os.path.join(SAVE_SCREEN, filename)
         _log_in_func({"screen": filename})
     screen = DEVICE.snapshot(filename)
+    
     # 如果截屏失败，直接返回None
     if screen is not None and screen.any():
         # screen = aircv.cv2.cvtColor(screen, aircv.cv2.COLOR_BGR2GRAY)
