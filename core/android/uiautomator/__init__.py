@@ -404,7 +404,7 @@ class AutomatorServer(object):
                     break
             # then we try forward no-rebind for 10 times, till success
             else:
-                for i in range(10):
+                for i in range(100):
                     global _init_local_port
                     _init_local_port += 1
                     returncode = self.adb.forward(_init_local_port, self.device_port)
