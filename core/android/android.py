@@ -674,14 +674,18 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=False, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
         self.adb = ADB(self.serialno, addr=addr)
         self._check_status()
         if init_display:
             self._init_display(props)
-        self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
-        self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+            # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
+            if self.sdk_version == 17:
+                print "minicap_stream mode not available on sdk 17"
+                minicap_stream = False
+            self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
+            self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
             self.ime = UiautomatorIme(self.adb)
 
@@ -1196,19 +1200,25 @@ def test_android():
     serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     # t = time.clock()
-    a = Android(serialno)
+    a = Android(serialno, minicap_stream=True)
     # gen = a.minicap.get_frames()
-    a.home()
-    a.amclear("com.netease.my")
-    frame = a.snapshot()
-    a.amstart("com.netease.my")
+    print a.sdk_version
+    # a.home()
+    # a.amclear("com.netease.my")
+    # for i in range(10):
+    #     print "get next frame"
+    #     # frame = gen.next()
+    #     frame = a.snapshot()
+    #     time.sleep(1)
+    # a.amstart("com.netease.my")
+    # header = gen.next()
     for i in range(1000):
         print "get next frame"
         # frame = gen.next()
+        # screen = aircv.string_2_img(frame)
+        # aircv.imwrite("tmp.png", screen)
         frame = a.snapshot()
-        if frame is None or not frame.any():
-            raise
-        time.sleep(0.2)
+        time.sleep(1)
     # # a.uninstall(RELEASELOCK_PACKAGE)
     # # a.wake()
     # a.amstart("com.netease.my")

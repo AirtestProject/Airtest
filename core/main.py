@@ -260,37 +260,49 @@ def set_mask_rect(mask_rect=None):
         print "pass wrong IDE rect into moa.MASK_RECT."
 
 
-def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
+def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False, strict_ret=STRICT_RET):
     ''' find picture position in screen 
     '''
+    # 通过新相似度计算，如果有结果
+    def cal_strict_ret(screen, picdata, ret, threshold, strict_ret):
+        # 开关：如果需要严格结果，将STRICT_RET设为True即可
+        if strict_ret:
+            return aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
+        else:
+            print "no strict"
+            return ret
+
     # 三种不同的匹配算法：
     try:
         if templateMatch is True:
             print "method: template match.."
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
+            ret = cal_strict_ret(screen, picdata, ret, threshold=threshold, strict_ret=strict_ret)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
         #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
             print "method: sift in whole screen.."
             ret = aircv.find_sift(screen, picdata)
+            ret = cal_strict_ret(screen, picdata, ret, threshold=threshold, strict_ret=strict_ret)
         #三个要求的参数均有输入时，加入区域预测部分：
         else:
-            print "method: sift  predicted area.."
+            print "method: sift in predicted area.."
             _pResolution = DEVICE.getCurrentScreenResolution()
             ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
+            ret = cal_strict_ret(screen, picdata, ret, threshold=threshold, strict_ret=strict_ret)
     except aircv.Error:
         ret = None
     except Exception as err:
         traceback.print_exc()
-        # aircv.show(screen)
         ret = None
-    # print ret
+
     _log_in_func({"cv": ret})
     if not ret:
         return None
     if threshold and ret["confidence"] < threshold:
         return None
+    print "    confidence: %.3f" %ret["confidence"] # 打印出结果可信度
     pos = TargetPos().getXY(ret, target_pos)
     return int(pos[0]), int(pos[1])
 
@@ -329,6 +341,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             screen = RECENT_CAPTURE
         else:
             screen = snapshot()
+
         # 如果屏幕全黑，跳过这次匹配，并打印一条提示信息
         if not screen.any():
             print "Whole screen is black, skip cv matching"
@@ -352,12 +365,15 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 for st in CVSTRATEGY:
                     if st == "siftpre" and getattr(pictarget, "record_pos"):
                         pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+                        print "\tsift pre  result: ", pos
                     elif st == "siftnopre":
                         # 在预测区域没有找到，则退回全局查找
                         pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
+                        print "\tsift result: ", pos
                     elif st == "tpl" and getattr(pictarget, "resolution"):
                         # 再用缩放后的模板匹配来找
                         pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+                        print "\ttpl result: ", pos
                     else:
                         print "skip CV_STRATEGY:%s"%st
                     # 找到一个就返回
