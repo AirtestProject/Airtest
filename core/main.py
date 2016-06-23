@@ -467,7 +467,6 @@ def amstart(package, activity=None):
         return
 
     DEVICE.amstart(package, activity)
-    # refresh_device()
 
 
 @logwrap
@@ -478,7 +477,6 @@ def amstop(package):
         return
 
     DEVICE.amstop(package)
-    # refresh_device()
 
 
 @logwrap
@@ -489,26 +487,8 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android", "IOS"])
-def install(filepath, clean=False, **kwargs):
-    if clean:
-        pkgname = kwargs['pkgname']
-        if get_platform() == 'IOS':
-            uninstall(pkgname)
-            return DEVICE.install(filepath)
-        else:
-            wake()
-            keyevent("HOME")
-            DEVICE.adb.shell(
-                'settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
-            DEVICE.adb.shell('settings put secure accessibility_enabled 1')
-            try:
-                amstop(pkgname)
-            except:
-                pass
-            install(filepath)
-            amclear(pkgname)
-    else:
-        return DEVICE.install(filepath)
+def install(filepath):
+    return DEVICE.install(filepath)
 
 
 @logwrap
@@ -542,13 +522,13 @@ def wake():
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-    # refresh_device()
 
 
 @platform(on=["Android"])
 def refresh_device():
-    time.sleep(REFRESH_SCREEN_DELAY)
-    DEVICE.refreshOrientationInfo()
+    print 'Warning, refresh_device is deprecated'
+    # time.sleep(REFRESH_SCREEN_DELAY)
+    # DEVICE.refreshOrientationInfo()
 
 
 @logwrap

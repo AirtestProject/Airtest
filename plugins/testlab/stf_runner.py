@@ -53,20 +53,6 @@ def setdns(sn, addr, dns):
     if sn in ('045BBI2H9F9B', ):
         return
 
-    # # stuck with uiautomator
-    # if sn in ('4df74f4b47e33081', ):
-    #     return
-
-    #
-    # # skip device too slow
-    # if sn in ('KVAM59CYHYWOS8V8', 'f565e08', '296eea5d', 'f565e08', 'AVY9KA95A2106482', '3230dd49644a10ad', 'X2P0215508002471', 'MXF5T15831007688', 'EMW8BYLJHANZCIBM', 'NX513J', 'JAEDU15A16007444'):
-    #     return
-    #
-    # # cannot not auto install apk
-    # if sn in ('JTJ4C15710038858', 'CQ556955VKOV5T4D', 'GYZL4H556HCUH6RK', 'cc9de083'):
-    #     return
-    #
-
     # connot save dns settings
     if sn in ('fdcbcc83', '8d260bf7'):
         return
@@ -109,14 +95,15 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script):
+def run(addr, moa_script, utils_dir):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
     filename = os.path.basename(moa_script)
     shutil.copytree(moa_script, filename)
+    utilfile = os.path.join(utils_dir, "utils.py")
     p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
-        "--setsn", addr, "--log", "--screen"
+        "--setsn", addr, "--log", "--screen", "--utilfile", utilfile
     ])
     p.wait()
     exit(p.returncode)
