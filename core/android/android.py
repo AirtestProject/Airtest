@@ -241,7 +241,7 @@ class ADB(object):
 
 class Minicap(object):
 
-    VERSION = 1
+    VERSION = 2
 
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None, stream=True):
