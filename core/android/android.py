@@ -681,9 +681,10 @@ class Android(object):
         if init_display:
             self._init_display(props)
             # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
-            if self.sdk_version == 17:
-                print "minicap_stream mode not available on sdk 17"
-                minicap_stream = False
+            # if self.sdk_version == 17:
+            #     print "minicap_stream mode not available on sdk 17"
+            #     minicap_stream = False
+            # minicap version > 2 解决了17的问题，先注视掉看看
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
