@@ -263,7 +263,6 @@ def set_mask_rect(mask_rect=None):
 def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False, strict_ret=STRICT_RET):
     ''' find picture position in screen 
     '''
-    # 通过新相似度计算，如果有结果
     def cal_strict_ret(screen, picdata, ret, threshold, strict_ret):
         # 开关：如果需要严格结果，将STRICT_RET设为True即可
         if strict_ret:
@@ -280,7 +279,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
             ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
             ret = cal_strict_ret(screen, picdata, ret, threshold=threshold, strict_ret=strict_ret)
         #三个参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2]
-        #如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
+        # 如果调用时四个要求参数输入不全，不调用区域预测，仍然使用原来的方法：
         elif not record_pos:
             print "method: sift in whole screen.."
             ret = aircv.find_sift(screen, picdata)
