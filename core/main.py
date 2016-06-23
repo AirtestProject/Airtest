@@ -1,33 +1,35 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#
+
 # Author:  hzsunshx gzliuxin
 # Created: 2015-05-17 20:30
 # Modified: 2015-06-09
 # Modified: 2015-10-13 ver 0.0.2 gzliuxin
 # Modified: 2016-04-28 ver 0.0.3 gzliuxin
 
-"""
-Moa for Android/Windows/iOS
-Moa Android = ADB + AIRCV + MINICAP + MINITOUCH
-Script engine.
-"""
-
-__version__ = '0.0.3'
-
+import fnmatch
+import functools
 import os
 import shutil
 import time
-import functools
-import fnmatch
 import traceback
+
 from moa.aircv import aircv
 from moa.aircv import generate_character_img as textgen
 from moa.aircv.aircv_tool_func import find_in_area
-from moa.core.error import MoaError, MoaNotFoundError
-from moa.core.utils import _isstr, MoaLogger, Logwrap, TargetPos
-from moa.core.settings import *
 from moa.core import android
+from moa.core.error import MoaError, MoaNotFoundError
+from moa.core.settings import *
+from moa.core.utils import Logwrap, MoaLogger, TargetPos, _isstr
+
+__version__ = '0.0.3'
+
+"""
+    Moa for Android/Windows/iOS
+    Moa Android = ADB + AIRCV + MINICAP + MINITOUCH
+    Script engine.
+"""
+
 try:
     from moa.core import win
 except ImportError as e:
@@ -127,7 +129,8 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     if not sn:
         devs = list(android.adb_devices(state='device', addr=addr))
         if len(devs) > 1:
-            print ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+            print(
+                "more than one device, auto choose one, to specify serialno: set_serialno(sn)")
         elif len(devs) == 0:
             raise MoaError("no device, please check your adb connection")
         sn = devs[0][0]
@@ -143,10 +146,12 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
     global CVSTRATEGY, DEVICE, PLAYRES
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    DEVICE = android.Android(
+        sn, addr=addr, minicap=minicap, minitouch=minitouch)
     DEVICE.wake()
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
+
 
 def set_ios_udid(udid=None):
     '''
@@ -157,14 +162,15 @@ def set_ios_udid(udid=None):
     udids = ios.utils.list_all_udid()
     if not udid:
         if len(udids) > 1:
-            print ("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
+            print(
+                "more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
         elif len(udids) == 0:
             raise MoaError("no device, please check your connection")
         IOSUDID = udids[0]
     else:
         exists = 0
         for id in udids:
-            if fnmatch.fnmatch(id,udid):
+            if fnmatch.fnmatch(id, udid):
                 exists += 1
                 IOSUDID = id
         if exists == 0:
@@ -181,13 +187,14 @@ def set_ios_udid(udid=None):
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return IOSUDID
 
+
 def resign(ipaname):
     """resign an app, only valid on Mac"""
 
     import platform
     os_name = platform.system()
     if os_name != "Darwin":  # Mac os name
-        raise MoaError("can't resign ipa on %s OS" %os_name)
+        raise MoaError("can't resign ipa on %s OS" % os_name)
 
     new_ipaname = ios.resign.sign(ipaname)
     return new_ipaname
@@ -228,7 +235,7 @@ def set_screendir(dirpath=SCREEN_DIR):
 def set_threshold(value):
     global THRESHOLD
     if value > 1 or value < 0:
-        raise MoaError("invalid threshold: %s"%value)
+        raise MoaError("invalid threshold: %s" % value)
     THRESHOLD = value
 
 
@@ -249,7 +256,7 @@ def set_mask_rect(mask_rect=None):
         mask_rect = []
         for i in str_rect:
             try:
-                mask_rect.append(max(int(i), 0)) # 如果有负数，就用0 代替
+                mask_rect.append(max(int(i), 0))  # 如果有负数，就用0 代替
             except:
                 MASK_RECT = None
                 return
@@ -260,24 +267,52 @@ def set_mask_rect(mask_rect=None):
         print "pass wrong IDE rect into moa.MASK_RECT."
 
 
+def get_search_img(pictarget):
+    '''获取 截图  (picdata)'''
+    if isinstance(pictarget, MoaText):
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
+        # picdata = aircv.pil_2_cv2(pictarget.img)
+        pictarget.img.save("text.png")
+        picdata = aircv.imread("text.png")
+    elif isinstance(pictarget, MoaPic):
+        picdata = aircv.imread(pictarget.filepath)
+    else:
+        pictarget = MoaPic(pictarget)
+        picdata = aircv.imread(pictarget.filepath)
+    return picdata
+
+
+def get_screen_img():
+    '''获取 截屏 , 每次识别loop获取一次'''
+    # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
+    if KEEP_CAPTURE and RECENT_CAPTURE is not None:
+        screen = RECENT_CAPTURE
+    else:
+        screen = snapshot()
+    if not screen.any():
+        print "Whole screen is black, skip cv matching"
+        return None
+    return screen
+
+
 def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
-    ''' 
-        find picture position in screen 
-    '''
+    '''   find picture position in screen  '''
     try:
         if templateMatch is True:
             print "method: template match.."
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[
+                                                960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         # 参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2],如果参数输入不全，不调用区域预测：
         elif not record_pos:
             print "method: sift in whole screen.."
             ret = aircv.find_sift(screen, picdata)
-        #三个要求的参数均有输入时，加入区域预测部分：
+        # 三个要求的参数均有输入时，加入区域预测部分：
         else:
             print "method: sift in predicted area.."
             _pResolution = DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
+            ret = aircv.find_sift_by_pre(
+                screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
         ret = None
     except Exception as err:
@@ -290,6 +325,46 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     if threshold and ret["confidence"] < threshold:
         return None
     return ret
+
+
+def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None):
+    '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
+    # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
+    global MASK_RECT
+    if MASK_RECT:
+        screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[
+                                     2], MASK_RECT[3]), (255, 255, 255), -1)
+    # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
+    if pictarget.rect and not find_in:
+        rect = pictarget.rect
+        find_in = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
+    # 获取指定区域：指定区域图像+指定区域坐标偏移
+    screen, offset = find_in_area(screen, find_in)
+    # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
+    threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
+    # 在screen中寻找picdata: 分别尝试CVSTRATEGY中的方法
+    pos = None
+    for st in CVSTRATEGY:
+        if st == "siftpre" and getattr(pictarget, "record_pos"):
+            pos = _find_pic(screen, picdata, threshold=threshold,
+                            target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+            print "\tsift pre  result: ", pos
+        elif st == "siftnopre":
+            # 在预测区域没有找到，则退回全局查找
+            pos = _find_pic(screen, picdata, threshold=threshold,
+                            target_pos=pictarget.target_pos)
+            print "\tsift result: ", pos
+        elif st == "tpl" and getattr(pictarget, "resolution"):
+            # 再用缩放后的模板匹配来找
+            pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos,
+                            record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+            print "\ttpl result: ", pos
+        else:
+            print "skip CV_STRATEGY:%s" % st
+        # 找到一个就返回
+        if pos is not None:
+            return pos, offset
+    return pos, offset
 
 
 @logwrap
@@ -306,67 +381,14 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     ret_pos = None
     left = max(1, int(timeout))
     start_time = time.time()
-    # --------------------------------获取 “ 截图 ” (picdata):
-    if isinstance(pictarget, MoaText):
-        # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
-        # picdata = aircv.pil_2_cv2(pictarget.img)
-        pictarget.img.save("text.png")
-        picdata = aircv.imread("text.png")
-    elif isinstance(pictarget, MoaPic):
-        picdata = aircv.imread(pictarget.filepath)
-    else:
-        pictarget = MoaPic(pictarget)
-        picdata = aircv.imread(pictarget.filepath)
+    picdata = get_search_img(pictarget)
 
     while True:
-        # --------------------------------每次loop获取一次 “ 截屏 ”
-        # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
-        if KEEP_CAPTURE and RECENT_CAPTURE is not None:
-            screen = RECENT_CAPTURE
-        else:
-            screen = snapshot()
-
-        # 如果屏幕全黑，跳过这次匹配，并打印一条提示信息
-        if not screen.any():
-            print "Whole screen is black, skip cv matching"
-            ret_pos = None
-        # 进行图像匹配
-        else:
-            # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
-            global MASK_RECT
-            if MASK_RECT:
-                screen = aircv.cv2.rectangle(screen, (MASK_RECT[0],MASK_RECT[1]), (MASK_RECT[2],MASK_RECT[3]), (255,255,255), -1)
-            # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
-            if pictarget.rect and not find_in:
-                rect = pictarget.rect
-                find_in = [rect[0], rect[1], rect[2]-rect[0], rect[3]-rect[1]]
-            # 获取指定区域：指定区域图像+指定区域坐标偏移
-            screen, bias = find_in_area(screen, find_in)
-            # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
-            threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
-            def find_pic_by_strategy():
-                pos = None
-                for st in CVSTRATEGY:
-                    if st == "siftpre" and getattr(pictarget, "record_pos"):
-                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
-                        print "\tsift pre  result: ", pos
-                    elif st == "siftnopre":
-                        # 在预测区域没有找到，则退回全局查找
-                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
-                        print "\tsift result: ", pos
-                    elif st == "tpl" and getattr(pictarget, "resolution"):
-                        # 再用缩放后的模板匹配来找
-                        pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
-                        print "\ttpl result: ", pos
-                    else:
-                        print "skip CV_STRATEGY:%s"%st
-                    # 找到一个就返回
-                    if pos is not None:
-                        return pos
-                return pos
-            ret = find_pic_by_strategy()
+        screen = get_screen_img()
+        if screen is not None:
+            ret, offset = find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=find_in)
             if strict_ret:
-                ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
+                ret = aircv.cal_strict_confi(screen, picdata, ret, offset, threshold=threshold)
             if ret:
                 pos = TargetPos().getXY(ret, pictarget.target_pos)
                 ret_pos = int(pos[0]), int(pos[1])
@@ -379,9 +401,9 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
             continue
-        # 找到了就直接返回
         else:
-            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, bias))) # 两个tuple的对应元素相加
+            # 找到了就直接返回, 两个tuple的对应元素相加
+            return tuple(map(lambda x: x[0] + x[1], zip(ret_pos, offset)))
 
 
 def keep_capture(flag=True):
@@ -391,6 +413,7 @@ def keep_capture(flag=True):
 
 class MoaText(object):
     """autogen Text with aircv"""
+
     def __init__(self, text, font=u"微软雅黑", size=70, inverse=True):
         self.info = dict(text=text, font=font, size=size, inverse=inverse)
         self.img = textgen.gen_text(text, font, size, inverse)
@@ -411,10 +434,11 @@ class MoaPic(object):
     record_pos: pos in screen when recording
     resolution: screen resolution when recording
     """
+
     def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[]):
         self.filename = filename
         self.rect = rect
-        self.threshold = threshold # if threshold is not None else THRESHOLD
+        self.threshold = threshold  # if threshold is not None else THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
@@ -428,6 +452,7 @@ class MoaPic(object):
 Device operation & flow control
 """
 
+
 @logwrap
 @platform(on=["Android"])
 def shell(cmd):
@@ -435,19 +460,20 @@ def shell(cmd):
 
 
 @logwrap
-@platform(on=["Android","IOS"])
+@platform(on=["Android", "IOS"])
 def amstart(package, activity=None):
     if get_platform() == "IOS":
-        DEVICE.launch_app(package) # package = appid
+        DEVICE.launch_app(package)  # package = appid
         return
 
     DEVICE.amstart(package, activity)
     # refresh_device()
 
+
 @logwrap
-@platform(on=["Android","IOS"])
+@platform(on=["Android", "IOS"])
 def amstop(package):
-    if get_platform() == "IOS": # package = appid
+    if get_platform() == "IOS":  # package = appid
         DEVICE.stop_app(package)
         return
 
@@ -462,7 +488,7 @@ def amclear(package):
 
 
 @logwrap
-@platform(on=["Android","IOS"])
+@platform(on=["Android", "IOS"])
 def install(filepath, clean=False, **kwargs):
     if clean:
         pkgname = kwargs['pkgname']
@@ -472,7 +498,8 @@ def install(filepath, clean=False, **kwargs):
         else:
             wake()
             keyevent("HOME")
-            DEVICE.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
+            DEVICE.adb.shell(
+                'settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService')
             DEVICE.adb.shell('settings put secure accessibility_enabled 1')
             try:
                 amstop(pkgname)
@@ -480,12 +507,12 @@ def install(filepath, clean=False, **kwargs):
                 pass
             install(filepath)
             amclear(pkgname)
-    else:    
+    else:
         return DEVICE.install(filepath)
 
 
 @logwrap
-@platform(on=["Android","IOS"])
+@platform(on=["Android", "IOS"])
 def uninstall(package):
     return DEVICE.uninstall(package)
 
@@ -495,13 +522,13 @@ def uninstall(package):
 def snapshot(filename="screen.png"):
     global RECENT_CAPTURE, SAVE_SCREEN
     if SAVE_SCREEN:
-        filename = "%s.jpg" % int(time.time()*1000)
+        filename = "%s.jpg" % int(time.time() * 1000)
         filename = os.path.join(SAVE_SCREEN, filename)
         _log_in_func({"screen": filename})
     screen = DEVICE.snapshot(filename)
     # 如果屏幕全黑，则screen.any()返回false
     # 实际上手机可能正好是全黑，不做特殊处理了
-    RECENT_CAPTURE = screen # used for keep_capture()
+    RECENT_CAPTURE = screen  # used for keep_capture()
     return screen
 
 
@@ -544,10 +571,11 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
     if offset:
         if offset['percent']:
             w, h = DEVICE.size['width'], DEVICE.size['height']
-            pos = (pos[0] + offset['x'] * w / 100, pos[1] + offset['y'] * h / 100)
+            pos = (pos[0] + offset['x'] * w / 100,
+                   pos[1] + offset['y'] * h / 100)
         else:
             pos = (pos[0] + offset['x'], pos[1] + offset['y'])
-        print ('touchpos after offset', pos)
+        print('touchpos after offset', pos)
     else:
         print 'touchpos:', pos
 
@@ -601,13 +629,13 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=No
 
 @logwrap
 @_transparam
-@platform(on=["Android","Windows"])
+@platform(on=["Android", "Windows"])
 def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_in=None):
     if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, find_in=find_in)
     else:
         pos = v
-    print ('downpos', pos)
+    print('downpos', pos)
 
     DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
     for vector in route:
@@ -637,12 +665,12 @@ def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
 def text(text, delay=OPDELAY):
     # 如果文本是“-delete”，那么判定为删除一个字符：
     text_temp = text.lower()
-    if text_temp=="-delete":
-        if get_platform()=="Windows":
+    if text_temp == "-delete":
+        if get_platform() == "Windows":
             # 执行一次‘backspace’删除操作：
-            key_str='backspace'
-            keyevent(key_str,escape=True)
-            return 
+            key_str = 'backspace'
+            keyevent(key_str, escape=True)
+            return
         else:
             # print "do sth in android device."
             DEVICE.keyevent('KEYCODE_DEL')
@@ -661,7 +689,8 @@ def sleep(secs=1.0):
 @_transparam
 def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_in=find_in)
+        pos = _loop_find(v, timeout=timeout, interval=interval,
+                         intervalfunc=intervalfunc, find_in=find_in)
         return pos
     except MoaNotFoundError:
         if not safe:
@@ -688,7 +717,8 @@ Assertions for result verification
 @_transparam
 def assert_exists(v, msg="", timeout=TIMEOUT, find_in=None):
     try:
-        pos = _loop_find(v, timeout=timeout, threshold=THRESHOLD_STRICT, find_in=find_in)
+        pos = _loop_find(v, timeout=timeout,
+                         threshold=THRESHOLD_STRICT, find_in=find_in)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
@@ -711,7 +741,7 @@ def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_in=None):
 def assert_equal(first, second, msg="", delay=OPDELAY):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = (unicode(first) == unicode(second))
-    elif type(first)==type(second):
+    elif type(first) == type(second):
         result = (first == second)
 
     if not result:
@@ -724,8 +754,8 @@ def assert_equal(first, second, msg="", delay=OPDELAY):
 def assert_not_equal(first, second, msg="", delay=OPDELAY):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = (unicode(first) == unicode(second))
-    elif type(first)==type(second):
-        result = False if first==second else True
+    elif type(first) == type(second):
+        result = False if first == second else True
 
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
@@ -737,10 +767,10 @@ def test_android():
     set_serialno()
     # set_serialno('9ab171d')
     # set_basedir('../taskdata/1433820164')
-    #wake()
-    #touch('target.png')
-    #touch([100, 200])
-    #swipe([100, 500], [800, 600])
+    # wake()
+    # touch('target.png')
+    # touch([100, 200])
+    # swipe([100, 500], [800, 600])
     # exec_script(script.decode('string-escape'))
     # import urllib
     # serialno, base_dir, script = sys.argv[1: 4]
@@ -773,9 +803,11 @@ def test_win():
     swipe("win.png", vector=(0.3, 0.3))
     touch("win.png")
 
+
 def test_ios():
     basedir = os.path.dirname(os.path.abspath(__file__))
-    new_ipaname = resign(os.path.join(basedir,"ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
+    new_ipaname = resign(os.path.join(
+        basedir, "ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
     print new_ipaname
     udid = set_ios_udid()
     print udid
