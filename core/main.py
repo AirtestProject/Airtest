@@ -442,7 +442,6 @@ def amstart(package, activity=None):
         return
 
     DEVICE.amstart(package, activity)
-    # refresh_device()
 
 @logwrap
 @platform(on=["Android","IOS"])
@@ -452,7 +451,6 @@ def amstop(package):
         return
 
     DEVICE.amstop(package)
-    # refresh_device()
 
 
 @logwrap
@@ -498,13 +496,13 @@ def wake():
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-    # refresh_device()
 
 
 @platform(on=["Android"])
 def refresh_device():
-    time.sleep(REFRESH_SCREEN_DELAY)
-    DEVICE.refreshOrientationInfo()
+    print 'Warning, refresh_device is deprecated'
+    # time.sleep(REFRESH_SCREEN_DELAY)
+    # DEVICE.refreshOrientationInfo()
 
 
 @logwrap
