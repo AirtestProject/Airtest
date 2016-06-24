@@ -405,7 +405,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         else:
             pos = TargetPos().getXY(ret, pictarget.target_pos)
             ret_pos = int(pos[0]), int(pos[1])
-            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, bias))) # 两个tuple的对应元素相加
+            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, offset))) # 两个tuple的对应元素相加
 
 
 def keep_capture(flag=True):
