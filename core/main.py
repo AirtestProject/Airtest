@@ -7,13 +7,13 @@
 # Modified: 2015-10-13 ver 0.0.2 gzliuxin
 # Modified: 2016-04-28 ver 0.0.3 gzliuxin
 
-import fnmatch
-import functools
+
 import os
 import shutil
 import time
 import traceback
-
+import fnmatch
+import functools
 from moa.aircv import aircv
 from moa.aircv import generate_character_img as textgen
 from moa.aircv.aircv_tool_func import find_in_area
@@ -129,8 +129,7 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     if not sn:
         devs = list(android.adb_devices(state='device', addr=addr))
         if len(devs) > 1:
-            print(
-                "more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+            print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
         elif len(devs) == 0:
             raise MoaError("no device, please check your adb connection")
         sn = devs[0][0]
@@ -146,8 +145,7 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
     global CVSTRATEGY, DEVICE, PLAYRES
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = android.Android(
-        sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     DEVICE.wake()
     PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
     return sn
@@ -162,8 +160,7 @@ def set_ios_udid(udid=None):
     udids = ios.utils.list_all_udid()
     if not udid:
         if len(udids) > 1:
-            print(
-                "more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
+            print("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
         elif len(udids) == 0:
             raise MoaError("no device, please check your connection")
         IOSUDID = udids[0]
@@ -190,7 +187,6 @@ def set_ios_udid(udid=None):
 
 def resign(ipaname):
     """resign an app, only valid on Mac"""
-
     import platform
     os_name = platform.system()
     if os_name != "Darwin":  # Mac os name
@@ -248,26 +244,22 @@ def set_globals(key, value):
     globals()[key] = value
 
 
-def set_mask_rect(mask_rect=None):
-    if mask_rect:
-        global MASK_RECT
-
-        str_rect = mask_rect.split(',')
-        mask_rect = []
-        for i in str_rect:
-            try:
-                mask_rect.append(max(int(i), 0))  # 如果有负数，就用0 代替
-            except:
-                MASK_RECT = None
-                return
-        # global MASK_RECT
-        MASK_RECT = mask_rect
-        print 'MASK_RECT in moa changed : ', MASK_RECT
-    else:
-        print "pass wrong IDE rect into moa.MASK_RECT."
+def set_mask_rect(mask_rect):
+    global MASK_RECT
+    str_rect = mask_rect.split(',')
+    mask_rect = []
+    for i in str_rect:
+        try:
+            mask_rect.append(max(int(i), 0))  # 如果有负数，就用0 代替
+        except:
+            MASK_RECT = None
+            return
+    # global MASK_RECT
+    MASK_RECT = mask_rect
+    print 'MASK_RECT in moa changed : ', MASK_RECT
 
 
-def get_search_img(pictarget):
+def _get_search_img(pictarget):
     '''获取 截图  (picdata)'''
     if isinstance(pictarget, MoaText):
         # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
@@ -282,16 +274,13 @@ def get_search_img(pictarget):
     return picdata
 
 
-def get_screen_img():
+def _get_screen_img():
     '''获取 截屏 , 每次识别loop获取一次'''
     # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
         screen = snapshot()
-    if not screen.any():
-        print "Whole screen is black, skip cv matching"
-        return None
     return screen
 
 
@@ -301,8 +290,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
         if templateMatch is True:
             print "method: template match.."
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[
-                                                960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
         # 参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2],如果参数输入不全，不调用区域预测：
         elif not record_pos:
             print "method: sift in whole screen.."
@@ -311,8 +299,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
         else:
             print "method: sift in predicted area.."
             _pResolution = DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_sift_by_pre(
-                screen, picdata, _pResolution, record_pos[0], record_pos[1])
+            ret = aircv.find_sift_by_pre(screen, picdata, _pResolution, record_pos[0], record_pos[1])
     except aircv.Error:
         ret = None
     except Exception as err:
@@ -332,8 +319,7 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, st
     # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
     global MASK_RECT
     if MASK_RECT:
-        screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[
-                                     2], MASK_RECT[3]), (255, 255, 255), -1)
+        screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[2], MASK_RECT[3]), (255, 255, 255), -1)
     # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
     if pictarget.rect and not find_in:
         rect = pictarget.rect
@@ -346,26 +332,25 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, st
     ret = None
     for st in CVSTRATEGY:
         if st == "siftpre" and getattr(pictarget, "record_pos"):
-            ret = _find_pic(screen, picdata, threshold=threshold,
-                            target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
             print "\tsift pre  result: ", ret
         elif st == "siftnopre":
             # 在预测区域没有找到，则退回全局查找
-            ret = _find_pic(screen, picdata, threshold=threshold,
-                            target_pos=pictarget.target_pos)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
             print "\tsift result: ", ret
         elif st == "tpl" and getattr(pictarget, "resolution"):
             # 再用缩放后的模板匹配来找
-            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos,
-                            record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
             print "\ttpl result: ", ret
         else:
             print "skip CV_STRATEGY:%s" % st
         # 找到一个就返回
+        if ret is None:
+            continue
+        # strict_mode进行进一步检测
+        if strict_ret:
+            ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
         if ret is not None:
-            # strict_mode进行进一步检测
-            if strict_ret:
-                ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
             return ret, offset
     return ret, offset
 
@@ -384,15 +369,15 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     ret_pos = None
     left = max(1, int(timeout))
     start_time = time.time()
-    picdata = get_search_img(pictarget)
+    picdata = _get_search_img(pictarget)
 
     while True:
-        screen = get_screen_img()
-        if screen is None:
+        screen = _get_screen_img()
+        if not screen.any():
             ret, offset = None, (0, 0)
+            print "Whole screen is black, skip cv matching"
         else:
             ret, offset = find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=find_in)
-
         # 如果没找到，调用用户指定的intervalfunc
         if ret is None:
             if intervalfunc is not None:
