@@ -329,7 +329,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         # 如果屏幕全黑，跳过这次匹配，并打印一条提示信息
         if not screen.any():
             print "Whole screen is black, skip cv matching"
-            ret_pos = None
+            ret = None
         # 进行图像匹配
         else:
             # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
@@ -361,19 +361,17 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                     else:
                         print "skip CV_STRATEGY:%s"%st
                     # 找到一个就返回
+                    if pos is None:
+                        continue
+                    # strict_mode进行进一步检测
+                    if strict_ret:
+                        pos = aircv.cal_strict_confi(screen, picdata, pos, threshold=threshold)
                     if pos is not None:
-                        # strict_mode进行进一步检测
-                        if strict_ret:
-                            pos = aircv.cal_strict_confi(screen, picdata, pos, threshold=threshold)
                         return pos
                 return pos
             ret = find_pic_by_strategy()
-
-            if ret:
-                pos = TargetPos().getXY(ret, pictarget.target_pos)
-                ret_pos = int(pos[0]), int(pos[1])
         # 如果没找到，调用用户指定的intervalfunc
-        if ret_pos is None:
+        if ret is None:
             if intervalfunc is not None:
                 intervalfunc()
             # 超时则抛出异常
@@ -383,6 +381,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             continue
         # 找到了就直接返回
         else:
+            pos = TargetPos().getXY(ret, pictarget.target_pos)
+            ret_pos = int(pos[0]), int(pos[1])
             return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, bias))) # 两个tuple的对应元素相加
 
 
