@@ -343,31 +343,31 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, st
     # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
     threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
     # 在screen中寻找picdata: 分别尝试CVSTRATEGY中的方法
-    pos = None
+    ret = None
     for st in CVSTRATEGY:
         if st == "siftpre" and getattr(pictarget, "record_pos"):
-            pos = _find_pic(screen, picdata, threshold=threshold,
+            ret = _find_pic(screen, picdata, threshold=threshold,
                             target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
-            print "\tsift pre  result: ", pos
+            print "\tsift pre  result: ", ret
         elif st == "siftnopre":
             # 在预测区域没有找到，则退回全局查找
-            pos = _find_pic(screen, picdata, threshold=threshold,
+            ret = _find_pic(screen, picdata, threshold=threshold,
                             target_pos=pictarget.target_pos)
-            print "\tsift result: ", pos
+            print "\tsift result: ", ret
         elif st == "tpl" and getattr(pictarget, "resolution"):
             # 再用缩放后的模板匹配来找
-            pos = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos,
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos,
                             record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
-            print "\ttpl result: ", pos
+            print "\ttpl result: ", ret
         else:
             print "skip CV_STRATEGY:%s" % st
         # 找到一个就返回
-        if pos is not None:
+        if ret is not None:
             # strict_mode进行进一步检测
             if strict_ret:
-                pos = aircv.cal_strict_confi(screen, picdata, pos, threshold=threshold)
-            return pos, offset
-    return pos, offset
+                ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
+            return ret, offset
+    return ret, offset
 
 
 @logwrap
@@ -388,14 +388,13 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
 
     while True:
         screen = get_screen_img()
-        if screen is not None:
+        if screen is None:
+            ret, offset = None, (0, 0)
+        else:
             ret, offset = find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=find_in)
 
-            if ret:
-                pos = TargetPos().getXY(ret, pictarget.target_pos)
-                ret_pos = int(pos[0]), int(pos[1])
         # 如果没找到，调用用户指定的intervalfunc
-        if ret_pos is None:
+        if ret is None:
             if intervalfunc is not None:
                 intervalfunc()
             # 超时则抛出异常
@@ -404,8 +403,9 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             time.sleep(interval)
             continue
         else:
-            # 找到了就直接返回, 两个tuple的对应元素相加
-            return tuple(map(lambda x: x[0] + x[1], zip(ret_pos, offset)))
+            pos = TargetPos().getXY(ret, pictarget.target_pos)
+            ret_pos = int(pos[0]), int(pos[1])
+            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, bias))) # 两个tuple的对应元素相加
 
 
 def keep_capture(flag=True):
