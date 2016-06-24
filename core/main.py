@@ -327,7 +327,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     return ret
 
 
-def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None):
+def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, strict_ret=STRICT_RET):
     '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
     # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
     global MASK_RECT
@@ -338,7 +338,7 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None):
     if pictarget.rect and not find_in:
         rect = pictarget.rect
         find_in = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
-    # 获取指定区域：指定区域图像+指定区域坐标偏移
+    # 获取图像识别的指定区域：指定区域图像+指定区域坐标偏移
     screen, offset = find_in_area(screen, find_in)
     # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
     threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
@@ -363,12 +363,15 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None):
             print "skip CV_STRATEGY:%s" % st
         # 找到一个就返回
         if pos is not None:
+            # strict_mode进行进一步检测
+            if strict_ret:
+                pos = aircv.cal_strict_confi(screen, picdata, pos, threshold=threshold)
             return pos, offset
     return pos, offset
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_in=None, strict_ret=STRICT_RET):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_in=None):
     '''
     mask_rect: 原图像中需要被白色化的区域——IDE的所在区域.
     find_in: 用于指定区域的图片位置定位，
@@ -387,8 +390,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         screen = get_screen_img()
         if screen is not None:
             ret, offset = find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=find_in)
-            if strict_ret:
-                ret = aircv.cal_strict_confi(screen, picdata, ret, offset, threshold=threshold)
+
             if ret:
                 pos = TargetPos().getXY(ret, pictarget.target_pos)
                 ret_pos = int(pos[0]), int(pos[1])
@@ -680,7 +682,7 @@ def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None,
 
 @logwrap
 @_transparam
-def exists(v, timeout=1, find_in=None):
+def exists(v, timeout=3, find_in=None):
     try:
         pos = _loop_find(v, timeout=timeout, find_in=find_in)
         return pos
