@@ -362,11 +362,13 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                         print "skip CV_STRATEGY:%s"%st
                     # 找到一个就返回
                     if pos is not None:
+                        # strict_mode进行进一步检测
+                        if strict_ret:
+                            pos = aircv.cal_strict_confi(screen, picdata, pos, threshold=threshold)
                         return pos
                 return pos
             ret = find_pic_by_strategy()
-            if strict_ret:
-                ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
+
             if ret:
                 pos = TargetPos().getXY(ret, pictarget.target_pos)
                 ret_pos = int(pos[0]), int(pos[1])
@@ -652,7 +654,7 @@ def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None,
 
 @logwrap
 @_transparam
-def exists(v, timeout=1, find_in=None):
+def exists(v, timeout=3, find_in=None):
     try:
         pos = _loop_find(v, timeout=timeout, find_in=find_in)
         return pos
