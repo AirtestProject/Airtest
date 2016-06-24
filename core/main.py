@@ -16,7 +16,7 @@ import fnmatch
 import functools
 from moa.aircv import aircv
 from moa.aircv import generate_character_img as textgen
-from moa.aircv.aircv_tool_func import crop_image
+from moa.aircv.aircv_tool_func import crop_image, mask_image
 from moa.core import android
 from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.settings import *
@@ -362,15 +362,17 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     start_time = time.time()
     while True:
         screen = _get_screen_img()
+        offset = (0, 0)
         if not screen.any():
             ret = None
             print "Whole screen is black, skip cv matching"
         else:
             # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
             if MASK_RECT:
-                screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[2], MASK_RECT[3]), (255, 255, 255), -1)
+                screen = mask_image(screen, MASK_RECT)
             # 获取图像识别的指定区域：指定区域图像+指定区域坐标偏移
-            screen, offset = crop_image(screen, find_in)
+            if find_in:
+                screen, offset = crop_image(screen, find_in)
             ret = find_pic_by_strategy(screen, picdata, threshold, pictarget)
         # 如果没找到，调用用户指定的intervalfunc
         if ret is None:
