@@ -16,7 +16,7 @@ import fnmatch
 import functools
 from moa.aircv import aircv
 from moa.aircv import generate_character_img as textgen
-from moa.aircv.aircv_tool_func import find_in_area
+from moa.aircv.aircv_tool_func import crop_image
 from moa.core import android
 from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.settings import *
@@ -275,7 +275,6 @@ def _get_search_img(pictarget):
 
 
 def _get_screen_img():
-    '''获取 截屏 , 每次识别loop获取一次'''
     # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
@@ -285,7 +284,6 @@ def _get_screen_img():
 
 
 def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
-    '''   find picture position in screen  '''
     try:
         if templateMatch is True:
             print "method: template match.."
@@ -305,7 +303,6 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     except Exception as err:
         traceback.print_exc()
         ret = None
-
     _log_in_func({"cv": ret})
     if not ret:
         return None
@@ -314,34 +311,23 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     return ret
 
 
-def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, strict_ret=STRICT_RET):
+def find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRICT_RET):
     '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
-    # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
-    global MASK_RECT
-    if MASK_RECT:
-        screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[2], MASK_RECT[3]), (255, 255, 255), -1)
-    # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
-    if pictarget.rect and not find_in:
-        rect = pictarget.rect
-        find_in = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
-    # 获取图像识别的指定区域：指定区域图像+指定区域坐标偏移
-    screen, offset = find_in_area(screen, find_in)
-    # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
-    threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
     # 在screen中寻找picdata: 分别尝试CVSTRATEGY中的方法
     ret = None
     for st in CVSTRATEGY:
         if st == "siftpre" and getattr(pictarget, "record_pos"):
+            # 预测区域sift匹配
             ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
-            print "\tsift pre  result: ", ret
+            print "sift pre  result: ", ret
         elif st == "siftnopre":
-            # 在预测区域没有找到，则退回全局查找
+            # 全局sift
             ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos)
-            print "\tsift result: ", ret
+            print "sift result: ", ret
         elif st == "tpl" and getattr(pictarget, "resolution"):
-            # 再用缩放后的模板匹配来找
+            # 缩放后的模板匹配
             ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
-            print "\ttpl result: ", ret
+            print "tpl result: ", ret
         else:
             print "skip CV_STRATEGY:%s" % st
         # 找到一个就返回
@@ -351,8 +337,8 @@ def find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=None, st
         if strict_ret:
             ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
         if ret is not None:
-            return ret, offset
-    return ret, offset
+            return ret
+    return ret
 
 
 @logwrap
@@ -365,19 +351,27 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             find_in=[x, y, w, h]时，进行截图寻找（其中，x,y,w,h可以为像素值，也可以为0.0-1.0的比例值）
             注意，之前的rect参数现在已并入find_in，兼容之前脚本
     '''
-    print "\nTry finding:\n %s" % pictarget
-    ret_pos = None
-    left = max(1, int(timeout))
-    start_time = time.time()
+    print "Try finding:\n %s" % pictarget
     picdata = _get_search_img(pictarget)
-
+    # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_in:
+    if pictarget.rect and not find_in:
+        rect = pictarget.rect
+        find_in = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
+    # 阈值优先取脚本传入的，其次是utils.py中设置的，再次是moa默认阈值
+    threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
+    start_time = time.time()
     while True:
         screen = _get_screen_img()
         if not screen.any():
-            ret, offset = None, (0, 0)
+            ret = None
             print "Whole screen is black, skip cv matching"
         else:
-            ret, offset = find_pic_by_strategy(screen, picdata, threshold, pictarget, find_in=find_in)
+            # windows下使用IDE运行脚本时，会有识别到截屏中IDE脚本区的问题，MASK_RECT区域遮挡：
+            if MASK_RECT:
+                screen = aircv.cv2.rectangle(screen, (MASK_RECT[0], MASK_RECT[1]), (MASK_RECT[2], MASK_RECT[3]), (255, 255, 255), -1)
+            # 获取图像识别的指定区域：指定区域图像+指定区域坐标偏移
+            screen, offset = crop_image(screen, find_in)
+            ret = find_pic_by_strategy(screen, picdata, threshold, pictarget)
         # 如果没找到，调用用户指定的intervalfunc
         if ret is None:
             if intervalfunc is not None:
@@ -389,8 +383,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             continue
         else:
             pos = TargetPos().getXY(ret, pictarget.target_pos)
-            ret_pos = int(pos[0]), int(pos[1])
-            return tuple(map(lambda x: x[0]+x[1], zip(ret_pos, offset))) # 两个tuple的对应元素相加
+            ret_pos = int(pos[0] + offset[0]), int(pos[1] + offset[1])
+            return ret_pos
 
 
 def keep_capture(flag=True):
