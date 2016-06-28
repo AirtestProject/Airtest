@@ -35,7 +35,7 @@ STFLIB = os.path.join(THISPATH, "libs")
 LOCALADBADRR = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
-ORIENTATION_MAP = {0:0,1:90,2:180,3:270}
+ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
 DEBUG = True
 RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
@@ -59,7 +59,7 @@ def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=Fal
         init_adb()
         adbpath = ADBPATH
     if isinstance(cmds, basestring):
-        # cmds = shlex.split(cmds)  # disable auto removing \
+        # cmds = shlex.split(cmds)  # disable auto removing \ on windows
         cmds = cmds.split()
     else:
         cmds = list(cmds)
