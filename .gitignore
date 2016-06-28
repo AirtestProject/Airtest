@@ -45,7 +45,7 @@ log.txt
 localrunner/test1.owl/img_record
 localrunner/other/test2.owl/img_record
 core/ios/certificate_config.py
-plugins/testlab/user_config.py
+moa/plugins/testlab/user_config.py
 
 .idea/
 
