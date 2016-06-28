@@ -44,63 +44,6 @@ ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 
-# def init_adb():
-#     global ADBPATH
-#     if ADBPATH:
-#         return
-#     ADBPATH = get_adb_path()
-#     if not ADBPATH:
-#         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
-
-
-# def adbrun(cmds, adbpath=ADBPATH, addr=DEFAULT_ADB_SERVER, serialno=None, not_wait=False):
-#     if adbpath is None:
-#         init_adb()
-#         adbpath = ADBPATH
-#     if isinstance(cmds, basestring):
-#         # cmds = shlex.split(cmds)  # disable auto removing \ on windows
-#         cmds = cmds.split()
-#     else:
-#         cmds = list(cmds)
-#     # start-server cannot assign -H -P -s
-#     if cmds == ["start-server"] and addr == DEFAULT_ADB_SERVER:
-#         subprocess.check_call([adbpath, "start-server"])
-#         return
-
-#     host, port = addr
-#     prefix = [adbpath, '-H', host, '-P', str(port)]
-#     if serialno:
-#         prefix += ['-s', serialno]
-#     cmds = prefix + cmds
-#     if DEBUG:
-#         print ' '.join(cmds)
-#         sys.stdout.flush()
-#     proc = subprocess.Popen(cmds,
-#         stdout=subprocess.PIPE,
-#         stderr=subprocess.PIPE
-#     )
-#     if not_wait:
-#         return proc
-#     # return subprocess.check_output(cmds)
-#     stdout, stderr = proc.communicate()
-#     if proc.returncode:
-#         raise AdbError(stdout, stderr)
-#     return stdout
-
-
-# def adb_devices(state=None, addr=DEFAULT_ADB_SERVER):
-#     ''' Get all device list '''
-#     patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
-#     adbrun('start-server')
-#     for line in adbrun('devices', addr=addr).splitlines():
-#         line = line.strip()
-#         if not line or not patten.match(line):
-#             continue
-#         serialno, cstate = line.split('\t')
-#         if state and cstate != state:
-#             continue
-#         yield (serialno, cstate)
-
 
 class ADB(object):
     """adb client for one serialno"""
@@ -331,9 +274,10 @@ class ADB(object):
 
 class Minicap(object):
 
+    """quick screenshot from minicap  https://github.com/openstf/minicap"""
+
     VERSION = 2
 
-    """quick screenshot from minicap  https://github.com/openstf/minicap"""
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None, stream=True):
         self.serialno = serialno
         self.localport = localport
@@ -346,7 +290,6 @@ class Minicap(object):
         self.stream_mode = stream
         self.frame_gen = None
         self.init_stream()
-        # self._setup() #单帧截图minicap不需要setup
 
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
@@ -762,10 +705,11 @@ def autoretry(func):
 class Android(object):
 
     """Android Client"""
+
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
     def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
-        self.serialno = serialno or adb_devices(state="device").next()[0]
+        self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
         self._check_status()
         if init_display:
@@ -774,7 +718,7 @@ class Android(object):
             # if self.sdk_version == 17:
             #     print "minicap_stream mode not available on sdk 17"
             #     minicap_stream = False
-            # minicap version > 2 解决了17的问题，先注视掉看看
+            # minicap version > 2 解决了17的问题，先注释掉看看
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
