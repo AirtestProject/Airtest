@@ -1,5 +1,4 @@
-coverage run --source moa test/test_andorid.py
+nosetests test --with-coverage --cover-package ./moa --cover-html
 pause
-coverage report
-coverage html
-start htmlcov/index.html
+start cover/index.html
+

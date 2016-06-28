@@ -1,5 +1,3 @@
-import sys
-sys.path.insert(1, ".")
 from moa.core.android.android import Android, ADB, adb_devices, Minicap, Minitouch
 from moa import report
 print report
