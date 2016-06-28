@@ -20,7 +20,7 @@ from moa.aircv.aircv_tool_func import crop_image, mask_image
 from moa.core import android
 from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.settings import *
-from moa.core.utils import Logwrap, MoaLogger, TargetPos, _isstr
+from moa.core.utils import Logwrap, MoaLogger, TargetPos, is_str
 
 __version__ = '0.0.3'
 
@@ -72,7 +72,7 @@ def _transparam(f):
     """
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        if not _isstr(args[0]):
+        if not is_str(args[0]):
             return f(*args, **kwargs)
         picname = args[0]
         picargs = {}
@@ -127,14 +127,14 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     '''
     addr = addr or ADDRESS
     if not sn:
-        devs = list(android.adb_devices(state='device', addr=addr))
+        devs = android.ADB(server_addr=addr).devices(state='device')
         if len(devs) > 1:
             print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
         elif len(devs) == 0:
             raise MoaError("no device, please check your adb connection")
         sn = devs[0][0]
     else:
-        for (serialno, st) in android.adb_devices(addr=addr):
+        for (serialno, st) in android.ADB(server_addr=addr).devices(state='device'):
             if not fnmatch.fnmatch(serialno, sn):
                 continue
             if st != 'device':
@@ -521,7 +521,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
     '''
     @param offset: {'x':10,'y':10,'percent':True}
     '''
-    if _isstr(v) or isinstance(v, (MoaPic, MoaText)):
+    if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
             pos = _loop_find(v, timeout=timeout, find_in=find_in)
         except MoaNotFoundError:
@@ -564,13 +564,13 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=No
         else:
             raise Exception("invalid params for swipe")
     else:
-        if _isstr(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
+        if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
             pos1 = _loop_find(v1, find_in=find_in)
         else:
             pos1 = v1
 
         if v2:
-            if (_isstr(v2) or isinstance(v2, MoaText)):
+            if (is_str(v2) or isinstance(v2, MoaText)):
                 keep_capture()
                 pos2 = _loop_find(v2, find_in=find_in)
                 keep_capture(False)
@@ -594,7 +594,7 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_in=No
 @_transparam
 @platform(on=["Android", "Windows"])
 def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_in=None):
-    if _isstr(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+    if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout, find_in=find_in)
     else:
         pos = v

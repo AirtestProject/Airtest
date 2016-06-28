@@ -24,7 +24,7 @@ import random
 import traceback
 import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
-from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, _islist, get_adb_path, retries
+from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
 from moa.aircv import aircv
 from moa.core.android.ime_helper import UiautomatorIme
 
@@ -32,7 +32,7 @@ from moa.core.android.ime_helper import UiautomatorIme
 THISPATH = os.path.dirname(os.path.realpath(__file__))
 ADBPATH = get_adb_path()
 STFLIB = os.path.join(THISPATH, "libs")
-LOCALADBADRR = ('127.0.0.1', 5037)
+DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
 ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
@@ -44,63 +44,62 @@ ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 
-
-def init_adb():
-    global ADBPATH
-    if ADBPATH:
-        return
-    ADBPATH = get_adb_path()
-    if not ADBPATH:
-        raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
-
-
-def adbrun(cmds, adbpath=ADBPATH, addr=LOCALADBADRR, serialno=None, not_wait=False):
-    if adbpath is None:
-        init_adb()
-        adbpath = ADBPATH
-    if isinstance(cmds, basestring):
-        # cmds = shlex.split(cmds)  # disable auto removing \ on windows
-        cmds = cmds.split()
-    else:
-        cmds = list(cmds)
-    # start-server cannot assign -H -P -s
-    if cmds == ["start-server"] and addr == LOCALADBADRR:
-        subprocess.check_call([adbpath, "start-server"])
-        return
-
-    host, port = addr
-    prefix = [adbpath, '-H', host, '-P', str(port)]
-    if serialno:
-        prefix += ['-s', serialno]
-    cmds = prefix + cmds
-    if DEBUG:
-        print ' '.join(cmds)
-        sys.stdout.flush()
-    proc = subprocess.Popen(cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    if not_wait:
-        return proc
-    # return subprocess.check_output(cmds)
-    stdout, stderr = proc.communicate()
-    if proc.returncode:
-        raise AdbError(stdout, stderr)
-    return stdout
+# def init_adb():
+#     global ADBPATH
+#     if ADBPATH:
+#         return
+#     ADBPATH = get_adb_path()
+#     if not ADBPATH:
+#         raise MoaError("moa require adb in PATH, \n\tdownloads from: http://adbshell.com/downloads")
 
 
-def adb_devices(state=None, addr=LOCALADBADRR):
-    ''' Get all device list '''
-    patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
-    adbrun('start-server')
-    for line in adbrun('devices', addr=addr).splitlines():
-        line = line.strip()
-        if not line or not patten.match(line):
-            continue
-        serialno, cstate = line.split('\t')
-        if state and cstate != state:
-            continue
-        yield (serialno, cstate)
+# def adbrun(cmds, adbpath=ADBPATH, addr=DEFAULT_ADB_SERVER, serialno=None, not_wait=False):
+#     if adbpath is None:
+#         init_adb()
+#         adbpath = ADBPATH
+#     if isinstance(cmds, basestring):
+#         # cmds = shlex.split(cmds)  # disable auto removing \ on windows
+#         cmds = cmds.split()
+#     else:
+#         cmds = list(cmds)
+#     # start-server cannot assign -H -P -s
+#     if cmds == ["start-server"] and addr == DEFAULT_ADB_SERVER:
+#         subprocess.check_call([adbpath, "start-server"])
+#         return
+
+#     host, port = addr
+#     prefix = [adbpath, '-H', host, '-P', str(port)]
+#     if serialno:
+#         prefix += ['-s', serialno]
+#     cmds = prefix + cmds
+#     if DEBUG:
+#         print ' '.join(cmds)
+#         sys.stdout.flush()
+#     proc = subprocess.Popen(cmds,
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.PIPE
+#     )
+#     if not_wait:
+#         return proc
+#     # return subprocess.check_output(cmds)
+#     stdout, stderr = proc.communicate()
+#     if proc.returncode:
+#         raise AdbError(stdout, stderr)
+#     return stdout
+
+
+# def adb_devices(state=None, addr=DEFAULT_ADB_SERVER):
+#     ''' Get all device list '''
+#     patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
+#     adbrun('start-server')
+#     for line in adbrun('devices', addr=addr).splitlines():
+#         line = line.strip()
+#         if not line or not patten.match(line):
+#             continue
+#         serialno, cstate = line.split('\t')
+#         if state and cstate != state:
+#             continue
+#         yield (serialno, cstate)
 
 
 class ADB(object):
@@ -108,78 +107,162 @@ class ADB(object):
 
     _forward_local = 11111
 
-    def __init__(self, serialno, adbpath=None, addr=('127.0.0.1', 5037)):
-        self.adbpath = ADBPATH if not adbpath else adbpath
-        self.addr = addr
+    status_device = "device"
+    status_offline = "offline"
+
+    def __init__(self, serialno=None, adb_path=None, server_addr=None):
+        self.adb_path = adb_path or ADBPATH
+        self.adb_server_addr = server_addr or self.default_server()
+        self.set_serialno(serialno)
+        self._props_cache = {}
+
+    @staticmethod
+    def default_server():
+        """get default adb server"""
+        host = DEFAULT_ADB_SERVER[0]
+        port = os.environ.get("ANDROID_ADB_SERVER_PORT", DEFAULT_ADB_SERVER[1])
+        return (host, port)
+
+    def set_serialno(self, serialno):
+        """set serialno after init"""
         self.serialno = serialno
-        self.props = {}
         self.connect()
 
+    def start_server(self):
+        """adb start-server, cannot assign any -H -P -s"""
+        if self.adb_server_addr[0] not in ("localhost", "127.0.0.1"):
+            raise RuntimeError("cannot start-server on other host")
+        return subprocess.check_call([self.adb_path, "start-server"])
+
+    def start_cmd(self, cmds, device=True):
+        """
+        start a subprocess to run adb cmd
+        device: specify -s serialno if True
+        """
+        cmds = split_cmd(cmds)
+        if cmds == ["start-server"]:
+            raise RuntimeError("please use self.start_server instead")
+
+        host, port = self.adb_server_addr
+        prefix = [self.adb_path, '-H', host, '-P', str(port)]
+        if device:
+            if not self.serialno:
+                raise RuntimeError("please set_serialno first")
+            prefix += ['-s', self.serialno]
+        cmds = prefix + cmds
+        if DEBUG:
+            print ' '.join(cmds)
+            sys.stdout.flush()
+        proc = subprocess.Popen(
+            cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        return proc
+
+    def cmd(self, cmds, device=True):
+        """
+        get adb cmd output
+        device: specify -s serialno if True
+        """
+        proc = self.start_cmd(cmds, device)
+        stdout, stderr = proc.communicate()
+        if proc.returncode > 0:
+            raise AdbError(stdout, stderr)
+        return stdout
+
+    def version(self):
+        """adb version, 1.0.36 for windows, 1.0.32 for linux/mac"""
+        return self.cmd("version", device=False).strip()
+
+    def devices(self, state=None):
+        """adb devices"""
+        patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
+        device_list = []
+        self.start_server()
+        output = self.cmd("devices", device=False)
+        for line in output.splitlines():
+            line = line.strip()
+            if not line or not patten.match(line):
+                continue
+            serialno, cstate = line.split('\t')
+            if state and cstate != state:
+                continue
+            device_list.append((serialno, cstate))
+        return device_list
+
     def connect(self, force=False):
-        # if remote devices, connect first
-        if ":" in self.serialno and (force or self.get_status() != "device"):
-            print adbrun("connect %s"%self.serialno)
+        """adb connect, if remote devices, connect first"""
+        if self.serialno and ":" in self.serialno and (force or self.get_status() != "device"):
+            print self.cmd("connect %s" % self.serialno)
+
+    def disconnect(self):
+        """adb disconnect"""
+        if ":" in self.serialno:
+            print self.cmd("disconnect %s" % self.serialno)
 
     def get_status(self):
-        for dev, status in adb_devices(addr=self.addr):
+        """get device's adb status"""
+        for dev, status in self.devices():
             if dev == self.serialno:
                 return status
         return None
 
-    def disconnect(self):
-        if ":" in self.serialno:
-            adbrun("disconnect %s"%self.serialno)
-
-    def run(self, cmds, not_wait=False):
-        return adbrun(cmds, adbpath=self.adbpath, addr=self.addr, serialno=self.serialno, not_wait=not_wait)
-
-    @property
-    def sdk_version(self):
-        keyname = 'ro.build.version.sdk'
-        if keyname not in self.props:
-            self.props[keyname] = int(self.getprop(keyname))
-        return self.props[keyname]
-
-    def safe_run(self, *args, **kwargs):
-        try:
-            return True, self.run(*args, **kwargs)
-        except Exception as e:
-            return False, e
-
     def shell(self, cmds, not_wait=False):
+        """
+        adb shell
+        not_wait: 
+            return subprocess if True
+            return output if False
+        """
         if isinstance(cmds, basestring):
             cmds = 'shell '+ cmds
         else:
             cmds = ['shell'] + list(cmds)
-        return self.run(cmds, not_wait=not_wait)
+        if not_wait:
+            return self.start_cmd(cmds)
+        else:
+            return self.cmd(cmds)
 
     def getprop(self, key, strip=True):
+        """adb shell getprop"""
         prop = self.shell(['getprop', key])
         if strip:
             prop = prop.rstrip('\r\n')
         return prop
 
+    @property
+    def sdk_version(self):
+        """adb shell get sdk version"""
+        keyname = 'ro.build.version.sdk'
+        if keyname not in self._props_cache:
+            self._props_cache[keyname] = int(self.getprop(keyname))
+        return self._props_cache[keyname]
+
     def pull(self, remote, local):
-        self.run(["pull", remote, local])
+        """adb pull"""
+        self.cmd(["pull", remote, local])
 
     def forward(self, local, remote, no_rebind=True):
+        """adb forward"""
         cmds = ['forward']
         if no_rebind:
             cmds += ['--no-rebind']
-        self.run(cmds + [local, remote])
+        self.cmd(cmds + [local, remote])
         reg_cleanup(self.remove_forward, local)
 
     def get_forwards(self):
-        out = self.run(['forward', '--list'])
+        """adb forward --list"""
+        out = self.cmd(['forward', '--list'])
         for line in out.splitlines():
             line = line.strip()
             if not line:
                 continue
-            ss = line.split()
-            if len(ss) != 3:
+            cols = line.split()
+            if len(cols) != 3:
                 continue
-            sn, local, remote = ss
-            yield sn, local, remote
+            serialno, local, remote = cols
+            yield serialno, local, remote
 
     @classmethod
     def _get_forward_local(cls):
@@ -202,22 +285,27 @@ class ADB(object):
         raise RuntimeError("No available adb forward local port for %s times" % (times))
 
     def remove_forward(self, local=None):
+        """adb forward --remove"""
         if local:
-            self.safe_run(["forward", "--remove", local])
+            cmds = ["forward", "--remove", local]
         else:
-            self.safe_run(["forward", "--remove-all"])
+            cmds = ["forward", "--remove-all"]
+        self.cmd(cmds)
 
     def install(self, filepath):
+        """adb install"""
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
-        p = self.run(['install', filepath], not_wait=True)
-        nbsp = NonBlockingStreamReader(p.stdout)
-        p.wait()
+        proc = self.start_cmd(['install', filepath])
+        nbsp = NonBlockingStreamReader(proc.stdout)
+        proc.wait()
 
     def uninstall(self, package):
-        return self.run(['uninstall', package])
+        """adb uninstall"""
+        return self.cmd(['uninstall', package])
 
     def snapshot(self):
+        """take a screenshot"""
         raw = self.shell(['screencap', '-p'])
         if platform.system() == "Windows":
             link_breaker = "\r\r\n"
@@ -226,10 +314,12 @@ class ADB(object):
         return raw.replace(link_breaker, "\n")
 
     def touch(self, (x, y)):
+        """touch screen"""
         self.shell('input tap %d %d' % (x, y))
         time.sleep(0.1)
 
-    def swipe(self, (x0, y0), (x1, y1), duration=500, steps=1):
+    def swipe(self, (x0, y0), (x1, y1), duration=500):
+        """swipe screen"""
         version = self.sdk_version
         if version <= 15:
             raise MoaError('swipe: API <= 15 not supported (version=%d)' % version)
@@ -285,12 +375,12 @@ class Minicap(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi,binfile).replace("\\", r"\\")
-        self.adb.run("push %s %s/minicap" % (path, device_dir)) 
+        self.adb.cmd("push %s %s/minicap" % (path, device_dir)) 
         self.adb.shell("chmod 755 %s/minicap" % (device_dir))
 
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
             % (sdk, abi)).replace("\\", r"\\")
-        self.adb.run("push %s %s" % (path, device_dir))    
+        self.adb.cmd("push %s %s" % (path, device_dir))    
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
         print "install_minicap finished"
 
@@ -300,7 +390,7 @@ class Minicap(object):
         real_orientation = self.size["rotation"]
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
-        elif _islist(self.projection):
+        elif is_list(self.projection):
             proj_width, proj_height = self.projection
         elif isinstance(self.projection, (int, float)):
             proj_width = self.projection * real_width
@@ -429,7 +519,7 @@ class Minicap(object):
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None, adb_addr=LOCALADBADRR):
+    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
@@ -461,7 +551,7 @@ class Minitouch(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
-        self.adb.run(r"push %s %s/minitouch" % (path, device_dir)) 
+        self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir)) 
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
         print "install_minitouch finished"
 
@@ -674,9 +764,9 @@ class Android(object):
     """Android Client"""
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=LOCALADBADRR, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or adb_devices(state="device").next()[0]
-        self.adb = ADB(self.serialno, addr=addr)
+        self.adb = ADB(self.serialno, server_addr=addr)
         self._check_status()
         if init_display:
             self._init_display(props)

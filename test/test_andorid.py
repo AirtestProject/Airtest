@@ -1,11 +1,12 @@
-from moa.core.android.android import Android, ADB, adb_devices, Minicap, Minitouch
+from moa.core.android.android import Android, ADB, Minicap, Minitouch
 import unittest
 
 
 class TestAndroid(unittest.TestCase):
+
     @classmethod
     def setUpClass(self):
-        self.serialno = adb_devices(state="device").next()[0]
+        self.serialno = ADB().devices(state="device")[0][0]
         self.android = Android(self.serialno)
 
     def test_serialno(self):

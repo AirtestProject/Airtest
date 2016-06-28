@@ -95,7 +95,7 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script, utils_dir):
+def run(addr, moa_script, utils_dir=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
