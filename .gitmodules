@@ -5,5 +5,5 @@
 	path = moa/report
 	url = ssh://git@git-qa.gz.netease.com:32200/qiujinxing/moa-log-report.git
 [submodule "plugins/sdkautomator"]
-	path = plugins/sdkautomator
+	path = moa/plugins/sdkautomator
 	url = ssh://git@git-qa.gz.netease.com:32200/hongyifan/sdkautomator.git
