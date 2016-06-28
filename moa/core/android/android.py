@@ -292,6 +292,7 @@ class Minicap(object):
         self.init_stream()
 
     def install(self, reinstall=False):
+        """install or upgrade minicap"""
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
@@ -317,17 +318,17 @@ class Minicap(object):
             binfile = "minicap-nopie"
 
         device_dir = "/data/local/tmp"
-        path = os.path.join(STFLIB, abi,binfile).replace("\\", r"\\")
+        path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
         self.adb.cmd("push %s %s/minicap" % (path, device_dir)) 
         self.adb.shell("chmod 755 %s/minicap" % (device_dir))
 
-        path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' 
-            % (sdk, abi)).replace("\\", r"\\")
+        path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' % (sdk, abi)).replace("\\", r"\\")
         self.adb.cmd("push %s %s" % (path, device_dir))    
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
-        print "install_minicap finished"
+        print "minicap install finished"
 
     def _get_params(self, use_ori_size=False):
+        """get minicap start params, and count projection"""
         real_width = self.size["width"]
         real_height = self.size["height"]
         real_orientation = self.size["rotation"]
@@ -342,7 +343,8 @@ class Minicap(object):
             raise RuntimeError("invalid projection type: %s"%repr(self.projection))
         return real_width, real_height, proj_width, proj_height, real_orientation
 
-    def _setup(self, adb_port=None,lazy=False):
+    def _setup(self, adb_port=None, lazy=False):
+        """setup minicap process on device"""
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
             self.server_proc.kill()
@@ -361,48 +363,55 @@ class Minicap(object):
 
         self.localport, device_port = set_up_forward()
         other_opt = "-l" if lazy else ""
-        p = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s" % (
-            device_port,
-            real_width, real_height,
-            proj_width,proj_height,
-            real_orientation,other_opt), not_wait=True)
-        nbsp = NonBlockingStreamReader(p.stdout,print_output=True)
-        info = nbsp.read(0.5)
-        # print info
-        nbsp.kill()
+        proc = self.adb.shell(
+            "LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s" % (
+                device_port,
+                real_width, real_height,
+                proj_width, proj_height,
+                real_orientation, other_opt),
+            not_wait=True
+        )
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True)
+        while True:
+            line = nbsp.readline(timeout=5.0)
+            if line is None:
+                raise RuntimeError("minicap setup error")
+            if "Server start" in line:
+                break
 
-        if p.poll() is not None:
+        if proc.poll() is not None:
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
-            print "minicap setup error"
-            return None
-        reg_cleanup(p.kill)
-        self.server_proc = p
-
-    def get_header(self):
-        pass
+            raise RuntimeError("minicap setup error")
+        reg_cleanup(proc.kill)
+        self.server_proc = proc
 
     def get_display_info(self):
+        """
+        get display info by minicap
+        warning: it may segfault, so we prefer to get from adb
+        """
         display_info = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i")
         display_info = json.loads(display_info)
-        if display_info['width'] > display_info['height'] and display_info['rotation'] in [90,270]:
-            display_info['width'],display_info['height'] = display_info['height'],display_info['width']
+        if display_info['width'] > display_info['height'] and display_info['rotation'] in [90, 270]:
+            display_info['width'], display_info['height'] = display_info['height'], display_info['width']
         self.size = display_info
         return display_info
 
     def get_frame(self, use_ori_size=True):
         """
+        get single frame from minicap -s, slower than get_frames
         1. shell cmd
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        # self.get_display_info() # 设备的朝向发生更改时，由脚本层进行负责更新朝向并进行更新。
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
-        raw_data = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" % (
-            real_width, real_height, proj_width, proj_height, real_orientation))
-        os = platform.system()
-        if os == "Windows":
+        raw_data = self.adb.shell(
+            "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" %
+            (real_width, real_height, proj_width, proj_height, real_orientation)
+        )
+        if platform.system() == "Windows":
             link_breaker = "\r\r\n"
         else:
             link_breaker = "\r\n"
@@ -411,9 +420,9 @@ class Minicap(object):
 
     def get_frames(self, max_cnt=1000000000, adb_port=None, lazy=False):
         """
-            use adb forward and socket communicate
-            lazy: use minicap lazy mode (provided by maruijie)
-                  long connection, send 1 to server, than server return one lastest frame
+        use adb forward and socket communicate
+        lazy: use minicap lazy mode (provided by gzmaruijie)
+              long connection, send 1 to server, than server return one lastest frame
         """
         self._setup(adb_port, lazy=lazy)
         s = SafeSocket()
@@ -445,17 +454,24 @@ class Minicap(object):
                 yield one_frame
         s.close()
 
+    def get_header(self):
+        """get minicap header info"""
+        pass
+
     def init_stream(self):
+        """init minicap stream if stream_mode"""
         if self.stream_mode:
             self.frame_gen = self.get_frames(lazy=True)
             print "minicap header:", self.frame_gen.next()
 
     def get_frame_from_stream(self):
+        """get one frame from minicap stream"""
         if self.frame_gen is None:
             self.init_stream()
         return self.frame_gen.next()
 
-    def updateRotation(self, rotation):
+    def update_rotation(self, rotation):
+        """update rotation, and reset backend stream generator"""
         self.size["rotation"] = rotation
         self.frame_gen = None
 
@@ -1129,7 +1145,7 @@ class Android(object):
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
-            self.minicap.updateRotation(self.size["rotation"])
+            self.minicap.update_rotation(self.size["rotation"])
             # self.minicap.get_display_info()
 
     def _initOrientationWatcher(self):
@@ -1227,14 +1243,13 @@ def test_minitouch(serialno):
     time.sleep(1)
     mi.operate({"type": "up"})
     time.sleep(1)
-
     mi.teardown()
 
 
 def test_android():
-    serialno = adb_devices(state="device").next()[0]
     # serialno = "10.250.210.118:57217"
     # t = time.clock()
+    serialno = None
     a = Android(serialno, minicap_stream=True)
     # gen = a.minicap.get_frames()
     print a.sdk_version
