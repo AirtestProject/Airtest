@@ -192,7 +192,12 @@ class ADB(object):
         if no_rebind:
             cmds += ['--no-rebind']
         self.cmd(cmds + [local, remote])
-        reg_cleanup(self.remove_forward, local)
+        def try_remove_forward():
+            try:
+                self.remove_forward(local)
+            except:
+                pass
+        reg_cleanup(try_remove_forward)
 
     def get_forwards(self):
         """adb forward --list"""
@@ -289,6 +294,7 @@ class Minicap(object):
         self.install()
         self.stream_mode = stream
         self.frame_gen = None
+        self.stream_lock = threading.Lock()
         self.init_stream()
 
     def install(self, reinstall=False):
@@ -466,14 +472,16 @@ class Minicap(object):
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
-        if self.frame_gen is None:
-            self.init_stream()
-        return self.frame_gen.next()
+        with self.stream_lock:
+            if self.frame_gen is None:
+                self.init_stream()
+            return self.frame_gen.next()
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
-        self.size["rotation"] = rotation
-        self.frame_gen = None
+        with self.stream_lock:
+            self.size["rotation"] = rotation
+            self.frame_gen = None
 
 
 class Minitouch(object):

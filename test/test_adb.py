@@ -78,6 +78,7 @@ class TestADBWithDevice(unittest.TestCase):
         ret = self.adb.shell("ls")
         self.assertIsInstance(ret, str)
         self.assertIn("\n", ret)
+        self.assertIn("data", ret)
 
         proc = self.adb.shell("ls", not_wait=True)
         proc.kill()
