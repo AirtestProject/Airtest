@@ -214,7 +214,7 @@ def set_basedir(base_dir):
 def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
-    filepath = os.path.join(filename, basedir)
+    filepath = os.path.join(basedir, filename)
     LOGGER.set_logfile(filepath)
 
 
