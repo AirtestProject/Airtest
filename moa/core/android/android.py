@@ -492,7 +492,7 @@ class Minitouch(object):
         self.client = None
         self.max_x, self.max_y = None, None
         self.size = size
-        self.adb = adb or ADB(serialno, addr=adb_addr)
+        self.adb = adb or ADB(serialno, server_addr=adb_addr)
         self.localport = localport
         self.install()
         self.setup_server()
