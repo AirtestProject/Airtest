@@ -1,1 +1,4 @@
-bunch
+AxmlParserPY==0.01
+Jinja2==2.8
+Pillow==2.4.0
+requests==2.4.3
