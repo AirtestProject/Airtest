@@ -45,5 +45,8 @@ TEST_DEVICE_LIST = (
     'eebcdab5',
     '7N2SQL151N004298',
     'G1NPCX069194A8V',
-    '4e49701b'
+    '4e49701b',
+    '4d00df1f9b034067',
+    '5T2SQL154G012154',
+    '0b2b5e3c'
 )
