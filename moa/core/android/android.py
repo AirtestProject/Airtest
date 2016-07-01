@@ -808,11 +808,17 @@ class Android(object):
         packages = [p.split(":")[1] for p in packages if p]
         return packages
 
-    def amcheck(self, package):
+    def ampath(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]'%output)
         return output.split(":")[1].strip()
+
+    def amcheck(self, package):
+        output = self.adb.shell(['pm', 'list', 'packages', package])
+        if 'package:' not in output:
+            raise MoaError('package not found, output:[%s]'%output)
+        return output.strip()
 
     def amstart(self, package, activity=None):
         self.amcheck(package)
@@ -1158,10 +1164,10 @@ class Android(object):
 
     def _initOrientationWatcher(self):
         try:
-            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+            apk_path = self.ampath(ROTATIONWATCHER_PACKAGE)
         except MoaError:
             self.install(ROTATIONWATCHER_APK)
-            apk_path = self.amcheck(ROTATIONWATCHER_PACKAGE)
+            apk_path = self.ampath(ROTATIONWATCHER_PACKAGE)
         p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
