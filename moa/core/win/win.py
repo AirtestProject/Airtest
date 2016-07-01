@@ -1,6 +1,6 @@
 # _*_ coding:UTF-8 _*_
 from winutils import mouse_click, mouse_drag, get_screen_shot, \
-    key_input, WindowMgr, get_resolution,mouse_down,mouse_up,mouse_move
+    key_input, WindowMgr, get_resolution, mouse_down, mouse_up, mouse_move
 from winsendkey import SendKeys
 from moa.aircv import aircv
 
@@ -26,8 +26,8 @@ class Windows(object):
     def keyevent(self, keyname, escape=False, combine=None):
         key_input(keyname, escape, combine)
 
-    def text(self, text):
-        SendKeys(text.decode("utf-8"))
+    def text(self, text, with_spaces=True, with_tabs=False, with_newlines=False):
+        SendKeys(text.decode("utf-8"), with_spaces=with_spaces, with_tabs=with_tabs, with_newlines=with_newlines)
 
     def touch(self, pos, right_click=False, duration=None): # 暂时添加了duration接口，但是并无对应的响应
         mouse_click(pos, right_click)
@@ -57,15 +57,15 @@ class Windows(object):
     def getCurrentScreenResolution(self):
         return get_resolution()
 
-    def operate(self,args):
+    def operate(self, args):
         if args["type"] == "down":
-            mouse_down(pos=(args['x'],args['y']))
+            mouse_down(pos=(args['x'], args['y']))
         elif args["type"] == "move":
-            mouse_move(int(args['x']),int(args['y']))
+            mouse_move(int(args['x']), int(args['y']))
         elif args["type"] == "up":
             mouse_up()
         else:
-            raise RuntimeError("invalid operate args: %s"%args)
+            raise RuntimeError("invalid operate args: %s" % args)
 
 
 if __name__ == '__main__':

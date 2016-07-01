@@ -570,6 +570,7 @@ def parse_keys(string, with_spaces=False, with_tabs=False, with_newlines=False, 
         elif c == "(":
             # find the end of the bracketed text
             end_pos = string.find(")", index)
+            # 取消(的校验 (缺少右括号不再提醒)
             if end_pos == -1:
                 raise KeySequenceError('`)` not found')
 
@@ -585,6 +586,7 @@ def parse_keys(string, with_spaces=False, with_tabs=False, with_newlines=False, 
         # Escape or named key     “{ xxxx }”是特殊的key名，直接不作特殊处理
         elif c == "{":
             end_pos = string.find("}", index)
+            # 取消{的校验 (缺少右大括号不再提醒)
             if end_pos == -1:
                 raise KeySequenceError('`}` not found')
 
@@ -593,6 +595,7 @@ def parse_keys(string, with_spaces=False, with_tabs=False, with_newlines=False, 
 
             keys.extend(handle_code(code))
 
+        # 取消括号的校验：
         # unmatched ")"
         elif c == ')':
             raise KeySequenceError('`)` should be preceeded by `(`')
@@ -665,20 +668,6 @@ def SendKeys(keys,
         else:
             k.Run()
 
-        # if k=="(":
-        #     x_key = KeyAction("(")
-        #     x_key.Run()
-        # elif k==")":
-        #     x_key = KeyAction(")")
-        #     x_key.Run()
-        # elif k=="{":
-        #     x_key = KeyAction("{")
-        #     x_key.Run()
-        # elif k=="}":
-        #     x_key = KeyAction("}")
-        #     x_key.Run()
-        # else:
-        #     k.Run()
         time.sleep(pause)
 
 
