@@ -270,10 +270,8 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
         proc = self.start_cmd(['install', filepath])
-        # nbsp = NonBlockingStreamReader(proc.stdout)
-        # proc.wait()
-        stdout, stderr = proc.communicate()
-        print len(stdout)
+        nbsp = NonBlockingStreamReader(proc.stdout)
+        proc.wait()
 
     def uninstall(self, package):
         """adb uninstall"""

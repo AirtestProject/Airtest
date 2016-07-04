@@ -11,7 +11,8 @@ from config import STF_TOKEN_ID as TOKEN_ID
 
 # need modify params, please config yours...
 # STF_WEB
-HOST_IP = 'phone.nie.netease.com'
+# HOST_IP = 'phone.nie.netease.com'
+HOST_IP = '10.254.28.35'
 # User Token_Id
 # 在stf-web个人设置页的“Setting UI”——“密钥”——“访问令牌”生成的，需要自行纪录一下
 # TOKEN_ID = '0bdfdb70533d415ba2781c0dff47c3c5528d23a0dac44e81882cb2874c37ce3e'
