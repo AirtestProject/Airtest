@@ -80,6 +80,11 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     return scriptpath
 
 
+def set_scripthome(dirpath):
+    global SCRIPTHOME
+    SCRIPTHOME = dirpath
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
@@ -132,6 +137,8 @@ def main():
 
     if args.setwin:
         # print "auto set_windows"
+        # todo: 1. window_title
+        #       2. find_in window rect
         set_windows()
 
     if args.log:

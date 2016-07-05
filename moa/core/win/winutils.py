@@ -378,6 +378,7 @@ class WindowMgr:
     def __init__ (self):
         """Constructor"""
         self._handle = None
+        self._handle_list = []
 
     def find_window(self, class_name, window_name = None):
         """find a window by its class_name"""
@@ -387,18 +388,30 @@ class WindowMgr:
         '''Pass to win32gui.EnumWindows() to check all the opened windows'''
         window_title = win32gui.GetWindowText(hwnd)
         window_title = window_title.decode("gbk")
-        if re.match(wildcard, window_title) != None:
-            self._handle = hwnd
-            print window_title.encode("utf8")
+        # print "%s %s" % (repr(window_title), repr(wildcard))
+        if window_title:
+            try:
+                m = re.search(wildcard, window_title)
+            except:
+                m = None
+            if m != None:
+                self._handle = hwnd
+                self._handle_list.append(hwnd)
+                print window_title.encode("utf8")
 
     def find_window_wildcard(self, wildcard):
         self._handle = None
         win32gui.EnumWindows(self._window_enum_callback, wildcard)
         return self._handle
 
+    def find_window_list(self, wildcard):
+        self._handle_list = []
+        win32gui.EnumWindows(self._window_enum_callback, wildcard)
+        return self._handle_list
+
     def set_foreground(self):
         """put the window in the foreground"""
-        print self._handle
+        # print self._handle
         win32gui.SetForegroundWindow(self._handle)
 
     def get_window_pos(self):
@@ -508,4 +521,7 @@ if __name__ == "__main__":
     print get_window_pos(u"梦幻西游2 ONLINE.*")
     """
     # mouse_click(630, 260)
-    print get_resolution()
+    # print get_resolution()
+    w = WindowMgr()
+    print w.find_window_list(u"Chrome")
+    print w._handle

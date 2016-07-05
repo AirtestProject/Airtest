@@ -8,8 +8,10 @@ from PIL import ImageGrab
 
 class Windows(object):
     """Windows Client"""
-    def __init__(self):
+    def __init__(self, handle=None):
         self.winmgr = WindowMgr()
+        self.handle = handle
+        self.window_title = None
 
     def snapshot(self, filename="tmp.png"):
         # # 将回放脚本时的截图方式，换成ImageGrab()
@@ -39,16 +41,24 @@ class Windows(object):
         """
         遍历所有window按re.match来查找wildcard，并设置为当前handle
         """
-        return self.winmgr.find_window_wildcard(wildcard)
-
-    def set_foreground(self, handle=None):
+        self.window_title = wildcard
+        handle = self.winmgr.find_window_wildcard(wildcard)
         if handle:
-            self.winmgr._handle = handle
+            self.handle = handle
+        return handle
+
+    def find_window_list(self, wildcard):
+        self.window_title = wildcard
+        return self.winmgr.find_window_list(wildcard)
+
+    def set_handle(self, handle):
+        self.handle = handle
+        self.winmgr._handle = handle
+
+    def set_foreground(self):
         self.winmgr.set_foreground()
 
-    def get_window_pos(self, handle=None):
-        if handle:
-            self.winmgr._handle = handle
+    def get_window_pos(self):
         return self.winmgr.get_window_pos()
 
     def set_window_pos(self, (x, y)):
@@ -75,7 +85,7 @@ if __name__ == '__main__':
     # w.text("nimei")
     # w.touch((10, 10))
     # w.swipe((10,10), (200,200))
-    print w.find_window(".*Sublime.*")
+    print w.find_window("Chrome")
     w.set_foreground()
     print w.get_window_pos()
-    w.set_window_pos((0, 0))
+    # w.set_window_pos((0, 0))

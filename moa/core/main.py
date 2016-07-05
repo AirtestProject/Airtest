@@ -22,7 +22,7 @@ from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.settings import *
 from moa.core.utils import Logwrap, MoaLogger, TargetPos, is_str
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 """
     Moa for Android/Windows/iOS
@@ -44,6 +44,7 @@ except ImportError as e:
 LOGGER = MoaLogger(None)
 SCREEN = None
 DEVICE = None
+DEVICE_LIST = []
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
 
@@ -143,15 +144,17 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
             break
         if sn is None:
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
-    global CVSTRATEGY, DEVICE, PLAYRES
+    dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    dev.wake()
+    print dev
+    global CVSTRATEGY, DEVICE, DEVICE_LIST
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
-    DEVICE.wake()
-    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
+    DEVICE = dev
+    DEVICE_LIST.append(dev)
     return sn
 
 
-def set_ios_udid(udid=None):
+def set_udid(udid=None):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
@@ -160,7 +163,7 @@ def set_ios_udid(udid=None):
     udids = ios.utils.list_all_udid()
     if not udid:
         if len(udids) > 1:
-            print("more than one device, auto choose one, to specify serialno: set_ios_udid(udid)")
+            print("more than one device, auto choose one, to specify serialno: set_udid(udid)")
         elif len(udids) == 0:
             raise MoaError("no device, please check your connection")
         IOSUDID = udids[0]
@@ -175,13 +178,11 @@ def set_ios_udid(udid=None):
         if exists > 1:
             IOSUDID = ''
             raise MoaError("too many devices found")
-    global CVSTRATEGY
-    if not CVSTRATEGY:
-        CVSTRATEGY = ["siftpre", "siftnopre", "tpl"]
-    global DEVICE
-    DEVICE = ios.client.IOS(IOSUDID)
-    global PLAYRES
-    PLAYRES = [DEVICE.size["width"], DEVICE.size["height"]]
+    dev = ios.client.IOS(IOSUDID)
+    global CVSTRATEGY, DEVICE, DEVICE_LIST
+    CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
+    DEVICE = dev
+    DEVICE_LIST.append(dev)
     return IOSUDID
 
 
@@ -196,14 +197,62 @@ def resign(ipaname):
     return new_ipaname
 
 
-def set_windows():
+def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
-    global DEVICE, CVSTRATEGY, RESIZE_METHOD
-    DEVICE = win.Windows()
+    dev = win.Windows()
+    if handle:
+        dev.set_handle(int(handle))
+    elif window_title:
+        handle = dev.find_window(window_title)
+        if handle is None:
+            raise MoaError("no window found with title: '%s'" % window_title)
+    else:
+        print "handle not set, use entire screen"
+    if dev.handle:
+        dev.set_foreground()
+    global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
+    DEVICE = dev
+    DEVICE_LIST.append(dev)
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_WINDOWS
     # set no resize on windows as default
     RESIZE_METHOD = RESIZE_METHOD or aircv.no_resize
+
+
+@platform(on=["Android", "Windows"])
+def add_device():
+    # for android  add another serialno
+    if isinstance(DEVICE, android.Android):
+        devs = DEVICE.adb.devices(state='device')
+        devs = [d[0] for d in devs]
+        try:
+            another_dev = (set(devs) - set([DEVICE.serialno])).pop()
+        except KeyError:
+            raise MoaError("no more device to add")
+        set_serialno(another_dev)
+    # for win add another handler
+    elif isinstance(DEVICE, win.Windows):
+        if not (DEVICE.window_title and DEVICE.handle):
+            raise MoaError("please set_windows with window_title first")
+        devs = DEVICE.find_window_list(DEVICE.window_title)
+        print devs
+        print DEVICE.handle
+        try:
+            another_dev = (set(devs) - set([DEVICE.handle])).pop()
+        except KeyError:
+            raise MoaError("no more device to add")
+        set_windows(handle=another_dev)
+    else:
+        pass
+
+
+@platform(on=["Android", "Windows"])
+def set_current(index):
+    global DEVICE
+    DEVICE = DEVICE_LIST[index]
+    if isinstance(DEVICE, win.Windows):
+        DEVICE.set_foreground()
+    print DEVICE
 
 
 def set_basedir(base_dir):
@@ -233,11 +282,6 @@ def set_threshold(value):
     if value > 1 or value < 0:
         raise MoaError("invalid threshold: %s" % value)
     THRESHOLD = value
-
-
-def set_scripthome(dirpath):
-    global SCRIPTHOME
-    SCRIPTHOME = dirpath
 
 
 def set_globals(key, value):
@@ -730,7 +774,9 @@ def test_android():
     set_serialno()
     # set_serialno('9ab171d')
     # set_basedir('../taskdata/1433820164')
-    # wake()
+    home()
+    add_device()
+    home()
     # touch('target.png')
     # touch([100, 200])
     # swipe([100, 500], [800, 600])
@@ -746,7 +792,7 @@ def test_android():
     # set_logfile('run.log')
     # touch('fb.png', rect=(10, 10, 500, 500))
     # time.sleep(1)
-    home()
+    # home()
     # time.sleep(1)
     # swipe('sm.png', vector=(0, 0.3))
     # time.sleep(1)
@@ -760,19 +806,22 @@ def test_android():
 
 
 def test_win():
+    # set_windows(window_title="Chrome")
+    # touch("win.png")
+    # add_device()
+    # touch("win.png")
     set_windows()
-    swipe("win.png", (300, 300))
-    sleep(1.0)
-    swipe("win.png", vector=(0.3, 0.3))
     touch("win.png")
+    # # swipe("win.png", (300, 300))
+    # # sleep(1.0)
+    # # swipe("win.png", vector=(0.3, 0.3))
 
 
 def test_ios():
     basedir = os.path.dirname(os.path.abspath(__file__))
-    new_ipaname = resign(os.path.join(
-        basedir, "ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
+    new_ipaname = resign(os.path.join(basedir, "ios/mhxy_mobile2016-05-20-09-58_265402_resign.ipa"))
     print new_ipaname
-    udid = set_ios_udid()
+    udid = set_udid()
     print udid
     install(new_ipaname)
     # amstart("com.netease.devtest")
@@ -782,5 +831,6 @@ def test_ios():
 
 
 if __name__ == '__main__':
-    test_android()
+    # test_android()
     # test_ios()
+    test_win()
