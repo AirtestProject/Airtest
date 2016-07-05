@@ -378,6 +378,8 @@ class Minicap(object):
         """setup minicap process on device"""
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
+            print "****************resetup****************"
+            sys.stdout.flush()
             self.server_proc.kill()
             self.server_proc = None
             self.adb.remove_forward("tcp:%s" % self.localport)
@@ -493,7 +495,7 @@ class Minicap(object):
         """init minicap stream if stream_mode"""
         if self.stream_mode:
             self.frame_gen = self.get_frames(lazy=True)
-            print "minicap header:", self.frame_gen.next()
+            print "minicap header: " + str(self.frame_gen.next())
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
@@ -1295,6 +1297,9 @@ def test_android():
     #     time.sleep(1)
     # a.amstart("com.netease.my")
     # header = gen.next()
+    a.amclear("com.netease.my")
+    a.amstart("com.netease.my")
+    time.sleep(100)
     for i in range(1000):
         print "get next frame"
         # frame = gen.next()
