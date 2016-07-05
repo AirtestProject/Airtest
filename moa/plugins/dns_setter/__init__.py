@@ -34,7 +34,7 @@ class DefaultDnsSetter(object):
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
 
-    @particular_case.specified(['2053d814'])
+    @particular_case.specified(['2053d814', 'd523384'])
     def enter_wlan_list(self):
         self.adb.shell('am start -a "android.settings.WIFI_SETTINGS" --activity-clear-top')
 
@@ -228,13 +228,13 @@ class DefaultDnsSetter(object):
             print '[DNS SETTER] skip, dns already satisfied.'
             return True
 
-        if dns1 == '-1':
-            try:
-                self.test_ping('www.baidu.com')
-                print '[DNS SETTER] skip switching to dhcp mode. network is available.'
-                return True
-            except:
-                pass
+        # if dns1 == '-1':
+        #     try:
+        #         self.test_ping('www.baidu.com')
+        #         print '[DNS SETTER] skip switching to dhcp mode. network is available.'
+        #         return True
+        #     except:
+        #         pass
 
         # change STATIC mode and dns
         with self.android.ime:
@@ -396,16 +396,18 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    print d(text='IP 设定').down(className="android.widget.Spinner").click()
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
+    # print d(text='IP 设定').down(className="android.widget.Spinner").click()
 
-    # import xml.etree.ElementTree
-    # import chardet.chardetect
-    # with open(r'C:\Users\lxn3032\Downloads\xxx.tmp') as f:
-    #     # root = xml.etree.ElementTree.ElementTree(f.read())
-    #     print chardet.detect(f.read())
+    a = Android('d523384', minicap_stream=True)
+    # a.home()
+    for i in range(1000):
+        print "get next frame"
+        frame = a.snapshot()
+        time.sleep(1)
+
 
     # for d in stf.get_device_list_rest(None):
     #     sn = d['serial']

@@ -867,6 +867,9 @@ class Android(object):
         if check:
             self.amcheck(apk_package)
 
+        self.adb.shell('settings put secure accessibility_enabled 0')
+        self.adb.shell('settings put secure enabled_accessibility_services 0')
+
     def uninstall(self, package):
         return self.adb.uninstall(package)
 
