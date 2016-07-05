@@ -146,10 +146,35 @@ class ADB(object):
 
     def get_status(self):
         """get device's adb status"""
-        for dev, status in self.devices():
-            if dev == self.serialno:
-                return status
-        return None
+        # old way...
+        # for dev, status in self.devices():
+        #     if dev == self.serialno:
+        #         return status
+        # return None
+
+        # new way!
+        proc = self.start_cmd("get-state")
+        stdout, stderr = proc.communicate()
+        if proc.returncode == 0:
+            return stdout.strip()
+        elif "not found" in stderr:
+            return None
+        else:
+            raise AdbError(stdout, stderr)
+
+    def wait_for_device(self, timeout=5):
+        """
+        adb wait-for-device
+        if timeout, raise MoaError
+        """
+        proc = self.start_cmd("wait-for-device")
+        timer = threading.Timer(timeout, proc.kill)
+        timer.start()
+        ret = proc.wait()
+        if ret == 0:
+            timer.cancel()
+        else:
+            raise MoaError("device not ready")
 
     def shell(self, cmds, not_wait=False):
         """
@@ -735,7 +760,7 @@ class Android(object):
     def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
-        self._check_status()
+        self.adb.wait_for_device()
         if init_display:
             self._init_display(props)
             # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
@@ -780,12 +805,6 @@ class Android(object):
         data = json.dumps(data).replace(r'"', r'\"')
         print data
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
-
-    @retries(5, delay=0.5)
-    def _check_status(self):
-        status = self.adb.get_status()
-        if status != "device":
-            raise MoaError("device status error:%s %s"%(self.serialno, status))
 
     def amlist(self, third_only=False):
         """

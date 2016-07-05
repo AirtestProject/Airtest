@@ -47,3 +47,10 @@ def hunter_sendto(tokenid, data, **kwargs):
         print 'message=', r.json()['message']
         print '======================================================================\n'
     return None
+
+
+if __name__ == '__main__':
+    token = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MDE1NTE5NiwiaWF0IjoxNDY3MzU1MTk2fQ.eyJ1c2VybmFtZSI6Imd6bGl1eGluIn0.GaWGg0E8_snNm3o6Zdn4P_evqKXTgea_0pLwdpb9TWI"
+    devid = "mh_at_10-251-81-101"
+    data = {'devid': devid, 'data': '$at h'}
+    hunter_sendto(token, data)

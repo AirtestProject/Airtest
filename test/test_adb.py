@@ -1,4 +1,5 @@
-from moa.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER
+# encoding=utf-8
+from moa.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError
 import unittest
 import subprocess
 
@@ -61,6 +62,12 @@ class TestADBWithDevice(unittest.TestCase):
         serialno = adb.devices(state=ADB.status_device)[0][0]
         adb.set_serialno(serialno)
         cls.adb = adb
+
+    def test_wait_for_device(self):
+        self.adb.wait_for_device()
+
+        with self.assertRaises(MoaError):
+            ADB("wtf").wait_for_device()
 
     def test_connect(self):
         pass
