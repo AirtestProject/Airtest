@@ -381,6 +381,7 @@ class Minicap(object):
             print "****************resetup****************"
             sys.stdout.flush()
             self.server_proc.kill()
+            self.nbsp.kill()
             self.server_proc = None
             self.adb.remove_forward("tcp:%s" % self.localport)
 
@@ -418,6 +419,7 @@ class Minicap(object):
             raise RuntimeError("minicap setup error")
         reg_cleanup(proc.kill)
         self.server_proc = proc
+        self.nbsp = nbsp
 
     def get_display_info(self):
         """
