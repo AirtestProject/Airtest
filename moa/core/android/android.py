@@ -306,7 +306,7 @@ class Minicap(object):
 
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
 
-    VERSION = 2
+    VERSION = 3
 
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None, stream=True):
         self.serialno = serialno
@@ -322,7 +322,7 @@ class Minicap(object):
         self.stream_lock = threading.Lock()
         self.init_stream()
 
-    def install(self, reinstall=False):
+    def install(self, reinstall=True):
         """install or upgrade minicap"""
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
@@ -1302,7 +1302,6 @@ def test_android():
     # header = gen.next()
     a.amclear("com.netease.my")
     a.amstart("com.netease.my")
-    time.sleep(100)
     for i in range(1000):
         print "get next frame"
         # frame = gen.next()
