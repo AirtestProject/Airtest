@@ -19,7 +19,6 @@ class Windows(object):
         # # screen = ImageGrab.grab()
         # screen = aircv.pil_2_cv2(screen)
         screen = get_screen_shot()
-
         # aircv.show(screen)
         if filename:
             aircv.imwrite(filename, screen)
@@ -42,10 +41,7 @@ class Windows(object):
         遍历所有window按re.match来查找wildcard，并设置为当前handle
         """
         self.window_title = wildcard
-        handle = self.winmgr.find_window_wildcard(wildcard)
-        if handle:
-            self.handle = handle
-        return handle
+        return self.winmgr.find_window_wildcard(wildcard)
 
     def find_window_list(self, wildcard):
         self.window_title = wildcard
@@ -53,7 +49,7 @@ class Windows(object):
 
     def set_handle(self, handle):
         self.handle = handle
-        self.winmgr._handle = handle
+        self.winmgr.handle = handle
 
     def set_foreground(self):
         self.winmgr.set_foreground()
@@ -79,13 +75,22 @@ class Windows(object):
 
 
 if __name__ == '__main__':
+    import time
     w = Windows()
     # w.snapshot()
     # w.keyevent("enter", escape=True)
     # w.text("nimei")
     # w.touch((10, 10))
     # w.swipe((10,10), (200,200))
-    print w.find_window("Chrome")
+    print w.find_window(u"QA平台")
     w.set_foreground()
     print w.get_window_pos()
+    time.sleep(1)
     # w.set_window_pos((0, 0))
+    w2 = Windows()
+    w2.find_window("GitHub")
+    w2.set_foreground()
+    time.sleep(1)
+    w.set_foreground()
+    time.sleep(1)
+    w2.set_foreground()

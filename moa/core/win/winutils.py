@@ -377,8 +377,9 @@ class WindowMgr:
     """Encapsulates some calls to the winapi for window management"""
     def __init__ (self):
         """Constructor"""
-        self._handle = None
-        self._handle_list = []
+        self.handle = None
+        self._handle_found = None
+        self._handle_list_found = []
 
     def find_window(self, class_name, window_name = None):
         """find a window by its class_name"""
@@ -395,35 +396,34 @@ class WindowMgr:
             except:
                 m = None
             if m != None:
-                self._handle = hwnd
-                self._handle_list.append(hwnd)
+                self._handle_found = hwnd
+                self._handle_list_found.append(hwnd)
                 print window_title.encode("utf8")
 
     def find_window_wildcard(self, wildcard):
-        self._handle = None
+        self._handle_found = None
         win32gui.EnumWindows(self._window_enum_callback, wildcard)
-        return self._handle
+        return self._handle_found
 
     def find_window_list(self, wildcard):
-        self._handle_list = []
+        self._handle_list_found = []
         win32gui.EnumWindows(self._window_enum_callback, wildcard)
-        return self._handle_list
+        return self._handle_list_found
 
     def set_foreground(self):
         """put the window in the foreground"""
-        # print self._handle
-        win32gui.SetForegroundWindow(self._handle)
+        win32gui.SetForegroundWindow(self.handle)
 
     def get_window_pos(self):
         """get window pos in (x0, y0, x1, y1)"""
-        return win32gui.GetWindowRect(self._handle)
+        return win32gui.GetWindowRect(self.handle)
 
     def set_window_pos(self,x,y):
         rec = self.get_window_pos()
-        return win32gui.SetWindowPos(self._handle,win32con.HWND_TOP,x,y,rec[2]-rec[0],rec[3]-rec[1],0)
+        return win32gui.SetWindowPos(self.handle,win32con.HWND_TOP,x,y,rec[2]-rec[0],rec[3]-rec[1],0)
 
     def get_window_title(self):
-        return win32gui.GetWindowText(self._handle)
+        return win32gui.GetWindowText(self.handle)
 
 import wx
 
@@ -524,4 +524,6 @@ if __name__ == "__main__":
     # print get_resolution()
     w = WindowMgr()
     print w.find_window_list(u"Chrome")
-    print w._handle
+    print w.handle
+    w.handle = 921578
+    w.set_foreground()

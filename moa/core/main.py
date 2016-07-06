@@ -207,9 +207,12 @@ def set_windows(handle=None, window_title=None):
         handle = dev.find_window(window_title)
         if handle is None:
             raise MoaError("no window found with title: '%s'" % window_title)
+        else:
+            dev.set_handle(handle)
     else:
         print "handle not set, use entire screen"
     if dev.handle:
+        print dev.handle
         dev.set_foreground()
     global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
     DEVICE = dev
@@ -232,11 +235,10 @@ def add_device():
         set_serialno(another_dev)
     # for win add another handler
     elif isinstance(DEVICE, win.Windows):
-        if not (DEVICE.window_title and DEVICE.handle):
-            raise MoaError("please set_windows with window_title first")
-        devs = DEVICE.find_window_list(DEVICE.window_title)
-        print devs
-        print DEVICE.handle
+        window_title = WINDOW_TITLE or DEVICE.window_title
+        if not window_title:
+            raise MoaError("please set_global WINDOW_TITLE or set_windows with window_title first")
+        devs = DEVICE.find_window_list(window_title)
         try:
             another_dev = (set(devs) - set([DEVICE.handle])).pop()
         except KeyError:
@@ -249,10 +251,12 @@ def add_device():
 @platform(on=["Android", "Windows"])
 def set_current(index):
     global DEVICE
+    if index > len(DEVICE_LIST):
+        raise MoaError("add_device first")
     DEVICE = DEVICE_LIST[index]
+    print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
     if isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
-    print DEVICE
 
 
 def set_basedir(base_dir):
@@ -777,6 +781,7 @@ def test_android():
     home()
     add_device()
     home()
+
     # touch('target.png')
     # touch([100, 200])
     # swipe([100, 500], [800, 600])
@@ -806,12 +811,20 @@ def test_android():
 
 
 def test_win():
-    # set_windows(window_title="Chrome")
-    # touch("win.png")
-    # add_device()
-    # touch("win.png")
-    set_windows()
+    set_windows(window_title="Chrome")
     touch("win.png")
+    time.sleep(1)
+    add_device()
+    time.sleep(1)
+    touch("win.png")
+    time.sleep(1)
+    set_current(0)
+    time.sleep(1)
+    set_current(1)
+    time.sleep(1)
+    # set_current(1)
+    # set_windows()
+    # touch("win.png")
     # # swipe("win.png", (300, 300))
     # # sleep(1.0)
     # # swipe("win.png", vector=(0.3, 0.3))

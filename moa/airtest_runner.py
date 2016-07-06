@@ -121,7 +121,7 @@ def main():
         set_mask_rect(args.maskrect)
 
     if args.setsn:
-        print "auto set_serialno", args.setsn
+        print "set_serialno", args.setsn
         # if setsn==True, but not specified, auto choose one
         sn = args.setsn if isinstance(args.setsn, str) else None
         if args.setadb:
@@ -131,15 +131,24 @@ def main():
             set_serialno(sn)
 
     if args.setudid:  # modified by gzlongqiumeng
-        print "auto set_udid", args.setudid
+        print "set_udid", args.setudid
         udid = args.setudid if isinstance(args.setudid,str) else None
         set_udid(udid)
 
     if args.setwin:
-        # print "auto set_windows"
         # todo: 1. window_title
         #       2. find_in window rect
-        set_windows()
+        if args.setwin is True:
+            print "auto set_windows"
+            set_windows()
+        else:
+            try:
+                handle = int(args.setwin)
+                print "set_windows handle=%s" % handle
+                set_windows(handle=handle)
+            except ValueError:
+                print "set_windows title=%s" % args.setwin
+                set_windows(window_title=args.setwin)
 
     if args.log:
         print "save log in", "'%s'" %args.log

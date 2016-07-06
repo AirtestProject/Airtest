@@ -24,3 +24,4 @@ CVINTERVAL = 0.5
 # PLAYRES = [] # to be deleted
 OPDELAY = 0.1
 TIMEOUT = 20
+WINDOW_TITLE = None
