@@ -8,7 +8,7 @@ import os
 
 
 def devices():
-    listDevices = stf.get_device_list_rest("")
+    listDevices = stf.get_usable_device_list_rest()
     for i in listDevices:
         if i['serial'] in TEST_DEVICE_LIST:
             serialno = i['serial']

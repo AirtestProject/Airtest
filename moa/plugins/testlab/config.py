@@ -1,5 +1,8 @@
 # encoding=utf-8
-from user_config import STF_TOKEN_ID
+
+
+STF_HOST_IP = 'phone.nie.netease.com'
+STF_TOKEN_ID = 'b77c4cf79ce940a6aeccc3ae987f1eb23cc2450b28544ca39662a56a8f546333'
 
 
 # 安装之前会先清掉第三方应用

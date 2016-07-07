@@ -1,61 +1,56 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import sys
-import os
+"""
+REST API Demos 详情请参考/openstf/doc/API.md
+token认证方式:将用户在Setting UI生成的Token_id放在每一次请求的header中即可
+"""
 import json
 import urllib  
 import urllib2  
 import cookielib
 import requests
-from config import STF_TOKEN_ID as TOKEN_ID
+try:
+    import user_config as config
+except ImportError:
+    import config
 
-# need modify params, please config yours...
-# STF_WEB
-HOST_IP = 'phone.nie.netease.com'
-# User Token_Id
-# 在stf-web个人设置页的“Setting UI”——“密钥”——“访问令牌”生成的，需要自行纪录一下
-# TOKEN_ID = '0bdfdb70533d415ba2781c0dff47c3c5528d23a0dac44e81882cb2874c37ce3e'
-# end modify
+TOKEN_ID = config.STF_TOKEN_ID
+HOST_IP = config.STF_HOST_IP
+
 
 def _islist(v):
     return isinstance(v, list) or isinstance(v, tuple)
 
 def http_get(host, data={}, headers={}):
- 
     data = urllib.urlencode(data) 
     url = '%s?%s' % (host, data)
-    
-    opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-    
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
     urllib2.install_opener(opener)
-    
     request = urllib2.Request(url, headers=headers)
-    
     response = opener.open(request)
     response.status_code = response.getcode()
     response.data = response.read()
-      
     return response
 
-# REST API Demos 详情请参考/openstf/doc/API.md
-# token认证方式:将用户在Setting UI生成的Token_id放在每一次请求的header中即可
 DEV_USABLE = "usable"
 DEV_ONLINE = "present"
 
 
 # 获取设备列表
-def get_device_list_rest(req, status=DEV_USABLE):
-    if status:
-        url = "http://%s:7100/api/v1/devices/status/%s" % (HOST_IP, status)
-    else:
-        url = "http://%s:7100/api/v1/devices" % (HOST_IP)
+def get_device_list_rest():
+    url = "http://%s:7100/api/v1/devices" % (HOST_IP)
     res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
     # print res.status_code
     return json.loads(res.data)['devices']
 
+def get_usable_device_list_rest():
+    device_list = get_device_list_rest()
+    useable_list = [d for d in device_list if (d["present"] is True and d["using"] is False)]
+    return useable_list
+
+
 # 获取单台设备信息
-def get_device_info_rest(req, serial):    
+def get_device_info_rest(serial):    
     url = "http://%s:7100/api/v1/devices/%s" % (HOST_IP, serial)
     res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
     # print res.status_code
@@ -63,7 +58,7 @@ def get_device_info_rest(req, serial):
 
 # 获取设备列表中特定字段
 # fields参数为目标字段列表
-def get_device_list_fields(req, fields=[]):
+def get_device_list_fields(fields=[]):
     if(_islist(fields)):
         fields = ','.join(fields)
     url = "http://%s:7100/api/v1/devices?fields=%s" % (HOST_IP, fields)
@@ -143,10 +138,10 @@ def get_use_statistics(req):
 if __name__ == "__main__":
     from pprint import pprint
     import time
-    req = ""
-    listDevices = get_device_list_rest(req)
+    # listDevices = get_device_list_rest()
+    listDevices = get_usable_device_list_rest()
     print "Available devices:", len(listDevices) 
-    # pprint(listDevices)
+    pprint(listDevices)
 
     # for i in range(2):
     #     serial = listDevices[i]['serial']
