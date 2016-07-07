@@ -764,6 +764,7 @@ class Android(object):
     def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
+        self.adb.start_server()
         self.adb.wait_for_device()
         if init_display:
             self._init_display(props)
