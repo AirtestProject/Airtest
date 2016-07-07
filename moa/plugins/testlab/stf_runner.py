@@ -5,6 +5,7 @@ from pprint import pprint
 import stf
 import sys
 import os
+import random
 
 
 def devices():
@@ -23,15 +24,28 @@ def join(serialno):
     join = stf.join_group(serialno)
     if not join['success']:
         pprint(join)
-        raise RuntimeError("join group failed")
+        raise RuntimeError("join group failed:%s" % serialno)
 
     connect = stf.remote_connect(serialno)
     if not connect["success"]:
         # pprint(connect)
-        raise RuntimeError("remote connect failed")
+        raise RuntimeError("remote connect failed:%s" % serialno)
     addr = connect["remoteConnectUrl"]
     print addr
     return addr
+
+
+def randomjoin():
+    """
+    随便取一台可用设备，并connect
+    print serialno
+    print addr
+    """
+    listDevices = stf.get_usable_device_list_rest()
+    random.shuffle(listDevices)
+    serialno = listDevices[0]['serial']
+    print serialno
+    join(serialno)
 
 
 def test(addr):
@@ -127,10 +141,14 @@ def cleanup(serialno):
     stf.leave_group(serialno)
 
 
-if __name__ == '__main__':
+def main():
     action = sys.argv[1]
     thismodule = sys.modules[__name__]
     func = getattr(thismodule, action, None)
     if not func:
         raise Exception("invalid action:"+action)
     func(*sys.argv[2:])
+
+
+if __name__ == '__main__':
+    main()
