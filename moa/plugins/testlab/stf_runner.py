@@ -21,16 +21,16 @@ def join(serialno):
     占用stf设备，通过设备号获取connect的地址
     注意，这里将print addr作为输出，一定不要print其他信息(坑爹的jenkins pipeline)
     """
-    join = stf.join_group(serialno)
-    if not join['success']:
-        pprint(join)
+    joined = stf.join_group(serialno)
+    if not joined['success']:
+        pprint(joined)
         raise RuntimeError("join group failed:%s" % serialno)
 
-    connect = stf.remote_connect(serialno)
-    if not connect["success"]:
+    connected = stf.remote_connect(serialno)
+    if not connected["success"]:
         # pprint(connect)
         raise RuntimeError("remote connect failed:%s" % serialno)
-    addr = connect["remoteConnectUrl"]
+    addr = connected["remoteConnectUrl"]
     print addr
     return addr
 
