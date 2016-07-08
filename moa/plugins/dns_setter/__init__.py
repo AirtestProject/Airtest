@@ -60,6 +60,7 @@ class DefaultDnsSetter(object):
 
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
+        time.sleep(1.5)
         self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if strict:
             self.test_netease_game_connected()
@@ -171,6 +172,7 @@ class DefaultDnsSetter(object):
             if uiobj:
                 self.uiutil.replace_text(uiobj, masklen)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+        time.sleep(2)
 
     @particular_case.default_call
     def get_current_ssid(self):
@@ -195,10 +197,19 @@ class DefaultDnsSetter(object):
             raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
     def test_ping(self, server):
-        result = self.adb.shell('ping -c2 {}'.format(server))
-        matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
-        if not matcher or matcher.group(1) == '0':
-            raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
+        """
+        try 5 times to ping a server, success if any of ping is ok
+        """
+        result = ''
+        for i in range(5):
+            result = self.adb.shell('ping -c2 {}'.format(server))
+            matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
+            if matcher and matcher.group(1) != '0':
+                return True
+            else:
+                time.sleep(2)
+                self.connect_netease_game()
+        raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
 
     def test_dns(self, dns1):
         test_getdns = self.adb.shell('getprop net.dns1')  # 这样获取的dns才是准的
@@ -396,17 +407,18 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    print d(resourceId="com.netease.my:id/netease_mpay__login_channels").child(text="更多").click()
     # print d(text='IP 设定').down(className="android.widget.Spinner").click()
 
-    a = Android('d523384', minicap_stream=True)
-    # a.home()
-    for i in range(1000):
-        print "get next frame"
-        frame = a.snapshot()
-        time.sleep(1)
+    # a = Android('d523384', minicap_stream=True)
+    # # a.home()
+    # for i in range(1000):
+    #     print "get next frame"
+    #     frame = a.snapshot()
+    #     time.sleep(1)
 
 
     # for d in stf.get_device_list_rest(None):
