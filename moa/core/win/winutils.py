@@ -237,13 +237,13 @@ def mouse_dclick(x=None,y=None):
 def mouse_move(x,y):
     windll.user32.SetCursorPos(x, y)
 
-def mouse_drag((x0, y0), (x1, y1), duration=0.3, steps=5):
-    mouse_move(x0,y0)
+def mouse_drag((x0, y0), (x1, y1), duration=0.3, steps=10):
+    mouse_move(x0, y0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    interval = float(duration)/(steps+1)
+    interval = float(duration) / (steps + 1)
     time.sleep(interval)
-    for i in range(1, steps):
-        _x, _y = x0+(x1-x0)*i/steps, y0+(y1-y0)*i/steps
+    for i in range(1, steps+1):
+        _x, _y = x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps
         mouse_move(_x, _y)
         time.sleep(interval)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)

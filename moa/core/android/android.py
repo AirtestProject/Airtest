@@ -39,7 +39,7 @@ ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
 DEBUG = True
 RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
-ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
+ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "AccessibilityService.apk")
 ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ACCESSIBILITYSERVICE_VERSION = 2.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
@@ -868,7 +868,6 @@ class Android(object):
 
     def install(self, filepath, reinstall=False, check=True):
         self.wake()
-        self.keyevent("HOME")
 
         # 预装accessibility的apk，用于自动点掉各种弹框
         packages = self.amlist()

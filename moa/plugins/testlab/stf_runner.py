@@ -21,16 +21,16 @@ def join(serialno):
     占用stf设备，通过设备号获取connect的地址
     注意，这里将print addr作为输出，一定不要print其他信息(坑爹的jenkins pipeline)
     """
-    join = stf.join_group(serialno)
-    if not join['success']:
-        pprint(join)
+    joined = stf.join_group(serialno)
+    if not joined['success']:
+        pprint(joined)
         raise RuntimeError("join group failed:%s" % serialno)
 
-    connect = stf.remote_connect(serialno)
-    if not connect["success"]:
+    connected = stf.remote_connect(serialno)
+    if not connected["success"]:
         # pprint(connect)
         raise RuntimeError("remote connect failed:%s" % serialno)
-    addr = connect["remoteConnectUrl"]
+    addr = connected["remoteConnectUrl"]
     print addr
     return addr
 
@@ -100,6 +100,10 @@ def install(addr, apk):
     """安装apk"""
     clearapk(addr)
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
+    def mute(dev):
+        for i in range(5):
+            dev.shell("input keyevent 25")
+    mute(a)
     a.install(apk, reinstall=True, check=True)
 
 
