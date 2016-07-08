@@ -60,6 +60,7 @@ class DefaultDnsSetter(object):
 
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
+        time.sleep(1.5)
         self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
         if strict:
             self.test_netease_game_connected()
@@ -171,6 +172,7 @@ class DefaultDnsSetter(object):
             if uiobj:
                 self.uiutil.replace_text(uiobj, masklen)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+        time.sleep(2)
 
     @particular_case.default_call
     def get_current_ssid(self):
@@ -205,7 +207,8 @@ class DefaultDnsSetter(object):
             if matcher and matcher.group(1) != '0':
                 return True
             else:
-                time.sleep(1.5)
+                time.sleep(2)
+                self.connect_netease_game()
         raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
 
     def test_dns(self, dns1):
