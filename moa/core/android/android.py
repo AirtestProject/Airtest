@@ -868,7 +868,6 @@ class Android(object):
 
     def install(self, filepath, reinstall=False, check=True):
         self.wake()
-
         # 预装accessibility的apk，用于自动点掉各种弹框
         packages = self.amlist()
         if ACCESSIBILITYSERVICE_PACKAGE not in packages:
