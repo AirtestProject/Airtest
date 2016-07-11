@@ -113,13 +113,12 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script, utils_dir=""):
+def run(addr, moa_script, utilfile=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
     filename = os.path.basename(moa_script)
     shutil.copytree(moa_script, filename)
-    utilfile = os.path.join(utils_dir, "utils.py")
     p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen", "--utilfile", utilfile
     ])
