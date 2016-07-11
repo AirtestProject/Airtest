@@ -877,10 +877,11 @@ class Android(object):
         if apk_package in packages:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
+                print "package:%s already exists, uninstall first" % apk_package
                 self.uninstall(apk_package)
             # 否则直接return True
             else:
-                print "package:%s already exists" % apk_package
+                print "package:%s already exists, skip reinstall" % apk_package
                 return True
 
         # 唤醒设备
