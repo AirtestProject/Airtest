@@ -146,6 +146,14 @@ def cleanup(serialno):
     stf.leave_group(serialno)
 
 
+def listscripts(path):
+    """获取脚本列表"""
+    for root, dirs, files in os.walk(path, True):
+        for name in dirs:
+            if name.endswith(".owl"):
+                print(os.path.join(root,name))
+
+
 def main():
     action = sys.argv[1]
     thismodule = sys.modules[__name__]
