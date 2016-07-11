@@ -100,6 +100,10 @@ def install(addr, apk):
     """安装apk"""
     clearapk(addr)
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
+    def mute(dev):
+        for i in range(5):
+            dev.shell("input keyevent 25")
+    mute(a)
     a.install(apk, reinstall=True, check=True)
 
 

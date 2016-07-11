@@ -39,8 +39,9 @@ ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
 DEBUG = True
 RELEASELOCK_APK = os.path.join(THISPATH, "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
-ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "accessibilityservice.apk")
+ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "AccessibilityService.apk")
 ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
+ACCESSIBILITYSERVICE_VERSION = 2.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 
@@ -872,6 +873,21 @@ class Android(object):
         packages = self.amlist()
         if ACCESSIBILITYSERVICE_PACKAGE not in packages:
             self.adb.install(ACCESSIBILITYSERVICE_APK)
+        else:
+            output = self.adb.shell("dumpsys package "+ACCESSIBILITYSERVICE_PACKAGE)
+            try:
+                version = re.search("versionName=(\S+)", output)
+                version = float(version.group().split("=")[1])
+            except (ValueError, IndexError, AttributeError):
+                version = -1
+            if version >= ACCESSIBILITYSERVICE_VERSION:
+                print 'accessibility service install skipped'
+            else:
+                print 'current version:', version
+                print 'upgrading accessibility service to lastest version:', ACCESSIBILITYSERVICE_VERSION
+                self.uninstall(ACCESSIBILITYSERVICE_PACKAGE)
+                self.adb.install(ACCESSIBILITYSERVICE_APK)
+
         # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
         # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
         # by liuxin 2016.6.17

@@ -34,7 +34,7 @@ class Windows(object):
         mouse_click(pos, right_click)
 
     def swipe(self, p1, p2, duration=0.8):
-        mouse_drag(p1, p2, duration=0.8)  # windows拖拽时间固定为0.8s
+        mouse_drag(p1, p2, duration=duration)  # windows拖拽时间固定为0.8s
 
     def find_window(self, wildcard):
         """
