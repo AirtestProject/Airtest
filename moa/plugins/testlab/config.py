@@ -20,6 +20,8 @@ PKG_NOT_REMOVE = [
     "jp.co.cyberagent.stf.rotationwatcher",
     "jp.co.cyberagent.stf",
     "jp.jun_nama.test.utf7ime",
+    # 保留的游戏app
+    "com.netease.my",
 ]
 
 
