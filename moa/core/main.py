@@ -145,8 +145,8 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
         if sn is None:
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
     dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
-    dev.wake()
-    print dev
+    # dev.wake()
+    # print dev
     global CVSTRATEGY, DEVICE, DEVICE_LIST
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
     DEVICE = dev

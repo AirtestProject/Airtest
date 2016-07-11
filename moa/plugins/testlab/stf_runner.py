@@ -96,7 +96,7 @@ def clearapk(addr):
         a.amuninstall(i)
 
 
-def install(addr, apk):
+def install(addr, apk, reinstall=True):
     """安装apk"""
     clearapk(addr)
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
@@ -104,7 +104,7 @@ def install(addr, apk):
         for i in range(5):
             dev.shell("input keyevent 25")
     mute(a)
-    a.install(apk, reinstall=True, check=True)
+    a.install(apk, reinstall=(reinstall=="true"), check=True)
 
 
 def startapp(addr, package):
@@ -113,7 +113,7 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script, utils_dir=""):
+def run(addr, moa_script, utilfile=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess

@@ -867,10 +867,26 @@ class Android(object):
         self.adb.shell(cmd)
 
     def install(self, filepath, reinstall=False, check=True):
-        self.wake()
-
-        # 预装accessibility的apk，用于自动点掉各种弹框
+        """
+        安装应用
+        """
+        # 先解析apk，看是否存在已安装的app
         packages = self.amlist()
+        apk = apkparser.APK(filepath)
+        apk_package = apk.get_package()
+        if apk_package in packages:
+            # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
+            if reinstall:
+                print "package:%s already exists, uninstall first" % apk_package
+                self.uninstall(apk_package)
+            # 否则直接return True
+            else:
+                print "package:%s already exists, skip reinstall" % apk_package
+                return True
+
+        # 唤醒设备
+        self.wake()
+        # 预装accessibility的apk，用于自动点掉各种弹框
         if ACCESSIBILITYSERVICE_PACKAGE not in packages:
             self.adb.install(ACCESSIBILITYSERVICE_APK)
         else:
@@ -894,12 +910,6 @@ class Android(object):
         self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
         self.adb.shell('settings put secure accessibility_enabled 1')
 
-        # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
-        apk = apkparser.APK(filepath)
-        apk_package = apk.get_package()
-        if reinstall:
-            if apk_package in packages:
-                self.uninstall(apk_package)
         # rm all apks in /data/local/tmp to get enouph space
         self.adb.shell("rm -f /data/local/tmp/*.apk")
         self.adb.install(filepath)
