@@ -878,7 +878,7 @@ class Android(object):
             try:
                 version = re.search("versionName=(\S+)", output)
                 version = float(version.group().split("=")[1])
-            except (ValueError, IndexError):
+            except (ValueError, IndexError, AttributeError):
                 version = -1
             if version >= ACCESSIBILITYSERVICE_VERSION:
                 print 'accessibility service install skipped'
