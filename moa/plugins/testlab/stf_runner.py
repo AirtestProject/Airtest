@@ -104,7 +104,7 @@ def install(addr, apk, reinstall=True):
         for i in range(5):
             dev.shell("input keyevent 25")
     mute(a)
-    a.install(apk, reinstall=reinstall, check=True)
+    a.install(apk, reinstall=(reinstall=="true"), check=True)
 
 
 def startapp(addr, package):
