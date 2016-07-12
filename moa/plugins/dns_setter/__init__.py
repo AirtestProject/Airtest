@@ -12,7 +12,7 @@ from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
-from particular_devices.samsung import Galaxy, GalaxyNoet2
+from particular_devices.samsung import Galaxy, GalaxyNote2, GalaxyNote5
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
@@ -297,7 +297,7 @@ class DefaultDnsSetter(object):
             self.test_ping('www.baidu.com')
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNoet2):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNote2, GalaxyNote5):
     pass
 
 
@@ -407,13 +407,17 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    print d(resourceId="com.netease.my:id/netease_mpay__login_channels").child(text="更多").click()
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
+    # d.click(1440, 800)
+    # from moa.plugins.sdkautomator.sdkautomator import neteasesdk
+    # sau = neteasesdk.NeteaseSDK('0815f8485f032404')
+    # sau.do_login('1231', '123', 10)
+    # print d(resourceId="com.netease.my:id/netease_mpay__login_channels").child(text="更多").click()
     # print d(text='IP 设定').down(className="android.widget.Spinner").click()
 
-    # a = Android('d523384', minicap_stream=True)
+    # a = Android('0815f8485f032404', minicap_stream=True)
     # # a.home()
     # for i in range(1000):
     #     print "get next frame"
@@ -436,29 +440,31 @@ if __name__ == '__main__':
     #         print 'finish!'
     #         time.sleep(40)
 
-    # import requests
-    #
-    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ2ODgxOTE2OSwiaWF0IjoxNDY2MjI3MTY5fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.YKUOtcoBRgoMr1LDNAl5UbXlZx9lceTD_KXKy3lZOro'
-    # def create_instruction(tokenid, data, **kwargs):
-    #     data.update(kwargs)
-    #     r = requests.post('http://hunter.nie.netease.com/api/instruction', headers={'tokenid': tokenid}, data=data)
-    #     if r.status_code == 201:
-    #         try:
-    #             return r.json()
-    #         except:
-    #             pass
-    #     else:
-    #         print '======================================================================\n'
-    #         print 'r.status_code=', r.status_code
-    #         print 'data=', data
-    #         print 'message=', r.json()['message']
-    #         print '======================================================================\n'
-    #     return None
-    #
-    # instruction = {
-    #     'name': 'fun1(a, b)',
-    #     'code': 'print a, b',
-    #     'process': 'safaia',
-    #     'category': '中文',
-    # }
-    # print create_instruction(tokenid, instruction)
+    import requests
+
+    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MTIxNiwiaWF0IjoxNDY3OTY5MjE2fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.jBrBI4ksqjpU_rCQIlK-JIgBR3YpYn-KCMU7VNoXxsk'
+    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MjQ2MiwiaWF0IjoxNDY3OTcwNDYyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.CMHetTEla9i_0pXFh8R2zAx9glkWvYjvF-MLBekrXWI'
+    def create_instruction(tokenid, data, **kwargs):
+        data.update(kwargs)
+        r = requests.post('http://10.251.93.179:32022/api/sendto_device', headers={'tokenid': tokenid}, data=data)
+        if r.status_code == 201:
+            try:
+                return r.json()
+            except:
+                pass
+        else:
+            print '======================================================================\n'
+            print 'r.status_code=', r.status_code
+            print 'data=', data
+            print 'message=', r.json()['message']
+            print '======================================================================\n'
+        return None
+
+    data = {
+        'devid': 'g18_at_10-254-29-164',
+        'data': 'showMessage',
+        'lang': 'lua',
+    }
+    for i in range(200):
+        print create_instruction(tokenid, data)
+        time.sleep(5)

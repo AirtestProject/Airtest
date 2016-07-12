@@ -96,11 +96,15 @@ def clearapk(addr):
         a.amuninstall(i)
 
 
-def install(addr, apk):
+def install(addr, apk, reinstall=True):
     """安装apk"""
     clearapk(addr)
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
-    a.install(apk, reinstall=True, check=True)
+    def mute(dev):
+        for i in range(5):
+            dev.shell("input keyevent 25")
+    mute(a)
+    a.install(apk, reinstall=(reinstall=="true"), check=True)
 
 
 def startapp(addr, package):
@@ -109,13 +113,14 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script, utils_dir=""):
+def run(addr, moa_script, utilfile=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
     filename = os.path.basename(moa_script)
-    shutil.copytree(moa_script, filename)
-    utilfile = os.path.join(utils_dir, "utils.py")
+    if not os.path.exists(filename):
+        shutil.copytree(moa_script, filename)
+##    utilfile = os.path.join(utils_dir, "utils.py")
     p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen", "--utilfile", utilfile
     ])
@@ -139,6 +144,16 @@ def cleanup(serialno):
     """清场，释放stf设备"""
     stf.remote_disconnect(serialno)
     stf.leave_group(serialno)
+
+
+def listscripts(path):
+    """获取一个目录下的moa脚本列表，返回相对路径"""
+    os.chdir(path)
+    for root, dirs, files in os.walk(".", True):
+        for name in dirs:
+            if name.endswith(".owl"):
+                file_name = os.path.join(root,name)
+                print file_name
 
 
 def main():

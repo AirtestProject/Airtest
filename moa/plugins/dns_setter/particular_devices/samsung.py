@@ -8,6 +8,7 @@ from . import particular_case
 
 GALAXY = ('07173333', )
 GALAXY_NOTE2 = ('4df74f4b47e33081', )
+GALAXY_NOTE5 = ('0815f8485f032404', )
 
 
 class Galaxy(object):
@@ -65,7 +66,7 @@ class Galaxy(object):
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
 
-class GalaxyNoet2(object):
+class GalaxyNote2(object):
     def scroll_find_legacy(self, pattern):
         scrollable = self.uiutil.get_scrollable()
         for _ in range(4):
@@ -139,3 +140,11 @@ class GalaxyNoet2(object):
         if dnsfield:
             self.uiutil.replace_text(dnsfield, dns1)
         self.uiutil.click_any({'text': u'储存'})
+
+
+class GalaxyNote5(object):
+    @particular_case.specified(GALAXY_NOTE5)
+    def enter_wlan_settings(self):
+        self.d(text='netease_game').long_click()
+        time.sleep(0.5)
+        self.uiutil.click_any({'text': u'管理网络设置'})
