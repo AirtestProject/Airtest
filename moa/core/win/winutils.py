@@ -385,6 +385,28 @@ class WindowMgr:
         """find a window by its class_name"""
         self._handle = win32gui.FindWindow(class_name, window_name)
 
+    def find_hwnd_title(self, h_wnd):
+        """获取指定hwnd的title."""
+        def _wnd_enum_callback(hwnd, h_wnd=None):
+            if hwnd == h_wnd:
+                window_title = win32gui.GetWindowText(hwnd)
+                window_title = window_title.decode("gbk")
+                self._wnd_title_toget = window_title
+                # print window_title.encode("utf8")
+
+        self._wnd_title_toget = None
+        win32gui.EnumWindows(_wnd_enum_callback, h_wnd)
+        return self._wnd_title_toget
+
+    def find_all_hwnd(self, test_str):
+        """获取所有窗口的hwnd."""
+        def _wnd_enum_callback(hwnd, test_str=None):
+            self._all_hwnd_list.append(hwnd)
+
+        self._all_hwnd_list = []
+        win32gui.EnumWindows(_wnd_enum_callback, test_str)
+        return self._all_hwnd_list
+
     def _window_enum_callback(self, hwnd, wildcard):
         '''Pass to win32gui.EnumWindows() to check all the opened windows'''
         window_title = win32gui.GetWindowText(hwnd)

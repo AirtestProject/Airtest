@@ -43,6 +43,22 @@ class Windows(object):
         self.window_title = wildcard
         return self.winmgr.find_window_wildcard(wildcard)
 
+    def find_hwnd_title(self, hwnd):
+        """
+        获取指定hwnd的title.
+        """
+        title = self.winmgr.find_hwnd_title(hwnd)
+        # print "in win.py : find_hwnd_title()", title.encode("utf8")
+        return title
+
+    def find_all_hwnd(self):
+        """
+        获取当前的所有窗口队列.
+        """
+        hwnd_list = self.winmgr.find_all_hwnd("get_all")  # 获取所有的窗口句柄
+        # print "in win.py : find_hwnd_title()", title.encode("utf8")
+        return hwnd_list
+
     def find_window_list(self, wildcard):
         self.window_title = wildcard
         return self.winmgr.find_window_list(wildcard)
