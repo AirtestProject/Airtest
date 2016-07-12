@@ -398,13 +398,13 @@ class WindowMgr:
         win32gui.EnumWindows(_wnd_enum_callback, h_wnd)
         return self._wnd_title_toget
 
-    def find_all_hwnd(self, test_str):
+    def find_all_hwnd(self):
         """获取所有窗口的hwnd."""
         def _wnd_enum_callback(hwnd, test_str=None):
             self._all_hwnd_list.append(hwnd)
 
         self._all_hwnd_list = []
-        win32gui.EnumWindows(_wnd_enum_callback, test_str)
+        win32gui.EnumWindows(_wnd_enum_callback, "")
         return self._all_hwnd_list
 
     def _window_enum_callback(self, hwnd, wildcard):

@@ -55,7 +55,7 @@ class Windows(object):
         """
         获取当前的所有窗口队列.
         """
-        hwnd_list = self.winmgr.find_all_hwnd("get_all")  # 获取所有的窗口句柄
+        hwnd_list = self.winmgr.find_all_hwnd()  # 获取所有的窗口句柄
         # print "in win.py : find_hwnd_title()", title.encode("utf8")
         return hwnd_list
 
