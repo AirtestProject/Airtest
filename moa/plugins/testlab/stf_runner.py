@@ -120,7 +120,7 @@ def run(addr, moa_script, utilfile=""):
     filename = os.path.basename(moa_script)
     if not os.path.exists(filename):
         shutil.copytree(moa_script, filename)
-    utilfile = os.path.join(utils_dir, "utils.py")
+##    utilfile = os.path.join(utils_dir, "utils.py")
     p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen", "--utilfile", utilfile
     ])
@@ -151,7 +151,8 @@ def listscripts(path):
     for root, dirs, files in os.walk(path, True):
         for name in dirs:
             if name.endswith(".owl"):
-                print(os.path.join(root,name))
+                file_name = os.path.join(root,name)
+                print file_name.replace(".\\moaworkspace\\","")
 
 
 def main():
