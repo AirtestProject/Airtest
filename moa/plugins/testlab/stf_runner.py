@@ -147,7 +147,7 @@ def cleanup(serialno):
 
 
 def listscripts(path):
-    """获取脚本列表"""
+    """获取一个目录下的moa脚本列表"""
     for root, dirs, files in os.walk(path, True):
         for name in dirs:
             if name.endswith(".owl"):
