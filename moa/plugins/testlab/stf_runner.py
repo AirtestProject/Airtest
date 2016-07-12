@@ -148,11 +148,12 @@ def cleanup(serialno):
 
 def listscripts(path):
     """获取一个目录下的moa脚本列表"""
+    os.chdir(path)
     for root, dirs, files in os.walk(path, True):
         for name in dirs:
             if name.endswith(".owl"):
                 file_name = os.path.join(root,name)
-                print file_name.replace(".\\moaworkspace\\","")
+                print file_name
 
 
 def main():
