@@ -151,7 +151,8 @@ def listscripts(path):
     for root, dirs, files in os.walk(path, True):
         for name in dirs:
             if name.endswith(".owl"):
-                print(os.path.join(root,name))
+                file_name = os.path.join(root,name)
+                print file_name.replace(".\\moaworkspace\\","")
 
 
 def main():
