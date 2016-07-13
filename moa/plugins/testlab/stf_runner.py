@@ -84,6 +84,7 @@ def setdns(sn, addr, dns, verify_host='www.163.com'):
         dsetter.test_ping(verify_host, max_try=1)
     except:
         dsetter.set_dns(dns)
+        dsetter.test_ping(verify_host)
     a.home()
 
 

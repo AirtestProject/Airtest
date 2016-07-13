@@ -283,10 +283,6 @@ class DefaultDnsSetter(object):
         if dns1 != '-1':
             print '[DNS SETTER] check current dns1'
             self.test_dns(dns1)
-            self.test_ping('192.168.40.111')
-        else:
-            print '[DNS SETTER] validate network connection'
-            self.test_ping('www.163.com')
 
 
 class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNote2, GalaxyNote5):
