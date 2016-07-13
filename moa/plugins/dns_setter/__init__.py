@@ -196,12 +196,12 @@ class DefaultDnsSetter(object):
         elif ssid != 'netease_game':
             raise Exception('cannot connect to netease_game. current AP is {}'.format(ssid))
 
-    def test_ping(self, server):
+    def test_ping(self, server, max_try=5):
         """
         try 5 times to ping a server, success if any of ping is ok
         """
         result = ''
-        for i in range(5):
+        for i in range(max_try):
             result = self.adb.shell('ping -c2 {}'.format(server))
             matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
             if matcher and matcher.group(1) != '0':
@@ -238,14 +238,6 @@ class DefaultDnsSetter(object):
         if dns1 in self.adb.shell('getprop net.dns1'):
             print '[DNS SETTER] skip, dns already satisfied.'
             return True
-
-        # if dns1 == '-1':
-        #     try:
-        #         self.test_ping('www.baidu.com')
-        #         print '[DNS SETTER] skip switching to dhcp mode. network is available.'
-        #         return True
-        #     except:
-        #         pass
 
         # change STATIC mode and dns
         with self.android.ime:
@@ -294,7 +286,7 @@ class DefaultDnsSetter(object):
             self.test_ping('192.168.40.111')
         else:
             print '[DNS SETTER] validate network connection'
-            self.test_ping('www.baidu.com')
+            self.test_ping('www.163.com')
 
 
 class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNote2, GalaxyNote5):
