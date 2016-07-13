@@ -307,7 +307,7 @@ class Minicap(object):
 
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
 
-    VERSION = 3
+    VERSION = 4
 
     def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None, stream=True):
         self.serialno = serialno

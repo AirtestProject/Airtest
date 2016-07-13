@@ -60,7 +60,7 @@ def test(addr):
     # a.amstart("com.netease.thdmx")
 
 
-def setdns(sn, addr, dns):
+def setdns(sn, addr, dns, verify_host='www.163.com'):
     """设置dns"""
 
     # these two device cannot connect to netease_game
@@ -80,7 +80,11 @@ def setdns(sn, addr, dns):
     a.wake()
     dsetter = DnsSetter(addr, sn)
     dsetter.network_prepare()
-    dsetter.set_dns(dns)
+    try:
+        dsetter.test_ping(verify_host, max_try=1)
+    except:
+        dsetter.set_dns(dns)
+        dsetter.test_ping(verify_host)
     a.home()
 
 
