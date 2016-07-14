@@ -323,7 +323,7 @@ class Minicap(object):
         self.stream_lock = threading.Lock()
         self.init_stream()
 
-    def install(self, reinstall=True):
+    def install(self, reinstall=False):
         """install or upgrade minicap"""
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
