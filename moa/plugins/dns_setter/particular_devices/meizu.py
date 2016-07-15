@@ -83,23 +83,25 @@ class MX3(object):
 
     @particular_case.specified(MX3_ALL)
     def is_dhcp_mode(self):
-        switch = self.d(className="android.widget.Switch", text=u'关闭')
-        return switch and switch.exists
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
+        return switch and switch.exists and (not switch.checked or switch.text == u'关闭')
 
     @particular_case.specified(MX3_ALL)
     def use_dhcp(self):
-        switch = self.d(className="android.widget.Switch", text=u'打开')
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
         if switch and switch.exists:
-            switch.click()
-            time.sleep(0.5)
+            if switch.text == u'打开' or switch.checked:
+                switch.click()
+                time.sleep(0.5)
         self.uiutil.click_any({'text': u'保存'})
 
     @particular_case.specified(MX3_ALL)
     def use_static_ip(self):
-        switch = self.d(className="android.widget.Switch", text=u'关闭')
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
         if switch and switch.exists:
-            switch.click()
-            time.sleep(0.5)
+            if switch.text == u'关闭' or not switch.checked:
+                switch.click()
+                time.sleep(0.5)
 
     @particular_case.specified(MX3_ALL)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
