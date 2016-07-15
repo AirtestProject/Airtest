@@ -12,7 +12,7 @@ from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
-from particular_devices.samsung import Galaxy, GalaxyNote2, GalaxyNote5
+from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
@@ -33,6 +33,9 @@ class DefaultDnsSetter(object):
         self.android = Android(rsn, init_display=False, minicap=False, minitouch=False, init_ime=True)
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
+
+    def clear_float_tips(self):
+        self.uiutil.click_any({'text': u'取消'}, {'text': u'确定'}, {'text': u'好'})
 
     @particular_case.specified(['2053d814', 'd523384'])
     def enter_wlan_list(self):
@@ -61,7 +64,7 @@ class DefaultDnsSetter(object):
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
         time.sleep(1.5)
-        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=40000)
         if strict:
             self.test_netease_game_connected()
 
@@ -190,7 +193,7 @@ class DefaultDnsSetter(object):
     def test_netease_game_connected(self):
         ssid = self.get_current_ssid()
         if ssid is None:
-            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=40000)
             if not success:
                 raise Exception('cannot connect to netease_game. network not available.')
         elif ssid != 'netease_game':
@@ -285,7 +288,7 @@ class DefaultDnsSetter(object):
             self.test_dns(dns1)
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNote2, GalaxyNote5):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5):
     pass
 
 
@@ -395,15 +398,12 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
-    # d.click(1440, 800)
-    # from moa.plugins.sdkautomator.sdkautomator import neteasesdk
-    # sau = neteasesdk.NeteaseSDK('0815f8485f032404')
-    # sau.do_login('1231', '123', 10)
-    # print d(resourceId="com.netease.my:id/netease_mpay__login_channels").child(text="更多").click()
-    # print d(text='IP 设定').down(className="android.widget.Spinner").click()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    d(text='开启WLAN').right(checkable="true").click()
+    d(text='开启WLAN').right(checkable="true").click()
+    # ds = DnsSetter('10.249.81.76:57089', '10.249.81.76:57089')
 
     # a = Android('0815f8485f032404', minicap_stream=True)
     # # a.home()
@@ -428,31 +428,31 @@ if __name__ == '__main__':
     #         print 'finish!'
     #         time.sleep(40)
 
-    import requests
-
-    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MTIxNiwiaWF0IjoxNDY3OTY5MjE2fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.jBrBI4ksqjpU_rCQIlK-JIgBR3YpYn-KCMU7VNoXxsk'
-    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MjQ2MiwiaWF0IjoxNDY3OTcwNDYyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.CMHetTEla9i_0pXFh8R2zAx9glkWvYjvF-MLBekrXWI'
-    def create_instruction(tokenid, data, **kwargs):
-        data.update(kwargs)
-        r = requests.post('http://10.251.93.179:32022/api/sendto_device', headers={'tokenid': tokenid}, data=data)
-        if r.status_code == 201:
-            try:
-                return r.json()
-            except:
-                pass
-        else:
-            print '======================================================================\n'
-            print 'r.status_code=', r.status_code
-            print 'data=', data
-            print 'message=', r.json()['message']
-            print '======================================================================\n'
-        return None
-
-    data = {
-        'devid': 'g18_at_10-254-29-164',
-        'data': 'showMessage',
-        'lang': 'lua',
-    }
-    for i in range(200):
-        print create_instruction(tokenid, data)
-        time.sleep(5)
+    # import requests
+    #
+    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MTIxNiwiaWF0IjoxNDY3OTY5MjE2fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.jBrBI4ksqjpU_rCQIlK-JIgBR3YpYn-KCMU7VNoXxsk'
+    # # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ3MDU2MjQ2MiwiaWF0IjoxNDY3OTcwNDYyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.CMHetTEla9i_0pXFh8R2zAx9glkWvYjvF-MLBekrXWI'
+    # def create_instruction(tokenid, data, **kwargs):
+    #     data.update(kwargs)
+    #     r = requests.post('http://10.251.93.179:32022/api/sendto_device', headers={'tokenid': tokenid}, data=data)
+    #     if r.status_code == 201:
+    #         try:
+    #             return r.json()
+    #         except:
+    #             pass
+    #     else:
+    #         print '======================================================================\n'
+    #         print 'r.status_code=', r.status_code
+    #         print 'data=', data
+    #         print 'message=', r.json()['message']
+    #         print '======================================================================\n'
+    #     return None
+    #
+    # data = {
+    #     'devid': 'g18_at_10-254-29-164',
+    #     'data': 'showMessage',
+    #     'lang': 'lua',
+    # }
+    # for i in range(200):
+    #     print create_instruction(tokenid, data)
+    #     time.sleep(5)
