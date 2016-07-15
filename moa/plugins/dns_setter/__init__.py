@@ -398,12 +398,16 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    d(text='开启WLAN').right(checkable="true").click()
-    d(text='开启WLAN').right(checkable="true").click()
-    # ds = DnsSetter('10.249.81.76:57089', '10.249.81.76:57089')
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
+    # d(text='开启WLAN').right(checkable="true").click()
+    # d(text='开启WLAN').right(checkable="true").click()
+    ds = DnsSetter('10.254.28.35:7477', '0815f8485f032404')
+    ds.clear_float_tips()
+    ds.network_prepare()
+    ds.set_dns('192.168.229.227')
+    ds.test_ping('www.163.com')
 
     # a = Android('0815f8485f032404', minicap_stream=True)
     # # a.home()
