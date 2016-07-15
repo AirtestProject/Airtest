@@ -52,5 +52,5 @@ class UiautomatorIme(CustomIme):
 
 class AdbKeyboardIme(CustomIme):
     """支持中文输入"""
-    def __init__(self, arg):
+    def __init__(self, adb):
         super(AdbKeyboardIme, self).__init__(adb, ADBKEYBOARD_IME_PATH, ADBKEYBOARD_SERVICE)
