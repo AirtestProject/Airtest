@@ -58,7 +58,9 @@ class MX4(object):
     @particular_case.specified(MX4_ALL)
     @particular_case.specified(MX5_ALL)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
-        self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')  # 横屏模式下可能会遮住下面的域名 1
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')  # 横屏模式下可能会遮住下面的域名 1
+            time.sleep(1.5)
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -105,7 +107,9 @@ class MX3(object):
 
     @particular_case.specified(MX3_ALL)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
-        self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+            time.sleep(1.5)
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -166,7 +170,9 @@ class MeiLanNote(object):
 
     @particular_case.specified(MX_MEILAN_NOTE)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
-        self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+            time.sleep(1.5)
         uiobj = self.d(textMatches=ur'(DNS\s*1|域名\s*1)').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
