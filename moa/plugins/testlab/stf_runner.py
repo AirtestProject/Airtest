@@ -81,11 +81,16 @@ def setdns(sn, addr, dns, verify_host='www.163.com'):
     dsetter = DnsSetter(addr, sn)
     dsetter.clear_float_tips()
     dsetter.network_prepare()
-    try:
-        dsetter.test_ping(verify_host, max_try=1)
-    except:
+    if dns == '-1':
+        # -1时强制设置成dhcp mode
         dsetter.set_dns(dns)
-        dsetter.test_ping(verify_host)
+        dsetter.test_ping('www.163.com')
+    else:
+        try:
+            dsetter.test_ping(verify_host, max_try=1)
+        except:
+            dsetter.set_dns(dns)
+            dsetter.test_ping(verify_host)
     a.home()
 
 
