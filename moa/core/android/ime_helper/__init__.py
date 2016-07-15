@@ -35,7 +35,13 @@ class CustomIme(object):
 
     def start(self):
         if self.service_name not in self.ime_list:
+            # to be fixed.....maybe: with accessibilty:
+            self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+            self.adb.shell('settings put secure accessibility_enabled 1')
             self.adb.cmd("install -r %s" % self.apk_path)
+            self.adb.shell('settings put secure accessibility_enabled 0')
+            self.adb.shell('settings put secure enabled_accessibility_services 0')
+
         self.adb.shell("ime enable %s" % self.service_name)
         self.adb.shell("ime set %s" % self.service_name)
 
