@@ -79,6 +79,7 @@ def setdns(sn, addr, dns, verify_host='www.163.com'):
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.wake()
     dsetter = DnsSetter(addr, sn)
+    dsetter.clear_float_tips()
     dsetter.network_prepare()
     try:
         dsetter.test_ping(verify_host, max_try=1)
