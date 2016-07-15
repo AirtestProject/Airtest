@@ -975,7 +975,7 @@ class Android(object):
         self.keyevent("HOME")
 
     def text(self, text):
-        if self.init_ime:
+        if getattr(self, "ime", None):
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
             self.adb.shell(["input", "keyevent", "ENTER"])
         else:
