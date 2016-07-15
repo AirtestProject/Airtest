@@ -18,9 +18,10 @@ class MIx(object):
         time.sleep(0.5)
 
         # switch on
-        wlan_switch = self.d(text='开启WLAN').right(checkable="true")
-        if wlan_switch and wlan_switch.exists and not wlan_switch.checked:
-            wlan_switch.click()
+        if self.d(text=u'开启WLAN').exists:
+            wlan_switch = self.d(text=u'开启WLAN').right(checkable="true")
+            if wlan_switch and wlan_switch.exists and not wlan_switch.checked:
+                wlan_switch.click()
 
     @particular_case.specified(MI_SERIALS)
     def enter_wlan_advanced_settings(self):
