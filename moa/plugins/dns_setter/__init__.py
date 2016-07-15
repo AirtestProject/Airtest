@@ -12,7 +12,7 @@ from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
-from particular_devices.samsung import Galaxy, GalaxyNote2, GalaxyNote5
+from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
@@ -288,7 +288,7 @@ class DefaultDnsSetter(object):
             self.test_dns(dns1)
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, GalaxyNote2, GalaxyNote5):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5):
     pass
 
 
@@ -401,6 +401,7 @@ if __name__ == '__main__':
     from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
+
     # ds = DnsSetter('10.249.81.76:57089', '10.249.81.76:57089')
 
     # a = Android('0815f8485f032404', minicap_stream=True)
