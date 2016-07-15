@@ -26,7 +26,7 @@ import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
 from moa.aircv import aircv
-from moa.core.android.ime_helper import UiautomatorIme
+from moa.core.android.ime_helper import AdbKeyboardIme
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -777,7 +777,8 @@ class Android(object):
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = UiautomatorIme(self.adb)
+            self.ime = AdbKeyboardIme(self.adb)
+            self.toggle_shell_ime()
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -974,7 +975,11 @@ class Android(object):
         self.keyevent("HOME")
 
     def text(self, text):
-        self.adb.shell(["input", "text", text])
+        if self.init_ime:
+            self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
+            self.adb.shell(["input", "keyevent", "ENTER"])
+        else:
+            self.adb.shell(["input", "text", text])
 
     def toggle_shell_ime(self, on=True):
         """切换到shell的输入法，用于text"""
