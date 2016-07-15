@@ -64,7 +64,7 @@ class DefaultDnsSetter(object):
         # 优先连接
         self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
         time.sleep(1.5)
-        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+        self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=40000)
         if strict:
             self.test_netease_game_connected()
 
@@ -193,7 +193,7 @@ class DefaultDnsSetter(object):
     def test_netease_game_connected(self):
         ssid = self.get_current_ssid()
         if ssid is None:
-            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=30000)
+            success = self.uiutil.wait_any({'textMatches': ur'(已连接|已連線|connected).*$'}, timeout=40000)
             if not success:
                 raise Exception('cannot connect to netease_game. network not available.')
         elif ssid != 'netease_game':
@@ -401,7 +401,8 @@ if __name__ == '__main__':
     from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
-
+    d(text='开启WLAN').right(checkable="true").click()
+    d(text='开启WLAN').right(checkable="true").click()
     # ds = DnsSetter('10.249.81.76:57089', '10.249.81.76:57089')
 
     # a = Android('0815f8485f032404', minicap_stream=True)

@@ -16,8 +16,10 @@ class MIx(object):
     def enter_wlan_list(self):
         self.adb.shell('am start -a "android.net.wifi.PICK_WIFI_NETWORK" --activity-clear-top')
         time.sleep(0.5)
+
+        # switch on
         wlan_switch = self.d(text='开启WLAN').right(checkable="true")
-        if wlan_switch and not wlan_switch.checked:
+        if wlan_switch and wlan_switch.exists and not wlan_switch.checked:
             wlan_switch.click()
 
     @particular_case.specified(MI_SERIALS)
