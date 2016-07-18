@@ -13,6 +13,17 @@ MI_SERIALS = ('96528427', '4c6a4cf2', '4a139669', '4e49701b') + MI_2s + MI_2
 
 class MIx(object):
     @particular_case.specified(MI_SERIALS)
+    def enter_wlan_list(self):
+        self.adb.shell('am start -a "android.net.wifi.PICK_WIFI_NETWORK" --activity-clear-top')
+        time.sleep(0.5)
+
+        # switch on
+        if self.d(text=u'开启WLAN').exists:
+            wlan_switch = self.d(text=u'开启WLAN').right(checkable="true")
+            if wlan_switch and wlan_switch.exists and not wlan_switch.checked:
+                wlan_switch.click()
+
+    @particular_case.specified(MI_SERIALS)
     def enter_wlan_advanced_settings(self):
         pass
 

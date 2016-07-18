@@ -10,10 +10,13 @@ import random
 
 def devices():
     listDevices = stf.get_usable_device_list_rest()
+    ret = []
     for i in listDevices:
         if i['serial'] in TEST_DEVICE_LIST:
             serialno = i['serial']
             print serialno
+            ret.append(serialno)
+    return ret
 
 
 def join(serialno):
@@ -79,12 +82,18 @@ def setdns(sn, addr, dns, verify_host='www.163.com'):
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.wake()
     dsetter = DnsSetter(addr, sn)
+    dsetter.clear_float_tips()
     dsetter.network_prepare()
-    try:
-        dsetter.test_ping(verify_host, max_try=1)
-    except:
+    if dns == '-1':
+        # -1时强制设置成dhcp mode
         dsetter.set_dns(dns)
-        dsetter.test_ping(verify_host)
+        dsetter.test_ping('www.163.com')
+    else:
+        try:
+            dsetter.test_ping(verify_host, max_try=1)
+        except:
+            dsetter.set_dns(dns)
+            dsetter.test_ping(verify_host)
     a.home()
 
 
@@ -117,16 +126,17 @@ def startapp(addr, package):
     a.amstart(package)
 
 
-def run(addr, moa_script, utilfile=""):
+def run(addr, moa_script, utilfile="", user_vars=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
     filename = os.path.basename(moa_script)
     if not os.path.exists(filename):
         shutil.copytree(moa_script, filename)
-##    utilfile = os.path.join(utils_dir, "utils.py")
-    p = subprocess.Popen(["python", "-m", "moa.airtest_runner", filename,
-        "--setsn", addr, "--log", "--screen", "--utilfile", utilfile
+    p = subprocess.Popen([
+        "python", "-m", "moa.airtest_runner", filename,
+        "--setsn", addr, "--log", "--screen", 
+        "--utilfile", utilfile, "--kwargs", user_vars,
     ])
     p.wait()
     exit(p.returncode)
@@ -169,5 +179,21 @@ def main():
     func(*sys.argv[2:])
 
 
+def run_on_all_devices():
+    import subprocess
+    import traceback
+    for sn in devices():
+        try:
+            addr = join(sn)
+            dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
+            # turn screen red to find device
+            print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+        except:
+            traceback.print_exc()
+        finally:
+            cleanup(sn)
+
+
 if __name__ == '__main__':
     main()
+    # run_on_all_devices()

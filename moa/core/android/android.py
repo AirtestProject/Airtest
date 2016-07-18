@@ -26,7 +26,7 @@ import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
 from moa.aircv import aircv
-from moa.core.android.ime_helper import UiautomatorIme
+from moa.core.android.ime_helper import AdbKeyboardIme
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -323,7 +323,7 @@ class Minicap(object):
         self.stream_lock = threading.Lock()
         self.init_stream()
 
-    def install(self, reinstall=True):
+    def install(self, reinstall=False):
         """install or upgrade minicap"""
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
@@ -777,7 +777,8 @@ class Android(object):
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = UiautomatorIme(self.adb)
+            self.ime = AdbKeyboardIme(self.adb)
+            self.toggle_shell_ime()
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -958,6 +959,7 @@ class Android(object):
         #start release lock app
         self.amstop(RELEASELOCK_PACKAGE)
         self.amstart(RELEASELOCK_PACKAGE)
+        self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
         # todo:
         # 1. 还需要按power键吗？
@@ -974,7 +976,12 @@ class Android(object):
         self.keyevent("HOME")
 
     def text(self, text):
-        self.adb.shell(["input", "text", text])
+        if getattr(self, "ime", None):
+            text = text.decode("utf-8").encode(sys.stdin.encoding)
+            self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
+            self.adb.shell(["input", "keyevent", "ENTER"])
+        else:
+            self.adb.shell(["input", "text", text])
 
     def toggle_shell_ime(self, on=True):
         """切换到shell的输入法，用于text"""

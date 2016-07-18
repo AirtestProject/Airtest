@@ -1,8 +1,8 @@
 # encoding=utf-8
 
 
-STF_HOST_IP = 'phone.nie.netease.com'
-STF_TOKEN_ID = 'b77c4cf79ce940a6aeccc3ae987f1eb23cc2450b28544ca39662a56a8f546333'
+STF_HOST_IP = '192.168.40.111'
+STF_TOKEN_ID = 'bfa446e605ba4af8b0d14487b257435e3b06722aace84de09faffc7119302050'
 
 
 # 安装之前会先清掉第三方应用
@@ -20,6 +20,7 @@ PKG_NOT_REMOVE = [
     "jp.co.cyberagent.stf.rotationwatcher",
     "jp.co.cyberagent.stf",
     "jp.jun_nama.test.utf7ime",
+    "com.android.adbkeyboard",
     # 保留的游戏app
     "com.netease.my",
 ]
@@ -56,4 +57,7 @@ TEST_DEVICE_LIST = (
     'd523384',
     '0b2b5e3c',
     '8d95c245',
+    '0815f8485f032404',
+    '79AEALB253QE',
+    'G2W7N15930015071',
 )

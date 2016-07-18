@@ -58,6 +58,9 @@ class MX4(object):
     @particular_case.specified(MX4_ALL)
     @particular_case.specified(MX5_ALL)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')  # 横屏模式下可能会遮住下面的域名 1
+            time.sleep(1.5)
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -82,26 +85,31 @@ class MX3(object):
 
     @particular_case.specified(MX3_ALL)
     def is_dhcp_mode(self):
-        switch = self.d(className="android.widget.Switch", text=u'关闭')
-        return switch and switch.exists
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
+        return switch and switch.exists and (not switch.checked or switch.text == u'关闭')
 
     @particular_case.specified(MX3_ALL)
     def use_dhcp(self):
-        switch = self.d(className="android.widget.Switch", text=u'打开')
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
         if switch and switch.exists:
-            switch.click()
-            time.sleep(0.5)
+            if switch.text == u'打开' or switch.checked:
+                switch.click()
+                time.sleep(0.5)
         self.uiutil.click_any({'text': u'保存'})
 
     @particular_case.specified(MX3_ALL)
     def use_static_ip(self):
-        switch = self.d(className="android.widget.Switch", text=u'关闭')
+        switch = self.d(classNameMatches="^.*widget\.Switch$")
         if switch and switch.exists:
-            switch.click()
-            time.sleep(0.5)
+            if switch.text == u'关闭' or not switch.checked:
+                switch.click()
+                time.sleep(0.5)
 
     @particular_case.specified(MX3_ALL)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+            time.sleep(1.5)
         uiobj = self.d(text=u'域名 1').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 
@@ -162,6 +170,9 @@ class MeiLanNote(object):
 
     @particular_case.specified(MX_MEILAN_NOTE)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
+        if self.d.orientation != 'natural':
+            self.d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
+            time.sleep(1.5)
         uiobj = self.d(textMatches=ur'(DNS\s*1|域名\s*1)').right(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
 

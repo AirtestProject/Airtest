@@ -7,6 +7,7 @@ from . import particular_case
 
 
 GALAXY = ('07173333', )
+GALAXY_4 = ('4d00df1f9b034067', )
 GALAXY_NOTE2 = ('4df74f4b47e33081', )
 GALAXY_NOTE5 = ('0815f8485f032404', )
 
@@ -64,6 +65,26 @@ class Galaxy(object):
         uiobj = dns_title.down(className="android.widget.EditText")
         self.uiutil.replace_text(uiobj, dns1)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+
+
+class Galaxy4(object):
+    @particular_case.specified(GALAXY_4)
+    def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
+        uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'},
+                                        {'resourceId': 'com.android.settings.wifi:id/dns1'},
+                                        {'resourceId': 'com.lge.wifisettings:id/dns1'},
+                                        )
+        if uiobj:
+            self.uiutil.replace_text(uiobj, dns1)
+
+        # 恢复误操作的阶段2认证
+        self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/phase2'}).click()
+        time.sleep(0.5)
+        self.d(text=u'无').click()
+        time.sleep(0.5)
+
+        self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
+        time.sleep(2)
 
 
 class GalaxyNote2(object):
