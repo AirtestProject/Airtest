@@ -19,6 +19,7 @@ from moa.core.android.uiautomator import Device
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
 from moa.plugins.dns_setter import iputils
+from moa.core.android.ime_helper import UiautomatorIme
 
 
 SONY_XPERIA = ('CB5A1NW8WK', )
@@ -33,6 +34,7 @@ class DefaultDnsSetter(object):
         self.android = Android(rsn, init_display=False, minicap=False, minitouch=False, init_ime=True)
         self.adb = self.android.adb
         self.uiutil = uiutils.UIUtil(self.d)
+        self.ime_helper = UiautomatorIme(self.adb)
 
     def clear_float_tips(self):
         self.uiutil.click_any({'text': u'取消'}, {'text': u'确定'}, {'text': u'好'})
@@ -243,7 +245,7 @@ class DefaultDnsSetter(object):
             return True
 
         # change STATIC mode and dns
-        with self.android.ime:
+        with self.ime_helper:
             print '[DNS SETTER] enter wlan config page'
             self.enter_wlan_settings()
             print '[DNS SETTER] enable wlan advanced settings'
@@ -398,16 +400,18 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    print d.orientation
+    d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
     # d(text='开启WLAN').right(checkable="true").click()
     # d(text='开启WLAN').right(checkable="true").click()
-    ds = DnsSetter('10.254.28.35:7477', '0815f8485f032404')
-    ds.clear_float_tips()
-    ds.network_prepare()
-    ds.set_dns('192.168.229.227')
-    ds.test_ping('www.163.com')
+    # ds = DnsSetter('10.254.28.35:7477', '0815f8485f032404')
+    # ds.clear_float_tips()
+    # ds.network_prepare()
+    # ds.set_dns('192.168.229.227')
+    # ds.test_ping('www.163.com')
 
     # a = Android('0815f8485f032404', minicap_stream=True)
     # # a.home()
