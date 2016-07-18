@@ -850,7 +850,6 @@ class Android(object):
         self.amcheck(package)
         if not activity:
             self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
-            self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
         else:
             self.adb.shell(['am', 'start', '-n', '%s/%s.%s'%(package, package, activity)])
 
@@ -960,6 +959,7 @@ class Android(object):
         #start release lock app
         self.amstop(RELEASELOCK_PACKAGE)
         self.amstart(RELEASELOCK_PACKAGE)
+        self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
         # todo:
         # 1. 还需要按power键吗？
