@@ -565,15 +565,16 @@ def refresh_device():
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, right_click=False, duration=0.01, find_in=None):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_in=None):
     '''
+    @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
             pos = _loop_find(v, timeout=timeout, find_in=find_in)
         except MoaNotFoundError:
-            if safe:
+            if if_exists:
                 return False
             raise
     else:
@@ -594,7 +595,6 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
         if right_click:
             DEVICE.touch(pos, right_click=True)
         else:
-            # print "in moa , duration is:", duration
             DEVICE.touch(pos, duration=duration)
     time.sleep(delay)
 
@@ -698,15 +698,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None, find_in=None):
-    try:
-        pos = _loop_find(v, timeout=timeout, interval=interval,
-                         intervalfunc=intervalfunc, find_in=find_in)
-        return pos
-    except MoaNotFoundError:
-        if not safe:
-            raise
-        return None
+def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_in=None):
+    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_in=find_in)
+    return pos
 
 
 @logwrap
