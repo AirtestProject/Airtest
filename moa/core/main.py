@@ -92,6 +92,7 @@ def get_platform():
     if win:
         name_dict = {
             android.Android: "Android",
+            android.Emulator: "Android",
             win.Windows: "Windows"
         }
     else:
@@ -146,6 +147,41 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
     dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     dev.wake()
+    print dev
+    global CVSTRATEGY, DEVICE, DEVICE_LIST
+    CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
+    DEVICE = dev
+    DEVICE_LIST.append(dev)
+    return sn
+
+
+def set_emulator(emu_name='bluestacks', sn=None, addr=None):
+    '''
+    auto set if only one device
+    support filepath match patten, eg: c123*
+    '''
+    addr = addr or ADDRESS
+    if not sn:
+        devs = android.ADB(server_addr=addr).devices(state='device')
+        if len(devs) > 1:
+            print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+        elif len(devs) == 0:
+            raise MoaError("no device, please check your adb connection")
+        sn = devs[0][0]
+    else:
+        for (serialno, st) in android.ADB(server_addr=addr).devices(state='device'):
+            if not fnmatch.fnmatch(serialno, sn):
+                continue
+            if st != 'device':
+                raise MoaError("Device status not good: %s" % (st,))
+            sn = serialno
+            break
+        if sn is None:
+            raise MoaError("Device[%s] not found in %s" % (sn, addr))
+    #dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    if not emu_name:
+        emu_name = 'bluestacks'
+    dev = android.Emulator(emu_name, sn, addr=addr)
     print dev
     global CVSTRATEGY, DEVICE, DEVICE_LIST
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
@@ -308,6 +344,20 @@ def set_mask_rect(mask_rect):
 
 
 def _get_search_img(pictarget):
+    '''获取 截图  (picdata)'''
+    if isinstance(pictarget, MoaText):
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
+        # picdata = aircv.pil_2_cv2(pictarget.img)
+        pictarget.img.save("text.png")
+        picdata = aircv.imread("text.png")
+    elif isinstance(pictarget, MoaPic):
+        picdata = aircv.imread(pictarget.filepath)
+    else:
+        pictarget = MoaPic(pictarget)
+        picdata = aircv.imread(pictarget.filepath)
+    return picdata
+
+def get_search_img(pictarget):
     '''获取 截图  (picdata)'''
     if isinstance(pictarget, MoaText):
         # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
@@ -547,6 +597,7 @@ def snapshot(filename="screen.png"):
 @platform(on=["Android"])
 def wake():
     DEVICE.wake()
+    pass
 
 
 @logwrap
