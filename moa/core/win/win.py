@@ -36,6 +36,20 @@ class Windows(object):
     def swipe(self, p1, p2, duration=0.8):
         mouse_drag(p1, p2, duration=duration)  # windows拖拽时间固定为0.8s
 
+    def snapshot_by_hwnd(self, hwnd, filename="tmp.png"):
+        """
+        根据窗口句柄进行截图，如果发现窗口句柄已经不在则直接返回None.
+            返回值还包括窗口左上角的位置.
+        """
+        # 如果当前的hwnd不存在，直接返回None
+        hwnd_list = self.find_all_hwnd()
+        if hwnd not in hwnd_list:
+            return None, (0, 0)
+        else:
+            print "snapshot_by_hwnd in win.py", hwnd, filename
+            img, pos = self.winmgr.snapshot_by_hwnd(hwnd=hwnd, filename=filename)
+            return img, pos
+
     def find_window(self, wildcard):
         """
         遍历所有window按re.match来查找wildcard，并设置为当前handle
