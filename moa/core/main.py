@@ -49,6 +49,7 @@ CURRENT_HWND = None
 MARGIN_LIST = [0, 0, 0, 0]  # 用于标注有效窗口在HWND窗体的左上角margin和右下角margin
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
+DEBUG = False
 
 
 """
@@ -395,7 +396,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRI
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=False, debug=False):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=False):
     '''
         find_outside: 在源图像中执行区域外寻找. (执行方法：抹去对应区域的图片内容)
         find_inside: 在指定的图片区域内寻找，find_inside=[x, y, w, h]时，进行截图寻找（其中，x,y,w,h为像素值）
@@ -437,7 +438,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
 
         # 如果指定调试时，就将最后图像识别时，对应的有效截屏区域展示一下，用于某个脚本语句中临时调试查看搜索截屏时使用：
-        if debug:
+        if DEBUG:
             aircv.show(screen)
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
@@ -585,14 +586,14 @@ def refresh_device():
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=MASK_RECT, debug=False):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=MASK_RECT):
     '''
     @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
-            pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, debug=debug)
+            pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
         except MoaNotFoundError:
             if if_exists:
                 return False
@@ -622,25 +623,25 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_inside=None, find_outside=MASK_RECT, duration=0.5, debug=False):
+def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_inside=None, find_outside=MASK_RECT, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
-            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, debug=debug)
+            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
             v1.target_pos = target_poses[1]
-            pos2 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, debug=debug)
+            pos2 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
         else:
             raise Exception("invalid params for swipe")
     else:
         if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
-            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, debug=debug)
+            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
         else:
             pos1 = v1
 
         if v2:
             if (is_str(v2) or isinstance(v2, MoaText)):
                 keep_capture()
-                pos2 = _loop_find(v2, find_inside=find_inside, find_outside=find_outside, debug=debug)
+                pos2 = _loop_find(v2, find_inside=find_inside, find_outside=find_outside)
                 keep_capture(False)
             else:
                 pos2 = v2
@@ -661,9 +662,9 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_insid
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT, debug=False):
+def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, debug=debug)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
     else:
         pos = v
     print('downpos', pos)
@@ -718,28 +719,16 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-<<<<<<< HEAD
-def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_in=None):
-    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_in=find_in)
+def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=MASK_RECT):
+    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside)
     return pos
-=======
-def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=MASK_RECT, debug=False):
-    try:
-        pos = _loop_find(v, timeout=timeout, interval=interval,
-                         intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside, debug=debug)
-        return pos
-    except MoaNotFoundError:
-        if not safe:
-            raise
-        return None
->>>>>>> 7c4ebc25040ce6dcaadbe5e2fe6aaa413e33e326
 
 
 @logwrap
 @_transparam
-def exists(v, timeout=3, find_inside=None, find_outside=MASK_RECT, debug=False):
+def exists(v, timeout=3, find_inside=None, find_outside=MASK_RECT):
     try:
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, debug=debug)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
         return pos
     except MoaNotFoundError as e:
         return False
@@ -752,10 +741,10 @@ Assertions for result verification
 
 @logwrap
 @_transparam
-def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=MASK_RECT, debug=False):
+def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=MASK_RECT):
     try:
         pos = _loop_find(v, timeout=timeout,
-                         threshold=THRESHOLD_STRICT, find_inside=find_inside, find_outside=find_outside, debug=debug)
+                         threshold=THRESHOLD_STRICT, find_inside=find_inside, find_outside=find_outside)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
@@ -763,9 +752,9 @@ def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=MAS
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT, debug=False):
+def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT):
     try:
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, debug=debug)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
         time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
