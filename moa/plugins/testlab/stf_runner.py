@@ -48,7 +48,6 @@ def randomjoin():
     random.shuffle(listDevices)
     serialno = listDevices[0]['serial']
     print serialno
-    join(serialno)
 
 
 def test(addr):
@@ -184,10 +183,11 @@ def run_on_all_devices():
     import traceback
     for sn in devices():
         try:
-            addr = join(sn)
-            dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
-            # turn screen red to find device
-            print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+            print subprocess.check_output("adb -s %s shell input keyevent HOME" % sn, shell=True)
+##            addr = join(sn)
+##            dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
+##            # turn screen red to find device
+##            print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
         except:
             traceback.print_exc()
         finally:
@@ -195,5 +195,5 @@ def run_on_all_devices():
 
 
 if __name__ == '__main__':
-    main()
-    # run_on_all_devices()
+##    main()
+    run_on_all_devices()
