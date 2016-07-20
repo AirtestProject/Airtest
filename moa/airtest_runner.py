@@ -111,9 +111,6 @@ def main():
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
-    # cd script dir
-    os.chdir(args.script)
-
     if args.findoutside:
         set_mask_rect(args.findoutside)
 
