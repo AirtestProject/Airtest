@@ -599,6 +599,7 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times
     else:
         pos = v
         # 互通版需求：点击npc，传入find_inside参数作为矫正
+        find_inside = find_inside or FIND_INSIDE
         if find_inside and get_platform() == "Windows" and DEVICE.handle:
             wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)
             # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
