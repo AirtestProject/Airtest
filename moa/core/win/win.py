@@ -19,10 +19,29 @@ class Windows(object):
         # # screen = ImageGrab.grab()
         # screen = aircv.pil_2_cv2(screen)
         screen = get_screen_shot()
-        # aircv.show(screen)
         if filename:
             aircv.imwrite(filename, screen)
         return screen
+
+    def snapshot_by_hwnd(self, filename="tmp.png", hwnd_to_snap=None):
+        """
+            根据窗口句柄进行截图，如果发现窗口句柄已经不在则直接返回None.
+            返回值还包括窗口左上角的位置.
+        """
+        # 如果当前的hwnd不存在，直接返回None
+        hwnd_list = self.find_all_hwnd()
+        if hwnd_to_snap not in hwnd_list:
+            raise Exception("hwnd not exist in system !")
+        else:
+            # print "snapshot_by_hwnd in win.py", hwnd, filename
+            img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+            if filename:
+                aircv.imwrite(filename, img)
+            return img
+
+    def get_wnd_pos_by_hwnd(self, hwnd):
+        wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd)
+        return wnd_pos
 
     def keyevent(self, keyname, escape=False, combine=None):
         key_input(keyname, escape, combine)

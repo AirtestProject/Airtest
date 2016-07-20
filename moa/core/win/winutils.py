@@ -2,6 +2,8 @@
 import win32api
 import win32con
 import win32gui
+import win32ui
+import cv2
 from ctypes import *
 import time
 import chardet
@@ -381,6 +383,30 @@ class WindowMgr:
         self._handle_found = None
         self._handle_list_found = []
 
+    def snapshot_by_hwnd(self, hwnd, filename="tmp.png"):
+        rect = win32gui.GetWindowRect(hwnd)
+        # pos = (rect[0], rect[1])
+        width = abs(rect[2] - rect[0])
+        height = abs(rect[3] - rect[1])
+        # print "in winutils.py WindowMgr():", pos, width, height
+        hwndDC = win32gui.GetWindowDC(hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
+
+        saveBitMap = win32ui.CreateBitmap()
+        saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+        saveDC.SelectObject(saveBitMap)
+        saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
+        saveBitMap.SaveBitmapFile(saveDC, filename)
+        img = cv2.imread(filename)
+
+        return img
+
+    def get_wnd_pos_by_hwnd(self, hwnd):
+        rect = win32gui.GetWindowRect(hwnd)
+        pos = (rect[0], rect[1])
+        return pos
+
     def find_window(self, class_name, window_name = None):
         """find a window by its class_name"""
         self._handle = win32gui.FindWindow(class_name, window_name)
@@ -434,6 +460,10 @@ class WindowMgr:
 
     def set_foreground(self):
         """put the window in the foreground"""
+        # 如果窗口最小化，那么需要将窗口正常显示出来:
+        if win32gui.IsIconic(self.handle):
+            win32gui.ShowWindow(self.handle, 4)
+        time.sleep(0.01)
         win32gui.SetForegroundWindow(self.handle)
 
     def get_window_pos(self):

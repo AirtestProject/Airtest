@@ -1,7 +1,7 @@
 # encoding=utf-8
-"""
-settings can be changed by user
-"""
+
+"""settings can be changed by user."""
+
 DEBUG = False
 ADDRESS = ('127.0.0.1', 5037)
 LOGFILE = "log.txt"
@@ -10,13 +10,15 @@ BASE_DIR = '.'
 SAVE_SCREEN = None
 # REFRESH_SCREEN_DELAY = 5 # to be deleted # 设备发生屏幕旋转时，需要等待5s左右才能确定旋转完毕(大部分设备)
 # RECONNECT_TIMES = 5 # to be deleted
-RESIZE_METHOD = None 
+RESIZE_METHOD = None
 SCRIPTHOME = None
-SRC_RESOLUTION = [] # to be move to DEVICE
+SRC_RESOLUTION = []  # to be move to DEVICE
 CVSTRATEGY = None
 CVSTRATEGY_ANDROID = ["siftpre", "siftnopre", "tpl"]
 CVSTRATEGY_WINDOWS = ["tpl", "siftnopre"]
-MASK_RECT = None # windows模式下IDE运行时，屏蔽掉IDE区域(MASK_RECT)
+FIND_INSIDE = None
+FIND_OUTSIDE = None
+# MASK_RECT = None  # windows模式下IDE运行时，屏蔽掉IDE区域(MASK_RECT)
 THRESHOLD = 0.6
 THRESHOLD_STRICT = 0.7
 STRICT_RET = True
