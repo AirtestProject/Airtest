@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import argparse
+import traceback
 from core.main import *
 # import here to build dependent modules
 import requests
@@ -160,6 +161,8 @@ def main():
                 exit(0)
             pass
 
+    exit_code = 0
+
     for script in args.script.split(","):
         # cd script dir
         os.chdir(script)
@@ -172,8 +175,14 @@ def main():
             print "save img in", "'%s'" %args.screen
             set_screendir(args.screen)
 
-        # execute code
-        exec_script(script, scope=globals(), original=True)
+        try:
+            # execute code
+            exec_script(script, scope=globals(), original=True)
+        except Exception:
+            traceback.print_exc()
+            exit_code = 1
+
+    exit(exit_code)
 
 
 if __name__ == '__main__':
