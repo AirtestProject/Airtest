@@ -385,7 +385,7 @@ class WindowMgr:
 
     def snapshot_by_hwnd(self, hwnd, filename="tmp.png"):
         rect = win32gui.GetWindowRect(hwnd)
-        pos = (rect[0], rect[1])
+        # pos = (rect[0], rect[1])
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
         # print "in winutils.py WindowMgr():", pos, width, height
@@ -400,7 +400,12 @@ class WindowMgr:
         saveBitMap.SaveBitmapFile(saveDC, filename)
         img = cv2.imread(filename)
 
-        return img, pos
+        return img
+
+    def get_wnd_pos_by_hwnd(self, hwnd):
+        rect = win32gui.GetWindowRect(hwnd)
+        pos = (rect[0], rect[1])
+        return pos
 
     def find_window(self, class_name, window_name = None):
         """find a window by its class_name"""
