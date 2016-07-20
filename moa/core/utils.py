@@ -307,7 +307,7 @@ def Logwrap(f, logger):
             fndata.update(data)
             fndata.update(LOGGER.extra_log)
             LOGGER.log("error", fndata)
-            LOGGER.handle_stacked_log()
+            LOGGER.running_stack.pop()
             raise
         else:
             time_used = time.time() - start
