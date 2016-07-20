@@ -126,15 +126,17 @@ def startapp(addr, package):
 
 
 def run(addr, moa_script, utilfile="", user_vars=""):
-    """运行moa任务，并生成报告"""
+    """运行moa任务"""
     import shutil
     import subprocess
+    script_list = []
     for script in moa_script.split(","):
         filename = os.path.basename(script)
         if not os.path.exists(filename):
             shutil.copytree(script, filename)
+            script_list.append(os.path.abspath(filename))
     p = subprocess.Popen([
-        "python", "-m", "moa.airtest_runner", filename,
+        "python", "-m", "moa.airtest_runner", ",".join(script_list),
         "--setsn", addr, "--log", "--screen", 
         "--utilfile", utilfile, "--kwargs", user_vars,
     ])
