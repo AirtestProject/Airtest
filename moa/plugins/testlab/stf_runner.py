@@ -129,9 +129,10 @@ def run(addr, moa_script, utilfile="", user_vars=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
-    filename = os.path.basename(moa_script)
-    if not os.path.exists(filename):
-        shutil.copytree(moa_script, filename)
+    for script in moa_script.split(","):
+        filename = os.path.basename(script)
+        if not os.path.exists(filename):
+            shutil.copytree(script, filename)
     p = subprocess.Popen([
         "python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen", 
@@ -178,22 +179,6 @@ def main():
     func(*sys.argv[2:])
 
 
-def run_on_all_devices():
-    import subprocess
-    import traceback
-    for sn in devices():
-        try:
-            print subprocess.check_output("adb -s %s shell input keyevent HOME" % sn, shell=True)
-##            addr = join(sn)
-##            dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
-##            # turn screen red to find device
-##            print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
-        except:
-            traceback.print_exc()
-        finally:
-            cleanup(sn)
-
 
 if __name__ == '__main__':
-##    main()
-    run_on_all_devices()
+    main()
