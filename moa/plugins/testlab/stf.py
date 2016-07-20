@@ -146,6 +146,15 @@ def set_device_notes(serial, notes):
     return res.json()
 
 
+def get_device_notes(serial):
+    url = "http://%s:7100/api/v1/devices/%s/" % (HOST_IP, serial)
+    headers = {'authorization': 'Bearer %s' % TOKEN_ID}
+    res = requests.get(url, params={'fields': 'notes'}, headers=headers)
+    if res.status_code == 200:
+        return res.json()['device']['notes']
+    return None
+
+
 if __name__ == "__main__":
     from pprint import pprint
     import time
