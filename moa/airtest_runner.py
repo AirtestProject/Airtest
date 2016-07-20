@@ -97,7 +97,7 @@ def main():
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
     # 建军添加：设置运行进程中moa的参数，将maskrect设置为
-    ap.add_argument("--maskrect", help="set IDE rect tobe a moa mask, during windows running.")
+    ap.add_argument("--findoutside", help="find outside a rectangle area.")
 
     global args
     args = ap.parse_args()
@@ -111,9 +111,11 @@ def main():
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
-    if args.maskrect:
-        # print "set mask_rect : ", args.maskrect
-        set_mask_rect(args.maskrect)
+    # cd script dir
+    os.chdir(args.script)
+
+    if args.findoutside:
+        set_mask_rect(args.findoutside)
 
     if args.setsn:
         print "set_serialno", args.setsn
