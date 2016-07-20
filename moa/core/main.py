@@ -203,6 +203,7 @@ def resign(ipaname):
 def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
+    window_title = window_title or WINDOW_TITLE
     dev = win.Windows()
     if handle:
         dev.set_handle(int(handle))
@@ -242,6 +243,7 @@ def add_device():
         if not window_title:
             raise MoaError("please set_global WINDOW_TITLE or set_windows with window_title first")
         devs = DEVICE.find_window_list(window_title)
+
         try:
             another_dev = (set(devs) - set([DEVICE.handle])).pop()
         except KeyError:
