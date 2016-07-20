@@ -50,6 +50,7 @@ MARGIN_LIST = [0, 0, 0, 0]  # 用于标注有效窗口在HWND窗体的左上角m
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
 DEBUG = False
+WATCHER = {}
 
 
 """
@@ -275,6 +276,7 @@ def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
     filepath = os.path.join(basedir, filename)
+    print "set_logfile", os.path.realpath(filepath)
     LOGGER.set_logfile(filepath)
 
 
@@ -444,6 +446,9 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         if ret is None:
             if intervalfunc is not None:
                 intervalfunc()
+            for name, func in WATCHER.items():
+                print "exec watcher name"
+                func()
             # 超时则抛出异常
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
@@ -732,6 +737,16 @@ def exists(v, timeout=3, find_inside=None, find_outside=MASK_RECT):
         return pos
     except MoaNotFoundError as e:
         return False
+
+
+@logwrap
+def add_watcher(name, func):
+    WATCHER[name] = func
+
+
+@logwrap
+def remove_watcher(name):
+    WATCHER.pop(name)
 
 
 """

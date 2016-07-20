@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
 import sdkautomator
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False):
     """
     execute script: original or submodule
     1. cd to original dir
@@ -65,8 +65,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
-    if not pyfilename:
-        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+    pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if scope:
@@ -89,7 +88,6 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
-    ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
     ap.add_argument("--setadb", help="auto set adb ip and port, default 127.0.0.1:5037 .")
     ap.add_argument("--setudid", help="auto set ios device udid", nargs="?", const=True)
@@ -112,9 +110,6 @@ def main():
             exec(utilcontent) in globals()
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
-
-    # cd script dir
-    os.chdir(args.script)
 
     if args.maskrect:
         # print "set mask_rect : ", args.maskrect
@@ -150,14 +145,6 @@ def main():
                 print "set_windows title=%s" % args.setwin
                 set_windows(window_title=args.setwin)
 
-    if args.log:
-        print "save log in", "'%s'" %args.log
-        set_logfile(args.log)
-
-    if args.screen:
-        print "save img in", "'%s'" %args.screen
-        set_screendir(args.screen)
-
     if args.kwargs:
         print "load kwargs", repr(args.kwargs)
         for kv in args.kwargs.split(","):
@@ -175,8 +162,20 @@ def main():
                 exit(0)
             pass
 
-    # execute code
-    exec_script(args.script, scope=globals(), original=True, pyfilename=args.pyfile)
+    for script in args.script.split(","):
+        # cd script dir
+        os.chdir(script)
+
+        if args.log:
+            print "save log in", "'%s'" %args.log
+            set_logfile(args.log)
+
+        if args.screen:
+            print "save img in", "'%s'" %args.screen
+            set_screendir(args.screen)
+
+        # execute code
+        exec_script(script, scope=globals(), original=True)
 
 
 if __name__ == '__main__':

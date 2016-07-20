@@ -258,7 +258,8 @@ class MoaLogger(object):
         if logfile is None:
             self.logfile = None
             self.logfd = None
-        elif logfile != self.logfile:
+        else:
+            self.handle_stacked_log()
             self.logfile = logfile
             self.logfd = open(self.logfile, "w")
 
