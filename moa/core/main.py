@@ -390,7 +390,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRI
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=False):
     '''
         find_outside: 在源图像中执行区域外寻找. (执行方法：抹去对应区域的图片内容)
         find_inside: 在指定的图片区域内寻找，find_inside=[x, y, w, h]时，进行截图寻找（其中，x,y,w,h为像素值）
@@ -414,9 +414,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
         # 其他情况：手机回放，或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
         else:
             screen = _get_screen_img()
-            # 暂时只在全屏截取时才执行find_outside，主要关照IDE调试脚本情形
-            find_outside = find_outside or FIND_OUTSIDE
-            screen = mask_image(screen, find_outside)  # 在截屏的find_outside区域外寻找(win下指定了hwnd则是相对窗口的区域)
+            find_outside = find_outside or FIND_OUTSIDE  # 暂时只在全屏截取时才执行find_outside，主要关照IDE调试脚本情形
+            screen = mask_image(screen, find_outside)
 
         if screen.any():
             # *************************************************************************************
@@ -425,8 +424,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # if find_outside:  # 在截屏的find_outside区域外寻找(win下指定了hwnd则是相对窗口的区域)
             #     screen = mask_image(screen, find_outside)
             # *************************************************************************************
-
-            # 需要把find_in造成的crop偏移，加入到操作偏移值offset中，如果find_inside为None，获取的offset=None.
+            # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中，如果find_inside为None，获取的offset=None.
             find_inside = find_inside or FIND_INSIDE
             screen, offset = crop_image(screen, find_inside)
             ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
@@ -434,8 +432,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             print "Whole screen is black, skip cv matching"
             ret = None
 
-        # 如果指定调试状态，展示图像识别时的有效截屏区域：
-        if DEBUG:
+        if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
             aircv.show(screen)
 
         # 如果识别失败，调用用户指定的intervalfunc
@@ -587,15 +584,16 @@ def refresh_device():
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=None, whole_screen=None):
+def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=None, whole_screen=None):
     '''
+    @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
             pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         except MoaNotFoundError:
-            if safe:
+            if if_exists:
                 return False
             raise
     else:
@@ -621,7 +619,6 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False, times=1, r
         if right_click:
             DEVICE.touch(pos, right_click=True)
         else:
-            # print "in moa , duration is:", duration
             DEVICE.touch(pos, duration=duration)
     time.sleep(delay)
 
@@ -725,15 +722,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=TIMEOUT, safe=False, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
-    try:
-        pos = _loop_find(v, timeout=timeout, interval=interval,
-                         intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
-        return pos
-    except MoaNotFoundError:
-        if not safe:
-            raise
-        return None
+def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
+    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
+    return pos
 
 
 @logwrap
