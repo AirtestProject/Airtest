@@ -243,9 +243,10 @@ def add_device():
         if not window_title:
             raise MoaError("please set_global WINDOW_TITLE or set_windows with window_title first")
         devs = DEVICE.find_window_list(window_title)
-
+        print "devs:", devs
         try:
             another_dev = (set(devs) - set([DEVICE.handle])).pop()
+            print "another_dev:", another_dev
         except KeyError:
             raise MoaError("no more device to add")
         set_windows(handle=another_dev)
@@ -429,7 +430,7 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # if find_outside:  # 在截屏的find_outside区域外寻找(win下指定了hwnd则是相对窗口的区域)
             #     screen = mask_image(screen, find_outside)
             # *************************************************************************************
-            # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中，如果find_inside为None，获取的offset=None.
+            # 如果find_inside为None，获取的offset=None.
             find_inside = find_inside or FIND_INSIDE
             screen, offset = crop_image(screen, find_inside)
             ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
@@ -453,9 +454,9 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             time.sleep(interval)
             continue
         else:
-            pos = TargetPos().getXY(ret, pictarget.target_pos)
-            ret_pos = int(pos[0] + offset[0]), int(pos[1] + offset[1])
-
+            ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
+            if offset:   # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中：
+                ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
             if wnd_pos:  # 实际操作位置：将相对于窗口的操作坐标，转换成相对于整个屏幕的操作坐标
                 ret_pos = int(ret_pos[0] + wnd_pos[0]), int(ret_pos[1] + wnd_pos[1])
             return ret_pos
