@@ -129,9 +129,10 @@ def run(addr, moa_script, utilfile="", user_vars=""):
     """运行moa任务，并生成报告"""
     import shutil
     import subprocess
-    filename = os.path.basename(moa_script)
-    if not os.path.exists(filename):
-        shutil.copytree(moa_script, filename)
+    for script in moa_script.split(","):
+        filename = os.path.basename(script)
+        if not os.path.exists(filename):
+            shutil.copytree(script, filename)
     p = subprocess.Popen([
         "python", "-m", "moa.airtest_runner", filename,
         "--setsn", addr, "--log", "--screen", 
