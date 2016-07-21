@@ -12,10 +12,10 @@ def run_on_all_devices():
                 addr = join(sn)
                 dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
                 # home
-                # dev.home()
+                dev.home()
 
                 # turn screen red to find device
-                print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+                # print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
                 # shine
                 # for i in range(100):
