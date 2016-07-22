@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import argparse
+import traceback
 from core.main import *
 # import here to build dependent modules
 import requests
@@ -15,7 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
 import sdkautomator
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False):
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
     """
     execute script: original or submodule
     1. cd to original dir
@@ -65,7 +66,8 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
-    pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+    if not pyfilename:
+        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if scope:
@@ -88,6 +90,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
+    ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="auto set serialno", nargs="?", const=True)
     ap.add_argument("--setadb", help="auto set adb ip and port, default 127.0.0.1:5037 .")
     ap.add_argument("--setudid", help="auto set ios device udid", nargs="?", const=True)
@@ -160,6 +163,8 @@ def main():
                 exit(0)
             pass
 
+    exit_code = 0
+
     for script in args.script.split(","):
         # cd script dir
         os.chdir(script)
@@ -172,8 +177,14 @@ def main():
             print "save img in", "'%s'" %args.screen
             set_screendir(args.screen)
 
-        # execute code
-        exec_script(script, scope=globals(), original=True)
+        try:
+            # execute code
+            exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
+        except Exception:
+            traceback.print_exc()
+            exit_code = 1
+
+    exit(exit_code)
 
 
 if __name__ == '__main__':

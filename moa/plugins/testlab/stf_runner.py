@@ -64,18 +64,9 @@ def test(addr):
 
 def setdns(sn, addr, dns, verify_host='www.163.com'):
     """设置dns"""
-
-    # these two device cannot connect to netease_game
-    if sn in ('045BBI2H9F9B', ):
-        return
-
     # connot save dns settings
     if sn in ('fdcbcc83', '8d260bf7'):
         return
-    #
-    # # 手机有问题，桌面黑黑的
-    # if sn in ('TA9921AVZE', ):
-    #     return
 
     from moa.plugins.dns_setter import DnsSetter
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
@@ -179,7 +170,6 @@ def main():
     if not func:
         raise Exception("invalid action:"+action)
     func(*sys.argv[2:])
-
 
 
 if __name__ == '__main__':

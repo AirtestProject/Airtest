@@ -36,6 +36,10 @@ class DefaultDnsSetter(object):
         self.uiutil = uiutils.UIUtil(self.d)
         self.ime_helper = UiautomatorIme(self.adb)
 
+        # ensure accessibility services disabled
+        self.adb.shell('settings put secure accessibility_enabled 0')
+        self.adb.shell('settings put secure enabled_accessibility_services 0')
+
     def clear_float_tips(self):
         self.uiutil.click_any({'text': u'取消'}, {'text': u'确定'}, {'text': u'好'})
 
@@ -400,14 +404,15 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    print d.orientation
-    d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
-    # d(text='开启WLAN').right(checkable="true").click()
-    # d(text='开启WLAN').right(checkable="true").click()
-    # ds = DnsSetter('10.254.28.35:7477', '0815f8485f032404')
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
+
+    from moa.plugins.testlab.stf import set_device_notes, get_device_notes, join_group
+    print get_device_notes('02c1957e')
+    print join_group('0815f8485f032404')
+
+    # ds = DnsSetter('d523384', 'd523384')
     # ds.clear_float_tips()
     # ds.network_prepare()
     # ds.set_dns('192.168.229.227')
