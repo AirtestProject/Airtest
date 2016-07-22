@@ -28,7 +28,8 @@ from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
 
-from moa.core.android.android_emulator import EMULATOR_INFO, WinHandleFinder
+from moa.core.android.emulator.emulator_config import EMULATOR_INFO
+from moa.core.android.emulator.android_emulator import EmulatorHelper
 import win32gui
 
 
@@ -1379,7 +1380,7 @@ class Emulator(Android):
             self.serialno = emu_info['adb_connect']
         else:
             self.serialno = ''
-        self.emulator_hwnd = WinHandleFinder.find_emu_windows_hwnd(self.emulator_name) or 0
+        self.emulator_hwnd = EmulatorHelper.find_emu_windows_hwnd(self.emulator_name) or 0
         if not self.emulator_name or not self.emulator_hwnd:
             print 'please launch a emulator first'
 
