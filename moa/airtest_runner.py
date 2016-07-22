@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import time
 import os
 import sys
@@ -160,7 +159,7 @@ def main():
             exec(line) in globals()
             if line == "":
                 print "end of stdin"
-                exit(0)
+                sys.exit(0)
             pass
 
     exit_code = 0
@@ -184,7 +183,7 @@ def main():
             traceback.print_exc()
             exit_code = 1
 
-    exit(exit_code)
+    sys.exit(exit_code)
 
 
 if __name__ == '__main__':

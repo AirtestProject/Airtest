@@ -459,6 +459,8 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
             if wnd_pos:  # 实际操作位置：将相对于窗口的操作坐标，转换成相对于整个屏幕的操作坐标
                 ret_pos = int(ret_pos[0] + wnd_pos[0]), int(ret_pos[1] + wnd_pos[1])
+                # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
+                _log_in_func({"wnd_pos": wnd_pos})
             return ret_pos
 
 

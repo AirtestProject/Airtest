@@ -412,9 +412,13 @@ class WindowMgr:
         img_crop = screen[y_min:y_max, x_min:x_max]
         return img_crop
 
-    def get_wnd_pos_by_hwnd(self, hwnd):
+    def get_wnd_pos_by_hwnd(self, hwnd, use_crop_screen=False):
         rect = win32gui.GetWindowRect(hwnd)
-        pos = (rect[0], rect[1])
+
+        if use_crop_screen:
+            pos = (max(0, rect[0]), max(0, rect[1]))
+        else:
+            pos = (rect[0], rect[1])
         return pos
 
     def find_window(self, class_name, window_name = None):
