@@ -6,22 +6,24 @@ import threading
 
 
 def run_on_all_devices():
+    p = subprocess.Popen("adb devices", shell=True)
+    print p.communicate()
     for sn in devices():
         def func(sn):
             try:
                 addr = join(sn)
                 dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
                 # home
-                dev.home()
+                # dev.home()
 
                 # turn screen red to find device
                 # print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
                 # shine
-                # for i in range(100):
-                #     dev.home()
-                #     print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
-                #     time.sleep(1)
+                for i in range(20):
+                    dev.home()
+                    print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+                    time.sleep(1)
                 
             except:
                 traceback.print_exc()
