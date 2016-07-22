@@ -34,7 +34,11 @@ class Windows(object):
             raise Exception("hwnd not exist in system !")
         else:
             # print "snapshot_by_hwnd in win.py", hwnd, filename
-            img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+            # 小马电脑上有问题，暂时启用crop_screen_by_hwnd：
+            # img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+            screen = get_screen_shot()
+            img = self.winmgr.crop_screen_by_hwnd(screen, hwnd=hwnd_to_snap, filename=filename)
+
             if filename:
                 aircv.imwrite(filename, img)
             return img
