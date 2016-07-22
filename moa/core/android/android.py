@@ -977,7 +977,7 @@ class Android(object):
 
     def text(self, text):
         if getattr(self, "ime", None):
-            text = text.decode("utf-8").encode(sys.stdin.encoding)
+            text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
             self.adb.shell(["input", "keyevent", "ENTER"])
         else:

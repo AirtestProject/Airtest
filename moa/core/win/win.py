@@ -23,7 +23,7 @@ class Windows(object):
             aircv.imwrite(filename, screen)
         return screen
 
-    def snapshot_by_hwnd(self, filename="tmp.png", hwnd_to_snap=None):
+    def snapshot_by_hwnd(self, filename="tmp.png", hwnd_to_snap=None, use_crop_screen=True):
         """
             根据窗口句柄进行截图，如果发现窗口句柄已经不在则直接返回None.
             返回值还包括窗口左上角的位置.
@@ -34,13 +34,20 @@ class Windows(object):
             raise Exception("hwnd not exist in system !")
         else:
             # print "snapshot_by_hwnd in win.py", hwnd, filename
-            img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+            if use_crop_screen:  # 小马电脑上有问题，暂时启用crop_screen_by_hwnd=True：
+                screen = get_screen_shot()
+                img = self.winmgr.crop_screen_by_hwnd(screen, hwnd=hwnd_to_snap, filename=filename)
+            else:
+                img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+
             if filename:
                 aircv.imwrite(filename, img)
             return img
 
-    def get_wnd_pos_by_hwnd(self, hwnd):
-        wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd)
+    def get_wnd_pos_by_hwnd(self, hwnd, use_crop_screen=True):
+        # 如果使用的是use_crop_screen的方法，计算wnd_pos时就不能有负数了：
+        #     否则在窗口左边在屏幕外时，将会有实际操作的左偏移：
+        wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd, use_crop_screen=use_crop_screen)
         return wnd_pos
 
     def keyevent(self, keyname, escape=False, combine=None):
