@@ -108,6 +108,7 @@ def install(addr, apk, reinstall=True):
             dev.shell("input keyevent 25")
     mute(a)
     a.install(apk, reinstall=(reinstall=="true"), check=True)
+    a.wake()
 
 
 def startapp(addr, package):
