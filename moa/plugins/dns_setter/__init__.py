@@ -186,7 +186,7 @@ class DefaultDnsSetter(object):
     @particular_case.default_call
     def get_current_ssid(self):
         netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
-        matcher = re.search(r'networkId=(.*?)\]\]', netinfo)
+        matcher = re.search(r'networkId=(.*?)[\]|\}]\]', netinfo)
         if matcher:
             return matcher.group(1).strip('"')
         return None
@@ -408,15 +408,12 @@ if __name__ == '__main__':
     # d = AutomatorDevice()
     # print d.dump()
 
-    from moa.plugins.testlab.stf import set_device_notes, get_device_notes, join_group
-    print get_device_notes('02c1957e')
-    print join_group('0815f8485f032404')
 
-    # ds = DnsSetter('d523384', 'd523384')
-    # ds.clear_float_tips()
-    # ds.network_prepare()
-    # ds.set_dns('192.168.229.227')
-    # ds.test_ping('www.163.com')
+    ds = DnsSetter('CQ556955VKOV5T4D', 'CQ556955VKOV5T4D')
+    ds.clear_float_tips()
+    ds.network_prepare()
+    ds.set_dns('-1')
+    ds.test_ping('www.163.com')
 
     # a = Android('0815f8485f032404', minicap_stream=True)
     # # a.home()
