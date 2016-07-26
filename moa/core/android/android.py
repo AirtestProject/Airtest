@@ -1236,19 +1236,26 @@ class Android(object):
         self.ow_proc = self._initOrientationWatcher()
         reg_cleanup(self.ow_proc.kill)
 
+
+        def _refresh_by_ow():
+            line = self.ow_proc.stdout.readline()
+            if not line:
+                print "orientationWatcher has ended"
+                return None
+
+            ori = int(line) / 90
+            self.refreshOrientationInfo(ori)
+            return ori
+
         def _refresh_orientation(self):
             while True:
-                line = self.ow_proc.stdout.readline()
-                if not line:
-                    print "orientationWatcher has ended"
-                    if getattr(self, "ow_callback", None):
-                        self.ow_callback(None, *self.ow_callback_args)
+                ori = _refresh_by_ow()
+                if ori is None:
                     break
-                ori = int(line) / 90
-                self.refreshOrientationInfo(ori)
                 if getattr(self, "ow_callback", None):
                     self.ow_callback(ori, *self.ow_callback_args)
 
+        _refresh_by_ow()
         self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
         self._t.daemon = True
         self._t.start()
