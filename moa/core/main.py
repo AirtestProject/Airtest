@@ -258,7 +258,7 @@ def set_current(index):
     if index > len(DEVICE_LIST):
         raise MoaError("add_device first")
     DEVICE = DEVICE_LIST[index]
-    print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
+    # print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
     if isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
 
@@ -364,7 +364,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     return ret
 
 
-def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRICT_RET):
+def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=False):
     '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
     ret = None
     for st in CVSTRATEGY:
@@ -386,6 +386,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRI
         if ret is None:
             continue
         # cal_strict_confi进行进一步计算精确相似度
+        strict_ret = strict_ret or STRICT_RET
         if strict_ret:
             ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
         if ret is not None:
