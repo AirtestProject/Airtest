@@ -4,7 +4,7 @@ __author__ = 'lxn3032'
 
 import re
 import requests
-from moa.core.main import DEVICE, logwrap, platform, get_platform
+import moa.core.main as moa
 
 
 def _handle_api_request_err(r, data):
@@ -16,13 +16,13 @@ def _handle_api_request_err(r, data):
     print '======================================================================\n'
 
 
-@logwrap
-@platform(on=['Android', 'IOS', 'Windows'])
+@moa.logwrap
+@moa.platform(on=['Android', 'IOS', 'Windows'])
 def get_wlanip():
-    if get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
+    if moa.get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
         return "10.254.140.145"
     else:
-        netcfg = DEVICE.adb.shell('netcfg')
+        netcfg = moa.DEVICE.adb.shell('netcfg')
         for l in netcfg.split('\n'):
             if 'wlan' in l:
                 addr_matcher = re.search(r'(\d+\.){3}\d+', l)
@@ -30,7 +30,7 @@ def get_wlanip():
     return None
 
 
-@logwrap
+@moa.logwrap
 def get_hunter_devid(tokenid, process):
     wlanip = get_wlanip()
     if wlanip:
