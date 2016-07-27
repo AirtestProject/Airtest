@@ -13,6 +13,7 @@ from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
+from particular_devices.lenovo import LenovoPad
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
@@ -294,7 +295,8 @@ class DefaultDnsSetter(object):
             self.test_dns(dns1)
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2,
+                GalaxyNote5, LenovoPad):
     pass
 
 
@@ -409,7 +411,7 @@ if __name__ == '__main__':
     # print d.dump()
 
 
-    ds = DnsSetter('CQ556955VKOV5T4D', 'CQ556955VKOV5T4D')
+    ds = DnsSetter('CQSCMVOFHI5TEY8D', 'CQSCMVOFHI5TEY8D')
     ds.clear_float_tips()
     ds.network_prepare()
     ds.set_dns('-1')
