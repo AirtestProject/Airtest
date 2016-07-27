@@ -38,7 +38,7 @@ console.write('sys', '-ok-', logging=False)
 '''
     wlanip = get_wlanip()
     if wlanip:
-        devs = get_devices(tokenid, process=process, ip=wlanip)
+        devs = get_devices(tokenid, process=process, ip=wlanip, online=True)
         for devid, dev in devs.items():
             dev_ret = hunter_sendto(tokenid, {
                         'lang': 'python',
@@ -77,6 +77,27 @@ def get_devices(tokenid, **kwargs):
     return None
 
 
+def release_devices(tokenid, devid=None):
+    r = requests.post('http://hunter.nie.netease.com/api/release_device', headers={'tokenid': tokenid}, data={'devid': devid})
+    if r.status_code == 201:
+        try:
+            return r.json()
+        except:
+            pass
+    else:
+        _handle_api_request_err(r, devid)
+    return None
+
+
 if __name__ == '__main__':
-    token = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MDE1NTE5NiwiaWF0IjoxNDY3MzU1MTk2fQ.eyJ1c2VybmFtZSI6Imd6bGl1eGluIn0.GaWGg0E8_snNm3o6Zdn4P_evqKXTgea_0pLwdpb9TWI"
-    devs = get_devices(token, process='mh', ip='10.251.80.238')
+    tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MDE1NTE5NiwiaWF0IjoxNDY3MzU1MTk2fQ.eyJ1c2VybmFtZSI6Imd6bGl1eGluIn0.GaWGg0E8_snNm3o6Zdn4P_evqKXTgea_0pLwdpb9TWI"
+    devs = get_devices(tokenid, process='mh', online=True)
+#     life_detection = '''
+# console = require('safaia.console')
+# console.write('sys', '-ok-', logging=False)
+# '''
+    for devid, _ in devs.items():
+#         reply = hunter_sendto(tokenid, {'lang': 'python', 'data': life_detection, 'devid': devid}, watch_type='sys', need_reply=True)
+#         if not reply:
+#             print devid
+        release_devices(tokenid, devid)
