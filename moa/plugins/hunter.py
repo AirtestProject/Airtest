@@ -17,7 +17,7 @@ def _handle_api_request_err(r, data):
 
 
 @logwrap
-@platform(on=['Android', 'IOS'])
+@platform(on=['Android', 'IOS', 'Windows'])
 def get_wlanip():
     if get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
         return "10.254.140.145"
@@ -31,17 +31,19 @@ def get_wlanip():
 
 
 @logwrap
-@platform(on=['Android', 'IOS'])
 def get_hunter_devid(tokenid, process):
     wlanip = get_wlanip()
     if wlanip:
         devs = get_devices(token, process=process, ip=wlanip)
         for devid, dev in devs.items():
-            dev_ret = hunter_sendto(tokenid,
-                    {'lang': 'python', 'data': 'require("safaia.console").write("sys", "ok")', 'devid': devid},
+            dev_ret = hunter_sendto(tokenid, {
+                        'lang': 'python',
+                        'data': 'require("safaia.console").write("sys", "-ok-", logging=False)',
+                        'devid': devid,
+                    },
                     watch_type='sys',
                     need_reply=True)
-            if dev_ret and dev_ret['data'] == 'ok':
+            if dev_ret and dev_ret['data'] == '-ok-':
                 return devid
     return None
 
