@@ -19,7 +19,7 @@ class LenovoPad(object):
 
     @particular_case.specified(LENOVO_PAD)
     def is_dhcp_mode(self):
-        ipsettings = self.d(text=u'IP 设置').right(className="android.widget.TextView")
+        ipsettings = self.uiutil.scroll_find({'text': u'IP 设置'}).right(className="android.widget.TextView")
         if ipsettings and ipsettings.exists:
             if ipsettings.text == 'DHCP':
                 return True
@@ -27,7 +27,7 @@ class LenovoPad(object):
 
     @particular_case.specified(LENOVO_PAD)
     def use_dhcp(self):
-        ipsettings = self.d(text=u'IP 设置').right(className="android.widget.TextView")
+        ipsettings = self.uiutil.scroll_find({'text': u'IP 设置'}).right(className="android.widget.TextView")
         ipsettings.click()
         time.sleep(0.5)
         self.uiutil.click_any({'text': 'DHCP'})
@@ -35,14 +35,14 @@ class LenovoPad(object):
 
     @particular_case.specified(LENOVO_PAD)
     def use_static_ip(self):
-        ipsettings = self.d(text=u'IP 设置').right(className="android.widget.TextView")
+        ipsettings = self.uiutil.scroll_find({'text': u'IP 设置'}).right(className="android.widget.TextView")
         ipsettings.click()
         time.sleep(0.5)
         self.uiutil.click_any({'text': '静态'})
 
     @particular_case.specified(LENOVO_PAD)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
-        dnsfield = self.uiutil.scroll_find({'text': '域名 1'}).right(className="android.widget.EditText")
+        dnsfield = self.uiutil.scroll_find({'text': u'域名 1'}).right(className="android.widget.EditText")
         self.uiutil.replace_text(dnsfield, dns1)
         self.uiutil.click_any({'text': u'保存'})
         time.sleep(2)
