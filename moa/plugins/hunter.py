@@ -32,13 +32,17 @@ def get_wlanip():
 
 @moa.logwrap
 def get_hunter_devid(tokenid, process):
+    life_detection = '''
+console = require('safaia.console')
+console.write('sys', '-ok-', logging=False)
+'''
     wlanip = get_wlanip()
     if wlanip:
-        devs = get_devices(token, process=process, ip=wlanip)
+        devs = get_devices(tokenid, process=process, ip=wlanip)
         for devid, dev in devs.items():
             dev_ret = hunter_sendto(tokenid, {
                         'lang': 'python',
-                        'data': 'require("safaia.console").write("sys", "-ok-", logging=False)',
+                        'data': life_detection,
                         'devid': devid,
                     },
                     watch_type='sys',
