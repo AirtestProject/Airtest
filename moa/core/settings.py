@@ -18,6 +18,7 @@ CVSTRATEGY_ANDROID = ["siftpre", "siftnopre", "tpl"]
 CVSTRATEGY_WINDOWS = ["tpl", "siftnopre"]
 FIND_INSIDE = None
 FIND_OUTSIDE = None
+WHOLE_SCREEN = False  # 指定WHOLE_SCREEN时，就默认截取全屏(而非hwnd窗口截图)
 # MASK_RECT = None  # windows模式下IDE运行时，屏蔽掉IDE区域(MASK_RECT)
 THRESHOLD = 0.6
 THRESHOLD_STRICT = 0.7
@@ -27,3 +28,6 @@ CVINTERVAL = 0.5
 OPDELAY = 0.1
 TIMEOUT = 20
 WINDOW_TITLE = None
+
+FIND_TIMEOUT = 20
+FIND_TIMEOUT_TMP = 3
