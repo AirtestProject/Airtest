@@ -126,7 +126,7 @@ def run(addr, moa_script, utilfile="", user_vars=""):
         filename = os.path.basename(script)
         if not os.path.exists(filename):
             shutil.copytree(script, filename)
-            script_list.append(os.path.abspath(filename))
+        script_list.append(os.path.abspath(filename))
     p = subprocess.Popen([
         "python", "-m", "moa.airtest_runner", ",".join(script_list),
         "--setsn", addr, "--log", "--screen", 

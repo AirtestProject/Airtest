@@ -12,6 +12,7 @@ import requests
 import re
 import urllib2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
+import hunter
 import sdkautomator
 
 

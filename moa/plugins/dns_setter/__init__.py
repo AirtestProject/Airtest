@@ -56,7 +56,7 @@ class DefaultDnsSetter(object):
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
         if not uiobj.exists:
-            for i in range(5):
+            for i in range(10):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
@@ -210,15 +210,22 @@ class DefaultDnsSetter(object):
         """
         try 5 times to ping a server, success if any of ping is ok
         """
+        def _ping(cmd):
+            res = self.adb.shell(cmd)
+            matcher = re.search(r'packets transmitted.*?(\d).*?received', res, re.DOTALL)
+            if matcher and matcher.group(1) != '0':
+                return res
+            else:
+                return False
+
         result = ''
         for i in range(max_try):
-            result = self.adb.shell('ping -c2 {}'.format(server))
-            matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
-            if matcher and matcher.group(1) != '0':
-                return True
-            else:
+            result = _ping('ping -c2 {}'.format(server)) or _ping(['echo "ping -c2 {}" | su'.format(server)])
+            if not result:
                 time.sleep(2)
                 self.connect_netease_game()
+            else:
+                return
         raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
 
     def test_dns(self, dns1):
@@ -406,23 +413,21 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    print d(text=u'开启WLAN').right(checkable="true").info
 
 
-    ds = DnsSetter('CQSCMVOFHI5TEY8D', 'CQSCMVOFHI5TEY8D')
-    ds.clear_float_tips()
-    ds.network_prepare()
-    ds.set_dns('-1')
-    ds.test_ping('www.163.com')
+    # ds = DnsSetter('10.251.83.51:7481', '4df74f4b47e33081')
+    # ds.clear_float_tips()
+    # ds.network_prepare()
+    # ds.set_dns('192.168.229.227')
+    # ds.test_ping('www.163.com')
 
-    # a = Android('0815f8485f032404', minicap_stream=True)
-    # # a.home()
-    # for i in range(1000):
-    #     print "get next frame"
-    #     frame = a.snapshot()
-    #     time.sleep(1)
+    # a = Android('4df74f4b47e33081')
+    # print a.shell('echo "ping -c2 www.163.com" | su')
+
 
 
     # for d in stf.get_device_list_rest(None):

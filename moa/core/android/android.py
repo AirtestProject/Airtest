@@ -780,6 +780,7 @@ class Android(object):
         if init_ime:
             self.ime = AdbKeyboardIme(self.adb)
             self.toggle_shell_ime()
+            reg_cleanup(self.ime.end)
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
