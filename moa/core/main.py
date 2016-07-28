@@ -43,12 +43,10 @@ except ImportError as e:
 
 LOGGER = MoaLogger(None)
 SCREEN = None
-WHOLE_SCREEN = False  # 指定WHOLE_SCREEN时，就默认截取全屏(而非hwnd窗口截图)
 DEVICE = None
 DEVICE_LIST = []
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
-DEBUG = False
 WATCHER = {}
 
 

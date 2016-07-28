@@ -130,7 +130,7 @@ class GalaxyNote2(object):
 
     @particular_case.specified(GALAXY_NOTE2)
     def is_dhcp_mode(self):
-        ipsetting = self.scroll_find_legacy({'text': "IP 设定"})
+        ipsetting = self.scroll_find_legacy({'text': u"IP 设定"})
         ipsetting_field = ipsetting.down(className="android.widget.Spinner")
         if not ipsetting_field or not ipsetting_field.exists:
             raise Exception("cannot find ip settings field.")
@@ -139,7 +139,7 @@ class GalaxyNote2(object):
 
     @particular_case.specified(GALAXY_NOTE2)
     def use_dhcp(self):
-        ipsetting = self.scroll_find_legacy({'text': "IP 设定"})
+        ipsetting = self.scroll_find_legacy({'text': u"IP 设定"})
         ipsetting.down(className="android.widget.Spinner").click()
         time.sleep(0.5)
         self.uiutil.click_any({'text': 'DHCP'})
@@ -148,10 +148,10 @@ class GalaxyNote2(object):
 
     @particular_case.specified(GALAXY_NOTE2)
     def use_static_ip(self):
-        ipsetting = self.scroll_find_legacy({'text': "IP 设定"})
+        ipsetting = self.scroll_find_legacy({'text': u"IP 设定"})
         ipsetting.down(className="android.widget.Spinner").click()
         time.sleep(0.5)
-        self.uiutil.click_any({'text': u'静止'})
+        self.uiutil.click_any({'text': u'静态'})
         time.sleep(1)
 
     @particular_case.specified(GALAXY_NOTE2)
