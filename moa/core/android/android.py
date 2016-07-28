@@ -1317,9 +1317,9 @@ class Emulator(Android):
     """
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, emulator_name='mumu_old', serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, \
-                 minicap_stream=False, minitouch=True, init_ime=True):
-        from moa.core.android.android_emulator import EMULATOR_INFO
+    def __init__(self, emulator_name='bluestacks', serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, \
+                 minicap_stream=False, minitouch=True, init_ime=False):
+        from moa.core.android.emulator.android_emulator import EMULATOR_INFO
         if EMULATOR_INFO.get(emulator_name):
             self.emulator_name = emulator_name
             self.emulator_info = EMULATOR_INFO[emulator_name]
@@ -1335,7 +1335,8 @@ class Emulator(Android):
             self._init_display(props)
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = UiautomatorIme(self.adb)
+            self.ime = AdbKeyboardIme(self.adb)
+            self.toggle_shell_ime()
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -1359,6 +1360,7 @@ class Emulator(Android):
         self.size["max_x"], self.size["max_y"] = self.getEventInfo()
 
         hwnd = self.emulator_hwnd
+        print 'hwnd', hwnd
         rect = win32gui.GetClientRect(hwnd)
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
@@ -1389,7 +1391,10 @@ class Emulator(Android):
         else:
             self.serialno = ''
         self.emulator_hwnd = EmulatorHelper.find_emu_windows_hwnd(self.emulator_name) or 0
-        if not self.emulator_name or not self.emulator_hwnd:
+        if not self.emulator_hwnd:
+            # 如果模拟器已经被嵌入到IDE里的话，会找不到句柄的，要重新搜索IDE下面的子窗口句柄才能找到
+            self.emulator_hwnd = EmulatorHelper.find_emu_embed_airtestide(self.emulator_name) or 0
+        if not self.emulator_hwnd or not self.emulator_name:
             print 'please launch a emulator first'
 
     def wake(self):
@@ -1438,7 +1443,13 @@ class Emulator(Android):
         import win32con
         import cv2
         hwnd = self.emulator_hwnd
-        rect = win32gui.GetClientRect(hwnd)
+        if not hwnd:
+            raise RuntimeError("please launch a emulator first ")
+        try:
+            rect = win32gui.GetClientRect(hwnd)
+        except:
+            print "snapshot failed"
+            raise RuntimeError("please launch a emulator first ")
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
         if width != self.size['width']:
