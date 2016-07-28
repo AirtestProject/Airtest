@@ -594,11 +594,12 @@ def refresh_device():
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=None, whole_screen=None):
+def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=None, whole_screen=None):
     '''
     @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
     '''
+    timeout = timeout or FIND_TIMEOUT
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
             pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
@@ -733,14 +734,16 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
+def wait(v, timeout=0, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT
     pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
     return pos
 
 
 @logwrap
 @_transparam
-def exists(v, timeout=3, find_inside=None, find_outside=None, whole_screen=None):
+def exists(v, timeout=0, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT_TMP
     try:
         pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         return pos
@@ -765,7 +768,8 @@ Assertions for result verification
 
 @logwrap
 @_transparam
-def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=None, whole_screen=None):
+def assert_exists(v, msg="", timeout=0, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT
     try:
         pos = _loop_find(v, timeout=timeout,
                          threshold=THRESHOLD_STRICT, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
@@ -776,7 +780,8 @@ def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=Non
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=None, whole_screen=None):
+def assert_not_exists(v, msg="", timeout=0, delay=OPDELAY, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT_TMP
     try:
         pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         time.sleep(delay)
