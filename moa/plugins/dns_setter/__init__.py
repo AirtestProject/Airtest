@@ -56,7 +56,7 @@ class DefaultDnsSetter(object):
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
         if not uiobj.exists:
-            for i in range(5):
+            for i in range(10):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
@@ -413,16 +413,17 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
-    # d = AutomatorDevice()
-    # print d.dump()
+    from moa.core.android.uiautomator import AutomatorDevice
+    d = AutomatorDevice()
+    print d.dump()
+    print d(text=u'开启WLAN').right(checkable="true").info
 
 
-    ds = DnsSetter('4df74f4b47e33081', '4df74f4b47e33081')
-    ds.clear_float_tips()
-    ds.network_prepare()
-    ds.set_dns('192.168.229.227')
-    ds.test_ping('www.163.com')
+    # ds = DnsSetter('10.251.83.51:7481', '4df74f4b47e33081')
+    # ds.clear_float_tips()
+    # ds.network_prepare()
+    # ds.set_dns('192.168.229.227')
+    # ds.test_ping('www.163.com')
 
     # a = Android('4df74f4b47e33081')
     # print a.shell('echo "ping -c2 www.163.com" | su')

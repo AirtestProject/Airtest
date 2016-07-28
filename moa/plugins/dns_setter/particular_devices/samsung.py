@@ -105,7 +105,7 @@ class GalaxyNote2(object):
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
         if not uiobj.exists:
-            for i in range(5):
+            for i in range(10):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
