@@ -64,18 +64,9 @@ def test(addr):
 
 def setdns(sn, addr, dns, verify_host='www.163.com'):
     """设置dns"""
-
-    # these two device cannot connect to netease_game
-    if sn in ('045BBI2H9F9B', ):
-        return
-
     # connot save dns settings
     if sn in ('fdcbcc83', '8d260bf7'):
         return
-    #
-    # # 手机有问题，桌面黑黑的
-    # if sn in ('TA9921AVZE', ):
-    #     return
 
     from moa.plugins.dns_setter import DnsSetter
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
@@ -117,6 +108,7 @@ def install(addr, apk, reinstall=True):
             dev.shell("input keyevent 25")
     mute(a)
     a.install(apk, reinstall=(reinstall=="true"), check=True)
+    a.wake()
 
 
 def startapp(addr, package):
@@ -126,14 +118,17 @@ def startapp(addr, package):
 
 
 def run(addr, moa_script, utilfile="", user_vars=""):
-    """运行moa任务，并生成报告"""
+    """运行moa任务"""
     import shutil
     import subprocess
-    filename = os.path.basename(moa_script)
-    if not os.path.exists(filename):
-        shutil.copytree(moa_script, filename)
+    script_list = []
+    for script in moa_script.split(","):
+        filename = os.path.basename(script)
+        if not os.path.exists(filename):
+            shutil.copytree(script, filename)
+            script_list.append(os.path.abspath(filename))
     p = subprocess.Popen([
-        "python", "-m", "moa.airtest_runner", filename,
+        "python", "-m", "moa.airtest_runner", ",".join(script_list),
         "--setsn", addr, "--log", "--screen", 
         "--utilfile", utilfile, "--kwargs", user_vars,
     ])
@@ -178,22 +173,5 @@ def main():
     func(*sys.argv[2:])
 
 
-def run_on_all_devices():
-    import subprocess
-    import traceback
-    for sn in devices():
-        try:
-            print subprocess.check_output("adb -s %s shell input keyevent HOME" % sn, shell=True)
-##            addr = join(sn)
-##            dev = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
-##            # turn screen red to find device
-##            print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
-        except:
-            traceback.print_exc()
-        finally:
-            cleanup(sn)
-
-
 if __name__ == '__main__':
-##    main()
-    run_on_all_devices()
+    main()

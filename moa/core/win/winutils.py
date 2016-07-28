@@ -385,7 +385,7 @@ class WindowMgr:
 
     def snapshot_by_hwnd(self, hwnd, filename="tmp.png"):
         rect = win32gui.GetWindowRect(hwnd)
-        pos = (rect[0], rect[1])
+        # pos = (rect[0], rect[1])
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
         # print "in winutils.py WindowMgr():", pos, width, height
@@ -400,7 +400,26 @@ class WindowMgr:
         saveBitMap.SaveBitmapFile(saveDC, filename)
         img = cv2.imread(filename)
 
-        return img, pos
+        return img
+
+    def crop_screen_by_hwnd(self, screen, hwnd, filename="tmp.png"):
+        rect = win32gui.GetWindowRect(hwnd)
+        h, w = screen.shape[:2]
+        x_min, y_min = max(0, rect[0]), max(1, rect[1])
+        x_max, y_max = min(w - 1, rect[2]), min(h - 1, rect[3])
+        if x_min > w-1 or y_min > h - 1 or x_max < 0 or y_max < 0:
+            raise Exception("hwnd area is out of screen, cannot get its image.")
+        img_crop = screen[y_min:y_max, x_min:x_max]
+        return img_crop
+
+    def get_wnd_pos_by_hwnd(self, hwnd, use_crop_screen=False):
+        rect = win32gui.GetWindowRect(hwnd)
+
+        if use_crop_screen:
+            pos = (max(0, rect[0]), max(0, rect[1]))
+        else:
+            pos = (rect[0], rect[1])
+        return pos
 
     def find_window(self, class_name, window_name = None):
         """find a window by its class_name"""

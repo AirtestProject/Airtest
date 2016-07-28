@@ -13,19 +13,49 @@ VIVO_SERIALS = ('ZTAMDU49ZT59TOAE', 'CQ556955VKOV5T4D', 'JBRSCYZTS8JN7HZD', '38d
 
 class Vivo(object):
     @particular_case.specified(VIVO_SERIALS)
+    def connect_netease_game(self, strict=True):
+        uiobj = self.d(text='netease_game')
+        if not uiobj.exists:
+            for i in range(10):
+                uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
+                if uiobj:
+                    break
+                time.sleep(3)
+        if not uiobj or not uiobj.exists:
+            raise Exception('AP netease_game not found')
+        uiobj.click()
+        time.sleep(1)
+
+        # 优先连接
+        self.uiutil.click_any({'textMatches': ur'连接|連接'}, {'textMatches': ur'完成|取消|关闭|關閉'})
+        time.sleep(1.5)
+        connected = self.d(text=u"选取网络").up(text='netease_game')
+        for i in range(20):
+            if not connected:
+                time.sleep(2)
+                connected = self.d(text=u"选取网络").up(text='netease_game')
+            else:
+                break
+        if strict:
+            self.test_netease_game_connected()
+
+    @particular_case.specified(VIVO_SERIALS)
     def is_dhcp_mode(self):
-        # TODO
-        pass
+        # 通过网关这个ui来判断是否静态ip的按钮打开了
+        switch = self.d(text=u'网关')
+        return not switch.enabled
 
     @particular_case.specified(VIVO_SERIALS)
     def use_dhcp(self):
-        # TODO
-        pass
+        switch = self.d(text=u'网关')
+        if switch.enabled:
+            self.d(text=u'静态IP').right(resourceId="android:id/checkbox").click()
 
     @particular_case.specified(VIVO_SERIALS)
     def use_static_ip(self):
-        # TODO
-        pass
+        switch = self.d(text=u'网关')
+        if not switch.enabled:
+            self.d(text=u'静态IP').right(resourceId="android:id/checkbox").click()
 
     @particular_case.specified(VIVO_SERIALS)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):

@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-
 import time
 import os
 import sys
 import json
 import argparse
+import traceback
 from core.main import *
 # import here to build dependent modules
 import requests
 import re
 import urllib2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
+import hunter
 import sdkautomator
 
 
@@ -99,8 +100,7 @@ def main():
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
-    # 建军添加：设置运行进程中moa的参数，将maskrect设置为
-    ap.add_argument("--maskrect", help="set IDE rect tobe a moa mask, during windows running.")
+    ap.add_argument("--findoutside", help="find outside a rectangle area.")
 
     global args
     args = ap.parse_args()
@@ -114,12 +114,8 @@ def main():
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
-    # cd script dir
-    os.chdir(args.script)
-
-    if args.maskrect:
-        # print "set mask_rect : ", args.maskrect
-        set_mask_rect(args.maskrect)
+    if args.findoutside:
+        set_mask_rect(args.findoutside)
 
     if args.setsn:
         print "set_serialno", args.setsn
@@ -160,14 +156,6 @@ def main():
                 print "set_windows title=%s" % args.setwin
                 set_windows(window_title=args.setwin)
 
-    if args.log:
-        print "save log in", "'%s'" %args.log
-        set_logfile(args.log)
-
-    if args.screen:
-        print "save img in", "'%s'" %args.screen
-        set_screendir(args.screen)
-
     if args.kwargs:
         print "load kwargs", repr(args.kwargs)
         for kv in args.kwargs.split(","):
@@ -182,11 +170,31 @@ def main():
             exec(line) in globals()
             if line == "":
                 print "end of stdin"
-                exit(0)
+                sys.exit(0)
             pass
 
-    # execute code
-    exec_script(args.script, scope=globals(), original=True, pyfilename=args.pyfile)
+    exit_code = 0
+
+    for script in args.script.split(","):
+        # cd script dir
+        os.chdir(script)
+
+        if args.log:
+            print "save log in", "'%s'" %args.log
+            set_logfile(args.log)
+
+        if args.screen:
+            print "save img in", "'%s'" %args.screen
+            set_screendir(args.screen)
+
+        try:
+            # execute code
+            exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
+        except Exception:
+            traceback.print_exc()
+            exit_code = 1
+
+    sys.exit(exit_code)
 
 
 if __name__ == '__main__':

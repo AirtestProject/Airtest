@@ -45,11 +45,9 @@ LOGGER = MoaLogger(None)
 SCREEN = None
 DEVICE = None
 DEVICE_LIST = []
-CURRENT_HWND = None
-MARGIN_LIST = [0, 0, 0, 0]  # 用于标注有效窗口在HWND窗体的左上角margin和右下角margin
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
-DEBUG = False
+WATCHER = {}
 
 
 """
@@ -239,6 +237,7 @@ def resign(ipaname):
 def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
+    window_title = window_title or WINDOW_TITLE
     dev = win.Windows()
     if handle:
         dev.set_handle(int(handle))
@@ -253,8 +252,6 @@ def set_windows(handle=None, window_title=None):
     if dev.handle:
         print dev.handle
         dev.set_foreground()
-        # 将CURRENT_HWND置为当前handle，windows匹配时使用此句柄进行截图:
-        set_globals("CURRENT_HWND", dev.handle)
     global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
     DEVICE = dev
     DEVICE_LIST.append(dev)
@@ -280,8 +277,10 @@ def add_device():
         if not window_title:
             raise MoaError("please set_global WINDOW_TITLE or set_windows with window_title first")
         devs = DEVICE.find_window_list(window_title)
+        print "devs:", devs
         try:
             another_dev = (set(devs) - set([DEVICE.handle])).pop()
+            print "another_dev:", another_dev
         except KeyError:
             raise MoaError("no more device to add")
         set_windows(handle=another_dev)
@@ -295,11 +294,9 @@ def set_current(index):
     if index > len(DEVICE_LIST):
         raise MoaError("add_device first")
     DEVICE = DEVICE_LIST[index]
-    print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
+    # print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
     if isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
-        # 将CURRENT_HWND置为当前handle，windows匹配时使用此句柄进行截图:
-        set_globals("CURRENT_HWND", dev.handle)
 
 
 def set_basedir(base_dir):
@@ -311,6 +308,7 @@ def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
     filepath = os.path.join(basedir, filename)
+    print "set_logfile", os.path.realpath(filepath)
     LOGGER.set_logfile(filepath)
 
 
@@ -335,19 +333,18 @@ def set_globals(key, value):
     globals()[key] = value
 
 
-def set_mask_rect(mask_rect):
-    global MASK_RECT
-    str_rect = mask_rect.split(',')
-    mask_rect = []
+def set_mask_rect(find_outside):
+    global FIND_OUTSIDE
+    str_rect = find_outside.split(',')
+    find_outside = []
     for i in str_rect:
         try:
-            mask_rect.append(max(int(i), 0))  # 如果有负数，就用0 代替
+            find_outside.append(max(int(i), 0))  # 如果有负数，就用0 代替
         except:
-            MASK_RECT = None
+            FIND_OUTSIDE = None
             return
-    # global MASK_RECT
-    MASK_RECT = mask_rect
-    print 'MASK_RECT in moa changed : ', MASK_RECT
+    FIND_OUTSIDE = find_outside
+    print 'FIND_OUTSIDE in moa changed : ', FIND_OUTSIDE
 
 
 def _get_search_img(pictarget):
@@ -379,12 +376,13 @@ def get_search_img(pictarget):
     return picdata
 
 
-def _get_screen_img(hwnd_to_snap=None):
+def _get_screen_img(windows_hwnd=None):
     # 如果是KEEP_CAPTURE, 就取上次的截屏，否则重新截屏
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
-        screen = snapshot(hwnd_to_snap=hwnd_to_snap)
+        screen = snapshot(windows_hwnd=windows_hwnd)
+
     return screen
 
 
@@ -393,7 +391,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
         if templateMatch is True:
             print "method: template match.."
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD)
+            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR)
         # 参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2],如果参数输入不全，不调用区域预测：
         elif not record_pos:
             print "method: sift in whole screen.."
@@ -416,7 +414,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
     return ret
 
 
-def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRICT_RET):
+def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=False):
     '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
     ret = None
     for st in CVSTRATEGY:
@@ -438,6 +436,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=STRI
         if ret is None:
             continue
         # cal_strict_confi进行进一步计算精确相似度
+        strict_ret = strict_ret or STRICT_RET
         if strict_ret:
             ret = aircv.cal_strict_confi(screen, picdata, ret, threshold=threshold)
         if ret is not None:
@@ -461,47 +460,56 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
     threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
     start_time = time.time()
     while True:
-        offset = (0, 0)
-        # whole_screen开关关闭\win平台回放、且指定了CURRENT_HWND 的情况下：使用hwnd获取有效图像
-        if not whole_screen and get_platform() == "Windows" and CURRENT_HWND:
-            print "CURRENT_HWND in loop_find:", CURRENT_HWND
-            screen, wnd_pos = _get_screen_img(hwnd_to_snap=CURRENT_HWND)
-            if screen is None:
-                print "CURRENT_HWND not exist in system, skip cv matching"
-                ret = None
-            else:
-                screen = aircv.crop_by_margin(screen, MARGIN_LIST)
-                ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
-                offset = (wnd_pos[0] + MARGIN_LIST[0], wnd_pos[1] + MARGIN_LIST[1])
-
-        # 其他情况：手机回放，或者windows全屏回放时，使用之前的截屏方法(inside、outside参数生效)
+        wnd_pos = None
+        # 未指定whole_screen、win平台回放、且指定了handle 的情况下：使用hwnd获取有效图像
+        whole_screen = whole_screen or WHOLE_SCREEN
+        if not whole_screen and get_platform() == "Windows" and DEVICE.handle:
+            screen = _get_screen_img(windows_hwnd=DEVICE.handle)
+            wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)  # 获取窗口相对于屏幕的位置(用于操作坐标的转换)
+        # 其他情况：手机回放，或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
         else:
             screen = _get_screen_img()
-            if not screen.any():
-                print "Whole screen is black, skip cv matching"
-                ret = None
-            else:
-                if find_outside:  # 在截屏的find_outside区域外寻找(win下指定了hwnd则不需要)
-                    screen = mask_image(screen, find_outside)
-                if find_inside:   # 获取图像识别的指定区域：指定区域图像+指定区域坐标偏移
-                    screen, offset = crop_image(screen, find_inside)
-                ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
+            find_outside = find_outside or FIND_OUTSIDE  # 暂时只在全屏截取时才执行find_outside，主要关照IDE调试脚本情形
+            screen = mask_image(screen, find_outside)
 
-        # 如果指定调试时，就将最后图像识别时，对应的有效截屏区域展示一下，用于某个脚本语句中临时调试查看搜索截屏时使用：
-        if DEBUG:
+        if screen.any():
+            # *************************************************************************************
+            # 先不加通用回放时的find_outside，稍后根据具体需求，仔细考虑如何添加：
+            # find_outside = find_outside or FIND_OUTSIDE
+            # if find_outside:  # 在截屏的find_outside区域外寻找(win下指定了hwnd则是相对窗口的区域)
+            #     screen = mask_image(screen, find_outside)
+            # *************************************************************************************
+            # 如果find_inside为None，获取的offset=None.
+            find_inside = find_inside or FIND_INSIDE
+            screen, offset = crop_image(screen, find_inside)
+            ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
+        else:
+            print "Whole screen is black, skip cv matching"
+            ret = None
+
+        if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
             aircv.show(screen)
+
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
             if intervalfunc is not None:
                 intervalfunc()
+            for name, func in WATCHER.items():
+                print "exec watcher name"
+                func()
             # 超时则抛出异常
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
             time.sleep(interval)
             continue
         else:
-            pos = TargetPos().getXY(ret, pictarget.target_pos)
-            ret_pos = int(pos[0] + offset[0]), int(pos[1] + offset[1])
+            ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
+            if offset:   # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中：
+                ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
+            if wnd_pos:  # 实际操作位置：将相对于窗口的操作坐标，转换成相对于整个屏幕的操作坐标
+                ret_pos = int(ret_pos[0] + wnd_pos[0]), int(ret_pos[1] + wnd_pos[1])
+                # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
+                _log_in_func({"wnd_pos": wnd_pos})
             return ret_pos
 
 
@@ -598,17 +606,17 @@ def uninstall(package):
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
-def snapshot(filename="screen.png", hwnd_to_snap=None):
+def snapshot(filename="screen.png", windows_hwnd=None):
     global RECENT_CAPTURE, SAVE_SCREEN
     if SAVE_SCREEN:
         filename = "%s.jpg" % int(time.time() * 1000)
         filename = os.path.join(SAVE_SCREEN, filename)
         _log_in_func({"screen": filename})
-    if hwnd_to_snap:  # 只有windows平台才会走到这一逻辑
-        screen = DEVICE.snapshot_by_hwnd(hwnd_to_snap, filename=filename)
+
+    if get_platform() == "Windows" and windows_hwnd:
+        screen = DEVICE.snapshot_by_hwnd(filename=filename, hwnd_to_snap=windows_hwnd)
     else:
-        screen = DEVICE.snapshot(filename)
-    # 如果屏幕全黑，则screen.any()返回false
+        screen = DEVICE.snapshot(filename=filename)
     # 实际上手机可能正好是全黑，不做特殊处理了
     RECENT_CAPTURE = screen  # used for keep_capture()
     return screen
@@ -637,20 +645,27 @@ def refresh_device():
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=MASK_RECT):
+def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01, find_inside=None, find_outside=None, whole_screen=None):
     '''
     @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
     '''
+    timeout = timeout or FIND_TIMEOUT
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
-            pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
+            pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         except MoaNotFoundError:
             if if_exists:
                 return False
             raise
     else:
         pos = v
+        # 互通版需求：点击npc，传入find_inside参数作为矫正
+        find_inside = find_inside or FIND_INSIDE
+        if find_inside and get_platform() == "Windows" and DEVICE.handle:
+            wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)
+            # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
+            pos = (wnd_pos[0] + find_inside[0] + pos[0], wnd_pos[1] + find_inside[1] + pos[1])
 
     if offset:
         if offset['percent']:
@@ -674,25 +689,25 @@ def touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, if_exists=False, times
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_inside=None, find_outside=MASK_RECT, duration=0.5):
+def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_inside=None, find_outside=None, whole_screen=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
-            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
+            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
             v1.target_pos = target_poses[1]
-            pos2 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
+            pos2 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         else:
             raise Exception("invalid params for swipe")
     else:
         if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
-            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside)
+            pos1 = _loop_find(v1, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         else:
             pos1 = v1
 
         if v2:
             if (is_str(v2) or isinstance(v2, MoaText)):
                 keep_capture()
-                pos2 = _loop_find(v2, find_inside=find_inside, find_outside=find_outside)
+                pos2 = _loop_find(v2, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
                 keep_capture(False)
             else:
                 pos2 = v2
@@ -713,9 +728,9 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, find_insid
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT):
+def operate(v, route, timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=None, whole_screen=None):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
     else:
         pos = v
     print('downpos', pos)
@@ -770,19 +785,31 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=TIMEOUT, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=MASK_RECT):
-    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside)
+def wait(v, timeout=0, interval=CVINTERVAL, intervalfunc=None, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT
+    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
     return pos
 
 
 @logwrap
 @_transparam
-def exists(v, timeout=3, find_inside=None, find_outside=MASK_RECT):
+def exists(v, timeout=0, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT_TMP
     try:
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         return pos
     except MoaNotFoundError as e:
         return False
+
+
+@logwrap
+def add_watcher(name, func):
+    WATCHER[name] = func
+
+
+@logwrap
+def remove_watcher(name):
+    WATCHER.pop(name)
 
 
 """
@@ -792,10 +819,11 @@ Assertions for result verification
 
 @logwrap
 @_transparam
-def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=MASK_RECT):
+def assert_exists(v, msg="", timeout=0, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT
     try:
         pos = _loop_find(v, timeout=timeout,
-                         threshold=THRESHOLD_STRICT, find_inside=find_inside, find_outside=find_outside)
+                         threshold=THRESHOLD_STRICT, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
@@ -803,9 +831,10 @@ def assert_exists(v, msg="", timeout=TIMEOUT, find_inside=None, find_outside=MAS
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=TIMEOUT, delay=OPDELAY, find_inside=None, find_outside=MASK_RECT):
+def assert_not_exists(v, msg="", timeout=0, delay=OPDELAY, find_inside=None, find_outside=None, whole_screen=None):
+    timeout = timeout or FIND_TIMEOUT_TMP
     try:
-        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside)
+        pos = _loop_find(v, timeout=timeout, find_inside=find_inside, find_outside=find_outside, whole_screen=whole_screen)
         time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
@@ -829,7 +858,7 @@ def assert_equal(first, second, msg="", delay=OPDELAY):
 @logwrap
 def assert_not_equal(first, second, msg="", delay=OPDELAY):
     if isinstance(second, unicode) or isinstance(first, unicode):
-        result = (unicode(first) == unicode(second))
+        result = not (unicode(first) == unicode(second))
     elif type(first) == type(second):
         result = False if first == second else True
 

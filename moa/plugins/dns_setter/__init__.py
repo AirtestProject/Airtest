@@ -13,6 +13,7 @@ from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
+from particular_devices.lenovo import LenovoPad
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
@@ -36,6 +37,10 @@ class DefaultDnsSetter(object):
         self.uiutil = uiutils.UIUtil(self.d)
         self.ime_helper = UiautomatorIme(self.adb)
 
+        # ensure accessibility services disabled
+        self.adb.shell('settings put secure accessibility_enabled 0')
+        self.adb.shell('settings put secure enabled_accessibility_services 0')
+
     def clear_float_tips(self):
         self.uiutil.click_any({'text': u'取消'}, {'text': u'确定'}, {'text': u'好'})
 
@@ -51,7 +56,7 @@ class DefaultDnsSetter(object):
     def connect_netease_game(self, strict=True):
         uiobj = self.d(text='netease_game')
         if not uiobj.exists:
-            for i in range(5):
+            for i in range(10):
                 uiobj = self.uiutil.scroll_find({'text': 'netease_game'})
                 if uiobj:
                     break
@@ -182,7 +187,7 @@ class DefaultDnsSetter(object):
     @particular_case.default_call
     def get_current_ssid(self):
         netinfo = self.adb.shell("dumpsys netstats | grep -E 'iface=wlan.*networkId'")
-        matcher = re.search(r'networkId=(.*?)\]\]', netinfo)
+        matcher = re.search(r'networkId=(.*?)[\]|\}]\]', netinfo)
         if matcher:
             return matcher.group(1).strip('"')
         return None
@@ -205,15 +210,22 @@ class DefaultDnsSetter(object):
         """
         try 5 times to ping a server, success if any of ping is ok
         """
+        def _ping(cmd):
+            res = self.adb.shell(cmd)
+            matcher = re.search(r'packets transmitted.*?(\d).*?received', res, re.DOTALL)
+            if matcher and matcher.group(1) != '0':
+                return res
+            else:
+                return False
+
         result = ''
         for i in range(max_try):
-            result = self.adb.shell('ping -c2 {}'.format(server))
-            matcher = re.search(r'packets transmitted.*?(\d).*?received', result, re.DOTALL)
-            if matcher and matcher.group(1) != '0':
-                return True
-            else:
+            result = _ping('ping -c2 {}'.format(server)) or _ping(['echo "ping -c2 {}" | su'.format(server)])
+            if not result:
                 time.sleep(2)
                 self.connect_netease_game()
+            else:
+                return
         raise Exception('cannot ping to {}. cmd `ping` results: \n{}'.format(server, result))
 
     def test_dns(self, dns1):
@@ -290,7 +302,8 @@ class DefaultDnsSetter(object):
             self.test_dns(dns1)
 
 
-class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5):
+class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2,
+                GalaxyNote5, LenovoPad):
     pass
 
 
@@ -403,22 +416,18 @@ if __name__ == '__main__':
     from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
-    print d.orientation
-    d(text=u"网关").drag.to(textMatches=u'^静态\s*IP$')
-    # d(text='开启WLAN').right(checkable="true").click()
-    # d(text='开启WLAN').right(checkable="true").click()
-    # ds = DnsSetter('10.254.28.35:7477', '0815f8485f032404')
+    print d(text=u'开启WLAN').right(checkable="true").info
+
+
+    # ds = DnsSetter('10.251.83.51:7481', '4df74f4b47e33081')
     # ds.clear_float_tips()
     # ds.network_prepare()
     # ds.set_dns('192.168.229.227')
     # ds.test_ping('www.163.com')
 
-    # a = Android('0815f8485f032404', minicap_stream=True)
-    # # a.home()
-    # for i in range(1000):
-    #     print "get next frame"
-    #     frame = a.snapshot()
-    #     time.sleep(1)
+    # a = Android('4df74f4b47e33081')
+    # print a.shell('echo "ping -c2 www.163.com" | su')
+
 
 
     # for d in stf.get_device_list_rest(None):

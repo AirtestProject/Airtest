@@ -135,6 +135,26 @@ def get_use_statistics(req):
     return json.loads(res.data)
 
 
+def set_device_notes(serial, notes):
+    url = "http://%s:7100/api/v1/devices/%s/notes" % (HOST_IP, serial)
+    headers = {
+        'content-type': 'application/json',
+        'authorization': 'Bearer %s' % TOKEN_ID
+    }
+
+    res = requests.post(url, data=json.dumps({'note': notes}), headers=headers)
+    return res.json()
+
+
+def get_device_notes(serial):
+    url = "http://%s:7100/api/v1/devices/%s/" % (HOST_IP, serial)
+    headers = {'authorization': 'Bearer %s' % TOKEN_ID}
+    res = requests.get(url, params={'fields': 'notes'}, headers=headers)
+    if res.status_code == 200:
+        return res.json()['device']['notes']
+    return None
+
+
 if __name__ == "__main__":
     from pprint import pprint
     import time

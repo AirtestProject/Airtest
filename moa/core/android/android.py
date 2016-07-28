@@ -787,6 +787,7 @@ class Android(object):
         if init_ime:
             self.ime = AdbKeyboardIme(self.adb)
             self.toggle_shell_ime()
+            reg_cleanup(self.ime.end)
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -985,7 +986,7 @@ class Android(object):
 
     def text(self, text):
         if getattr(self, "ime", None):
-            text = text.decode("utf-8").encode(sys.stdin.encoding)
+            text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
             self.adb.shell(["input", "keyevent", "ENTER"])
         else:
@@ -1245,19 +1246,26 @@ class Android(object):
         self.ow_proc = self._initOrientationWatcher()
         reg_cleanup(self.ow_proc.kill)
 
+
+        def _refresh_by_ow():
+            line = self.ow_proc.stdout.readline()
+            if not line:
+                print "orientationWatcher has ended"
+                return None
+
+            ori = int(line) / 90
+            self.refreshOrientationInfo(ori)
+            return ori
+
         def _refresh_orientation(self):
             while True:
-                line = self.ow_proc.stdout.readline()
-                if not line:
-                    print "orientationWatcher has ended"
-                    if getattr(self, "ow_callback", None):
-                        self.ow_callback(None, *self.ow_callback_args)
+                ori = _refresh_by_ow()
+                if ori is None:
                     break
-                ori = int(line) / 90
-                self.refreshOrientationInfo(ori)
                 if getattr(self, "ow_callback", None):
                     self.ow_callback(ori, *self.ow_callback_args)
 
+        _refresh_by_ow()
         self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
         self._t.daemon = True
         self._t.start()

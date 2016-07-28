@@ -252,13 +252,14 @@ class MoaLogger(object):
         self.running_stack = []
         self.extra_log = {}
         self.set_logfile(logfile)
-        atexit.register(self.handle_stacked_log)
+        # atexit.register(self.handle_stacked_log)
 
     def set_logfile(self, logfile):
         if logfile is None:
             self.logfile = None
             self.logfd = None
-        elif logfile != self.logfile:
+        else:
+            self.handle_stacked_log()
             self.logfile = logfile
             self.logfd = open(self.logfile, "w")
 
@@ -306,6 +307,7 @@ def Logwrap(f, logger):
             fndata.update(data)
             fndata.update(LOGGER.extra_log)
             LOGGER.log("error", fndata)
+            LOGGER.running_stack.pop()
             raise
         else:
             time_used = time.time() - start
@@ -314,9 +316,9 @@ def Logwrap(f, logger):
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(LOGGER.extra_log)
             LOGGER.log('function', fndata)
+            LOGGER.running_stack.pop()
         finally:
             LOGGER.extra_log = {}
-            LOGGER.running_stack.pop()
         return res
     return wrapper
 
