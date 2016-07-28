@@ -99,6 +99,7 @@ class ADB(object):
             sys.stdout.flush()
         proc = subprocess.Popen(
             cmds,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -271,7 +272,7 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
         proc = self.start_cmd(['install', filepath])
-        nbsp = NonBlockingStreamReader(proc.stdout)
+        nbsp = NonBlockingStreamReader(proc.stdout, name="adb_install")
         proc.wait()
 
     def uninstall(self, package):
@@ -406,7 +407,7 @@ class Minicap(object):
                 real_orientation, other_opt),
             not_wait=True
         )
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True)
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
@@ -580,7 +581,7 @@ class Minitouch(object):
 
         self.localport, deviceport  = set_up_forward()
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % deviceport, not_wait=True)
-        self.nbsp = NonBlockingStreamReader(p.stdout)
+        self.nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:
             line = self.nbsp.readline(timeout=5.0)
             if line is None:
@@ -1235,7 +1236,6 @@ class Android(object):
     def orientationWatcher(self):
         self.ow_proc = self._initOrientationWatcher()
         reg_cleanup(self.ow_proc.kill)
-
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()

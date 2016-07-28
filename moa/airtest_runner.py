@@ -155,12 +155,30 @@ def main():
         while True:
             print "wait for stdin..."
             sys.stdout.flush()
-            line = sys.stdin.readline()
-            exec(line) in globals()
-            if line == "":
+            input_line = sys.stdin.readline().strip()
+            if input_line.startswith("c "):
+                code = input_line[2:]
+                print "exec code %s" % repr(code)
+                try:
+                    exec(code) in globals()
+                except:
+                    print "exec code error"
+                    traceback.print_exc()
+            elif input_line.startswith("f "):
+                script = input_line[2:]
+                print "exec script %s" % repr(script)
+                try:
+                    os.chdir(script)
+                    exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
+                except:
+                    "exec script error"
+                    traceback.print_exc()
+            elif input_line == "":
                 print "end of stdin"
                 sys.exit(0)
-            pass
+            else:
+                print "invalid input %s" % repr(input_line)
+            sys.stdout.flush()
 
     exit_code = 0
 
