@@ -19,6 +19,7 @@ CVSTRATEGY_WINDOWS = ["tpl", "siftnopre"]
 FIND_INSIDE = None
 FIND_OUTSIDE = None
 WHOLE_SCREEN = False  # 指定WHOLE_SCREEN时，就默认截取全屏(而非hwnd窗口截图)
+CHECK_COLOR = True
 # MASK_RECT = None  # windows模式下IDE运行时，屏蔽掉IDE区域(MASK_RECT)
 THRESHOLD = 0.6
 THRESHOLD_STRICT = 0.7
