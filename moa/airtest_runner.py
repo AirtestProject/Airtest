@@ -156,9 +156,9 @@ def main():
         while True:
             print "wait for stdin..."
             sys.stdout.flush()
-            input_line = sys.stdin.readline().strip()
+            input_line = sys.stdin.readline()
             if input_line.startswith("c "):
-                code = input_line[2:]
+                code = input_line.strip()[2:]
                 print "exec code %s" % repr(code)
                 try:
                     exec(code) in globals()
@@ -166,7 +166,7 @@ def main():
                     print "exec code error"
                     traceback.print_exc()
             elif input_line.startswith("f "):
-                script = input_line[2:]
+                script = input_line.strip()[2:]
                 print "exec script %s" % repr(script)
                 try:
                     os.chdir(script)
