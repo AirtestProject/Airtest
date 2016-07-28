@@ -17,14 +17,16 @@ def run_on_all_devices():
                 # dev.home()
 
                 # turn screen red to find device
-                # print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+                print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
+                # turn on camera
+                # print dev.shell(['am', 'start', '-a', 'android.media.action.IMAGE_CAPTURE'])
                 # shine
-                for i in range(20):
-                    dev.home()
-                    print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
-                    time.sleep(1)
-                
+                # for i in range(20):
+                #     dev.home()
+                #     print dev.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+                #     time.sleep(1)
+
             except:
                 traceback.print_exc()
             finally:

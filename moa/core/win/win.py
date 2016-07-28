@@ -50,6 +50,13 @@ class Windows(object):
         wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd, use_crop_screen=use_crop_screen)
         return wnd_pos
 
+    def get_childhwnd_list_by_hwnd(self, hwnd, child_hwnd_list, w_h):
+        # 传入当前的child_hwnd_list，去除当前已经不在hwnd内的child_hwnd
+        #     如果发现全都不在了，那么就使用w_h进行查找新的child_hwnd_list
+        #     如果发现w_h的也不在了，那么就按照w_h的比例相同的原则进行查找，还没有，就报错...
+        new_child_hwnd_list = self.winmgr.get_childhwnd_list_by_hwnd(hwnd, child_hwnd_list, w_h)
+        return new_child_hwnd_list
+
     def keyevent(self, keyname, escape=False, combine=None):
         key_input(keyname, escape, combine)
 
