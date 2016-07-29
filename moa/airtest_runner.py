@@ -164,7 +164,7 @@ def main():
                     exec(code) in globals()
                 except:
                     print "exec code error"
-                    traceback.print_exc()
+                    sys.stderr.write(traceback.format_exc())
                 else:
                     print "exec code end"
             elif input_line.startswith("f "):
@@ -175,7 +175,7 @@ def main():
                     exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
                 except:
                     print "exec script error"
-                    traceback.print_exc()
+                    sys.stderr.write(traceback.format_exc())
                 else:
                     print "exec script end"
             elif input_line == "":
@@ -184,6 +184,7 @@ def main():
             else:
                 print "invalid input %s" % repr(input_line)
             sys.stdout.flush()
+            sys.stderr.flush()
 
     exit_code = 0
 
