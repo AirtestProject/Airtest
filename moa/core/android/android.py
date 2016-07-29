@@ -23,7 +23,7 @@ import Queue
 import random
 import traceback
 import axmlparserpy.apk as apkparser
-from moa.core.error import MoaError, AdbError
+from moa.core.error import MoaError, AdbError, MinicapError, MinitouchError
 from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
@@ -506,7 +506,11 @@ class Minicap(object):
         with self.stream_lock:
             if self.frame_gen is None:
                 self.init_stream()
-            return self.frame_gen.next()
+            try:
+                frame = self.frame_gen.next()
+                return frame
+            except Exception as err:
+                raise MinicapError(err)
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
@@ -690,10 +694,16 @@ class Minitouch(object):
             raise RuntimeError("invalid operate args: %s"%args)
         self.handle(cmd)
 
+    def safe_send(self, data):
+        try:
+            self.client.send(data)
+        except Exception as err:
+            raise MinitouchError(err)
+
     def _backend_worker(self):
         while not self.backend_stop_event.isSet():
             cmd = self.backend_queue.get()
-            self.client.send(cmd)
+            self.safe_send(cmd)
 
     def setup_client_backend(self):
         self.backend_queue = Queue.Queue()
@@ -727,7 +737,7 @@ class Minitouch(object):
                 break
         print "minitouch header:", repr(header)
         self.client = s
-        self.handle = self.client.send
+        self.handle = self.safe_send
 
     def teardown(self):
         if hasattr(self, "backend_stop_event"):
