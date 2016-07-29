@@ -371,7 +371,7 @@ import logging
 
 logging.basicConfig(
     level=logging.DEBUG, 
-    format='[%(asctime)s][%(levelname)-8s]<%(name)-8s>%(message)s', 
+    format='[%(asctime)s][%(levelname)s]<%(name)s> %(message)s', 
     datefmt='%I:%M:%S'
 )
 
