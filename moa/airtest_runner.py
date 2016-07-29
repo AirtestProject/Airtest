@@ -165,6 +165,8 @@ def main():
                 except:
                     print "exec code error"
                     traceback.print_exc()
+                else:
+                    print "exec code end"
             elif input_line.startswith("f "):
                 script = input_line.strip()[2:]
                 print "exec script %s" % repr(script)
@@ -172,8 +174,10 @@ def main():
                     os.chdir(script)
                     exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
                 except:
-                    "exec script error"
+                    print "exec script error"
                     traceback.print_exc()
+                else:
+                    print "exec script end"
             elif input_line == "":
                 print "end of stdin"
                 sys.exit(0)
