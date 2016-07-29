@@ -1,5 +1,6 @@
 rd /s /q cover
-nosetests test --with-coverage --cover-package ./moa --cover-html
+del .coverage
+nosetests tests --with-coverage --cover-package ./moa --cover-html
 pause
 start cover/index.html
 
