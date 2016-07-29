@@ -131,6 +131,7 @@ def main():
         else:
             for sn in args.setsn.split(","):
                 set_serialno(sn, addr=addr)
+        set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng
         print "set_udid", args.setudid
@@ -146,6 +147,8 @@ def main():
         else:
             for handle in args.setwin.split(","):
                 set_windows(handle=int(handle))
+
+        set_current(0)
 
     if args.kwargs:
         print "load kwargs", repr(args.kwargs)
@@ -207,6 +210,7 @@ def main():
 
         try:
             # execute code
+            set_current(0)
             exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
         except Exception:
             traceback.print_exc()
