@@ -38,8 +38,7 @@ class DefaultDnsSetter(object):
         self.ime_helper = UiautomatorIme(self.adb)
 
         # ensure accessibility services disabled
-        self.adb.shell('settings put secure accessibility_enabled 0')
-        self.adb.shell('settings put secure enabled_accessibility_services 0')
+        self.android.disable_accessibility_service()
 
     def clear_float_tips(self):
         self.uiutil.click_any({'text': u'取消'}, {'text': u'确定'}, {'text': u'好'})

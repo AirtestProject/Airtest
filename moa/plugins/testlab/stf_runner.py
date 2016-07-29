@@ -114,6 +114,9 @@ def install(addr, apk, reinstall=True):
 def startapp(addr, package):
     """打开app"""
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
+
+    # enable accessibility before moa job
+    a.enable_accessibility_service()
     a.amstart(package)
 
 

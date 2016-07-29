@@ -869,6 +869,14 @@ class Android(object):
             cmd.append('-k')
         self.adb.shell(cmd)
 
+    def enable_accessibility_service(self):
+        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
+        self.adb.shell('settings put secure accessibility_enabled 1')
+
+    def disable_accessibility_service(self):
+        self.adb.shell('settings put secure accessibility_enabled 0')
+        self.adb.shell('settings put secure enabled_accessibility_services 0')
+
     def install(self, filepath, reinstall=False, check=True):
         """
         安装应用
@@ -910,8 +918,7 @@ class Android(object):
         # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
         # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
         # by liuxin 2016.6.17
-        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
-        self.adb.shell('settings put secure accessibility_enabled 1')
+        self.enable_accessibility_service()
 
         # rm all apks in /data/local/tmp to get enouph space
         self.adb.shell("rm -f /data/local/tmp/*.apk")
@@ -919,8 +926,7 @@ class Android(object):
         if check:
             self.amcheck(apk_package)
 
-        self.adb.shell('settings put secure accessibility_enabled 0')
-        self.adb.shell('settings put secure enabled_accessibility_services 0')
+        self.disable_accessibility_service()
 
     def uninstall(self, package):
         return self.adb.uninstall(package)
