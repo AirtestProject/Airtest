@@ -5,7 +5,7 @@ import os
 import time
 import unittest
 
-TEST_APK = 'Ma51.apk'
+TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')
 
 class TestAndroid(unittest.TestCase):
 
