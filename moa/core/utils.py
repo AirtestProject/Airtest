@@ -365,3 +365,9 @@ class TargetPos(object):
         else:
             print "invalid target_pos:%s, use mid point instead" % pos
             return cvret["result"]
+
+
+import logging
+logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s][%(levelname)s][%(name)s]%(message)s', datefmt='%I:%M:%S')
+def get_logger(name):
+    return logging.getLogger(name)
