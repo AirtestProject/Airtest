@@ -24,7 +24,7 @@ import random
 import traceback
 import axmlparserpy.apk as apkparser
 from moa.core.error import MoaError, AdbError, MinicapError, MinitouchError
-from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd, get_logger
+from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
 
@@ -368,7 +368,7 @@ class Minicap(object):
         real_orientation = self.size["rotation"]
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
-        elif is_list(self.projection):
+        elif isinstance(self.projection, (list, tuple)):
             proj_width, proj_height = self.projection
         elif isinstance(self.projection, (int, float)):
             proj_width = self.projection * real_width

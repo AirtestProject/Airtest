@@ -27,10 +27,11 @@ def look_path(program):
 def get_adb_path():
     system = platform.system()
     base_path = os.path.dirname(os.path.realpath(__file__))
+    base_path = os.path.join(base_path, "..", "android", "adb")
     moa_adb_path = {
-        "Windows": os.path.join("android", "adb", "windows", "adb.exe"),
-        "Darwin": os.path.join("android", "adb", "mac", "adb"),
-        "Linux": os.path.join("android", "adb", "linux", "adb")
+        "Windows": os.path.join("windows", "adb.exe"),
+        "Darwin": os.path.join("mac", "adb"),
+        "Linux": os.path.join("linux", "adb")
     }
     moa_adb = os.path.join(base_path, moa_adb_path[system])
     # overwrite uiautomator adb
@@ -38,13 +39,3 @@ def get_adb_path():
         del os.environ["ANDROID_HOME"]
     os.environ["PATH"] = os.path.dirname(moa_adb) + os.pathsep + os.environ["PATH"]
     return moa_adb
-
-
-def split_cmd(cmds):
-    """split cmd to list, for subprocess"""
-    if isinstance(cmds, basestring):
-        # cmds = shlex.split(cmds)  # disable auto removing \ on windows
-        cmds = cmds.split()
-    else:
-        cmds = list(cmds)
-    return cmds
