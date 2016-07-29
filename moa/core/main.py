@@ -273,7 +273,7 @@ def set_current(index):
         raise MoaError("add_device first")
     DEVICE = DEVICE_LIST[index]
     # print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
-    if isinstance(DEVICE, win.Windows):
+    if win and isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
 
 
