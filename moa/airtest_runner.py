@@ -7,7 +7,7 @@ import json
 import argparse
 import traceback
 from core.main import *
-from core.error import MinicapError, MinitouchError
+from core.error import MinicapError, MinitouchError, AdbError
 # import here to build dependent modules
 import requests
 import re
@@ -163,7 +163,7 @@ def main():
                 print "exec code %s" % repr(code)
                 try:
                     exec(code) in globals()
-                except (MinitouchError,MinicapError) as e:
+                except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
                     print "exec code error"
@@ -176,7 +176,7 @@ def main():
                 try:
                     os.chdir(script)
                     exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
-                except (MinitouchError,MinicapError) as e:
+                except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
                     print "exec script error"
