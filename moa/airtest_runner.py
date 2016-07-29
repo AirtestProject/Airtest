@@ -91,10 +91,11 @@ def main():
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
-    ap.add_argument("--setsn", help="auto set serialno", nargs="?", const="")
-    ap.add_argument("--setadb", help="auto set adb ip and port, default 127.0.0.1:5037 .")
-    ap.add_argument("--setudid", help="auto set ios device udid", nargs="?", const=True)
-    ap.add_argument("--setwin", help="auto set windows", action="store_true")
+    ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
+    ap.add_argument("--setadb", help="set adb ip and port, default 127.0.0.1:5037 .")
+    ap.add_argument("--setudid", help="set ios device udid", nargs="?", const="")
+    ap.add_argument("--setwin", help="set dev by windows handle", nargs="?", const="")
+    ap.add_argument("--devcount", help="set dev count autoly", nargs="?", const=1, default=1, type=int)
     ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
     ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
@@ -122,31 +123,28 @@ def main():
             addr = args.setadb.split(":")
         else:
             addr = None
-        for sn in args.setsn.split(","):
-            if sn == "":
+        if args.setsn == "":
+            for i in range(args.devcount):
                 # auto choose one serialno
-                sn = None
-            set_serialno(sn, addr=addr)
+                set_serialno(addr=addr)
+        else:
+            for sn in args.setsn.split(","):
+                set_serialno(sn, addr=addr)
 
-    if args.setudid:  # modified by gzlongqiumeng
+    if args.setudid is not None:  # modified by gzlongqiumeng
         print "set_udid", args.setudid
         udid = args.setudid if isinstance(args.setudid,str) else None
         set_udid(udid)
 
-    if args.setwin:
-        # todo: 1. window_title
-        #       2. find_in window rect
-        if args.setwin is True:
-            print "auto set_windows"
-            set_windows()
+    if args.setwin is not None:
+        print "set_windows", args.setwin
+        if args.setwin == "":
+            for i in range(args.devcount):
+                # auto choose one window
+                set_windows()
         else:
-            try:
-                handle = int(args.setwin)
-                print "set_windows handle=%s" % handle
-                set_windows(handle=handle)
-            except ValueError:
-                print "set_windows title=%s" % args.setwin
-                set_windows(window_title=args.setwin)
+            for handle in args.setwin.split(","):
+                set_windows(handle=int(handle))
 
     if args.kwargs:
         print "load kwargs", repr(args.kwargs)
