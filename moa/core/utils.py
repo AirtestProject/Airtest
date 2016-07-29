@@ -145,7 +145,7 @@ class NonBlockingStreamReader:
                         if print_new_line and line == self._lastline:
                             continue
                         self._lastline = line
-                        print "[%s]%s" % (self.name, repr(line.strip()))
+                        print "[nbsp][%s]%s" % (self.name, repr(line.strip()))
                         sys.stdout.flush()
                 elif kill_event.is_set():
                     break

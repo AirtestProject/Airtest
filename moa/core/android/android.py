@@ -44,7 +44,8 @@ ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ACCESSIBILITYSERVICE_VERSION = 2.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
-LOGGING = get_logger(__name__)
+LOGGING = get_logger('android')
+
 
 class ADB(object):
     """adb client for one serialno"""
