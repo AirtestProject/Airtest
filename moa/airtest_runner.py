@@ -191,6 +191,14 @@ def main():
                 print "exec script %s" % repr(script)
                 try:
                     os.chdir(script)
+                    if args.log:
+                        print "save log in", "'%s'" %args.log
+                        set_logfile(args.log)
+
+                    if args.screen:
+                        print "save img in", "'%s'" %args.screen
+                        set_screendir(args.screen)
+                        
                     exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
                 except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
