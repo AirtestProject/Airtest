@@ -6,6 +6,7 @@ import sys
 import json
 import argparse
 import traceback
+import core.main
 from core.main import *
 from core.error import MinicapError, MinitouchError, AdbError
 # import here to build dependent modules
@@ -85,6 +86,18 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
 def set_scripthome(dirpath):
     global SCRIPTHOME
     SCRIPTHOME = dirpath
+
+
+def get_globals(key):
+    return getattr(core.main, key)
+
+
+def set_globals(key, value):
+    setattr(core.main, key, value)
+
+
+def device():
+    return get_globals("DEVICE")
 
 
 def main():
