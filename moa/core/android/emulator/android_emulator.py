@@ -43,7 +43,7 @@ class EmulatorHelper(object):
         :return {'10000': {'title': window_title, 'emu_info': EMULATOR_INFO[name]}
     """
     @classmethod
-    def get_emu_hwnd_title_dict(cls, name_list=['bluestacks', 'mumu_old']):
+    def get_emu_hwnd_title_dict(cls, name_list=['bluestacks']):
         """
         直接拿到所有现在支持的模拟器的句柄列表
         name_list=[] 返回当前所有句柄
