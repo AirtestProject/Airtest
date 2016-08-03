@@ -28,9 +28,13 @@ from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
 
-from moa.core.android.emulator.emulator_config import EMULATOR_INFO
-from moa.core.android.emulator.android_emulator import EmulatorHelper
-import win32gui
+try:
+    from moa.core.android.emulator.emulator_config import EMULATOR_INFO
+    from moa.core.android.emulator.android_emulator import EmulatorHelper
+    import win32gui
+except ImportError:
+    print "emulator not available"
+    pass
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
