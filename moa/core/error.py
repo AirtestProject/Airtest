@@ -35,3 +35,23 @@ class ICmdError(Exception):
 
     def __str__(self):
         return "stdout[%s] stderr[%s]" %(self.stdout, self.stderr)
+
+
+class MinicapError(Exception):
+
+    def __init__(self, err):
+        super(MinicapError, self).__init__()
+        self.err = err
+    
+    def __str__(self):
+        return repr(self.err)
+
+
+class MinitouchError(Exception):
+
+    def __init__(self, err):
+        super(MinitouchError, self).__init__()
+        self.err = err
+    
+    def __str__(self):
+        return repr(self.err)

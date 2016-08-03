@@ -129,26 +129,34 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     support filepath match patten, eg: c123*
     '''
     addr = addr or ADDRESS
-    if not sn:
+    def get_available_sn(sn):
         devs = android.ADB(server_addr=addr).devices(state='device')
-        if len(devs) > 1:
-            print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
-        elif len(devs) == 0:
-            raise MoaError("no device, please check your adb connection")
-        sn = devs[0][0]
-    else:
-        for (serialno, st) in android.ADB(server_addr=addr).devices(state='device'):
-            if not fnmatch.fnmatch(serialno, sn):
-                continue
-            if st != 'device':
-                raise MoaError("Device status not good: %s" % (st,))
-            sn = serialno
-            break
-        if sn is None:
-            raise MoaError("Device[%s] not found in %s" % (sn, addr))
+        if not sn:
+            # if len(devs) > 1:
+            #     print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+            # elif len(devs) == 0:
+            if len(devs) == 0:
+                raise MoaError("no device, please check your adb connection")
+            devs = [d[0] for d in devs]
+            devs_in_moa = [d.serialno for d in DEVICE_LIST]
+            try:
+                another_sn = (set(devs) - set(devs_in_moa)).pop()
+            except KeyError:
+                raise MoaError("no more device to add")
+            sn = another_sn
+        else:
+            for (serialno, st) in devs:
+                if not fnmatch.fnmatch(serialno, sn):
+                    continue
+                if st != 'device':
+                    raise MoaError("Device status not good: %s" % (st,))
+                sn = serialno
+                break
+            if sn is None:
+                raise MoaError("Device[%s] not found in %s" % (sn, addr))
+        return sn
+    sn = get_available_sn(sn)
     dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
-    # dev.wake()
-    # print dev
     global CVSTRATEGY, DEVICE, DEVICE_LIST
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
     DEVICE = dev
@@ -237,22 +245,27 @@ def resign(ipaname):
 def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
+    global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
     window_title = window_title or WINDOW_TITLE
     dev = win.Windows()
     if handle:
         dev.set_handle(int(handle))
     elif window_title:
-        handle = dev.find_window(window_title)
-        if handle is None:
+        devs = dev.find_window_list(window_title)
+        if not devs:
             raise MoaError("no window found with title: '%s'" % window_title)
-        else:
-            dev.set_handle(handle)
+        devs_in_moa = [d.handle for d in DEVICE_LIST]
+        try:
+            another_dev = (set(devs) - set(devs_in_moa)).pop()
+            # print "another_dev:", another_dev
+        except KeyError:
+            raise MoaError("no more device to add")
+        dev.set_handle(another_dev)
     else:
         print "handle not set, use entire screen"
     if dev.handle:
         print dev.handle
         dev.set_foreground()
-    global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
     DEVICE = dev
     DEVICE_LIST.append(dev)
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_WINDOWS
@@ -262,6 +275,7 @@ def set_windows(handle=None, window_title=None):
 
 @platform(on=["Android", "Windows"])
 def add_device():
+    """to be deprecate"""
     # for android  add another serialno
     if isinstance(DEVICE, android.Android):
         devs = DEVICE.adb.devices(state='device')
@@ -295,7 +309,7 @@ def set_current(index):
         raise MoaError("add_device first")
     DEVICE = DEVICE_LIST[index]
     # print DEVICE, DEVICE.handle, DEVICE.winmgr.handle
-    if isinstance(DEVICE, win.Windows):
+    if win and isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
 
 
@@ -327,10 +341,6 @@ def set_threshold(value):
     if value > 1 or value < 0:
         raise MoaError("invalid threshold: %s" % value)
     THRESHOLD = value
-
-
-def set_globals(key, value):
-    globals()[key] = value
 
 
 def set_mask_rect(find_outside):
@@ -761,20 +771,15 @@ def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
 @logwrap
 @platform(on=["Android", "Windows"])
 def text(text, delay=OPDELAY):
-    # 如果文本是“-delete”，那么判定为删除一个字符：
     text_temp = text.lower()
     if text_temp == "-delete":
+        # 如果文本是“-delete”，那么删除一个字符
         if get_platform() == "Windows":
-            # 执行一次‘backspace’删除操作：
-            key_str = 'backspace'
-            keyevent(key_str, escape=True)
-            return
+            DEVICE.keyevent('backspace', escape=True)
         else:
-            # print "do sth in android device."
             DEVICE.keyevent('KEYCODE_DEL')
-            return
-    DEVICE.text(text)
-
+    else:
+        DEVICE.text(text)
     time.sleep(delay)
 
 
