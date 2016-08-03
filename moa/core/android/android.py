@@ -33,7 +33,7 @@ try:
     from moa.core.android.emulator.android_emulator import EmulatorHelper
     import win32gui
 except ImportError:
-    print "emulator not available"
+    # emulator not available
     pass
 
 
