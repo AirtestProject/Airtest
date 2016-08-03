@@ -98,7 +98,8 @@ def get_platform():
         }
     else:
         name_dict = {
-            android.Android: "Android"
+            android.Android: "Android",
+            android.Emulator: "Android",
         }
 
     if ios:
