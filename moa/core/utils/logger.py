@@ -1,12 +1,16 @@
 import logging
+import sys
 
 
 logging.basicConfig(
-    level=logging.DEBUG, 
+    # level=logging.DEBUG, 
     format='[%(asctime)s][%(levelname)s]<%(name)s> %(message)s', 
-    datefmt='%I:%M:%S'
+    datefmt='%I:%M:%S',
+    stream=sys.stdout
 )
 
 
 def get_logger(name):
-    return logging.getLogger(name)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    return logger

@@ -307,10 +307,6 @@ def set_threshold(value):
     THRESHOLD = value
 
 
-def set_globals(key, value):
-    globals()[key] = value
-
-
 def set_mask_rect(find_outside):
     global FIND_OUTSIDE
     str_rect = find_outside.split(',')
