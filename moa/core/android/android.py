@@ -23,10 +23,18 @@ import Queue
 import random
 import traceback
 import axmlparserpy.apk as apkparser
-from moa.core.error import MoaError, AdbError
-from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
+from moa.core.error import MoaError, AdbError, MinicapError, MinitouchError
+from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
+
+try:
+    from moa.core.android.emulator.emulator_config import EMULATOR_INFO
+    from moa.core.android.emulator.android_emulator import EmulatorHelper
+    import win32gui
+except ImportError:
+    # emulator not available
+    pass
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
@@ -44,6 +52,7 @@ ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ACCESSIBILITYSERVICE_VERSION = 2.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
+LOGGING = get_logger('android')
 
 
 class ADB(object):
@@ -94,9 +103,10 @@ class ADB(object):
                 raise RuntimeError("please set_serialno first")
             prefix += ['-s', self.serialno]
         cmds = prefix + cmds
-        if DEBUG:
-            print ' '.join(cmds)
-            sys.stdout.flush()
+        # if DEBUG:
+        #     print ' '.join(cmds)
+        #     sys.stdout.flush()
+        LOGGING.debug(" ".join(cmds))
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -139,12 +149,12 @@ class ADB(object):
     def connect(self, force=False):
         """adb connect, if remote devices, connect first"""
         if self.serialno and ":" in self.serialno and (force or self.get_status() != "device"):
-            print self.cmd("connect %s" % self.serialno)
+            self.cmd("connect %s" % self.serialno)
 
     def disconnect(self):
         """adb disconnect"""
         if ":" in self.serialno:
-            print self.cmd("disconnect %s" % self.serialno)
+            self.cmd("disconnect %s" % self.serialno)
 
     def get_status(self):
         """get device's adb status"""
@@ -334,17 +344,16 @@ class Minicap(object):
             except (ValueError, IndexError):
                 version = -1
             if version >= self.VERSION:
-                print 'minicap install skipped'
+                LOGGING.debug('minicap install skipped')
                 return
             else:
-                print output
-                print 'upgrading minicap to lastest version:', self.VERSION
+                LOGGING.debug(output)
+                LOGGING.debug('upgrading minicap to lastest version:%s', self.VERSION)
 
         self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
         rel = self.adb.getprop("ro.build.version.release")
-        # print abi, sdk, rel
         if sdk >= 16:
             binfile = "minicap"
         else:
@@ -358,7 +367,7 @@ class Minicap(object):
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' % (sdk, abi)).replace("\\", r"\\")
         self.adb.cmd("push %s %s" % (path, device_dir))    
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
-        print "minicap install finished"
+        LOGGING.info("minicap install finished")
 
     def _get_params(self, use_ori_size=False):
         """get minicap start params, and count projection"""
@@ -367,7 +376,7 @@ class Minicap(object):
         real_orientation = self.size["rotation"]
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
-        elif is_list(self.projection):
+        elif isinstance(self.projection, (list, tuple)):
             proj_width, proj_height = self.projection
         elif isinstance(self.projection, (int, float)):
             proj_width = self.projection * real_width
@@ -380,7 +389,7 @@ class Minicap(object):
         """setup minicap process on device"""
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
-            print "****************resetup****************"
+            LOGGING.debug("****************resetup****************")
             sys.stdout.flush()
             self.server_proc.kill()
             self.nbsp.kill()
@@ -480,12 +489,11 @@ class Minicap(object):
             else:
                 header = s.recv(4)
             if header is None:
-                print "header is None"
+                LOGGING.error("minicap header is None")
                 # recv timeout, if not frame updated, maybe screen locked
                 yield None
             else:
                 frame_size = struct.unpack("<I", header)[0]
-                # print 'frame_size',frame_size
                 # recv image data
                 one_frame = s.recv(frame_size)
                 yield one_frame
@@ -499,14 +507,18 @@ class Minicap(object):
         """init minicap stream if stream_mode"""
         if self.stream_mode:
             self.frame_gen = self.get_frames(lazy=True)
-            print "minicap header: " + str(self.frame_gen.next())
+            LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
         with self.stream_lock:
             if self.frame_gen is None:
                 self.init_stream()
-            return self.frame_gen.next()
+            try:
+                frame = self.frame_gen.next()
+                return frame
+            except Exception as err:
+                raise MinicapError(err)
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
@@ -536,7 +548,7 @@ class Minitouch(object):
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minitouch\r" in output:
-            print "install_minitouch skipped"
+            LOGGING.debug("install_minitouch skipped")
             return
 
         abi = self.adb.getprop("ro.product.cpu.abi")
@@ -551,7 +563,7 @@ class Minitouch(object):
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
         self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir)) 
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
-        print "install_minitouch finished"
+        LOGGING.info("install_minitouch finished")
 
     def __transform_xy(self, x, y):
         # 根据设备方向、长宽来转换xy值
@@ -559,6 +571,8 @@ class Minitouch(object):
             return x, y
 
         width ,height = self.size['width'], self.size['height']
+        print '__transform', x, y
+        print self.size
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
 
@@ -591,7 +605,9 @@ class Minitouch(object):
             if m:
                 self.max_x, self.max_y = int(m.group(1)), int(m.group(2))
                 break
-
+            else:
+                self.max_x = 32768
+                self.max_y = 32768
         # self.nbsp.kill() # 保留，不杀了，后面还会继续读取并pirnt
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -690,10 +706,16 @@ class Minitouch(object):
             raise RuntimeError("invalid operate args: %s"%args)
         self.handle(cmd)
 
+    def safe_send(self, data):
+        try:
+            self.client.send(data)
+        except Exception as err:
+            raise MinitouchError(err)
+
     def _backend_worker(self):
         while not self.backend_stop_event.isSet():
             cmd = self.backend_queue.get()
-            self.client.send(cmd)
+            self.safe_send(cmd)
 
     def setup_client_backend(self):
         self.backend_queue = Queue.Queue()
@@ -725,9 +747,9 @@ class Minitouch(object):
                 raise RuntimeError("minitouch setup client error")
             if header.count('\n') >= 3:
                 break
-        print "minitouch header:", repr(header)
+        LOGGING.debug("minitouch header:%s", repr(header))
         self.client = s
-        self.handle = self.client.send
+        self.handle = self.safe_send
 
     def teardown(self):
         if hasattr(self, "backend_stop_event"):
@@ -741,7 +763,6 @@ class Minitouch(object):
 def autoretry(func):
     def f(self, *args, **kwargs):
         def fail_hook(tries_remaining, e, mydelay):
-            # print "autoretry", tries_remaining, repr(e), mydelay
             try:
                 self.reconnect()
             except:
@@ -749,7 +770,6 @@ def autoretry(func):
 
         @retries(1, hook=fail_hook)
         def f_with_retries(self, *args, **kwargs):
-            # print self, args, kwargs
             return func(self, *args, **kwargs)
 
         ret = f_with_retries(self, *args, **kwargs)
@@ -798,11 +818,11 @@ class Android(object):
     def _load_props(self):
         try:
             props = self.adb.shell("cat %s" % self._props_tmp)
-            print "load props:\n", props
+            LOGGING.debug("load props:\n%s", props)
             props = json.loads(props)
         except ValueError as err:
             # traceback.print_exc()
-            print "load props failed:", err.message
+            LOGGING.debug("load props failed:%s", err.message)
             props = {}
         return props
 
@@ -812,7 +832,6 @@ class Android(object):
             "sdk_version": self.sdk_version,
         }
         data = json.dumps(data).replace(r'"', r'\"')
-        print data
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
 
     def amlist(self, third_only=False):
@@ -888,11 +907,11 @@ class Android(object):
         if apk_package in packages:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
-                print "package:%s already exists, uninstall first" % apk_package
+                LOGGING.info("package:%s already exists, uninstall first", apk_package)
                 self.uninstall(apk_package)
             # 否则直接return True
             else:
-                print "package:%s already exists, skip reinstall" % apk_package
+                LOGGING.info("package:%s already exists, skip reinstall", apk_package)
                 return True
 
         # 唤醒设备
@@ -908,10 +927,10 @@ class Android(object):
             except (ValueError, IndexError, AttributeError):
                 version = -1
             if version >= ACCESSIBILITYSERVICE_VERSION:
-                print 'accessibility service install skipped'
+                LOGGING.debug('accessibility service install skipped')
             else:
-                print 'current version:', version
-                print 'upgrading accessibility service to lastest version:', ACCESSIBILITYSERVICE_VERSION
+                LOGGING.debug('current version:%s', version)
+                LOGGING.debug('upgrading accessibility service to lastest version:%s', ACCESSIBILITYSERVICE_VERSION)
                 self.uninstall(ACCESSIBILITYSERVICE_PACKAGE)
                 self.adb.install(ACCESSIBILITYSERVICE_APK)
 
@@ -1000,7 +1019,6 @@ class Android(object):
 
     @autoretry
     def touch(self, pos, duration=0.01):
-        # print "touch...........", pos
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         if self.minitouch:
@@ -1032,10 +1050,10 @@ class Android(object):
         p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
-        print info
+        LOGGING.debug(info)
         nbsp.kill()
         if p.poll() is not None:
-            print "start_recording error:", p.communicate()
+            LOGGING.error("start_recording error:%s", p.communicate())
             return
         self.recording_proc = p
         self.recording_file = savefile
@@ -1097,6 +1115,7 @@ class Android(object):
     def get_display_info(self):
         self.size = self.getPhysicalDisplayInfo()
         self.size["orientation"] = self.getDisplayOrientation()
+        print self.size
         self.size["rotation"] = self.size["orientation"] * 90
         self.size["max_x"], self.size["max_y"] = self.getEventInfo()
         return self.size
@@ -1222,7 +1241,7 @@ class Android(object):
         """
         if ori is None:
             ori = self.getDisplayOrientation()
-        print "refreshOrientationInfo:", ori
+        LOGGING.debug("refreshOrientationInfo:%s", ori)
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
@@ -1247,7 +1266,7 @@ class Android(object):
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
             if not line:
-                print "orientationWatcher has ended"
+                LOGGING.error("orientationWatcher has ended")
                 return None
 
             ori = int(line) / 90
@@ -1306,6 +1325,225 @@ class XYTransformer(object):
         elif orientation == 3:
             x, y = h - y, x
         return x, y
+
+
+class Emulator(Android):
+    """ android emulator
+    注意init第一个参数是模拟器的名字
+    """
+    _props_tmp = "/data/local/tmp/moa_props.tmp"
+
+    def __init__(self, emulator_name='bluestacks', serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, \
+                 minicap_stream=False, minitouch=True, init_ime=False):
+        from moa.core.android.emulator.android_emulator import EMULATOR_INFO
+        if EMULATOR_INFO.get(emulator_name):
+            self.emulator_name = emulator_name
+            self.emulator_info = EMULATOR_INFO[emulator_name]
+        else:
+            raise RuntimeError("please use the Bluestacks emulator")
+        self.init_emulator()
+        if not self.serialno:
+            self.serialno = serialno or ADB('').devices(state="device")[0][0]
+        self.adb = ADB(self.serialno, server_addr=addr)
+        self.adb.start_server()
+        self.adb.wait_for_device()
+        if init_display:
+            self._init_display(props)
+            self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+        if init_ime:
+            self.ime = AdbKeyboardIme(self.adb)
+            self.toggle_shell_ime()
+
+    def _init_display(self, props=None):
+        # read props from outside or cached source, to save init time
+        self.props = props or self._load_props()
+        self.get_display_info()
+        # 直接读props的配置可能有点问题，屏幕的朝向不正确
+        #self.get_display_info()
+        self.orientationWatcher()
+        self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
+        self._dump_props()
+
+    def get_display_info(self):
+        """
+        发现新版bluestacks有应用分辨率与实际软件设置分辨率大小不匹配的情况
+        改用窗口获取大小的方式来拿分辨率准确一点
+        :return:
+        """
+        self.size = self.getPhysicalDisplayInfo()
+        self.size["orientation"] = self.getDisplayOrientation()
+        self.size["rotation"] = self.size["orientation"] * 90
+        self.size["max_x"], self.size["max_y"] = self.getEventInfo()
+
+        hwnd = self.emulator_hwnd
+        print 'hwnd', hwnd
+        rect = win32gui.GetClientRect(hwnd)
+        width = abs(rect[2] - rect[0])
+        height = abs(rect[3] - rect[1])
+        if self.size['width'] != width or self.size['height'] != height:
+            self.size['width'] = width
+            self.size['height'] = height
+        return self.size
+
+    def getPhysicalDisplayInfo(self):
+        # android那边会保证width < height
+        # 但是模拟器如果坚持保证宽比长小的话可能会有转置的问题
+        info = self._getPhysicalDisplayInfo()
+        return info
+
+    def init_emulator(self):
+        """
+        初始化模拟器，需要1.找到对应的窗口句柄 2.连上adb
+        :return:
+        """
+        emu_info = self.emulator_info
+        if not emu_info:
+            self.emulator_hwnd = 0
+            self.emulator_info = {}
+        else:
+            self.emulator_info = emu_info
+        if emu_info and emu_info['adb_connect']:
+            self.serialno = emu_info['adb_connect']
+        else:
+            self.serialno = ''
+        self.emulator_hwnd = EmulatorHelper.find_emu_windows_hwnd(self.emulator_name) or 0
+        if not self.emulator_hwnd:
+            # 如果模拟器已经被嵌入到IDE里的话，会找不到句柄的，要重新搜索IDE下面的子窗口句柄才能找到
+            self.emulator_hwnd = EmulatorHelper.find_emu_embed_airtestide(self.emulator_name) or 0
+        if not self.emulator_hwnd or not self.emulator_name:
+            print 'please launch a emulator first'
+
+    def wake(self):
+        """
+        模拟器的解锁屏幕有点问题，这里直接return先
+        :return:
+        """
+        return True
+
+    def getDisplayOrientation(self):
+        """
+        模拟器里的横屏和竖屏，跟真机好像是相反的，一些老版本的机型上可能也有同样问题
+        目前尝试过的orientation值：
+        网易模拟器：横屏0
+        逍遥安卓： 横屏0，竖屏3
+        TODO: genymotion 待测，尤其是最后一种返回情况
+        但是虽然值不同，坐标的转换规则是一样的，就是即使是横屏，坐标也不需要转换，后续更多情况待测试
+        :return:
+        """
+        SurfaceFlingerRE = re.compile('orientation=(\d+)')
+        output = self.adb.shell('dumpsys SurfaceFlinger')
+        m = SurfaceFlingerRE.search(output)
+        if m:
+            ori = int(m.group(1))
+            return ori
+
+        # Fallback method to obtain the orientation
+        # See https://github.com/dtmilano/AndroidViewClient/issues/128
+        surfaceOrientationRE = re.compile('SurfaceOrientation:\s+(\d+)')
+        output = self.adb.shell('dumpsys input')
+        m = surfaceOrientationRE.search(output)
+        if m:
+            ori = int(m.group(1))
+            return ori
+
+        # 几乎大部分模拟器都是横屏，但是height依然会大于width，先默认返回1
+        return 0 if self.size["height"] > self.size['width'] else 1
+
+    def snapshot_bluestacks(self, filename="tmp.png", ensure_orientation=True):
+        """这种截图方法是windows窗口截图，不能截最小化状态下的模拟器，
+        只能截bluestacks内核的相关模拟器，如果是海马玩等其他类别的模拟器暂不支持
+
+        """
+        import win32gui
+        import win32ui
+        import win32con
+        import cv2
+        hwnd = self.emulator_hwnd
+        if not hwnd:
+            raise RuntimeError("please launch a emulator first ")
+        try:
+            rect = win32gui.GetClientRect(hwnd)
+        except:
+            print "snapshot failed"
+            raise RuntimeError("please launch a emulator first ")
+        width = abs(rect[2] - rect[0])
+        height = abs(rect[3] - rect[1])
+        if width != self.size['width']:
+            self.size['width'] = width
+        if height != self.size['height']:
+            self.size['height'] = height
+        hwndDC = win32gui.GetWindowDC(hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
+
+        saveBitMap = win32ui.CreateBitmap()
+        saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+        saveDC.SelectObject(saveBitMap)
+        saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
+        saveBitMap.SaveBitmapFile(saveDC, filename)
+        img = cv2.imread(filename)
+        return img
+
+    def snapshot_win_game(self, filename="tmp.png", ensure_orientation=True):
+        """
+        这种截图方法比上一种稍微慢一些，能够截游戏窗口、genymotion模拟器
+        不能截windows下的aero效果，不能截海马玩
+        """
+        import sys
+        import ctypes, win32con
+        import cv2
+        from PyQt4 import QtGui
+        app = QtGui.QApplication(sys.argv)
+        # getWindowRect取得的是整个窗口的RECT坐标，left, top, right, bottom
+        client_hwnd = self.emulator_hwnd
+        print "snapshot_win", client_hwnd, filename
+        rect = win32gui.GetClientRect(client_hwnd)
+        width = abs(rect[2] - rect[0])
+        height = abs(rect[3] - rect[1])
+
+        gdi = ctypes.windll.gdi32
+        targetDC = ctypes.windll.user32.GetDC(client_hwnd)
+        bitmapDC = gdi.CreateCompatibleDC(targetDC)
+        hBitmap = gdi.CreateCompatibleBitmap(targetDC, width, height)
+        oldBitmap = gdi.SelectObject(bitmapDC, hBitmap)
+        gdi.BitBlt(bitmapDC, 0, 0, width, height, targetDC, 0, 0, win32con.SRCCOPY)
+        iBPP = gdi.GetDeviceCaps(bitmapDC, 12)
+        flag = QtGui.QImage.Format_RGB16 if iBPP == 16 else QtGui.QImage.Format_ARGB32
+        flashImage = QtGui.QImage(width, height, flag)
+        pBits = flashImage.bits()
+        gdi.GetBitmapBits(hBitmap, width*height*iBPP/8, int(pBits))
+        gdi.SelectObject(bitmapDC, oldBitmap)
+        gdi.DeleteDC(bitmapDC)
+        gdi.DeleteObject(hBitmap)
+
+        ctypes.windll.user32.ReleaseDC(client_hwnd, targetDC)
+        print flashImage.save(filename)
+        img = cv2.imread(filename)
+        print img
+        return img
+
+    def snapshot(self, filename="tmp.png", ensure_orientation=True):
+        """
+        模拟器的截图
+        """
+        if self.emulator_info.get('kernel') in ['bluestacks']:
+            if not self.emulator_hwnd:
+                raise RuntimeError("please lanuch a emulator first")
+            return self.snapshot_bluestacks(filename, ensure_orientation)
+        else:
+            screen = self.adb.snapshot()
+            screen = aircv.string_2_img(screen)
+
+            # 保证方向是正的
+            if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
+                h, w = screen.shape[:2] #cv2的shape是高度在前面!!!!
+                if w < h: #当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+                    screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
+            if filename:  # 这里图像格式不对，要写+读才对，to be fixed
+                # open(filename, "wb").write(screen)
+                aircv.imwrite(filename, screen)
+            return screen
+
 
 
 def test_minicap(serialno):
