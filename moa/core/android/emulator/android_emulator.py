@@ -101,7 +101,7 @@ class EmulatorHelper(object):
                     clsname = win32gui.GetClassName(hwnd)
                     if title == get_emu_info['sub_title'] and clsname == get_emu_info['class_name']:
                         return hwnd
-        return None
+        raise RuntimeError("please run App first")
 
     @classmethod
     def find_emu_embed_airtestide(cls, emulator_name='bluestacks'):
@@ -122,9 +122,7 @@ class EmulatorHelper(object):
                     clsname = win32gui.GetClassName(hwnd)
                     if title == emu_info['sub_title'] and clsname == emu_info['class_name']:
                         return hwnd
-                    elif re.search(emu_info['title'], title):
-                        return hwnd
-        return None
+        raise RuntimeError("please start App ")
 
     @classmethod
     def get_support_emulator_hwnd(cls):
@@ -244,7 +242,15 @@ class EmulatorHelper(object):
         :param emulator_path: 模拟器的exe路径，如果没有的话，就在硬盘里搜索一个
         :return: True 是否成功找到对应exe, emulator_path
         """
-        emulator_path = EmulatorHelper.check_emulator_exe_path(emulator_path)
+        # 首先搜索一下当前启动中的所有支持的模拟器列表，如果已经打开就不要重复启动
+        running_emu_list = EmulatorHelper.get_support_emulator_hwnd()
+        if running_emu_list:
+            running_emu = [e['name'] for e in running_emu_list]
+        else:
+            running_emu = []
+        emulator_path, emu_name = EmulatorHelper.check_emulator_exe_path(emulator_path)
+        if emu_name in running_emu:
+            return True, ''
         if emulator_path:
             try:
                 os.startfile(emulator_path)
@@ -255,10 +261,15 @@ class EmulatorHelper(object):
             for emu in SUPPORT_EMULATOR:
                 emulator_path = EmulatorHelper.search_emulator_path(emu)
                 if emulator_path:
-                    emulator_path = EmulatorHelper.check_emulator_exe_path(emulator_path)
+                    emulator_path, emu_name = EmulatorHelper.check_emulator_exe_path(emulator_path)
+                    if emu_name in running_emu:
+                        return True, ''
                     if emulator_path:
-                        os.startfile(emulator_path)
-                        return True, emulator_path
+                        try:
+                            os.startfile(emulator_path)
+                            return True, emulator_path
+                        except:
+                            return False, ''
             return False, ''
 
     @classmethod
@@ -266,12 +277,12 @@ class EmulatorHelper(object):
         """
         确认一下传入的exe是不是可用的模拟器路径
         :param emulator_path: 模拟器的可执行exe完整路径
-        :return: 返回一个可用的exe路径或者空字符串''
+        :return: 返回2个值，第一个是可用的exe路径或者空字符串''，第二个是模拟器的名称
         """
         emulator_path = os.path.normpath(emulator_path)
         if os.path.isfile(emulator_path):
             for emu in SUPPORT_EMULATOR:
                 if re.search(EMULATOR_INFO[emu].get('exe_re'), emulator_path):
-                    return emulator_path
-        return ''
+                    return emulator_path, emu
+        return '', ''
 

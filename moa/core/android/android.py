@@ -1473,11 +1473,14 @@ class Emulator(Android):
         这种截图方法比上一种稍微慢一些，能够截游戏窗口、genymotion模拟器
         不能截windows下的aero效果，不能截海马玩
         """
+        import sys
         import ctypes, win32con
         import cv2
         from PyQt4 import QtGui
+        app = QtGui.QApplication(sys.argv)
         # getWindowRect取得的是整个窗口的RECT坐标，left, top, right, bottom
         client_hwnd = self.emulator_hwnd
+        print "snapshot_win", client_hwnd, filename
         rect = win32gui.GetClientRect(client_hwnd)
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
@@ -1498,8 +1501,9 @@ class Emulator(Android):
         gdi.DeleteObject(hBitmap)
 
         ctypes.windll.user32.ReleaseDC(client_hwnd, targetDC)
-        flashImage.save(filename)
+        print flashImage.save(filename)
         img = cv2.imread(filename)
+        print img
         return img
 
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
