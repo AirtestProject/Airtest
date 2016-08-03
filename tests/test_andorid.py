@@ -5,7 +5,7 @@ import os
 import time
 import unittest
 
-TEST_APK = 'Ma51.apk'
+TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')
 
 class TestAndroid(unittest.TestCase):
 
@@ -43,20 +43,16 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.ampath(package), str)
 
     def test_ampath_error(self):
-        try:
+        with self.assertRaises(MoaError):
             self.android.ampath('test_error')
-        except Exception, e:
-            self.assertIsInstance(e, MoaError)
 
     def test_amcheck(self):
         package = self.android.amlist()[0]
         self.assertIsInstance(self.android.amcheck(package), str)
 
     def test_amcheck_error(self):
-        try:
+        with self.assertRaises(MoaError):
             self.android.amcheck('test_error')
-        except Exception, e:
-            self.assertIsInstance(e, MoaError)
 
     def test_install_start_stop_uninstall(self):
         apk = apkparser.APK(TEST_APK)
@@ -134,10 +130,8 @@ class TestAndroid(unittest.TestCase):
                     pass
 
     def test_stop_recording_error(self):
-        try:
+        with self.assertRaises(MoaError):
             self.android.stop_recording()
-        except Exception, e:
-            self.assertIsInstance(e, MoaError)   
 
     def test_get_top_activity_name_and_pid(self):
         res = self.android.get_top_activity_name_and_pid()

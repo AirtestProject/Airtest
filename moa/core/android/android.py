@@ -23,8 +23,8 @@ import Queue
 import random
 import traceback
 import axmlparserpy.apk as apkparser
-from moa.core.error import MoaError, AdbError
-from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, is_list, get_adb_path, retries, split_cmd
+from moa.core.error import MoaError, AdbError, MinicapError, MinitouchError
+from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
 from moa.aircv import aircv
 from moa.core.android.ime_helper import AdbKeyboardIme
 
@@ -44,6 +44,7 @@ ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
 ACCESSIBILITYSERVICE_VERSION = 2.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
+LOGGING = get_logger('android')
 
 
 class ADB(object):
@@ -94,9 +95,10 @@ class ADB(object):
                 raise RuntimeError("please set_serialno first")
             prefix += ['-s', self.serialno]
         cmds = prefix + cmds
-        if DEBUG:
-            print ' '.join(cmds)
-            sys.stdout.flush()
+        # if DEBUG:
+        #     print ' '.join(cmds)
+        #     sys.stdout.flush()
+        LOGGING.debug(" ".join(cmds))
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -139,12 +141,12 @@ class ADB(object):
     def connect(self, force=False):
         """adb connect, if remote devices, connect first"""
         if self.serialno and ":" in self.serialno and (force or self.get_status() != "device"):
-            print self.cmd("connect %s" % self.serialno)
+            self.cmd("connect %s" % self.serialno)
 
     def disconnect(self):
         """adb disconnect"""
         if ":" in self.serialno:
-            print self.cmd("disconnect %s" % self.serialno)
+            self.cmd("disconnect %s" % self.serialno)
 
     def get_status(self):
         """get device's adb status"""
@@ -334,17 +336,16 @@ class Minicap(object):
             except (ValueError, IndexError):
                 version = -1
             if version >= self.VERSION:
-                print 'minicap install skipped'
+                LOGGING.debug('minicap install skipped')
                 return
             else:
-                print output
-                print 'upgrading minicap to lastest version:', self.VERSION
+                LOGGING.debug(output)
+                LOGGING.debug('upgrading minicap to lastest version:%s', self.VERSION)
 
         self.adb.shell("rm /data/local/tmp/minicap*")
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
         rel = self.adb.getprop("ro.build.version.release")
-        # print abi, sdk, rel
         if sdk >= 16:
             binfile = "minicap"
         else:
@@ -358,7 +359,7 @@ class Minicap(object):
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' % (sdk, abi)).replace("\\", r"\\")
         self.adb.cmd("push %s %s" % (path, device_dir))    
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
-        print "minicap install finished"
+        LOGGING.info("minicap install finished")
 
     def _get_params(self, use_ori_size=False):
         """get minicap start params, and count projection"""
@@ -367,7 +368,7 @@ class Minicap(object):
         real_orientation = self.size["rotation"]
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
-        elif is_list(self.projection):
+        elif isinstance(self.projection, (list, tuple)):
             proj_width, proj_height = self.projection
         elif isinstance(self.projection, (int, float)):
             proj_width = self.projection * real_width
@@ -380,7 +381,7 @@ class Minicap(object):
         """setup minicap process on device"""
         # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
-            print "****************resetup****************"
+            LOGGING.debug("****************resetup****************")
             sys.stdout.flush()
             self.server_proc.kill()
             self.nbsp.kill()
@@ -480,12 +481,11 @@ class Minicap(object):
             else:
                 header = s.recv(4)
             if header is None:
-                print "header is None"
+                LOGGING.error("minicap header is None")
                 # recv timeout, if not frame updated, maybe screen locked
                 yield None
             else:
                 frame_size = struct.unpack("<I", header)[0]
-                # print 'frame_size',frame_size
                 # recv image data
                 one_frame = s.recv(frame_size)
                 yield one_frame
@@ -499,14 +499,18 @@ class Minicap(object):
         """init minicap stream if stream_mode"""
         if self.stream_mode:
             self.frame_gen = self.get_frames(lazy=True)
-            print "minicap header: " + str(self.frame_gen.next())
+            LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
         with self.stream_lock:
             if self.frame_gen is None:
                 self.init_stream()
-            return self.frame_gen.next()
+            try:
+                frame = self.frame_gen.next()
+                return frame
+            except Exception as err:
+                raise MinicapError(err)
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
@@ -536,7 +540,7 @@ class Minitouch(object):
     def install(self, reinstall=False):
         output = self.adb.shell("ls /data/local/tmp")
         if not reinstall and "minitouch\r" in output:
-            print "install_minitouch skipped"
+            LOGGING.debug("install_minitouch skipped")
             return
 
         abi = self.adb.getprop("ro.product.cpu.abi")
@@ -551,7 +555,7 @@ class Minitouch(object):
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
         self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir)) 
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
-        print "install_minitouch finished"
+        LOGGING.info("install_minitouch finished")
 
     def __transform_xy(self, x, y):
         # 根据设备方向、长宽来转换xy值
@@ -559,6 +563,8 @@ class Minitouch(object):
             return x, y
 
         width ,height = self.size['width'], self.size['height']
+        print '__transform', x, y
+        print self.size
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
 
@@ -591,7 +597,9 @@ class Minitouch(object):
             if m:
                 self.max_x, self.max_y = int(m.group(1)), int(m.group(2))
                 break
-
+            else:
+                self.max_x = 32768
+                self.max_y = 32768
         # self.nbsp.kill() # 保留，不杀了，后面还会继续读取并pirnt
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -690,10 +698,16 @@ class Minitouch(object):
             raise RuntimeError("invalid operate args: %s"%args)
         self.handle(cmd)
 
+    def safe_send(self, data):
+        try:
+            self.client.send(data)
+        except Exception as err:
+            raise MinitouchError(err)
+
     def _backend_worker(self):
         while not self.backend_stop_event.isSet():
             cmd = self.backend_queue.get()
-            self.client.send(cmd)
+            self.safe_send(cmd)
 
     def setup_client_backend(self):
         self.backend_queue = Queue.Queue()
@@ -725,9 +739,9 @@ class Minitouch(object):
                 raise RuntimeError("minitouch setup client error")
             if header.count('\n') >= 3:
                 break
-        print "minitouch header:", repr(header)
+        LOGGING.debug("minitouch header:%s", repr(header))
         self.client = s
-        self.handle = self.client.send
+        self.handle = self.safe_send
 
     def teardown(self):
         if hasattr(self, "backend_stop_event"):
@@ -741,7 +755,6 @@ class Minitouch(object):
 def autoretry(func):
     def f(self, *args, **kwargs):
         def fail_hook(tries_remaining, e, mydelay):
-            # print "autoretry", tries_remaining, repr(e), mydelay
             try:
                 self.reconnect()
             except:
@@ -749,7 +762,6 @@ def autoretry(func):
 
         @retries(1, hook=fail_hook)
         def f_with_retries(self, *args, **kwargs):
-            # print self, args, kwargs
             return func(self, *args, **kwargs)
 
         ret = f_with_retries(self, *args, **kwargs)
@@ -798,11 +810,11 @@ class Android(object):
     def _load_props(self):
         try:
             props = self.adb.shell("cat %s" % self._props_tmp)
-            print "load props:\n", props
+            LOGGING.debug("load props:\n%s", props)
             props = json.loads(props)
         except ValueError as err:
             # traceback.print_exc()
-            print "load props failed:", err.message
+            LOGGING.debug("load props failed:%s", err.message)
             props = {}
         return props
 
@@ -812,7 +824,6 @@ class Android(object):
             "sdk_version": self.sdk_version,
         }
         data = json.dumps(data).replace(r'"', r'\"')
-        print data
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
 
     def amlist(self, third_only=False):
@@ -888,11 +899,11 @@ class Android(object):
         if apk_package in packages:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
-                print "package:%s already exists, uninstall first" % apk_package
+                LOGGING.info("package:%s already exists, uninstall first", apk_package)
                 self.uninstall(apk_package)
             # 否则直接return True
             else:
-                print "package:%s already exists, skip reinstall" % apk_package
+                LOGGING.info("package:%s already exists, skip reinstall", apk_package)
                 return True
 
         # 唤醒设备
@@ -908,10 +919,10 @@ class Android(object):
             except (ValueError, IndexError, AttributeError):
                 version = -1
             if version >= ACCESSIBILITYSERVICE_VERSION:
-                print 'accessibility service install skipped'
+                LOGGING.debug('accessibility service install skipped')
             else:
-                print 'current version:', version
-                print 'upgrading accessibility service to lastest version:', ACCESSIBILITYSERVICE_VERSION
+                LOGGING.debug('current version:%s', version)
+                LOGGING.debug('upgrading accessibility service to lastest version:%s', ACCESSIBILITYSERVICE_VERSION)
                 self.uninstall(ACCESSIBILITYSERVICE_PACKAGE)
                 self.adb.install(ACCESSIBILITYSERVICE_APK)
 
@@ -1000,7 +1011,6 @@ class Android(object):
 
     @autoretry
     def touch(self, pos, duration=0.01):
-        # print "touch...........", pos
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         if self.minitouch:
@@ -1032,10 +1042,10 @@ class Android(object):
         p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         info = nbsp.read(0.5)
-        print info
+        LOGGING.debug(info)
         nbsp.kill()
         if p.poll() is not None:
-            print "start_recording error:", p.communicate()
+            LOGGING.error("start_recording error:%s", p.communicate())
             return
         self.recording_proc = p
         self.recording_file = savefile
@@ -1097,6 +1107,7 @@ class Android(object):
     def get_display_info(self):
         self.size = self.getPhysicalDisplayInfo()
         self.size["orientation"] = self.getDisplayOrientation()
+        print self.size
         self.size["rotation"] = self.size["orientation"] * 90
         self.size["max_x"], self.size["max_y"] = self.getEventInfo()
         return self.size
@@ -1222,7 +1233,7 @@ class Android(object):
         """
         if ori is None:
             ori = self.getDisplayOrientation()
-        print "refreshOrientationInfo:", ori
+        LOGGING.debug("refreshOrientationInfo:%s", ori)
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
         if getattr(self, "minicap", None) and self.minicap:
@@ -1247,7 +1258,7 @@ class Android(object):
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
             if not line:
-                print "orientationWatcher has ended"
+                LOGGING.error("orientationWatcher has ended")
                 return None
 
             ori = int(line) / 90
