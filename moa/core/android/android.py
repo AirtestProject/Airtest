@@ -539,7 +539,7 @@ class Minitouch(object):
         self.localport = localport
         self.install()
         self.setup_server()
-        self.backend=backend
+        self.backend = backend
         if backend:
             self.setup_client_backend()
         else:
@@ -570,9 +570,9 @@ class Minitouch(object):
         if not (self.size and self.size['max_x'] and self.size['max_y']):
             return x, y
 
-        width ,height = self.size['width'], self.size['height']
-        print '__transform', x, y
-        print self.size
+        width, height = self.size['width'], self.size['height']
+        # print '__transform', x, y
+        # print self.size
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
 
