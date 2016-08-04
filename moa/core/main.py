@@ -589,7 +589,6 @@ def amstop(package):
     if get_platform() == "IOS":  # package = appid
         DEVICE.stop_app(package)
         return
-
     DEVICE.amstop(package)
 
 
