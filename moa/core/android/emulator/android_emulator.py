@@ -6,35 +6,7 @@ import win32api
 import pythoncom
 import os
 import re
-from win32com.shell import shell
 from moa.core.android.emulator.emulator_config import SUPPORT_EMULATOR, EMULATOR_INFO
-
-"""
-# win32com如果在py2exe打包过程中出现问题，可以试试以下这段
-# ...
-# ModuleFinder can't handle runtime changes to __path__, but win32com uses them
-try:
-    # py2exe 0.6.4 introduced a replacement modulefinder.
-    # This means we have to add package paths there, not to the built-in
-    # one.  If this new modulefinder gets integrated into Python, then
-    # we might be able to revert this some day.
-    # if this doesn't work, try import modulefinder
-    try:
-        import py2exe.mf as modulefinder
-    except ImportError:
-        import modulefinder
-    import win32com, sys
-    for p in win32com.__path__[1:]:
-        modulefinder.AddPackagePath("win32com", p)
-    for extra in ["win32com.shell"]: #,"win32com.mapi"
-        __import__(extra)
-        m = sys.modules[extra]
-        for p in m.__path__[1:]:
-            modulefinder.AddPackagePath(extra, p)
-except ImportError:
-    # no build path setup, no worries.
-    pass
-"""
 
 
 class EmulatorHelper(object):
@@ -140,27 +112,6 @@ class EmulatorHelper(object):
         return ret
 
     @classmethod
-    def set_shortcut(cls, filename, lnkname, iconname=''):
-        """
-        新建一个快捷方式，指向系统里的模拟器安装位置
-        :param filename: exe的位置
-        :param lnkname: 生成的快捷方式的名字
-        :param iconname: 快捷方式的图标，可以不写
-        :return:
-        """
-        shortcut = pythoncom.CoCreateInstance(
-            shell.CLSID_ShellLink, None,
-            pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLink)
-        shortcut.SetPath(filename)
-        shortcut.SetWorkingDirectory(filename.strip("\\"+filename.split("\\")[-1]))#设置快捷方式的起始位置（即文件所在的目录）
-        if iconname:
-            shortcut.SetIconLocation(iconname, 0)  # 可有可无，没有就默认使用文件本身的图标
-        if os.path.splitext(lnkname)[-1] != '.lnk':
-            lnkname += ".lnk"
-        print lnkname
-        shortcut.QueryInterface(pythoncom.IID_IPersistFile).Save(lnkname,0)
-
-    @classmethod
     def search_emulator_path(cls, emulator='bluestacks'):
         """
         搜索本机目录下有没有安装支持的模拟器，根据事先配置好的文件夹/exe名字的正则表达式来快速查找目录
@@ -210,30 +161,6 @@ class EmulatorHelper(object):
                 if filename:
                     break
         return filename
-
-    @classmethod
-    def add_emulator_shortcut(cls, emulator_path=''):
-        """
-        搜索电脑中是否安装了支持的模拟器，如果找得到就加一个快捷方式
-        :param emulator_path: 如果为空，就自动在电脑中搜索是否安装，如果不为空，检查下是不是指定模拟器，是的话就添加一个快捷方式
-        :return:
-        """
-        if not emulator_path:
-            for emu in SUPPORT_EMULATOR:
-                path = EmulatorHelper.search_emulator_path(emu)
-                if path:
-                    emulator_path = path
-                    break
-        if not emulator_path:
-            return False
-        emulator_path = os.path.normpath(emulator_path)
-        if os.path.isfile(emulator_path):
-            for emu in SUPPORT_EMULATOR:
-                if re.search(EMULATOR_INFO[emu].get('exe_re'), emulator_path):
-                    EmulatorHelper.set_shortcut(emulator_path, os.path.join(os.path.dirname(os.path.abspath(__file__)), \
-                                                                            EMULATOR_INFO[emu].get('name')))
-                    return True
-        return False
 
     @classmethod
     def start_emulator(cls, emulator_path=''):
