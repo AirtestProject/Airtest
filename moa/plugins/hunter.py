@@ -31,12 +31,12 @@ def get_wlanip():
 
 
 @moa.logwrap
-def get_hunter_devid(tokenid, process):
+def get_hunter_devid(tokenid, process, wlanip=None):
     life_detection = '''
 console = require('safaia.console')
 console.write('sys', '-ok-', logging=False)
 '''
-    wlanip = get_wlanip()
+    wlanip = wlanip or get_wlanip()
     if wlanip:
         devs = get_devices(tokenid, process=process, ip=wlanip, online=True)
         for devid, dev in devs.items():
@@ -91,13 +91,4 @@ def release_devices(tokenid, devid=None):
 
 if __name__ == '__main__':
     tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MDE1NTE5NiwiaWF0IjoxNDY3MzU1MTk2fQ.eyJ1c2VybmFtZSI6Imd6bGl1eGluIn0.GaWGg0E8_snNm3o6Zdn4P_evqKXTgea_0pLwdpb9TWI"
-    devs = get_devices(tokenid, process='mh', online=True)
-#     life_detection = '''
-# console = require('safaia.console')
-# console.write('sys', '-ok-', logging=False)
-# '''
-    for devid, _ in devs.items():
-#         reply = hunter_sendto(tokenid, {'lang': 'python', 'data': life_detection, 'devid': devid}, watch_type='sys', need_reply=True)
-#         if not reply:
-#             print devid
-        release_devices(tokenid, devid)
+    print get_hunter_devid(tokenid, 'mh', '10.250.190.182')
