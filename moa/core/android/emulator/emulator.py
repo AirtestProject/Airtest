@@ -1,9 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-try:
-    import win32gui
-except:
-    print "Emulator module available on Windows only"
+
+import win32gui
 import re
 from moa.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch, AdbKeyboardIme
 from moa.aircv import aircv

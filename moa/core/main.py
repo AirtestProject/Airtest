@@ -170,6 +170,8 @@ def set_emulator(emu_name='bluestacks', sn=None, addr=None):
     auto set if only one device
     support filepath match patten, eg: c123*
     '''
+    if not android.Emulator:
+        raise RuntimeError("Emulator module available on Windows only")
     addr = addr or ADDRESS
     if not sn:
         devs = android.ADB(server_addr=addr).devices(state='device')
