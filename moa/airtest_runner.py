@@ -124,6 +124,7 @@ def main():
     if args.utilfile:
         if os.path.isfile(args.utilfile):
             print "try loading:", args.utilfile
+            sys.path.append(os.path.dirname(args.utilfile))
             utilcontent = open(args.utilfile).read()
             exec(utilcontent) in globals()
         else:

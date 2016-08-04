@@ -8,8 +8,7 @@ from moa.core import main
 
 TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')
 TEST_PKG = apkparser.APK(TEST_APK).get_package()
-print TEST_PKG
-
+TARGET_PIC = os.path.join(os.path.dirname(__file__), 'target.png')
 
 class TestMoaOnAndroid(unittest.TestCase):
 
@@ -72,7 +71,7 @@ class TestMoaOnAndroid(unittest.TestCase):
             install(TEST_APK)
         amstart(TEST_PKG, 'UnityPlayerNativeActivity')
 
-        touch("target.png")
+        touch(TARGET_PIC)
         self.assertTrue(os.path.exists("screen.png"))
         os.remove("screen.png")
 
