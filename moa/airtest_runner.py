@@ -14,7 +14,7 @@ import requests
 import re
 import urllib2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
-import hunter
+from plugins import hunter
 import sdkautomator
 
 
@@ -23,7 +23,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     execute script: original or submodule
     1. cd to original dir
     2. exec original script
-    3. if sub: 
+    3. if sub:
         2.1 cp imgs to sub_dir
         2.2 set_basedir(sub_dir)
         2.3 exec sub script
