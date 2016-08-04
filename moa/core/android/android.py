@@ -563,8 +563,8 @@ class Minitouch(object):
             return x, y
 
         width ,height = self.size['width'], self.size['height']
-        print '__transform', x, y
-        print self.size
+        # print '__transform', x, y
+        # print self.size
         if width > height and self.size['orientation'] in [1,3]:
             width, height = height, width
 
