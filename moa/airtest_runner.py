@@ -131,7 +131,7 @@ def main():
             print "file does not exist:", os.path.abspath(args.utilfile)
 
     if args.findoutside:
-        set_mask_rect(args.findoutside)
+        set_find_outside(args.findoutside)
 
     if args.setsn is not None:
         print "set_serialno", args.setsn
