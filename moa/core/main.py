@@ -786,6 +786,12 @@ def exists(v, timeout=0):
 
 
 @logwrap
+@platform(on=["Android"])
+def logcat(grep_str="", extra_args="", read_timeout=10):
+    return DEVICE.logcat(grep_str, extra_args, read_timeout)
+
+
+@logwrap
 def add_watcher(name, func):
     WATCHER[name] = func
 

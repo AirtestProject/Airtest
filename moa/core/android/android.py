@@ -287,15 +287,17 @@ class ADB(object):
         else:
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
-    def logcat(self, grepstr="", extra_arg="", read_timeout=10):
-        cmds = "shell logcat " + extra_arg
-        if grepstr:
-            cmds += " | grep " + grepstr
+    def logcat(self, grep_str="", extra_args="", read_timeout=10):
+        cmds = "shell logcat"
+        if extra_args:
+            cmds += " " + extra_args
+        if grep_str:
+            cmds += " | grep " + grep_str
         logcat_proc = self.start_cmd(cmds)
         nbsp = NonBlockingStreamReader(logcat_proc.stdout, print_output=False)
         while True:
             line = nbsp.readline(read_timeout)
-            if line in (None, ""):
+            if line is None:
                 break
             else:
                 yield line
@@ -1289,6 +1291,9 @@ class Android(object):
         else:
             self.minitouch.setup_client()
 
+    def logcat(self, *args):
+        return self.adb.logcat(*args)
+
 
 class XYTransformer(object):
     """
@@ -1314,7 +1319,3 @@ class XYTransformer(object):
         elif orientation == 3:
             x, y = h - y, x
         return x, y
-
-
-if __name__ == '__main__':
-    pass
