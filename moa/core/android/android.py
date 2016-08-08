@@ -287,6 +287,21 @@ class ADB(object):
         else:
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
+    def logcat(self, grepstr="", extra_arg="", read_timeout=10):
+        cmds = "shell logcat " + extra_arg
+        if grepstr:
+            cmds += " | grep " + grepstr
+        logcat_proc = self.start_cmd(cmds)
+        nbsp = NonBlockingStreamReader(logcat_proc.stdout, print_output=False)
+        while True:
+            line = nbsp.readline(read_timeout)
+            if line in (None, ""):
+                break
+            else:
+                yield line
+        nbsp.kill()
+        logcat_proc.kill()
+
 
 class Minicap(object):
 
