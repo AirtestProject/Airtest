@@ -23,7 +23,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     execute script: original or submodule
     1. cd to original dir
     2. exec original script
-    3. if sub: 
+    3. if sub:
         2.1 cp imgs to sub_dir
         2.2 set_basedir(sub_dir)
         2.3 exec sub script
@@ -124,13 +124,14 @@ def main():
     if args.utilfile:
         if os.path.isfile(args.utilfile):
             print "try loading:", args.utilfile
+            sys.path.append(os.path.dirname(args.utilfile))
             utilcontent = open(args.utilfile).read()
             exec(utilcontent) in globals()
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
     if args.findoutside:
-        set_mask_rect(args.findoutside)
+        set_find_outside(args.findoutside)
 
     if args.setsn is not None:
         print "set_serialno", args.setsn
