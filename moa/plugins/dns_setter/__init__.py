@@ -19,7 +19,7 @@ from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
-from moa.plugins.dns_setter import iputils
+from moa.core.android.utils import iputils
 from moa.core.android.ime_helper import UiautomatorIme
 
 
@@ -415,7 +415,6 @@ if __name__ == '__main__':
     from moa.core.android.uiautomator import AutomatorDevice
     d = AutomatorDevice()
     print d.dump()
-    print d(text=u'开启WLAN').right(checkable="true").info
 
 
     # ds = DnsSetter('10.251.83.51:7481', '4df74f4b47e33081')

@@ -5,6 +5,7 @@ __author__ = 'lxn3032'
 import re
 import requests
 import moa.core.main as moa
+from moa.core.android.utils import iputils
 
 
 def _handle_api_request_err(r, data):
@@ -22,12 +23,7 @@ def get_wlanip():
     if moa.get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
         return "10.254.140.145"
     else:
-        netcfg = moa.DEVICE.adb.shell('netcfg')
-        for l in netcfg.split('\n'):
-            if 'wlan' in l:
-                addr_matcher = re.search(r'(\d+\.){3}\d+', l)
-                return addr_matcher.group(0)
-    return None
+        return iputils.get_ip_address(moa.DEVICE.adb)
 
 
 @moa.logwrap
@@ -90,5 +86,5 @@ def release_devices(tokenid, devid=None):
 
 
 if __name__ == '__main__':
-    tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MDE1NTE5NiwiaWF0IjoxNDY3MzU1MTk2fQ.eyJ1c2VybmFtZSI6Imd6bGl1eGluIn0.GaWGg0E8_snNm3o6Zdn4P_evqKXTgea_0pLwdpb9TWI"
-    print get_hunter_devid(tokenid, 'mh', '10.250.190.182')
+    tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
+    print get_hunter_devid(tokenid, 'mh', '10.254.148.39')
