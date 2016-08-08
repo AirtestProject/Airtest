@@ -652,11 +652,11 @@ def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, ri
             raise
     else:
         pos = v
-        # 互通版需求：点击npc，传入find_inside参数作为矫正
-        if pictarget.find_inside and get_platform() == "Windows" and DEVICE.handle:
+        # 互通版需求：点击npc，传入FIND_INSIDE参数作为touch位置矫正(此时的v非img_name_str、非MoaPic、MoaText)
+        if FIND_INSIDE and get_platform() == "Windows" and DEVICE.handle:
             wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)
             # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
-            pos = (wnd_pos[0] + pictarget.find_inside[0] + pos[0], wnd_pos[1] + pictarget.find_inside[1] + pos[1])
+            pos = (wnd_pos[0] + FIND_INSIDE[0] + pos[0], wnd_pos[1] + FIND_INSIDE[1] + pos[1])
 
     if offset:
         if offset['percent']:
