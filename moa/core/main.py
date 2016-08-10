@@ -871,7 +871,10 @@ def exists(v, timeout=0):
 @_transparam
 def find_all(v, timeout=0):
     timeout = timeout or FIND_TIMEOUT_TMP
-    return _loop_find(v, timeout=timeout, find_all=True)
+    try:
+        return _loop_find(v, timeout=timeout, find_all=True)
+    except MoaNotFoundError:
+        return []
 
 
 @logwrap
