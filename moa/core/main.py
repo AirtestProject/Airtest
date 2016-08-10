@@ -433,8 +433,38 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
     return ret
 
 
+def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
+    '''直接使用单个方法进行寻找'''
+    ret_list = []
+    if getattr(pictarget, "resolution"):
+        try:
+            # 缩放后的模板匹配
+            LOGGING.debug("method: template match (find_all) ..")
+            device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+            ret_list = aircv.find_template_after_resize(screen, picdata, sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR, find_all=True)
+        except aircv.Error:
+            ret_list = []
+        except Exception as err:
+            traceback.print_exc()
+            ret_list = []
+
+        _log_in_func({"cv": ret_list})
+
+        if threshold and ret_list:
+            nice_ret_list = []
+            for one_ret in ret_list:  # 将ret列表内低于阈值的结果都去掉
+                if one_ret["confidence"] >= threshold:
+                    nice_ret_list.append(one_ret)
+            ret_list = nice_ret_list
+        LOGGING.debug("tpl result_list (find_all): %s", ret_list)
+        return ret_list
+    else:
+        LOGGING.warning("please check script : there is no 'resolution' param.")
+        return ret_list    # 走了else逻辑，ret_list为空
+
+
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_all=False):
     '''
         keep looking for pic util timeout, execute intervalfunc if pic not found.
     '''
@@ -468,13 +498,21 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # *************************************************************************************
             # 如果find_inside为None，获取的offset=None.
             screen, offset = crop_image(screen, pictarget.find_inside)
-            ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
+            if find_all:  # 如果是要find_all，就执行一下找到所有图片的逻辑:
+                ret = _find_all_pic(screen, picdata, threshold, pictarget)
+            else:
+                ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
         else:
             LOGGING.warning("Whole screen is black, skip cv matching")
             ret = None
 
         if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
             aircv.show(screen)
+
+        # find_all相关：如果发现ret是个list，如果是[]或者None则换成None，list非空，则求出ret = ret_pos_list
+        ret = _settle_ret_list(ret, pictarget, offset, wnd_pos)
+        if isinstance(ret, list):  # 如果发现返回的是个list，说明是find_all模式，直接返回这个结果ret_pos_list
+            return ret
 
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
@@ -497,6 +535,39 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
                 _log_in_func({"wnd_pos": wnd_pos})
             return ret_pos
+
+
+def _settle_ret_list(ret, pictarget, offset=None, wnd_pos=None):
+    """
+        find_all相关：如果发现ret是个list，如果是[]则换成None，list非空，则求出ret = ret_pos_list
+    """
+    if not ret:  # 没找到结果，直接返回None,以便_loop_find执行未找到的逻辑
+        return None
+
+    elif isinstance(ret, list):  # 如果是find_all模式，则找到的是一个结果列表，处理后返回ret_pos_list
+        ret_pos_list = []
+
+        for one_ret in ret:  # 对结果列表中的每一个结果都进行一次结果偏移的处理
+            ret_pos = TargetPos().getXY(one_ret, pictarget.target_pos)
+            if offset:   # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中：
+                ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
+            if wnd_pos:  # 实际操作位置：将相对于窗口的操作坐标，转换成相对于整个屏幕的操作坐标
+                ret_pos = int(ret_pos[0] + wnd_pos[0]), int(ret_pos[1] + wnd_pos[1])
+                # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
+                _log_in_func({"wnd_pos": wnd_pos})
+            ret_pos_list.append(ret_pos)
+
+        return ret_pos_list
+
+    else:  # 非find_all模式，返回的是一个dict，则正常返回即可
+        return ret
+
+
+def find_all(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
+    '''
+        keep looking for pic util timeout, execute intervalfunc if pic not found.
+    '''
+    return _loop_find(pictarget, timeout=timeout, interval=interval, threshold=threshold, intervalfunc=threshold, find_all=True)
 
 
 def keep_capture(flag=True):
