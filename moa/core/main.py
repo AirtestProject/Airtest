@@ -736,6 +736,13 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
 
 
 @logwrap
+@platform(on=["Android"])
+def pinch(in_or_out='in', center=None, percent=0.5, delay=OPDELAY):
+    DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
+    time.sleep(delay)
+
+
+@logwrap
 @platform(on=["Android", "Windows"])
 def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
     if get_platform() == "Windows":
