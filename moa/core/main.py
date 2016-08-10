@@ -563,13 +563,6 @@ def _settle_ret_list(ret, pictarget, offset=None, wnd_pos=None):
         return ret
 
 
-def find_all(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
-    '''
-        keep looking for pic util timeout, execute intervalfunc if pic not found.
-    '''
-    return _loop_find(pictarget, timeout=timeout, interval=interval, threshold=threshold, intervalfunc=threshold, find_all=True)
-
-
 def keep_capture(flag=True):
     global KEEP_CAPTURE
     KEEP_CAPTURE = flag
@@ -872,6 +865,13 @@ def exists(v, timeout=0):
         return pos
     except MoaNotFoundError as e:
         return False
+
+
+@logwrap
+@_transparam
+def find_all(v, timeout=0):
+    timeout = timeout or FIND_TIMEOUT_TMP
+    return _loop_find(v, timeout=timeout, find_all=True)
 
 
 @logwrap
