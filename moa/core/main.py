@@ -748,8 +748,15 @@ def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text, delay=OPDELAY):
+def text(text, delay=OPDELAY, clear=False):
     text_temp = text.lower()
+    if clear is True:
+        if get_platform() == "Windows":
+            for i in range(30):
+                DEVICE.keyevent('backspace', escape=True)
+        else:
+            DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
+
     if text_temp == "-delete":
         # 如果文本是“-delete”，那么删除一个字符
         if get_platform() == "Windows":
