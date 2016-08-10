@@ -14,12 +14,13 @@ from particular_devices.vivo import Vivo, VivoY27, VivoX6S
 from particular_devices.meizu import MX4, MX3, MeiLanNote
 from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
 from particular_devices.lenovo import LenovoPad
+from particular_devices.oppo import OPPOR9
 
 from moa.core.android.android import Android
 from moa.core.android.uiautomator import Device
 from moa.core.android.android import ADB
 from moa.plugins.testlab import stf, stf_runner
-from moa.plugins.dns_setter import iputils
+from moa.core.android.utils import iputils
 from moa.core.android.ime_helper import UiautomatorIme
 
 
@@ -118,11 +119,7 @@ class DefaultDnsSetter(object):
 
     @particular_case.default_call
     def is_dhcp_mode(self):
-        ipsettings = self.uiutil.scroll_find(
-            {'resourceId': 'com.android.settings:id/ip_settings'},
-            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
-            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
-        )
+        ipsettings = self.uiutil.scroll_find({'resourceIdMatches': '^.*:id/ip_settings$'})
         if ipsettings and ipsettings.exists:
             if ipsettings.text in ['DHCP', 'dhcp', '自动']:
                 return True
@@ -134,50 +131,30 @@ class DefaultDnsSetter(object):
 
     @particular_case.default_call
     def use_dhcp(self):
-        self.uiutil.scroll_to_click_any(
-            {'resourceId': 'com.android.settings:id/ip_settings'},
-            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
-            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
-        )
+        self.uiutil.scroll_to_click_any({'resourceIdMatches': '^.*:id/ip_settings$'})
         self.uiutil.click_any({'textMatches': ur'DHCP|dhcp|自动'})
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
 
     @particular_case.default_call
     def use_static_ip(self):
-        self.uiutil.scroll_to_click_any(
-            {'resourceId': 'com.android.settings:id/ip_settings'},
-            {'resourceId': 'com.android.settings.wifi:id/ip_settings'},
-            {'resourceId': 'com.lge.wifisettings:id/ip_settings'},
-        )
+        self.uiutil.scroll_to_click_any({'resourceIdMatches': '^.*:id/ip_settings$'})
         self.uiutil.click_any({'textMatches': ur'静态|static|STATIC|靜態|静止'})
 
     @particular_case.default_call
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
-        uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/dns1'},
-                                        {'resourceId': 'com.android.settings.wifi:id/dns1'},
-                                        {'resourceId': 'com.lge.wifisettings:id/dns1'},
-                                        )
+        uiobj = self.uiutil.scroll_find({'resourceIdMatches': '^.*:id/dns1$'})
         if uiobj:
             self.uiutil.replace_text(uiobj, dns1)
         if ip_addr is not None:
-            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/ipaddress'},
-                                            {'resourceId': 'com.android.settings.wifi:id/ipaddress'},
-                                            {'resourceId': 'com.lge.wifisettings:id/ipaddress'},
-                                            )
+            uiobj = self.uiutil.scroll_find({'resourceIdMatches': '^.*:id/ipaddress$'})
             if uiobj:
                 self.uiutil.replace_text(uiobj, ip_addr)
         if gateway is not None:
-            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/gateway'},
-                                            {'resourceId': 'com.android.settings.wifi:id/gateway'},
-                                            {'resourceId': 'com.lge.wifisettings:id/gateway'},
-                                            )
+            uiobj = self.uiutil.scroll_find({'resourceIdMatches': '^.*:id/gateway$'})
             if uiobj:
                 self.uiutil.replace_text(uiobj, gateway)
         if masklen is not None:
-            uiobj = self.uiutil.scroll_find({'resourceId': 'com.android.settings:id/network_prefix_length'},
-                                            {'resourceId': 'com.android.settings.wifi:id/network_prefix_length'},
-                                            {'resourceId': 'com.lge.wifisettings:id/network_prefix_length'},
-                                            )
+            uiobj = self.uiutil.scroll_find({'resourceIdMatches': '^.*:id/network_prefix_length$'})
             if uiobj:
                 self.uiutil.replace_text(uiobj, masklen)
         self.uiutil.click_any({'textMatches': ur'保存|确定|儲存|储存|ok|OK|Ok'})
@@ -302,7 +279,7 @@ class DefaultDnsSetter(object):
 
 
 class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2,
-                GalaxyNote5, LenovoPad):
+                GalaxyNote5, LenovoPad, OPPOR9):
     pass
 
 
@@ -412,17 +389,16 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    from moa.core.android.uiautomator import AutomatorDevice
-    d = AutomatorDevice()
-    print d.dump()
-    print d(text=u'开启WLAN').right(checkable="true").info
+    # from moa.core.android.uiautomator import AutomatorDevice
+    # d = AutomatorDevice()
+    # print d.dump()
 
 
-    # ds = DnsSetter('10.251.83.51:7481', '4df74f4b47e33081')
-    # ds.clear_float_tips()
-    # ds.network_prepare()
-    # ds.set_dns('192.168.229.227')
-    # ds.test_ping('www.163.com')
+    ds = DnsSetter('QK7D6LDM4HWWOJBQ', 'QK7D6LDM4HWWOJBQ')
+    ds.clear_float_tips()
+    ds.network_prepare()
+    ds.set_dns('-1')
+    ds.test_ping('www.163.com')
 
     # a = Android('4df74f4b47e33081')
     # print a.shell('echo "ping -c2 www.163.com" | su')

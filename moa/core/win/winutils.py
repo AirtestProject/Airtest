@@ -449,8 +449,9 @@ class WindowMgr:
         # 第四步：发现child_hwnd_list仍为[]，则根据w_h的宽高比重新查找一遍：
         for key in all_child_hwnd_list:
             width, height = self.target_child_hwnd_dict[key][2], self.target_child_hwnd_dict[key][3]
-            if (width / height - w_h[0] / w_h[1]) < 0.00001:
-                child_hwnd_list.append(key)
+            if height != 0 and w_h[1] != 0:
+                if (width / height - w_h[0] / w_h[1]) < 0.00001:
+                    child_hwnd_list.append(key)
         if child_hwnd_list:
             return child_hwnd_list
         else:
