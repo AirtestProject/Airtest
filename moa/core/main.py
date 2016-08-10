@@ -630,14 +630,12 @@ def home():
 @platform(on=["Android"])
 def refresh_device():
     LOGGING.warning('Warning, refresh_device is deprecated')
-    # time.sleep(REFRESH_SCREEN_DELAY)
-    # DEVICE.refreshOrientationInfo()
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
+def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
     '''
     @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
@@ -674,13 +672,14 @@ def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, ri
             DEVICE.touch(pos, right_click=True)
         else:
             DEVICE.touch(pos, duration=duration)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, duration=0.5):
+def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
@@ -711,13 +710,14 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, duration=0
             raise Exception("no enouph params for swipe")
     DEVICE.swipe(pos1, pos2, duration=duration)
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
+def operate(v, route, timeout=TIMEOUT, delay=0):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout)
     else:
@@ -732,30 +732,33 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
         DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
         time.sleep(vector[2])
     DEVICE.operate({"type": "up"})
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @platform(on=["Android"])
-def pinch(in_or_out='in', center=None, percent=0.5, delay=OPDELAY):
+def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
     DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
+def keyevent(keyname, escape=False, combine=None, delay=0):
     if get_platform() == "Windows":
         DEVICE.keyevent(keyname, escape, combine)
     else:
         DEVICE.keyevent(keyname)
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text, delay=OPDELAY, clear=False):
+def text(text, delay=0, clear=False):
     text_temp = text.lower()
     if clear is True:
         if get_platform() == "Windows":
@@ -772,6 +775,7 @@ def text(text, delay=OPDELAY, clear=False):
             DEVICE.keyevent('KEYCODE_DEL')
     else:
         DEVICE.text(text)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
@@ -833,19 +837,19 @@ def assert_exists(v, msg="", timeout=0):
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=0, delay=OPDELAY):
+def assert_not_exists(v, msg="", timeout=0, delay=0):
     timeout = timeout or FIND_TIMEOUT_TMP
     try:
         pos = _loop_find(v, timeout=timeout)
-        time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         # 本语句成功执行后，睡眠delay时间后，再执行下一行语句：
+        delay = delay or OPDELAY
         time.sleep(delay)
 
 
 @logwrap
-def assert_equal(first, second, msg="", delay=OPDELAY):
+def assert_equal(first, second, msg="", delay=0):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -854,11 +858,12 @@ def assert_equal(first, second, msg="", delay=OPDELAY):
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
-def assert_not_equal(first, second, msg="", delay=OPDELAY):
+def assert_not_equal(first, second, msg="", delay=0):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = not (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -867,4 +872,5 @@ def assert_not_equal(first, second, msg="", delay=OPDELAY):
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
 
+    delay = delay or OPDELAY
     time.sleep(delay)
