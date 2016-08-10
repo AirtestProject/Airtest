@@ -78,6 +78,14 @@ class TestMoaOnAndroid(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             touch("test.png")
 
+    def test_logcat(self):
+        for i in logcat("nimei", "V", read_timeout=2):
+            print i
+
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(TestMoaOnAndroid("test_logcat"))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

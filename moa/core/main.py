@@ -748,8 +748,15 @@ def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text, delay=OPDELAY):
+def text(text, delay=OPDELAY, clear=False):
     text_temp = text.lower()
+    if clear is True:
+        if get_platform() == "Windows":
+            for i in range(30):
+                DEVICE.keyevent('backspace', escape=True)
+        else:
+            DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
+
     if text_temp == "-delete":
         # 如果文本是“-delete”，那么删除一个字符
         if get_platform() == "Windows":
@@ -783,6 +790,12 @@ def exists(v, timeout=0):
         return pos
     except MoaNotFoundError as e:
         return False
+
+
+@logwrap
+@platform(on=["Android"])
+def logcat(grep_str="", extra_args="", read_timeout=10):
+    return DEVICE.logcat(grep_str, extra_args, read_timeout)
 
 
 @logwrap

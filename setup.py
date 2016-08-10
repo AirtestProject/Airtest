@@ -1,36 +1,26 @@
 from setuptools import setup, find_packages
-#import moa
-#from moa import __version__
 
-VERSION = '0.0.1' #__version__
 
 setup(
-    name='air-moa',
-    version=VERSION,
-    author='codeskyblue@gmail.com(hzsunshx)',
-    # author_email='',
-    description='Android auto test package',
-    # long_description=long_description,
-    url='https://git-qa.gz.netease.com/airtest-projects/moa.git',
-    # download_url='https://github.com/Cal-CS-61A-Staff/ok/releases/download/v{}/ok'.format(VERSION),
-
+    name='moa',
+    version='0.0.4',
+    author='Netease Game',
+    author_email='gzliuxin@corp.netease.com',
+    description='automated test package',
+    long_description='automated test package from Netease Game',
+    url='http://git-qa.gz.netease.com/gzliuxin/moa',
     license='MIT',
-    keywords=['mobile', 'android', 'opencv'],
-    packages=find_packages(),##include=[
-        #'client',
-        #'client.*',
-    #]),
-    #package_data={
-    #    'client': ['config.ok'],
-    #},
-    # install_requires=[],
-    entry_points={
-        'console_scripts': [
-            'moatool=moa.moatool:main',
-        ],
+    keywords=['automation', 'test', 'android', 'opencv'],
+    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist']),
+    package_data={
+        'android_deps': ["*.apk", "moa/core/libs", "moa/core/adb"],
+        'html_statics': ["moa/report"]
     },
     install_requires=[
         'requests',
+        'Jinja2',
+        'Pillow',
+        'AxmlParserPY',
     ],
     classifiers=[
         'Programming Language :: Python :: 2.7',
