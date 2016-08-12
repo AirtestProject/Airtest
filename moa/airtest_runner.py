@@ -13,9 +13,8 @@ from core.error import MinicapError, MinitouchError, AdbError
 import requests
 import re
 import urllib2
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
-import hunter
-import sdkautomator
+from moa.plugins import hunter
+from moa.plugins import sdkautomator
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
