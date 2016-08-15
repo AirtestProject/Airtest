@@ -67,4 +67,6 @@ TEST_DEVICE_LIST = (
     '810EBM535P6F',
     '4df74f4b47e33081',
     'QK7D6LDM4HWWOJBQ',
+    'bf353c38',
+    '6d54dae7',
 )
