@@ -23,6 +23,7 @@ PKG_NOT_REMOVE = [
     "com.android.adbkeyboard",
     # 保留的游戏app
     "com.netease.my",
+    "com.netease.mhxyhtb",
 ]
 
 
