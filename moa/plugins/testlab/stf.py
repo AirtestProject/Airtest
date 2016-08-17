@@ -38,15 +38,27 @@ DEV_ONLINE = "present"
 
 # 获取设备列表
 def get_device_list_rest():
-    url = "http://%s:7100/api/v1/devices" % (HOST_IP)
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
-    # print res.status_code
-    return json.loads(res.data)['devices']
+    devs = []
+    r = requests.get('http://92.168.40.111:3000/api/devices')
+    if r.status_code == 200:
+        devs = [dev for sn, dev in r.json()['devices'].items()]
+    else:
+        url = "http://%s:7100/api/v1/devices" % (HOST_IP)
+        res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
+        devs = json.loads(res.data)['devices']
+    return devs
+
 
 def get_usable_device_list_rest():
-    device_list = get_device_list_rest()
-    useable_list = [d for d in device_list if (d["present"] is True and d["using"] is False)]
-    return useable_list
+    devs = []
+    r = requests.get('http://92.168.40.111:3000/api/availableDevices')
+    if r.status_code == 200:
+        devs = [dev for sn, dev in r.json()['devices'].items()]
+    else:
+        url = "http://%s:7100/api/v1/devices" % (HOST_IP)
+        res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
+        devs = [d for d in json.loads(res.data)['devices'] if d["present"] and not d["using"]]
+    return devs
 
 
 # 获取单台设备信息

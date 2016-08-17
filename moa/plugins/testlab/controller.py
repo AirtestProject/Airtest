@@ -12,7 +12,7 @@ def run_multi_devices(sns):
 
 
 def run_random_devices(count):
-    listDevices = stf.get_device_list_rest("")
+    listDevices = stf.get_device_list_rest()
     total = len(listDevices) 
     print "Available devices:", total
     if count is None:
