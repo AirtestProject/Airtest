@@ -39,7 +39,7 @@ DEV_ONLINE = "present"
 # 获取设备列表
 def get_device_list_rest():
     devs = []
-    r = requests.get('http://92.168.40.111:3000/api/devices')
+    r = requests.get('http://192.168.40.111:3000/api/devices')
     if r.status_code == 200:
         devs = [dev for sn, dev in r.json()['devices'].items()]
     else:
@@ -51,7 +51,7 @@ def get_device_list_rest():
 
 def get_usable_device_list_rest():
     devs = []
-    r = requests.get('http://92.168.40.111:3000/api/availableDevices')
+    r = requests.get('http://192.168.40.111:3000/api/availableDevices')
     if r.status_code == 200:
         devs = [dev for sn, dev in r.json()['devices'].items()]
     else:
