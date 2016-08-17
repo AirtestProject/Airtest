@@ -21,7 +21,10 @@ HOST_IP = config.STF_HOST_IP
 def _islist(v):
     return isinstance(v, list) or isinstance(v, tuple)
 
-def http_get(host, data={}, headers={}):
+
+def http_get(host, data=None, headers=None):
+    data = data or {}
+    headers = headers or {}
     data = urllib.urlencode(data) 
     url = '%s?%s' % (host, data)
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
@@ -39,10 +42,13 @@ DEV_ONLINE = "present"
 # 获取设备列表
 def get_device_list_rest():
     devs = []
-    r = requests.get('http://92.168.40.111:3000/api/devices')
-    if r.status_code == 200:
-        devs = [dev for sn, dev in r.json()['devices'].items()]
-    else:
+    try:
+        r = requests.get('http://192.168.40.111:3000/api/devices', timeout=2)
+        if r.status_code == 200:
+            devs = [dev for sn, dev in r.json()['devices'].items()]
+        else:
+            raise Exception('testlab monitor server no response')
+    except:
         url = "http://%s:7100/api/v1/devices" % HOST_IP
         res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
         devs = json.loads(res.data)['devices']
@@ -51,10 +57,13 @@ def get_device_list_rest():
 
 def get_usable_device_list_rest():
     devs = []
-    r = requests.get('http://92.168.40.111:3000/api/availableDevices')
-    if r.status_code == 200:
-        devs = [dev for sn, dev in r.json()['devices'].items()]
-    else:
+    try:
+        r = requests.get('http://192.168.40.111:3000/api/availableDevices', timeout=2)
+        if r.status_code == 200:
+            devs = [dev for sn, dev in r.json()['devices'].items()]
+        else:
+            raise Exception('testlab monitor server no response')
+    except:
         url = "http://%s:7100/api/v1/devices" % HOST_IP
         res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
         devs = [d for d in json.loads(res.data)['devices'] if d["present"] and not d["using"]]
