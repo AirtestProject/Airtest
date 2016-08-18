@@ -198,7 +198,11 @@ def main():
                 else:
                     print "exec code end"
             elif input_line.startswith("f "):
+                # print 'get input_line',input_line
                 script = input_line.strip()[2:]
+                pyfile = ""
+                if script.endswith(".py"):
+                    script,pyfile = os.path.split(script)
                 print "exec script %s" % repr(script)
                 try:
                     os.chdir(script)
@@ -210,14 +214,14 @@ def main():
                         print "save img in", "'%s'" %args.screen
                         set_screendir(args.screen)
                         
-                    exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
+                    exec_script(script, scope=globals(), original=True, pyfilename=pyfile)
                 except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
-                    print "exec script error"
+                    print "exec script error",script
                     sys.stderr.write(traceback.format_exc())
                 else:
-                    print "exec script end"
+                    print "exec script end",script
             elif input_line == "":
                 print "end of stdin"
                 sys.exit(0)
