@@ -596,7 +596,8 @@ class WindowMgr:
         if win32gui.IsIconic(self.handle):
             win32gui.ShowWindow(self.handle, 4)
         time.sleep(0.01)
-        win32gui.SetForegroundWindow(self.handle)
+        if self.handle:
+            win32gui.SetForegroundWindow(self.handle)
 
     def get_window_pos(self):
         """get window pos in (x0, y0, x1, y1)"""

@@ -13,9 +13,8 @@ from core.error import MinicapError, MinitouchError, AdbError
 import requests
 import re
 import urllib2
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "plugins"))
-import hunter
-import sdkautomator
+from moa.plugins import hunter
+from moa.plugins import sdkautomator
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
@@ -40,30 +39,33 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         scriptpath = scriptname
 
     def copy_script(src, dst):
+        if os.path.isdir(sub_dir):
+            shutil.rmtree(dst, ignore_errors=True)
+        os.mkdir(sub_dir)
         for f in os.listdir(src):
             srcfile = os.path.join(src, f)
             if not (os.path.isfile(srcfile) and f.endswith(tplext)):
                 continue
             dstfile = os.path.join(dst, f)
             shutil.copy(srcfile, dstfile)
+
     def get_sub_dir_name(scriptname):
         dirname = os.path.splitdrive(os.path.normpath(scriptname))[-1]
         dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(scriptext, "_sub")
         return dirname
+
     ori_dir = None
     # copy submodule's images into sub_dir, and set_basedir
     if not original:
         ori_dir = BASE_DIR
         sub_dir = get_sub_dir_name(scriptname)
         set_basedir(sub_dir)
-        if not os.path.isdir(sub_dir):
-            os.mkdir(sub_dir)
-        # copy_script(scriptpath, sub_dir)
-        try:
-            copy_script(scriptpath, sub_dir)
-        except:
-            log("error", {"name": "exec_script", "step": "fail","args": ["   "+scriptpath+ "   "], "traceback": "Fail to find this child script.."}, False)
-            return scriptpath
+        copy_script(scriptpath, sub_dir)
+        # try:
+        #     copy_script(scriptpath, sub_dir)
+        # except:
+        #     log("error", {"name": "exec_script", "step": "fail","args": ["   "+scriptpath+ "   "], "traceback": "Fail to find this child script.."}, False)
+        #     return scriptpath
 
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})

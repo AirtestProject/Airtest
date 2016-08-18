@@ -7,7 +7,7 @@ from . import particular_case
 
 
 GALAXY = ('07173333', )
-GALAXY_4 = ('4d00df1f9b034067', )
+GALAXY_4 = ('4d00df1f9b034067', '5d0a64b5')
 GALAXY_NOTE2 = ('4df74f4b47e33081', )
 GALAXY_NOTE5 = ('0815f8485f032404', )
 

@@ -287,6 +287,23 @@ class ADB(object):
         else:
             self.shell('input touchscreen swipe %d %d %d %d %d' % (x0, y0, x1, y1, duration))
 
+    def logcat(self, grep_str="", extra_args="", read_timeout=10):
+        cmds = "shell logcat"
+        if extra_args:
+            cmds += " " + extra_args
+        if grep_str:
+            cmds += " | grep " + grep_str
+        logcat_proc = self.start_cmd(cmds)
+        nbsp = NonBlockingStreamReader(logcat_proc.stdout, print_output=False)
+        while True:
+            line = nbsp.readline(read_timeout)
+            if line is None:
+                break
+            else:
+                yield line
+        nbsp.kill()
+        logcat_proc.kill()
+
 
 class Minicap(object):
 
@@ -637,7 +654,7 @@ class Minitouch(object):
         time.sleep(interval)
         self.handle("u 0\nc\n")
 
-    def pinch(self):
+    def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
         d 0 0 100 50
         d 1 100 0 50
@@ -664,7 +681,42 @@ class Minitouch(object):
         u 1
         c
         """
-        pass
+        w, h = self.size['width'], self.size['height']
+        if isinstance(center, (list, tuple)):
+            x0, y0 = center
+        elif center is None:
+            x0, y0 = w / 2, h / 2
+        else:
+            raise RuntimeError("center should be None or list/tuple, not %s" % repr(center))
+        
+        x1, y1 = x0 - w * percent / 2, y0 - h * percent / 2
+        x2, y2 = x0 + w * percent / 2, y0 + h * percent / 2
+        cmds = []
+        if in_or_out == 'in':
+            cmds.append("d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
+            for i in range(1, steps):
+                cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                    x1+(x0-x1)*i/steps, y1+(y0-y1)*i/steps,
+                    x2+(x0-x2)*i/steps, y2+(y0-y2)*i/steps
+                ))
+            cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
+            cmds.append("u 0\nu 1\nc\n")
+        elif in_or_out == 'out':
+            cmds.append("d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
+            for i in range(1, steps):
+                cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                    x0+(x1-x0)*i/steps, y0+(y1-y0)*i/steps,
+                    x0+(x2-x0)*i/steps, y0+(y2-y0)*i/steps
+                ))
+            cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
+            cmds.append("u 0\nu 1\nc\n")
+        else:
+            raise RuntimeError("center should be 'in' or 'out', not %s" % repr(in_or_out))
+
+        interval = float(duration)/(steps+1)
+        for i, c in enumerate(cmds):
+            self.handle(c)
+            time.sleep(interval)
 
     def operate(self, args):
         cmd = ""
@@ -1274,6 +1326,12 @@ class Android(object):
         else:
             self.minitouch.setup_client()
 
+    def logcat(self, *args, **kwargs):
+        return self.adb.logcat(*args, **kwargs)
+
+    def pinch(self, *args, **kwargs):
+        return self.minitouch.pinch(*args, **kwargs)
+
 
 class XYTransformer(object):
     """
@@ -1299,7 +1357,3 @@ class XYTransformer(object):
         elif orientation == 3:
             x, y = h - y, x
         return x, y
-
-
-if __name__ == '__main__':
-    pass

@@ -21,7 +21,10 @@ HOST_IP = config.STF_HOST_IP
 def _islist(v):
     return isinstance(v, list) or isinstance(v, tuple)
 
-def http_get(host, data={}, headers={}):
+
+def http_get(host, data=None, headers=None):
+    data = data or {}
+    headers = headers or {}
     data = urllib.urlencode(data) 
     url = '%s?%s' % (host, data)
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
@@ -38,40 +41,62 @@ DEV_ONLINE = "present"
 
 # 获取设备列表
 def get_device_list_rest():
-    url = "http://%s:7100/api/v1/devices" % (HOST_IP)
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
-    # print res.status_code
-    return json.loads(res.data)['devices']
+    devs = []
+    try:
+        r = requests.get('http://192.168.40.111:3000/api/devices', timeout=2)
+        if r.status_code == 200:
+            devs = [dev for sn, dev in r.json()['devices'].items()]
+        else:
+            raise Exception('testlab monitor server no response')
+    except:
+        url = "http://%s:7100/api/v1/devices" % HOST_IP
+        res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
+        devs = json.loads(res.data)['devices']
+    return devs
+
 
 def get_usable_device_list_rest():
-    device_list = get_device_list_rest()
-    useable_list = [d for d in device_list if (d["present"] is True and d["using"] is False)]
-    return useable_list
+    devs = []
+    try:
+        r = requests.get('http://192.168.40.111:3000/api/availableDevices', timeout=2)
+        if r.status_code == 200:
+            devs = [dev for sn, dev in r.json()['devices'].items()]
+        else:
+            raise Exception('testlab monitor server no response')
+    except:
+        url = "http://%s:7100/api/v1/devices" % HOST_IP
+        res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
+        devs = [d for d in json.loads(res.data)['devices'] if d["present"] and not d["using"]]
+    return devs
 
 
 # 获取单台设备信息
 def get_device_info_rest(serial):    
     url = "http://%s:7100/api/v1/devices/%s" % (HOST_IP, serial)
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
+    res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
     # print res.status_code
     return json.loads(res.data)
 
+
 # 获取设备列表中特定字段
 # fields参数为目标字段列表
-def get_device_list_fields(fields=[]):
-    if(_islist(fields)):
+def get_device_list_fields(fields=None):
+    if not fields:
+        fields = []
+    if _islist(fields):
         fields = ','.join(fields)
     url = "http://%s:7100/api/v1/devices?fields=%s" % (HOST_IP, fields)
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
+    res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
     # print res.status_code
     return json.loads(res.data)
+
 
 # 使用设备
 def join_group(serial):
     url = "http://%s:7100/api/v1/user/devices" % HOST_IP
     headers = {
         'content-type': 'application/json',
-        'authorization':'Bearer %s' % TOKEN_ID
+        'authorization': 'Bearer %s' % TOKEN_ID
     }
 
     data = {"serial": serial}
@@ -80,57 +105,63 @@ def join_group(serial):
     # print 'joinGroup ', res.json()
     return res.json()
 
+
 # 释放设备
 def leave_group(serial):
     url = "http://%s:7100/api/v1/user/devices/%s" % (HOST_IP, serial)
-    headers = {'authorization':'Bearer %s' % TOKEN_ID}
+    headers = {'authorization': 'Bearer %s' % TOKEN_ID}
 
     res = requests.delete(url, headers=headers)
 
     print 'leaveGroup ', res.json()
     return res.json()
 
+
 # 远程设备连接，返回远程连接url
 def remote_connect(serial):
     url = "http://%s:7100/api/v1/user/devices/%s/remoteConnect" % (HOST_IP, serial)
     headers = {
         'content-type': 'application/json',
-        'authorization':'Bearer %s' % TOKEN_ID
+        'authorization': 'Bearer %s' % TOKEN_ID
     }
 
     res = requests.post(url, headers=headers)
     # print 'remoteConnect ', res.json()
     return res.json()
 
+
 # 结束远程设备连接
 def remote_disconnect(serial):
     url = "http://%s:7100/api/v1/user/devices/%s/remoteConnect" % (HOST_IP, serial)
-    headers = {'authorization':'Bearer %s' % TOKEN_ID}
+    headers = {'authorization': 'Bearer %s' % TOKEN_ID}
 
     res = requests.delete(url, headers=headers)
     print 'remoteConnect ', res.json()
     return res.json()
 
+
 # 获取当前Token_id对应user的信息
 def get_user_info():
     url = "http://%s:7100/api/v1/user" % HOST_IP 
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
+    res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
     # print res.status_code
     return json.loads(res.data)
+
 
 # 获取当前Token_id对应user使用设备的信息
 def get_user_devices(req):    
     url = "http://%s:7100/api/v1/user/devices" % HOST_IP 
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
+    res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
     # print res.status_code
     return json.loads(res.data)
+
 
 # 获取使用情况统计信息的数据
 # Response Description
 #   - usestat (list or array)
 def get_use_statistics(req):
     url = "http://%s:7100/api/v1/usestat" % HOST_IP 
-    res = http_get(url, headers={'authorization':'Bearer %s' % TOKEN_ID})   
+    res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
     # print res.status_code
     return json.loads(res.data)
 

@@ -380,7 +380,7 @@ def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, re
         if templateMatch is True:
             LOGGING.debug("method: template match..")
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_pre(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR)
+            ret = aircv.find_template_after_resize(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR)
         # 参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2],如果参数输入不全，不调用区域预测：
         elif not record_pos:
             LOGGING.debug("method: sift in whole screen..")
@@ -433,8 +433,38 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
     return ret
 
 
+def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
+    '''直接使用单个方法进行寻找'''
+    ret_list = []
+    if getattr(pictarget, "resolution"):
+        try:
+            # 缩放后的模板匹配
+            LOGGING.debug("method: template match (find_all) ..")
+            device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+            ret_list = aircv.find_template_after_resize(screen, picdata, sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR, find_all=True)
+        except aircv.Error:
+            ret_list = []
+        except Exception as err:
+            traceback.print_exc()
+            ret_list = []
+
+        _log_in_func({"cv": ret_list})
+
+        if threshold and ret_list:
+            nice_ret_list = []
+            for one_ret in ret_list:  # 将ret列表内低于阈值的结果都去掉
+                if one_ret["confidence"] >= threshold:
+                    nice_ret_list.append(one_ret)
+            ret_list = nice_ret_list
+        LOGGING.debug("tpl result_list (find_all): %s", ret_list)
+        return ret_list
+    else:
+        LOGGING.warning("please check script : there is no 'resolution' param.")
+        return ret_list    # 走了else逻辑，ret_list为空
+
+
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None):
+def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_all=False):
     '''
         keep looking for pic util timeout, execute intervalfunc if pic not found.
     '''
@@ -468,13 +498,21 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             # *************************************************************************************
             # 如果find_inside为None，获取的offset=None.
             screen, offset = crop_image(screen, pictarget.find_inside)
-            ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
+            if find_all:  # 如果是要find_all，就执行一下找到所有图片的逻辑:
+                ret = _find_all_pic(screen, picdata, threshold, pictarget)
+            else:
+                ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
         else:
             LOGGING.warning("Whole screen is black, skip cv matching")
             ret = None
 
         if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
             aircv.show(screen)
+
+        # find_all相关：如果发现ret是个list，如果是[]或者None则换成None，list非空，则求出ret = ret_pos_list
+        ret = _settle_ret_list(ret, pictarget, offset, wnd_pos)
+        if isinstance(ret, list):  # 如果发现返回的是个list，说明是find_all模式，直接返回这个结果ret_pos_list
+            return ret
 
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
@@ -497,6 +535,32 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
                 # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
                 _log_in_func({"wnd_pos": wnd_pos})
             return ret_pos
+
+
+def _settle_ret_list(ret, pictarget, offset=None, wnd_pos=None):
+    """
+        find_all相关：如果发现ret是个list，如果是[]则换成None，list非空，则求出ret = ret_pos_list
+    """
+    if not ret:  # 没找到结果，直接返回None,以便_loop_find执行未找到的逻辑
+        return None
+
+    elif isinstance(ret, list):  # 如果是find_all模式，则找到的是一个结果列表，处理后返回ret_pos_list
+        ret_pos_list = []
+
+        for one_ret in ret:  # 对结果列表中的每一个结果都进行一次结果偏移的处理
+            ret_pos = TargetPos().getXY(one_ret, pictarget.target_pos)
+            if offset:   # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中：
+                ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
+            if wnd_pos:  # 实际操作位置：将相对于窗口的操作坐标，转换成相对于整个屏幕的操作坐标
+                ret_pos = int(ret_pos[0] + wnd_pos[0]), int(ret_pos[1] + wnd_pos[1])
+                # 将窗口位置记录进log内，以便report在解析时可以mark到正确位置
+                _log_in_func({"wnd_pos": wnd_pos})
+            ret_pos_list.append(ret_pos)
+
+        return ret_pos_list
+
+    else:  # 非find_all模式，返回的是一个dict，则正常返回即可
+        return ret
 
 
 def keep_capture(flag=True):
@@ -630,14 +694,12 @@ def home():
 @platform(on=["Android"])
 def refresh_device():
     LOGGING.warning('Warning, refresh_device is deprecated')
-    # time.sleep(REFRESH_SCREEN_DELAY)
-    # DEVICE.refreshOrientationInfo()
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
+def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
     '''
     @param if_exists: touch only if the target pic exists
     @param offset: {'x':10,'y':10,'percent':True}
@@ -674,13 +736,14 @@ def touch(v, timeout=0, delay=OPDELAY, offset=None, if_exists=False, times=1, ri
             DEVICE.touch(pos, right_click=True)
         else:
             DEVICE.touch(pos, duration=duration)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, duration=0.5):
+def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
@@ -711,13 +774,14 @@ def swipe(v1, v2=None, delay=OPDELAY, vector=None, target_poses=None, duration=0
             raise Exception("no enouph params for swipe")
     DEVICE.swipe(pos1, pos2, duration=duration)
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
+def operate(v, route, timeout=TIMEOUT, delay=0):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout)
     else:
@@ -732,24 +796,41 @@ def operate(v, route, timeout=TIMEOUT, delay=OPDELAY):
         DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
         time.sleep(vector[2])
     DEVICE.operate({"type": "up"})
+    delay = delay or OPDELAY
+    time.sleep(delay)
+
+
+@logwrap
+@platform(on=["Android"])
+def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
+    DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def keyevent(keyname, escape=False, combine=None, delay=OPDELAY):
+def keyevent(keyname, escape=False, combine=None, delay=0):
     if get_platform() == "Windows":
         DEVICE.keyevent(keyname, escape, combine)
     else:
         DEVICE.keyevent(keyname)
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text, delay=OPDELAY):
+def text(text, delay=0, clear=False):
     text_temp = text.lower()
+    if clear is True:
+        if get_platform() == "Windows":
+            for i in range(30):
+                DEVICE.keyevent('backspace', escape=True)
+        else:
+            DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
+
     if text_temp == "-delete":
         # 如果文本是“-delete”，那么删除一个字符
         if get_platform() == "Windows":
@@ -758,6 +839,7 @@ def text(text, delay=OPDELAY):
             DEVICE.keyevent('KEYCODE_DEL')
     else:
         DEVICE.text(text)
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
@@ -783,6 +865,22 @@ def exists(v, timeout=0):
         return pos
     except MoaNotFoundError as e:
         return False
+
+
+@logwrap
+@_transparam
+def find_all(v, timeout=0):
+    timeout = timeout or FIND_TIMEOUT_TMP
+    try:
+        return _loop_find(v, timeout=timeout, find_all=True)
+    except MoaNotFoundError:
+        return []
+
+
+@logwrap
+@platform(on=["Android"])
+def logcat(grep_str="", extra_args="", read_timeout=10):
+    return DEVICE.logcat(grep_str, extra_args, read_timeout)
 
 
 @logwrap
@@ -813,19 +911,19 @@ def assert_exists(v, msg="", timeout=0):
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=0, delay=OPDELAY):
+def assert_not_exists(v, msg="", timeout=0, delay=0):
     timeout = timeout or FIND_TIMEOUT_TMP
     try:
         pos = _loop_find(v, timeout=timeout)
-        time.sleep(delay)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         # 本语句成功执行后，睡眠delay时间后，再执行下一行语句：
+        delay = delay or OPDELAY
         time.sleep(delay)
 
 
 @logwrap
-def assert_equal(first, second, msg="", delay=OPDELAY):
+def assert_equal(first, second, msg="", delay=0):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -834,11 +932,12 @@ def assert_equal(first, second, msg="", delay=OPDELAY):
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
+    delay = delay or OPDELAY
     time.sleep(delay)
 
 
 @logwrap
-def assert_not_equal(first, second, msg="", delay=OPDELAY):
+def assert_not_equal(first, second, msg="", delay=0):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = not (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -847,4 +946,5 @@ def assert_not_equal(first, second, msg="", delay=OPDELAY):
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
 
+    delay = delay or OPDELAY
     time.sleep(delay)
