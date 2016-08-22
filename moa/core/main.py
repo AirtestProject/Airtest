@@ -320,7 +320,7 @@ def set_logfile(filename=LOGFILE, inbase=True):
     global LOGGER
     basedir = BASE_DIR if inbase else ""
     filepath = os.path.join(basedir, filename)
-    LOGGING.info("set_logfile %s", os.path.realpath(filepath))
+    LOGGING.info("set_logfile %s", repr(os.path.realpath(filepath)))
     LOGGER.set_logfile(filepath)
 
 
