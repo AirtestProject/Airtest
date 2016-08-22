@@ -2,7 +2,10 @@
 
 
 STF_HOST_IP = '192.168.40.111'
-STF_TOKEN_ID = 'd83250eed8bf4eb69b1f30bd7d34d76482fc138a50404cb1832b04cfd00c9d6a'
+STF_TOKEN_ID = {
+    'testlab-admin': 'd83250eed8bf4eb69b1f30bd7d34d76482fc138a50404cb1832b04cfd00c9d6a',
+    'g18': '58987d4d799742d984b037395c41459c4e16e4ea38d3486da266632690cf48fb',
+}
 
 
 # 安装之前会先清掉第三方应用

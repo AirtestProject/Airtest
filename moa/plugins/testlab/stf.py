@@ -14,7 +14,8 @@ try:
 except ImportError:
     import config
 
-TOKEN_ID = config.STF_TOKEN_ID
+# TODO: remember to pass correct group parameter
+TOKEN_ID = config.STF_TOKEN_ID['g18']
 HOST_IP = config.STF_HOST_IP
 
 
