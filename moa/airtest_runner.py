@@ -206,9 +206,10 @@ def main():
                 if script.endswith(".py"):
                     script,pyfile = os.path.split(script)
                 print "exec script %s" % repr(script)
-                # 脚本路径为了解决中文问题，可能已经被repr过一次
+                # 脚本路径为了解决中文问题，在IDE那边可能先被json dumps一次再传过来
                 try:
-                    script = eval(script)
+                    if type(script) == type(''):
+                        script = json.loads(script)
                 except:
                     script = script
                 try:
