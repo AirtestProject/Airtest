@@ -206,6 +206,11 @@ def main():
                 if script.endswith(".py"):
                     script,pyfile = os.path.split(script)
                 print "exec script %s" % repr(script)
+                # 脚本路径为了解决中文问题，可能已经被repr过一次
+                try:
+                    script = eval(script)
+                except:
+                    script = script
                 try:
                     os.chdir(script)
                     if args.log:
