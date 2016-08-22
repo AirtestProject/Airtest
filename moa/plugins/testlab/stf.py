@@ -15,7 +15,7 @@ except ImportError:
     import config
 
 # TODO: remember to pass correct group parameter
-TOKEN_ID = config.STF_TOKEN_ID['g18']
+TOKEN_ID = config.STF_TOKEN_ID['testlab-admin']
 HOST_IP = config.STF_HOST_IP
 
 
