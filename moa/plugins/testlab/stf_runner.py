@@ -31,7 +31,7 @@ def join(serialno):
 
     connected = stf.remote_connect(serialno)
     if not connected["success"]:
-        # pprint(connect)
+        pprint(connect)
         raise RuntimeError("remote connect failed:%s" % serialno)
     addr = connected["remoteConnectUrl"]
     print addr
