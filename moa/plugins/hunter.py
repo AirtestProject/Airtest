@@ -31,16 +31,25 @@ def get_wlanip():
 
 @moa.logwrap
 def get_hunter_devid(tokenid, process, wlanip=None):
-    life_detection = '''
+    if process in ['g18']:
+        life_detection = '''
+local console = hunter.require('console')
+console.write('sys', '-ok-', {logging = false})
+'''
+        lang = 'lua'
+    else:
+        life_detection = '''
 console = require('safaia.console')
 console.write('sys', '-ok-', logging=False)
 '''
+        lang = 'python'
+
     wlanip = wlanip or get_wlanip()
     if wlanip:
         devs = get_devices(tokenid, process=process, ip=wlanip, online=True)
         for devid, dev in devs.items():
             dev_ret = hunter_sendto(tokenid, {
-                        'lang': 'python',
+                        'lang': lang,
                         'data': life_detection,
                         'devid': devid,
                     },
@@ -90,9 +99,13 @@ def release_devices(tokenid, devid=None):
 
 if __name__ == '__main__':
     # tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
-    # print get_hunter_devid(tokenid, 'mh', '10.254.148.39')
+    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDczNjMwNSwiaWF0IjoxNDcxOTM2MzA1fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.Ykcb8-NKVJnkT9NO31inDCG2WGEdk6H68rlj9CvUAV0'
+    HUNTER_API_HOST = '10.251.93.179:32022'
+    print get_hunter_devid(tokenid, 'g18', '10.251.91.35')
 
-    r = requests.post('http://192.168.40.111:3000/api/device/0815f8485f032404/extra',
-                  {'extra': '123'}, headers={'content-type': 'application/json'})
-    # if r.status_code == 201:
-    print r.json()
+    # for i in range(100):
+    #     import json
+    #     r = requests.post('http://192.168.40.111:3000/api/device/0815f8485f032404/extra',
+    #                   data=json.dumps({'extra': {'456': [i]}}), headers={'content-type': 'application/json'})
+    #     # if r.status_code == 201:
+    #     print r.text
