@@ -2,7 +2,6 @@
 __author__ = 'lxn3032'
 
 
-import re
 import requests
 import moa.core.main as moa
 from moa.core.android.utils import iputils
@@ -11,13 +10,19 @@ from moa.core.android.utils import iputils
 HUNTER_API_HOST = 'hunter.nie.netease.com'
 
 
-def _handle_api_request_err(r, data):
-    print '======================================================================\n'
-    print '*** hunter api request err. ***'
-    print 'r.status_code=', r.status_code
-    print 'data=', data
-    print 'message=', r.json()['message']
-    print '======================================================================\n'
+class HunterApiException(Exception):
+    def __init__(self, message, api, data, resp):
+        reply = ''
+        try:
+            reply = resp.json()['message']
+        except:
+            pass
+        message += u', name={}, data={}, status_code={}, reply={}'.format(api, data, resp.status_code, reply)
+        super(HunterApiException, self).__init__(message)
+        self.api = api
+        self.data = data
+        self.status_code = resp.status_code
+        self.response = resp
 
 
 @moa.logwrap
@@ -37,6 +42,12 @@ local console = hunter.require('console')
 console.write('sys', '-ok-', {logging = false})
 '''
         lang = 'lua'
+    elif process in ['CallMeLeaderJack']:
+        life_detection = '''
+local console = hunter.require('safaia.console')
+console.write('sys', '-ok-', {logging = false})
+'''
+        lang = 'lua'
     else:
         life_detection = '''
 console = require('safaia.console')
@@ -48,15 +59,18 @@ console.write('sys', '-ok-', logging=False)
     if wlanip:
         devs = get_devices(tokenid, process=process, ip=wlanip, online=True)
         for devid, dev in devs.items():
-            dev_ret = hunter_sendto(tokenid, {
-                        'lang': lang,
-                        'data': life_detection,
-                        'devid': devid,
-                    },
-                    watch_type='sys',
-                    need_reply=True)
-            if dev_ret and dev_ret['data'] == '-ok-':
-                return devid
+            try:
+                dev_ret = hunter_sendto(tokenid, {
+                            'lang': lang,
+                            'data': life_detection,
+                            'devid': devid,
+                        },
+                        watch_type='sys',
+                        need_reply=True)
+                if dev_ret['data'] == '-ok-':
+                    return devid
+            except HunterApiException:
+                pass
     return None
 
 
@@ -64,44 +78,33 @@ def hunter_sendto(tokenid, data, **kwargs):
     data.update(kwargs)
     r = requests.post('http://{}/api/sendto_device'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, data=data)
     if r.status_code == 201:
-        try:
-            return r.json()
-        except:
-            pass
+        return r.json()
     else:
-        _handle_api_request_err(r, data)
-    return None
+        raise HunterApiException('Exceprions occured when invoking hunter api', 'sendto_device', data, r)
 
 
 def get_devices(tokenid, **kwargs):
     r = requests.get('http://{}/api/devices'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, params=kwargs)
     if r.status_code == 200:
-        try:
-            return r.json()['devices']
-        except:
-            pass
+        return r.json()['devices']
     else:
-        _handle_api_request_err(r, kwargs)
-    return None
+        raise HunterApiException('Exceprions occured when invoking hunter api', 'devices', kwargs, r)
 
 
 def release_devices(tokenid, devid=None):
     r = requests.post('http://{}/api/release_device'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, data={'devid': devid})
     if r.status_code == 201:
-        try:
-            return r.json()
-        except:
-            pass
+        return r.json()
     else:
-        _handle_api_request_err(r, devid)
-    return None
+        raise HunterApiException('Exceprions occured when invoking hunter api', 'release_device', devid, r)
 
 
 if __name__ == '__main__':
     # tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
     tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDczNjMwNSwiaWF0IjoxNDcxOTM2MzA1fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.Ykcb8-NKVJnkT9NO31inDCG2WGEdk6H68rlj9CvUAV0'
     HUNTER_API_HOST = '10.251.93.179:32022'
-    print get_hunter_devid(tokenid, 'g18', '10.251.91.35')
+    devid = get_hunter_devid(tokenid, 'g18', '10.251.91.3')
+    print hunter_sendto(tokenid, {'lang': 'lua', 'data': '', 'devid': devid})
 
     # for i in range(100):
     #     import json
