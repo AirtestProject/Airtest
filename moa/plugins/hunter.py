@@ -8,6 +8,9 @@ import moa.core.main as moa
 from moa.core.android.utils import iputils
 
 
+HUNTER_API_HOST = 'hunter.nie.netease.com'
+
+
 def _handle_api_request_err(r, data):
     print '======================================================================\n'
     print '*** hunter api request err. ***'
@@ -50,7 +53,7 @@ console.write('sys', '-ok-', logging=False)
 
 def hunter_sendto(tokenid, data, **kwargs):
     data.update(kwargs)
-    r = requests.post('http://hunter.nie.netease.com/api/sendto_device', headers={'tokenid': tokenid}, data=data)
+    r = requests.post('http://{}/api/sendto_device'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, data=data)
     if r.status_code == 201:
         try:
             return r.json()
@@ -62,7 +65,7 @@ def hunter_sendto(tokenid, data, **kwargs):
 
 
 def get_devices(tokenid, **kwargs):
-    r = requests.get('http://hunter.nie.netease.com/api/devices', headers={'tokenid': tokenid}, params=kwargs)
+    r = requests.get('http://{}/api/devices'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, params=kwargs)
     if r.status_code == 200:
         try:
             return r.json()['devices']
@@ -74,7 +77,7 @@ def get_devices(tokenid, **kwargs):
 
 
 def release_devices(tokenid, devid=None):
-    r = requests.post('http://hunter.nie.netease.com/api/release_device', headers={'tokenid': tokenid}, data={'devid': devid})
+    r = requests.post('http://{}/api/release_device'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, data={'devid': devid})
     if r.status_code == 201:
         try:
             return r.json()
@@ -86,5 +89,10 @@ def release_devices(tokenid, devid=None):
 
 
 if __name__ == '__main__':
-    tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
-    print get_hunter_devid(tokenid, 'mh', '10.254.148.39')
+    # tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
+    # print get_hunter_devid(tokenid, 'mh', '10.254.148.39')
+
+    r = requests.post('http://192.168.40.111:3000/api/device/0815f8485f032404/extra',
+                  {'extra': '123'}, headers={'content-type': 'application/json'})
+    # if r.status_code == 201:
+    print r.json()
