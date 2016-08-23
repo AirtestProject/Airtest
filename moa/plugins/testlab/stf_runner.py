@@ -12,7 +12,8 @@ def devices():
     listDevices = stf.get_usable_device_list_rest()
     ret = []
     for i in listDevices:
-        if i['serial'] in TEST_DEVICE_LIST:
+        serialno = i.get('serial')
+        if serialno in TEST_DEVICE_LIST:
             serialno = i['serial']
             print serialno
             ret.append(serialno)

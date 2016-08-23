@@ -206,9 +206,10 @@ def main():
                 if script.endswith(".py"):
                     script,pyfile = os.path.split(script)
                 print "exec script %s" % repr(script)
-                # 脚本路径为了解决中文问题，可能已经被repr过一次
+                # IDE使用的文件路径被命令行下的编码处理过，需要解码
                 try:
-                    script = eval(script)
+                    charset = sys.stdin.encoding
+                    script = script.decode(charset)
                 except:
                     script = script
                 try:
@@ -225,10 +226,10 @@ def main():
                 except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
-                    print "exec script error",script
+                    print "exec script error", repr(script)
                     sys.stderr.write(traceback.format_exc())
                 else:
-                    print "exec script end",script
+                    print "exec script end", repr(script)
             elif input_line == "":
                 print "end of stdin"
                 sys.exit(0)
