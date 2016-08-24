@@ -2,6 +2,7 @@
 __author__ = 'lxn3032'
 
 
+import json
 import requests
 import moa.core.main as moa
 from moa.core.android.utils import iputils
@@ -10,19 +11,10 @@ from moa.core.android.utils import iputils
 HUNTER_API_HOST = 'hunter.nie.netease.com'
 
 
-class HunterApiException(Exception):
-    def __init__(self, message, api, data, resp):
-        reply = ''
-        try:
-            reply = resp.json()['message']
-        except:
-            pass
-        message += u', name={}, data={}, status_code={}, reply={}'.format(api, data, resp.status_code, reply)
-        super(HunterApiException, self).__init__(message)
-        self.api = api
-        self.data = data
-        self.status_code = resp.status_code
-        self.response = resp
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
 
 
 @moa.logwrap
@@ -36,13 +28,7 @@ def get_wlanip():
 
 @moa.logwrap
 def get_hunter_devid(tokenid, process, wlanip=None):
-    if process in ['g18']:
-        life_detection = '''
-local console = hunter.require('console')
-console.write('sys', '-ok-', {logging = false})
-'''
-        lang = 'lua'
-    elif process in ['CallMeLeaderJack']:
+    if process in ['g18', 'CallMeLeaderJack']:
         life_detection = '''
 local console = hunter.require('safaia.console')
 console.write('sys', '-ok-', {logging = false})
@@ -74,13 +60,20 @@ console.write('sys', '-ok-', logging=False)
     return None
 
 
+def whoami(tokenid):
+    r = requests.get('http://{}/api/userinfo'.format(HUNTER_API_HOST), headers={'tokenid': tokenid})
+    if r.status_code == 200:
+        return r.json()['user']
+    return None
+
+
 def hunter_sendto(tokenid, data, **kwargs):
     data.update(kwargs)
     r = requests.post('http://{}/api/sendto_device'.format(HUNTER_API_HOST), headers={'tokenid': tokenid}, data=data)
     if r.status_code == 201:
         return r.json()
     else:
-        raise HunterApiException('Exceprions occured when invoking hunter api', 'sendto_device', data, r)
+        raise HunterApiException('sendto_device', data, r)
 
 
 def get_devices(tokenid, **kwargs):
@@ -88,7 +81,7 @@ def get_devices(tokenid, **kwargs):
     if r.status_code == 200:
         return r.json()['devices']
     else:
-        raise HunterApiException('Exceprions occured when invoking hunter api', 'devices', kwargs, r)
+        raise HunterApiException('devices', kwargs, r)
 
 
 def release_devices(tokenid, devid=None):
@@ -96,19 +89,168 @@ def release_devices(tokenid, devid=None):
     if r.status_code == 201:
         return r.json()
     else:
-        raise HunterApiException('Exceprions occured when invoking hunter api', 'release_device', devid, r)
+        raise HunterApiException('release_device', devid, r)
+
+
+class HunterApiException(Exception):
+    def __init__(self, api, data, resp):
+        reply = ''
+        try:
+            reply = resp.json()['message']
+        except:
+            pass
+        messageprefix = u'Exceprions occured when invoking hunter api, '
+        message = messageprefix + u'name={}, data={}, status_code={}, reply={}'.format(api, data, resp.status_code, reply)
+        message = message.encode('utf-8')
+        super(HunterApiException, self).__init__(message)
+        self.api = api
+        self.data = data
+        self.status_code = resp.status_code
+        self.response = resp
+
+
+class HunterDevidError(Exception):
+    def __init__(self, message):
+        super(HunterDevidError, self).__init__(message)
+
+
+class Hunter(object):
+    def __init__(self, tokenid, process, devid=None, apihost=None):
+        super(Hunter, self).__init__()
+        self.tokenid = tokenid
+        self.process = process
+        self.devid = devid
+        if self.process in ['g18', 'CallMeLeaderJack']:
+            self.lang = 'lua'
+        else:
+            self.lang = 'python'
+
+        if apihost is not None:
+            global HUNTER_API_HOST
+            HUNTER_API_HOST = apihost
+
+    def require(self, mod):
+        return HunterInstructionModule(self, mod)
+
+    def refresh_devid(self):
+        self.devid = get_hunter_devid(self.tokenid, self.process)
+        if not self.devid:
+            raise HunterDevidError('hunter devid is None, check whether the device is available on website')
+
+    def script(self, code, watch='ret'):
+        if not self.devid:
+            self.refresh_devid()
+        data = {'lang': self.lang, 'devid': self.devid, 'data': code}
+        if watch:
+            data['watch_type'] = watch
+            data['need_reply'] = True
+        ret = hunter_sendto(self.tokenid, data)
+        if watch:
+            return ret.get('data', None)
+        else:
+            return ret
+
+
+class HunterInstructionModule(object):
+    def __init__(self, hobj, mod_name, methods=None):
+        super(HunterInstructionModule, self).__init__()
+        self.hobj = hobj
+        self.mod_name = mod_name
+        self.mod_val = None
+        self.methods = methods or []
+
+    @staticmethod
+    def make_arglist(lang, *args, **kwargs):
+        if lang == 'lua':
+            arglist = repr(json.dumps(list(args) + kwargs.values(), default=set_default))
+        else:
+            arglist = ', '.join([repr(a) for a in args] + ['{}={}'.format(repr(k), repr(v)) for k, v in kwargs.items()])
+        return arglist
+
+    def __getattr__(self, key):
+        return HunterInstructionModule(self.hobj, self.mod_name, self.methods + [key])
+
+    def __repr__(self):
+        if not self.mod_val:
+            expr = ''
+            if self.methods:
+                expr = '.' + '.'.join(self.methods)
+            if self.hobj.lang == 'python':
+                code = '''
+console = require('safaia.console')
+try:
+    mod = require('{mod}')
+    console.ret(mod{expr})
+except:
+    import traceback
+    console.ret(traceback.format_exc())
+'''
+            else:
+                code = '''
+local console = hunter.require('safaia.console')
+xpcall(function()
+    local mod = hunter.require('{mod}')
+    console.ret(mod{expr})
+end, function(errmsg)
+    local tb = debug.traceback()
+    console.ret(errmsg .. '\\n' .. tb)
+end)
+'''
+            code = code.format(mod=self.mod_name, expr=expr)
+            self.mod_val = self.hobj.script(code)
+        return self.mod_val
+    __str__ = __repr__
+
+    def __call__(self, *args, **kwargs):
+        arglist = HunterInstructionModule.make_arglist(self.hobj.lang, *args, **kwargs)
+        expr = ''
+        if self.methods:
+            expr = '.' + '.'.join(self.methods)
+        if self.hobj.lang == 'python':
+            code = '''
+console = require('safaia.console')
+try:
+    mod = require('{mod}')
+    console.ret(mod{expr}({arglist}))
+except:
+    import traceback
+    console.ret(traceback.format_exc())
+'''
+        else:
+            code = '''
+local console = hunter.require('safaia.console')
+local unpackArgs = nil
+unpackArgs = function(t, i)
+    i = i or 1
+    if t[i] then
+        return t[i], unpackArgs(t, i + 1)
+    end
+end
+xpcall(function()
+    local mod = hunter.require('{mod}')
+    args = json.decode({arglist})
+    console.ret(mod{expr}(unpackArgs(args)))
+end, function(errmsg)
+    local tb = debug.traceback()
+    console.ret(errmsg .. '\\n' .. tb)
+end)
+'''
+        code = code.format(mod=self.mod_name, expr=expr, arglist=arglist)
+        ret = self.hobj.script(code)
+        return ret
 
 
 if __name__ == '__main__':
-    # tokenid = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0MzQyMTUxNiwiaWF0IjoxNDcwNjIxNTE2fQ.eyJ1c2VybmFtZSI6IndiLmxpbnNoYW9mZW4ifQ.Te0EYRfvA2wvQJBAho56qeW-m92i2Mc8KZSd_nQStuY"
-    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDczNjMwNSwiaWF0IjoxNDcxOTM2MzA1fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.Ykcb8-NKVJnkT9NO31inDCG2WGEdk6H68rlj9CvUAV0'
-    HUNTER_API_HOST = '10.251.93.179:32022'
-    devid = get_hunter_devid(tokenid, 'g18', '10.251.91.3')
-    print hunter_sendto(tokenid, {'lang': 'lua', 'data': '', 'devid': devid})
+    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDgyODYxMiwiaWF0IjoxNDcyMDI4NjEyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.7qHpOk3suWWtUuz6VX_IH2mmOtkZwVsxBhhg0CJZgVU'
+    # HUNTER_API_HOST = '10.251.93.179:32022'
+    # devid = get_hunter_devid(tokenid, 'g18', '10.251.91.3')
+    # print hunter_sendto(tokenid, {'lang': 'lua', 'data': '', 'devid': devid})
+    # print whoami(tokenid)['username']
 
-    # for i in range(100):
-    #     import json
-    #     r = requests.post('http://192.168.40.111:3000/api/device/0815f8485f032404/extra',
-    #                   data=json.dumps({'extra': {'456': [i]}}), headers={'content-type': 'application/json'})
-    #     # if r.status_code == 201:
-    #     print r.text
+    # hunter = Hunter(tokenid, 'safaia', 'safaia_at_10-251-80-196')
+    hunter = Hunter(tokenid, 'CallMeLeaderJack', 'CallMeLeaderJack_at_10-251-83-125')
+    cconsole = hunter.require('safaia.console')
+    print cconsole
+    print cconsole.log
+    ret = cconsole.write('test', 123, {'logging': True})
+    print ret
