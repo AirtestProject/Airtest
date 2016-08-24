@@ -15,6 +15,7 @@ import re
 import urllib2
 from moa.plugins import hunter
 from moa.plugins import sdkautomator
+from moa.plugins import dns_setter
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
