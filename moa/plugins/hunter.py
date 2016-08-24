@@ -129,8 +129,14 @@ class Hunter(object):
             global HUNTER_API_HOST
             HUNTER_API_HOST = apihost
 
+        self.HunterApiException = HunterApiException
+        self.HunterDevidError = HunterDevidError
+
     def require(self, mod):
         return HunterInstructionModule(self, mod)
+
+    def call(self, mod):
+        return HunterInstructionModule(self, mod).real_value()
 
     def refresh_devid(self):
         self.devid = get_hunter_devid(self.tokenid, self.process)
@@ -167,10 +173,7 @@ class HunterInstructionModule(object):
             arglist = ', '.join([repr(a) for a in args] + ['{}={}'.format(repr(k), repr(v)) for k, v in kwargs.items()])
         return arglist
 
-    def __getattr__(self, key):
-        return HunterInstructionModule(self.hobj, self.mod_name, self.methods + [key])
-
-    def __repr__(self):
+    def __calculate_value__(self):
         if not self.mod_val:
             expr = ''
             if self.methods:
@@ -198,8 +201,26 @@ end)
 '''
             code = code.format(mod=self.mod_name, expr=expr)
             self.mod_val = self.hobj.script(code)
+
+    def real_value(self):
+        self.__calculate_value__()
         return self.mod_val
+
+    def __getattr__(self, key):
+        if key in ['__calculate_value__', 'real_value']:
+            return getattr(self, key)
+        else:
+            return HunterInstructionModule(self.hobj, self.mod_name, self.methods + [key])
+
+    def __repr__(self):
+        self.__calculate_value__()
+        return '<object HunterInstructionModule>: ' + str(self.mod_val)
+
     __str__ = __repr__
+
+    def __int__(self):
+        self.__calculate_value__()
+        return int(self.mod_val)
 
     def __call__(self, *args, **kwargs):
         arglist = HunterInstructionModule.make_arglist(self.hobj.lang, *args, **kwargs)
@@ -247,10 +268,10 @@ if __name__ == '__main__':
     # print hunter_sendto(tokenid, {'lang': 'lua', 'data': '', 'devid': devid})
     # print whoami(tokenid)['username']
 
-    # hunter = Hunter(tokenid, 'safaia', 'safaia_at_10-251-80-196')
-    hunter = Hunter(tokenid, 'CallMeLeaderJack', 'CallMeLeaderJack_at_10-251-83-125')
-    cconsole = hunter.require('safaia.console')
-    print cconsole
-    print cconsole.log
-    ret = cconsole.write('test', 123, {'logging': True})
-    print ret
+    hunter = Hunter(tokenid, 'safaia', 'safaia_at_10-251-80-196')
+    # hunter = Hunter(tokenid, 'CallMeLeaderJack', 'CallMeLeaderJack_at_10-251-83-125')
+    test = hunter.require('test.123')
+    print test, type(test)
+    test2 = hunter.call('test.123')
+    print test2, type(test2)
+    # print test() == '123'
