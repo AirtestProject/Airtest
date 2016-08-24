@@ -107,7 +107,7 @@ def install(addr, apk, reinstall=True):
     def mute(dev):
         for i in range(5):
             dev.shell("input keyevent 25")
-    mute(a)
+    # mute(a)
     a.install(apk, reinstall=(reinstall=="true"), check=True)
     a.wake()
 

@@ -15,6 +15,7 @@ import re
 import urllib2
 from moa.plugins import hunter
 from moa.plugins import sdkautomator
+from moa.plugins import dns_setter
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
@@ -61,11 +62,6 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
         sub_dir = get_sub_dir_name(scriptname)
         set_basedir(sub_dir)
         copy_script(scriptpath, sub_dir)
-        # try:
-        #     copy_script(scriptpath, sub_dir)
-        # except:
-        #     log("error", {"name": "exec_script", "step": "fail","args": ["   "+scriptpath+ "   "], "traceback": "Fail to find this child script.."}, False)
-        #     return scriptpath
 
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
