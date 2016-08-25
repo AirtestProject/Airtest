@@ -31,7 +31,7 @@ def get_hunter_devid(tokenid, process, wlanip=None):
     if process in ['g18', 'CallMeLeaderJack']:
         life_detection = '''
 local console = hunter.require('safaia.console')
-console.write('sys', '-ok-', {logging = false})
+console.write('sys', '-ok-')
 '''
         lang = 'lua'
     else:
@@ -52,7 +52,8 @@ console.write('sys', '-ok-', logging=False)
                             'devid': devid,
                         },
                         watch_type='sys',
-                        need_reply=True)
+                        need_reply=True,
+                        timeout=5)
                 if dev_ret['data'] == '-ok-':
                     return devid
             except HunterApiException:
@@ -138,11 +139,6 @@ class Hunter(object):
     def call(self, mod):
         return HunterInstructionModule(self, mod).real_value()
 
-    def refresh_devid(self):
-        self.devid = get_hunter_devid(self.tokenid, self.process)
-        if not self.devid:
-            raise HunterDevidError('hunter devid is None, check whether the device is available on website')
-
     def script(self, code, watch='ret'):
         if not self.devid:
             self.refresh_devid()
@@ -155,6 +151,11 @@ class Hunter(object):
             return ret.get('data', None)
         else:
             return ret
+
+    def refresh_devid(self):
+        self.devid = get_hunter_devid(self.tokenid, self.process)
+        if not self.devid:
+            raise HunterDevidError('hunter devid is None, check whether the device is available on website')
 
 
 class HunterInstructionModule(object):
