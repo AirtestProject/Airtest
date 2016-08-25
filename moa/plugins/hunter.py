@@ -142,6 +142,8 @@ class Hunter(object):
     def script(self, code, watch='ret'):
         if not self.devid:
             self.refresh_devid()
+        if not self.devid:
+            raise HunterDevidError('hunter devid is None, check whether the device is available on website')
         data = {'lang': self.lang, 'devid': self.devid, 'data': code}
         if watch:
             data['watch_type'] = watch
@@ -154,8 +156,6 @@ class Hunter(object):
 
     def refresh_devid(self):
         self.devid = get_hunter_devid(self.tokenid, self.process)
-        if not self.devid:
-            raise HunterDevidError('hunter devid is None, check whether the device is available on website')
 
 
 class HunterInstructionModule(object):
@@ -263,16 +263,19 @@ end)
 
 
 if __name__ == '__main__':
-    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDgyODYxMiwiaWF0IjoxNDcyMDI4NjEyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.7qHpOk3suWWtUuz6VX_IH2mmOtkZwVsxBhhg0CJZgVU'
+    # tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDgyODYxMiwiaWF0IjoxNDcyMDI4NjEyfQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.7qHpOk3suWWtUuz6VX_IH2mmOtkZwVsxBhhg0CJZgVU'
+    tokenid = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTY0NDczNjMwNSwiaWF0IjoxNDcxOTM2MzA1fQ.eyJ1c2VybmFtZSI6Imx4bjMwMzIifQ.Ykcb8-NKVJnkT9NO31inDCG2WGEdk6H68rlj9CvUAV0'  # g18
     # HUNTER_API_HOST = '10.251.93.179:32022'
     # devid = get_hunter_devid(tokenid, 'g18', '10.251.91.3')
     # print hunter_sendto(tokenid, {'lang': 'lua', 'data': '', 'devid': devid})
     # print whoami(tokenid)['username']
 
-    hunter = Hunter(tokenid, 'safaia', 'safaia_at_10-251-80-196')
-    # hunter = Hunter(tokenid, 'CallMeLeaderJack', 'CallMeLeaderJack_at_10-251-83-125')
-    test = hunter.require('test.123')
-    print test, type(test)
-    test2 = hunter.call('test.123')
-    print test2, type(test2)
-    # print test() == '123'
+    HUNTER_API_HOST = '10.251.93.179:32022'
+    print get_hunter_devid(tokenid, 'g18', '10.254.27.120')
+    # hunter = Hunter(tokenid, 'g18', apihost='10.251.93.179:32022')
+    # # hunter = Hunter(tokenid, 'CallMeLeaderJack', 'CallMeLeaderJack_at_10-251-83-125')
+    # hunter.refresh_devid()
+    # print hunter.devid
+    # console = hunter.require('safaia.console')
+    # print console.write('sys', '=ok=')
+
