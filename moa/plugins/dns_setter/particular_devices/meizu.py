@@ -8,6 +8,7 @@ from . import particular_case
 
 MX_MEILAN = ('88MFBM72H9SN', '810EBM535P6F')
 MX_MEILAN_NOTE = ('71MBBLA238NH', )  # 这台很特殊
+MX_MEILAN_METAL = ('A10ABNL934ZX', )
 MX5_ALL = ('850ABM4YR6UW', )
 MX4_ALL = ('76UBBLR2264A', '75UBBLE226QD', '79AEALB253QE')
 MX3_ALL = ('351BBJPYF7PF', '351BBJPTHLR2', '351BBJPZ8F27')
@@ -148,11 +149,13 @@ class MeiLanNote(object):
     def enter_wlan_advanced_settings(self):
         pass
 
+    @particular_case.specified(MX_MEILAN_METAL)
     @particular_case.specified(MX_MEILAN_NOTE)
     def is_dhcp_mode(self):
         switch = self.d(className="com.meizu.common.widget.Switch")
         return switch.exists and not switch.checked
 
+    @particular_case.specified(MX_MEILAN_METAL)
     @particular_case.specified(MX_MEILAN_NOTE)
     def use_dhcp(self):
         switch = self.d(className="com.meizu.common.widget.Switch")
@@ -161,6 +164,7 @@ class MeiLanNote(object):
             time.sleep(0.5)
         self.uiutil.click_any({'text': u'保存'})
 
+    @particular_case.specified(MX_MEILAN_METAL)
     @particular_case.specified(MX_MEILAN_NOTE)
     def use_static_ip(self):
         switch = self.d(className="com.meizu.common.widget.Switch")
@@ -168,6 +172,7 @@ class MeiLanNote(object):
             switch.click()
             time.sleep(0.5)
 
+    @particular_case.specified(MX_MEILAN_METAL)
     @particular_case.specified(MX_MEILAN_NOTE)
     def modify_wlan_settings_fields(self, dns1, ip_addr=None, gateway=None, masklen=None):
         if self.d.orientation != 'natural':
@@ -182,3 +187,16 @@ class MeiLanNote(object):
             dummy.click.bottomright()
 
         self.uiutil.click_any({'text': u'保存'})
+
+
+class MeilanMetal(object):
+    @particular_case.specified(MX_MEILAN_METAL)
+    def enter_wlan_settings(self):
+        self.d(text='netease_game').click()
+        time.sleep(0.8)
+        self.uiutil.click_any({'resourceId': "com.android.settings:id/menu_more"})
+        self.uiutil.click_any({'text': "静态 IP"})
+
+    @particular_case.specified(MX_MEILAN_NOTE)
+    def enter_wlan_advanced_settings(self):
+        pass

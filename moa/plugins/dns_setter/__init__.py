@@ -11,7 +11,7 @@ import uiutils
 from particular_devices import particular_case
 from particular_devices.xiaomi import MI2
 from particular_devices.vivo import Vivo, VivoY27, VivoX6S
-from particular_devices.meizu import MX4, MX3, MeiLanNote
+from particular_devices.meizu import MX4, MX3, MeiLanNote, MeilanMetal
 from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
 from particular_devices.lenovo import LenovoPad
 from particular_devices.oppo import OPPOR9
@@ -279,7 +279,7 @@ class DefaultDnsSetter(object):
 
 
 class DnsSetter(DefaultDnsSetter, MI2, Vivo, VivoY27, VivoX6S, MX4, MX3, MeiLanNote, Galaxy, Galaxy4, GalaxyNote2,
-                GalaxyNote5, LenovoPad, OPPOR9):
+                GalaxyNote5, LenovoPad, OPPOR9, MeilanMetal):
     pass
 
 
@@ -394,15 +394,16 @@ if __name__ == '__main__':
     # print d.dump()
 
 
-    ds = DnsSetter('QK7D6LDM4HWWOJBQ', 'QK7D6LDM4HWWOJBQ')
+    ds = DnsSetter('A10ABNL934ZX', 'A10ABNL934ZX')
     ds.clear_float_tips()
     ds.network_prepare()
+    ds.set_dns('192.168.229.227')
+    ds.test_ping('www.163.com')
     ds.set_dns('-1')
     ds.test_ping('www.163.com')
 
     # a = Android('4df74f4b47e33081')
     # print a.shell('echo "ping -c2 www.163.com" | su')
-
 
 
     # for d in stf.get_device_list_rest(None):
