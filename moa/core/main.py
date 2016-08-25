@@ -17,6 +17,7 @@ from moa.aircv import aircv
 from moa.aircv import generate_character_img as textgen
 from moa.aircv.aircv_tool_func import crop_image, mask_image
 from moa.core import android
+from moa.core.android import uiautomator
 from moa.core.error import MoaError, MoaNotFoundError
 from moa.core.settings import *
 from moa.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
@@ -948,3 +949,47 @@ def assert_not_equal(first, second, msg="", delay=0):
 
     delay = delay or OPDELAY
     time.sleep(delay)
+
+
+@logwrap
+def uiautowraper(name, func, *args, **kwargs):
+    print('called %r with %r and %r' % (name, args, kwargs))
+    return func(*args, **kwargs)
+
+
+class uiautoObj(object):
+    """wrapper class for uiautomator.AutomatorDeviceObject"""
+    def __init__(self, *args, **kwargs):
+        super(uiautoObj, self).__init__()
+        self.child = uiautomator.AutomatorDeviceObject(*args, **kwargs)
+
+    def __getattr__(self, key):
+            attr = getattr(self.child, key)
+            if callable(attr):
+                def wrapper(*args, **kw):
+                    return uiautowraper(key, attr, *args, **kw)
+                return wrapper
+            else:
+                return attr
+
+
+class uiauto(object):
+    """wrapper class for uiautomator.AutomatorDevice"""
+    def __init__(self):
+        super(uiauto, self).__init__()
+        self.child = uiautomator.AutomatorDevice(serial=DEVICE.serialno)
+
+    def __call__(self, **kwargs):
+        @logwrap
+        def uiaotuselector(**kwargs):
+            return uiautoObj(self.child, uiautomator.Selector(**kwargs))
+        return uiaotuselector(**kwargs)
+
+    def __getattr__(self, key):
+        attr = getattr(self.child, key)
+        if callable(attr):
+            def wrapper(*args, **kw):
+                return uiautowraper(key, attr, *args, **kw)
+            return wrapper
+        else:
+            return attr
