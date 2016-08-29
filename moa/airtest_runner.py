@@ -98,6 +98,11 @@ def device():
     return get_globals("DEVICE")
 
 
+def _on_init_done():
+    """to be overwritten by uses"""
+    pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
@@ -247,6 +252,8 @@ def main():
         if args.screen:
             print "save img in", "'%s'" %args.screen
             set_screendir(args.screen)
+
+        _on_init_done()
 
         try:
             # execute code
