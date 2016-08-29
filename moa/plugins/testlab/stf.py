@@ -67,7 +67,7 @@ def get_usable_device_list_rest():
     except:
         url = "http://%s:7100/api/v1/devices" % HOST_IP
         res = http_get(url, headers={'authorization': 'Bearer %s' % TOKEN_ID})
-        devs = [d for d in json.loads(res.data)['devices'] if d["present"] and not d["using"]]
+        devs = [d for d in json.loads(res.data)['devices'] if d["present"] and not d["owner"]]
     return devs
 
 
