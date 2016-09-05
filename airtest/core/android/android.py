@@ -20,6 +20,7 @@ import Queue
 import random
 import traceback
 import axmlparserpy.apk as apkparser
+from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
 from airtest.aircv import aircv
@@ -794,7 +795,7 @@ def autoretry(func):
     return f
 
 
-class Android(object):
+class Android(Device):
 
     """Android Client"""
 
@@ -851,7 +852,7 @@ class Android(object):
         data = json.dumps(data).replace(r'"', r'\"')
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
 
-    def amlist(self, third_only=False):
+    def list_app(self, third_only=False):
         """
         pm list packages: prints all packages, optionally only
           those whose package name contains the text in FILTER.  Options:
@@ -872,34 +873,34 @@ class Android(object):
         packages = [p.split(":")[1] for p in packages if p]
         return packages
 
-    def ampath(self, package):
+    def path_app(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]'%output)
         return output.split(":")[1].strip()
 
-    def amcheck(self, package):
+    def check_app(self, package):
         output = self.adb.shell(['pm', 'list', 'packages', package])
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]'%output)
         return output.strip()
 
-    def amstart(self, package, activity=None):
-        self.amcheck(package)
+    def start_app(self, package, activity=None):
+        self.check_app(package)
         if not activity:
             self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
         else:
             self.adb.shell(['am', 'start', '-n', '%s/%s.%s'%(package, package, activity)])
 
-    def amstop(self, package):
-        self.amcheck(package)
+    def stop_app(self, package):
+        self.check_app(package)
         self.adb.shell(['am', 'force-stop', package])
 
-    def amclear(self, package):
-        self.amcheck(package)
+    def clear_app(self, package):
+        self.check_app(package)
         self.adb.shell(['pm', 'clear', package])
 
-    def amuninstall(self, package, keepdata=False):
+    def uninstall_app_pm(self, package, keepdata=False):
         cmd = ['pm', 'uninstall', package]
         if keepdata:
             cmd.append('-k')
@@ -913,19 +914,19 @@ class Android(object):
         self.adb.shell('settings put secure accessibility_enabled 0')
         self.adb.shell('settings put secure enabled_accessibility_services 0')
 
-    def install(self, filepath, reinstall=False, check=True):
+    def install_app(self, filepath, reinstall=False, check=True):
         """
         安装应用
         """
         # 先解析apk，看是否存在已安装的app
-        packages = self.amlist()
+        packages = self.list_app()
         apk = apkparser.APK(filepath)
         apk_package = apk.get_package()
         if apk_package in packages:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
                 LOGGING.info("package:%s already exists, uninstall first", apk_package)
-                self.uninstall(apk_package)
+                self.uninstall_app(apk_package)
             # 否则直接return True
             else:
                 LOGGING.info("package:%s already exists, skip reinstall", apk_package)
@@ -948,7 +949,7 @@ class Android(object):
             else:
                 LOGGING.debug('current version:%s', version)
                 LOGGING.debug('upgrading accessibility service to lastest version:%s', ACCESSIBILITYSERVICE_VERSION)
-                self.uninstall(ACCESSIBILITYSERVICE_PACKAGE)
+                self.uninstall_app(ACCESSIBILITYSERVICE_PACKAGE)
                 self.adb.install(ACCESSIBILITYSERVICE_APK)
 
         # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
@@ -960,11 +961,11 @@ class Android(object):
         self.adb.shell("rm -f /data/local/tmp/*.apk")
         self.adb.install(filepath)
         if check:
-            self.amcheck(apk_package)
+            self.check_app(apk_package)
 
         self.disable_accessibility_service()
 
-    def uninstall(self, package):
+    def uninstall_app(self, package):
         return self.adb.uninstall(package)
 
     def snapshot(self, filename="tmp.png", ensure_orientation=True):
@@ -996,13 +997,13 @@ class Android(object):
 
     def wake(self):
         #check and install accessibility service and release lock app
-        packages = self.amlist()
+        packages = self.list_app()
 
         if RELEASELOCK_PACKAGE not in packages:
             self.adb.install(RELEASELOCK_APK)
         #start release lock app
-        self.amstop(RELEASELOCK_PACKAGE)
-        self.amstart(RELEASELOCK_PACKAGE)
+        self.stop_app(RELEASELOCK_PACKAGE)
+        self.start_app(RELEASELOCK_PACKAGE)
         self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
 
         # todo:
@@ -1267,10 +1268,10 @@ class Android(object):
 
     def _initOrientationWatcher(self):
         try:
-            apk_path = self.ampath(ROTATIONWATCHER_PACKAGE)
+            apk_path = self.path_app(ROTATIONWATCHER_PACKAGE)
         except MoaError:
-            self.install(ROTATIONWATCHER_APK)
-            apk_path = self.ampath(ROTATIONWATCHER_PACKAGE)
+            self.install_app(ROTATIONWATCHER_APK)
+            apk_path = self.path_app(ROTATIONWATCHER_PACKAGE)
         p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")

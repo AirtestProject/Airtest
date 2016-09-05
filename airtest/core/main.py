@@ -283,33 +283,6 @@ def set_windows(handle=None, window_title=None):
 
 
 @platform(on=["Android", "Windows"])
-def add_device():
-    """to be deprecate"""
-    # for android  add another serialno
-    if isinstance(DEVICE, android.Android):
-        devs = DEVICE.adb.devices(state='device')
-        devs = [d[0] for d in devs]
-        try:
-            another_dev = (set(devs) - set([DEVICE.serialno])).pop()
-        except KeyError:
-            raise MoaError("no more device to add")
-        set_serialno(another_dev)
-    # for win add another handler
-    elif isinstance(DEVICE, win.Windows):
-        window_title = WINDOW_TITLE or DEVICE.window_title
-        if not window_title:
-            raise MoaError("please set_global WINDOW_TITLE or set_windows with window_title first")
-        devs = DEVICE.find_window_list(window_title)
-        try:
-            another_dev = (set(devs) - set([DEVICE.handle])).pop()
-        except KeyError:
-            raise MoaError("no more device to add")
-        set_windows(handle=another_dev)
-    else:
-        pass
-
-
-@platform(on=["Android", "Windows"])
 def set_current(index):
     global DEVICE
     if index > len(DEVICE_LIST):
@@ -334,8 +307,6 @@ def set_logfile(filename=LOGFILE, inbase=True):
 
 def set_screendir(dirpath=SCREEN_DIR):
     global SAVE_SCREEN
-    # 强制删除dirpath (文件目录树)，新建截屏文件夹ditpath:
-    # windows系统下：如果资源管理器中打开了dirpath，再运行脚本时会有WindowsError[5]出现。
     shutil.rmtree(dirpath, ignore_errors=True)
     if not os.path.isdir(dirpath):
         os.mkdir(dirpath)
@@ -362,7 +333,8 @@ def set_find_outside(find_outside):
 def _get_search_img(pictarget):
     '''根据图片属性获取: 截图(picdata)'''
     if isinstance(pictarget, MoaText):
-        # moaText暂时没用了，截图太方便了，以后再考虑文字识别, pil_2_cv2函数有问题，会变底色，后续修
+        # moaText暂时没用了，截图太方便了，以后再考虑文字识别
+        # pil_2_cv2函数有问题，会变底色，后续修
         # picdata = aircv.pil_2_cv2(pictarget.img)
         pictarget.img.save("text.png")
         picdata = aircv.imread("text.png")
@@ -611,7 +583,6 @@ class MoaPic(object):
         self.record_pos = record_pos
         self.resolution = resolution
         self.filepath = os.path.join(BASE_DIR, filename)
-
         self.find_inside = find_inside or FIND_INSIDE
         self.find_outside = find_outside or FIND_OUTSIDE
         self.whole_screen = whole_screen or WHOLE_SCREEN
@@ -634,38 +605,31 @@ def shell(cmd):
 @logwrap
 @platform(on=["Android", "IOS"])
 def amstart(package, activity=None):
-    if get_platform() == "IOS":
-        DEVICE.launch_app(package)  # package = appid
-        return
-
-    DEVICE.amstart(package, activity)
+    DEVICE.start_app(package, activity)
 
 
 @logwrap
 @platform(on=["Android", "IOS"])
 def amstop(package):
-    if get_platform() == "IOS":  # package = appid
-        DEVICE.stop_app(package)
-        return
-    DEVICE.amstop(package)
+    DEVICE.stop_app(package)
 
 
 @logwrap
 @platform(on=["Android"])
 def amclear(package):
-    DEVICE.amclear(package)
+    DEVICE.clear_app(package)
 
 
 @logwrap
 @platform(on=["Android", "IOS"])
 def install(filepath):
-    return DEVICE.install(filepath)
+    return DEVICE.install_app(filepath)
 
 
 @logwrap
 @platform(on=["Android", "IOS"])
 def uninstall(package):
-    return DEVICE.uninstall(package)
+    return DEVICE.uninstall_app(package)
 
 
 @logwrap
@@ -919,7 +883,6 @@ def assert_not_exists(v, msg="", timeout=0, delay=0):
         pos = _loop_find(v, timeout=timeout)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
-        # 本语句成功执行后，睡眠delay时间后，再执行下一行语句：
         delay = delay or OPDELAY
         time.sleep(delay)
 

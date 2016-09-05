@@ -8,7 +8,7 @@ TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
 TEST_PKG = "org.cocos.Rabbit"
 TARGET_PIC = os.path.join(os.path.dirname(__file__), 'target.png')
 
-class TestMoaOnAndroid(unittest.TestCase):
+class TestAirtestOnAndroid(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -83,6 +83,6 @@ class TestMoaOnAndroid(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     # suite = unittest.TestSuite()
-    # suite.addTest(TestMoaOnAndroid("test_touch_pic"))
+    # suite.addTest(TestAirtestOnAndroid("test_touch_pic"))
     # runner = unittest.TextTestRunner()
     # runner.run(suite)

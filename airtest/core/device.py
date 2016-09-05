@@ -25,21 +25,6 @@ class Device(object):
     def shell(self):
         raise NotImplementedError
 
-    def start_app(self):
-        raise NotImplementedError
-
-    def stop_app(self):
-        raise NotImplementedError
-
-    def clear_app(self):
-        raise NotImplementedError
-
-    def install_app(self):
-        raise NotImplementedError
-
-    def uninstall_app(self):
-        raise NotImplementedError
-
     def snapshot(self):
         raise NotImplementedError
 
@@ -55,16 +40,17 @@ class Device(object):
     def text(self):
         raise NotImplementedError
 
+    def start_app(self):
+        raise NotImplementedError
 
-class iOS(Device):
+    def stop_app(self):
+        raise NotImplementedError
 
-    def __init__(self):
-        pass
+    def clear_app(self):
+        raise NotImplementedError
 
+    def install_app(self):
+        raise NotImplementedError
 
-class android(Device):
-
-    def __init__(self):
-        pass
-
-print DEV_TYPE_DICT
+    def uninstall_app(self):
+        raise NotImplementedError

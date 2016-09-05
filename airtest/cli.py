@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import time
 import os
 import sys
@@ -13,9 +12,9 @@ from core.error import MinicapError, MinitouchError, AdbError
 import requests
 import re
 import urllib2
-from airtest.plugins import hunter
-from airtest.plugins import sdkautomator
-from airtest.plugins import dns_setter
+from airtest.ext import hunter
+from airtest.ext import sdkautomator
+from airtest.ext import dns_setter
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
