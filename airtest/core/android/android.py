@@ -20,10 +20,10 @@ import Queue
 import random
 import traceback
 import axmlparserpy.apk as apkparser
-from moa.core.error import MoaError, AdbError, MinicapError, MinitouchError
-from moa.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
-from moa.aircv import aircv
-from moa.core.android.ime_helper import AdbKeyboardIme
+from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
+from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
+from airtest.aircv import aircv
+from airtest.core.android.ime_helper import AdbKeyboardIme
 from constant import *
 ADBPATH = get_adb_path()
 LOGGING = get_logger('android')

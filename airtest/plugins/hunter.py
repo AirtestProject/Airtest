@@ -4,8 +4,8 @@ __author__ = 'lxn3032'
 
 import json
 import requests
-import moa.core.main as moa
-from moa.core.android.utils import iputils
+import airtest.core.main as moa
+from airtest.core.android.utils import iputils
 
 
 HUNTER_API_HOST = 'hunter.nie.netease.com'
@@ -17,16 +17,16 @@ def set_default(obj):
     raise TypeError
 
 
-@moa.logwrap
-@moa.platform(on=['Android', 'IOS', 'Windows'])
+@airtest.logwrap
+@airtest.platform(on=['Android', 'IOS', 'Windows'])
 def get_wlanip():
-    if moa.get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
+    if airtest.get_platform() == 'IOS':  # temporary: using hardcode ip address for ios device
         return "10.254.140.145"
     else:
-        return iputils.get_ip_address(moa.DEVICE.adb)
+        return iputils.get_ip_address(airtest.DEVICE.adb)
 
 
-@moa.logwrap
+@airtest.logwrap
 def get_hunter_devid(tokenid, process, wlanip=None):
     if process in ['g18', 'CallMeLeaderJack']:
         life_detection = '''

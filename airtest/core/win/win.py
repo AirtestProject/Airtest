@@ -2,7 +2,7 @@
 from winutils import mouse_click, mouse_drag, get_screen_shot, \
     key_input, WindowMgr, get_resolution, mouse_down, mouse_up, mouse_move
 from winsendkey import SendKeys
-from moa.aircv import aircv
+from airtest.aircv import aircv
 
 from PIL import ImageGrab
 

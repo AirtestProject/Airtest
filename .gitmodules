@@ -1,9 +1,9 @@
-[submodule "aircv"]
-	path = moa/aircv
+[submodule "airtest/aircv"]
+	path = airtest/aircv
 	url = ssh://git@git-qa.gz.netease.com:32200/airtest-projects/aircv.git
-[submodule "report"]
-	path = moa/report
+[submodule "airtest/moa-log-report"]
+	path = airtest/moa-log-report
 	url = ssh://git@git-qa.gz.netease.com:32200/qiujinxing/moa-log-report.git
-[submodule "plugins/sdkautomator"]
-	path = moa/plugins/sdkautomator
-	url = ssh://git@git-qa.gz.netease.com:32200/hongyifan/sdkautomator.git
+[submodule "airtest/report"]
+	path = airtest/report
+	url = ssh://git@git-qa.gz.netease.com:32200/qiujinxing/moa-log-report.git

@@ -1,5 +1,5 @@
-from moa.core.android.android import Android, ADB, Minicap, Minitouch
-from moa.core.error import MoaError
+from airtest.core.android.android import Android, ADB, Minicap, Minitouch
+from airtest.core.error import MoaError
 import axmlparserpy.apk as apkparser
 import os
 import time

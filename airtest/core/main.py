@@ -13,14 +13,14 @@ import time
 import traceback
 import fnmatch
 import functools
-from moa.aircv import aircv
-from moa.aircv import generate_character_img as textgen
-from moa.aircv.aircv_tool_func import crop_image, mask_image
-from moa.core import android
-from moa.core.android import uiautomator
-from moa.core.error import MoaError, MoaNotFoundError
-from moa.core.settings import *
-from moa.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
+from airtest.aircv import aircv
+from airtest.aircv import generate_character_img as textgen
+from airtest.aircv.aircv_tool_func import crop_image, mask_image
+from airtest.core import android
+from airtest.core.android import uiautomator
+from airtest.core.error import MoaError, MoaNotFoundError
+from airtest.core.settings import *
+from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
 
 __version__ = '0.0.4'
 
@@ -31,12 +31,12 @@ __version__ = '0.0.4'
 """
 
 try:
-    from moa.core import win
+    from airtest.core import win
 except ImportError as e:
     win = None
     print "win module available on Windows only: %s" % e.message
 try:
-    from moa.core import ios
+    from airtest.core import ios
 except ImportError as e:
     ios = None
     print "ios module available on Mac OS only: %s" % e.message

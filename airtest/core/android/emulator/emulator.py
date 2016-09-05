@@ -3,8 +3,8 @@
 
 import win32gui
 import re
-from moa.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch, AdbKeyboardIme
-from moa.aircv import aircv
+from airtest.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch, AdbKeyboardIme
+from airtest.aircv import aircv
 from android_emulator import EmulatorHelper
 
 
@@ -16,7 +16,7 @@ class Emulator(Android):
 
     def __init__(self, emulator_name='bluestacks', serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, \
                  minicap_stream=False, minitouch=True, init_ime=False):
-        from moa.core.android.emulator.android_emulator import EMULATOR_INFO
+        from airtest.core.android.emulator.android_emulator import EMULATOR_INFO
         if EMULATOR_INFO.get(emulator_name):
             self.emulator_name = emulator_name
             self.emulator_info = EMULATOR_INFO[emulator_name]

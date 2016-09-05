@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from moa.core.main import *
+from airtest.core.main import *
 
 
 def test_android():

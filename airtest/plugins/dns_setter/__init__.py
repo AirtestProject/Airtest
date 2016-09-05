@@ -16,12 +16,12 @@ from particular_devices.samsung import Galaxy, Galaxy4, GalaxyNote2, GalaxyNote5
 from particular_devices.lenovo import LenovoPad
 from particular_devices.oppo import OPPOR9
 
-from moa.core.android.android import Android
-from moa.core.android.uiautomator import Device
-from moa.core.android.android import ADB
-from moa.plugins.testlab import stf, stf_runner
-from moa.core.android.utils import iputils
-from moa.core.android.ime_helper import UiautomatorIme
+from airtest.core.android.android import Android
+from airtest.core.android.uiautomator import Device
+from airtest.core.android.android import ADB
+from airtest.plugins.testlab import stf, stf_runner
+from airtest.core.android.utils import iputils
+from airtest.core.android.ime_helper import UiautomatorIme
 
 
 SONY_XPERIA = ('CB5A1NW8WK', )
@@ -389,7 +389,7 @@ PASS_LIST = (
 )
 
 if __name__ == '__main__':
-    # from moa.core.android.uiautomator import AutomatorDevice
+    # from airtest.core.android.uiautomator import AutomatorDevice
     # d = AutomatorDevice()
     # print d.dump()
 

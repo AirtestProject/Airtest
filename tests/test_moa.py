@@ -2,8 +2,8 @@ import os
 import time
 import unittest
 import axmlparserpy.apk as apkparser
-from moa.core.main import *
-from moa.core import main
+from airtest.core.main import *
+from airtest.core import main
 
 
 TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')

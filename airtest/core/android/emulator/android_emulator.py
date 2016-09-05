@@ -6,7 +6,7 @@ import win32api
 import pythoncom
 import os
 import re
-from moa.core.android.emulator.emulator_config import SUPPORT_EMULATOR, EMULATOR_INFO
+from airtest.core.android.emulator.emulator_config import SUPPORT_EMULATOR, EMULATOR_INFO
 
 
 class EmulatorHelper(object):

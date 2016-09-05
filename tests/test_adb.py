@@ -1,5 +1,5 @@
 # encoding=utf-8
-from moa.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError
+from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError
 import unittest
 import subprocess
 

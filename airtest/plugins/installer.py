@@ -6,7 +6,7 @@ import re
 import os
 import requests
 import plistlib
-from moa.core.main import logwrap
+from airtest.core.main import logwrap
 
 
 @logwrap

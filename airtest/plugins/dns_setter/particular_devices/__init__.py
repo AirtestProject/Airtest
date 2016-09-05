@@ -2,7 +2,7 @@
 __author__ = 'lxn3032'
 
 
-from moa.plugins.dns_setter.fnslots import FnSlots
+from airtest.plugins.dns_setter.fnslots import FnSlots
 
 
 try:

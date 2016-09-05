@@ -1,8 +1,8 @@
 from subprocess import Popen, PIPE, STDOUT
-from moa.core.utils import NonBlockingStreamReader as nbsp
+from airtest.core.utils import NonBlockingStreamReader as nbsp
 import time
 
-proc = Popen("python -m moa.airtest_runner wtf --setsn --forever", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+proc = Popen("python -m airtest.airtest_runner wtf --setsn --forever", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 proc_stdout = nbsp(proc.stdout)
 while True:
     proc_output_line = proc_stdout.readline(5.0)

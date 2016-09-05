@@ -1,5 +1,5 @@
 # encoding=utf-8
-from moa.core.android.android import Android
+from airtest.core.android.android import Android
 from config import PKG_NOT_REMOVE, TEST_DEVICE_LIST
 from pprint import pprint
 import stf
@@ -69,7 +69,7 @@ def setdns(sn, addr, dns, verify_host='www.163.com'):
     if sn in ('fdcbcc83', '8d260bf7'):
         return
 
-    from moa.plugins.dns_setter import DnsSetter
+    from airtest.plugins.dns_setter import DnsSetter
     a = Android(addr, init_display=False, minicap=False, minitouch=False, init_ime=False)
     a.wake()
     dsetter = DnsSetter(addr, sn)
@@ -132,7 +132,7 @@ def run(addr, moa_script, utilfile="", user_vars=""):
             shutil.copytree(script, filename)
         script_list.append(os.path.abspath(filename))
     p = subprocess.Popen([
-        "python", "-m", "moa.airtest_runner", ",".join(script_list),
+        "python", "-m", "airtest.airtest_runner", ",".join(script_list),
         "--setsn", addr, "--log", "--screen", 
         "--utilfile", utilfile, "--kwargs", user_vars,
     ])
@@ -142,7 +142,7 @@ def run(addr, moa_script, utilfile="", user_vars=""):
 
 def report(moa_script_name, filename, staticroot):
     import subprocess
-    p = subprocess.Popen(["python", "-m", "moa.report.report_one", moa_script_name, filename, staticroot])
+    p = subprocess.Popen(["python", "-m", "airtest.report.report_one", moa_script_name, filename, staticroot])
     p.wait()
     exit(p.returncode)
 

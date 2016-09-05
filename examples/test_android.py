@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from moa.core.android import ADB, Minicap, Minitouch, Android
+from airtest.core.android import ADB, Minicap, Minitouch, Android
 
 
 def test_minicap(serialno):
