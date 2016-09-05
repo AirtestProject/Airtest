@@ -1,13 +1,11 @@
 import os
-import time
 import unittest
-import axmlparserpy.apk as apkparser
 from airtest.core.main import *
 from airtest.core import main
 
 
 TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
-TEST_PKG = apkparser.APK(TEST_APK).get_package()
+TEST_PKG = "org.cocos.Rabbit"
 TARGET_PIC = os.path.join(os.path.dirname(__file__), 'target.png')
 
 class TestMoaOnAndroid(unittest.TestCase):
@@ -70,7 +68,6 @@ class TestMoaOnAndroid(unittest.TestCase):
         if TEST_PKG not in self.dev.amlist():
             install(TEST_APK)
         amstart(TEST_PKG)
-
         touch(TARGET_PIC)
         self.assertTrue(os.path.exists("screen.png"))
         os.remove("screen.png")

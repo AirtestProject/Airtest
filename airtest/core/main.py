@@ -7,6 +7,16 @@
 # Modified: 2015-10-13 ver 0.0.2 gzliuxin
 # Modified: 2016-04-28 ver 0.0.3 gzliuxin
 # Modified: 2016-08-04 ver 0.0.4 gzliuxin
+
+__version__ = '0.1.0'
+
+"""
+    Airtest
+    Automated test framework for Android/Windows/iOS
+    This file is a script engine.
+    Use cli.py to run scripts
+"""
+
 import os
 import shutil
 import time
@@ -21,15 +31,6 @@ from airtest.core.android import uiautomator
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.settings import *
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
-
-__version__ = '0.0.4'
-
-"""
-    Moa for Android/Windows/iOS
-    Moa Android = ADB + AIRCV + MINICAP + MINITOUCH
-    Script engine.
-"""
-
 try:
     from airtest.core import win
 except ImportError as e:
@@ -40,6 +41,12 @@ try:
 except ImportError as e:
     ios = None
     print "ios module available on Mac OS only: %s" % e.message
+
+
+"""
+Global running status
+"""
+
 
 LOGGER = MoaLogger(None)
 LOGGING = get_logger("main")
