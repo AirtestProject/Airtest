@@ -306,7 +306,7 @@ def add_device():
 def set_current(index):
     global DEVICE
     if index > len(DEVICE_LIST):
-        raise MoaError("add_device first")
+        raise IndexError("device index out of range")
     DEVICE = DEVICE_LIST[index]
     if win and isinstance(DEVICE, win.Windows):
         DEVICE.set_foreground()
