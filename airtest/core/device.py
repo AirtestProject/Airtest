@@ -37,4 +37,3 @@ class Device(object):
         
     def text(self):
         raise NotImplementedError
-        

@@ -868,7 +868,7 @@ class Android(object):
             cmd.append("-3")
         output = self.adb.shell(cmd)
         packages = output.splitlines()
-        # remove all ""; "package:xxx" -> "xxx"
+        # remove all empty string; "package:xxx" -> "xxx"
         packages = [p.split(":")[1] for p in packages if p]
         return packages
 

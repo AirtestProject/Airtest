@@ -683,18 +683,12 @@ def snapshot(filename="screen.png", windows_hwnd=None):
 @platform(on=["Android"])
 def wake():
     DEVICE.wake()
-    pass
 
 
 @logwrap
 @platform(on=["Android"])
 def home():
     DEVICE.home()
-
-
-@platform(on=["Android"])
-def refresh_device():
-    LOGGING.warning('Warning, refresh_device is deprecated')
 
 
 @logwrap
