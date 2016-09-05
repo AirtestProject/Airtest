@@ -1,7 +1,10 @@
-## moa
-## Developing
+## Airtest开源项目
 
-该项目起源于[airtest](https://github.com/netease/airtest), 是一个通过图像识别技术，自动化测试App的技术
+自动化测试框架
+
+*	基于图像匹配，适合做游戏的自动化测试，同样也可以用作App
+*	支持Windows/Android/iOS
+*	提供[IDE]()支持完整的工作流程：录制、回放、生成报告
 
 
 ## 接口说明
@@ -43,9 +46,6 @@
 ### set_globals(key, value)
 	设置moa里面的一些全局变量
 
-### ~~gevent_run(func)~~
-
-	~~用于windows或mac上的调试功能~~
 
 ### log(tag, data)
 
