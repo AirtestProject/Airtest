@@ -16,13 +16,6 @@
 """
 import sys
 import os
-import warnings
-
-
-class ExtDeprecationWarning(DeprecationWarning):
-    pass
-
-warnings.simplefilter('always', ExtDeprecationWarning)
 
 
 class ExtensionImporter(object):

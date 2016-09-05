@@ -77,10 +77,8 @@ class ADB(object):
                 raise RuntimeError("please set_serialno first")
             prefix += ['-s', self.serialno]
         cmds = prefix + cmds
-        # if DEBUG:
-        #     print ' '.join(cmds)
-        #     sys.stdout.flush()
         LOGGING.debug(" ".join(cmds))
+
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -132,13 +130,6 @@ class ADB(object):
 
     def get_status(self):
         """get device's adb status"""
-        # old way...
-        # for dev, status in self.devices():
-        #     if dev == self.serialno:
-        #         return status
-        # return None
-
-        # new way!
         proc = self.start_cmd("get-state")
         stdout, stderr = proc.communicate()
         if proc.returncode == 0:
@@ -231,7 +222,7 @@ class ADB(object):
 
     def get_available_forward_local(self):
         """
-        1. do not repeat in different process, by check forward list(latency when setting up)
+        1. do not repeat in different process, by check forward list(latency exists when setting up)
         2. do not repeat in one process, by cls._forward_local
         """
         forwards = self.get_forwards()

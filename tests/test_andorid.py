@@ -6,7 +6,8 @@ import time
 import unittest
 
 
-TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')
+TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
+TEST_APK_PKG = "org.cocos.Rabbit"
 
 
 class TestAndroid(unittest.TestCase):
@@ -63,7 +64,7 @@ class TestAndroid(unittest.TestCase):
         if apk_package in self.android.amlist():
             self.android.uninstall(apk_package)
         self.android.install(TEST_APK, check=False)
-        self.android.amstart(apk_package, 'UnityPlayerNativeActivity')
+        self.android.amstart(apk_package, TEST_APK_PKG)
         self.android.amstop(apk_package)
         #test reinstall function
         self.android.install(TEST_APK, reinstall=True)

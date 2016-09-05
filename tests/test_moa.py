@@ -6,7 +6,7 @@ from airtest.core.main import *
 from airtest.core import main
 
 
-TEST_APK = os.path.join(os.path.dirname(__file__), 'Ma51.apk')
+TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
 TEST_PKG = apkparser.APK(TEST_APK).get_package()
 TARGET_PIC = os.path.join(os.path.dirname(__file__), 'target.png')
 
@@ -69,7 +69,7 @@ class TestMoaOnAndroid(unittest.TestCase):
     def test_touch_pic(self):
         if TEST_PKG not in self.dev.amlist():
             install(TEST_APK)
-        amstart(TEST_PKG, 'UnityPlayerNativeActivity')
+        amstart(TEST_PKG)
 
         touch(TARGET_PIC)
         self.assertTrue(os.path.exists("screen.png"))
@@ -84,8 +84,8 @@ class TestMoaOnAndroid(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # unittest.main()
-    suite = unittest.TestSuite()
-    suite.addTest(TestMoaOnAndroid("test_logcat"))
-    runner = unittest.TextTestRunner()
-    runner.run(suite)
+    unittest.main()
+    # suite = unittest.TestSuite()
+    # suite.addTest(TestMoaOnAndroid("test_touch_pic"))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
