@@ -29,6 +29,7 @@ class ExtensionImporter(object):
         self.wrapper_module = wrapper_module
         self.prefix = wrapper_module + '.'
         self.prefix_cutoff = wrapper_module.count('.') + 1
+        self.root_module_name = None
 
     def __eq__(self, other):
         return self.__class__.__module__ == other.__class__.__module__ and \
@@ -47,13 +48,25 @@ class ExtensionImporter(object):
             return self
 
     def load_module(self, fullname):
+        # print "try loading %s" % fullname
+        if self.root_module_name is None:
+            self.root_module_name = fullname + "."
+
         if fullname in sys.modules:
             return sys.modules[fullname]
 
         modname = fullname.split('.', self.prefix_cutoff)[self.prefix_cutoff]
+        # print "try importing %s" % modname
 
-        for path in self.module_choices:
-            realname = path % modname
+        choices = [path % modname for path in self.module_choices]
+
+        # search PythonPath for global module
+        # useful if "python -m airtest.ext.aaa.bbb"
+        if self.root_module_name and fullname.startswith(self.root_module_name):
+            global_module = fullname[len(self.root_module_name):]
+            choices.append(global_module)
+
+        for realname in choices:
             try:
                 __import__(realname)
             except ImportError:
@@ -81,6 +94,9 @@ class ExtensionImporter(object):
                 setattr(sys.modules[self.wrapper_module], modname, module)
 
             return module
+
+
+
         raise ImportError('No module named %s' % fullname)
 
     def is_important_traceback(self, important_module, tb):
