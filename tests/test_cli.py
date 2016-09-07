@@ -1,5 +1,6 @@
 import os
 import unittest
+import numpy
 from airtest.core.main import *
 from airtest.core import main
 
@@ -7,6 +8,7 @@ from airtest.core import main
 TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
 TEST_PKG = "org.cocos.Rabbit"
 TARGET_PIC = os.path.join(os.path.dirname(__file__), 'target.png')
+
 
 class TestAirtestOnAndroid(unittest.TestCase):
 
@@ -21,32 +23,31 @@ class TestAirtestOnAndroid(unittest.TestCase):
 
     def test_install(self):
         install(TEST_APK)
-        self.assertIn(TEST_PKG, self.dev.amlist())
+        self.assertIn(TEST_PKG, self.dev.list_app())
 
     def test_uninstall(self):
-        if TEST_PKG not in self.dev.amlist():
+        if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
         uninstall(TEST_PKG)
 
     def test_amstart(self):
-        if TEST_PKG not in self.dev.amlist():
+        if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
         amstart(TEST_PKG)
 
     def test_amclear(self):
-        if TEST_PKG not in self.dev.amlist():
+        if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
         amstart(TEST_PKG)
         amclear(TEST_PKG)
 
     def test_amstop(self):
-        if TEST_PKG not in self.dev.amlist():
+        if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
         amstart(TEST_PKG)
         amstop(TEST_PKG)
 
     def test_snapshot(self):
-        import numpy
         screen = snapshot()
         self.assertIsInstance(screen, numpy.ndarray)
         self.assertTrue(os.path.exists("screen.png"))
@@ -65,7 +66,7 @@ class TestAirtestOnAndroid(unittest.TestCase):
         touch((1, 1))
 
     def test_touch_pic(self):
-        if TEST_PKG not in self.dev.amlist():
+        if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
         amstart(TEST_PKG)
         touch(TARGET_PIC)

@@ -12,9 +12,6 @@ from core.error import MinicapError, MinitouchError, AdbError
 import requests
 import re
 import urllib2
-from airtest.ext import hunter
-from airtest.ext import sdkautomator
-from airtest.ext import dns_setter
 
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):

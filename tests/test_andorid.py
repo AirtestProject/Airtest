@@ -3,6 +3,7 @@ from airtest.core.error import MoaError
 import axmlparserpy.apk as apkparser
 import os
 import time
+import numpy
 import unittest
 
 
@@ -37,43 +38,44 @@ class TestAndroid(unittest.TestCase):
     def test_minitouch(self):
         self.assertIsInstance(self.android.minitouch, Minitouch)
 
-    def test_amlist(self):
-        self.assertIsInstance(self.android.amlist(), list)
-        self.assertIsInstance(self.android.amlist(third_only=True), list)
+    def test_list_app(self):
+        self.assertIsInstance(self.android.list_app(), list)
+        self.assertIsInstance(self.android.list_app(third_only=True), list)
 
-    def test_ampath(self):
-        package = self.android.amlist()[0]
-        self.assertIsInstance(self.android.ampath(package), str)
+    def test_path_app(self):
+        package = self.android.list_app()[0]
+        self.assertIsInstance(self.android.path_app(package), str)
 
-    def test_ampath_error(self):
+    def test_path_app_error(self):
         with self.assertRaises(MoaError):
-            self.android.ampath('test_error')
+            self.android.path_app('test_error')
 
-    def test_amcheck(self):
-        package = self.android.amlist()[0]
-        self.assertIsInstance(self.android.amcheck(package), str)
+    def test_check_app(self):
+        package = self.android.list_app()[0]
+        self.assertIsInstance(self.android.check_app(package), str)
 
-    def test_amcheck_error(self):
+    def test_check_app_error(self):
         with self.assertRaises(MoaError):
-            self.android.amcheck('test_error')
+            self.android.check_app('test_error')
 
     def test_install_start_stop_uninstall(self):
         apk = apkparser.APK(TEST_APK)
         apk_package = apk.get_package()
         print apk.get_activities()
-        if apk_package in self.android.amlist():
-            self.android.uninstall(apk_package)
-        self.android.install(TEST_APK, check=False)
-        self.android.amstart(apk_package, TEST_PKG)
-        self.android.amstop(apk_package)
+        if apk_package in self.android.list_app():
+            self.android.uninstall_app(apk_package)
+        self.android.install_app(TEST_APK, check=False)
+        self.android.start_app(apk_package, TEST_PKG)
+        self.android.stop_app(apk_package)
         #test reinstall function
-        self.android.install(TEST_APK, reinstall=True)
-        self.android.amstart(apk_package)
-        self.android.amstop(apk_package)
-        self.android.uninstall(apk_package)
+        self.android.install_app(TEST_APK, reinstall=True)
+        self.android.start_app(apk_package)
+        self.android.stop_app(apk_package)
+        self.android.uninstall_app(apk_package)
 
     def test_snapshot(self):
-        self.android.snapshot(filename="test.png")
+        screen = self.android.snapshot(filename="test.png")
+        self.assertIsInstance(screen, numpy.ndarray)
         self.assertIs(os.path.exists("test.png"), True)
         os.remove("test.png") 
 

@@ -2,16 +2,22 @@
 from winutils import mouse_click, mouse_drag, get_screen_shot, \
     key_input, WindowMgr, get_resolution, mouse_down, mouse_up, mouse_move
 from winsendkey import SendKeys
+from airtest.core.device import Device
 from airtest.aircv import aircv
-
 from PIL import ImageGrab
+import subprocess
+import sys
 
-class Windows(object):
+
+class Windows(Device):
     """Windows Client"""
     def __init__(self, handle=None):
         self.winmgr = WindowMgr()
         self.handle = handle
         self.window_title = None
+
+    def shell(self, cmd):
+        return subprocess.check_output(cmd, shell=True)
 
     def snapshot(self, filename="tmp.png"):
         # # 将回放脚本时的截图方式，换成ImageGrab()
@@ -121,6 +127,18 @@ class Windows(object):
             mouse_up()
         else:
             raise RuntimeError("invalid operate args: %s" % args)
+
+    def start_app(self, path):
+        return subprocess.call('start "" "%s"' % path, shell=True)
+
+    def stop_app(self, title=None, pid=None, image=None):
+        if title:
+            cmd = 'taskkill /FI "WINDOWTITLE eq %s"' % title
+        elif pid:
+            cmd = 'taskkill /PID %s' % pid
+        elif image:
+            cmd = 'taskkill /IM %s' % image
+        return subprocess.check_output(cmd, shell=True)
 
 
 if __name__ == '__main__':
