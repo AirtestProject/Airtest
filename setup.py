@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages
+from pip.req import parse_requirements
+
+install_reqs = parse_requirements('requirements.txt', session=False)
+reqs = [str(ir.req) for ir in install_reqs]
 
 
 setup(
@@ -16,12 +20,7 @@ setup(
         'android_deps': ["*.apk", "airtest/core/libs", "airtest/core/adb"],
         'html_statics': ["moa/report"]
     },
-    install_requires=[
-        'requests',
-        'Jinja2',
-        'Pillow',
-        'AxmlParserPY',
-    ],
+    install_requires=reqs,
     classifiers=[
         'Programming Language :: Python :: 2.7',
     ],
