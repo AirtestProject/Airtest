@@ -26,6 +26,7 @@ import functools
 from airtest.aircv import aircv
 from airtest.aircv import generate_character_img as textgen
 from airtest.aircv.aircv_tool_func import crop_image, mask_image
+from airtest.core import device
 from airtest.core import android
 from airtest.core.android import uiautomator
 from airtest.core.error import MoaError, MoaNotFoundError
@@ -34,12 +35,10 @@ from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
 try:
     from airtest.core import win
 except ImportError as e:
-    win = None
     print "win module available on Windows only: %s" % e.message
 try:
     from airtest.core import ios
 except ImportError as e:
-    ios = None
     print "ios module available on Mac OS only: %s" % e.message
 
 
@@ -99,21 +98,10 @@ def _transparam(f):
 
 
 def get_platform():
-    if win:
-        name_dict = {
-            android.Android: "Android",
-            android.Emulator: "Android",
-            win.Windows: "Windows"
-        }
-    else:
-        name_dict = {
-            android.Android: "Android",
-            android.Emulator: "Android",
-        }
-
-    if ios:
-        name_dict[ios.client.IOS] = "IOS"
-    return name_dict.get(DEVICE.__class__)
+    for name, cls in device.DEV_TYPE_DICT.items():
+        if DEVICE.__class__ == cls:
+            return name
+    return None 
 
 
 def platform(on=["Android"]):
@@ -128,6 +116,17 @@ def platform(on=["Android"]):
     return decorator
 
 
+def _register_device(dev):
+    global DEVICE, DEVICE_LIST
+    DEVICE = dev
+    DEVICE_LIST.append(dev)
+
+
+def _delay_after_operation(secs):
+    delay = secs or OPDELAY
+    time.sleep(delay)
+
+
 """
 Environment initialization
 """
@@ -136,7 +135,7 @@ Environment initialization
 def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
     '''
     auto set if only one device
-    support filepath match patten, eg: c123*
+    support filepath match pattern, eg: c123*
     '''
     addr = addr or ADDRESS
     def get_available_sn(sn):
@@ -167,17 +166,16 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
         return sn
     sn = get_available_sn(sn)
     dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
-    global CVSTRATEGY, DEVICE, DEVICE_LIST
+    _register_device(dev)
+    global CVSTRATEGY
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = dev
-    DEVICE_LIST.append(dev)
     return sn
 
 
 def set_emulator(emu_name='bluestacks', sn=None, addr=None):
     '''
     auto set if only one device
-    support filepath match patten, eg: c123*
+    support filepath match pattern, eg: c123*
     '''
     if not android.Emulator:
         raise RuntimeError("Emulator module available on Windows only")
@@ -203,10 +201,9 @@ def set_emulator(emu_name='bluestacks', sn=None, addr=None):
     if not emu_name:
         emu_name = 'bluestacks'
     dev = android.Emulator(emu_name, sn, addr=addr)
-    global CVSTRATEGY, DEVICE, DEVICE_LIST
+    _register_device(dev)
+    global CVSTRATEGY
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = dev
-    DEVICE_LIST.append(dev)
     return sn
 
 
@@ -235,10 +232,9 @@ def set_udid(udid=None):
             IOSUDID = ''
             raise MoaError("too many devices found")
     dev = ios.client.IOS(IOSUDID)
-    global CVSTRATEGY, DEVICE, DEVICE_LIST
+    _register_device(dev)
+    global CVSTRATEGY
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    DEVICE = dev
-    DEVICE_LIST.append(dev)
     return IOSUDID
 
 
@@ -256,7 +252,6 @@ def resign(ipaname):
 def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
-    global DEVICE, DEVICE_LIST, CVSTRATEGY, RESIZE_METHOD
     window_title = window_title or WINDOW_TITLE
     dev = win.Windows()
     if handle:
@@ -275,8 +270,9 @@ def set_windows(handle=None, window_title=None):
         LOGGING.info("handle not set, use entire screen")
     if dev.handle:
         dev.set_foreground()
-    DEVICE = dev
-    DEVICE_LIST.append(dev)
+    _register_device(dev)
+
+    global CVSTRATEGY, RESIZE_METHOD
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_WINDOWS
     # set no resize on windows as default
     RESIZE_METHOD = RESIZE_METHOD or aircv.no_resize
@@ -702,8 +698,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
             DEVICE.touch(pos, right_click=True)
         else:
             DEVICE.touch(pos, duration=duration)
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
@@ -739,9 +734,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
         else:
             raise Exception("no enouph params for swipe")
     DEVICE.swipe(pos1, pos2, duration=duration)
-
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
@@ -762,16 +755,14 @@ def operate(v, route, timeout=TIMEOUT, delay=0):
         DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
         time.sleep(vector[2])
     DEVICE.operate({"type": "up"})
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
 @platform(on=["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
     DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
@@ -781,9 +772,7 @@ def keyevent(keyname, escape=False, combine=None, delay=0):
         DEVICE.keyevent(keyname, escape, combine)
     else:
         DEVICE.keyevent(keyname)
-
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
@@ -805,8 +794,7 @@ def text(text, delay=0, clear=False):
             DEVICE.keyevent('KEYCODE_DEL')
     else:
         DEVICE.text(text)
-    delay = delay or OPDELAY
-    time.sleep(delay)
+    _delay_after_operation(delay)
 
 
 @logwrap
@@ -877,18 +865,17 @@ def assert_exists(v, msg="", timeout=0):
 
 @logwrap
 @_transparam
-def assert_not_exists(v, msg="", timeout=0, delay=0):
+def assert_not_exists(v, msg="", timeout=0):
     timeout = timeout or FIND_TIMEOUT_TMP
     try:
         pos = _loop_find(v, timeout=timeout)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
-        delay = delay or OPDELAY
-        time.sleep(delay)
+        pass
 
 
 @logwrap
-def assert_equal(first, second, msg="", delay=0):
+def assert_equal(first, second, msg=""):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -897,12 +884,9 @@ def assert_equal(first, second, msg="", delay=0):
     if not result:
         raise AssertionError("%s and %s are not equal" % (first, second))
 
-    delay = delay or OPDELAY
-    time.sleep(delay)
-
 
 @logwrap
-def assert_not_equal(first, second, msg="", delay=0):
+def assert_not_equal(first, second, msg=""):
     if isinstance(second, unicode) or isinstance(first, unicode):
         result = not (unicode(first) == unicode(second))
     elif type(first) == type(second):
@@ -910,50 +894,3 @@ def assert_not_equal(first, second, msg="", delay=0):
 
     if not result:
         raise AssertionError("%s and %s are equal" % (first, second))
-
-    delay = delay or OPDELAY
-    time.sleep(delay)
-
-
-@logwrap
-def uiautowraper(name, func, *args, **kwargs):
-    print('called %r with %r and %r' % (name, args, kwargs))
-    return func(*args, **kwargs)
-
-
-class uiautoObj(object):
-    """wrapper class for uiautomator.AutomatorDeviceObject"""
-    def __init__(self, *args, **kwargs):
-        super(uiautoObj, self).__init__()
-        self.child = uiautomator.AutomatorDeviceObject(*args, **kwargs)
-
-    def __getattr__(self, key):
-            attr = getattr(self.child, key)
-            if callable(attr):
-                def wrapper(*args, **kw):
-                    return uiautowraper(key, attr, *args, **kw)
-                return wrapper
-            else:
-                return attr
-
-
-class uiauto(object):
-    """wrapper class for uiautomator.AutomatorDevice"""
-    def __init__(self):
-        super(uiauto, self).__init__()
-        self.child = uiautomator.AutomatorDevice(serial=DEVICE.serialno)
-
-    def __call__(self, **kwargs):
-        @logwrap
-        def uiaotuselector(**kwargs):
-            return uiautoObj(self.child, uiautomator.Selector(**kwargs))
-        return uiaotuselector(**kwargs)
-
-    def __getattr__(self, key):
-        attr = getattr(self.child, key)
-        if callable(attr):
-            def wrapper(*args, **kw):
-                return uiautowraper(key, attr, *args, **kw)
-            return wrapper
-        else:
-            return attr

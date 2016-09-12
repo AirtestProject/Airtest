@@ -6,7 +6,7 @@ import numpy
 import unittest
 
 
-class TestAndroid(unittest.TestCase):
+class TestWindows(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
