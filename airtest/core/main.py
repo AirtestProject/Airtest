@@ -35,10 +35,12 @@ from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
 try:
     from airtest.core import win
 except ImportError as e:
+    win = None
     print "win module available on Windows only: %s" % e.message
 try:
     from airtest.core import ios
 except ImportError as e:
+    ios = None
     print "ios module available on Mac OS only: %s" % e.message
 
 
