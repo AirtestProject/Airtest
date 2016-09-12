@@ -80,6 +80,13 @@ class TestAirtestOnAndroid(unittest.TestCase):
         for i in logcat("nimei", "V", read_timeout=2):
             print i
 
+    def test_set_current(self):
+        set_current(0)
+        self.assertIs(main.DEVICE, main.DEVICE_LIST[0])
+
+        with self.assertRaises(IndexError):
+            set_current(10)
+
 
 if __name__ == '__main__':
     unittest.main()

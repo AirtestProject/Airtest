@@ -284,7 +284,7 @@ def set_current(index):
     if index > len(DEVICE_LIST):
         raise IndexError("device index out of range")
     DEVICE = DEVICE_LIST[index]
-    if win and isinstance(DEVICE, win.Windows):
+    if win and get_platform() == "Windows" :
         DEVICE.set_foreground()
 
 
