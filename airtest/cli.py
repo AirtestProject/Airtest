@@ -95,7 +95,7 @@ def device():
 
 
 def _on_init_done():
-    """to be overwritten by uses"""
+    """to be overwritten by users"""
     pass
 
 
