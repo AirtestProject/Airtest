@@ -3,7 +3,7 @@ import os
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
-STFLIB = os.path.join(THISPATH, "libs")
+STFLIB = os.path.join(THISPATH, "stf_libs")
 DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
 PROJECTIONRATE = 1
 MINICAPTIMEOUT = None
