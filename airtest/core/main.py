@@ -89,7 +89,7 @@ def _transparam(f):
         picargs = {}
         opargs = {}
         for k, v in kwargs.iteritems():
-            if k in ["rect", "threshold", "target_pos", "record_pos", "resolution"]:
+            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "rect", "threshold", "target_pos", "record_pos", "resolution"]:
                 picargs[k] = v
             else:
                 opargs[k] = v
@@ -412,9 +412,31 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
             return ret
     return ret
 
+def _find_pic_with_ignore_focus(screen, picdata, threshold, pictarget):
+    '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
+    ret = None
+    try:
+        # 缩放后的模板匹配
+        LOGGING.debug("method: template match (with ignore & focus rects) ..")
+        device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+        ret = aircv.template_focus_ignore_after_resize(screen, picdata, sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, ignore=pictarget.ignore, focus=pictarget.focus, resize_method=RESIZE_METHOD)
+    except aircv.Error:
+        ret = None
+    except Exception as err:
+        traceback.print_exc()
+        ret = None
+
+    _log_in_func({"cv": ret})
+
+    if threshold and ret:
+        if ret["confidence"] < threshold:
+            ret = None
+    LOGGING.debug("tpl result (with ignore & focus rects): %s", ret)
+    return ret
+
 
 def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
-    '''直接使用单个方法进行寻找'''
+    '''直接使用单个方法进行寻找(find_template_after_resize).'''
     ret_list = []
     if getattr(pictarget, "resolution"):
         try:
@@ -480,11 +502,13 @@ def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, 
             screen, offset = crop_image(screen, pictarget.find_inside)
             if find_all:  # 如果是要find_all，就执行一下找到所有图片的逻辑:
                 ret = _find_all_pic(screen, picdata, threshold, pictarget)
+            elif pictarget.ignore or pictarget.focus:  # 只要含有ignore或focus参数，就使用_find_pic_with_ignore_focus方法进行匹配
+                ret = _find_pic_with_ignore_focus(screen, picdata, threshold, pictarget)
             else:
                 ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
         else:
             LOGGING.warning("Whole screen is black, skip cv matching")
-            ret = None
+            ret, offset = None, None
 
         if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
             aircv.show(screen)
@@ -573,9 +597,11 @@ class MoaPic(object):
     find_outside: 在源图像指定区域外寻找. (执行方式：抹去对应区域的图片有效内容)
     find_inside:  在源图像指定区域内寻找，find_inside=[x, y, w, h]时，进行截图寻找.（其中，x,y,w,h为像素值）
     whole_screen: 为True时，则指定在全屏内寻找.
+    ignore: [ [x_min, y_min, x_max, y_max], ... ]  识别时，忽略掉ignore包含的矩形区域 (mask_tpl)
+    focus: [ [x_min, y_min, x_max, y_max], ... ]  识别时，只识别ignore包含的矩形区域 (可信度为面积加权平均)
     """
 
-    def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], find_inside=None, find_outside=None, whole_screen=False):
+    def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
         self.filename = filename
         self.rect = rect
         self.threshold = threshold  # if threshold is not None else THRESHOLD
@@ -583,9 +609,13 @@ class MoaPic(object):
         self.record_pos = record_pos
         self.resolution = resolution
         self.filepath = os.path.join(BASE_DIR, filename)
+
         self.find_inside = find_inside or FIND_INSIDE
         self.find_outside = find_outside or FIND_OUTSIDE
         self.whole_screen = whole_screen or WHOLE_SCREEN
+
+        self.ignore = ignore
+        self.focus = focus
 
     def __repr__(self):
         return self.filepath

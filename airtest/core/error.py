@@ -19,6 +19,9 @@ class MoaError(Exception):
 class MoaNotFoundError(MoaError):
     pass
 
+class MoaScriptParamError(MoaError):
+    pass
+
 
 class AdbError(Exception):
     def __init__(self, stdout, stderr):
