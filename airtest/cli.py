@@ -250,7 +250,7 @@ def main():
             print "save img in", "'%s'" %args.screen
             set_screendir(args.screen)
 
-        # _on_init_done()
+        _on_init_done()
 
         try:
             # execute code
