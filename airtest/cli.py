@@ -15,24 +15,24 @@ import re
 import urllib2
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, original=False, pyfilename=None):
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=False):
     """
-    execute script: original or submodule
-    1. cd to original dir
-    2. exec original script
+    execute script: root or submodule
+    1. cd to root dir
+    2. exec root script
     3. if sub:
         2.1 cp imgs to sub_dir
         2.2 set_basedir(sub_dir)
         2.3 exec sub script
         2.4 set_basedir(ori_dir)
     """
-    if not original and not os.path.isabs(scriptname):
+    if not root and not os.path.isabs(scriptname):
         if not SCRIPTHOME:
             raise RuntimeError("SCRIPTHOME not set, please set_scripthome first")
         scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
-    elif original:
-        scriptpath = "."
+    elif root:
+        scriptpath = scriptname
     else:
         scriptpath = scriptname
 
@@ -54,7 +54,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
 
     ori_dir = None
     # copy submodule's images into sub_dir, and set_basedir
-    if not original:
+    if not root:
         ori_dir = BASE_DIR
         sub_dir = get_sub_dir_name(scriptname)
         set_basedir(sub_dir)
@@ -63,15 +63,14 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, origina
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
-    if not pyfilename:
-        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+    pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if scope:
         exec(code) in scope
     else:
         exec(code) in globals()
-    # set_basedir back to original dir
+    # set_basedir back to root dir
     if ori_dir:
         set_basedir(ori_dir)
     log("function", {"name": "exec_script", "step": "end"})
@@ -104,18 +103,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
-    ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
+    # ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
-    ap.add_argument("--setadb", help="set adb ip and port, default 127.0.0.1:5037 .")
+    # ap.add_argument("--setadb", help="set adb ip and port, default 127.0.0.1:5037 .")
     ap.add_argument("--setudid", help="set ios device udid", nargs="?", const="")
     ap.add_argument("--setwin", help="set dev by windows handle", nargs="?", const="")
+    ap.add_argument("--setemulator", help="set emulator name default bluestacks", nargs="?", const=True)
     ap.add_argument("--devcount", help="set dev count autoly", nargs="?", const=1, default=1, type=int)
-    ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
-    ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
+    ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
+    # ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
+    # ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
-    ap.add_argument("--findoutside", help="find outside a rectangle area.")
-    ap.add_argument("--setemulator", help="set emulator name default bluestacks", nargs="?", const=True)
+    # ap.add_argument("--findoutside", help="find outside a rectangle area.")
 
     global args
     args = ap.parse_args()
@@ -130,22 +130,15 @@ def main():
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
-    if args.findoutside:
-        set_find_outside(args.findoutside)
-
     if args.setsn is not None:
         print "set_serialno", args.setsn
-        if args.setadb:
-            addr = args.setadb.split(":")
-        else:
-            addr = None
         if args.setsn == "":
             for i in range(args.devcount):
                 # auto choose one serialno
-                set_serialno(addr=addr)
+                set_serialno()
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn, addr=addr)
+                set_serialno(sn)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng
@@ -162,14 +155,7 @@ def main():
         else:
             for handle in args.setwin.split(","):
                 set_windows(handle=int(handle))
-
         set_current(0)
-
-    if args.kwargs:
-        print "load kwargs", repr(args.kwargs)
-        for kv in args.kwargs.split(","):
-            k, v = kv.split("=")
-            globals()[k] = v
 
     if args.setemulator:
         print "set_emulator", args.setemulator #  add by zq
@@ -180,6 +166,13 @@ def main():
         else:
             set_emulator(emu_name)
 
+    if args.kwargs:
+        print "load kwargs", repr(args.kwargs)
+        for kv in args.kwargs.split(","):
+            k, v = kv.split("=")
+            globals()[k] = v
+
+    # run script in forever mode, read input & exec
     if args.forever:
         while True:
             print "wait for stdin..."
@@ -220,7 +213,7 @@ def main():
                         print "save img in", "'%s'" %args.screen
                         set_screendir(args.screen)
                         
-                    exec_script(script, scope=globals(), original=True, pyfilename=pyfile)
+                    exec_script(script, scope=globals(), root=True)
                 except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
@@ -236,26 +229,24 @@ def main():
             sys.stdout.flush()
             sys.stderr.flush()
 
+    # run script
     exit_code = 0
 
     for script in args.script.split(","):
         # cd script dir
-        os.chdir(script)
+        # os.chdir(script)
+        set_basedir(script)
 
         if args.log:
-            print "save log in", "'%s'" %args.log
-            set_logfile(args.log)
-
-        if args.screen:
-            print "save img in", "'%s'" %args.screen
-            set_screendir(args.screen)
+            print "save log & screen in", "'%s'" %args.log
+            set_logdir(args.log)
 
         _on_init_done()
 
         try:
             # execute code
             set_current(0)
-            exec_script(script, scope=globals(), original=True, pyfilename=args.pyfile)
+            exec_script(script, scope=globals(), root=True)
         except Exception:
             traceback.print_exc()
             exit_code = 1

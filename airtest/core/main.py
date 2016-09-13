@@ -7,8 +7,9 @@
 # Modified: 2015-10-13 ver 0.0.2 gzliuxin
 # Modified: 2016-04-28 ver 0.0.3 gzliuxin
 # Modified: 2016-08-04 ver 0.0.4 gzliuxin
+# Modified: 2016-09-01 ver 0.0.5 gzliuxin prepare to opensource
 
-__version__ = '0.1.0'
+__version__ = '0.0.5'
 
 """
     Airtest
@@ -290,25 +291,37 @@ def set_current(index):
         DEVICE.set_foreground()
 
 
-def set_basedir(base_dir):
+def set_basedir(filepath):
     global BASE_DIR
-    BASE_DIR = base_dir
+    BASE_DIR = filepath
 
 
-def set_logfile(filename=LOGFILE, inbase=True):
+def set_logdir(dirpath=None):
+    global LOG_DIR
+    if dirpath is not None:
+        LOG_DIR = dirpath
+    elif BASE_DIR is not None:
+        LOG_DIR = BASE_DIR
+    else:
+        raise MoaError("set_logdir(dirpath) or set_basedir first")
+    set_logfile()
+    set_screendir()
+
+
+def set_logfile(filename=LOG_FILE):
     global LOGGER
-    basedir = BASE_DIR if inbase else ""
-    filepath = os.path.join(basedir, filename)
+    filepath = os.path.join(LOG_DIR, filename)
     LOGGING.info("set_logfile %s", repr(os.path.realpath(filepath)))
     LOGGER.set_logfile(filepath)
 
 
-def set_screendir(dirpath=SCREEN_DIR):
+def set_screendir(dirname=SCREEN_DIR):
     global SAVE_SCREEN
+    dirpath = os.path.join(LOG_DIR, dirname)
     shutil.rmtree(dirpath, ignore_errors=True)
     if not os.path.isdir(dirpath):
         os.mkdir(dirpath)
-    SAVE_SCREEN = dirpath
+    SAVE_SCREEN = dirname
 
 
 def set_threshold(value):
@@ -464,7 +477,7 @@ def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
 
 
 @logwrap
-def _loop_find(pictarget, timeout=TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_all=False):
+def _loop_find(pictarget, timeout=FIND_TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_all=False):
     '''
         keep looking for pic util timeout, execute intervalfunc if pic not found.
     '''
@@ -588,10 +601,10 @@ class MoaPic(object):
     """
     picture as touch/swipe/wait/exists target and extra info for cv match
     filename: pic filename
-    rect: find pic in rect of screen
     target_pos: ret which pos in the pic
     record_pos: pos in screen when recording
     resolution: screen resolution when recording
+    rect: find pic in rect of screen
     find_outside: 在源图像指定区域外寻找. (执行方式：抹去对应区域的图片有效内容)
     find_inside:  在源图像指定区域内寻找，find_inside=[x, y, w, h]时，进行截图寻找.（其中，x,y,w,h为像素值）
     whole_screen: 为True时，则指定在全屏内寻找.
@@ -599,15 +612,15 @@ class MoaPic(object):
     focus: [ [x_min, y_min, x_max, y_max], ... ]  识别时，只识别ignore包含的矩形区域 (可信度为面积加权平均)
     """
 
-    def __init__(self, filename, rect=None, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
         self.filename = filename
-        self.rect = rect
+        self.filepath = os.path.join(BASE_DIR, filename)
         self.threshold = threshold  # if threshold is not None else THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
-        self.filepath = os.path.join(BASE_DIR, filename)
 
+        self.rect = rect
         self.find_inside = find_inside or FIND_INSIDE
         self.find_outside = find_outside or FIND_OUTSIDE
         self.whole_screen = whole_screen or WHOLE_SCREEN
@@ -663,7 +676,6 @@ def uninstall(package):
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def snapshot(filename="screen.png", windows_hwnd=None):
-    global RECENT_CAPTURE, SAVE_SCREEN
     if SAVE_SCREEN:
         filename = "%s.jpg" % int(time.time() * 1000)
         filename = os.path.join(SAVE_SCREEN, filename)
@@ -673,7 +685,7 @@ def snapshot(filename="screen.png", windows_hwnd=None):
         screen = DEVICE.snapshot_by_hwnd(filename=filename, hwnd_to_snap=windows_hwnd)
     else:
         screen = DEVICE.snapshot(filename=filename)
-    # 实际上手机可能正好是全黑，不做特殊处理了
+    global RECENT_CAPTURE
     RECENT_CAPTURE = screen  # used for keep_capture()
     return screen
 
@@ -772,7 +784,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
 @logwrap
 @_transparam
 @platform(on=["Android", "Windows"])
-def operate(v, route, timeout=TIMEOUT, delay=0):
+def operate(v, route, timeout=FIND_TIMEOUT, delay=0):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
         pos = _loop_find(v, timeout=timeout)
     else:
