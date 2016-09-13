@@ -678,8 +678,9 @@ def uninstall(package):
 def snapshot(filename="screen.png", windows_hwnd=None):
     if SAVE_SCREEN:
         filename = "%s.jpg" % int(time.time() * 1000)
-        filename = os.path.join(SAVE_SCREEN, filename)
-        _log_in_func({"screen": filename})
+        # no abspath in log
+        _log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
+        filename = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
 
     if get_platform() == "Windows" and windows_hwnd:
         screen = DEVICE.snapshot_by_hwnd(filename=filename, hwnd_to_snap=windows_hwnd)

@@ -103,19 +103,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
-    # ap.add_argument("--pyfile", help="py filename to run in script dir, omit to be the same as script name", nargs="?", const=None)
     ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
-    # ap.add_argument("--setadb", help="set adb ip and port, default 127.0.0.1:5037 .")
     ap.add_argument("--setudid", help="set ios device udid", nargs="?", const="")
     ap.add_argument("--setwin", help="set dev by windows handle", nargs="?", const="")
     ap.add_argument("--setemulator", help="set emulator name default bluestacks", nargs="?", const=True)
     ap.add_argument("--devcount", help="set dev count autoly", nargs="?", const=1, default=1, type=int)
     ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
-    # ap.add_argument("--log", help="auto set log file", nargs="?", const="log.txt")
-    # ap.add_argument("--screen", help="auto set screen dir", nargs="?", const="img_record")
     ap.add_argument("--kwargs", help="extra kwargs")
-    ap.add_argument("--forever", help="run forever, read stdin and exec", action="store_true")
-    # ap.add_argument("--findoutside", help="find outside a rectangle area.")
+    ap.add_argument("--forever", help="run in forever mode, read stdin and exec", action="store_true")
 
     global args
     args = ap.parse_args()
@@ -233,13 +228,16 @@ def main():
     exit_code = 0
 
     for script in args.script.split(","):
-        # cd script dir
-        # os.chdir(script)
         set_basedir(script)
 
-        if args.log:
-            print "save log & screen in", "'%s'" %args.log
+        if args.log is True:
+            print "save log & screen in script dir"
+            set_logdir()
+        elif args.log:
+            print "save log & screen in '%s'" % args.log
             set_logdir(args.log)
+        else:
+            print "do not save log & screen"
 
         _on_init_done()
 
