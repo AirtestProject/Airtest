@@ -14,11 +14,10 @@ import requests
 import re
 import urllib2
 
-
 SCRIPT_STACK = []
 
-def _is_root_script():
-    return len(SCRIPT_STACK) == 1
+def _is_root_script(scriptname):
+    return scriptname == args.script
 
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     """
@@ -28,14 +27,17 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         2.1 cp imgs to sub_dir
         2.2 exec sub script
     """
-    SCRIPT_STACK.append(scriptname)
-    if not _is_root_script() and not os.path.isabs(scriptname):
+    if _is_root_script(scriptname):
+        scriptpath = scriptname
+    elif os.path.isabs(scriptname):
+        SCRIPT_STACK.append(scriptname)
+        scriptpath = scriptname
+    else:
         if not SCRIPTHOME:
             raise RuntimeError("SCRIPTHOME not set, please set_scripthome first")
+        SCRIPT_STACK.append(scriptname)
         scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
-    else:
-        scriptpath = scriptname
 
     def copy_script(src, dst):
         if os.path.isdir(dst):
@@ -54,20 +56,21 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         return dirname
 
     # copy submodule's images into sub_dir
-    if not _is_root_script():
+    if not _is_root_script(scriptname):
         sub_dir = get_sub_dir_name(scriptname)
         sub_dirpath = os.path.join(SCRIPT_STACK[0], sub_dir)
         copy_script(scriptpath, sub_dirpath)
         SCRIPT_STACK[-1] = sub_dir
 
     # start exec
-    log("function", {"name": "exec_script", "step": "start"})
+    log("function", {"name": "exec_script", "step": "start", "script": scriptname})
+    print "script_stack", SCRIPT_STACK
     print "exec_script", scriptpath
     # read code
     pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
-    if not _is_root_script():
+    if not _is_root_script(scriptname):
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
     # exec code
@@ -77,7 +80,8 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         exec(code) in globals()
     # finish exec
     log("function", {"name": "exec_script", "step": "end", "script": scriptname})
-    SCRIPT_STACK.pop()
+    if not _is_root_script(scriptname):
+        SCRIPT_STACK.pop()
     return scriptpath
 
 
@@ -231,8 +235,6 @@ def main():
             sys.stderr.flush()
 
     # run script
-    set_basedir(args.script)
-
     if args.log is True:
         print "save log & screen in script dir"
         set_logdir(args.script)
@@ -243,7 +245,9 @@ def main():
         print "do not save log & screen"
 
     _on_init_done()
-
+    # set root script as basedir
+    set_basedir(args.script)
+    SCRIPT_STACK.append(args.script)
     try:
         set_current(0)
         # execute pre script
@@ -252,6 +256,8 @@ def main():
         # execute script
         exec_script(args.script, scope=globals())
     except:
+        err = traceback.format_exc()
+        log("error", {"final_exception": err})
         raise
     finally:
         # execute post script, whether pre & script succeed or not
