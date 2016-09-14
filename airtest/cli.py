@@ -15,7 +15,12 @@ import re
 import urllib2
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=False):
+SCRIPT_STACK = []
+
+def _is_root_script():
+    return len(SCRIPT_STACK) == 1
+
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     """
     execute script: root or submodule
     1. cd to root dir
@@ -26,20 +31,19 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
         2.3 exec sub script
         2.4 set_basedir(ori_dir)
     """
-    if not root and not os.path.isabs(scriptname):
+    SCRIPT_STACK.append(scriptname)
+    if not _is_root_script() and not os.path.isabs(scriptname):
         if not SCRIPTHOME:
             raise RuntimeError("SCRIPTHOME not set, please set_scripthome first")
         scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
-    elif root:
-        scriptpath = scriptname
     else:
         scriptpath = scriptname
 
     def copy_script(src, dst):
-        if os.path.isdir(sub_dir):
+        if os.path.isdir(dst):
             shutil.rmtree(dst, ignore_errors=True)
-        os.mkdir(sub_dir)
+        os.mkdir(dst)
         for f in os.listdir(src):
             srcfile = os.path.join(src, f)
             if not (os.path.isfile(srcfile) and f.endswith(tplext)):
@@ -52,13 +56,13 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
         dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(scriptext, "_sub")
         return dirname
 
-    ori_dir = None
     # copy submodule's images into sub_dir, and set_basedir
-    if not root:
-        ori_dir = BASE_DIR
+    if not _is_root_script():
         sub_dir = get_sub_dir_name(scriptname)
-        set_basedir(sub_dir)
+        sub_dir = os.path.join(SCRIPT_STACK[0], sub_dir)
+        # set_basedir(sub_dir)
         copy_script(scriptpath, sub_dir)
+        SCRIPT_STACK[-1] = sub_dir
 
     # start to exec
     log("function", {"name": "exec_script", "step": "start"})
@@ -66,14 +70,17 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
     pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
+    if not _is_root_script():
+        print SCRIPT_STACK
+        re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
+        print code
     if scope:
         exec(code) in scope
     else:
         exec(code) in globals()
-    # set_basedir back to root dir
-    if ori_dir:
-        set_basedir(ori_dir)
-    log("function", {"name": "exec_script", "step": "end"})
+
+    log("function", {"name": "exec_script", "step": "end", "script": scriptname})
+    SCRIPT_STACK.pop()
     return scriptpath
 
 
@@ -111,6 +118,8 @@ def main():
     ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
     ap.add_argument("--kwargs", help="extra kwargs")
     ap.add_argument("--forever", help="run in forever mode, read stdin and exec", action="store_true")
+    ap.add_argument("--pre", help="run before script, setup environment")
+    ap.add_argument("--post", help="run after script, clean up environment, will be run whether script succeeded or not")
 
     global args
     args = ap.parse_args()
@@ -208,7 +217,7 @@ def main():
                         print "save img in", "'%s'" %args.screen
                         set_screendir(args.screen)
                         
-                    exec_script(script, scope=globals(), root=True)
+                    exec_script(script, scope=globals())
                 except (MinitouchError,MinicapError,AdbError) as e:
                     raise e
                 except:
@@ -225,31 +234,35 @@ def main():
             sys.stderr.flush()
 
     # run script
-    exit_code = 0
+    set_basedir(args.script)
 
-    for script in args.script.split(","):
-        set_basedir(script)
+    if args.log is True:
+        print "save log & screen in script dir"
+        set_logdir(args.script)
+    elif args.log:
+        print "save log & screen in '%s'" % args.log
+        set_logdir(args.log)
+    else:
+        print "do not save log & screen"
 
-        if args.log is True:
-            print "save log & screen in script dir"
-            set_logdir()
-        elif args.log:
-            print "save log & screen in '%s'" % args.log
-            set_logdir(args.log)
-        else:
-            print "do not save log & screen"
+    _on_init_done()
 
-        _on_init_done()
-
-        try:
-            # execute code
-            set_current(0)
-            exec_script(script, scope=globals(), root=True)
-        except Exception:
-            traceback.print_exc()
-            exit_code = 1
-
-    sys.exit(exit_code)
+    try:
+        set_current(0)
+        # execute pre script
+        if args.pre:
+            exec_script(args.pre, scope=globals())
+        # execute script
+        exec_script(args.script, scope=globals())
+    except:
+        raise
+    finally:
+        # execute post script, whether pre & script succeed or not
+        if args.post:
+            try:
+                exec_script(args.post, scope=globals())
+            except:
+                traceback.print_exc()
 
 
 if __name__ == '__main__':
