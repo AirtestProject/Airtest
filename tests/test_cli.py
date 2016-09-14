@@ -5,11 +5,11 @@ import subprocess
 from airtest.core.android.android import Android, ADB
 from airtest import cli
 
-
+THIS_DIR = os.path.dirname(__file__)
 TEST_PKG = "org.cocos.Rabbit"
-TEST_APK = os.path.join(os.path.dirname(__file__), 'Rabbit.apk')
-TEST_OWL = os.path.join(os.path.dirname(__file__), 'test_owl.owl')
-KWARGS = "PKG=%s,APK=%s" % (TEST_PKG, TEST_APK)
+TEST_APK = os.path.join(THIS_DIR, 'Rabbit.apk')
+TEST_OWL = os.path.join(THIS_DIR, 'test_owl.owl')
+KWARGS = "PKG=%s,APK=%s,SCRIPTHOME=%s" % (TEST_PKG, TEST_APK, THIS_DIR)
 
 class TestReportOnAndroid(unittest.TestCase):
 

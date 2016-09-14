@@ -11,4 +11,4 @@ assert_exists(r"tpl1473667188174.png", "小兔子出现", record_pos=(-0.019, 0.
 p = wait(r"tpl1473667207419.png", record_pos=(0.365, -0.602), resolution=(1536, 2048), timeout=3)
 touch(p)
 sleep(1)
-exec_script(r"C:\Users\game-netease\Desktop\test\14-untitled.owl")
+exec_script(r"14-untitled.owl")
