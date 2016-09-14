@@ -59,9 +59,8 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     # copy submodule's images into sub_dir, and set_basedir
     if not _is_root_script():
         sub_dir = get_sub_dir_name(scriptname)
-        sub_dir = os.path.join(SCRIPT_STACK[0], sub_dir)
-        # set_basedir(sub_dir)
-        copy_script(scriptpath, sub_dir)
+        sub_dirpath = os.path.join(SCRIPT_STACK[0], sub_dir)
+        copy_script(scriptpath, sub_dirpath)
         SCRIPT_STACK[-1] = sub_dir
 
     # start to exec
@@ -71,9 +70,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if not _is_root_script():
-        print SCRIPT_STACK
-        re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
-        print code
+        code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
     if scope:
         exec(code) in scope
     else:
