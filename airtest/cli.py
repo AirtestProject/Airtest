@@ -257,7 +257,7 @@ def main():
         exec_script(args.script, scope=globals())
     except:
         err = traceback.format_exc()
-        log("error", {"final_exception": err})
+        log("error", {"script_exception": err})
         raise
     finally:
         # execute post script, whether pre & script succeed or not
@@ -265,6 +265,7 @@ def main():
             try:
                 exec_script(args.post, scope=globals())
             except:
+                log("error", {"post_exception": traceback.format_exc()})
                 traceback.print_exc()
 
 
