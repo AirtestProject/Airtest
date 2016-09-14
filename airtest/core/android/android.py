@@ -1284,7 +1284,8 @@ class Android(Device):
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
             if not line:
-                LOGGING.error("orientationWatcher has ended")
+                if LOGGING is not None: # may be None atexit
+                    LOGGING.error("orientationWatcher has ended")
                 return None
 
             ori = int(line) / 90

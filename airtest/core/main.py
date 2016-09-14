@@ -614,7 +614,7 @@ class MoaPic(object):
 
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
         self.filename = filename
-        self.filepath = os.path.join(BASE_DIR, filename)
+        self.filepath = filename if os.path.isabs(filename) else os.path.join(BASE_DIR, filename) 
         self.threshold = threshold  # if threshold is not None else THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos

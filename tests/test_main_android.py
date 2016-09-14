@@ -69,13 +69,18 @@ class TestAirtestOnAndroid(unittest.TestCase):
     def test_touch_pic(self):
         if TEST_PKG not in self.dev.list_app():
             install(TEST_APK)
+        amstop(TEST_PKG)
         amstart(TEST_PKG)
         touch(TARGET_PIC)
         self.assertTrue(os.path.exists("screen.png"))
         os.remove("screen.png")
 
-        with self.assertRaises(RuntimeError):
+        # no base dir specified
+        with self.assertRaises(Exception):
             touch("test.png")
+
+        with self.assertRaises(RuntimeError):
+            touch("/test.png")
 
     def test_logcat(self):
         for i in logcat("nimei", "V", read_timeout=2):
@@ -90,8 +95,8 @@ class TestAirtestOnAndroid(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
-    # suite = unittest.TestSuite()
-    # suite.addTest(TestAirtestOnAndroid("test_touch_pic"))
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
+    # unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(TestAirtestOnAndroid("test_touch_pic"))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
