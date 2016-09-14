@@ -23,13 +23,10 @@ def _is_root_script():
 def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     """
     execute script: root or submodule
-    1. cd to root dir
-    2. exec root script
-    3. if sub:
+    1. exec root script
+    2. if submodule script:
         2.1 cp imgs to sub_dir
-        2.2 set_basedir(sub_dir)
-        2.3 exec sub script
-        2.4 set_basedir(ori_dir)
+        2.2 exec sub script
     """
     SCRIPT_STACK.append(scriptname)
     if not _is_root_script() and not os.path.isabs(scriptname):
@@ -56,26 +53,28 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(scriptext, "_sub")
         return dirname
 
-    # copy submodule's images into sub_dir, and set_basedir
+    # copy submodule's images into sub_dir
     if not _is_root_script():
         sub_dir = get_sub_dir_name(scriptname)
         sub_dirpath = os.path.join(SCRIPT_STACK[0], sub_dir)
         copy_script(scriptpath, sub_dirpath)
         SCRIPT_STACK[-1] = sub_dir
 
-    # start to exec
+    # start exec
     log("function", {"name": "exec_script", "step": "start"})
     print "exec_script", scriptpath
+    # read code
     pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
     pyfilepath = os.path.join(scriptpath, pyfilename)
     code = open(pyfilepath).read()
     if not _is_root_script():
+        # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
+    # exec code
     if scope:
         exec(code) in scope
     else:
         exec(code) in globals()
-
     # finish exec
     log("function", {"name": "exec_script", "step": "end", "script": scriptname})
     SCRIPT_STACK.pop()
