@@ -21,10 +21,7 @@ class TestReportOnAndroid(unittest.TestCase):
 
     def test_android_for_cover(self):
         sys.argv = [sys.argv[0], TEST_OWL, '--setsn', '--kwargs', KWARGS, '--log']
-        try:
-            cli.main()
-        except SystemExit as err:
-            self.assertEqual(err.message, 0)
+        cli.main()
 
 
 if __name__ == '__main__':
