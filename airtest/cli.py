@@ -76,6 +76,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
     else:
         exec(code) in globals()
 
+    # finish exec
     log("function", {"name": "exec_script", "step": "end", "script": scriptname})
     SCRIPT_STACK.pop()
     return scriptpath
