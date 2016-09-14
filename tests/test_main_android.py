@@ -14,7 +14,8 @@ class TestAirtestOnAndroid(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        set_serialno()
+        if not isinstance(main.DEVICE, main.android.Android):
+            set_serialno()
         self.dev = main.DEVICE
 
     def test_shell(self):

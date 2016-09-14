@@ -16,7 +16,7 @@ class TestAirtestOnAndroid(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.serialno = ADB().devices(state="device")[0][0]
-        self.android = Android(self.serialno)
+        self.android = Android(self.serialno, init_display=False, init_ime=False)
         self.android.install_app(TEST_APK)
 
     def test_android(self):
@@ -24,6 +24,13 @@ class TestAirtestOnAndroid(unittest.TestCase):
         proc = subprocess.Popen(cmd, shell=True)
         proc.wait()
         self.assertIs(proc.returncode, 0)
+
+    def test_android_for_cover(self):
+        sys.argv = [sys.argv[0], TEST_OWL, '--setsn']
+        try:
+            cli.main()
+        except SystemExit as err:
+            self.assertEqual(err.message, 0)
 
 
 if __name__ == '__main__':
