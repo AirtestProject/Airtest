@@ -30,6 +30,7 @@ class TestAirtestOnWindows(unittest.TestCase):
             shell()
 
     def test_snapshot(self):
+        main.SAVE_SCREEN = None
         screen = snapshot()
         self.assertIsInstance(screen, numpy.ndarray)
         self.assertTrue(os.path.exists("screen.png"))

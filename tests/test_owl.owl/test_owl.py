@@ -2,7 +2,7 @@
 __author__ = "刘欣"
 
 # start your script here
-PKG = "org.cocos.Rabbit"
+install(APK)
 amstop(PKG)
 amstart(PKG)
 sleep(1)
