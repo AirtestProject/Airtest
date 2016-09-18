@@ -1,9 +1,10 @@
 # _*_ coding:UTF-8 _*_
-from winutils import mouse_click, mouse_drag, get_screen_shot, \
-    key_input, WindowMgr, get_resolution, mouse_down, mouse_up, mouse_move
-from winsendkey import SendKeys
 from airtest.core.device import Device
 from airtest.aircv import aircv
+from window_mgr import WindowMgr, get_screen_shot, get_resolution, get_window_pos
+from mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
+from keyboard import key_input
+from winsendkey import SendKeys
 from PIL import ImageGrab
 import subprocess
 import sys
@@ -149,13 +150,13 @@ if __name__ == '__main__':
     # w.text("nimei")
     # w.touch((10, 10))
     # w.swipe((10,10), (200,200))
-    print w.find_window(u"QA平台")
+    w.set_handle(w.find_window(u"QA平台"))
     w.set_foreground()
     print w.get_window_pos()
     time.sleep(1)
     # w.set_window_pos((0, 0))
     w2 = Windows()
-    w2.find_window("GitHub")
+    w.set_handle(w2.find_window("GitHub"))
     w2.set_foreground()
     time.sleep(1)
     w.set_foreground()

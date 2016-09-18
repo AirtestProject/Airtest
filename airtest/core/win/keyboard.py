@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from keycode import VK_CODE, SHIFT_KCODE
 import time
 import win32api

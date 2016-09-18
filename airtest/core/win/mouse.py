@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ctypes import *
 from keycode import VK_CODE, SHIFT_KCODE
 import time

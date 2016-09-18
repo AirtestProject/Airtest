@@ -36,6 +36,7 @@ class TestWindows(unittest.TestCase):
         time.sleep(1)
         self.windows.find_window("计算器")
         self.windows.keyevent("1")
+        self.windows.keyevent("f4", combine="alt", escape=True)
 
     def test_text(self):
         self.windows.start_app("calc")
