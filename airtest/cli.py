@@ -7,6 +7,7 @@ import json
 import argparse
 import traceback
 import core.main
+from urllib import unquote
 from core.main import *
 from core.error import MinicapError, MinitouchError, AdbError
 # import here to build dependent modules
@@ -16,10 +17,10 @@ import urllib2
 
 SCRIPT_STACK = []
 
-def _is_root_script(scriptname):
-    return scriptname == args.script
+# def _is_root_script(scriptname):
+#     return scriptname == args.script
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
+def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=False, code=None):
     """
     execute script: root or submodule
     1. exec root script
@@ -27,17 +28,18 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         2.1 cp imgs to sub_dir
         2.2 exec sub script
     """
-    if _is_root_script(scriptname):
+    global SCRIPT_STACK
+    if root:
         scriptpath = scriptname
+        SCRIPT_STACK = [] 
     elif os.path.isabs(scriptname):
-        SCRIPT_STACK.append(scriptname)
         scriptpath = scriptname
     else:
         if not SCRIPTHOME:
             raise RuntimeError("SCRIPTHOME not set, please set_scripthome first")
-        SCRIPT_STACK.append(scriptname)
         scripthome = os.path.abspath(SCRIPTHOME)
         scriptpath = os.path.join(scripthome, scriptname)
+    SCRIPT_STACK.append(scriptname)
 
     def copy_script(src, dst):
         if os.path.isdir(dst):
@@ -55,24 +57,25 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(scriptext, "_sub")
         return dirname
 
-    # copy submodule's images into sub_dir
-    if not _is_root_script(scriptname):
-        sub_dir = get_sub_dir_name(scriptname)
-        sub_dirpath = os.path.join(SCRIPT_STACK[0], sub_dir)
-        copy_script(scriptpath, sub_dirpath)
-        SCRIPT_STACK[-1] = sub_dir
-
     # start exec
     log("function", {"name": "exec_script", "step": "start", "script": scriptname})
     print "script_stack", SCRIPT_STACK
     print "exec_script", scriptpath
     # read code
-    pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
-    pyfilepath = os.path.join(scriptpath, pyfilename)
-    code = open(pyfilepath).read()
-    if not _is_root_script(scriptname):
+    if code is None:
+        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+        pyfilepath = os.path.join(scriptpath, pyfilename)
+        code = open(pyfilepath).read()
+
+    if not root:
+        # copy submodule's images into sub_dir
+        sub_dir = get_sub_dir_name(scriptname)
+        sub_dirpath = os.path.join(SCRIPT_STACK[0], sub_dir)
+        copy_script(scriptpath, sub_dirpath)
+        # SCRIPT_STACK[-1] = sub_dir
+
         # replace tpl filepath with filepath in sub_dir
-        code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % SCRIPT_STACK[-1], code)
+        code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
     # exec code
     if scope:
         exec(code) in scope
@@ -80,8 +83,9 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None):
         exec(code) in globals()
     # finish exec
     log("function", {"name": "exec_script", "step": "end", "script": scriptname})
-    if not _is_root_script(scriptname):
-        SCRIPT_STACK.pop()
+    # if not _is_root_script(scriptname):
+    SCRIPT_STACK.pop()
+
     return scriptpath
 
 
@@ -106,6 +110,57 @@ def _on_init_done():
     """to be overwritten by users"""
     pass
 
+def _exec_script_for_forever(args, script, code=None):
+    # IDE使用的文件路径被命令行下的编码处理过，需要解码 
+    try:
+        charset = sys.stdin.encoding
+        script = script.decode(charset)
+    except:
+        script = script
+
+    set_basedir(script)
+    if args.log is True:
+        set_logdir(script)
+    elif args.log:
+        set_logdir(args.log)
+
+    try:
+        exec_script(script, scope=globals(), root=True, code=code)
+    except (MinitouchError, MinicapError, AdbError) as e:
+        raise e
+    except:
+        print "exec script error",repr(script)
+        sys.stderr.write(traceback.format_exc())
+    else:
+        print "exec script end",repr(script)
+
+
+def forever_handle(args):#args先传着，有需要用到其他参数可以直接拓展，不想用全局变量- - 
+    while True:
+        print "wait for stdin..."
+        sys.stdout.flush()
+        input_line = sys.stdin.readline().strip()
+        print 'get input_line',input_line
+        if input_line.startswith("c "):
+            _, script, code = input_line.split(" ")
+            code = unquote(code) # decode code
+            print "exec code %s" % repr(code)
+
+            _exec_script_for_forever(args, script, code=code)
+        elif input_line.startswith("f "):
+            _, script = input_line.split(" ")
+            script = input_line.strip()[2:]
+            print "exec script %s" % repr(script)
+
+            _exec_script_for_forever(args, script)
+        elif input_line == "exit":
+            print "end of stdin"
+            sys.exit(0)
+        else:
+            print "invalid input %s" % repr(input_line)
+        
+        sys.stdout.flush()
+        sys.stderr.flush()
 
 def main():
     ap = argparse.ArgumentParser()
@@ -179,60 +234,7 @@ def main():
 
     # run script in forever mode, read input & exec
     if args.forever:
-        while True:
-            print "wait for stdin..."
-            sys.stdout.flush()
-            input_line = sys.stdin.readline()
-            if input_line.startswith("c "):
-                code = input_line.strip()[2:]
-                print "exec code %s" % repr(code)
-                try:
-                    exec(code) in globals()
-                except (MinitouchError,MinicapError,AdbError) as e:
-                    raise e
-                except:
-                    print "exec code error"
-                    sys.stderr.write(traceback.format_exc())
-                else:
-                    print "exec code end"
-            elif input_line.startswith("f "):
-                # print 'get input_line',input_line
-                script = input_line.strip()[2:]
-                pyfile = ""
-                if script.endswith(".py"):
-                    script,pyfile = os.path.split(script)
-                print "exec script %s" % repr(script)
-                # IDE使用的文件路径被命令行下的编码处理过，需要解码
-                try:
-                    charset = sys.stdin.encoding
-                    script = script.decode(charset)
-                except:
-                    script = script
-                try:
-                    os.chdir(script)
-                    if args.log:
-                        print "save log in", "'%s'" %args.log
-                        set_logfile(args.log)
-
-                    if args.screen:
-                        print "save img in", "'%s'" %args.screen
-                        set_screendir(args.screen)
-                        
-                    exec_script(script, scope=globals())
-                except (MinitouchError,MinicapError,AdbError) as e:
-                    raise e
-                except:
-                    print "exec script error", repr(script)
-                    sys.stderr.write(traceback.format_exc())
-                else:
-                    print "exec script end", repr(script)
-            elif input_line == "":
-                print "end of stdin"
-                sys.exit(0)
-            else:
-                print "invalid input %s" % repr(input_line)
-            sys.stdout.flush()
-            sys.stderr.flush()
+        forever_handle(args)
 
     # run script
     if args.log is True:
@@ -247,14 +249,17 @@ def main():
     _on_init_done()
     # set root script as basedir
     set_basedir(args.script)
-    SCRIPT_STACK.append(args.script)
+    # SCRIPT_STACK.append(args.script)
     try:
-        set_current(0)
         # execute pre script
         if args.pre:
-            exec_script(args.pre, scope=globals())
+            for i in range(args.devcount):#pre for all devices
+                set_current(i)
+                exec_script(args.pre, scope=globals(),root=True)
+
         # execute script
-        exec_script(args.script, scope=globals())
+        set_current(0)
+        exec_script(args.script, scope=globals(),root=True)
     except:
         err = traceback.format_exc()
         log("error", {"script_exception": err})
@@ -263,7 +268,9 @@ def main():
         # execute post script, whether pre & script succeed or not
         if args.post:
             try:
-                exec_script(args.post, scope=globals())
+                for i in range(args.devcount):#post for all devices
+                    set_current(i)
+                    exec_script(args.post, scope=globals(),root=True)
             except:
                 log("error", {"post_exception": traceback.format_exc()})
                 traceback.print_exc()
