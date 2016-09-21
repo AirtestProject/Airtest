@@ -120,8 +120,10 @@ def _exec_script_for_forever(args, script, code=None):
 
     set_basedir(script)
     if args.log is True:
+        print 'set logpath scriptpath'
         set_logdir(script)
     elif args.log:
+        print 'set logpath',repr(args.log)
         set_logdir(args.log)
 
     try:
@@ -248,16 +250,17 @@ def main():
 
     _on_init_done()
     # set root script as basedir
-    set_basedir(args.script)
     # SCRIPT_STACK.append(args.script)
     try:
         # execute pre script
         if args.pre:
+            set_basedir(args.pre)
             for i in range(args.devcount):#pre for all devices
                 set_current(i)
                 exec_script(args.pre, scope=globals(),root=True)
 
         # execute script
+        set_basedir(args.script)
         set_current(0)
         exec_script(args.script, scope=globals(),root=True)
     except:
@@ -268,6 +271,7 @@ def main():
         # execute post script, whether pre & script succeed or not
         if args.post:
             try:
+                set_basedir(args.post)
                 for i in range(args.devcount):#post for all devices
                     set_current(i)
                     exec_script(args.post, scope=globals(),root=True)
