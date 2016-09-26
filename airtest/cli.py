@@ -111,41 +111,33 @@ def _on_init_done():
     pass
 
 def _exec_script_for_forever(args, script, code=None):
-    # IDE使用的文件路径被命令行下的编码处理过，需要解码 
+    # IDE使用的文件路径被命令行下的编码处理过，需要解码
     try:
         charset = sys.stdin.encoding
         script = script.decode(charset)
     except:
         script = script
 
-    set_basedir(script)
-    if args.log is True:
-        print 'set logpath scriptpath'
-        set_logdir(script)
-    elif args.log:
-        print 'set logpath',repr(args.log)
-        set_logdir(args.log)
-
     try:
         exec_script(script, scope=globals(), root=True, code=code)
     except (MinitouchError, MinicapError, AdbError) as e:
         raise e
     except:
-        print "exec script error",repr(script)
+        print "exec script error", repr(script)
         sys.stderr.write(traceback.format_exc())
     else:
-        print "exec script end",repr(script)
+        print "exec script end", repr(script)
 
 
-def forever_handle(args):#args先传着，有需要用到其他参数可以直接拓展，不想用全局变量- - 
+def forever_handle(args):  # args先传着，有需要用到其他参数可以直接拓展，不想用全局变量- - 
     while True:
         print "wait for stdin..."
         sys.stdout.flush()
         input_line = sys.stdin.readline().strip()
-        print 'get input_line',input_line
+        print 'get input_line', input_line
         if input_line.startswith("c "):
             _, script, code = input_line.split(" ")
-            code = unquote(code) # decode code
+            code = unquote(code)  # decode code
             print "exec code %s" % repr(code)
 
             _exec_script_for_forever(args, script, code=code)
@@ -160,7 +152,7 @@ def forever_handle(args):#args先传着，有需要用到其他参数可以直�
             sys.exit(0)
         else:
             print "invalid input %s" % repr(input_line)
-        
+
         sys.stdout.flush()
         sys.stderr.flush()
 
