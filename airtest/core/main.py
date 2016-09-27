@@ -539,7 +539,7 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, intervalfunc=Non
             # 超时则抛出异常
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
-            time.sleep(interval)
+            time.sleep(0.5)
             continue
         else:
             ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
