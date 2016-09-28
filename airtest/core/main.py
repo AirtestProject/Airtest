@@ -477,7 +477,7 @@ def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
 
 
 @logwrap
-def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, intervalfunc=None, find_all=False):
+def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
     '''
         keep looking for pic util timeout, execute intervalfunc if pic not found.
     '''
@@ -539,7 +539,7 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, intervalfunc=Non
             # 超时则抛出异常
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
-            time.sleep(0.5)
+            time.sleep(interval)
             continue
         else:
             ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
@@ -852,9 +852,9 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=0, intervalfunc=None):
+def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or FIND_TIMEOUT
-    pos = _loop_find(v, timeout=timeout, intervalfunc=intervalfunc)
+    pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
 
 
