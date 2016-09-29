@@ -1024,6 +1024,7 @@ class Android(Device):
         if getattr(self, "ime", None):
             text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
+            # 互通版脚本编写中，反馈输入后Enter会导致一些异常，未知用途，此处先注释掉。
             self.adb.shell(["input", "keyevent", "ENTER"])
         else:
             self.adb.shell(["input", "text", text])

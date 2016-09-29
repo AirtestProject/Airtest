@@ -118,6 +118,8 @@ def _exec_script_for_forever(args, script, code=None):
     except:
         script = script
 
+    set_basedir(script)
+
     try:
         exec_script(script, scope=globals(), root=True, code=code)
     except (MinitouchError, MinicapError, AdbError) as e:

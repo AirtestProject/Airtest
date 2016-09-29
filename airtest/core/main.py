@@ -477,7 +477,7 @@ def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
 
 
 @logwrap
-def _loop_find(pictarget, timeout=FIND_TIMEOUT, interval=CVINTERVAL, threshold=None, intervalfunc=None, find_all=False):
+def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
     '''
         keep looking for pic util timeout, execute intervalfunc if pic not found.
     '''
@@ -614,6 +614,9 @@ class MoaPic(object):
 
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
         self.filename = filename
+
+        print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
+
         self.filepath = filename if os.path.isabs(filename) else os.path.join(BASE_DIR, filename) 
         self.threshold = threshold  # if threshold is not None else THRESHOLD
         self.target_pos = target_pos
@@ -849,7 +852,7 @@ def sleep(secs=1.0):
 
 @logwrap
 @_transparam
-def wait(v, timeout=0, interval=CVINTERVAL, intervalfunc=None):
+def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or FIND_TIMEOUT
     pos = _loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
