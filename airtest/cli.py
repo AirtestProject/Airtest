@@ -214,7 +214,7 @@ def main():
         set_current(0)
 
     if args.setemulator:
-        print "set_emulator", args.setemulator #  add by zq
+        print "set_emulator", args.setemulator  # add by zq
         emu_name = args.setemulator if isinstance(args.setemulator, str) else None
         if args.setadb:
             addr = args.setadb.split(":")
@@ -226,7 +226,10 @@ def main():
         print "load kwargs", repr(args.kwargs)
         for kv in args.kwargs.split(","):
             k, v = kv.split("=")
-            globals()[k] = v
+            if k == "findoutside":  # if extra arg is findoutside, set airtest-FINDOUTSIDE
+                set_find_outside(v)
+            else:
+                globals()[k] = v
 
     # run script in forever mode, read input & exec
     if args.forever:
