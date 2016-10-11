@@ -332,7 +332,7 @@ def set_threshold(value):
 
 def set_find_outside(find_outside):
     """设置FIND_OUTSIDE, IDE中调用遮挡脚本编辑区."""
-    str_rect = find_outside.split(',')
+    str_rect = find_outside.split('-')
     find_outside = []
     for i in str_rect:
         find_outside.append(max(int(i), 0))  # 如果有负数，就用0 代替
@@ -478,7 +478,7 @@ def _find_all_pic(screen, picdata, threshold, pictarget, strict_ret=False):
 @logwrap
 def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
     '''
-        keep looking for pic util timeout, execute intervalfunc if pic not found.
+        keep looking for pic until timeout, execute intervalfunc if pic not found.
     '''
     LOGGING.info("Try finding:\n%s", pictarget)
     picdata = _get_search_img(pictarget)
@@ -824,11 +824,11 @@ def keyevent(keyname, escape=False, combine=None, delay=0):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def text(text, delay=0, clear=False):
+def text(text, delay=0, clear=False, enter=True):
     text_temp = text.lower()
     if clear is True:
         if get_platform() == "Windows":
-            for i in range(30):
+            for i in range(20):
                 DEVICE.keyevent('backspace', escape=True)
         else:
             DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
@@ -840,7 +840,12 @@ def text(text, delay=0, clear=False):
         else:
             DEVICE.keyevent('KEYCODE_DEL')
     else:
-        DEVICE.text(text)
+        # 如果是android设备，则传入enter参数( 输入后是否执行enter操作 )
+        if get_platform() == "Windows":
+            DEVICE.text(text)
+        else:
+            DEVICE.text(text, enter=enter)
+
     _delay_after_operation(delay)
 
 
