@@ -29,7 +29,6 @@ from airtest.aircv import generate_character_img as textgen
 from airtest.aircv.aircv_tool_func import crop_image, mask_image
 from airtest.core import device
 from airtest.core import android
-from airtest.core.android import uiautomator
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.settings import *
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
