@@ -54,6 +54,33 @@ log = []
 action_stack = []
 
 
+def genlog(action, params, uiobj):
+    global log, action_stack
+    pprint(log)
+    @logwrap
+    def command_layer(action, params):
+        traverse_layer(action, params)
+        _log_in_func({"name": action, 'ret': None})
+
+    @logwrap
+    def traverse_layer(action, params):
+        snapshot()
+        if uiobj and 'visibleBounds' in uiobj:
+            b = uiobj['visibleBounds']['bottom']
+            l = uiobj['visibleBounds']['left']
+            r = uiobj['visibleBounds']['right']
+            t = uiobj['visibleBounds']['top']
+            x = (l + r) / 2
+            y = (b + t) / 2
+            _log_in_func({
+                "cv": {"confidence": 1, "result": [x, y], "rectangle": [[l, t], [l, b], [r, b], [r, t]]},
+                'ret': [x, y],
+            })
+    command_layer(action, params)
+    log = []
+    action_stack = []
+
+
 class AutomatorWrapper(object):
     def __init__(self, obj):
         super(AutomatorWrapper, self).__init__()
@@ -74,28 +101,6 @@ class AutomatorWrapper(object):
                     uiobj = self.obj.info
                 except:
                     uiobj = None
-
-                @logwrap
-                def command_layer(action, uiobj):
-                    traverse_layer(action, uiobj)
-                    _log_in_func({"name": action, 'ret': None})
-
-                @logwrap
-                def traverse_layer(action, uiobj):
-                    snapshot()
-                    if 'visibleBounds' in uiobj:
-                        b = uiobj['visibleBounds']['bottom']
-                        l = uiobj['visibleBounds']['left']
-                        r = uiobj['visibleBounds']['right']
-                        t = uiobj['visibleBounds']['top']
-                        x = (l + r) / 2
-                        y = (b + t) / 2
-                        _log_in_func({
-                            "cv": {"confidence": 1, "result": [x, y], "rectangle": [[l, t], [l, b], [r, b], [r, t]]},
-                            'ret': [x, y],
-                        })
-
-                command_layer(action, uiobj)
                 log.append({'primary-action': action, 'uiobj': uiobj})
             else:
                 log.append({'action': action})
@@ -110,34 +115,35 @@ class AutomatorWrapper(object):
         global log, action_stack
         calling = self.obj(*args, **kwargs)
 
+        try:
+            uiobj = calling.info
+        except:
+            uiobj = None
         if args or kwargs:
             if all([k in SELECTOR_ARGS for k in kwargs]):
-                try:
-                    uiobj = calling.info
-                except:
-                    uiobj = None
                 log.append({'select': kwargs, 'uiobj': uiobj})
             else:
                 log.append({'args': (args, kwargs)})
+
+        if len(log) >= 1 and 'select' in log[-1]:
+            if len(log) >= 2 and 'action' in log[-2]:
+                action = log[-2]['action']
+            else:
+                action = 'global'
+            genlog('select', [action, log[-1]['select']], uiobj)
 
         if len(action_stack) >= 3 and action_stack[-3] in TERTIARY_ACTION:
             taction = TERTIARY_ACTION[action_stack[-3]]
             if action_stack[-2] in taction:
                 saction = taction[action_stack[-2]]
                 if action_stack[-1] in saction:
-                    pprint(log)
-                    log = []
-                    action_stack = []
+                    genlog(action_stack[-3], action_stack[-2:] + log[-1].values(), uiobj)
         if len(action_stack) >= 2 and action_stack[-2] in SECONDARY_ACTIONS:
             secondary_action = SECONDARY_ACTIONS[action_stack[-2]]
             if action_stack[-1] in secondary_action:
-                pprint(log)
-                log = []
-                action_stack = []
+                genlog(action_stack[-2], action_stack[-1:] + log[-1].values(), uiobj)
         if len(action_stack) >= 1 and action_stack[-1] in PRIMARY_ACTION:
-            pprint(log)
-            log = []
-            action_stack = []
+            genlog(action_stack[-1], log[-1].values(), uiobj)
 
         return self.__class__(calling)
 
