@@ -2,13 +2,16 @@
 __author__ = 'lxn3032'
 
 
-import random
+import time
+import traceback
 from pprint import pprint
 
 import airtest.core.main
 from airtest.core.main import set_serialno, snapshot, logwrap, _log_in_func
 from airtest.core.android.uiautomator import AutomatorDevice
 
+
+__all__ = ['UiAutomator']
 
 PRIMARY_ACTION = ['click', 'long_click', 'swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text']
 
@@ -81,10 +84,47 @@ def genlog(action, params, uiobj):
     action_stack = []
 
 
+def call_trackaback(f, action, *args, **kwargs):
+    logger = airtest.core.main.LOGGER
+    start = time.time()
+    fndata = {'name': action, 'args': args, 'kwargs': kwargs}
+    logger.running_stack.append(fndata)
+    try:
+        ret = f(*args, **kwargs)
+    except Exception:
+        data = {"traceback": traceback.format_exc(), "time_used": time.time() - start}
+        fndata.update(data)
+        fndata.update(logger.extra_log)
+        logger.log("error", fndata)
+        raise
+    finally:
+        logger.running_stack.pop()
+    return ret
+
+
+def getattr_traceback(obj, attr, action, *args, **kwargs):
+    logger = airtest.core.main.LOGGER
+    start = time.time()
+    fndata = {'name': action, 'args': args, 'kwargs': kwargs}
+    logger.running_stack.append(fndata)
+    try:
+        ret = getattr(obj, attr)
+    except Exception:
+        data = {"traceback": traceback.format_exc(), "time_used": time.time() - start}
+        fndata.update(data)
+        fndata.update(logger.extra_log)
+        logger.log("error", fndata)
+        raise
+    finally:
+        logger.running_stack.pop()
+    return ret
+
+
 class AutomatorWrapper(object):
-    def __init__(self, obj):
+    def __init__(self, obj, last_obj=None):
         super(AutomatorWrapper, self).__init__()
         self.obj = obj
+        self.last_obj = last_obj  # prev layer obj
 
     def __getattr__(self, action):
         global log, action_stack
@@ -97,67 +137,91 @@ class AutomatorWrapper(object):
         if important:
             action_stack.append(action)
             if is_key_action:
-                try:
-                    uiobj = self.obj.info
-                except:
-                    uiobj = None
+                uiobj = self._get_uiobj()
                 log.append({'primary-action': action, 'uiobj': uiobj})
             else:
                 log.append({'action': action})
 
         attr = getattr(self.obj, action)
         if callable(attr):
-            return AutomatorWrapper(attr)
+            return AutomatorWrapper(attr, self)
         else:
             return attr
 
     def __call__(self, *args, **kwargs):
         global log, action_stack
-        calling = self.obj(*args, **kwargs)
+        calling = None
 
-        try:
-            uiobj = calling.info
-        except:
-            uiobj = None
+        uiobj = self._get_uiobj()
         if args or kwargs:
             if all([k in SELECTOR_ARGS for k in kwargs]):
+                # 由于选择操作的特殊性，需要在选择后才能得到uiobj信息，所以要先call
+                calling = self.obj(*args, **kwargs)
+
+                # 寻找上一个选择action
+                # 处理 .right(**selector) 这种情况，要记录到right这个动作
+                if len(log) >= 1 and 'action' in log[-1]:
+                    prev_action = log[-1]['action']
+                else:
+                    prev_action = 'global'
+                uiobj = getattr_traceback(calling, 'info', 'select', prev_action, kwargs)
                 log.append({'select': kwargs, 'uiobj': uiobj})
             else:
                 log.append({'args': (args, kwargs)})
 
+        # select操作log记录
         if len(log) >= 1 and 'select' in log[-1]:
             if len(log) >= 2 and 'action' in log[-2]:
                 action = log[-2]['action']
             else:
                 action = 'global'
-            genlog('select', [action, log[-1]['select']], uiobj)
+            genlog('select', [action, log[-1]['select']], log[-1]['uiobj'])
 
+        # 其他操作的log记录
+        if args or kwargs:
+            last_log = list(args) or kwargs.values()
+        else:
+            last_log = []
         if len(action_stack) >= 3 and action_stack[-3] in TERTIARY_ACTION:
             taction = TERTIARY_ACTION[action_stack[-3]]
             if action_stack[-2] in taction:
                 saction = taction[action_stack[-2]]
                 if action_stack[-1] in saction:
-                    genlog(action_stack[-3], action_stack[-2:] + log[-1].values(), uiobj)
+                    genlog(action_stack[-3], action_stack[-2:] + last_log, uiobj)
         if len(action_stack) >= 2 and action_stack[-2] in SECONDARY_ACTIONS:
             secondary_action = SECONDARY_ACTIONS[action_stack[-2]]
             if action_stack[-1] in secondary_action:
-                genlog(action_stack[-2], action_stack[-1:] + log[-1].values(), uiobj)
+                genlog(action_stack[-2], action_stack[-1:] + last_log, uiobj)
         if len(action_stack) >= 1 and action_stack[-1] in PRIMARY_ACTION:
-            genlog(action_stack[-1], log[-1].values(), uiobj)
+            genlog(action_stack[-1], last_log, uiobj)
 
+        if not calling:
+            calling = call_trackaback(self.obj, 'action', *args, **kwargs)
         return self.__class__(calling)
 
+    def _get_uiobj(self):
+        # 最多嵌套三层
+        try:
+            uiobj = self.obj.info
+        except:
+            try:
+                uiobj = self.last_obj.obj.info
+            except:
+                try:
+                    uiobj = self.last_obj.last_obj.obj.info
+                except:
+                    try:
+                        uiobj = self.last_obj.last_obj.last_obj.obj.info
+                    except:
+                        uiobj = None
+        return uiobj
 
-if not airtest.core.main.DEVICE:
-    set_serialno()
-dev = AutomatorDevice(airtest.core.main.DEVICE.serialno)
-d = AutomatorWrapper(dev)
+    def end(self):
+        genlog('end', [], self._get_uiobj())
 
 
-if __name__ == '__main__':
-    uiobj = d(text='WLAN').right(className='android.widget.TextView')
-    if uiobj and uiobj.text == 'netease_game':
-        print uiobj.info
-        uiobj.click.topleft()
-        d.wait.idle()
-        d.press.back()
+def UiAutomator():
+    if not airtest.core.main.DEVICE:
+        set_serialno()
+    dev = AutomatorDevice(airtest.core.main.DEVICE.serialno)
+    return AutomatorWrapper(dev)
