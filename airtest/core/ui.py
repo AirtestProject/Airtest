@@ -73,8 +73,14 @@ def genlog(action, params, uiobj):
             l = uiobj['visibleBounds']['left']
             r = uiobj['visibleBounds']['right']
             t = uiobj['visibleBounds']['top']
-            x = (l + r) / 2
-            y = (b + t) / 2
+            
+            if params and params[-1] == "topleft":  # 点击识别区域的左上角
+                x, y = l, t
+            elif params and params[-1] == "bottomright":  # 点击识别区域的右下角
+                x, y = r, b
+            else:  # 点击中间位置
+                x, y = (l + r) / 2, (b + t) / 2
+
             _log_in_func({
                 "cv": {"confidence": 1, "result": [x, y], "rectangle": [[l, t], [l, b], [r, b], [r, t]]},
                 'ret': [x, y],
