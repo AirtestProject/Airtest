@@ -222,6 +222,14 @@ class AutomatorWrapper(object):
             calling = try_call(self.obj, 'action', *args, **kwargs)
         return self.__class__(calling, self)
 
+    def __len__(self):
+        return len(self.obj)
+
+    def __nonzero__(self):
+        """ python 2 only, for python 3, please overide __bool__
+        """
+        return bool(self.obj)
+
     def _get_selector_obj(self):
         ret = None
         if self.selectors:
