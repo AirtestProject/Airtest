@@ -181,7 +181,7 @@ class AutomatorWrapper(object):
 
                 calling = try_call(self.obj, action, *args, **kwargs)
                 ret = self.__class__(calling, self)
-                ret.selectors = kwargs
+                ret.selectors = args, kwargs if args else kwargs
                 ret.select_action = action
                 return ret
 
@@ -227,6 +227,26 @@ class AutomatorWrapper(object):
         """ python 2 only, for python 3, please overide __bool__
         """
         return bool(self.obj)
+
+    def __getitem__(self, item):
+        return self.__class__(self.obj[item], self)
+
+    def __iter__(self):
+        objs, length = self, len(self)
+
+        class Iter(object):
+            def __init__(self):
+                self.index = -1
+
+            def next(self):
+                self.index += 1
+                if self.index < length:
+                    return objs[self.index]
+                else:
+                    raise StopIteration()
+            __next__ = next
+
+        return Iter()
 
     def _get_selector_obj(self):
         ret = None
