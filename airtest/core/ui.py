@@ -13,7 +13,7 @@ from airtest.core.android.uiautomator import AutomatorDevice
 
 __all__ = ['UiAutomator']
 
-PRIMARY_ACTION = ['click', 'long_click', 'swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text']
+PRIMARY_ACTION = ['click', 'long_click', 'swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'assert']
 
 SECONDARY_ACTIONS = {
     'press': ['home', 'back', 'left', 'right', 'up', 'down', 'center', 'menu', 'search', 'enter', 'delete', 'del',
@@ -133,20 +133,30 @@ def try_getattr(obj, attr, action, *args, **kwargs):
 
 
 class AutomatorWrapper(object):
-    def __init__(self, obj, last_obj=None):
+    def __init__(self, obj, last_obj=None, assertion=None):
         super(AutomatorWrapper, self).__init__()
         self.obj = obj
         self.last_obj = last_obj  # prev layer obj
         self.selectors = None
         self.select_action = None
+        self.assertion = assertion
 
     def __getattr__(self, action):
         global log, action_stack
+
+        assertion = None
+        if action.startswith('assert_not_'):
+            assertion = 'assert_not_'
+            action = action[len(assertion):]
+        elif action.startswith('assert_'):
+            assertion = 'assert_'
+            action = action[len(assertion):]
+
         important = True
         is_key_action = False
         if action in PRIMARY_ACTION:
             is_key_action = True
-        if action in QUERY_ACTION:
+        if action in QUERY_ACTION and not assertion:
             important = False
         if important:
             action_stack.append(action)
@@ -156,8 +166,8 @@ class AutomatorWrapper(object):
                 log.append({'action': action})
 
         attr = getattr(self.obj, action)
-        if callable(attr):
-            return self.__class__(attr, self)
+        if callable(attr) or assertion:
+            return self.__class__(attr, self, assertion=assertion)
         else:
             return attr
 
@@ -165,6 +175,16 @@ class AutomatorWrapper(object):
         global log, action_stack
         calling = None
 
+        # handle assertion expr
+        assert_value = False if self.assertion == 'assert_not_' else True
+        if self.assertion:
+            prev_selector_obj = self._get_selector_obj()
+            print prev_selector_obj
+            uiobj = try_getattr(prev_selector_obj.obj, 'info', prev_selector_obj.select_action, prev_selector_obj.selectors)
+            genlog('assert', [self.assertion + action_stack[-1], self.obj is assert_value] + list(args), uiobj)
+            return None
+
+        # handle selector expr
         if args or kwargs:
             if all([k in SELECTOR_ARGS for k in kwargs]):
                 # get this select action name
