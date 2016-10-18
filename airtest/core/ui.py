@@ -176,7 +176,6 @@ class AutomatorWrapper(object):
                 # relative selector
                 prev_selector_obj = self._get_selector_obj()
                 if prev_selector_obj:
-                    print '+++---+++', prev_selector_obj.select_action
                     uiobj = try_getattr(prev_selector_obj.obj, 'info', prev_selector_obj.select_action, prev_selector_obj.selectors)
                     genlog('select', [prev_selector_obj.select_action, prev_selector_obj.selectors], uiobj)
 
@@ -213,7 +212,6 @@ class AutomatorWrapper(object):
             selector_obj = self._get_selector_obj()
             uiobj = None
             if selector_obj:
-                print '---+++---', selector_obj.select_action
                 uiobj = try_getattr(selector_obj.obj, 'info', selector_obj.select_action, selector_obj.selectors)
                 genlog('select', [selector_obj.select_action, selector_obj.selectors], uiobj)
             genlog(action, params, uiobj)
