@@ -59,6 +59,12 @@ action_stack = []
 
 def genlog(action, params, uiobj):
     global log, action_stack
+
+    # transform action names
+    # avoid conflicting with airtest actions
+    if action == 'swipe':
+        action = 'ui.swipe'
+
     pprint(log)
     @logwrap
     def command_layer(action, params):
@@ -84,7 +90,7 @@ def genlog(action, params, uiobj):
     action_stack = []
 
 
-def call_trackaback(f, action, *args, **kwargs):
+def try_call(f, action, *args, **kwargs):
     logger = airtest.core.main.LOGGER
     start = time.time()
     fndata = {'name': action, 'args': args, 'kwargs': kwargs}
@@ -102,7 +108,7 @@ def call_trackaback(f, action, *args, **kwargs):
     return ret
 
 
-def getattr_traceback(obj, attr, action, *args, **kwargs):
+def try_getattr(obj, attr, action, *args, **kwargs):
     logger = airtest.core.main.LOGGER
     start = time.time()
     fndata = {'name': action, 'args': args, 'kwargs': kwargs}
@@ -164,7 +170,7 @@ class AutomatorWrapper(object):
                     prev_action = log[-1]['action']
                 else:
                     prev_action = 'global'
-                uiobj = getattr_traceback(calling, 'info', 'select', prev_action, kwargs)
+                uiobj = try_getattr(calling, 'info', 'select', prev_action, kwargs)
                 log.append({'select': kwargs, 'uiobj': uiobj})
             else:
                 log.append({'args': (args, kwargs)})
@@ -196,7 +202,7 @@ class AutomatorWrapper(object):
             genlog(action_stack[-1], last_log, uiobj)
 
         if not calling:
-            calling = call_trackaback(self.obj, 'action', *args, **kwargs)
+            calling = try_call(self.obj, 'action', *args, **kwargs)
         return self.__class__(calling)
 
     def _get_uiobj(self):
