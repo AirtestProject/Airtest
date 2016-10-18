@@ -57,7 +57,7 @@ log = []
 action_stack = []
 
 
-def genlog(action, params, uiobj):
+def genlog(action, params, uiobj=None):
     global log, action_stack
 
     # transform action names
@@ -131,6 +131,8 @@ class AutomatorWrapper(object):
         super(AutomatorWrapper, self).__init__()
         self.obj = obj
         self.last_obj = last_obj  # prev layer obj
+        self.selectors = None
+        self.select_action = None
 
     def __getattr__(self, action):
         global log, action_stack
@@ -143,14 +145,13 @@ class AutomatorWrapper(object):
         if important:
             action_stack.append(action)
             if is_key_action:
-                uiobj = self._get_uiobj()
-                log.append({'primary-action': action, 'uiobj': uiobj})
+                log.append({'primary-action': action})
             else:
                 log.append({'action': action})
 
         attr = getattr(self.obj, action)
         if callable(attr):
-            return AutomatorWrapper(attr, self)
+            return self.__class__(attr, self)
         else:
             return attr
 
@@ -158,32 +159,29 @@ class AutomatorWrapper(object):
         global log, action_stack
         calling = None
 
-        uiobj = self._get_uiobj()
         if args or kwargs:
             if all([k in SELECTOR_ARGS for k in kwargs]):
-                # 由于选择操作的特殊性，需要在选择后才能得到uiobj信息，所以要先call
-                calling = self.obj(*args, **kwargs)
-
-                # 寻找上一个选择action
-                # 处理 .right(**selector) 这种情况，要记录到right这个动作
-                if len(log) >= 1 and 'action' in log[-1]:
-                    prev_action = log[-1]['action']
+                # get this select action name
+                if len(action_stack) >= 1:
+                    action = action_stack[-1]
                 else:
-                    prev_action = 'global'
-                uiobj = try_getattr(calling, 'info', 'select', prev_action, kwargs)
-                log.append({'select': kwargs, 'uiobj': uiobj})
-            else:
-                log.append({'args': (args, kwargs)})
+                    action = 'global'
 
-        # select操作log记录
-        if len(log) >= 1 and 'select' in log[-1]:
-            if len(log) >= 2 and 'action' in log[-2]:
-                action = log[-2]['action']
-            else:
-                action = 'global'
-            genlog('select', [action, log[-1]['select']], log[-1]['uiobj'])
+                # relative selector
+                prev_selector_obj = self._get_selector_obj()
+                if prev_selector_obj:
+                    print '+++---+++', prev_selector_obj.select_action
+                    uiobj = try_getattr(prev_selector_obj.obj, 'info', prev_selector_obj.select_action, prev_selector_obj.selectors)
+                    genlog('select', [prev_selector_obj.select_action, prev_selector_obj.selectors], uiobj)
+
+                calling = try_call(self.obj, action, *args, **kwargs)
+                ret = self.__class__(calling, self)
+                ret.selectors = kwargs
+                ret.select_action = action
+                return ret
 
         # 其他操作的log记录
+        action, params = None, None
         if args or kwargs:
             last_log = list(args) or kwargs.values()
         else:
@@ -193,37 +191,46 @@ class AutomatorWrapper(object):
             if action_stack[-2] in taction:
                 saction = taction[action_stack[-2]]
                 if action_stack[-1] in saction:
-                    genlog(action_stack[-3], action_stack[-2:] + last_log, uiobj)
+                    action = action_stack[-3]
+                    params = action_stack[-2:] + last_log
         if len(action_stack) >= 2 and action_stack[-2] in SECONDARY_ACTIONS:
             secondary_action = SECONDARY_ACTIONS[action_stack[-2]]
             if action_stack[-1] in secondary_action:
-                genlog(action_stack[-2], action_stack[-1:] + last_log, uiobj)
+                action = action_stack[-2]
+                params = action_stack[-1:] + last_log
         if len(action_stack) >= 1 and action_stack[-1] in PRIMARY_ACTION:
-            genlog(action_stack[-1], last_log, uiobj)
+            action = action_stack[-1]
+            params = last_log
+
+        if action:
+            # select操作log记录
+            selector_obj = self._get_selector_obj()
+            uiobj = None
+            if selector_obj:
+                print '---+++---', selector_obj.select_action
+                uiobj = try_getattr(selector_obj.obj, 'info', selector_obj.select_action, selector_obj.selectors)
+                genlog('select', [selector_obj.select_action, selector_obj.selectors], uiobj)
+            genlog(action, params, uiobj)
 
         if not calling:
             calling = try_call(self.obj, 'action', *args, **kwargs)
-        return self.__class__(calling)
+        return self.__class__(calling, self)
 
-    def _get_uiobj(self):
-        # 最多嵌套三层
-        try:
-            uiobj = self.obj.info
-        except:
-            try:
-                uiobj = self.last_obj.obj.info
-            except:
-                try:
-                    uiobj = self.last_obj.last_obj.obj.info
-                except:
-                    try:
-                        uiobj = self.last_obj.last_obj.last_obj.obj.info
-                    except:
-                        uiobj = None
-        return uiobj
+    def _get_selector_obj(self):
+        ret = None
+        if self.selectors:
+            ret = self
+        elif self.last_obj and self.last_obj.selectors:
+            ret = self.last_obj
+        elif self.last_obj and self.last_obj.last_obj and self.last_obj.last_obj.selectors:
+            ret = self.last_obj.last_obj
+        elif self.last_obj and self.last_obj.last_obj and self.last_obj.last_obj.last_obj and self.last_obj.last_obj.last_obj.selectors:
+            ret = self.last_obj.last_obj.last_obj
+        return ret
 
     def end(self):
-        genlog('end', [], self._get_uiobj())
+        time.sleep(1)
+        genlog('end', [], None)
 
 
 def UiAutomator():
