@@ -97,46 +97,40 @@ def genlog(action, params, uiobj=None):
 
 
 def try_call(f, action, *args, **kwargs):
-    logger = airtest.core.main.LOGGER
-    start = time.time()
-    fndata = {'name': action, 'args': args, 'kwargs': kwargs}
-    logger.running_stack.append(fndata)
     try:
-        ret = f(*args, **kwargs)
+        return f(*args, **kwargs)
     except Exception:
-        data = {"traceback": traceback.format_exc(), "time_used": time.time() - start}
-        fndata.update(data)
-        fndata.update(logger.extra_log)
-        logger.log("error", fndata)
+        log_error(action, traceback.format_exc(), *args, **kwargs)
         raise
-    finally:
-        logger.running_stack.pop()
-    return ret
 
 
 def try_getattr(obj, attr, action, *args, **kwargs):
+    try:
+        return getattr(obj, attr)
+    except Exception:
+        log_error(action, traceback.format_exc(), *args, **kwargs)
+        raise
+
+
+def log_error(action, tb, *args, **kwargs):
     logger = airtest.core.main.LOGGER
     start = time.time()
     fndata = {'name': action, 'args': args, 'kwargs': kwargs}
     logger.running_stack.append(fndata)
-    try:
-        ret = getattr(obj, attr)
-    except Exception:
-        data = {"traceback": traceback.format_exc(), "time_used": time.time() - start}
-        fndata.update(data)
-        fndata.update(logger.extra_log)
-        logger.log("error", fndata)
-        raise
-    finally:
-        logger.running_stack.pop()
-    return ret
+    fndata.update({"traceback": tb, "time_used": time.time() - start})
+    logger.log("error", fndata)
+    logger.running_stack.pop()
+
+
+class AutomatorAssertionFail(Exception):
+    pass
 
 
 class AutomatorWrapper(object):
-    def __init__(self, obj, last_obj=None, assertion=None):
+    def __init__(self, obj, parent=None, assertion=None):
         super(AutomatorWrapper, self).__init__()
         self.obj = obj
-        self.last_obj = last_obj  # prev layer obj
+        self.parent = parent  # prev layer obj
         self.selectors = None
         self.select_action = None
         self.assertion = assertion
@@ -178,10 +172,24 @@ class AutomatorWrapper(object):
         # handle assertion expr
         assert_value = False if self.assertion == 'assert_not_' else True
         if self.assertion:
+            action = action_stack[-1]
+            assert_result = self.obj == assert_value
             prev_selector_obj = self._get_selector_obj()
-            print prev_selector_obj
-            uiobj = try_getattr(prev_selector_obj.obj, 'info', prev_selector_obj.select_action, prev_selector_obj.selectors)
-            genlog('assert', [self.assertion + action_stack[-1], self.obj is assert_value] + list(args), uiobj)
+
+            # 必须预先判断所选对象是否存在，不存在的对象调用info属性时会抛出uiautomator.UiObjectNotFoundException
+            # 因为即使是assert_not_checked时，也是可以获取对象info的
+            if prev_selector_obj.obj.exists:
+                uiobj = prev_selector_obj.obj.info
+            else:
+                uiobj = None
+            assert_action = self.assertion + action
+            genlog('assert', [assert_action, prev_selector_obj.selectors, assert_result] + list(args), uiobj)
+            if not assert_result:
+                try:
+                    raise AutomatorAssertionFail('assert failed of {}, require {}, got {}'.format(assert_action, assert_value, self.obj))
+                except AutomatorAssertionFail:
+                    log_error('assert', traceback.format_exc(), assert_action, prev_selector_obj.selectors, assert_result, *args, **kwargs)
+                    raise
             return None
 
         # handle selector expr
@@ -201,7 +209,7 @@ class AutomatorWrapper(object):
 
                 calling = try_call(self.obj, action, *args, **kwargs)
                 ret = self.__class__(calling, self)
-                ret.selectors = args, kwargs if args else kwargs
+                ret.selectors = (args, kwargs) if args else kwargs
                 ret.select_action = action
                 return ret
 
@@ -269,15 +277,18 @@ class AutomatorWrapper(object):
         return Iter()
 
     def _get_selector_obj(self):
+        # 下面的is not None的判断方法有点特殊
+        # 因为该类实现了bool隐式转换接口，如果不这样判断的话，在and表达式返回时，还会自动bool隐式转换一次
+        # 导致条件判断非预期
         ret = None
         if self.selectors:
             ret = self
-        elif self.last_obj and self.last_obj.selectors:
-            ret = self.last_obj
-        elif self.last_obj and self.last_obj.last_obj and self.last_obj.last_obj.selectors:
-            ret = self.last_obj.last_obj
-        elif self.last_obj and self.last_obj.last_obj and self.last_obj.last_obj.last_obj and self.last_obj.last_obj.last_obj.selectors:
-            ret = self.last_obj.last_obj.last_obj
+        elif (self.parent and self.parent.selectors) is not None:
+            ret = self.parent
+        elif (self.parent and self.parent.parent and self.parent.parent.selectors) is not None:
+            ret = self.parent.parent
+        elif (self.parent and self.parent.parent and self.parent.parent.parent and self.parent.parent.parent.selectors) is not None:
+            ret = self.parent.parent.parent
         return ret
 
     def end(self):
