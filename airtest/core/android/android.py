@@ -1169,10 +1169,16 @@ class Android(Device):
         return w, h
 
     def getPhysicalDisplayInfo(self):
+        """维护了两套分辨率：
+            (physical_width, physical_height)为设备的物理分辨率，
+            (width, height)为屏幕的有效内容分辨率.
+        """
         info = self._getPhysicalDisplayInfo()
         # 记录物理屏幕的宽高(供屏幕映射使用)：
-        info["physical_width"] = min(info["width"], info["height"])
-        info["physical_height"] = max(info["width"], info["height"])
+        if info["width"] > info["height"]:
+            info["physical_height"], info["physical_width"] = info["width"], info["height"]
+        else:
+            info["physical_width"], info["physical_height"] = info["width"], info["height"]
         # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
         mRestrictedScreen = self._getRestrictedScreen()
         if mRestrictedScreen:
@@ -1180,6 +1186,13 @@ class Android(Device):
         # 不同sdk版本规则不一样，这里保证height>width
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]
+
+        # 如果是特殊的设备，进行特殊处理：
+        special_device_list = ["5fde825d043782fc", "320496728874b1a5"]
+        if self.adb.serialno in special_device_list:
+            # 上面已经确保了宽小于高，现在反过来->宽大于高
+            info["height"], info["width"] = info["width"], info["height"]
+            info["physical_width"], info["physical_height"] = info["physical_height"], info["physical_width"]
         return info
 
     def _getRestrictedScreen(self):
