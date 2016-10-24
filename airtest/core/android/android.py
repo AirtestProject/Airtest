@@ -354,8 +354,9 @@ class Minicap(object):
 
     def _get_params(self, use_ori_size=False):
         """get minicap start params, and count projection"""
-        real_width = self.size["width"]
-        real_height = self.size["height"]
+        # minicap截屏时，需要截取全屏图片:
+        real_width = self.size["physical_width"]
+        real_height = self.size["physical_height"]
         real_orientation = self.size["rotation"]
 
         if use_ori_size or not self.projection:
@@ -554,7 +555,7 @@ class Minitouch(object):
         if not (self.size and self.size['max_x'] and self.size['max_y']):
             return x, y
 
-        width, height = self.size['width'], self.size['height']
+        width, height = self.size['physical_width'], self.size['physical_height']
         # print '__transform', x, y
         # print self.size
         if width > height and self.size['orientation'] in [1,3]:
@@ -827,6 +828,9 @@ class Android(Device):
         if "display_info" in self.props:
             self.size = self.props["display_info"]
             # self.refreshOrientationInfo()
+            # 新添加的key如果不在文件中，则重新获取(主要为了适配以前曾经已经生成过moa_props.tmp的设备):
+            if not self.size.has_key("physical_width") or not self.size.has_key("physical_height"):
+                self.get_display_info()
         else:
             self.get_display_info()
         self.orientationWatcher()
@@ -1166,6 +1170,9 @@ class Android(Device):
 
     def getPhysicalDisplayInfo(self):
         info = self._getPhysicalDisplayInfo()
+        # 记录物理屏幕的宽高(供屏幕映射使用)：
+        info["physical_width"] = min(info["width"], info["height"])
+        info["physical_height"] = max(info["width"], info["height"])
         # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
         mRestrictedScreen = self._getRestrictedScreen()
         if mRestrictedScreen:
