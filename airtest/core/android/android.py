@@ -357,6 +357,7 @@ class Minicap(object):
         real_width = self.size["width"]
         real_height = self.size["height"]
         real_orientation = self.size["rotation"]
+
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
         elif isinstance(self.projection, (list, tuple)):
@@ -1164,11 +1165,30 @@ class Android(Device):
         return w, h
 
     def getPhysicalDisplayInfo(self):
-        # 不同sdk版本规则不一样，这里保证height>width
         info = self._getPhysicalDisplayInfo()
+        # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
+        mRestrictedScreen = self._getRestrictedScreen()
+        if mRestrictedScreen:
+            info["width"], info["height"] = mRestrictedScreen
+        # 不同sdk版本规则不一样，这里保证height>width
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]
         return info
+
+    def _getRestrictedScreen(self):
+        """Get mRestrictedScreen from 'adb -s sno shell dumpsys window' """
+        # 获取设备有效内容的分辨率(屏幕内含有软按键、S6 Edge等设备，进行黑边去除.)
+        result = None
+        # 根据设备序列号拿到对应的mRestrictedScreen参数：
+        dumpsys_info = self.adb.cmd("shell dumpsys window", device=True)
+        match = re.search(r'mRestrictedScreen=.+', dumpsys_info)
+        if match:
+            infoline = match.group(0).strip()  # like 'mRestrictedScreen=(0,0) 720x1184'
+            resolution = infoline.split(" ")[1].split("x")
+            if isinstance(resolution, list) and len(resolution) == 2:
+                result = int(str(resolution[0])), int(str(resolution[1]))
+
+        return result
 
     def _getPhysicalDisplayInfo(self):
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
