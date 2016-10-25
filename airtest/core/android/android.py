@@ -825,14 +825,19 @@ class Android(Device):
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
-        if "display_info" in self.props:
-            self.size = self.props["display_info"]
-            # self.refreshOrientationInfo()
-            # 新添加的key如果不在文件中，则重新获取(主要为了适配以前曾经已经生成过moa_props.tmp的设备):
-            if not self.size.has_key("physical_width") or not self.size.has_key("physical_height"):
-                self.get_display_info()
-        else:
-            self.get_display_info()
+
+        # if "display_info" in self.props:
+        #     self.size = self.props["display_info"]
+        #     # self.refreshOrientationInfo()
+        #     # 新添加的key如果不在文件中，则重新获取(主要为了适配以前曾经已经生成过moa_props.tmp的设备):
+        #     if not self.size.has_key("physical_width") or not self.size.has_key("physical_height"):
+        #         self.get_display_info()
+        # else:
+        #     self.get_display_info()
+        
+        # 因为部分设备有虚拟按键造成的黑边(黑边可能存在可能不存在，需要实时获取)
+        self.get_display_info()
+
         self.orientationWatcher()
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
@@ -1170,24 +1175,28 @@ class Android(Device):
 
     def getPhysicalDisplayInfo(self):
         """维护了两套分辨率：
-           设备的物理分辨率 : (physical_width, physical_height)
-           屏幕有效内容分辨率:(width, height)
+            (physical_width, physical_height)为设备的物理分辨率，
+            (width, height)为屏幕的有效内容分辨率.
         """
         info = self._getPhysicalDisplayInfo()
         # 记录物理屏幕的宽高(供屏幕映射使用)：
-        info["physical_height"], info["physical_width"] = info["width"], info["height"]
+        if info["width"] > info["height"]:
+            info["physical_height"], info["physical_width"] = info["width"], info["height"]
+        else:
+            info["physical_width"], info["physical_height"] = info["width"], info["height"]
         # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
         mRestrictedScreen = self._getRestrictedScreen()
         if mRestrictedScreen:
             info["width"], info["height"] = mRestrictedScreen
-        
+        # 因为获取mRestrictedScreen跟设备的横纵向状态有关，所以此处进行高度、宽度的自定义设定:
+        if info["width"] > info["height"]:
+            info["height"], info["width"] = info["width"], info["height"]
         # 如果是特殊的设备，进行特殊处理：
         special_device_list = ["5fde825d043782fc", "320496728874b1a5"]
         if self.adb.serialno in special_device_list:
-            # 默认状态下: 宽小于高，现在反过来 -> 宽大于高
+            # 上面已经确保了宽小于高，现在反过来->宽大于高
             info["height"], info["width"] = info["width"], info["height"]
             info["physical_width"], info["physical_height"] = info["physical_height"], info["physical_width"]
-
         return info
 
     def _getRestrictedScreen(self):
