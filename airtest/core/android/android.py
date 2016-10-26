@@ -826,17 +826,15 @@ class Android(Device):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
 
-        # if "display_info" in self.props:
-        #     self.size = self.props["display_info"]
-        #     # self.refreshOrientationInfo()
-        #     # 新添加的key如果不在文件中，则重新获取(主要为了适配以前曾经已经生成过moa_props.tmp的设备):
-        #     if not self.size.has_key("physical_width") or not self.size.has_key("physical_height"):
-        #         self.get_display_info()
-        # else:
-        #     self.get_display_info()
-        
-        # 因为部分设备有虚拟按键造成的黑边(黑边可能存在可能不存在，需要实时获取)
-        self.get_display_info()
+        if "display_info" in self.props:
+            self.size = self.props["display_info"]
+            # self.refreshOrientationInfo()
+
+        # 每次运行时均获取设备的有效区域，此处进行一次get_display_info，但此函数在GT-N7100设备上报错，因此加上兼容：
+        try:
+            self.get_display_info()
+        except Exception, e:
+            traceback.print_exc()
 
         self.orientationWatcher()
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
