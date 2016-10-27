@@ -354,9 +354,11 @@ class Minicap(object):
 
     def _get_params(self, use_ori_size=False):
         """get minicap start params, and count projection"""
-        real_width = self.size["width"]
-        real_height = self.size["height"]
+        # minicap截屏时，需要截取全屏图片:
+        real_width = self.size["physical_width"]
+        real_height = self.size["physical_height"]
         real_orientation = self.size["rotation"]
+
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
         elif isinstance(self.projection, (list, tuple)):
@@ -553,7 +555,7 @@ class Minitouch(object):
         if not (self.size and self.size['max_x'] and self.size['max_y']):
             return x, y
 
-        width, height = self.size['width'], self.size['height']
+        width, height = self.size['physical_width'], self.size['physical_height']
         # print '__transform', x, y
         # print self.size
         if width > height and self.size['orientation'] in [1,3]:
@@ -823,11 +825,17 @@ class Android(Device):
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
         self.props = props or self._load_props()
+
         if "display_info" in self.props:
             self.size = self.props["display_info"]
             # self.refreshOrientationInfo()
-        else:
+
+        # 每次运行时均获取设备的有效区域，此处进行一次get_display_info，但此函数在GT-N7100设备上报错，因此加上兼容：
+        try:
             self.get_display_info()
+        except Exception, e:
+            traceback.print_exc()
+
         self.orientationWatcher()
         #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
@@ -1164,11 +1172,45 @@ class Android(Device):
         return w, h
 
     def getPhysicalDisplayInfo(self):
-        # 不同sdk版本规则不一样，这里保证height>width
+        """维护了两套分辨率：
+            (physical_width, physical_height)为设备的物理分辨率，
+            (width, height)为屏幕的有效内容分辨率.
+        """
         info = self._getPhysicalDisplayInfo()
+        # 记录物理屏幕的宽高(供屏幕映射使用)：
+        if info["width"] > info["height"]:
+            info["physical_height"], info["physical_width"] = info["width"], info["height"]
+        else:
+            info["physical_width"], info["physical_height"] = info["width"], info["height"]
+        # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
+        mRestrictedScreen = self._getRestrictedScreen()
+        if mRestrictedScreen:
+            info["width"], info["height"] = mRestrictedScreen
+        # 因为获取mRestrictedScreen跟设备的横纵向状态有关，所以此处进行高度、宽度的自定义设定:
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]
+        # 如果是特殊的设备，进行特殊处理：
+        special_device_list = ["5fde825d043782fc", "320496728874b1a5"]
+        if self.adb.serialno in special_device_list:
+            # 上面已经确保了宽小于高，现在反过来->宽大于高
+            info["height"], info["width"] = info["width"], info["height"]
+            info["physical_width"], info["physical_height"] = info["physical_height"], info["physical_width"]
         return info
+
+    def _getRestrictedScreen(self):
+        """Get mRestrictedScreen from 'adb -s sno shell dumpsys window' """
+        # 获取设备有效内容的分辨率(屏幕内含有软按键、S6 Edge等设备，进行黑边去除.)
+        result = None
+        # 根据设备序列号拿到对应的mRestrictedScreen参数：
+        dumpsys_info = self.adb.cmd("shell dumpsys window", device=True)
+        match = re.search(r'mRestrictedScreen=.+', dumpsys_info)
+        if match:
+            infoline = match.group(0).strip()  # like 'mRestrictedScreen=(0,0) 720x1184'
+            resolution = infoline.split(" ")[1].split("x")
+            if isinstance(resolution, list) and len(resolution) == 2:
+                result = int(str(resolution[0])), int(str(resolution[1]))
+
+        return result
 
     def _getPhysicalDisplayInfo(self):
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
