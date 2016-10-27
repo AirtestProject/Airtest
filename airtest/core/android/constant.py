@@ -13,6 +13,6 @@ RELEASELOCK_APK = os.path.join(THISPATH, "apks", "releaselock.apk")
 RELEASELOCK_PACKAGE = "com.netease.releaselock"
 ACCESSIBILITYSERVICE_APK = os.path.join(THISPATH, "apks", "AccessibilityService.apk")
 ACCESSIBILITYSERVICE_PACKAGE = "com.netease.accessibility"
-ACCESSIBILITYSERVICE_VERSION = 2.0
+ACCESSIBILITYSERVICE_VERSION = 3.0
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
