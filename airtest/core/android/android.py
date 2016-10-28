@@ -971,7 +971,6 @@ class Android(Device):
         if check:
             self.check_app(apk_package)
 
-        self.disable_accessibility_service()
 
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
