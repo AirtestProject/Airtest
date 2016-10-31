@@ -1325,8 +1325,9 @@ class Android(Device):
         reg_cleanup(self.ow_proc.kill)
 
         def _refresh_by_ow():
+            
             line = self.ow_proc.stdout.readline()
-            if not line:
+            if line == "":
                 if LOGGING is not None: # may be None atexit
                     LOGGING.error("orientationWatcher has ended")
                 return None

@@ -429,8 +429,9 @@ def _find_pic_with_ignore_focus(screen, picdata, threshold, pictarget):
         # 缩放后的模板匹配
         LOGGING.debug("method: template match (with ignore & focus rects) ..")
         device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-        record_pos = pictarget.record_pos
-        ret = aircv.tpl_focus_ignore_after_resize_with_pre(screen, picdata, record_pos[0], record_pos[1], sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, ignore=pictarget.ignore, focus=pictarget.focus, resize_method=RESIZE_METHOD)
+        ret = aircv.template_focus_ignore_after_resize(screen, picdata, sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, ignore=pictarget.ignore, focus=pictarget.focus, resize_method=RESIZE_METHOD)
+        # record_pos = pictarget.record_pos
+        # ret = aircv.tpl_focus_ignore_after_resize_with_pre(screen, picdata, record_pos[0], record_pos[1], sch_resolution=pictarget.resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, ignore=pictarget.ignore, focus=pictarget.focus, resize_method=RESIZE_METHOD)
     except aircv.Error:
         ret = None
     except Exception as err:
