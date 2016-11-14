@@ -90,7 +90,7 @@ def _transparam(f):
         picargs = {}
         opargs = {}
         for k, v in kwargs.iteritems():
-            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "rect", "threshold", "target_pos", "record_pos", "resolution"]:
+            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "rect", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
                 picargs[k] = v
             else:
                 opargs[k] = v
@@ -365,12 +365,12 @@ def _get_screen_img(windows_hwnd=None):
     return screen
 
 
-def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False):
+def _find_pic(screen, picdata, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=[], sch_resolution=[], templateMatch=False, rgb=False):
     try:
         if templateMatch is True:
             LOGGING.debug("method: template match..")
             device_resolution = SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-            ret = aircv.find_template_after_resize(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR)
+            ret = aircv.find_template_after_resize(screen, picdata, sch_resolution=sch_resolution, src_resolution=device_resolution, design_resolution=[960, 640], threshold=0.6, resize_method=RESIZE_METHOD, check_color=CHECK_COLOR, rgb=rgb)
         # 参数要求：点击位置press_pos=[x,y]，搜索图像截屏分辨率sch_pixel=[a1,b1]，源图像截屏分辨率src_pixl=[a2,b2],如果参数输入不全，不调用区域预测：
         elif not record_pos:
             LOGGING.debug("method: sift in whole screen..")
@@ -399,7 +399,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
     for st in CVSTRATEGY:
         if st == "siftpre" and getattr(pictarget, "record_pos"):
             # 预测区域sift匹配
-            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, rgb=pictarget.rgb)
             LOGGING.debug("sift pre  result: %s", ret)
         elif st == "siftnopre":
             # 全局sift
@@ -613,7 +613,7 @@ class MoaPic(object):
     focus: [ [x_min, y_min, x_max, y_max], ... ]  识别时，只识别ignore包含的矩形区域 (可信度为面积加权平均)
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False):
         self.filename = filename
 
         print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
@@ -631,6 +631,8 @@ class MoaPic(object):
 
         self.ignore = ignore
         self.focus = focus
+
+        self.rgb = rgb
 
     def __repr__(self):
         return self.filepath

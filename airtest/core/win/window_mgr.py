@@ -130,7 +130,11 @@ class WindowMgr(object):
     def _window_enum_callback(self, hwnd, wildcard):
         '''Pass to win32gui.EnumWindows() to check all the opened windows'''
         window_title = win32gui.GetWindowText(hwnd)
-        window_title = window_title.decode("gbk")
+        try:
+            window_title = window_title.decode("gbk")
+        except:
+            import chardet
+            print "-*-*- windows-title codec:", chardet.detect(window_title)
         # print "%s %s" % (repr(window_title), repr(wildcard))
         if window_title:
             try:
