@@ -399,7 +399,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
     for st in CVSTRATEGY:
         if st == "siftpre" and getattr(pictarget, "record_pos"):
             # 预测区域sift匹配
-            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, rgb=pictarget.rgb)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
             LOGGING.debug("sift pre  result: %s", ret)
         elif st == "siftnopre":
             # 全局sift
@@ -407,7 +407,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
             LOGGING.debug("sift result: %s", ret)
         elif st == "tpl" and getattr(pictarget, "resolution"):
             # 缩放后的模板匹配
-            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True)
+            ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos, sch_resolution=pictarget.resolution, templateMatch=True, rgb=pictarget.rgb)
             LOGGING.debug("tpl result: %s", ret)
         else:
             LOGGING.warning("skip CV_STRATEGY:%s", st)
