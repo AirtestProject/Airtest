@@ -252,7 +252,7 @@ def main():
         # execute pre script
         if args.pre:
             set_basedir(args.pre)
-            for i in range(args.devcount):#pre for all devices
+            for i in range(len(DEVICE_LIST)):#pre for all devices
                 set_current(i)
                 exec_script(args.pre, scope=globals(),root=True)
 
@@ -269,7 +269,7 @@ def main():
         if args.post:
             try:
                 set_basedir(args.post)
-                for i in range(args.devcount):#post for all devices
+                for i in range(len(DEVICE_LIST)):#post for all devices
                     set_current(i)
                     exec_script(args.post, scope=globals(),root=True)
             except:
