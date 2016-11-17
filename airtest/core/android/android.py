@@ -243,11 +243,15 @@ class ADB(object):
             cmds = ["forward", "--remove-all"]
         self.cmd(cmds)
 
-    def install(self, filepath):
-        """adb install"""
+    def install(self, filepath, overinstall=False):
+        """adb install, if overinstall then adb install -r xxx"""
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
-        proc = self.start_cmd(['install', filepath])
+        if not overinstall:
+            proc = self.start_cmd(['install', filepath])
+        else:
+            proc = self.start_cmd(['install -r', filepath])
+
         nbsp = NonBlockingStreamReader(proc.stdout, name="adb_install")
         proc.wait()
 
@@ -922,15 +926,17 @@ class Android(Device):
         self.adb.shell('settings put secure accessibility_enabled 0')
         self.adb.shell('settings put secure enabled_accessibility_services 0')
 
-    def install_app(self, filepath, reinstall=False, check=True):
+    def install_app(self, filepath, reinstall=False, overinstall=False, check=True):
         """
         安装应用
+        overinstall: 不管应用在不在，直接覆盖安装；
+        reinstall: 如果在则先卸载再安装，不在则直接安装。
         """
         # 先解析apk，看是否存在已安装的app
         packages = self.list_app()
         apk = apkparser.APK(filepath)
         apk_package = apk.get_package()
-        if apk_package in packages:
+        if apk_package in packages and not overinstall:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
                 LOGGING.info("package:%s already exists, uninstall first", apk_package)
@@ -967,7 +973,10 @@ class Android(Device):
 
         # rm all apks in /data/local/tmp to get enouph space
         self.adb.shell("rm -f /data/local/tmp/*.apk")
-        self.adb.install(filepath)
+        if not overinstall:
+            self.adb.install(filepath)
+        else:
+            self.adb.install(filepath, overinstall=overinstall)
         if check:
             self.check_app(apk_package)
 
