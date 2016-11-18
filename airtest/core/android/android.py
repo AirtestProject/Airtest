@@ -250,7 +250,7 @@ class ADB(object):
         if not overinstall:
             proc = self.start_cmd(['install', filepath])
         else:
-            proc = self.start_cmd(['install -r', filepath])
+            proc = self.start_cmd(['install', '-r', filepath])
 
         nbsp = NonBlockingStreamReader(proc.stdout, name="adb_install")
         proc.wait()
