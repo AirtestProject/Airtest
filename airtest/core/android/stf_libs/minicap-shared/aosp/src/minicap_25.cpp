@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <math.h>
+#include <dlfcn.h>
 
 #include <binder/ProcessState.h>
 
@@ -69,14 +70,7 @@ error_name(int32_t err) {
   }
 }
 
-// This trick is needed for many Samsung devices running 5.1. Examples include
-// Galaxy S5 Neo, Galaxy J1, Galaxy A8 and so on.
-struct CompatFrameAvailableListener : public virtual android::RefBase {
-  virtual void onFrameAvailable(const android::BufferItem& item) = 0;
-  virtual void onFrameReplaced() {};
-};
-
-class FrameProxy: public CompatFrameAvailableListener {
+class FrameProxy: public android::ConsumerBase::FrameAvailableListener {
 public:
   FrameProxy(Minicap::FrameAvailableListener* listener): mUserListener(listener) {
   }
@@ -199,7 +193,7 @@ private:
   android::sp<android::IGraphicBufferConsumer> mBufferConsumer;
   android::sp<android::CpuConsumer> mConsumer;
   android::sp<android::IBinder> mVirtualDisplay;
-  android::sp<android::CpuConsumer::FrameAvailableListener> mFrameProxy;
+  android::sp<FrameProxy> mFrameProxy;
   Minicap::FrameAvailableListener* mUserFrameAvailableListener;
   bool mHaveBuffer;
   bool mHaveRunningDisplay;
@@ -270,12 +264,35 @@ private:
     mConsumer->setName(android::String8("minicap"));
 
     MCINFO("Creating frame waiter");
-    mFrameProxy = reinterpret_cast<android::CpuConsumer::FrameAvailableListener*>(new FrameProxy(mUserFrameAvailableListener));
+    mFrameProxy = new FrameProxy(mUserFrameAvailableListener);
     mConsumer->setFrameAvailableListener(mFrameProxy);
 
     MCINFO("Publishing virtual display");
     android::SurfaceComposerClient::openGlobalTransaction();
-    android::SurfaceComposerClient::setDisplaySurface(mVirtualDisplay, mBufferProducer);
+
+    // Well, this is just horrible. Thanks 7.1 Developer Preview.
+    typedef void (*setDisplaySurfaceAOSP_t)(android::sp<android::IBinder> const&, android::sp<android::IGraphicBufferProducer> const&);
+    typedef void (*setDisplaySurface71DP_t)(android::sp<android::IBinder> const&, android::sp<android::IGraphicBufferProducer>);
+
+    // This is the standard AOSP symbol.
+    setDisplaySurfaceAOSP_t setDisplaySurfaceAOSP = (setDisplaySurfaceAOSP_t) dlsym(RTLD_DEFAULT, "_ZN7android21SurfaceComposerClient17setDisplaySurfaceERKNS_2spINS_7IBinderEEERKNS1_INS_22IGraphicBufferProducerEEE");
+    if (setDisplaySurfaceAOSP != NULL) {
+      // Yay! Things are like they're supposed to be!
+      setDisplaySurfaceAOSP(mVirtualDisplay, mBufferProducer);
+    }
+    else {
+      // This is the 7.1 Developer Preview symbol.
+      setDisplaySurface71DP_t setDisplaySurface71DP = (setDisplaySurface71DP_t) dlsym(RTLD_DEFAULT, "_ZN7android21SurfaceComposerClient17setDisplaySurfaceERKNS_2spINS_7IBinderEEENS1_INS_22IGraphicBufferProducerEEE");
+      if (setDisplaySurface71DP != NULL) {
+        MCINFO("Found 7.1 Developer Preview SurfaceComposerClient::setDisplaySurface");
+        setDisplaySurface71DP(mVirtualDisplay, mBufferProducer);
+      }
+      else {
+        MCERROR("Unable to find AOSP or 7.1 DP style SurfaceComposerClient::setDisplaySurface");
+        return android::NAME_NOT_FOUND;
+      }
+    }
+
     android::SurfaceComposerClient::setDisplayProjection(mVirtualDisplay,
       android::DISPLAY_ORIENTATION_0, layerStackRect, visibleRect);
     android::SurfaceComposerClient::setDisplayLayerStack(mVirtualDisplay, 0); // default stack

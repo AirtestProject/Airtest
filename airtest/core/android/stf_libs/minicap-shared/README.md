@@ -17,7 +17,7 @@ Using this setup, the minimum server-side machine requirements are:
 * [docker](https://www.docker.com/)
 * [SSH](http://www.openssh.com/)
 * A user account with SSH public key authentication and sudo-less access to docker
-* Approximately 20GB of disk space per checked out branch, and approximately 60GB for a full mirror. We'll get to the branches later. We recommend a 512GB SSD, possibly more if you wish to compile other things as well (i.e. not just minicap).
+* Depending on the SDK version, 25-60GB of disk space per built branch, and approximately 120GB for a full mirror. We'll get to the branches later. We recommend a 1TB SSD, possibly more if you wish to compile other things as well (i.e. not just minicap). With branch and mirror sizes ever growing, 512GB will soon not be enough, so don't bother if you want to keep everything on one disk.
 
 You'll also need [rsync](https://rsync.samba.org/) and [SSH](http://www.openssh.com/) properly set up on your development machine.
 
@@ -50,11 +50,13 @@ Currently the following branches are required to build the libraries for all sup
 | android-4.4_r1      | 19  | openstf/aosp:jdk6             |
 | android-5.0.1_r1    | 21  | openstf/aosp:jdk7             |
 | android-5.1.0_r1    | 22  | openstf/aosp:jdk7             |
-| android-m-preview-2 | 23  | openstf/aosp:jdk7             |
+| android-6.0.0_r1    | 23  | openstf/aosp:jdk7             |
+| android-7.0.0_r1    | 24  | openstf/aosp:jdk8             |
+| android-7.1.0_r1    | 25  | openstf/aosp:jdk8             |
 
-Furthermore, to make use of our provided Makefile, you should check out the branches to `/srv/aosp` for maximum ease of use.
+Furthermore, to make use of our provided Makefile, you should check out the branches to `/media/aosp` for maximum ease of use.
 
-To check out the branches, you have two options. To reduce download time and avoid bandwidth caps (on the server side), it would be advisable to fetch a full local mirror and then checkout out the individual branches from there. What tends to happen, though, is that the mirror manifest does not get updated quickly enough for new branches, and may be missing a repository or two, making it practically impossible to check out the branch you want. Additionally, the mirror takes over 50GB of disk space in addition to the checkouts.
+To check out the branches, you have two options. To reduce download time and avoid bandwidth caps (on the server side), it would be advisable to fetch a full local mirror and then checkout out the individual branches from there. What tends to happen, though, is that the mirror manifest does not get updated quickly enough for new branches, and may be missing a repository or two, making it practically impossible to check out the branch you want. Additionally, the mirror takes over 120GB of disk space in addition to the checkouts.
 
 You can also skip the mirror and download each branch directly, but that will stress the AOSP server unnecessarily.
 
@@ -89,7 +91,7 @@ Now that we're a bit more familiar with the helper script, let's start fetching 
 
 ```bash
 docker run -ti --rm \
-    -v /srv/aosp/mirror:/mirror \
+    -v /media/aosp/mirror:/mirror \
     -v $PWD/.gitcookies:/root/.gitcookies:ro \
     openstf/aosp:jdk7 \
     /aosp.sh create-mirror
@@ -97,7 +99,7 @@ docker run -ti --rm \
 
 This will take a LONG time, easily several hours. You may wish to leave it running overnight. If an error occurs (it will tell you), run the same command again and again until it finishes without errors.
 
-When the command is done, you should have a copy of the latest mirror in `/srv/aosp/mirror`. We will mount this mirror when checking out individual branches.
+When the command is done, you should have a copy of the latest mirror in `/media/aosp/mirror`. We will mount this mirror when checking out individual branches.
 
 You should rerun the command whenever a new branch you're interested in gets added to AOSP to sync the mirrored repos.
 
@@ -109,8 +111,8 @@ For each branch in the table, run the following command:
 
 ```bash
 docker run -ti --rm \
-    -v /srv/aosp/mirror:/mirror \
-    -v /srv/aosp/android-5.1.0_r1:/aosp \
+    -v /media/aosp/mirror:/mirror \
+    -v /media/aosp/android-5.1.0_r1:/aosp \
     -v $PWD/.gitcookies:/root/.gitcookies:ro \
     openstf/aosp:jdk7 \
     /aosp.sh checkout-branch android-5.1.0_r1
@@ -128,7 +130,7 @@ For each branch you wish to download directly from the AOSP servers, run the fol
 
 ```bash
 docker run -ti --rm \
-    -v /srv/aosp/android-5.1.0_r1:/aosp \
+    -v /media/aosp/android-5.1.0_r1:/aosp \
     -v $PWD/.gitcookies:/root/.gitcookies:ro \
     openstf/aosp:jdk7 \
     /aosp.sh checkout-branch --no-mirror android-5.1.0_r1
@@ -175,3 +177,25 @@ Our advice? Be damn sure your code compiles before actually compiling :)
 Alternatively, you may wish to temporarily remove other targets from the `Makefile` all target when working on bigger changes but focusing on a single branch.
 
 In any case, congratulations, you're done!
+
+### Tips
+
+Here's a systemd unit to keep an external disk mounted in `/media/aosp`. It assumes you have a btrfs-formatted partition labeled `AOSP` on a disk somewhere, mine's on an external SSD. Example of how to create one:
+
+```sh
+mkfs.btrfs -L AOSP /dev/sdc1
+```
+
+And here's the corresponding unit:
+
+```systemd
+[Mount]
+What=/dev/disk/by-label/AOSP
+Where=/media/aosp
+Type=btrfs
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now just run `systemctl enable media-aosp.mount && systemctl start media-aosp.mount`.

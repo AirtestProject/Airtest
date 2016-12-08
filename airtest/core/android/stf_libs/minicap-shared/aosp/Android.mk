@@ -5,8 +5,10 @@ LOCAL_MODULE := minicap
 
 LOCAL_MODULE_TAGS := optional
 
-ifeq      ($(OVERRIDE_PLATFORM_SDK_VERSION),23)
-LOCAL_SRC_FILES += src/minicap_23.cpp
+ifeq      ($(PLATFORM_SDK_VERSION),25)
+LOCAL_SRC_FILES += src/minicap_25.cpp
+else ifeq ($(PLATFORM_SDK_VERSION),24)
+LOCAL_SRC_FILES += src/minicap_24.cpp
 else ifeq ($(PLATFORM_SDK_VERSION),23)
 LOCAL_SRC_FILES += src/minicap_23.cpp
 else ifeq ($(PLATFORM_SDK_VERSION),22)
@@ -15,15 +17,6 @@ else ifeq ($(PLATFORM_SDK_VERSION),21)
 LOCAL_SRC_FILES += src/minicap_21.cpp
 else ifeq ($(PLATFORM_SDK_VERSION),19)
 LOCAL_SRC_FILES += src/minicap_19.cpp
-
-ifeq ($(TARGET_ARCH),x86)
-LOCAL_SRC_FILES += \
-	src/override-19/ConsumerBase.cpp \
-	src/override-19/CpuConsumer.cpp
-LOCAL_CFLAGS += \
-	-DUSE_CUSTOM_CONSUMER=1
-endif
-
 else ifeq ($(PLATFORM_SDK_VERSION),18)
 LOCAL_SRC_FILES += src/minicap_18.cpp
 else ifeq ($(PLATFORM_SDK_VERSION),17)

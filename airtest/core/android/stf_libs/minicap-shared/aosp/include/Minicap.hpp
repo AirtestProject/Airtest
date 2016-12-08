@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-
 class Minicap {
 public:
   enum CaptureMethod {
