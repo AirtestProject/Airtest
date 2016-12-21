@@ -253,7 +253,9 @@ private:
     );
 
     MCINFO("Creating CPU consumer");
-    mConsumer = new android::CpuConsumer(3);
+    // Some devices have a modified, larger CpuConsumer. Try to account
+    // for that by increasing the size.
+    mConsumer = new(operator new(sizeof(android::CpuConsumer) + 100)) android::CpuConsumer(3);
     mConsumer->setName(android::String8("minicap"));
 
     MCINFO("Creating buffer queue");

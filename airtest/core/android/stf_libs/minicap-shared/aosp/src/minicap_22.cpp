@@ -69,7 +69,14 @@ error_name(int32_t err) {
   }
 }
 
-class FrameProxy: public android::ConsumerBase::FrameAvailableListener {
+// This trick is needed for many Samsung devices running 5.1. Examples include
+// Galaxy S5 Neo, Galaxy J1, Galaxy A8 and so on.
+struct CompatFrameAvailableListener : public virtual android::RefBase {
+  virtual void onFrameAvailable(const android::BufferItem& item) = 0;
+  virtual void onFrameReplaced() {};
+};
+
+class FrameProxy: public CompatFrameAvailableListener {
 public:
   FrameProxy(Minicap::FrameAvailableListener* listener): mUserListener(listener) {
   }
@@ -192,7 +199,7 @@ private:
   android::sp<android::IGraphicBufferConsumer> mBufferConsumer;
   android::sp<android::CpuConsumer> mConsumer;
   android::sp<android::IBinder> mVirtualDisplay;
-  android::sp<FrameProxy> mFrameProxy;
+  android::sp<android::CpuConsumer::FrameAvailableListener> mFrameProxy;
   Minicap::FrameAvailableListener* mUserFrameAvailableListener;
   bool mHaveBuffer;
   bool mHaveRunningDisplay;
@@ -263,7 +270,7 @@ private:
     mConsumer->setName(android::String8("minicap"));
 
     MCINFO("Creating frame waiter");
-    mFrameProxy = new FrameProxy(mUserFrameAvailableListener);
+    mFrameProxy = reinterpret_cast<android::CpuConsumer::FrameAvailableListener*>(new FrameProxy(mUserFrameAvailableListener));
     mConsumer->setFrameAvailableListener(mFrameProxy);
 
     MCINFO("Publishing virtual display");
