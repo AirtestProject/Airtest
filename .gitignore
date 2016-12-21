@@ -50,6 +50,7 @@ cover/
 moa/plugins/testlab/user_config.py
 
 .idea/
+.DS_Store
 screencapture.bmp
 log.html
 log.gif
