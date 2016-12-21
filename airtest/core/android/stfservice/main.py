@@ -129,11 +129,7 @@ def on_sd_status_event(message_type, message):
     print(message_obj)
 
 
-register(wire_pb2.EVENT_BATTERY, on_battery_event)
-register(wire_pb2.GET_SD_STATUS, on_sd_status_event)
-
-
-def test_client():
+def init_connection():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', 9998))
     s.setblocking(False)
@@ -167,6 +163,12 @@ def test_client():
     t = Thread(target=bg_worker)
     t.daemon = True
     t.start()
+
+
+def test_client():
+    register(wire_pb2.EVENT_BATTERY, on_battery_event)
+    register(wire_pb2.GET_SD_STATUS, on_sd_status_event)
+    init_connection()
     time.sleep(2)
     message = wait_for(wire_pb2.EVENT_ROTATION)
     message_obj = wire_pb2.RotationEvent()
