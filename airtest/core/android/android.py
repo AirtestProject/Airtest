@@ -893,8 +893,8 @@ class Android(Device):
 
     def check_app(self, package):
         output = self.adb.shell(['pm', 'list', 'packages', package])
-        if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]'%output)
+        if ('package:%s' % package) not in output.splitlines():
+            raise MoaError('package not found, output:[%s]' % output)
         return output.strip()
 
     def start_app(self, package, activity=None):
