@@ -225,12 +225,7 @@ def main():
 
     if args.kwargs:
         print "load kwargs", repr(args.kwargs)
-        # 中文逗号容错：
-        args_text = args.kwargs.replace("，", ",")
-        args_list = args_text.split(",")
-        for kv in args_list:
-            if not kv:
-                continue
+        for kv in args.kwargs.split(","):
             k, v = kv.split("=")
             if k == "findoutside":  # if extra arg is findoutside, set airtest-FINDOUTSIDE
                 set_find_outside(v)
