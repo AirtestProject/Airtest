@@ -1,13 +1,18 @@
 # _*_ coding:UTF-8 _*_
-from airtest.core.device import Device
-from airtest.aircv import aircv
-from window_mgr import WindowMgr, get_screen_shot, get_resolution, get_window_pos
-from mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
-from keyboard import key_input
-from winsendkey import SendKeys
-from PIL import ImageGrab
-import subprocess
+
 import sys
+import subprocess
+import win32process
+import win32com.client
+from PIL import ImageGrab
+
+from airtest.aircv import aircv
+from airtest.core.device import Device
+
+from winsendkey import SendKeys
+from keyboard import key_input
+from mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
+from window_mgr import WindowMgr, get_screen_shot, get_resolution, get_window_pos
 
 
 class Windows(Device):
@@ -109,6 +114,16 @@ class Windows(Device):
 
     def set_foreground(self):
         self.winmgr.set_foreground()
+        self.set_hwnd_focus()
+
+    def set_hwnd_focus(self):
+        """根据handle获取窗口焦点，使得键盘事件对该窗口生效."""
+        if self.handle:
+            _, pid = win32process.GetWindowThreadProcessId(self.handle)
+            shell = win32com.client.Dispatch("WScript.Shell")
+            shell.AppActivate('Console2')
+            shell.SendKeys('{UP}{ENTER}')
+            shell.AppActivate(pid)
 
     def get_window_pos(self):
         return self.winmgr.get_window_pos()

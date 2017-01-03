@@ -141,7 +141,7 @@ class WindowMgr(object):
                 m = re.search(wildcard, window_title)
             except:
                 m = None
-            if m != None:
+            if m is not None:
                 self._handle_found = hwnd
                 self._handle_list_found.append(hwnd)
                 print window_title.encode("utf8")
