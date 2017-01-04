@@ -56,6 +56,7 @@ DEVICE = None
 DEVICE_LIST = []
 KEEP_CAPTURE = False
 RECENT_CAPTURE = None
+RECENT_CAPTURE_PATH = None
 WATCHER = {}
 
 
@@ -514,22 +515,22 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, in
             screen, offset = crop_image(screen, pictarget.find_inside)
             if find_all:  # 如果是要find_all，就执行一下找到所有图片的逻辑:
                 ret = _find_all_pic(screen, picdata, threshold, pictarget)
-            elif pictarget.ignore or pictarget.focus:  # 只要含有ignore或focus参数，就使用_find_pic_with_ignore_focus方法进行匹配
+            # 只要含有ignore或focus参数，就使用_find_pic_with_ignore_focus方法进行匹配
+            elif pictarget.ignore or pictarget.focus:
                 ret = _find_pic_with_ignore_focus(screen, picdata, threshold, pictarget)
             else:
                 ret = _find_pic_by_strategy(screen, picdata, threshold, pictarget)
         else:
             LOGGING.warning("Whole screen is black, skip cv matching")
             ret, offset = None, None
-
-        if DEBUG:  # 如果指定调试状态，展示图像识别时的有效截屏区域：
+        # 如果指定调试状态，展示图像识别时的截屏图片：
+        if DEBUG:
             aircv.show(screen)
-
         # find_all相关：如果发现ret是个list，如果是[]或者None则换成None，list非空，则求出ret = ret_pos_list
         ret = _settle_ret_list(ret, pictarget, offset, wnd_pos)
-        if isinstance(ret, list):  # 如果发现返回的是个list，说明是find_all模式，直接返回这个结果ret_pos_list
+        # 如果发现返回的是个list，说明是find_all模式，直接返回这个结果ret_pos_list
+        if isinstance(ret, list):
             return ret
-
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
             if intervalfunc is not None:
@@ -537,9 +538,18 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, in
             for name, func in WATCHER.items():
                 LOGGING.info("exec watcher %s", name)
                 func()
-            # 超时则抛出异常
+            # 超时则抛出异常，如果没有超时则准备进行下次循环进行图片查找，
             if (time.time() - start_time) > timeout:
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
+            else:
+                # 如果不是持久使用同一张截屏，则本次循环的截屏文件需要删除以节省空间:
+                global RECENT_CAPTURE_PATH
+                if RECENT_CAPTURE_PATH and not KEEP_CAPTURE:
+                    try:
+                        os.remove(RECENT_CAPTURE_PATH)
+                    except Exception as err:
+                        traceback.print_exc()
+
             time.sleep(interval)
             continue
         else:
@@ -687,6 +697,8 @@ def snapshot(filename="screen.png", windows_hwnd=None):
         # no abspath in log
         _log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
         filename = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
+        global RECENT_CAPTURE_PATH
+        RECENT_CAPTURE_PATH = filename  # used for delete useless capture file
 
     if get_platform() == "Windows" and windows_hwnd:
         screen = DEVICE.snapshot_by_hwnd(filename=filename, hwnd_to_snap=windows_hwnd)
