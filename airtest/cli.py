@@ -202,7 +202,7 @@ def main():
                 else:
                     return result_str.encode("utf8")  # 在Linux\Darwin上打印
             else:
-                print ""
+                return ""
 
         author, title, desc = extarct_param("__author__"), extarct_param("__title__"), extarct_param("__desc__")
         print author, title, desc
