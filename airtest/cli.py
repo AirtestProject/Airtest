@@ -162,6 +162,7 @@ def forever_handle(args):  # args先传着，有需要用到其他参数可以�
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
+    ap.add_argument("--getinfo", help="get script info, like __author__ __title__ __desc__", action="store_true")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
     ap.add_argument("--setudid", help="set ios device udid", nargs="?", const="")
@@ -176,6 +177,39 @@ def main():
 
     global args
     args = ap.parse_args()
+
+    # get script info, and print to stdout:
+    if args.getinfo:
+        script_path, pyfilename = args.script, os.path.basename(args.script).replace(".owl", ".py")
+        pyfilepath = os.path.join(script_path, pyfilename)
+        # load script
+        pyfilecontent = open(pyfilepath).read()
+        # extract params value from script:
+        import platform
+        os_name = platform.system()
+        def extarct_param(param_name):
+            # 先找三引号，再找单个引号的，避免非贪婪模式出现问题.
+            reg_trian_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'''", '"""', "'''", '"""')
+            reg_single_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'", '"', "'", '"')
+            search_result = re.search(reg_trian_author, pyfilecontent, flags=re.S) or re.search(reg_single_author, pyfilecontent, flags=re.S)
+            if search_result is not None:
+                result_item = search_result.group()
+                # print result_item.encode("gbk")
+                result_str = result_item.split("=")[-1].strip(" \'\"\n")
+                if os_name == "Windows":
+                    # print result_str
+                    return result_str.encode("gbk")  # 在Windows上打印
+                else:
+                    return result_str.encode("utf8")  # 在Linux\Darwin上打印
+            else:
+                print ""
+
+        author, title, desc = extarct_param("__author__"), extarct_param("__title__"), extarct_param("__desc__")
+        print author, title, desc
+        result_json = {"author": author, "title": title, "desc": desc}
+        print "\n\n", result_json
+        # 直接return
+        return        
 
     # loading util file
     if args.utilfile:
