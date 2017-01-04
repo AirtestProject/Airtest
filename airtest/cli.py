@@ -188,7 +188,7 @@ def main():
         import platform
         os_name = platform.system()
         def extarct_param(param_name):
-            # 先找三引号，再找单个引号的，避免非贪婪模式出现问题.
+            # try to find tri ' " first, then single ' "
             reg_trian_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'''", '"""', "'''", '"""')
             reg_single_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'", '"', "'", '"')
             search_result = re.search(reg_trian_author, pyfilecontent, flags=re.S) or re.search(reg_single_author, pyfilecontent, flags=re.S)
@@ -205,10 +205,11 @@ def main():
                 return ""
 
         author, title, desc = extarct_param("__author__"), extarct_param("__title__"), extarct_param("__desc__")
-        print author, title, desc
+        # print author, title, desc
         result_json = {"author": author, "title": title, "desc": desc}
-        print "\n\n", result_json
-        # 直接return
+        import json
+        print json.dumps(result_json)
+        # just return here
         return        
 
     # loading util file
