@@ -195,7 +195,7 @@ def main():
             if search_result is not None:
                 result_item = search_result.group()
                 # print result_item.encode("gbk")
-                result_str = result_item.split("=")[-1].strip(" \'\"\n")
+                result_str = result_item.split("=")[-1].strip(" \'\"\r\n")
                 if os_name == "Windows":
                     # print result_str
                     return result_str.encode("gbk")  # 在Windows上打印
