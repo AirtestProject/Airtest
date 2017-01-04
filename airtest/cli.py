@@ -11,6 +11,7 @@ import core.main
 from urllib import unquote
 from core.main import *
 from core.error import MinicapError, MinitouchError, AdbError
+from core.utils.script_info_utils import get_script_info
 # import here to build dependent modules
 import requests
 import re
@@ -180,37 +181,9 @@ def main():
 
     # get script info, and print to stdout:
     if args.getinfo:
-        script_path, pyfilename = args.script, os.path.basename(args.script).replace(".owl", ".py")
-        pyfilepath = os.path.join(script_path, pyfilename)
-        # load script
-        pyfilecontent = open(pyfilepath).read()
-        # extract params value from script:
-        import platform
-        os_name = platform.system()
-        def extarct_param(param_name):
-            # try to find tri ' " first, then single ' "
-            reg_trian_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'''", '"""', "'''", '"""')
-            reg_single_author = "%s\s*=\s*(%s|%s).*?(%s|%s)" % (param_name, "'", '"', "'", '"')
-            search_result = re.search(reg_trian_author, pyfilecontent, flags=re.S) or re.search(reg_single_author, pyfilecontent, flags=re.S)
-            if search_result is not None:
-                result_item = search_result.group()
-                # print result_item.encode("gbk")
-                result_str = result_item.split("=")[-1].strip(" \'\"\r\n")
-                if os_name == "Windows":
-                    # print result_str
-                    return result_str.encode("gbk")  # 在Windows上打印
-                else:
-                    return result_str.encode("utf8")  # 在Linux\Darwin上打印
-            else:
-                return ""
-
-        author, title, desc = extarct_param("__author__"), extarct_param("__title__"), extarct_param("__desc__")
-        # print author, title, desc
-        result_json = {"author": author, "title": title, "desc": desc}
-        import json
-        print json.dumps(result_json)
-        # just return here
-        return        
+        json_info = get_script_info(args.script)
+        print json_info
+        return
 
     # loading util file
     if args.utilfile:
