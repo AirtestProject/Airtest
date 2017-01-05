@@ -1181,8 +1181,9 @@ class Android(Device):
 
     def getPhysicalDisplayInfo(self):
         """维护了两套分辨率：
-            (physical_width, physical_height)为设备的物理分辨率，
-            (width, height)为屏幕的有效内容分辨率.
+            (physical_width, physical_height)为设备的物理分辨率， (minitouch点击坐标转换要用这个)
+            (width, height)为屏幕的有效内容分辨率. (游戏图像适配的分辨率要用这个)
+            (max_x, max_y)为点击范围的分辨率。
         """
         info = self._getPhysicalDisplayInfo()
         # 记录物理屏幕的宽高(供屏幕映射使用)：
@@ -1297,9 +1298,10 @@ class Android(Device):
         return 0 if self.size["height"] > self.size['width'] else 1
 
     def _transformPointByOrientation(self, (x, y)):
+        """图片坐标转换为物理坐标，即相对于手机物理左上角的坐标(minitouch点击的是物理坐标)."""
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self.size["width"], self.size["height"]),
+            (self.size["physical_width"], self.size["physical_height"]),
             self.size["orientation"]
         )
         return x, y

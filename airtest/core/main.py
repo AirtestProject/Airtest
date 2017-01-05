@@ -362,7 +362,7 @@ def _get_screen_img(windows_hwnd=None):
     if KEEP_CAPTURE and RECENT_CAPTURE is not None:
         screen = RECENT_CAPTURE
     else:
-        screen = snapshot(windows_hwnd=windows_hwnd)
+        screen = _snapshot(windows_hwnd=windows_hwnd)
     return screen
 
 
@@ -584,6 +584,26 @@ def _settle_ret_list(ret, pictarget, offset=None, wnd_pos=None):
         return ret
 
 
+@logwrap
+@platform(on=["Android", "Windows", "IOS"])
+def _snapshot(filename="screen.png", windows_hwnd=None):
+    filename = "%s.jpg" % int(time.time() * 1000)
+    # to use it as snapshot file name:
+    global RECENT_CAPTURE_PATH
+    RECENT_CAPTURE_PATH = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
+    # write filepath into log:
+    if SAVE_SCREEN:
+        _log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
+    # device snapshot: default not save
+    if get_platform() == "Windows" and windows_hwnd:
+        screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
+    else:
+        screen = DEVICE.snapshot(filename=None)
+    global RECENT_CAPTURE
+    RECENT_CAPTURE = screen  # used for keep_capture()
+    return screen
+
+
 def keep_capture(flag=True):
     global KEEP_CAPTURE
     KEEP_CAPTURE = flag
@@ -685,23 +705,14 @@ def uninstall(package):
 
 
 @logwrap
-@platform(on=["Android", "Windows", "IOS"])
-def snapshot(filename="screen.png", windows_hwnd=None):
-    filename = "%s.jpg" % int(time.time() * 1000)
-    # to use it as snapshot file name:
-    global RECENT_CAPTURE_PATH
-    RECENT_CAPTURE_PATH = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
-    # write filepath into log:
-    if SAVE_SCREEN:
-        _log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
-    # device snapshot: default not save
-    if get_platform() == "Windows" and windows_hwnd:
-        screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
+def snapshot(filename=None, windows_hwnd=None):
+    """capture device screen and save it into file."""
+    screen = _snapshot()
+    if filename is None:
+        aircv.imwrite(RECENT_CAPTURE_PATH, screen)
     else:
-        screen = DEVICE.snapshot(filename=None)
-    global RECENT_CAPTURE
-    RECENT_CAPTURE = screen  # used for keep_capture()
-    return screen
+        filename = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
+        aircv.imwrite(filename, screen)
 
 
 @logwrap
