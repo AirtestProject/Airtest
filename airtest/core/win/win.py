@@ -25,7 +25,8 @@ class Windows(Device):
     def shell(self, cmd):
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename="tmp.png"):
+    def snapshot(self, filename=None):
+        """default not write into file."""
         # # 将回放脚本时的截图方式，换成ImageGrab()
         # screen = get_screen_shot(output=None)
         # # screen = ImageGrab.grab()
@@ -57,6 +58,7 @@ class Windows(Device):
             return img
 
     def get_wnd_pos_by_hwnd(self, hwnd, use_crop_screen=True):
+        """ 根据窗口句柄，返回窗口左上角的位置. """
         # 如果使用的是use_crop_screen的方法，计算wnd_pos时就不能有负数了：
         #     否则在窗口左边在屏幕外时，将会有实际操作的左偏移：
         wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd, use_crop_screen=use_crop_screen)

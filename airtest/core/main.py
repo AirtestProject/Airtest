@@ -538,21 +538,16 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, in
             for name, func in WATCHER.items():
                 LOGGING.info("exec watcher %s", name)
                 func()
-            # 超时则抛出异常，如果没有超时则准备进行下次循环进行图片查找，
+            # if timeout and not found: save img and raise
             if (time.time() - start_time) > timeout:
+                aircv.imwrite(RECENT_CAPTURE_PATH, screen)
                 raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
-            else:
-                # 如果不是持久使用同一张截屏，则本次循环的截屏文件需要删除以节省空间:
-                global RECENT_CAPTURE_PATH
-                if RECENT_CAPTURE_PATH and not KEEP_CAPTURE:
-                    try:
-                        os.remove(RECENT_CAPTURE_PATH)
-                    except Exception as err:
-                        traceback.print_exc()
 
             time.sleep(interval)
             continue
         else:
+            # if image found, save img and return
+            aircv.imwrite(RECENT_CAPTURE_PATH, screen)
             ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
             if offset:   # 需要把find_inside造成的crop偏移，加入到操作偏移值offset中：
                 ret_pos = int(ret_pos[0] + offset[0]), int(ret_pos[1] + offset[1])
@@ -692,18 +687,18 @@ def uninstall(package):
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def snapshot(filename="screen.png", windows_hwnd=None):
+    filename = "%s.jpg" % int(time.time() * 1000)
+    # to use it as snapshot file name:
+    global RECENT_CAPTURE_PATH
+    RECENT_CAPTURE_PATH = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
+    # write filepath into log:
     if SAVE_SCREEN:
-        filename = "%s.jpg" % int(time.time() * 1000)
-        # no abspath in log
         _log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
-        filename = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
-        global RECENT_CAPTURE_PATH
-        RECENT_CAPTURE_PATH = filename  # used for delete useless capture file
-
+    # device snapshot: default not save
     if get_platform() == "Windows" and windows_hwnd:
-        screen = DEVICE.snapshot_by_hwnd(filename=filename, hwnd_to_snap=windows_hwnd)
+        screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
     else:
-        screen = DEVICE.snapshot(filename=filename)
+        screen = DEVICE.snapshot(filename=None)
     global RECENT_CAPTURE
     RECENT_CAPTURE = screen  # used for keep_capture()
     return screen

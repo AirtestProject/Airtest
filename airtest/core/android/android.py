@@ -984,7 +984,8 @@ class Android(Device):
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
 
-    def snapshot(self, filename="tmp.png", ensure_orientation=True):
+    def snapshot(self, filename=None, ensure_orientation=True):
+        """default not write into file."""
         if self.minicap and self.minicap.stream_mode:
             screen = self.minicap.get_frame_from_stream()
         elif self.minicap:
@@ -996,11 +997,10 @@ class Android(Device):
 
         # 保证方向是正的
         if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
-            h, w = screen.shape[:2] #cv2的shape是高度在前面!!!!
-            if w < h: #当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+            h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
+            if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                 screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
-        if filename:  # 这里图像格式不对，要写+读才对，to be fixed
-            # open(filename, "wb").write(screen)
+        if filename:
             aircv.imwrite(filename, screen)
         return screen
 

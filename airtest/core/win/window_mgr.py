@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-import win32gui
-import win32ui
-import win32con
-import win32api
+
+import os
 import re
 import time
 import cv2
+
+import win32ui
+import win32gui
+import win32con
+import win32api
 
 
 class WindowMgr(object):
@@ -252,7 +255,6 @@ class WindowMgr(object):
 def get_screen_shot(output="screenshot.png"):
     hwnd = win32gui.GetDesktopWindow()
     # print hwnd
-
     # you can use this to capture only a specific window
     #l, t, r, b = win32gui.GetWindowRect(hwnd)
     #w = r - l
@@ -269,22 +271,21 @@ def get_screen_shot(output="screenshot.png"):
     t = vscreeny = win32api.GetSystemMetrics(SM_YVIRTUALSCREEN)
     r = l + w
     b = t + h
-     
     # print l, t, r, b, ' -> ', w, h
-     
+
     hwndDC = win32gui.GetWindowDC(hwnd)
     mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
     saveDC = mfcDC.CreateCompatibleDC()
-     
+
     saveBitMap = win32ui.CreateBitmap()
     saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
     saveDC.SelectObject(saveBitMap)
     saveDC.BitBlt((0, 0), (w, h),  mfcDC,  (l, t),  win32con.SRCCOPY)
-    saveBitMap.SaveBitmapFile(saveDC,  'screencapture.bmp')
-
+    saveBitMap.SaveBitmapFile(saveDC,  "screencapture.bmp")
+    # get screencapture in cv2 format
     img = cv2.imread("screencapture.bmp")
-    # cv2.imshow("123", img)
-    # cv2.waitKey(0)
+    # delete temp file:
+    os.remove("screencapture.bmp")
     return img
 
 
