@@ -534,6 +534,7 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, in
         # 如果识别失败，调用用户指定的intervalfunc
         if ret is None:
             if intervalfunc is not None:
+                aircv.imwrite(RECENT_CAPTURE_PATH, screen)
                 intervalfunc()
             for name, func in WATCHER.items():
                 LOGGING.info("exec watcher %s", name)
