@@ -101,6 +101,7 @@ def _transparam(f):
 
 
 def get_platform():
+    global DEVICE
     for name, cls in device.DEV_TYPE_DICT.items():
         if DEVICE.__class__ == cls:
             return name
@@ -281,9 +282,9 @@ def set_windows(handle=None, window_title=None):
     RESIZE_METHOD = RESIZE_METHOD or aircv.no_resize
 
 
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows","IOS"])
 def set_current(index):
-    global DEVICE
+    global DEVICE,DEVICE_LIST
     if index > len(DEVICE_LIST):
         raise IndexError("device index out of range")
     DEVICE = DEVICE_LIST[index]
@@ -398,6 +399,7 @@ def _find_pic_by_strategy(screen, picdata, threshold, pictarget, strict_ret=Fals
     '''图像搜索时，按照CVSTRATEGY的顺序，依次使用不同方法进行图像搜索'''
     ret = None
     for st in CVSTRATEGY:
+        #threshold = 0.4
         if st == "siftpre" and getattr(pictarget, "record_pos"):
             # 预测区域sift匹配
             ret = _find_pic(screen, picdata, threshold=threshold, target_pos=pictarget.target_pos, record_pos=pictarget.record_pos)
@@ -525,7 +527,7 @@ def _loop_find(pictarget, timeout=FIND_TIMEOUT, threshold=None, interval=0.5, in
             ret, offset = None, None
         # 如果指定调试状态，展示图像识别时的截屏图片：
         if DEBUG:
-            aircv.show(screen)
+            aircv.show(screen)        
         # find_all相关：如果发现ret是个list，如果是[]或者None则换成None，list非空，则求出ret = ret_pos_list
         ret = _settle_ret_list(ret, pictarget, offset, wnd_pos)
         # 如果发现返回的是个list，说明是find_all模式，直接返回这个结果ret_pos_list
@@ -642,7 +644,7 @@ class MoaPic(object):
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False):
         self.filename = filename
 
-        print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
+        #print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
 
         self.filepath = filename if os.path.isabs(filename) else os.path.join(BASE_DIR, filename) 
         self.threshold = threshold  # if threshold is not None else THRESHOLD
@@ -730,7 +732,7 @@ def home():
 
 @logwrap
 @_transparam
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows","IOS"])
 def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
     '''
     @param if_exists: touch only if the target pic exists
@@ -773,7 +775,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
 
 @logwrap
 @_transparam
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows","IOS"])
 def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
@@ -853,7 +855,7 @@ def keyevent(keyname, escape=False, combine=None, delay=0, times=1):
 
 
 @logwrap
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows","IOS"])
 def text(text, delay=0, clear=False, enter=True):
     text_temp = text.lower()
     if clear is True:
@@ -871,10 +873,10 @@ def text(text, delay=0, clear=False, enter=True):
             DEVICE.keyevent('KEYCODE_DEL')
     else:
         # 如果是android设备，则传入enter参数( 输入后是否执行enter操作 )
-        if get_platform() == "Windows":
-            DEVICE.text(text)
-        else:
+        if get_platform() == "Android":
             DEVICE.text(text, enter=enter)
+        else:
+            DEVICE.text(text)
 
     _delay_after_operation(delay)
 

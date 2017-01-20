@@ -2,4 +2,5 @@
 #
 
 import client
-import resign
+## use wda so no need to resign
+#import resign
