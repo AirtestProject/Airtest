@@ -535,8 +535,8 @@ class Minitouch(object):
             self.setup_client()
 
     def install(self, reinstall=False):
-        output = self.adb.shell("ls /data/local/tmp")
-        if not reinstall and "minitouch\r" in output:
+        output = self.adb.shell("ls /data/local/tmp/minitouch").strip()
+        if not reinstall and output == '/data/local/tmp/minitouch':
             LOGGING.debug("install_minitouch skipped")
             return
 
