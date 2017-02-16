@@ -323,8 +323,9 @@ class Minicap(object):
 
     def install(self, reinstall=False):
         """install or upgrade minicap"""
-        output = self.adb.shell("ls /data/local/tmp")
-        if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
+        existence_test = self.adb.shell("ls /data/local/tmp/minicap /data/local/tmp/minicap.so").strip().splitlines()
+        if not reinstall and "/data/local/tmp/minicap" in existence_test \
+                         and "/data/local/tmp/minicap.so" in existence_test:
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
             try:
                 version = int(output.split(":")[1])
