@@ -18,21 +18,23 @@ import base64
 from PIL import Image
 
 
-class XYTransformer(object):
-    """
-    transform xy by orientation
-    add by gzzhengshenshen, it is different with android
-    """
 
-    @staticmethod
-    def up_2_ori((x, y), (w, h), orientation):
-        if orientation == 1:
-            x, y = y, w - x
-        elif orientation == 2:
-            x, y = w - y, h - x
-        elif orientation == 3:
-            x, y = h - y, x
-        return x, y
+# class XYTransformer(object):
+#     """
+#     transform xy by orientation
+#     add by gzzhengshenshen, it is different with android
+#     """
+# 
+#     @staticmethod
+#     def up_2_ori((x, y), (w, h), orientation):
+#         if orientation == 1:
+#             x, y = y, w - x
+#         elif orientation == 2:
+#             x, y = w - y, h - x
+#         elif orientation == 3:
+#             x, y = h - y, x
+#         return x, y
+        
 
 
 class IOS(Device):
@@ -42,15 +44,24 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, udid=None, devip='10.254.40.44', process='mh', port=8100):
+    def __init__(self, udid=None, devip='10.254.27.201', process='mh', port=8100,quickshot=True):
         self.udid = udid
+        self.process = process
+        self.quickshot = quickshot
+        #wda driver, use to tap home,start app
         self.driver = wda.Client('http://localhost:%d' % (port))
+        #init wda session, updata when start app
+        #use to click/swipe/close app/get wda size
         sessionId = self.driver.status()['sessionId']
         self.session = wda.Session('http://localhost:%d' % (port), sessionId)
-        self.process = process
+        #init hunter client
         hunter_tokenid = devip_tokenid.get(devip)
         self.hunter = Hunter(hunter_tokenid, process, devip=devip)
+        #init display info
+        #attention：there is 3 size,phy_size/pic_size/wda_size
         self.get_display_info()
+        
+        
 
     def shell(self):
         raise NotImplementedError
@@ -58,79 +69,66 @@ class IOS(Device):
     def home(self):
         self.driver.home()
 
-    def snapshot(self, filename="tmp.png", quick=True):
+    def snapshot(self, filename="tmp.png"):
+        return self._snapshot(filename, self.quickshot)
+        
+    def _snapshot(self, filename="tmp.png", quick=True):
         """
         take snapshot
         filename: save screenshot to filename
         """
+        
+        filename = filename or "tmp.png"
         if quick:
-            ##从hunter获取的图片大小和方向需要进行处理
+            ##从hunter获取的图片已经旋转好了
             b64img = self.hunter.script('console.screenshot', watch='ret')
-            datas = base64.b64decode(b64img)
-            file_data = StringIO(datas)
-            image = Image.open(file_data)
-            # trans
-            method = getattr(Image, 'ROTATE_{}'.format(360 - self.size["rotation"]))
-            image = image.transpose(method)
-            filename = filename or "tmp.png"
-            image.save(filename)
-            with open(filename) as f:
-                datas = f.read()
-
+            datas = base64.b64decode(b64img)           
+#             file_data = StringIO(datas)
+#             image = Image.open(file_data)
+#             image.save(filename)
+             
         else:
             datas = utils.screenshot(self.udid)
-            if filename:
-                try:
-                    open(filename, 'wb').write(datas)
-                except IOError:
-                    raise MoaError("snapshot error, write file %s failed" % filename)
+            file_data = StringIO(datas)
+            image = Image.open(file_data)
+            method = getattr(Image, 'ROTATE_{}'.format(self.size["rotation"]))
+            image = image.transpose(method)
+            image.save(filename)
+            with open(filename) as f:
+                    datas = f.read()
         # 输出cv2对象
         screen = aircv.string_2_img(datas)
-        self.hunter_sca = 1.0 * self.size["height"] / screen.shape[:2][0] if quick else 1
         return screen
 
     def touch(self, pos, duration=None, isWDA=False):
-        pos = (pos[0] * self.hunter_sca, pos[1] * self.hunter_sca)
+        if self.quickshot:
+            pos = (pos[0]*self.hunter_sca,pos[1]*self.hunter_sca) 
+            
         if isWDA:
             self.session.tap(pos[0] / self.wda_sca, pos[1] / self.wda_sca)
         else:
-            x, y = XYTransformer.up_2_ori(
-                pos,
-                (self.size["width"], self.size["height"]),
-                self.size["orientation"]
-            )
             touch_mode_name = process_op_mod[self.process]["touch"]
             touch_mod = self.hunter.require(touch_mode_name)
-            touch_mod(x, y)
+            touch_mod(pos[0], pos[1])
 
-    def swipe(self, fpos, tpos, duration=0.5, step=2, isWDA=True):
-        fpos = (fpos[0] * self.hunter_sca, fpos[1] * self.hunter_sca)
-        tpos = (tpos[0] * self.hunter_sca, tpos[1] * self.hunter_sca)
+    def swipe(self, fpos, tpos, duration=0.5, step=2, isWDA=False):
+        if self.quickshot:
+            fpos = (fpos[0]*self.hunter_sca,fpos[1]*self.hunter_sca) 
+            tpos = (tpos[0]*self.hunter_sca,tpos[1]*self.hunter_sca) 
+    
         if isWDA:
-            self.session.swipe(fpos[0] / self.wda_sca, fpos[1] / self.wda_sca,
+            self.session.swipe(fpos[0] / self.wda_sca, fpos[1] / self.wda_sca, 
                                tpos[0] / self.wda_sca, tpos[1] / self.wda_sca, step)
-
         else:
-            x1, y1 = XYTransformer.up_2_ori(
-                fpos,
-                (self.size["width"], self.size["height"]),
-                self.size["orientation"]
-            )
-            x2, y2 = XYTransformer.up_2_ori(
-                tpos,
-                (self.size["width"], self.size["height"]),
-                self.size["orientation"]
-            )
-
             swipe_mode_name = process_op_mod[self.process]["swipe"]
             swipe_mod = self.hunter.require(swipe_mode_name)
-            swipe_mod(x1, y1, x2, y2, step)
+            swipe_mod(fpos[0], fpos[1], tpos[0], tpos[1], step)
 
     def keyevent(self):
         raise NotImplementedError
 
     def text(self, text):
-        """you need to click first"""
+        """you need to click textfield first"""
         self.session.send_keys(text)
 
     def start_app(self, appid, isWDA=True):
@@ -161,25 +159,30 @@ class IOS(Device):
         utils.uninstall_app(appid, self.udid)
 
     def get_display_info(self):
-        self.size = self.getPhysicalDisplayInfo()
-        self.wda_sca = min(self.size.values()) / min(self.session.window_size())
-        self.hunter_sca = 1
+        self.size = {}
         self.size["orientation"] = self.getDisplayOrientation()
         self.size["rotation"] = self.size["orientation"] * 90
+        self.size["height"],self.size["width"] = self.getPhysicalDisplayInfo()
+        self.wda_sca = 1.0*min(self.size["height"],self.size["width"]) / min(self.session.window_size())
+        self.hunter_sca = 1
+        if self.quickshot:
+            self.size["hunter_h"],self.size["hunter_w"] = self.getHunterDisplayInfo()
+            self.hunter_sca = 1.0*self.size["height"] / self.size["hunter_h"]
+        print self.size
         return self.size
 
     def getPhysicalDisplayInfo(self):
         """
         get size of screen, height must be bigger then width
         """
-        # have to take snapshot without quick
-        screen = self.snapshot(filename="init.png", quick=False)
+        screen = self._snapshot(filename = "init_phy.png",quick=False)
         h, w = screen.shape[:2]
-        size = dict(
-            width=w,
-            height=h,
-        )
-        return size
+        return h,w
+    
+    def getHunterDisplayInfo(self):
+        screen = self._snapshot(filename = "init_hunter.png",quick=True)
+        h, w = screen.shape[:2]
+        return h,w
 
     def getDisplayOrientation(self):
         """
@@ -188,10 +191,14 @@ class IOS(Device):
 
         return utils.get_orientation(self.udid)
 
+    # use to resize
     def getCurrentScreenResolution(self):
-        w, h = self.size["width"], self.size["height"]
-        if self.size["orientation"] in [1, 3]:
-            w, h = h, w
+        if self.quickshot:
+            w, h = self.size["hunter_w"], self.size["hunter_h"]
+        else:
+            w, h = self.size["width"], self.size["height"]
+#         if self.size["orientation"] in [1, 3]:
+#             w, h = h, w
         return w, h
 
     def refreshOrientationInfo(self, ori=None):
@@ -206,19 +213,13 @@ class IOS(Device):
 
 
 if __name__ == "__main__":
-    driver = IOS(udid=None, devip='10.254.40.44', process='mh')
+    driver = IOS(udid=None, devip='10.254.27.201', process='mh',quickshot=True)
     # driver.start_app('com.netease.mhxyhtb')
     # driver.stop_app('com.netease.mhxyhtb')
     # driver.home()
-    # driver.touch((701, 168), isWDA=False)
-    # driver.touch((726, 168), isWDA=False)
-
-    # driver.touch("123")
+    #driver.touch((701, 168), isWDA=False)
+    a = time.time()
+    driver.snapshot()
+    print time.time()-a
 
     # driver.swipe((482, 753) ,(482, 670))
-
-
-
-
-
-
