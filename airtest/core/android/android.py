@@ -122,7 +122,8 @@ class ADB(object):
     def connect(self, force=False):
         """adb connect, if remote devices, connect first"""
         if self.serialno and ":" in self.serialno and (force or self.get_status() != "device"):
-            self.cmd("connect %s" % self.serialno)
+            connect_result = self.cmd("connect %s" % self.serialno)
+            LOGGING.info(connect_result)
 
     def disconnect(self):
         """adb disconnect"""
