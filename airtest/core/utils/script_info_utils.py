@@ -23,12 +23,18 @@ def get_script_info(script_path):
     """extract info from script, like __author__, __title__ and __desc__."""
     script_path, pyfilename = script_path, os.path.basename(script_path).replace(".owl", ".py")
     pyfilepath = os.path.join(script_path, pyfilename)
-    # load script pyfile
-    pyfilecontent = open(pyfilepath).read()
-    # extract params value from script:
-    author = extarct_param("__author__", pyfilecontent)
-    title = extarct_param("__title__", pyfilecontent)
-    desc = extarct_param("__desc__", pyfilecontent)
+
+    # check if py file exists:
+    if not os.path.isfile(pyfilepath):
+        author, title, desc = "", "", ""
+    else:
+        # load script pyfile
+        pyfilecontent = open(pyfilepath).read()
+        # extract params value from script:
+        author = extarct_param("__author__", pyfilecontent)
+        title = extarct_param("__title__", pyfilecontent)
+        desc = extarct_param("__desc__", pyfilecontent)
+
     result_json = {"author": author, "title": title, "desc": desc}
     # return json.dumps(result_json, ensure_ascii=False)
     return json.dumps(result_json)
