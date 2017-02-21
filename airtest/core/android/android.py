@@ -122,7 +122,8 @@ class ADB(object):
     def connect(self, force=False):
         """adb connect, if remote devices, connect first"""
         if self.serialno and ":" in self.serialno and (force or self.get_status() != "device"):
-            self.cmd("connect %s" % self.serialno)
+            connect_result = self.cmd("connect %s" % self.serialno)
+            LOGGING.info(connect_result)
 
     def disconnect(self):
         """adb disconnect"""
@@ -323,8 +324,9 @@ class Minicap(object):
 
     def install(self, reinstall=False):
         """install or upgrade minicap"""
-        output = self.adb.shell("ls /data/local/tmp")
-        if not reinstall and "minicap\r" in output and "minicap.so\r" in output:
+        existence_test = self.adb.shell("ls /data/local/tmp/minicap /data/local/tmp/minicap.so").strip().splitlines()
+        if not reinstall and "/data/local/tmp/minicap" in existence_test \
+                         and "/data/local/tmp/minicap.so" in existence_test:
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
             try:
                 version = int(output.split(":")[1])
@@ -535,8 +537,8 @@ class Minitouch(object):
             self.setup_client()
 
     def install(self, reinstall=False):
-        output = self.adb.shell("ls /data/local/tmp")
-        if not reinstall and "minitouch\r" in output:
+        output = self.adb.shell("ls /data/local/tmp/minitouch").strip()
+        if not reinstall and output == '/data/local/tmp/minitouch':
             LOGGING.debug("install_minitouch skipped")
             return
 

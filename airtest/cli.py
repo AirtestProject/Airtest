@@ -80,9 +80,9 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
     # exec code
     if scope:
-        exec(code) in scope
+        exec(compile(code, scriptname, 'exec')) in scope
     else:
-        exec(code) in globals()
+        exec(compile(code, scriptname, 'exec')) in globals()
     # finish exec
     log("function", {"name": "exec_script", "step": "end", "script": scriptname})
     # if not _is_root_script(scriptname):
@@ -112,13 +112,14 @@ def _on_init_done():
     """to be overwritten by users"""
     pass
 
+
 def _exec_script_for_forever(args, script, code=None):
     # IDE使用的文件路径被命令行下的编码处理过，需要解码
     try:
         charset = sys.stdin.encoding
         script = script.decode(charset)
     except:
-        script = script
+        pass
 
     set_basedir(script)
 
