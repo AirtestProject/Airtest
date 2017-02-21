@@ -69,25 +69,27 @@ class IOS(Device):
     def home(self):
         self.driver.home()
 
-    def snapshot(self, filename="tmp.png"):
+    def snapshot(self, filename=None):
         return self._snapshot(filename, self.quickshot)
         
-    def _snapshot(self, filename="tmp.png", quick=True):
+    def _snapshot(self, filename=None, quick=True):
         """
         take snapshot
         filename: save screenshot to filename
         """
         
-        filename = filename or "tmp.png"
+        
         if quick:
             ##从hunter获取的图片已经旋转好了
             b64img = self.hunter.script('console.screenshot', watch='ret')
-            datas = base64.b64decode(b64img)           
-#             file_data = StringIO(datas)
-#             image = Image.open(file_data)
-#             image.save(filename)
+            datas = base64.b64decode(b64img)
+            if filename:           
+                file_data = StringIO(datas)
+                image = Image.open(file_data)
+                image.save(filename)
              
         else:
+            filename = filename or "tmp.png"
             datas = utils.screenshot(self.udid)
             file_data = StringIO(datas)
             image = Image.open(file_data)
@@ -111,7 +113,7 @@ class IOS(Device):
             touch_mod = self.hunter.require(touch_mode_name)
             touch_mod(pos[0], pos[1])
 
-    def swipe(self, fpos, tpos, duration=0.5, step=2, isWDA=False):
+    def swipe(self, fpos, tpos, duration=0.5, step=4, isWDA=False):
         if self.quickshot:
             fpos = (fpos[0]*self.hunter_sca,fpos[1]*self.hunter_sca) 
             tpos = (tpos[0]*self.hunter_sca,tpos[1]*self.hunter_sca) 
@@ -217,9 +219,9 @@ if __name__ == "__main__":
     # driver.start_app('com.netease.mhxyhtb')
     # driver.stop_app('com.netease.mhxyhtb')
     # driver.home()
-    #driver.touch((701, 168), isWDA=False)
-    a = time.time()
-    driver.snapshot()
-    print time.time()-a
-
-    # driver.swipe((482, 753) ,(482, 670))
+    #driver.touch((333, 272))
+    #(421, 435) (476, 436)
+    #driver.touch((200,100))
+    driver.swipe((150, 450) ,(150, 100))
+    #driver.touch((0, 0),isWDA=True)
+    #driver.text("123")
