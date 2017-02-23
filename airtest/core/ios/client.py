@@ -5,27 +5,6 @@
 from airtest.aircv import aircv
 from airtest.core.device import Device
 import wda
-import airtest
-from cStringIO import StringIO
-from PIL import Image
-
-
-
-# class XYTransformer(object):
-#     """
-#     transform xy by orientation
-#     add by gzzhengshenshen, it is different with android
-#     """
-# 
-#     @staticmethod
-#     def up_2_ori((x, y), (w, h), orientation):
-#         if orientation == 1:
-#             x, y = y, w - x
-#         elif orientation == 2:
-#             x, y = w - y, h - x
-#         elif orientation == 3:
-#             x, y = h - y, x
-#         return x, y
         
 
 class IOS(Device):
@@ -60,6 +39,14 @@ class IOS(Device):
     def shell(self):
         raise NotImplementedError
 
+    def wake(self):
+        try:
+            self.driver.home()  # active screen backlight
+            self.driver.home()  # slide to unlock
+            self.driver.home()  # enter SpringBoard if other app is running
+        except wda.WDAError:
+            pass
+
     def home(self):
         self.driver.home()
 
@@ -73,13 +60,6 @@ class IOS(Device):
         """
         filename = filename or "tmp.png"
         data = self.driver.screenshot(filename)  # wda 截图不用考虑朝向
-        #file_data = StringIO(data)
-        #image = Image.open(file_data)
-        #method = getattr(Image, 'ROTATE_{}'.format(self.size["rotation"]))
-        #image = image.transpose(method)
-        #image.save(filename)
-        #with open(filename) as f:
-        #    data = f.read()
 
         # 输出cv2对象
         screen = aircv.string_2_img(data)
@@ -99,7 +79,7 @@ class IOS(Device):
         """you need to click textfield first"""
         self.session.send_keys(text)
 
-    def start_app(self, appid):
+    def start_app(self, appid, activity=None):
         """launch an app by appid"""
         self.session = self.driver.session(appid)
 
@@ -108,17 +88,20 @@ class IOS(Device):
         self.session.close()
 
     def clear_app(self, upload_file_path):
-        utils.cleanup(upload_file_path, self.udid)
+        pass
+        # utils.cleanup(upload_file_path, self.udid)
 
     def install_app(self, filepath, reinstall=True, appid=None):
-        if reinstall:
-            utils.uninstall_app(appid, self.udid)
-        upload_file_path = utils.upload_file(filepath, udid=self.udid)
-        utils.install_file(upload_file_path)
-        self.clear_app(upload_file_path)
+        pass
+        # if reinstall:
+        #     utils.uninstall_app(appid, self.udid)
+        # upload_file_path = utils.upload_file(filepath, udid=self.udid)
+        # utils.install_file(upload_file_path)
+        # self.clear_app(upload_file_path)
 
     def uninstall_app(self, appid):
-        utils.uninstall_app(appid, self.udid)
+        pass
+        # utils.uninstall_app(appid, self.udid)
 
     def get_display_info(self):
         self.size = {}
@@ -141,7 +124,7 @@ class IOS(Device):
         """
         return orientation code
         """
-        orientation = self.driver.orientation
+        orientation = self.session.orientation
         return 0 if orientation == 'PORTRAIT' else 1
 
     # use to resize
@@ -159,16 +142,18 @@ class IOS(Device):
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
 
+    def get_device_export_ip(self):
+        return self.driver.status()['ios']['ip']
+
 
 if __name__ == "__main__":
     ios = IOS('10.251.93.160:8100')
-    ios.home()
+    try:
+        ios.home()
+        ios.home()
+        ios.home()
+    except wda.WDAError:
+        pass
     ios.start_app('com.netease.mhxyhtb')
     ios.stop_app('com.netease.mhxyhtb')
-    # driver.home()
-    #driver.touch((333, 272))
-    #(421, 435) (476, 436)
-    #driver.touch((200,100))
-    # driver.swipe((150, 450) ,(150, 100))
-    #driver.touch((0, 0),isWDA=True)
-    #driver.text("123")
+

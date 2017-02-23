@@ -160,6 +160,7 @@ def forever_handle(args):  # args先传着，有需要用到其他参数可以�
         sys.stdout.flush()
         sys.stderr.flush()
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script", help="script filename")
@@ -208,7 +209,7 @@ def main():
 
     if args.setudid is not None:  # modified by gzlongqiumeng
         print "set_udid", args.setudid
-        udid = args.setudid if isinstance(args.setudid,str) else None
+        udid = args.setudid if isinstance(args.setudid, str) else None
         set_udid(udid)
 
     if args.setwin is not None:
@@ -261,14 +262,14 @@ def main():
         # execute pre script
         if args.pre:
             set_basedir(args.pre)
-            for i in range(len(DEVICE_LIST)):#pre for all devices
+            for i in range(len(DEVICE_LIST)):  # pre for all devices
                 set_current(i)
-                exec_script(args.pre, scope=globals(),root=True)
+                exec_script(args.pre, scope=globals(), root=True)
 
         # execute script
         set_basedir(args.script)
         set_current(0)
-        exec_script(args.script, scope=globals(),root=True)
+        exec_script(args.script, scope=globals(), root=True)
     except:
         err = traceback.format_exc()
         log("error", {"script_exception": err})
@@ -278,9 +279,9 @@ def main():
         if args.post:
             try:
                 set_basedir(args.post)
-                for i in range(len(DEVICE_LIST)):#post for all devices
+                for i in range(len(DEVICE_LIST)):  # post for all devices
                     set_current(i)
-                    exec_script(args.post, scope=globals(),root=True)
+                    exec_script(args.post, scope=globals(), root=True)
             except:
                 log("error", {"post_exception": traceback.format_exc()})
                 traceback.print_exc()
