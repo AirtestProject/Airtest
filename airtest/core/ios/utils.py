@@ -46,26 +46,6 @@ def list_all_udid():
         return result
 
 
-def get_device(udid=None):
-    """get ios device by udid"""
-
-    if udid is not None:
-        try:
-            device = imobiledevice.iDevice(str(udid))
-        except imobiledevice.iDeviceError:
-            raise MoaError("no ios device with udid: %s" % str(udid))
-    else:
-        try:
-            device = imobiledevice.iDevice()
-        except imobiledevice.iDeviceError:
-            raise MoaError("no ios devices")
-
-    if device is None:
-        raise MoaError("can't detect any ios devies")
-
-    return device
-
-
 def get_productType(udid=None):
     '''
     get apple productType
@@ -106,6 +86,29 @@ def check_system_version(udid=None):
             else:
                 version_pre = match_obj.group(1)
                 return version_pre
+
+
+# --------------------------------------------------
+# --------------------------------------------------
+
+def get_device(udid=None):
+    """get ios device by udid"""
+
+    if udid is not None:
+        try:
+            device = imobiledevice.iDevice(str(udid))
+        except imobiledevice.iDeviceError:
+            raise MoaError("no ios device with udid: %s" % str(udid))
+    else:
+        try:
+            device = imobiledevice.iDevice()
+        except imobiledevice.iDeviceError:
+            raise MoaError("no ios devices")
+
+    if device is None:
+        raise MoaError("can't detect any ios devies")
+
+    return device
 
 
 def get_service_client(service_class, udid=None):
@@ -206,6 +209,55 @@ def uninstall_app(appid, udid=None):
             instproxy.uninstall(appid, plist.Dict({}))
         except imobiledevice.InstallationProxyError:
             raise MoaError("uninstall app %s error" % appid)
+
+
+def screenshot(udid=None):
+    """
+    screenshot on device
+    return: screen datas
+    """
+
+    ssclient = get_service_client(imobiledevice.ScreenshotrClient, udid=udid)
+    try:
+        datas = ssclient.take_screenshot()
+    except imobiledevice.ScreenshotrError:
+        raise MoaError("take screenshot error")
+    else:
+        return datas
+
+
+def get_orientation(udid=None):
+    """
+    get interface orientation of device
+    return: orientation code like following                      IOS    Android
+        SBSERVICES_INTERFACE_ORIENTATION_UNKNOWN                = 0        /
+        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT               = 1        0
+        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT_UPSIDE_DOWN   = 2        2
+        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_RIGHT        = 3        1
+        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_LEFT         = 4        3
+    """
+
+    sbclient = get_service_client(imobiledevice.SpringboardServicesClient, udid=None)
+    try:
+        orientation = sbclient.get_orientation()
+    except imobiledevice.SpringboardServicesError:
+        raise MoaError("get interface orientation error")
+    else:
+        if orientation == 0:  # unknown
+            raise MoaError("get interface orientation: unknown")
+
+        # adjust to code used on android device
+        if orientation == 1:
+            return 0
+        elif orientation == 2:
+            return 2
+        elif orientation == 3:
+            return 1
+        elif orientation == 4:
+            return 3
+
+# --------------------------------------------------
+# --------------------------------------------------
 
 
 def browse_applist(app_type="Any", udid=None):
@@ -453,50 +505,8 @@ def stop_app(appid, udid=None):
     debugserver_stop_app(app_bin_path, udid=udid)
 
 
-def screenshot(udid=None):
-    """
-    screenshot on device
-    return: screen datas
-    """
-
-    ssclient = get_service_client(imobiledevice.ScreenshotrClient, udid=udid)
-    try:
-        datas = ssclient.take_screenshot()
-    except imobiledevice.ScreenshotrError:
-        raise MoaError("take screenshot error")
-    else:
-        return datas
 
 
-def get_orientation(udid=None):
-    """
-    get interface orientation of device
-    return: orientation code like following                      IOS    Android
-        SBSERVICES_INTERFACE_ORIENTATION_UNKNOWN                = 0        /
-        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT               = 1        0
-        SBSERVICES_INTERFACE_ORIENTATION_PORTRAIT_UPSIDE_DOWN   = 2        2
-        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_RIGHT        = 3        1
-        SBSERVICES_INTERFACE_ORIENTATION_LANDSCAPE_LEFT         = 4        3
-    """
-
-    sbclient = get_service_client(imobiledevice.SpringboardServicesClient, udid=None)
-    try:
-        orientation = sbclient.get_orientation()
-    except imobiledevice.SpringboardServicesError:
-        raise MoaError("get interface orientation error")
-    else:
-        if orientation == 0:  # unknown
-            raise MoaError("get interface orientation: unknown")
-
-        # adjust to code used on android device
-        if orientation == 1:
-            return 0
-        elif orientation == 2:
-            return 2
-        elif orientation == 3:
-            return 1
-        elif orientation == 4:
-            return 3
 
 
 def test():

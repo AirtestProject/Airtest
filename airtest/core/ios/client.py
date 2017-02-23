@@ -1,20 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import sys
-# sys.path.append("..")
-# from error import MoaError
-from airtest.core.error import MoaError
-import utils
+# import utils  # 暂时不用使用，需要修改utils里的逻辑
 from airtest.aircv import aircv
 from airtest.core.device import Device
-from constant import *
-from hunter_cli import Hunter
-import time
 import wda
 import airtest
 from cStringIO import StringIO
-import base64
 from PIL import Image
 
 
@@ -80,14 +72,15 @@ class IOS(Device):
         filename: save screenshot to filename
         """
         filename = filename or "tmp.png"
-        data = utils.screenshot(self.udid)
-        file_data = StringIO(data)
-        image = Image.open(file_data)
-        method = getattr(Image, 'ROTATE_{}'.format(self.size["rotation"]))
-        image = image.transpose(method)
-        image.save(filename)
-        with open(filename) as f:
-            data = f.read()
+        data = self.driver.screenshot(filename)  # wda 截图不用考虑朝向
+        #file_data = StringIO(data)
+        #image = Image.open(file_data)
+        #method = getattr(Image, 'ROTATE_{}'.format(self.size["rotation"]))
+        #image = image.transpose(method)
+        #image.save(filename)
+        #with open(filename) as f:
+        #    data = f.read()
+
         # 输出cv2对象
         screen = aircv.string_2_img(data)
         return screen
@@ -148,7 +141,8 @@ class IOS(Device):
         """
         return orientation code
         """
-        return utils.get_orientation(self.udid)
+        orientation = self.driver.orientation
+        return 0 if orientation == 'PORTRAIT' else 1
 
     # use to resize
     def getCurrentScreenResolution(self):
@@ -168,6 +162,7 @@ class IOS(Device):
 
 if __name__ == "__main__":
     ios = IOS('10.251.93.160:8100')
+    ios.home()
     ios.start_app('com.netease.mhxyhtb')
     ios.stop_app('com.netease.mhxyhtb')
     # driver.home()
