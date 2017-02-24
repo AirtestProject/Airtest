@@ -29,6 +29,7 @@ class IOS(Device):
         # use to click/swipe/close app/get wda size
         self.driver = wda.Client(device_url)
         self.session = self.driver.session()
+        self._last_activated_session_name = None  # package or bundleId
 
         # init display info
         # attention：there is 3 size,phy_size/pic_size/wda_size
@@ -99,7 +100,8 @@ class IOS(Device):
 
     def start_app(self, package, activity=None):
         """launch an app by appid"""
-        if self.session._sid != package:
+        if self._last_activated_session_name != package:
+            self._last_activated_session_name = package
             self.session = self.driver.session(package)
 
     def stop_app(self, package):
@@ -124,6 +126,12 @@ class IOS(Device):
         # utils.uninstall_app(appid, self.udid)
 
     def get_display_info(self):
+        """
+        Returns:
+        display info as <dict>
+          rotation: <int> in degrees
+          height, width: <int> logic pixels of screen output, not the touch panel
+        """
         self.size = {}
         self.size["orientation"] = self.getDisplayOrientation()
         self.size["rotation"] = self.size["orientation"] * 90
@@ -176,4 +184,3 @@ if __name__ == "__main__":
         pass
     ios.start_app('com.netease.mhxyhtb')
     ios.stop_app('com.netease.mhxyhtb')
-

@@ -21,11 +21,12 @@ class Device(object):
 
     def __init__(self):
         super(Device, self).__init__()
+        self._custom_snapshot_method = None
 
     def shell(self):
         raise NotImplementedError
 
-    def snapshot(self):
+    def snapshot(self, *args, **kwargs):
         raise NotImplementedError
 
     def touch(self):
@@ -54,3 +55,20 @@ class Device(object):
 
     def uninstall_app(self):
         raise NotImplementedError
+
+    def register_custom_snapshot_method(self, func):
+        """
+        注册自定义截图方法
+
+        Args:
+            func: 接受0个或1个参数的函数，
+                    @args filename=None, 截图临时存盘文件名
+                  返回aircv.screen对象，参考`aircv.string_2_img`
+        """
+        self._custom_snapshot_method = func
+
+    def _snapshot_impl(self, *args, **kwargs):
+        if callable(self._custom_snapshot_method):
+            self._custom_snapshot_method(*args, **kwargs)
+        else:
+            self.snapshot(*args, **kwargs)

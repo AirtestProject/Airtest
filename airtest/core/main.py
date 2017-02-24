@@ -602,7 +602,7 @@ def _snapshot(filename="screen.png", windows_hwnd=None):
     if get_platform() == "Windows" and windows_hwnd:
         screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
     else:
-        screen = DEVICE.snapshot(filename=None)
+        screen = DEVICE._snapshot_impl(filename=None)
     global RECENT_CAPTURE
     RECENT_CAPTURE = screen  # used for keep_capture()
     return screen
