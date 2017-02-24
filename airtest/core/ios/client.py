@@ -72,12 +72,32 @@ class IOS(Device):
         self.session.swipe(fpos[0] / self.wda_sca, fpos[1] / self.wda_sca,
                            tpos[0] / self.wda_sca, tpos[1] / self.wda_sca, step)
 
-    def keyevent(self):
-        raise NotImplementedError
+    def keyevent(self, key):
+        key = key.upper()
+        if key == 'HOME':
+            self.home()
+        else:
+            EVENT_CODE_TABLE = {
+                'ENTER': '\n',
+                'BACK': '\b',
+            }
+            key = EVENT_CODE_TABLE.get(key)
+            self._send_keys(key)
 
-    def text(self, text):
+    def text(self, text, enter=True):
         """you need to click textfield first"""
-        self.session.send_keys(text)
+        self._send_keys(text)
+        if enter:
+            self.keyevent('ENTER')
+
+    def _send_keys(self, keys):
+        for i in range(3):
+            # try N times waiting for keyboard present
+            try:
+                self.session.send_keys(keys)
+                break
+            except wda.WDAError:
+                pass
 
     def start_app(self, appid, activity=None):
         """launch an app by appid"""
