@@ -79,7 +79,7 @@ class IOS(Device):
         else:
             EVENT_CODE_TABLE = {
                 'ENTER': '\n',
-                'BACK': '\b',
+                'KEYCODE_DEL': '\b',
             }
             key = EVENT_CODE_TABLE.get(key)
             self._send_keys(key)

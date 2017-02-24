@@ -873,11 +873,7 @@ def text(text, delay=0, clear=False, enter=True):
         else:
             DEVICE.keyevent('KEYCODE_DEL')
     else:
-        # 如果是android设备，则传入enter参数( 输入后是否执行enter操作 )
-        if get_platform() == "Android":
-            DEVICE.text(text, enter=enter)
-        else:
-            DEVICE.text(text)
+        DEVICE.text(text, enter)
 
     _delay_after_operation(delay)
 
