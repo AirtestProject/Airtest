@@ -105,13 +105,17 @@ class IOS(Device):
     def start_app(self, package, activity=None):
         """launch an app by appid"""
         logger.info("current package is {}, will launch {}".format(self._last_activated_session_name, package))
-        if self._last_activated_session_name != package:
+        if self._last_activated_session_name != package or self.driver.status()['sessionId'] != self.session._sid:
             self._last_activated_session_name = package
             self.session = self.driver.session(package)
 
     def stop_app(self, package):
         """stop an app by appid"""
-        self._last_activated_session_name = None
+        logger.info("current package is {}, will stop {}".format(self._last_activated_session_name, package))
+        if self._last_activated_session_name == package:
+            self._last_activated_session_name = None
+        else:
+            logger.warn("stop package not at top activity is not recommended.")
         self.session.close()
         self.session = self.driver.session()  # get default session
 
