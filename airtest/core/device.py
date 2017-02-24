@@ -69,6 +69,6 @@ class Device(object):
 
     def _snapshot_impl(self, *args, **kwargs):
         if callable(self._custom_snapshot_method):
-            self._custom_snapshot_method(*args, **kwargs)
+            return self._custom_snapshot_method(*args, **kwargs)
         else:
-            self.snapshot(*args, **kwargs)
+            return self.snapshot(*args, **kwargs)
