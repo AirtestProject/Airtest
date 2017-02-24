@@ -1,4 +1,4 @@
-#encoding=utf-8
+# encoding=utf-8
 
 
 DEV_TYPE_DICT = {}

@@ -15,7 +15,7 @@ class IOS(Device):
     """
 
     def __init__(self, udid):
-        super(Device, self).__init__()
+        super(IOS, self).__init__()
         self.udid = udid
 
         # auto detect local device or remote device. using default 8100 port for local device's wda
@@ -176,6 +176,7 @@ class IOS(Device):
 
 if __name__ == "__main__":
     ios = IOS('http://10.251.93.160:8100')
+    print dir(ios)
     try:
         ios.home()
         ios.home()
