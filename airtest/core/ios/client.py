@@ -4,6 +4,7 @@
 # import utils  # 暂时不用使用，需要修改utils里的逻辑
 from airtest.aircv import aircv
 from airtest.core.device import Device
+from airtest.core.main import LOGGING
 import wda
         
 
@@ -100,6 +101,7 @@ class IOS(Device):
 
     def start_app(self, package, activity=None):
         """launch an app by appid"""
+        LOGGING.info("current package is {}, will launch {}".format(self._last_activated_session_name, package))
         if self._last_activated_session_name != package:
             self._last_activated_session_name = package
             self.session = self.driver.session(package)
