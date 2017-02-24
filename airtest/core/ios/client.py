@@ -111,6 +111,7 @@ class IOS(Device):
 
     def stop_app(self, package):
         """stop an app by appid"""
+        self._last_activated_session_name = None
         self.session.close()
         self.session = self.driver.session()  # get default session
 
