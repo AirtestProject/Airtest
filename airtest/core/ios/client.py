@@ -104,9 +104,8 @@ class IOS(Device):
 
     def stop_app(self, package):
         """stop an app by appid"""
-        if self.session._sid == package:
-            self.session.close()
-            self.session = self.driver.session()  # get default session
+        self.session.close()
+        self.session = self.driver.session()  # get default session
 
     def clear_app(self, upload_file_path):
         pass
