@@ -24,13 +24,11 @@ class IOS(Device):
         else:
             device_url = 'http://localhost:8100'
 
-        # wda driver, use to tap home, start app
+        # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
         self.driver = wda.Client(device_url)
-        wda_status = self.driver.status()
-        session_id = wda_status['sessionId']
-        self.session = wda.Session(device_url, session_id)
+        self.session = self.driver.session()
 
         # init display info
         # attention：there is 3 size,phy_size/pic_size/wda_size
@@ -99,13 +97,16 @@ class IOS(Device):
             except wda.WDAError:
                 pass
 
-    def start_app(self, appid, activity=None):
+    def start_app(self, package, activity=None):
         """launch an app by appid"""
-        self.session = self.driver.session(appid)
+        if self.session._sid != package:
+            self.session = self.driver.session(package)
 
-    def stop_app(self, appid):
+    def stop_app(self, package):
         """stop an app by appid"""
-        self.session.close()
+        if self.session._sid == package:
+            self.session.close()
+            self.session = self.driver.session()  # get default session
 
     def clear_app(self, upload_file_path):
         pass
