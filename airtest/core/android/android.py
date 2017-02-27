@@ -810,6 +810,7 @@ class Android(Device):
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
     def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+        super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
         self.adb.start_server()
