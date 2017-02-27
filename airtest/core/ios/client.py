@@ -144,8 +144,11 @@ class IOS(Device):
         """
         return orientation code
         """
-        orientation = self.session.orientation
-        return 0 if orientation == 'PORTRAIT' else 1
+        try:
+            orientation = self.session.orientation  # 不在主屏中且没有调用过start_app会报错
+            return 0 if orientation == 'PORTRAIT' else 1
+        except wda.WDAError:
+            return 0
 
     # use to resize
     def getCurrentScreenResolution(self):
