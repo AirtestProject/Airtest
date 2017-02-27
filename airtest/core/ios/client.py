@@ -34,10 +34,11 @@ class IOS(Device):
         self.driver = wda.Client(device_url)
         self.session = self.driver.session()
         self._last_activated_session_name = None  # package or bundleId
+        self._last_snapshot_image = None
 
         # init display info
         # attention：there is 3 size,phy_size/pic_size/wda_size
-        self.get_display_info()
+        self.refresh_display_info()
 
     def shell(self):
         raise NotImplementedError
@@ -66,6 +67,8 @@ class IOS(Device):
 
         # 输出cv2对象
         screen = aircv.string_2_img(data)
+        self._last_snapshot_image = screen
+        self.refresh_display_info()
         return screen
 
     def touch(self, pos, duration=None):
@@ -135,7 +138,7 @@ class IOS(Device):
         pass
         # utils.uninstall_app(appid, self.udid)
 
-    def get_display_info(self):
+    def refresh_display_info(self):
         """
         Returns:
         display info as <dict>
@@ -154,7 +157,7 @@ class IOS(Device):
         """
         get size of screen, height must be bigger then width
         """
-        screen = self._snapshot(filename="init_phy.png")
+        screen = self._last_snapshot_image or self._snapshot(filename="init_phy.png")
         h, w = screen.shape[:2]
         return h, w
 
@@ -180,18 +183,19 @@ class IOS(Device):
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
 
-    def get_device_export_ip(self):
+    def get_device_external_ip(self):
         return self.driver.status()['ios']['ip']
 
 
 if __name__ == "__main__":
     ios = IOS('http://10.251.93.160:8100')
-    print dir(ios)
-    try:
-        ios.home()
-        ios.home()
-        ios.home()
-    except wda.WDAError:
-        pass
-    ios.start_app('com.netease.mhxyhtb')
-    ios.stop_app('com.netease.mhxyhtb')
+    # print dir(ios)
+    # try:
+    #     ios.home()
+    #     ios.home()
+    #     ios.home()
+    # except wda.WDAError:
+    #     pass
+    # ios.start_app('com.netease.mhxyhtb')
+    # ios.stop_app('com.netease.mhxyhtb')
+    print ios.getCurrentScreenResolution()
