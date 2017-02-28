@@ -1057,13 +1057,16 @@ class Android(Device):
             self.ime.end()
 
     @autoretry
-    def touch(self, pos, duration=0.01):
+    def touch(self, pos, **kwargs):
+        duration = kwargs.get('duration', 0.01)
+        times = kwargs.get('times', 1)
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
-        if self.minitouch:
-            self.minitouch.touch(pos, duration=duration)
-        else:
-            self.adb.touch(pos)
+        for _ in range(times):
+            if self.minitouch:
+                self.minitouch.touch(pos, duration=duration)
+            else:
+                self.adb.touch(pos)
 
     @autoretry
     def swipe(self, p1, p2, duration=0.5):

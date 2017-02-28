@@ -766,11 +766,10 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     else:
         LOGGING.debug('touchpos: %s', pos)
 
-    for i in range(times):
-        if right_click:
-            DEVICE.touch(pos, right_click=True)
-        else:
-            DEVICE.touch(pos, duration=duration)
+    kwargs = {'times': times, 'duration': duration}
+    if right_click:
+        kwargs['right_click'] = right_click
+    DEVICE.touch(pos, **kwargs)
     _delay_after_operation(delay)
 
 

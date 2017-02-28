@@ -29,7 +29,7 @@ class Device(object):
     def snapshot(self, *args, **kwargs):
         raise NotImplementedError
 
-    def touch(self):
+    def touch(self, pos, **kwargs):
         raise NotImplementedError
         
     def swipe(self):

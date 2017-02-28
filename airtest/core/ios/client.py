@@ -4,6 +4,7 @@
 # import utils  # 暂时不用使用，需要修改utils里的逻辑
 from airtest.aircv import aircv
 from airtest.core.device import Device
+from airtest.core.error import MoaError
 from airtest.core.utils.logger import get_logger
 import wda
 
@@ -70,8 +71,16 @@ class IOS(Device):
         self.refresh_display_info(screen)
         return screen
 
-    def touch(self, pos, duration=None):
-        self.session.tap(pos[0] / self._wda_sca, pos[1] / self._wda_sca)
+    def touch(self, pos, **kwargs):
+        coord = pos[0] / self._wda_sca, pos[1] / self._wda_sca
+        times = kwargs.get('times')
+        if times:
+            if times == 2:
+                self.session.double_tap(*coord)
+            elif times > 2:
+                raise MoaError("Only tap or double-tap supported on ios devices. You're tapping {} times".format(times))
+        else:
+            self.session.tap(*coord)
 
     def swipe(self, fpos, tpos, duration=0.5, step=4):
         self.session.swipe(fpos[0] / self._wda_sca, fpos[1] / self._wda_sca,
