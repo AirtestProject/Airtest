@@ -105,13 +105,15 @@ class IOS(Device):
             self.keyevent('ENTER')
 
     def _send_keys(self, keys):
+        ex = None
         for i in range(3):
             # try N times waiting for keyboard present
             try:
                 self.session.send_keys(keys)
-                break
-            except wda.WDAError:
-                pass
+                return
+            except wda.WDAError as e:
+                ex = e
+        raise ex
 
     def start_app(self, package, activity=None):
         """launch an app by appid"""
