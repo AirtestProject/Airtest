@@ -73,14 +73,13 @@ class IOS(Device):
 
     def touch(self, pos, **kwargs):
         coord = pos[0] / self._wda_sca, pos[1] / self._wda_sca
-        times = kwargs.get('times')
-        if times:
-            if times == 2:
-                self.session.double_tap(*coord)
-            elif times > 2:
-                raise MoaError("Only tap or double-tap supported on ios devices. You're tapping {} times".format(times))
-        else:
+        times = kwargs.get('times', 1)
+        if times == 1:
             self.session.tap(*coord)
+        if times == 2:
+            self.session.double_tap(*coord)
+        elif times > 2:
+            raise MoaError("Only tap or double-tap supported on ios devices. You're tapping {} times".format(times))
 
     def swipe(self, fpos, tpos, duration=0.5, step=4):
         self.session.swipe(fpos[0] / self._wda_sca, fpos[1] / self._wda_sca,
