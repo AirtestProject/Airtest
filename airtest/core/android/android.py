@@ -929,24 +929,26 @@ class Android(Device):
         self.adb.shell('settings put secure accessibility_enabled 0')
         self.adb.shell('settings put secure enabled_accessibility_services 0')
 
-    def install_app(self, filepath, reinstall=False, overinstall=False, check=True):
+    def install_app(self, filepath, package, **kwargs):
         """
         安装应用
         overinstall: 不管应用在不在，直接覆盖安装；
         reinstall: 如果在则先卸载再安装，不在则直接安装。
         """
+        reinstall = kwargs.get('reinstall', False)
+        overinstall = kwargs.get('overinstall', False)
+        check = kwargs.get('check', True)
+
         # 先解析apk，看是否存在已安装的app
         packages = self.list_app()
-        apk = apkparser.APK(filepath)
-        apk_package = apk.get_package()
-        if apk_package in packages and not overinstall:
+        if package in packages and not overinstall:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
-                LOGGING.info("package:%s already exists, uninstall first", apk_package)
-                self.uninstall_app(apk_package)
+                LOGGING.info("package:%s already exists, uninstall first", package)
+                self.uninstall_app(package)
             # 否则直接return True
             else:
-                LOGGING.info("package:%s already exists, skip reinstall", apk_package)
+                LOGGING.info("package:%s already exists, skip reinstall", package)
                 return True
 
         # 唤醒设备
@@ -981,7 +983,7 @@ class Android(Device):
         else:
             self.adb.install(filepath, overinstall=overinstall)
         if check:
-            self.check_app(apk_package)
+            self.check_app(package)
 
 
     def uninstall_app(self, package):

@@ -35,25 +35,28 @@ class Device(object):
     def swipe(self):
         raise NotImplementedError
         
-    def keyevent(self):
+    def keyevent(self, key):
         raise NotImplementedError
         
-    def text(self):
+    def text(self, text, enter=True):
         raise NotImplementedError
 
-    def start_app(self):
+    def start_app(self, package):
         raise NotImplementedError
 
-    def stop_app(self):
+    def stop_app(self, package):
         raise NotImplementedError
 
     def clear_app(self):
         raise NotImplementedError
 
-    def install_app(self):
+    def list_app(self, third_only=True):
         raise NotImplementedError
 
-    def uninstall_app(self):
+    def install_app(self, uri, package, **kwargs):
+        raise NotImplementedError
+
+    def uninstall_app(self, package):
         raise NotImplementedError
 
     def register_custom_snapshot_method(self, func):

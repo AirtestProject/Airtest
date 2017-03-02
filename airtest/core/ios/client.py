@@ -1,12 +1,21 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import utils  # 暂时不用使用，需要修改utils里的逻辑
+
+import requests
+import six
+import time
+import wda
+
+if six.PY3:
+    from urllib.parse import urljoin
+else:
+    from urlparse import urljoin
+
 from airtest.aircv import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError
 from airtest.core.utils.logger import get_logger
-import wda
 
 
 logger = get_logger("ios")
@@ -19,32 +28,31 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, udid):
+    def __init__(self, addr):
         super(IOS, self).__init__()
-        self.udid = udid
-
-        # auto detect local device or remote device. using default 8100 port for local device's wda
-        if 'http' in udid and '//' in udid:
-            device_url = udid
-        else:
-            device_url = 'http://localhost:8100'
+        self.addr = addr
 
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        self.driver = wda.Client(device_url)
-        self.session = self.driver.session()
-        self._last_activated_session_name = None  # package or bundleId
-        self._size = {}
+        self.driver = wda.Client(addr)
+        self.udid = self.driver.status()['udid']
+        self._size = {'width': 0, 'height': 0}
         self._wda_sca = 1
 
         # take a snapshot to refresh display info
         self.snapshot()
 
+    @property
+    def session(self):
+        return self.driver.session()
+
     def shell(self):
         raise NotImplementedError
 
     def wake(self):
+        # TODO: 需要优化速度，按了home键并解了锁，如果没有进入到home而是回到某个应用的话，会白白等待20秒。
+        # 需要判断当前是否解锁完成和是否处于home
         try:
             self.driver.home()  # active screen backlight
             self.driver.home()  # slide to unlock
@@ -53,7 +61,7 @@ class IOS(Device):
             pass
 
     def home(self):
-        self.driver.home()
+        return self.driver.home()
 
     def snapshot(self, filename=None):
         return self._snapshot(filename)
@@ -68,7 +76,7 @@ class IOS(Device):
 
         # 输出cv2对象
         screen = aircv.string_2_img(data)
-        self.refresh_display_info(screen)
+        self._refresh_display_info(screen)
         return screen
 
     def touch(self, pos, **kwargs):
@@ -97,9 +105,9 @@ class IOS(Device):
 
     def text(self, text, enter=True):
         """you need to click textfield first"""
-        self._send_keys(text)
         if enter:
-            self.keyevent('ENTER')
+            text += '\n'
+        self._send_keys(text)
 
     def _send_keys(self, keys):
         ex = None
@@ -113,89 +121,169 @@ class IOS(Device):
         raise ex
 
     def start_app(self, package, activity=None):
-        """launch an app by appid"""
-        logger.info("current package is {}, will launch {}".format(self._last_activated_session_name, package))
-        if self._last_activated_session_name != package or self.driver.status()['sessionId'] != self.session._sid:
-            self._last_activated_session_name = package
-            self.session = self.driver.session(package)
+        """
+        Launch app by bundleId. A MoaError will raise if given bundleId not exists.
+        """
+        current_package = self.session.bundle_id
+        logger.info("current app(bundleId) is {}, will launch {}".format(current_package, package))
+        if current_package != package:
+            if package not in self.list_app():
+                raise MoaError('Fail to start app({}) because of not installed.'.format(package))
+            self.driver.session(package)
+            self._try_to_finish_alert('accept')
 
     def stop_app(self, package):
-        """stop an app by appid"""
-        logger.info("current package is {}, will stop {}".format(self._last_activated_session_name, package))
-        if self._last_activated_session_name == package:
-            self._last_activated_session_name = None
-        else:
-            logger.warn("stop package not at top activity is not recommended.")
-        self.session.close()
-        self.session = self.driver.session()  # get default session
+        """
+        Stop current top activity app.
+        Do nothing if the top activity's bundle id is not equal to package
+        """
+        current_package = self.session.bundle_id
+        logger.info("current app(bundleId) is {}, will stop {}".format(current_package, package))
+        if package == current_package:
+            self.session.close()
 
     def clear_app(self, upload_file_path):
         pass
-        # utils.cleanup(upload_file_path, self.udid)
 
-    def install_app(self, filepath, reinstall=True, appid=None):
-        pass
-        # if reinstall:
-        #     utils.uninstall_app(appid, self.udid)
-        # upload_file_path = utils.upload_file(filepath, udid=self.udid)
-        # utils.install_file(upload_file_path)
-        # self.clear_app(upload_file_path)
+    def list_app(self, third_only=True):
+        r = requests.get(urljoin(self.addr, '/api/v1/packages'))
+        if r.status_code == 200:
+            packages = r.json()['value']
+            return map(lambda v: v['bundleId'], packages)
+        raise RuntimeError("fail to connect to wda when fetching package list. "
+                           "status_code={}, content={}".format(r.status_code, r.text))
+
+    def install_app(self, uri, package, **kwargs):
+        uri = uri.strip()
+        self.wake()
+        self.driver.session('com.apple.mobilesafari')
+        self._try_to_finish_alert('dismiss')
+        url_control = self.session(class_name='Button', name='URL')
+        url_control.tap()
+        self.text(uri)
+        time.sleep(3)
+
+        self._try_to_finish_alert('accept')  # 是否打开App Store？
+        if uri.endswith('.plist'):
+            # 通过plist安装，是否安装？
+            logger.info('install via .plist')
+            self._try_to_finish_alert('accept')
+        else:
+            # 通过AppStore下载安装
+            logger.info('install via App Store')
+            purchase_button = self.session(class_name='Button', name='PurchaseButton')
+            purchase_button_text = purchase_button.attribute('label')
+            if purchase_button_text == u'下载':
+                purchase_button.tap()
+            else:
+                raise MoaError("{} are not purchased from app store. "
+                               "please purchase and trust the publisher first.".format(uri))
+        self._wait_until_app_installed(package)
 
     def uninstall_app(self, package):
-        pass
-        # utils.uninstall_app(package, self.udid)
+        installed_apps = self.list_app()
+        if package in installed_apps:
+            r = requests.delete(urljoin(self.addr, urljoin('/api/v1/packages/', package)))
+            if r.status_code != 200 or not r.json()['success']:
+                raise MoaError("fail to uninstall with network error. App(bundleId) is {}. status_code={}, text={}"
+                               .format(package, r.status_code, r.text))
+            if package not in self.list_app():
+                return True
+            else:
+                raise MoaError("fail to uninstall, app still exists. App(bundleId) is {}. status_code={}, text={}"
+                               .format(package, r.status_code, r.text))
 
     def getPhysicalDisplayInfo(self):
-        pass
+        raise NotImplementedError
 
     def getDisplayOrientation(self):
         """
         return orientation code
         """
-        try:
-            orientation = self.session.orientation  # 不在主屏中且没有调用过start_app会报错
-            return 0 if orientation == 'PORTRAIT' else 1
-        except wda.WDAError:
-            return 0
+        orientation = self.session.orientation
+        return 0 if orientation == 'PORTRAIT' else 1
 
-    # use to resize
     def getCurrentScreenResolution(self):
+        """
+        Get the resolution(w, h) of snapshot real size
+        Returns:
+            w, h
+        """
         return self._size["width"], self._size["height"]
 
     def refreshOrientationInfo(self, ori=None):
         """
         update dev orientation
-        if ori is assigned, set to it(useful when running a orientation monitor outside)
+        Orientation will keep up to date automatically in this class impl
         """
         pass
 
-    def refresh_display_info(self, screen):
+    def _refresh_display_info(self, screen):
         """
         Returns:
         display info as <dict>
           rotation: <int> in degrees
           height, width: <int> logic pixels of screen output, not the touch panel
         """
-        self._size["orientation"] = self.getDisplayOrientation()
-        self._size["rotation"] = self._size["orientation"] * 90
-        self._size["height"], self._size["width"] = screen.shape[:2]
-        self._wda_sca = 1.0 * min(self._size["height"], self._size["width"]) / min(self.session.window_size())
+
+        # 当画面确实发生了旋转才需要重新获取一次，否则不用刷新
+        h, w = screen.shape[:2]
+        if (h, w) != (self._size["height"], self._size["width"]):
+            self._size["orientation"] = self.getDisplayOrientation()
+            self._size["rotation"] = self._size["orientation"] * 90
+            self._size["height"], self._size["width"] = h, w
+            self._wda_sca = 1.0 * min(self._size["height"], self._size["width"]) / min(self.session.window_size())
         print self._size
         return self._size
+
+    def _try_to_finish_alert(self, method, times=1, interval=2):
+        success = False
+        for i in range(times):
+            time.sleep(interval)
+            try:
+                fn = getattr(self.driver.session().alert, method)
+                fn()
+                success = True
+                break
+            except wda.WDAError:
+                pass
+        return success
+
+    def _get_alert_text(self):
+        for i in range(2):
+            try:
+                return self.driver.session().alert.text
+            except wda.WDAError:
+                time.sleep(2)
+        return None
+
+    def _wait_until_app_installed(self, package, timeout=800):
+        check_interval = 3
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if package in self.list_app():
+                return True
+            else:
+                self._try_to_finish_alert('accept')
+                time.sleep(check_interval)
+        raise MoaError('Fail to install because of timeout. timeout={}'.format(timeout))
 
     def get_device_external_ip(self):
         return self.driver.status()['ios']['ip']
 
 
 if __name__ == "__main__":
+    start = time.time()
     ios = IOS('http://10.251.93.160:8100')
-    # print dir(ios)
-    # try:
-    #     ios.home()
-    #     ios.home()
-    #     ios.home()
-    # except wda.WDAError:
-    #     pass
+    ios.wake()
+    ios._try_to_finish_alert('dismiss')
+    print ios.list_app()
+    ios.uninstall_app('com.netease.oa2')
+    # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr')
+    ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')
+    ios.start_app('com.netease.oa2')
+    ios.uninstall_app('com.netease.oa2')
+    print time.time() - start
     # ios.start_app('com.netease.mhxyhtb')
     # ios.stop_app('com.netease.mhxyhtb')
-    print ios.getCurrentScreenResolution()
+    # print ios.getCurrentScreenResolution()
