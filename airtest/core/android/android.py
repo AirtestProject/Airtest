@@ -1017,15 +1017,15 @@ class Android(Device):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
-        #check and install accessibility service and release lock app
+        # check and install accessibility service and release lock app
         packages = self.list_app()
 
         if RELEASELOCK_PACKAGE not in packages:
             self.adb.install(RELEASELOCK_APK)
-        #start release lock app
+        # start release lock app
         self.stop_app(RELEASELOCK_PACKAGE)
         self.start_app(RELEASELOCK_PACKAGE)
-        self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+        self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
 
         # todo:
         # 1. 还需要按power键吗？
