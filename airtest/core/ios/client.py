@@ -139,8 +139,7 @@ class IOS(Device):
         """
         current_package = self.session.bundle_id
         logger.info("current app(bundleId) is {}, will stop {}".format(current_package, package))
-        if package == current_package:
-            self.session.close()
+        self.session.close()
 
     def clear_app(self, upload_file_path):
         pass
@@ -216,7 +215,8 @@ class IOS(Device):
         update dev orientation
         Orientation will keep up to date automatically in this class impl
         """
-        pass
+        self._size["orientation"] = self.getDisplayOrientation()
+        self._size["rotation"] = self._size["orientation"] * 90
 
     def _refresh_display_info(self, screen):
         """
@@ -233,7 +233,7 @@ class IOS(Device):
             self._size["rotation"] = self._size["orientation"] * 90
             self._size["height"], self._size["width"] = h, w
             self._wda_sca = 1.0 * min(self._size["height"], self._size["width"]) / min(self.session.window_size())
-        print self._size
+            print self._size
         return self._size
 
     def _try_to_finish_alert(self, method, times=1, interval=2):
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     ios._try_to_finish_alert('dismiss')
     print ios.list_app()
     ios.uninstall_app('com.netease.oa2')
-    # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr')
+    # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr', com.netease.mhxyhtb)
     ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')
     ios.start_app('com.netease.oa2')
     ios.uninstall_app('com.netease.oa2')
