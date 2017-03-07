@@ -41,7 +41,7 @@ class IOS(Device):
         self._wda_sca = 1
 
         # take a snapshot to refresh display info
-        self.snapshot()
+        self.refreshOrientationInfo()
 
     @property
     def session(self):
@@ -199,8 +199,7 @@ class IOS(Device):
         """
         return orientation code
         """
-        orientation = self.session.orientation
-        return 0 if orientation == 'PORTRAIT' else 1
+        return self._size["orientation"]
 
     def getCurrentScreenResolution(self):
         """
@@ -215,7 +214,8 @@ class IOS(Device):
         update dev orientation
         Orientation will keep up to date automatically in this class impl
         """
-        self._size["orientation"] = self.getDisplayOrientation()
+        orientation = self.session.orientation
+        self._size["orientation"] = 0 if orientation == 'PORTRAIT' else 1
         self._size["rotation"] = self._size["orientation"] * 90
 
     def _refresh_display_info(self, screen):
@@ -229,8 +229,7 @@ class IOS(Device):
         # 当画面确实发生了旋转才需要重新获取一次，否则不用刷新
         h, w = screen.shape[:2]
         if (h, w) != (self._size["height"], self._size["width"]):
-            self._size["orientation"] = self.getDisplayOrientation()
-            self._size["rotation"] = self._size["orientation"] * 90
+            self.refreshOrientationInfo()
             self._size["height"], self._size["width"] = h, w
             self._wda_sca = 1.0 * min(self._size["height"], self._size["width"]) / min(self.session.window_size())
             print self._size
