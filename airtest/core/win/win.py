@@ -71,8 +71,8 @@ class Windows(Device):
         new_child_hwnd_list = self.winmgr.get_childhwnd_list_by_hwnd(hwnd, child_hwnd_list, w_h)
         return new_child_hwnd_list
 
-    def keyevent(self, keyname, escape=False, combine=None):
-        key_input(keyname, escape, combine)
+    def keyevent(self, keyname, escape=False, combine=None, shift=False, ctrl=False):
+        key_input(keyname, escape=escape, combine=combine, shift=shift, ctrl=ctrl)
 
     def text(self, text, with_spaces=True, with_tabs=False, with_newlines=False):
         SendKeys(text.decode("utf-8"), with_spaces=with_spaces, with_tabs=with_tabs, with_newlines=with_newlines)

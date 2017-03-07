@@ -837,7 +837,7 @@ def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
 
 @logwrap
 @platform(on=["Android", "Windows"])
-def keyevent(keyname, escape=False, combine=None, delay=0, times=1):
+def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False, ctrl=False):
     """模拟设备的按键功能, times为点击次数. """
     key_temp = keyname.lower()
     for i in range(times):
@@ -846,7 +846,7 @@ def keyevent(keyname, escape=False, combine=None, delay=0, times=1):
             continue
         # 如果是非 -delete 的输入，则按照之前的逻辑进行设备输入:
         if get_platform() == "Windows":
-            DEVICE.keyevent(keyname, escape, combine)
+            DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
         else:
             DEVICE.keyevent(keyname)
     _delay_after_operation(delay)

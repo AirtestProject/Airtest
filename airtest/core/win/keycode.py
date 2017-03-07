@@ -1,4 +1,4 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 VK_CODE = {
     'backspace':0x08,
     'tab':0x09,
