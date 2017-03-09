@@ -71,13 +71,17 @@ class Windows(Device):
         new_child_hwnd_list = self.winmgr.get_childhwnd_list_by_hwnd(hwnd, child_hwnd_list, w_h)
         return new_child_hwnd_list
 
-    def keyevent(self, keyname, escape=False, combine=None, shift=False, ctrl=False):
-        key_input(keyname, escape=escape, combine=combine, shift=shift, ctrl=ctrl)
+    # def keyevent(self, keyname, escape=False, combine=None, shift=False, ctrl=False, alt=False):
+    #     key_input(keyname, escape=escape, combine=combine, shift=shift, ctrl=ctrl, alt=alt)
+
+    def keyevent(self, keyname, escape=False, combine=[]):
+        key_input(keyname, escape=escape, combine=combine)
 
     def text(self, text, with_spaces=True, with_tabs=False, with_newlines=False):
         SendKeys(text.decode("utf-8"), with_spaces=with_spaces, with_tabs=with_tabs, with_newlines=with_newlines)
 
-    def touch(self, pos, right_click=False, duration=None): # 暂时添加了duration接口，但是并无对应的响应
+    def touch(self, pos, **kwargs):
+        right_click = kwargs.get('right_click', False)
         mouse_click(pos, right_click)
 
     def swipe(self, p1, p2, duration=0.8):

@@ -210,35 +210,36 @@ def set_emulator(emu_name='bluestacks', sn=None, addr=None):
     return sn
 
 
-def set_udid(udid=None):
+def set_udid(udid):
     '''
     auto set if only one device
     support filepath match patten, eg: c123*
     '''
-    global IOSUDID
-    udids = ios.utils.list_all_udid()
-    if not udid:
-        if len(udids) > 1:
-            LOGGING.info("more than one device, auto choose one, to specify serialno: set_udid(udid)")
-        elif len(udids) == 0:
-            raise MoaError("no device, please check your connection")
-        IOSUDID = udids[0]
-    else:
-        exists = 0
-        for id in udids:
-            if fnmatch.fnmatch(id, udid):
-                exists += 1
-                IOSUDID = id
-        if exists == 0:
-            raise MoaError("Device[{}] not found".format(udid))
-        if exists > 1:
-            IOSUDID = ''
-            raise MoaError("too many devices found")
-    dev = ios.client.IOS(IOSUDID)
+    # global IOSUDID
+    # udids = ios.utils.list_all_udid()
+    # if not udid:
+    #     raise MoaError("ios udid should not be empty")
+    #     # if len(udids) > 1:
+    #     #     LOGGING.info("more than one device, auto choose one, to specify serialno: set_udid(udid)")
+    #     # elif len(udids) == 0:
+    #     #     raise MoaError("no device, please check your connection")
+    #     # IOSUDID = udids[0]
+    # else:
+    #     exists = 0
+    #     for id in udids:
+    #         if fnmatch.fnmatch(id, udid):
+    #             exists += 1
+    #             IOSUDID = id
+    #     if exists == 0:
+    #         raise MoaError("Device[{}] not found".format(udid))
+    #     if exists > 1:
+    #         IOSUDID = ''
+    #         raise MoaError("too many devices found")
+    dev = ios.client.IOS(udid)
     _register_device(dev)
     global CVSTRATEGY
     CVSTRATEGY = CVSTRATEGY or CVSTRATEGY_ANDROID
-    return IOSUDID
+    # return IOSUDID
 
 
 def resign(ipaname):
@@ -281,13 +282,13 @@ def set_windows(handle=None, window_title=None):
     RESIZE_METHOD = RESIZE_METHOD or aircv.no_resize
 
 
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def set_current(index):
-    global DEVICE
+    global DEVICE, DEVICE_LIST
     if index > len(DEVICE_LIST):
         raise IndexError("device index out of range")
     DEVICE = DEVICE_LIST[index]
-    if win and get_platform() == "Windows" :
+    if win and get_platform() == "Windows":
         DEVICE.set_foreground()
 
 
@@ -599,7 +600,7 @@ def _snapshot(filename="screen.png", windows_hwnd=None):
     if get_platform() == "Windows" and windows_hwnd:
         screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
     else:
-        screen = DEVICE.snapshot(filename=None)
+        screen = DEVICE._snapshot_impl(filename=None)
     global RECENT_CAPTURE
     RECENT_CAPTURE = screen  # used for keep_capture()
     return screen
@@ -642,7 +643,7 @@ class MoaPic(object):
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False):
         self.filename = filename
 
-        print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
+        # print "*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*", BASE_DIR, filename
 
         self.filepath = filename if os.path.isabs(filename) else os.path.join(BASE_DIR, filename) 
         self.threshold = threshold  # if threshold is not None else THRESHOLD
@@ -688,7 +689,7 @@ def amstop(package):
 
 
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android", "IOS"])
 def amclear(package):
     DEVICE.clear_app(package)
 
@@ -717,20 +718,20 @@ def snapshot(filename=None, windows_hwnd=None):
 
 
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android", "IOS"])
 def wake():
     DEVICE.wake()
 
 
 @logwrap
-@platform(on=["Android"])
+@platform(on=["Android", "IOS"])
 def home():
     DEVICE.home()
 
 
 @logwrap
 @_transparam
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
     '''
     @param if_exists: touch only if the target pic exists
@@ -763,17 +764,16 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     else:
         LOGGING.debug('touchpos: %s', pos)
 
-    for i in range(times):
-        if right_click:
-            DEVICE.touch(pos, right_click=True)
-        else:
-            DEVICE.touch(pos, duration=duration)
+    kwargs = {'times': times, 'duration': duration}
+    if right_click:
+        kwargs['right_click'] = right_click
+    DEVICE.touch(pos, **kwargs)
     _delay_after_operation(delay)
 
 
 @logwrap
 @_transparam
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
@@ -836,7 +836,7 @@ def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
 
 
 @logwrap
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False, ctrl=False):
     """模拟设备的按键功能, times为点击次数. """
     key_temp = keyname.lower()
@@ -853,7 +853,7 @@ def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False,
 
 
 @logwrap
-@platform(on=["Android", "Windows"])
+@platform(on=["Android", "Windows", "IOS"])
 def text(text, delay=0, clear=False, enter=True):
     text_temp = text.lower()
     if clear is True:
