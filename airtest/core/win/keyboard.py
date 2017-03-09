@@ -32,18 +32,16 @@ def _key_input(str='', alt=False):
                 one_key_input(VK_CODE[c])
 
 
-def key_input(msg='', escape=False, combine=False, shift=False, ctrl=False):
+def key_input(msg='', escape=False, combine=[]):
+# def key_input(msg='', escape=False, combine=False, shift=False, ctrl=False, alt=False):
     """windows模拟按键输入函数."""
+    # 校验combine组合键列表:
+    for key in combine:
+        if key not in VK_CODE.keys():
+            raise Exception("'%s' in combine=%s doesn't exist !" % (key, combine))
 
-    # 如果有ctrl，就按住ctrl:
-    if ctrl:
-        win32api.keybd_event(VK_CODE['ctrl'], 0, 0, 0)
-    # 如果有shift，就按住shift:
-    if shift:
-        win32api.keybd_event(VK_CODE['shift'], 0, 0, 0)
-    # 如果有alt，就先按住alt
-    if combine:
-        win32api.keybd_event(VK_CODE['alt'], 0, 0, 0)
+    for key in combine:
+        win32api.keybd_event(VK_CODE[key], 0, 0, 0)
 
     # 如果没有转义，直接输入每个字
     if not escape:
@@ -55,12 +53,7 @@ def key_input(msg='', escape=False, combine=False, shift=False, ctrl=False):
         else:
             one_key_input(VK_CODE[msg.lower()])
 
-    # 如果有alt，就在这里释放alt
-    if combine:
-        win32api.keybd_event(VK_CODE['alt'], 0, win32con.KEYEVENTF_KEYUP, 0)
-    # 如果有shift，就在这里释放shift:
-    if shift:
-        win32api.keybd_event(VK_CODE['shift'], 0, win32con.KEYEVENTF_KEYUP, 0)
-    # 如果有ctrl，就在这里释放ctrl:
-    if ctrl:
-        win32api.keybd_event(VK_CODE['ctrl'], 0, win32con.KEYEVENTF_KEYUP, 0)
+    # 释放组合键列表:
+    for key in combine:
+        # 不需要校验，因为前面键按下时已经校验过了:
+        win32api.keybd_event(VK_CODE[key], 0, win32con.KEYEVENTF_KEYUP, 0)
