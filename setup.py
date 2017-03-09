@@ -7,11 +7,11 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='airtest',
-    version='0.0.4',
+    version='0.1.0',
     author='Netease Game',
     author_email='gzliuxin@corp.netease.com',
-    description='automated test package',
-    long_description='automated test package from Netease Game',
+    description='Automated test framework for android/iOS/Windows',
+    long_description='Automated test framework for android/iOS/Windows, present by NetEase Games',
     url='http://git-qa.gz.netease.com/gzliuxin/airtest',
     license='MIT',
     keywords=['automation', 'test', 'android', 'opencv'],
