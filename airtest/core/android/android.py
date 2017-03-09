@@ -810,6 +810,7 @@ class Android(Device):
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
     def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+        super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
         self.adb.start_server()
@@ -928,24 +929,26 @@ class Android(Device):
         self.adb.shell('settings put secure accessibility_enabled 0')
         self.adb.shell('settings put secure enabled_accessibility_services 0')
 
-    def install_app(self, filepath, reinstall=False, overinstall=False, check=True):
+    def install_app(self, filepath, package, **kwargs):
         """
         安装应用
         overinstall: 不管应用在不在，直接覆盖安装；
         reinstall: 如果在则先卸载再安装，不在则直接安装。
         """
+        reinstall = kwargs.get('reinstall', False)
+        overinstall = kwargs.get('overinstall', False)
+        check = kwargs.get('check', True)
+
         # 先解析apk，看是否存在已安装的app
         packages = self.list_app()
-        apk = apkparser.APK(filepath)
-        apk_package = apk.get_package()
-        if apk_package in packages and not overinstall:
+        if package in packages and not overinstall:
             # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
             if reinstall:
-                LOGGING.info("package:%s already exists, uninstall first", apk_package)
-                self.uninstall_app(apk_package)
+                LOGGING.info("package:%s already exists, uninstall first", package)
+                self.uninstall_app(package)
             # 否则直接return True
             else:
-                LOGGING.info("package:%s already exists, skip reinstall", apk_package)
+                LOGGING.info("package:%s already exists, skip reinstall", package)
                 return True
 
         # 唤醒设备
@@ -980,7 +983,7 @@ class Android(Device):
         else:
             self.adb.install(filepath, overinstall=overinstall)
         if check:
-            self.check_app(apk_package)
+            self.check_app(package)
 
 
     def uninstall_app(self, package):
@@ -1014,15 +1017,15 @@ class Android(Device):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
-        #check and install accessibility service and release lock app
+        # check and install accessibility service and release lock app
         packages = self.list_app()
 
         if RELEASELOCK_PACKAGE not in packages:
             self.adb.install(RELEASELOCK_APK)
-        #start release lock app
+        # start release lock app
         self.stop_app(RELEASELOCK_PACKAGE)
         self.start_app(RELEASELOCK_PACKAGE)
-        self.adb.shell(['am', 'start', '-a', 'jp.co.cyberagent.stf.ACTION_IDENTIFY'])
+        self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
 
         # todo:
         # 1. 还需要按power键吗？
@@ -1056,13 +1059,16 @@ class Android(Device):
             self.ime.end()
 
     @autoretry
-    def touch(self, pos, duration=0.01):
+    def touch(self, pos, **kwargs):
+        duration = kwargs.get('duration', 0.01)
+        times = kwargs.get('times', 1)
         pos = map(lambda x: x/PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
-        if self.minitouch:
-            self.minitouch.touch(pos, duration=duration)
-        else:
-            self.adb.touch(pos)
+        for _ in range(times):
+            if self.minitouch:
+                self.minitouch.touch(pos, duration=duration)
+            else:
+                self.adb.touch(pos)
 
     @autoretry
     def swipe(self, p1, p2, duration=0.5):
