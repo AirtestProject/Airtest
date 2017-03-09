@@ -8,7 +8,7 @@ def register_class(name, cls):
     DEV_TYPE_DICT[name] = cls
 
 
-class Meta(type):
+class MetaDevice(type):
     def __new__(meta, name, bases, class_dict):
         cls = type.__new__(meta, name, bases, class_dict)
         register_class(name, cls)
@@ -17,7 +17,7 @@ class Meta(type):
 
 class Device(object):
     """base class for test device"""
-    __metaclass__ = Meta
+    __metaclass__ = MetaDevice
 
     def __init__(self):
         super(Device, self).__init__()

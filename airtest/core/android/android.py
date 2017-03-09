@@ -1,10 +1,5 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Author:  hzsunshx
-# Created: 2015-07-02 19:56
-# Modified: 2015-11 gzliuxin  add minitouch minicap
-# Modified: 2016-06 gzliuxin  add testlab support
 import os
 import sys
 import re
