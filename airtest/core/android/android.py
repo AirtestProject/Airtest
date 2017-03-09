@@ -1201,8 +1201,7 @@ class Android(Device):
             info["physical_width"], info["physical_height"] = info["width"], info["height"]
         # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
         mRestrictedScreen = self._getRestrictedScreen()
-        if mRestrictedScreen:
-            info["width"], info["height"] = mRestrictedScreen
+        if mRestrictedScreen:            info["width"], info["height"] = mRestrictedScreen
         # 因为获取mRestrictedScreen跟设备的横纵向状态有关，所以此处进行高度、宽度的自定义设定:
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]

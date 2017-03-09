@@ -193,7 +193,7 @@ def main():
             print "try loading:", args.utilfile
             sys.path.append(os.path.dirname(args.utilfile))
             utilcontent = open(args.utilfile).read()
-            exec(utilcontent) in globals()
+            exec(compile(utilcontent, args.utilfile, 'exec')) in globals()
         else:
             print "file does not exist:", os.path.abspath(args.utilfile)
 
