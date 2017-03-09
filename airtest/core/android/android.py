@@ -825,7 +825,7 @@ class Android(Device):
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = AdbKeyboardIme(self.adb)
+            self.ime = AdbKeyboardIme(self)
             self.toggle_shell_ime()
             reg_cleanup(self.ime.end)
 
@@ -953,23 +953,6 @@ class Android(Device):
 
         # 唤醒设备
         self.wake()
-        # 预装accessibility的apk，用于自动点掉各种弹框
-        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
-            self.adb.install(ACCESSIBILITYSERVICE_APK)
-        else:
-            output = self.adb.shell("dumpsys package "+ACCESSIBILITYSERVICE_PACKAGE)
-            try:
-                version = re.search("versionName=(\S+)", output)
-                version = float(version.group().split("=")[1])
-            except (ValueError, IndexError, AttributeError):
-                version = -1
-            if version >= ACCESSIBILITYSERVICE_VERSION:
-                LOGGING.debug('accessibility service install skipped')
-            else:
-                LOGGING.debug('current version:%s', version)
-                LOGGING.debug('upgrading accessibility service to lastest version:%s', ACCESSIBILITYSERVICE_VERSION)
-                self.uninstall_app(ACCESSIBILITYSERVICE_PACKAGE)
-                self.adb.install(ACCESSIBILITYSERVICE_APK)
 
         # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
         # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
@@ -984,7 +967,6 @@ class Android(Device):
             self.adb.install(filepath, overinstall=overinstall)
         if check:
             self.check_app(package)
-
 
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
@@ -1017,14 +999,6 @@ class Android(Device):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
-        # check and install accessibility service and release lock app
-        packages = self.list_app()
-
-        if RELEASELOCK_PACKAGE not in packages:
-            self.adb.install(RELEASELOCK_APK)
-        # start release lock app
-        self.stop_app(RELEASELOCK_PACKAGE)
-        self.start_app(RELEASELOCK_PACKAGE)
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
 
         # todo:
@@ -1077,7 +1051,7 @@ class Android(Device):
         if self.minitouch:
             self.minitouch.swipe(p1, p2, duration=duration)
         else:
-            duration = duration*1000 # adb的swipe操作时间是以毫秒为单位的。
+            duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
 
     @autoretry
