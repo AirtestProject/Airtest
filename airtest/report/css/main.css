@@ -1,0 +1,64 @@
+@charset "utf-8";
+
+
+html,* {
+  margin: 0;
+  padding: 0;
+}
+
+/* 精简了一些css */
+html, body{ 
+  display:block;
+  position: relative;
+  margin: 0;
+  background-image: url("../image/background.png");
+  font-family: Helvetica,'幼圆';
+  height: 100%;
+}
+
+
+a {
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.container-fluid {
+ 
+}
+
+/* 页面底部信息栏 */
+.footer{
+  height: 152px;
+  line-height: 152px;
+  text-align: center;
+  width: 100%;
+  font-size: 18px;
+  color: #fff;
+  background-color: #727171;
+}
+
+
+/** 通用 **/
+.bg-red{
+  background-color: #d44d4e !important;
+}
+.bg-yellow{
+  background-color: #f5d346 !important;
+}
+.bg-green{
+  background-color: #58c0c5 !important;
+}
+.bg-blue{
+  background-color: #3b6398 !important;
+}
+
+.green {
+  color: #58c0c5 !important;
+}
+
+.red {
+  color: #d44d4e !important; 
+}
