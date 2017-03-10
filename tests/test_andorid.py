@@ -64,11 +64,11 @@ class TestAndroid(unittest.TestCase):
         print apk.get_activities()
         if apk_package in self.android.list_app():
             self.android.uninstall_app(apk_package)
-        self.android.install_app(TEST_APK, check=False)
+        self.android.install_app(TEST_APK, 'com.netease.test', check=False)
         self.android.start_app(apk_package, TEST_PKG)
         self.android.stop_app(apk_package)
-        #test reinstall function
-        self.android.install_app(TEST_APK, reinstall=True)
+        # test reinstall function
+        self.android.install_app(TEST_APK, 'com.netease.test', reinstall=True)
         self.android.start_app(apk_package)
         self.android.stop_app(apk_package)
         self.android.uninstall_app(apk_package)
