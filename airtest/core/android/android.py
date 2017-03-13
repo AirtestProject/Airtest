@@ -18,7 +18,7 @@ import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
-from airtest.aircv import aircv
+# from airtest.aircv import aircv
 from airtest.core.android.ime_helper import AdbKeyboardIme
 from constant import *
 ADBPATH = get_adb_path()

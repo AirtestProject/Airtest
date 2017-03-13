@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# from airtest.core.utils.decouple import config
-from decouple import config, undefined
+from .utils.decouple import config, undefined
 
 
 class SConfig(object):
@@ -48,3 +47,31 @@ class Settings(object):
     FIND_TIMEOUT = SConfig(20, float)
     FIND_TIMEOUT_TMP = SConfig(3, float)
     DESIGN_RESOLUTION = SConfig([960, 640])
+
+    @classmethod
+    def set_basedir(cls, filepath):
+        cls.BASE_DIR = filepath
+
+    @classmethod
+    def set_logdir(cls, dirpath=None):
+        if dirpath is not None:
+            cls.LOG_DIR = dirpath
+        elif cls.BASE_DIR is not None:
+            cls.LOG_DIR = cls.BASE_DIR
+        else:
+            cls.LOG_DIR = "."
+
+    @classmethod
+    def set_threshold(cls, value):
+        if value > 1 or value < 0:
+            raise ValueError("invalid threshold: %s" % value)
+        cls.THRESHOLD = value
+
+    @classmethod
+    def set_find_outside(cls, find_outside):
+        """设置FIND_OUTSIDE, IDE中调用遮挡脚本编辑区."""
+        str_rect = find_outside.split('-')
+        find_outside = []
+        for i in str_rect:
+            find_outside.append(max(int(i), 0))  # 如果有负数，就用0 代替
+        cls.FIND_OUTSIDE = find_outside
