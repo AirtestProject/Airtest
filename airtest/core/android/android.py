@@ -19,6 +19,8 @@ import platform
 import Queue
 import random
 import traceback
+from distutils.version import LooseVersion
+
 import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
@@ -815,6 +817,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=addr)
         self.adb.start_server()
         self.adb.wait_for_device()
+        self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         if init_display:
             self._init_display(props)
             # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
@@ -844,7 +847,7 @@ class Android(Device):
             traceback.print_exc()
 
         self.orientationWatcher()
-        #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
+        # 注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
 
@@ -866,6 +869,20 @@ class Android(Device):
         }
         data = json.dumps(data).replace(r'"', r'\"')
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
+
+    def _init_requirement_apk(self, apk_path, package):
+        apk_version = apkparser.APK(apk_path).androidversion_name
+        installed_version = self._get_installed_apk_version(package)
+        LOGGING.info("local version is {}, installed version is {}".format(apk_version, installed_version))
+        if not installed_version or LooseVersion(apk_version) > LooseVersion(installed_version):
+            self.install_app(apk_path, package)
+
+    def _get_installed_apk_version(self, package):
+        package_info = self.shell(['dumpsys', 'package', package])
+        matcher = re.search(r'versionName=([\d\.]+)', package_info)
+        if matcher:
+            return matcher.group(1)
+        return None
 
     def list_app(self, third_only=False):
         """
@@ -891,14 +908,16 @@ class Android(Device):
     def path_app(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]'%output)
+            raise MoaError('package not found, output:[%s]' % output)
         return output.split(":")[1].strip()
 
     def check_app(self, package):
-        output = self.adb.shell(['pm', 'list', 'packages', package])
-        if ('package:%s' % package) not in output.splitlines():
-            raise MoaError('package not found, output:[%s]' % output)
-        return output.strip()
+        if '.' not in package:
+            raise MoaError('invalid package "{}"'.format(package))
+        output = self.shell(['dumpsys', 'package', package]).strip()
+        if not output:
+            raise MoaError('package "{}" not found'.format(package))
+        return 'package:{}'.format(package)
 
     def start_app(self, package, activity=None):
         self.check_app(package)
@@ -1320,7 +1339,7 @@ class Android(Device):
             
             line = self.ow_proc.stdout.readline()
             if line == "":
-                if LOGGING is not None: # may be None atexit
+                if LOGGING is not None:  # may be None atexit
                     LOGGING.error("orientationWatcher has ended")
                 return None
 

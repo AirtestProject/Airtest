@@ -11,3 +11,5 @@ ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
 DEBUG = True
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
+YOSEMITE_APK = os.path.join(THISPATH, "apks", "Yosemite.apk")
+YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'

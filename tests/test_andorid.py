@@ -56,7 +56,7 @@ class TestAndroid(unittest.TestCase):
 
     def test_check_app_error(self):
         with self.assertRaises(MoaError):
-            self.android.check_app('test_error')
+            self.android.check_app('test.error')
 
     def test_install_start_stop_uninstall(self):
         apk = apkparser.APK(TEST_APK)

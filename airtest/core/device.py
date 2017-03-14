@@ -47,7 +47,7 @@ class Device(object):
     def stop_app(self, package):
         raise NotImplementedError
 
-    def clear_app(self):
+    def clear_app(self, package):
         raise NotImplementedError
 
     def list_app(self, third_only=True):
