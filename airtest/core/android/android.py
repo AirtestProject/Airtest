@@ -915,7 +915,7 @@ class Android(Device):
         if '.' not in package:
             raise MoaError('invalid package "{}"'.format(package))
         output = self.shell(['dumpsys', 'package', package]).strip()
-        if not output:
+        if package not in output:
             raise MoaError('package "{}" not found'.format(package))
         return 'package:{}'.format(package)
 

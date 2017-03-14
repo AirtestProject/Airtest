@@ -48,7 +48,7 @@ class TestAndroid(unittest.TestCase):
 
     def test_path_app_error(self):
         with self.assertRaises(MoaError):
-            self.android.path_app('test_error')
+            self.android.path_app('com.netease.this.is.error')
 
     def test_check_app(self):
         package = self.android.list_app()[0]
@@ -56,7 +56,7 @@ class TestAndroid(unittest.TestCase):
 
     def test_check_app_error(self):
         with self.assertRaises(MoaError):
-            self.android.check_app('test.error')
+            self.android.check_app('com.netease.this.is.error')
 
     def test_install_start_stop_uninstall(self):
         apk = apkparser.APK(TEST_APK)
