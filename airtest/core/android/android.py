@@ -19,7 +19,6 @@ import platform
 import Queue
 import random
 import traceback
-from distutils.version import LooseVersion
 
 import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
@@ -871,17 +870,17 @@ class Android(Device):
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
 
     def _init_requirement_apk(self, apk_path, package):
-        apk_version = apkparser.APK(apk_path).androidversion_name
+        apk_version = int(apkparser.APK(apk_path).androidversion_code)
         installed_version = self._get_installed_apk_version(package)
-        LOGGING.info("local version is {}, installed version is {}".format(apk_version, installed_version))
-        if not installed_version or LooseVersion(apk_version) > LooseVersion(installed_version):
+        LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
+        if not installed_version or apk_version > installed_version:
             self.install_app(apk_path, package)
 
     def _get_installed_apk_version(self, package):
         package_info = self.shell(['dumpsys', 'package', package])
-        matcher = re.search(r'versionName=([\d\.]+)', package_info)
+        matcher = re.search(r'versionCode=(\d+)', package_info)
         if matcher:
-            return matcher.group(1)
+            return int(matcher.group(1))
         return None
 
     def list_app(self, third_only=False):
@@ -924,7 +923,7 @@ class Android(Device):
         if not activity:
             self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
         else:
-            self.adb.shell(['am', 'start', '-n', '%s/%s.%s'%(package, package, activity)])
+            self.adb.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
 
     def stop_app(self, package):
         self.check_app(package)
