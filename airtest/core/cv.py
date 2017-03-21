@@ -12,7 +12,7 @@ from airtest.core.img_matcher import template_in_predicted_area, template_after_
 
 def _get_search_img(pictarget):
     """获取搜索图像(cv2格式)."""
-    if not isinstance(pictarget, MoaPic)
+    if not isinstance(pictarget, MoaPic):
         pictarget = MoaPic(pictarget)
 
     return aircv.imread(pictarget.filepath)
@@ -214,6 +214,7 @@ def _do_match(screen, im_sch, op_pos, threshold, rgb, sch_resolution, src_resolu
                 G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
 
             # 使用某个识别方法找到后，就直接返回，不再继续循环下去:
-            return ret if ret else continue
+            if ret:
+                return ret
 
     return ret
