@@ -16,7 +16,6 @@ from aircv.utils import checkImageParamInput, generate_result
 from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos
-from airtest.core.img_matcher import template_in_predicted_area, template_after_resize, mask_template_in_predicted_area, mask_template_after_resize, find_sift_in_predicted_area, _refresh_result_pos
 
 
 @logwrap
