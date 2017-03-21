@@ -4,7 +4,8 @@
 """"Airtest图像识别专用."""
 
 import aircv
-from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, get_platform, platform
+import traceback
+from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos
 from airtest.core.img_matcher import template_in_predicted_area, template_after_resize, mask_template_in_predicted_area, mask_template_after_resize, find_sift_in_predicted_area, _refresh_result_pos
@@ -18,8 +19,8 @@ def _get_search_img(pictarget):
     return aircv.imread(pictarget.filepath)
 
 
-def _get_screen_img(windows_hwnd=None):
-    """获取屏幕图像."""
+def _get_device_screen(windows_hwnd=None):
+    """获取设备屏幕图像."""
     if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
         screen = G.RECENT_CAPTURE
     else:
@@ -48,22 +49,22 @@ def device_snapshot(filename="screen.png", windows_hwnd=None):
 
 
 @logwrap
-def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
+def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None):
     """keep looking for pic until timeout, execute intervalfunc if pic not found."""
     G.LOGGING.info("Try finding:\n%s", pictarget)
-    # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的，再次是设置的默认阈值
-    threshold = getattr(pictarget, "threshold") or threshold or ST.THRESHOLD
 
     start_time = time.time()
     while True:
         # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
-        ret = _get_img_match_result(pictarget, threshold, find_all=find_all)
+        srctarget = _get_scrtarget(pictarget)
+
+        ret = _get_img_match_result(srctarget, pictarget)
         if ret:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
             return ret
 
         if intervalfunc is not None:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
             intervalfunc()
         for name, func in WATCHER.items():
             G.LOGGING.info("exec watcher %s", name)
@@ -71,69 +72,107 @@ def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, 
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
             raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
         else:
             time.sleep(interval)
             continue
 
 
-def _get_img_match_result(pictarget, threshold, find_all=False):
-    """求取目标操作位置."""
-    # 第一步: 获取截图和截屏,以及偏移位置
-    # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_inside:
-    if pictarget.rect and not pictarget.find_inside:
-        rect = pictarget.rect
-        pictarget.find_inside = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
-
-    # 获取截图
-    im_sch = _get_search_img(pictarget)
-
-    # 获取截屏
+def _get_scrtarget(pictarget):
+    """求取图像匹配的截屏数据类."""
+    # 第一步: 获取截屏
     if not pictarget.whole_screen and get_platform() == "Windows" and DEVICE.handle:
         # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
-        screen = _get_screen_img(windows_hwnd=DEVICE.handle)
+        screen = _get_device_screen(windows_hwnd=DEVICE.handle)
         # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
         wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)
     else:
         wnd_pos = None  # 没有所谓的窗口偏移，设为None
         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
-        screen = _get_screen_img()
+        screen = _get_device_screen()
         # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
         screen = mask_image(screen, pictarget.find_outside)
+
     # 检查截屏:
-    screen = _check_screen(screen)
-    if not screen:
-        return None
-
-    # 第二步：图像识别，并求取实际操作位置
-    return _img_match(screen, im_sch, pictarget, threshold, find_all, wnd_pos)
-
-
-def _check_screen(screen):
-    """检查本次截屏."""
-    # 如果截屏有问题，直接返回None
     if not screen.any():
-        G.LOGGING.warning("Bad screen capture, skip cv matching")
-        return None
-    # 如果指定调试状态，展示图像识别时的截屏图片：
-    if ST.DEBUG:
+        G.LOGGING.warning("Bad screen capture, skip cv matching...")
+        screen = None
+    # 调试状态下，展示图像识别时的截屏图片：
+    if ST.DEBUG and screen is not None:
         aircv.show(screen)
 
-    return screen
+    # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
+    img_src, offset = aircv.crop_image(screen, pictarget.find_inside)
+
+    return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos)
 
 
-def _img_match(screen, im_sch, pictarget, threshold, find_all, wnd_pos):
-    """获取图像识别结果，并求取操作位置."""
-    # find_inside参数: 在寻找区得到结果后进行offset校正。为None则offset=[0, 0].
-    screen, offset = aircv.crop_image(screen, pictarget.find_inside)
-    # 先获取初始的图像识别结果:
-    cv_ret = _cv_match(screen, im_sch, threshold, pictarget, find_all)
+def _get_img_match_result(srctarget, pictarget):
+    """求取目标操作位置."""
+    # 第一步: 图像识别
+    try:
+        cv_ret = _cv_match(srctarget, pictarget)
+    except aircv.Error:
+        cv_ret = None
+    except Exception as err:
+        traceback.print_exc()
+        cv_ret = None
+
     G.LOGGING.debug("match result: %s", cv_ret)
-    # 矫正识别区域结果，并处理偏移target_pos:
+    # 将识别结果写入log文件:
+    log_in_func({"cv": ret})
+
+    # 第二步: 矫正识别区域结果，并处理偏移target_pos，并求取实际操作位置
+    offset, wnd_pos = getattr(srctarget, "offset"), getattr(srctarget, "wnd_pos")
     ret_pos = _calibrate_ret(cv_ret, pictarget, offset, wnd_pos)
 
     return ret_pos
+
+
+def _cv_match(srctarget, pictarget):
+    """调用功能函数，执行图像匹配."""
+    # 获取截图、截屏(注意是用于匹配的截屏)
+    im_sch = _get_search_img(pictarget)
+    im_src = getattr(srctarget, "img_src")
+    # 取出匹配相关的参数:
+    rgb = pictarget.resolution or ST.STRICT_RET
+    sch_resolution = pictarget.resolution
+    src_resolution = ST.SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+    design_resolution = ST.DESIGN_RESOLUTION
+    resize_strategy = ST.RESIZE_METHOD
+    ignore, focus = pictarget.ignore, pictarget.focus
+    op_pos = pictarget.record_pos
+    find_all = pictarget.find_all
+    threshold = pictarget.threshold
+
+    ret = None
+    if ignore or focus:
+        # 带有mask的模板匹配方法:
+        G.LOGGING.debug("method: template match (with ignore & focus rects)")
+        ret_in_pre = mask_template_in_predicted_area(im_src, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
+        ret = ret_in_pre or mask_template_after_resize(im_src, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
+    else:
+        # 根据cv_strategy配置进行匹配:
+        for method in ST.CVSTRATEGY:
+            if method == "tpl":
+                # 普通的模板匹配: (默认pre，其次全屏)
+                G.LOGGING.debug("method: template match")
+                ret_in_pre = template_in_predicted_area(im_src, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
+                ret = ret_in_pre or template_after_resize(im_src, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
+            elif method == "sift":
+                # sift匹配，默认pre，其次全屏
+                G.LOGGING.debug("method: sift match")
+                ret_in_pre = find_sift_in_predicted_area(im_src, im_sch, op_pos, src_resolution=src_resolution, threshold=threshold, rgb=rgb)
+                ret = ret_in_pre or aircv.find_sift(im_src, im_sch, threshold=threshold, rgb=rgb)
+            else:
+                G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
+
+            # 使用某个识别方法找到后，就直接返回，不再继续循环下去:
+            if ret:
+                return ret
+
+    return ret
 
 
 def _calibrate_ret(ret, pictarget, offset=None, wnd_pos=None):
@@ -164,59 +203,3 @@ def _calibrate_ret(ret, pictarget, offset=None, wnd_pos=None):
         ret = cal_ret(ret, offset, wnd_pos)
         ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
         return ret_pos
-
-
-def _cv_match(screen, im_sch, threshold, pictarget, find_all):
-    """根据传入的参数,进行图像识别."""
-    # 取出匹配相关的参数:
-    rgb = ST.STRICT_RET
-    sch_resolution = pictarget.resolution
-    src_resolution = ST.SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
-    design_resolution = ST.DESIGN_RESOLUTION
-    resize_strategy = ST.RESIZE_METHOD
-    ignore, focus = pictarget.ignore, pictarget.focus
-    op_pos = pictarget.record_pos
-
-    try:
-        ret = _do_match(screen, im_sch, op_pos, threshold, rgb, sch_resolution, src_resolution, design_resolution, ignore, focus, resize_strategy)
-    except aircv.Error:
-        ret = None
-    except Exception as err:
-        traceback.print_exc()
-        ret = None
-
-    # 将识别结果写入log文件:
-    log_in_func({"cv": ret})
-
-    return ret
-
-
-def _do_match(screen, im_sch, op_pos, threshold, rgb, sch_resolution, src_resolution, design_resolution, ignore, focus, resize_strategy):
-    """调用功能函数，执行图像匹配."""
-    ret = None
-    if ignore or focus:
-        # 带有mask的模板匹配方法:
-        G.LOGGING.debug("method: template match (with ignore & focus rects)")
-        ret_in_pre = mask_template_in_predicted_area(screen, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
-        ret = ret_in_pre or mask_template_after_resize(screen, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
-    else:
-        # 根据cv_strategy配置进行匹配:
-        for method in ST.CVSTRATEGY:
-            if method == "tpl":
-                # 普通的模板匹配: (默认pre，其次全屏)
-                G.LOGGING.debug("method: template match")
-                ret_in_pre = template_in_predicted_area(screen, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
-                ret = ret_in_pre or template_after_resize(screen, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
-            elif method == "sift":
-                # sift匹配，默认pre，其次全屏
-                G.LOGGING.debug("method: sift match")
-                ret_in_pre = find_sift_in_predicted_area(screen, im_sch, op_pos, src_resolution=src_resolution, threshold=threshold, rgb=rgb)
-                ret = ret_in_pre or aircv.find_sift(screen, im_sch, threshold=threshold, rgb=rgb)
-            else:
-                G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
-
-            # 使用某个识别方法找到后，就直接返回，不再继续循环下去:
-            if ret:
-                return ret
-
-    return ret

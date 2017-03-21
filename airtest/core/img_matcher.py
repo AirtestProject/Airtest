@@ -112,7 +112,7 @@ def _get_predicted_area(im_source, src_resolution, op_pos, radius_x=RADIUS_X, ra
     end_y = int(safe_xy(prePos_y + radius_y, 0, res_y - 1))
 
     # 调试代码: 输出调试信息.
-    print(("predict rect:  X (", start_x, ":", end_x, ")   Y (", start_y, ":",  end_y, ")"))
+    print(("predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)") % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y})
 
     # 如果发现预测区域完全在图像外，预测区域将只剩下一条像素，预测失败，直接raise:
     if start_x == end_x or start_y == end_y:

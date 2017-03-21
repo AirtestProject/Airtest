@@ -33,12 +33,15 @@ class MoaPic(object):
     whole_screen: 为True时，则指定在全屏内寻找.
     ignore: [ [x_min, y_min, x_max, y_max], ... ]  识别时，忽略掉ignore包含的矩形区域 (mask_tpl)
     focus: [ [x_min, y_min, x_max, y_max], ... ]  识别时，只识别ignore包含的矩形区域 (可信度为面积加权平均)
+    rgb: 识别结果是否使用rgb三通道进行校验.
+    find_all: 是否寻找所有满足条件的结果.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
         self.filename = filename
-        self.filepath = filename if os.path.isabs(filename) else os.path.join(ST.BASE_DIR, filename) 
-        self.threshold = threshold  # if threshold is not None else THRESHOLD
+        self.filepath = filename if os.path.isabs(filename) else os.path.join(ST.BASE_DIR, filename)
+        # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的
+        self.threshold = threshold or ST.THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
@@ -49,9 +52,29 @@ class MoaPic(object):
         self.ignore = ignore
         self.focus = focus
         self.rgb = rgb
+        self.find_all = find_all
+
+        self.compatibleRect()
 
     def __repr__(self):
         return "MoaPic(%s)" % self.filepath
+
+    def compatibleRect(self):
+        """兼容以前脚本中的rect参数."""
+        # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_inside:
+        if self.rect and not self.find_inside:
+            rect = self.rect
+            self.find_inside = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
+
+
+class MoaScreen(object):
+    """保存截屏及截屏相关的参数."""
+
+    def __init__(self, screen=None, img_src=None, offset=None, wnd_pos=None):
+        self.screen = screen
+        self.img_src = img_src
+        self.offset = offset
+        self.wnd_pos = wnd_pos
 
 
 class MoaText(object):
