@@ -185,8 +185,8 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android", "IOS"])
-def install(filepath):
-    return G.DEVICE.install_app(filepath)
+def install(filepath, package):
+    return G.DEVICE.install_app(filepath, package)
 
 
 @logwrap
@@ -200,10 +200,10 @@ def snapshot(filename=None, windows_hwnd=None):
     """capture device screen and save it into file."""
     screen = _snapshot()
     if filename is None:
-        filepath = RECENT_CAPTURE_PATH
+        filepath = G.RECENT_CAPTURE_PATH
     else:
         filepath = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
-    aircv.imwrite(filename, screen)
+    aircv.imwrite(filepath, screen)
 
 
 @logwrap

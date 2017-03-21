@@ -8,7 +8,7 @@ from pprint import pprint
 
 import airtest.core.main
 from airtest.core.main import set_serialno, snapshot, logwrap, _log_in_func
-from airtest.core.android.uiautomator import AutomatorDevice
+from uiautomator import AutomatorDevice
 
 
 __all__ = ['UiAutomator']

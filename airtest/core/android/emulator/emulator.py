@@ -32,7 +32,7 @@ class Emulator(Android):
             self._init_display(props)
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = AdbKeyboardIme(self.adb)
+            self.ime = AdbKeyboardIme(self)
             self.toggle_shell_ime()
 
     def _init_display(self, props=None):
