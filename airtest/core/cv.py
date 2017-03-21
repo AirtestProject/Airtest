@@ -20,8 +20,8 @@ def _get_search_img(pictarget):
 
 def _get_screen_img(windows_hwnd=None):
     """获取屏幕图像."""
-    last_capture_flag = KEEP_CAPTURE and (RECENT_CAPTURE is not None)
-    screen = _snapshot(windows_hwnd=windows_hwnd) if not last_capture_flag else RECENT_CAPTURE
+    last_capture_flag = KEEP_CAPTURE and (G.RECENT_CAPTURE is not None)
+    screen = _snapshot(windows_hwnd=windows_hwnd) if not last_capture_flag else G.RECENT_CAPTURE
 
     return screen
 
@@ -31,46 +31,45 @@ def _get_screen_img(windows_hwnd=None):
 def _snapshot(filename="screen.png", windows_hwnd=None):
     """设备截屏."""
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    G.RECENT_CAPTURE_PATH = os.path.join(LOG_DIR, SAVE_SCREEN, filename)
+    G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
     # write filepath into log:
     if ST.SAVE_SCREEN:
-        log_in_func({"screen": os.path.join(SAVE_SCREEN, filename)})
+        log_in_func({"screen": os.path.join(ST.SAVE_SCREEN, filename)})
     # device snapshot: default not save
     if windows_hwnd:
         screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
     else:
         screen = DEVICE._snapshot_impl(filename=None)
     # 使用screen更新RECENT_CAPTURE
-    global RECENT_CAPTURE
-    RECENT_CAPTURE = screen
+    G.RECENT_CAPTURE = screen
     return screen
 
 
 @logwrap
 def _loop_find(pictarget, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
     """keep looking for pic until timeout, execute intervalfunc if pic not found."""
-    LOGGING.info("Try finding:\n%s", pictarget)
+    G.LOGGING.info("Try finding:\n%s", pictarget)
     # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的，再次是设置的默认阈值
-    threshold = getattr(pictarget, "threshold") or threshold or THRESHOLD
+    threshold = getattr(pictarget, "threshold") or threshold or ST.THRESHOLD
 
     start_time = time.time()
     while True:
         # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
         ret = _get_img_match_result(pictarget, threshold, find_all=find_all)
         if ret:
-            aircv.imwrite(RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
             return ret
 
         if intervalfunc is not None:
-            aircv.imwrite(RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
             intervalfunc()
         for name, func in WATCHER.items():
-            LOGGING.info("exec watcher %s", name)
+            G.LOGGING.info("exec watcher %s", name)
             func()
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
-            aircv.imwrite(RECENT_CAPTURE_PATH, screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, screen)
             raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
         else:
             time.sleep(interval)
@@ -113,10 +112,10 @@ def _check_screen(screen):
     """检查本次截屏."""
     # 如果截屏有问题，直接返回None
     if not screen.any():
-        LOGGING.warning("Bad screen capture, skip cv matching")
+        G.LOGGING.warning("Bad screen capture, skip cv matching")
         return None
     # 如果指定调试状态，展示图像识别时的截屏图片：
-    if DEBUG:
+    if ST.DEBUG:
         aircv.show(screen)
 
     return screen
@@ -128,7 +127,7 @@ def _img_match(screen, im_sch, pictarget, threshold, find_all, wnd_pos):
     screen, offset = aircv.crop_image(screen, pictarget.find_inside)
     # 先获取初始的图像识别结果:
     cv_ret = _cv_match(screen, im_sch, threshold, pictarget, find_all)
-    LOGGING.debug("match result: %s", cv_ret)
+    G.LOGGING.debug("match result: %s", cv_ret)
     # 矫正识别区域结果，并处理偏移target_pos:
     ret_pos = _calibrate_ret(cv_ret, pictarget, offset, wnd_pos)
 
@@ -195,7 +194,7 @@ def _do_match(screen, im_sch, op_pos, threshold, rgb, sch_resolution, src_resolu
     ret = None
     if ignore or focus:
         # 带有mask的模板匹配方法:
-        LOGGING.debug("method: template match (with ignore & focus rects)")
+        G.LOGGING.debug("method: template match (with ignore & focus rects)")
         ret_in_pre = mask_template_in_predicted_area(screen, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
         ret = ret_in_pre or mask_template_after_resize(screen, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
     else:
@@ -203,16 +202,16 @@ def _do_match(screen, im_sch, op_pos, threshold, rgb, sch_resolution, src_resolu
         for method in ST.CVSTRATEGY:
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
-                LOGGING.debug("method: template match")
+                G.LOGGING.debug("method: template match")
                 ret_in_pre = template_in_predicted_area(screen, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
                 ret = ret_in_pre or template_after_resize(screen, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
             elif method == "sift":
                 # sift匹配，默认pre，其次全屏
-                LOGGING.debug("method: sift match")
+                G.LOGGING.debug("method: sift match")
                 ret_in_pre = find_sift_in_predicted_area(screen, im_sch, op_pos, src_resolution=src_resolution, threshold=threshold, rgb=rgb)
                 ret = ret_in_pre or aircv.find_sift(screen, im_sch, threshold=threshold, rgb=rgb)
             else:
-                LOGGING.warning("skip method in %s  CV_STRATEGY", method)
+                G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
 
             # 使用某个识别方法找到后，就直接返回，不再继续循环下去:
             return ret if ret else continue
