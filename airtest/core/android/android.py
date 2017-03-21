@@ -14,6 +14,7 @@ import platform
 import Queue
 import random
 import traceback
+
 import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
@@ -810,6 +811,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=addr)
         self.adb.start_server()
         self.adb.wait_for_device()
+        self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         if init_display:
             self._init_display(props)
             # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
@@ -820,7 +822,7 @@ class Android(Device):
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = AdbKeyboardIme(self.adb)
+            self.ime = AdbKeyboardIme(self)
             self.toggle_shell_ime()
             reg_cleanup(self.ime.end)
 
@@ -839,7 +841,7 @@ class Android(Device):
             traceback.print_exc()
 
         self.orientationWatcher()
-        #注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
+        # 注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
         self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
         self._dump_props()
 
@@ -861,6 +863,20 @@ class Android(Device):
         }
         data = json.dumps(data).replace(r'"', r'\"')
         self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
+
+    def _init_requirement_apk(self, apk_path, package):
+        apk_version = int(apkparser.APK(apk_path).androidversion_code)
+        installed_version = self._get_installed_apk_version(package)
+        LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
+        if not installed_version or apk_version > installed_version:
+            self.install_app(apk_path, package)
+
+    def _get_installed_apk_version(self, package):
+        package_info = self.shell(['dumpsys', 'package', package])
+        matcher = re.search(r'versionCode=(\d+)', package_info)
+        if matcher:
+            return int(matcher.group(1))
+        return None
 
     def list_app(self, third_only=False):
         """
@@ -886,21 +902,23 @@ class Android(Device):
     def path_app(self, package):
         output = self.adb.shell(['pm', 'path', package])
         if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]'%output)
+            raise MoaError('package not found, output:[%s]' % output)
         return output.split(":")[1].strip()
 
     def check_app(self, package):
-        output = self.adb.shell(['pm', 'list', 'packages', package])
-        if ('package:%s' % package) not in output.splitlines():
-            raise MoaError('package not found, output:[%s]' % output)
-        return output.strip()
+        if '.' not in package:
+            raise MoaError('invalid package "{}"'.format(package))
+        output = self.shell(['dumpsys', 'package', package]).strip()
+        if package not in output:
+            raise MoaError('package "{}" not found'.format(package))
+        return 'package:{}'.format(package)
 
     def start_app(self, package, activity=None):
         self.check_app(package)
         if not activity:
             self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
         else:
-            self.adb.shell(['am', 'start', '-n', '%s/%s.%s'%(package, package, activity)])
+            self.adb.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
 
     def stop_app(self, package):
         self.check_app(package)
@@ -948,23 +966,6 @@ class Android(Device):
 
         # 唤醒设备
         self.wake()
-        # 预装accessibility的apk，用于自动点掉各种弹框
-        if ACCESSIBILITYSERVICE_PACKAGE not in packages:
-            self.adb.install(ACCESSIBILITYSERVICE_APK)
-        else:
-            output = self.adb.shell("dumpsys package "+ACCESSIBILITYSERVICE_PACKAGE)
-            try:
-                version = re.search("versionName=(\S+)", output)
-                version = float(version.group().split("=")[1])
-            except (ValueError, IndexError, AttributeError):
-                version = -1
-            if version >= ACCESSIBILITYSERVICE_VERSION:
-                LOGGING.debug('accessibility service install skipped')
-            else:
-                LOGGING.debug('current version:%s', version)
-                LOGGING.debug('upgrading accessibility service to lastest version:%s', ACCESSIBILITYSERVICE_VERSION)
-                self.uninstall_app(ACCESSIBILITYSERVICE_PACKAGE)
-                self.adb.install(ACCESSIBILITYSERVICE_APK)
 
         # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
         # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
@@ -979,7 +980,6 @@ class Android(Device):
             self.adb.install(filepath, overinstall=overinstall)
         if check:
             self.check_app(package)
-
 
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
@@ -1012,14 +1012,6 @@ class Android(Device):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
-        # check and install accessibility service and release lock app
-        packages = self.list_app()
-
-        if RELEASELOCK_PACKAGE not in packages:
-            self.adb.install(RELEASELOCK_APK)
-        # start release lock app
-        self.stop_app(RELEASELOCK_PACKAGE)
-        self.start_app(RELEASELOCK_PACKAGE)
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
 
         # todo:
@@ -1072,7 +1064,7 @@ class Android(Device):
         if self.minitouch:
             self.minitouch.swipe(p1, p2, duration=duration)
         else:
-            duration = duration*1000 # adb的swipe操作时间是以毫秒为单位的。
+            duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
 
     @autoretry
@@ -1326,7 +1318,7 @@ class Android(Device):
         try:
             apk_path = self.path_app(ROTATIONWATCHER_PACKAGE)
         except MoaError:
-            self.install_app(ROTATIONWATCHER_APK)
+            self.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
             apk_path = self.path_app(ROTATIONWATCHER_PACKAGE)
         p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
         if p.poll() is not None:
@@ -1341,7 +1333,7 @@ class Android(Device):
             
             line = self.ow_proc.stdout.readline()
             if line == "":
-                if LOGGING is not None: # may be None atexit
+                if LOGGING is not None:  # may be None atexit
                     LOGGING.error("orientationWatcher has ended")
                 return None
 
