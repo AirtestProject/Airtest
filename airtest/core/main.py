@@ -10,7 +10,7 @@ from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.utils import is_str
 from airtest.core.settings import Settings as ST
-from airtest.core.cv import loop_find, snapshot
+from airtest.core.cv import loop_find, device_snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
     get_platform, platform, register_device, delay_after_operation
 try:
@@ -198,7 +198,7 @@ def uninstall(package):
 @logwrap
 def snapshot(filename=None, windows_hwnd=None):
     """capture device screen and save it into file."""
-    screen = _snapshot()
+    screen = device_snapshot()
     if filename is None:
         filepath = G.RECENT_CAPTURE_PATH
     else:

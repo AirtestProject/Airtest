@@ -23,14 +23,14 @@ def _get_screen_img(windows_hwnd=None):
     if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
         screen = G.RECENT_CAPTURE
     else:
-        screen = _snapshot(windows_hwnd=windows_hwnd)
+        screen = device_snapshot(windows_hwnd=windows_hwnd)
 
     return screen
 
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
-def snapshot(filename="screen.png", windows_hwnd=None):
+def device_snapshot(filename="screen.png", windows_hwnd=None):
     """设备截屏."""
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
