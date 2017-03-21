@@ -98,6 +98,11 @@ helper functions
 """
 
 
+def log(tag, data, in_stack=True):
+    if G.LOGGER:
+        G.LOGGER.log(tag, data, in_stack)
+
+
 def log_in_func(data):
     if G.LOGGER:
         G.LOGGER.extra_log.update(data)

@@ -14,12 +14,11 @@ import platform
 import Queue
 import random
 import traceback
-
+import aircv
 import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
-# from airtest.aircv import aircv
 from airtest.core.android.ime_helper import AdbKeyboardIme
 from constant import *
 ADBPATH = get_adb_path()
@@ -942,12 +941,13 @@ class Android(Device):
         self.adb.shell('settings put secure accessibility_enabled 0')
         self.adb.shell('settings put secure enabled_accessibility_services 0')
 
-    def install_app(self, filepath, package, **kwargs):
+    def install_app(self, filepath, package=None, **kwargs):
         """
         安装应用
         overinstall: 不管应用在不在，直接覆盖安装；
         reinstall: 如果在则先卸载再安装，不在则直接安装。
         """
+        package = package or apkparser.APK(filepath).get_package()
         reinstall = kwargs.get('reinstall', False)
         overinstall = kwargs.get('overinstall', False)
         check = kwargs.get('check', True)
@@ -993,10 +993,10 @@ class Android(Device):
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
-        screen = aircv.string_2_img(screen)
+        screen = aircv.utils.string_2_img(screen)
 
         # 保证方向是正的
-        if ensure_orientation and self.sdk_version <=16 and self.size["orientation"]:
+        if ensure_orientation and self.sdk_version <= 16 and self.size["orientation"]:
             h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
             if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                 screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)

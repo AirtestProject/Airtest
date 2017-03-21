@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """"Airtest图像识别专用."""
-
+import os
 import cv2
 import numpy as np
 import traceback
-
+import time
 import aircv
 from aircv.error import *  # noqa
 from aircv.template import find_all_template, find_template, _get_target_rectangle
@@ -17,6 +17,56 @@ from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logw
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos
 from airtest.core.img_matcher import template_in_predicted_area, template_after_resize, mask_template_in_predicted_area, mask_template_after_resize, find_sift_in_predicted_area, _refresh_result_pos
+
+
+@logwrap
+@platform(on=["Android", "Windows", "IOS"])
+def device_snapshot(filename="screen.png", windows_hwnd=None):
+    """设备截屏."""
+    filename = "%(time)d.jpg" % {'time': time.time() * 1000}
+    G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
+    # write filepath into log:
+    if ST.SCREEN_DIR:
+        log_in_func({"screen": os.path.join(ST.SCREEN_DIR, filename)})
+    # device snapshot: default not save
+    if windows_hwnd:
+        screen = G.DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
+    else:
+        screen = G.DEVICE._snapshot_impl(filename=None)
+    # 使用screen更新RECENT_CAPTURE
+    G.RECENT_CAPTURE = screen
+    return screen
+
+
+@logwrap
+def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None):
+    """keep looking for pic until timeout, execute intervalfunc if pic not found."""
+    G.LOGGING.info("Try finding:\n%s", pictarget)
+
+    start_time = time.time()
+    while True:
+        # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
+        srctarget = _get_scrtarget(pictarget)
+
+        ret = _get_img_match_result(srctarget, pictarget)
+        if ret:
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
+            return ret
+
+        if intervalfunc is not None:
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
+            intervalfunc()
+        for name, func in WATCHER.items():
+            G.LOGGING.info("exec watcher %s", name)
+            func()
+
+        # 超时则raise，未超时则进行下次循环:
+        if (time.time() - start_time) > timeout:
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
+            raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
+        else:
+            time.sleep(interval)
+            continue
 
 
 def no_resize(w_a, h_a, resolution_a, resolution_b, design_resolution):
@@ -56,64 +106,14 @@ def _get_device_screen(windows_hwnd=None):
     return screen
 
 
-@logwrap
-@platform(on=["Android", "Windows", "IOS"])
-def device_snapshot(filename="screen.png", windows_hwnd=None):
-    """设备截屏."""
-    filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
-    # write filepath into log:
-    if ST.SAVE_SCREEN:
-        log_in_func({"screen": os.path.join(ST.SAVE_SCREEN, filename)})
-    # device snapshot: default not save
-    if windows_hwnd:
-        screen = DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
-    else:
-        screen = DEVICE._snapshot_impl(filename=None)
-    # 使用screen更新RECENT_CAPTURE
-    G.RECENT_CAPTURE = screen
-    return screen
-
-
-@logwrap
-def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None):
-    """keep looking for pic until timeout, execute intervalfunc if pic not found."""
-    G.LOGGING.info("Try finding:\n%s", pictarget)
-
-    start_time = time.time()
-    while True:
-        # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
-        srctarget = _get_scrtarget(pictarget)
-
-        ret = _get_img_match_result(srctarget, pictarget)
-        if ret:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
-            return ret
-
-        if intervalfunc is not None:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
-            intervalfunc()
-        for name, func in WATCHER.items():
-            G.LOGGING.info("exec watcher %s", name)
-            func()
-
-        # 超时则raise，未超时则进行下次循环:
-        if (time.time() - start_time) > timeout:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
-            raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
-        else:
-            time.sleep(interval)
-            continue
-
-
 def _get_scrtarget(pictarget):
     """求取图像匹配的截屏数据类."""
     # 第一步: 获取截屏
-    if not pictarget.whole_screen and get_platform() == "Windows" and DEVICE.handle:
+    if not pictarget.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
         # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
-        screen = _get_device_screen(windows_hwnd=DEVICE.handle)
+        screen = _get_device_screen(windows_hwnd=G.DEVICE.handle)
         # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
-        wnd_pos = DEVICE.get_wnd_pos_by_hwnd(DEVICE.handle)
+        wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
     else:
         wnd_pos = None  # 没有所谓的窗口偏移，设为None
         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
@@ -165,7 +165,7 @@ def _cv_match(srctarget, pictarget):
     # 取出匹配相关的参数:
     rgb = pictarget.resolution or ST.STRICT_RET
     sch_resolution = pictarget.resolution
-    src_resolution = ST.SRC_RESOLUTION or DEVICE.getCurrentScreenResolution()
+    src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
     design_resolution = ST.DESIGN_RESOLUTION
     resize_strategy = ST.RESIZE_METHOD
     ignore, focus = pictarget.ignore, pictarget.focus

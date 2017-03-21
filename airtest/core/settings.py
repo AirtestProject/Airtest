@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .utils.decouple import config, undefined
+from airtest.core.utils.decouple import config, undefined
 
 
 class SConfig(object):
@@ -25,10 +25,9 @@ class Settings(object):
     DEBUG = SConfig(False, bool)
     ADDRESS = SConfig(('127.0.0.1', 5037))
     BASE_DIR = SConfig(None)
-    LOG_DIR = SConfig(None)
+    LOG_DIR = SConfig(".")
     LOG_FILE = SConfig("log.txt")
     SCREEN_DIR = SConfig("img_record")
-    SAVE_SCREEN = SConfig(None)
     RESIZE_METHOD = SConfig(None)
     SCRIPTHOME = SConfig(None)
     SRC_RESOLUTION = SConfig([])  # to be move to DEVICE

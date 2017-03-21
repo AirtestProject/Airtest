@@ -7,9 +7,12 @@ import traceback
 from urllib import unquote
 from airtest.core.main import *
 from airtest.core.error import MinicapError, MinitouchError, AdbError
+from airtest.core.helper import log, logwrap
 
 
 SCRIPT_STACK = []
+SCRIPTEXT = ".owl"
+TPLEXT = ".png"
 
 
 def run_script(args):
@@ -75,10 +78,10 @@ def run_script(args):
     # run script
     if args.log is True:
         print "save log & screen in script dir"
-        set_logdir(args.script)
+        ST.set_logdir(args.script)
     elif args.log:
         print "save log & screen in '%s'" % args.log
-        set_logdir(args.log)
+        ST.set_logdir(args.log)
     else:
         print "do not save log & screen"
 
@@ -88,13 +91,13 @@ def run_script(args):
     try:
         # execute pre script
         if args.pre:
-            set_basedir(args.pre)
+            ST.set_basedir(args.pre)
             for i in range(len(DEVICE_LIST)):  # pre for all devices
                 set_current(i)
                 exec_script(args.pre, scope=globals(), root=True)
 
         # execute script
-        set_basedir(args.script)
+        ST.set_basedir(args.script)
         set_current(0)
         exec_script(args.script, scope=globals(), root=True)
     except:
@@ -105,7 +108,7 @@ def run_script(args):
         # execute post script, whether pre & script succeed or not
         if args.post:
             try:
-                set_basedir(args.post)
+                ST.set_basedir(args.post)
                 for i in range(len(DEVICE_LIST)):  # post for all devices
                     set_current(i)
                     exec_script(args.post, scope=globals(), root=True)
@@ -114,7 +117,8 @@ def run_script(args):
                 traceback.print_exc()
 
 
-def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=False, code=None):
+@logwrap
+def exec_script(scriptname, scope=None, root=False, code=None):
     """
     execute script: root or submodule
     1. exec root script
@@ -136,11 +140,10 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
     SCRIPT_STACK.append(scriptname)
 
     # start exec
-    log("function", {"name": "exec_script", "step": "start", "script": scriptname})
     print "exec_script", scriptpath
     # read code
     if code is None:
-        pyfilename = os.path.basename(scriptname).replace(scriptext, ".py")
+        pyfilename = os.path.basename(scriptname).replace(SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         code = open(pyfilepath).read()
 
@@ -158,9 +161,7 @@ def exec_script(scriptname, scriptext=".owl", tplext=".png", scope=None, root=Fa
     else:
         exec(compile(code, scriptname, 'exec')) in globals()
     # finish exec
-    log("function", {"name": "exec_script", "step": "end", "script": scriptname})
     SCRIPT_STACK.pop()
-
     return scriptpath
 
 
@@ -170,7 +171,7 @@ def _copy_script(src, dst):
     os.mkdir(dst)
     for f in os.listdir(src):
         srcfile = os.path.join(src, f)
-        if not (os.path.isfile(srcfile) and f.endswith(tplext)):
+        if not (os.path.isfile(srcfile) and f.endswith(TPLEXT)):
             continue
         dstfile = os.path.join(dst, f)
         shutil.copy(srcfile, dstfile)
@@ -178,7 +179,7 @@ def _copy_script(src, dst):
 
 def _sub_dir_name(scriptname):
     dirname = os.path.splitdrive(os.path.normpath(scriptname))[-1]
-    dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(scriptext, "_sub")
+    dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(SCRIPTEXT, "_sub")
     return dirname
 
 
@@ -212,7 +213,7 @@ def _exec_script_for_forever(args, script, code=None):
     except:
         pass
 
-    set_basedir(script)
+    ST.set_basedir(script)
 
     try:
         exec_script(script, scope=globals(), root=True, code=code)

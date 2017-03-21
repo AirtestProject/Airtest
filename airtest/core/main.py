@@ -5,7 +5,7 @@
 import os
 import time
 import fnmatch
-# import aircv
+import aircv
 from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.utils import is_str
@@ -185,7 +185,7 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android", "IOS"])
-def install(filepath, package):
+def install(filepath, package=None):
     return G.DEVICE.install_app(filepath, package)
 
 
@@ -229,7 +229,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     timeout = timeout or ST.FIND_TIMEOUT
     if is_str(v) or isinstance(v, (MoaPic, MoaText)):
         try:
-            pos = _loop_find(v, timeout=timeout)
+            pos = loop_find(v, timeout=timeout)
         except MoaNotFoundError:
             if if_exists:
                 return False
@@ -268,21 +268,21 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
     if target_poses:
         if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
             v1.target_pos = target_poses[0]
-            pos1 = _loop_find(v1)
+            pos1 = loop_find(v1)
             v1.target_pos = target_poses[1]
-            pos2 = _loop_find(v1)
+            pos2 = loop_find(v1)
         else:
             raise Exception("invalid params for swipe")
     else:
         if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
-            pos1 = _loop_find(v1)
+            pos1 = loop_find(v1)
         else:
             pos1 = v1
 
         if v2:
             if (is_str(v2) or isinstance(v2, MoaText)):
                 keep_capture()
-                pos2 = _loop_find(v2)
+                pos2 = loop_find(v2)
                 keep_capture(False)
             else:
                 pos2 = v2
@@ -302,7 +302,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
 @platform(on=["Android", "Windows"])
 def operate(v, route, timeout=ST.FIND_TIMEOUT, delay=0):
     if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
-        pos = _loop_find(v, timeout=timeout)
+        pos = loop_find(v, timeout=timeout)
     else:
         pos = v
 
@@ -378,7 +378,7 @@ def sleep(secs=1.0):
 @moapicwrap
 def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or ST.FIND_TIMEOUT
-    pos = _loop_find(
+    pos = loop_find(
         v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
 
@@ -388,7 +388,7 @@ def wait(v, timeout=0, interval=0.5, intervalfunc=None):
 def exists(v, timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
-        pos = _loop_find(v, timeout=timeout)
+        pos = loop_find(v, timeout=timeout)
         return pos
     except MoaNotFoundError as e:
         return False
@@ -399,7 +399,7 @@ def exists(v, timeout=0):
 def find_all(v, timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
-        return _loop_find(v, timeout=timeout, find_all=True)
+        return loop_find(v, timeout=timeout, find_all=True)
     except MoaNotFoundError:
         return []
 
@@ -430,7 +430,7 @@ Assert functions
 def assert_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT
     try:
-        pos = _loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
+        pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
@@ -441,7 +441,7 @@ def assert_exists(v, msg="", timeout=0):
 def assert_not_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
-        pos = _loop_find(v, timeout=timeout)
+        pos = loop_find(v, timeout=timeout)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
     except MoaNotFoundError:
         pass

@@ -8,7 +8,7 @@ from airtest.cli.runner import run_script
 
 def get_parser():
     ap = argparse.ArgumentParser()
-    subparsers = ap.add_subparsers(help="run/info/report")
+    subparsers = ap.add_subparsers(dest="action", help="run/info/report")
     # subparser run
     ap_run = subparsers.add_parser("run", help="run script")
     run_parser(ap_run)
@@ -41,11 +41,11 @@ def main():
     ap = get_parser()
     args = ap.parse_args()
 
-    if args.info:
+    if args.action == "info":
         print(get_script_info(args.script))
-    elif args.report:
+    elif args.action == "report":
         report_main(args)
-    elif args.run:
+    elif args.action == "run":
         run_script(args)
 
 
