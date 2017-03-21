@@ -10,7 +10,7 @@ from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.utils import is_str
 from airtest.core.settings import Settings as ST
-from airtest.core.cv import _loop_find, _snapshot
+from airtest.core.cv import loop_find, snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
     get_platform, platform, register_device, delay_after_operation
 try:

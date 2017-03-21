@@ -20,15 +20,17 @@ def _get_search_img(pictarget):
 
 def _get_screen_img(windows_hwnd=None):
     """获取屏幕图像."""
-    last_capture_flag = KEEP_CAPTURE and (G.RECENT_CAPTURE is not None)
-    screen = _snapshot(windows_hwnd=windows_hwnd) if not last_capture_flag else G.RECENT_CAPTURE
+    if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
+        screen = G.RECENT_CAPTURE
+    else:
+        screen = _snapshot(windows_hwnd=windows_hwnd)
 
     return screen
 
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
-def _snapshot(filename="screen.png", windows_hwnd=None):
+def snapshot(filename="screen.png", windows_hwnd=None):
     """设备截屏."""
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
@@ -46,7 +48,7 @@ def _snapshot(filename="screen.png", windows_hwnd=None):
 
 
 @logwrap
-def _loop_find(pictarget, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
+def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, find_all=False):
     """keep looking for pic until timeout, execute intervalfunc if pic not found."""
     G.LOGGING.info("Try finding:\n%s", pictarget)
     # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的，再次是设置的默认阈值
