@@ -6,8 +6,6 @@ import re
 import os
 
 
-UIAUTOMATOR_IME_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], "Utf7Ime.apk")
-UIAUTOMATOR_SERVICE = "jp.jun_nama.test.utf7ime/.Utf7ImeService"
 ADBKEYBOARD_IME_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], "AdbKeyboard.apk")
 ADBKEYBOARD_SERVICE = "com.android.adbkeyboard/.AdbIME"
 YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
@@ -45,13 +43,7 @@ class CustomIme(object):
 
     def end(self):
         self.adb.shell("ime disable %s" % self.service_name)
-        self.adb.shell("ime set %s" % self.default_ime)    
-
-
-class UiautomatorIme(CustomIme):
-    """没有弹框"""
-    def __init__(self, android_device):
-        super(UiautomatorIme, self).__init__(android_device, UIAUTOMATOR_IME_PATH, UIAUTOMATOR_SERVICE)
+        self.adb.shell("ime set %s" % self.default_ime)
 
 
 class AdbKeyboardIme(CustomIme):
