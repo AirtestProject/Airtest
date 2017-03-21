@@ -1,5 +1,5 @@
-AxmlParserPY==0.01
+AxmlParserPY==0.1
 Jinja2==2.8
-Pillow==2.4.0
+Pillow>=2.4.0
 requests>=2.11.1
 atx-uiautomator
