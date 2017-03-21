@@ -47,6 +47,8 @@ class Settings(object):
     FIND_TIMEOUT = SConfig(20, float)
     FIND_TIMEOUT_TMP = SConfig(3, float)
     DESIGN_RESOLUTION = SConfig([960, 640])
+    RADIUS_X = SConfig(250)
+    RADIUS_Y = SConfig(250)
 
     @classmethod
     def set_basedir(cls, filepath):
