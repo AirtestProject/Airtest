@@ -7,7 +7,7 @@ import time
 import argparse
 import jinja2
 from report_gif import gen_gif
-from pprint import pprint
+
 
 LOGFILE = "log.txt"
 SCREENDIR = "img_record"
@@ -320,17 +320,18 @@ def get_file_author(file_path):
             author = line.split('=')[-1].strip()[1:-1].decode("utf-8")
             break
     return author
- 
-def main():
-    ap = argparse.ArgumentParser()
+
+
+def get_parger(ap):
     ap.add_argument("script", help="script filepath")
     ap.add_argument("--outfile", help="output html filepath, default to be log.html", default="log.html")
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
+    return ap
 
-    args = ap.parse_args()
 
+def main(args):
     # script filepath
     path = args.script.decode(sys.getfilesystemencoding())
     basename = os.path.basename(path).split(".")[0]

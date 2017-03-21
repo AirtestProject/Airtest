@@ -51,6 +51,7 @@ moa/plugins/testlab/user_config.py
 
 .idea/
 .DS_Store
+env/
 screencapture.bmp
 log.html
 log.gif
