@@ -37,7 +37,7 @@ class MoaPic(object):
     find_all: 是否寻找所有满足条件的结果.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], rect=None, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
         self.filename = filename
         self.filepath = filename if os.path.isabs(filename) else os.path.join(ST.BASE_DIR, filename)
         # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的
@@ -45,7 +45,6 @@ class MoaPic(object):
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
-        self.rect = rect
         self.find_inside = find_inside or ST.FIND_INSIDE
         self.find_outside = find_outside or ST.FIND_OUTSIDE
         self.whole_screen = whole_screen or ST.WHOLE_SCREEN
@@ -54,27 +53,19 @@ class MoaPic(object):
         self.rgb = rgb
         self.find_all = find_all
 
-        self.compatibleRect()
-
     def __repr__(self):
         return "MoaPic(%s)" % self.filepath
-
-    def compatibleRect(self):
-        """兼容以前脚本中的rect参数."""
-        # 兼容以前的rect参数（指定寻找区域），如果脚本层仍然有rect参数，传递给find_inside:
-        if self.rect and not self.find_inside:
-            rect = self.rect
-            self.find_inside = [rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]]
 
 
 class MoaScreen(object):
     """保存截屏及截屏相关的参数."""
 
-    def __init__(self, screen=None, img_src=None, offset=None, wnd_pos=None):
+    def __init__(self, screen=None, img_src=None, offset=None, wnd_pos=None, src_resolution=None):
         self.screen = screen
         self.img_src = img_src
         self.offset = offset
         self.wnd_pos = wnd_pos
+        self.src_resolution = src_resolution
 
 
 class MoaText(object):
@@ -124,7 +115,7 @@ def moapicwrap(f):
         picargs = {}
         opargs = {}
         for k, v in kwargs.iteritems():
-            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "rect", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
+            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
                 picargs[k] = v
             else:
                 opargs[k] = v

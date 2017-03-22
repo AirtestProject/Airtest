@@ -430,8 +430,8 @@ Assert functions
 def assert_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT
     try:
-        pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
-        # pos = loop_find(v, timeout=timeout, threshold=0.5)  # 此处设死了threshold..
+        # pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
+        pos = loop_find(v, timeout=timeout, threshold=0.5)  # 此处设死了threshold..
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)

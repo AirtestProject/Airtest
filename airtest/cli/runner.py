@@ -147,7 +147,14 @@ def exec_script(scriptname, scope=None, root=False, code=None):
     if code is None:
         pyfilename = os.path.basename(scriptname).replace(SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
-        code = open(pyfilepath).read()
+        # code = open(pyfilepath).read()
+        try:
+            with open(pyfilepath) as pyfile:
+                code = pyfile.read()
+        except Exception as err:
+            traceback.print_exc()
+            code = ""
+
 
     # handle submodule script
     if not root:

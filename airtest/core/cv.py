@@ -39,31 +39,31 @@ def device_snapshot(filename="screen.png", windows_hwnd=None):
 
 
 @logwrap
-def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, threshold=None, find_all=False):
+def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, threshold=None, find_all=False):
     """keep looking for pic until timeout, execute intervalfunc if pic not found."""
-    G.LOGGING.info("Try finding:\n%s", pictarget)
+    G.LOGGING.info("Try finding:\n%s", query)
 
     # 优先用指定版threshold(如assert_exists)，其次用脚本中传来的threshold
-    pictarget.threshold = threshold or pictarget.threshold
+    query.threshold = threshold or query.threshold
     # 优先使用指定的find_all参数，比如find_all()指定find_all=True
-    pictarget.find_all = find_all or pictarget.find_all
+    query.find_all = find_all or query.find_all
 
     start_time = time.time()
     while True:
         # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
-        srctarget = _get_srctarget(pictarget)
+        source = _get_source(query)
 
-        if srctarget.screen is None:
+        if source.screen is None:
             ret = None
         else:
-            ret = _get_img_match_result(srctarget, pictarget)
+            ret = _get_img_match_result(source, query)
 
         if ret:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
             return ret
 
         if intervalfunc is not None:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
             intervalfunc()
         for name, func in G.WATCHER.items():
             G.LOGGING.info("exec watcher %s", name)
@@ -71,8 +71,8 @@ def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=Non
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
-            raise MoaNotFoundError('Picture %s not found in screen' % pictarget)
+            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
+            raise MoaNotFoundError('Picture %s not found in screen' % query)
         else:
             time.sleep(interval)
             continue
@@ -97,12 +97,12 @@ def cocos_min_strategy(w, h, sch_resolution, src_resolution, design_resolution):
     return w_re, h_re
 
 
-def _get_search_img(pictarget):
+def _get_search_img(query):
     """获取搜索图像(cv2格式)."""
-    if not isinstance(pictarget, MoaPic):
-        pictarget = MoaPic(pictarget)
+    if not isinstance(query, MoaPic):
+        query = MoaPic(query)
 
-    return aircv.imread(pictarget.filepath)
+    return aircv.imread(query.filepath)
 
 
 def _get_device_screen(windows_hwnd=None):
@@ -115,10 +115,10 @@ def _get_device_screen(windows_hwnd=None):
     return screen
 
 
-def _get_srctarget(pictarget):
+def _get_source(query):
     """求取图像匹配的截屏数据类."""
     # 第一步: 获取截屏
-    if not pictarget.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
+    if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
         # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
         screen = _get_device_screen(windows_hwnd=G.DEVICE.handle)
         # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
@@ -128,7 +128,7 @@ def _get_srctarget(pictarget):
         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
         screen = _get_device_screen()
         # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
-        screen = aircv.mask_image(screen, pictarget.find_outside)
+        screen = aircv.mask_image(screen, query.find_outside)
 
     # 检查截屏:
     if not screen.any():
@@ -140,16 +140,18 @@ def _get_srctarget(pictarget):
             aircv.show(screen)
 
         # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
-        img_src, offset = aircv.crop_image(screen, pictarget.find_inside)
+        img_src, offset = aircv.crop_image(screen, query.find_inside)
 
-    return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos)
+    src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+
+    return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
 
 
-def _get_img_match_result(srctarget, pictarget):
+def _get_img_match_result(source, query):
     """求取目标操作位置."""
     # 第一步: 图像识别
     try:
-        cv_ret = _cv_match(srctarget, pictarget)
+        cv_ret = _cv_match(source, query)
     except aircv.Error:
         cv_ret = None
     except Exception as err:
@@ -161,47 +163,35 @@ def _get_img_match_result(srctarget, pictarget):
     log_in_func({"cv": cv_ret})
 
     # 第二步: 矫正识别区域结果，并处理偏移target_pos，并求取实际操作位置
-    offset, wnd_pos = getattr(srctarget, "offset"), getattr(srctarget, "wnd_pos")
-    ret_pos = _calibrate_ret(cv_ret, pictarget, offset, wnd_pos)
+    offset, wnd_pos = getattr(source, "offset"), getattr(source, "wnd_pos")
+    ret_pos = _calibrate_ret(cv_ret, query, offset, wnd_pos)
 
     return ret_pos
 
 
-def _cv_match(srctarget, pictarget):
+def _cv_match(source, query):
     """调用功能函数，执行图像匹配."""
-    # 获取截图、截屏(注意是用于匹配的截屏)
-    im_sch = _get_search_img(pictarget)
-    im_src = getattr(srctarget, "img_src")
-    # 取出匹配相关的参数:
-    rgb = pictarget.resolution or ST.STRICT_RET
-    sch_resolution = pictarget.resolution
-    src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
-    design_resolution = ST.DESIGN_RESOLUTION
-    resize_strategy = ST.RESIZE_METHOD
-    ignore, focus = pictarget.ignore, pictarget.focus
-    op_pos = pictarget.record_pos
-    find_all = pictarget.find_all
-    threshold = pictarget.threshold
-
     ret = None
-    if ignore or focus:
+    if query.ignore or query.focus:
         # 带有mask的模板匹配方法:
         G.LOGGING.debug("method: template match (with ignore & focus rects)")
-        ret_in_pre = mask_template_in_predicted_area(im_src, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
-        ret = ret_in_pre or mask_template_after_resize(im_src, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, ignore=ignore, focus=focus, resize_strategy=resize_strategy)
+        ret_in_pre = mask_template_in_predicted_area(source, query)
+        ret = ret_in_pre or mask_template_after_resize(source, query)
     else:
         # 根据cv_strategy配置进行匹配:
         for method in ST.CVSTRATEGY:
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
                 G.LOGGING.debug("method: template match")
-                ret_in_pre = template_in_predicted_area(im_src, im_sch, op_pos, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
-                ret = ret_in_pre or template_after_resize(im_src, im_sch, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
+                ret_in_pre = template_in_predicted_area(source, query)
+                ret = ret_in_pre or template_after_resize(source, query)
             elif method == "sift":
                 # sift匹配，默认pre，其次全屏
                 G.LOGGING.debug("method: sift match")
-                ret_in_pre = find_sift_in_predicted_area(im_src, im_sch, op_pos, src_resolution=src_resolution, threshold=threshold, rgb=rgb)
-                ret = ret_in_pre or aircv.find_sift(im_src, im_sch, threshold=threshold, rgb=rgb)
+                ret_in_pre = find_sift_in_predicted_area(source, query)
+                if not ret_in_pre:
+                    img_src, img_sch = source.img_src, _get_search_img(query)
+                    ret_in_pre = aircv.find_sift(img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
             else:
                 G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
 
@@ -212,7 +202,7 @@ def _cv_match(srctarget, pictarget):
     return ret
 
 
-def _calibrate_ret(ret, pictarget, offset=None, wnd_pos=None):
+def _calibrate_ret(ret, query, offset=None, wnd_pos=None):
     """进行识别结果进行整体偏移矫正,以及target_pos的矫正,返回点击位置."""
     def cal_ret(one_ret, offset, wnd_pos):
         if offset:
@@ -232,61 +222,76 @@ def _calibrate_ret(ret, pictarget, offset=None, wnd_pos=None):
         for one_ret in ret:  # 对结果列表中的每一个结果都进行一次结果偏移的处理
             one_ret = cal_ret(one_ret, offset, wnd_pos)
             # 这个是脚本语句的target_pos的点击偏移处理:
-            ret_pos = TargetPos().getXY(one_ret, pictarget.target_pos)
+            ret_pos = TargetPos().getXY(one_ret, query.target_pos)
             ret_pos_list.append(ret_pos)
         return ret_pos_list
     else:
         # 非find_all模式，返回的是一个dict，则正常返回即可
         ret = cal_ret(ret, offset, wnd_pos)
-        ret_pos = TargetPos().getXY(ret, pictarget.target_pos)
+        ret_pos = TargetPos().getXY(ret, query.target_pos)
         return ret_pos
 
 
-def template_in_predicted_area(im_source, im_search, op_pos, radius_x=ST.RADIUS_X, radius_y=ST.RADIUS_Y, threshold=0.8, rgb=False, sch_resolution=[], src_resolution=[], design_resolution=ST.DESIGN_RESOLUTION, resize_strategy=cocos_min_strategy, find_all=False):
+def template_in_predicted_area(source, query):
     '''带区域预测的模板匹配.'''
     # 第一步：定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(im_source, src_resolution, op_pos, radius_x, radius_y)
+    img_src, left_top_pos = _get_predicted_area(source, query)
+    source.img_src = img_src  # 更新待识别图像为预测区域的图像
 
     # 第二步：在预测区域内，进行跨分辨率识别，调用find_template_after_resize:
-    pre_result = template_after_resize(img_src, im_search, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all)
+    pre_result = template_after_resize(source, query)
 
     # 第三步：对结果进行位置校正:
     return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
 
 
-def template_after_resize(im_source, im_search, threshold=0.8, rgb=False, sch_resolution=[], src_resolution=[], design_resolution=ST.DESIGN_RESOLUTION, resize_strategy=cocos_min_strategy, find_all=False):
+def template_after_resize(source, query):
     '''跨分辨率template图像匹配.'''
     # 第一步：先对im_search进行跨分辨率适配resize
-    img_sch = _resize_im_search(im_search, sch_resolution, src_resolution, design_resolution, resize_strategy=resize_strategy)
+    img_sch = _resize_im_search(query, source.src_resolution)
 
     # 第二步：图像识别得到结果(可选择寻找结果集合)
-    if find_all:
-        return find_all_template(im_source, img_sch, threshold=threshold, rgb=rgb)
+    if query.find_all:
+        return find_all_template(source.img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
     else:
-        return find_template(im_source, img_sch, threshold=threshold, rgb=rgb)
+        return find_template(source.img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
 
 
-def find_sift_in_predicted_area(im_source, im_search, op_pos, src_resolution=(), radius_x=ST.RADIUS_X, radius_y=ST.RADIUS_Y, threshold=0.8, rgb=False):
+def find_sift_in_predicted_area(source, query):
     '''在预测区域内进行sift查找.'''
+    # 提取截图
+    im_search = _get_search_img(query)
     # 第一步：定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(im_source, src_resolution, op_pos, radius_x, radius_y)
+    img_src, left_top_pos = _get_predicted_area(source, query)
 
     # 第二步：在预测区域内进行基于sift的识别，调用find_sift:
-    pre_result = find_sift(img_src, im_search, threshold=threshold, rgb=rgb)
+    if not img_src.any():
+        pre_result = None
+    else:
+        pre_result = find_sift(img_src, im_search, threshold=query.threshold, rgb=query.rgb)
 
     # 第三步：对结果进行位置校正:
     return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
 
 
-def _resize_im_search(im_search, sch_resolution, src_resolution, design_resolution=ST.DESIGN_RESOLUTION, resize_strategy=None):
+def _resize_im_search(query, src_resolution, target_img=None):
     """模板匹配中，将输入的截图适配成 等待模板匹配的截图."""
+    # 提取参数:
+    if target_img is not None:
+        im_search = target_img
+    else:
+        im_search = _get_search_img(query)
+    sch_resolution = query.resolution
+    # src_resolution = source.src_resolution
+    design_resolution = ST.DESIGN_RESOLUTION
+
     # 如果分辨率一致，则不需要进行im_search的适配:
     if tuple(sch_resolution) == tuple(src_resolution):
         return im_search
     else:
         # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
         h, w = im_search.shape[:2]
-        resize_strategy = resize_strategy or cocos_min_strategy
+        resize_strategy = ST.RESIZE_METHOD or cocos_min_strategy
         w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution, design_resolution)
 
         # 调试代码: 输出调试信息.
@@ -297,8 +302,14 @@ def _resize_im_search(im_search, sch_resolution, src_resolution, design_resoluti
         return resized_im_search
 
 
-def _get_predicted_area(im_source, src_resolution, op_pos, radius_x=ST.RADIUS_X, radius_y=ST.RADIUS_Y):
+def _get_predicted_area(source, query):
     """从im_source中提取出预测区域."""
+    # 提取预测参数:
+    im_source = source.img_src
+    src_resolution = source.src_resolution
+    op_pos = query.record_pos
+    radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
+
     # 预测操作位置: (按照比例进行点预测) clk_x, clk_y是规划为比例的
     clk_x, clk_y = op_pos
     # 如果没有传递
@@ -361,52 +372,59 @@ def _refresh_result_pos(pre_result, left_top_pos):
     return result
 
 
-def mask_template_in_predicted_area(im_source, im_search, op_pos, radius_x=ST.RADIUS_X, radius_y=ST.RADIUS_Y, threshold=0.8, rgb=False, sch_resolution=[], src_resolution=[], design_resolution=ST.DESIGN_RESOLUTION, resize_strategy=cocos_min_strategy, find_all=False, ignore=[], focus=[]):
+def mask_template_in_predicted_area(source, query):
     """带预测区域的mask-template."""
     # 第一步: 定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(im_source, src_resolution, op_pos, radius_x, radius_y)
+    img_src, left_top_pos = _get_predicted_area(source, query)
+    source.img_src = img_src  # 更新待识别图像为预测区域的图像
 
     # 第二步：在预测区域内，进行跨分辨率识别，调用mask_template_after_resize
-    pre_result = mask_template_after_resize(img_src, im_search, threshold=threshold, rgb=rgb, sch_resolution=sch_resolution, src_resolution=src_resolution, design_resolution=design_resolution, resize_strategy=resize_strategy, find_all=find_all, ignore=[], focus=[])
+    pre_result = mask_template_after_resize(source, query)
 
     # 第三步：对结果进行位置校正:
     return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
 
 
-def mask_template_after_resize(im_source, im_search, threshold=0.8, rgb=False, sch_resolution=[], src_resolution=[], design_resolution=ST.DESIGN_RESOLUTION, resize_strategy=cocos_min_strategy, find_all=False, ignore=[], focus=[]):
+def mask_template_after_resize(source, query):
     """带有mask的跨分辨率template图像匹配, 带有ignore-focus区域. find_all未启用."""
+    im_search = _get_search_img(query)
+    im_source = source.img_src
+    ignore, focus = query.ignore, query.focus
+    resize_strategy = ST.RESIZE_METHOD or cocos_min_strategy
+
     # 第一步：对im_search进行跨分辨率适配resize
-    img_sch = _resize_im_search(im_search, sch_resolution, src_resolution, design_resolution, resize_strategy=resize_strategy)
+    img_sch = _resize_im_search(query, source.src_resolution)
 
     # 第二步：ignore-focus参数的处理
     if ignore:
         # 在截图中含有ignore区域时,在得到初步结果后需要进行可信度的更新:
         # 需要根据ignore区域生成匹配时的mask图像,注意需要进行跨分辨率的resize:
-        origin_mask_img = _generate_mask_img(im_search, rect_list=ignore)  # 先生成原始im_search的mask，下面在进行resize
-        ignore_mask = _resize_im_search(origin_mask_img, sch_resolution, src_resolution, design_resolution, resize_strategy=resize_strategy)
+        # # 先生成原始im_search的mask，下面再进行resize
+        origin_mask_img = _generate_mask_img(im_search, rect_list=ignore)
+        ignore_mask = _resize_im_search(query, source.src_resolution, target_img=origin_mask_img)
         # 根据缩放后的im_search、缩放后的mask图像，在im_source中获取初步识别区域的图像:
         result = template_with_mask(im_source, img_sch, ignore_mask)
-        target_img = _get_image_target_area(im_source, result)
+        target_img = _get_image_target_area(im_source, result)  # 截图在截屏中的目标区域
 
         if focus:
             # 截图既包含ignore, 又包含focus: 则在初始结果中进行focus区域的可信度计算:
-            confidence = _cal_confi_only_in_focus(target_img, im_search, focus, sch_resolution, src_resolution, design_resolution, resize_strategy, rgb=rgb)
+            confidence = _cal_confi_only_in_focus(target_img, query, source.src_resolution, resize_strategy)
         else:
             # 截图包含ignore区域，但是不包含focus,在初始结果内进行focus区域以外的图像进行可信度计算:
-            confidence = _cal_confi_outside_ignore(target_img, im_search, ignore, sch_resolution, src_resolution, design_resolution, resize_strategy, rgb=rgb)
+            confidence = _cal_confi_outside_ignore(target_img, query, source.src_resolution, resize_strategy)
     else:
         # 没有ignore区域，但是有focus区域，先找到img_sch的最优匹配，然后计算focus区域可信度
         if focus:
             result = find_template(im_source, img_sch, threshold=0, rgb=rgb)
             target_img = _get_image_target_area(im_source, result)
-            confidence = _cal_confi_only_in_focus(target_img, im_search, focus, sch_resolution, src_resolution, design_resolution, resize_strategy, rgb=rgb)
+            confidence = _cal_confi_only_in_focus(target_img, query, source.src_resolution, resize_strategy)
         else:
             # 既没有focus，也没有ignore，默认为基础的template匹配
             result = find_template(im_source, img_sch, threshold=0, rgb=rgb)
             confidence = result.get("confidence", 0)
 
     # 校验可信度:
-    if confidence < threshold:
+    if confidence < query.threshold:
         return None
     else:
         # 本方法中一直求取的是最佳解，因此此处result一定有效
@@ -461,15 +479,22 @@ def _get_image_target_area(im_source, result={}):
     return im_source[y_min:y_max, x_min:x_max]
 
 
-def _cal_confi_only_in_focus(target_img, im_search, focus_list, sch_resolution, src_resolution, design_resolution, resize_strategy, rgb=False):
+def _cal_confi_only_in_focus(target_img, query, src_resolution, resize_strategy):
     """将focus中的rect逐个进行可信度计算，再按面积加权平均."""
+    # 提取参数:
+    im_search = _get_search_img(query)
+    focus_list = query.focus
+    sch_resolution = query.resolution
+    rgb = query.rgb
+    design_resolution = ST.DESIGN_RESOLUTION
+
     # 注意:这里的focus小区域坐标均相对于原始的im_search，所以传入参数必须是原始大小的im_search
     # 第一步: 分别取出focus的区块，然后依次进行simple_tpl，求出可信度,并记录下面积
     area_list, confidence_list = [], []
     for focus_rect in focus_list:
         # focus_rect:[x_min,y_min,x_max,y_max], 截取focus小区块后，进行resize
         focus_area = im_search[focus_rect[1]:focus_rect[3], focus_rect[0]:focus_rect[2]]
-        focus_area = _resize_im_search(focus_area, sch_resolution, src_resolution, design_resolution, resize_strategy=resize_strategy)
+        focus_area = _resize_im_search(query, src_resolution, target_img=focus_area)
         # 因为是加权概念-按比例,因此面积可以都使用resize前的
         area = (focus_rect[2] - focus_rect[0]) * (focus_rect[3] - focus_rect[1])
         # 计算focus单个区块的可信度:
@@ -492,10 +517,17 @@ def cal_average_confidence(confidenceList, areaList):
     return whole_area_confi / whole_area
 
 
-def _cal_confi_outside_ignore(target_img, tmpl, ignore_list, sch_resolution, src_resolution, design_resolution=[], resize_strategy=None):
+def _cal_confi_outside_ignore(target_img, query, src_resolution, resize_strategy):
     """将原始im_search分成细分块，将ignore区域外的细分块逐个进行可信度计算."""
+    # 提取参数:
+    im_search = _get_search_img(query)
+    ignore_list = query.ignore
+    sch_resolution = query.resolution
+    rgb = query.rgb
+    design_resolution = ST.DESIGN_RESOLUTION
+
     # 第一步: 获取细分块
-    atom_rect_list = _generate_arom_rect_list(tmpl, ignore_list)
+    atom_rect_list = _generate_arom_rect_list(im_search, ignore_list)
 
     # 第二步: 计算各个细分块的面积和可信度
     area_list, confidence_list = [], []
@@ -507,7 +539,7 @@ def _cal_confi_outside_ignore(target_img, tmpl, ignore_list, sch_resolution, src
                 continue
             # atom_rect: [x_min,y_min,x_max,y_max], 截取ignore外小区块后，进行resize
             ignore_area = im_search[atom_rect[1]:atom_rect[3], atom_rect[0]:atom_rect[2]]
-            ignore_area = _resize_im_search(ignore_area, sch_resolution, src_resolution, design_resolution, resize_strategy=resize_strategy)
+            ignore_area = _resize_im_search(query, src_resolution, target_img=ignore_area)
             # 因为是加权概念-按比例,因此面积可以都使用resize前的
             area = (atom_rect[2] - atom_rect[0]) * (atom_rect[3] - atom_rect[1])
             # 记录各个ignore_area的相应数据
@@ -520,9 +552,9 @@ def _cal_confi_outside_ignore(target_img, tmpl, ignore_list, sch_resolution, src
     return cal_average_confidence(confidence_list, area_list)
 
 
-def _generate_arom_rect_list(tmpl, rect_list):
+def _generate_arom_rect_list(im_search, rect_list):
     """通过rect_list得到当前所有的原子矩形."""
-    h, w = tmpl.shape[:2]
+    h, w = im_search.shape[:2]
     x_list, y_list = [0], [0]
 
     def append_rule(element, ele_list):
