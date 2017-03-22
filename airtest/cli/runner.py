@@ -1,8 +1,10 @@
 #!/usr/bin/env
 # -*- coding: utf-8 -*-
 
+import re
 import os
 import sys
+import shutil
 import traceback
 from urllib import unquote
 from airtest.core.main import *

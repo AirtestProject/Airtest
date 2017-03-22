@@ -32,8 +32,8 @@ class Settings(object):
     SCRIPTHOME = SConfig(None)
     SRC_RESOLUTION = SConfig([])  # to be move to DEVICE
     CVSTRATEGY = SConfig(None)
-    CVSTRATEGY_ANDROID = SConfig(["tpl", "siftpre", "siftnopre"])
-    CVSTRATEGY_WINDOWS = SConfig(["tpl", "siftnopre"])
+    CVSTRATEGY_ANDROID = SConfig(["tpl", "sift"])
+    CVSTRATEGY_WINDOWS = SConfig(["tpl", "sift"])
     FIND_INSIDE = SConfig(None)
     FIND_OUTSIDE = SConfig(None)
     WHOLE_SCREEN = SConfig(False)  # 指定WHOLE_SCREEN时，就默认截取全屏(而非hwnd窗口截图)

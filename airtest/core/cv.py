@@ -13,6 +13,7 @@ from aircv.template import find_all_template, find_template, _get_target_rectang
 from aircv.sift import find_sift
 from aircv.utils import checkImageParamInput, generate_result
 
+from airtest.core.error import *  # noqa
 from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos
@@ -38,16 +39,25 @@ def device_snapshot(filename="screen.png", windows_hwnd=None):
 
 
 @logwrap
-def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None):
+def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, threshold=None, find_all=False):
     """keep looking for pic until timeout, execute intervalfunc if pic not found."""
     G.LOGGING.info("Try finding:\n%s", pictarget)
+
+    # 优先用指定版threshold(如assert_exists)，其次用脚本中传来的threshold
+    pictarget.threshold = threshold or pictarget.threshold
+    # 优先使用指定的find_all参数，比如find_all()指定find_all=True
+    pictarget.find_all = find_all or pictarget.find_all
 
     start_time = time.time()
     while True:
         # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
-        srctarget = _get_scrtarget(pictarget)
+        srctarget = _get_srctarget(pictarget)
 
-        ret = _get_img_match_result(srctarget, pictarget)
+        if srctarget.screen is None:
+            ret = None
+        else:
+            ret = _get_img_match_result(srctarget, pictarget)
+
         if ret:
             aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
             return ret
@@ -55,7 +65,7 @@ def loop_find(pictarget, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=Non
         if intervalfunc is not None:
             aircv.imwrite(G.RECENT_CAPTURE_PATH, srctarget.screen)
             intervalfunc()
-        for name, func in WATCHER.items():
+        for name, func in G.WATCHER.items():
             G.LOGGING.info("exec watcher %s", name)
             func()
 
@@ -105,7 +115,7 @@ def _get_device_screen(windows_hwnd=None):
     return screen
 
 
-def _get_scrtarget(pictarget):
+def _get_srctarget(pictarget):
     """求取图像匹配的截屏数据类."""
     # 第一步: 获取截屏
     if not pictarget.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
@@ -118,18 +128,19 @@ def _get_scrtarget(pictarget):
         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
         screen = _get_device_screen()
         # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
-        screen = mask_image(screen, pictarget.find_outside)
+        screen = aircv.mask_image(screen, pictarget.find_outside)
 
     # 检查截屏:
     if not screen.any():
-        G.LOGGING.warning("Bad screen capture, skip cv matching...")
-        screen = None
-    # 调试状态下，展示图像识别时的截屏图片：
-    if ST.DEBUG and screen is not None:
-        aircv.show(screen)
+        G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
+        screen, img_src, offset = None, None, None
+    else:
+        # 调试状态下，展示图像识别时的截屏图片：
+        if ST.DEBUG and screen is not None:
+            aircv.show(screen)
 
-    # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
-    img_src, offset = aircv.crop_image(screen, pictarget.find_inside)
+        # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
+        img_src, offset = aircv.crop_image(screen, pictarget.find_inside)
 
     return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos)
 
@@ -147,7 +158,7 @@ def _get_img_match_result(srctarget, pictarget):
 
     G.LOGGING.debug("match result: %s", cv_ret)
     # 将识别结果写入log文件:
-    log_in_func({"cv": ret})
+    log_in_func({"cv": cv_ret})
 
     # 第二步: 矫正识别区域结果，并处理偏移target_pos，并求取实际操作位置
     offset, wnd_pos = getattr(srctarget, "offset"), getattr(srctarget, "wnd_pos")
@@ -279,7 +290,7 @@ def _resize_im_search(im_search, sch_resolution, src_resolution, design_resoluti
         w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution, design_resolution)
 
         # 调试代码: 输出调试信息.
-        print(("cross resolution: (%s, %s)=>(%s, %s),  resize: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution)))
+        G.LOGGING.debug("cross resolution: (%s, %s)=>(%s, %s),  resize: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
 
         # 进行图片缩放:
         resized_im_search = cv2.resize(im_search, (w_re, h_re))
@@ -307,7 +318,7 @@ def _get_predicted_area(im_source, src_resolution, op_pos, radius_x=ST.RADIUS_X,
     end_y = int(safe_xy(prePos_y + radius_y, 0, res_y - 1))
 
     # 调试代码: 输出调试信息.
-    print(("predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)") % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y})
+    G.LOGGING.debug("predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)" % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y})
 
     # 如果发现预测区域完全在图像外，预测区域将只剩下一条像素，预测失败，直接raise:
     if start_x == end_x or start_y == end_y:
@@ -476,9 +487,6 @@ def cal_average_confidence(confidenceList, areaList):
     """根据areaList中的面积加权，计算confidenceList的加权平均confidence."""
     whole_area, whole_area_confi = 0, 0
     for i in range(len(areaList)):
-
-        print areaList[i], confidenceList[i]
-
         whole_area += areaList[i]
         whole_area_confi += areaList[i] * confidenceList[i]
     return whole_area_confi / whole_area
