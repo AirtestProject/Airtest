@@ -113,7 +113,8 @@ def platform(on=["Android"]):
         def wrapper(*args, **kwargs):
             pf = get_platform()
             if pf is None:
-                raise RuntimeError("Device not initialized.")
+                raise RuntimeError("Device not initialized yet. "
+                                   "Primary calls should be invoked under @on_device_ready.")
             if pf not in on:
                 raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, on))
             r = f(*args, **kwargs)
