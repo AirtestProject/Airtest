@@ -113,7 +113,7 @@ def platform(on=["Android"]):
         def wrapper(*args, **kwargs):
             pf = get_platform()
             if pf not in on:
-                raise NotImplementedError("method not implememted on {}".format(pf))
+                raise NotImplementedError("method not implememted on {}. required {}.".format(pf, on))
             r = f(*args, **kwargs)
             return r
         return wrapper
