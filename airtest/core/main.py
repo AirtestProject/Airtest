@@ -150,10 +150,6 @@ def set_current(index):
         G.DEVICE.set_foreground()
 
 
-def keep_capture(flag=True):
-    G.KEEP_CAPTURE = flag
-
-
 """
 Device operation
 """
@@ -198,11 +194,13 @@ def uninstall(package):
 @logwrap
 def snapshot(filename=None, windows_hwnd=None):
     """capture device screen and save it into file."""
-    screen = device_snapshot()
-    if filename is None:
-        filepath = G.RECENT_CAPTURE_PATH
+    screen, default_filepath = device_snapshot()
+    if not filename:
+        filepath = default_filepath
+    elif not os.path.isabs(filename):
+        filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
     else:
-        filepath = os.path.join(ST.LOG_DIR, ST.SAVE_SCREEN, filename)
+        filepath = filename
     aircv.imwrite(filepath, screen)
 
 
@@ -430,8 +428,7 @@ Assert functions
 def assert_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT
     try:
-        # pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
-        pos = loop_find(v, timeout=timeout, threshold=0.5)  # 此处设死了threshold..
+        pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
         return pos
     except MoaNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)

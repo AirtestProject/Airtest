@@ -15,7 +15,7 @@ KWARGS = "PKG=%s,APK=%s,SCRIPTHOME=%s" % (TEST_PKG, TEST_APK, THIS_DIR)
 class TestReportOnAndroid(unittest.TestCase):
 
     def test_android(self):
-        cmd = "py -2 -m airtest run %s --setsn --kwargs %s" % (TEST_OWL, KWARGS)
+        cmd = "python -m airtest run %s --setsn --kwargs %s" % (TEST_OWL, KWARGS)
         proc = subprocess.Popen(cmd, shell=True)
         proc.wait()
         self.assertIs(proc.returncode, 0)

@@ -27,10 +27,10 @@ class Windows(Device):
 
     def snapshot(self, filename=None):
         """default not write into file."""
-        # # 将回放脚本时的截图方式，换成ImageGrab()
-        # screen = get_screen_shot(output=None)
-        # # screen = ImageGrab.grab()
-        # screen = aircv.pil_2_cv2(screen)
+        # snapshot in window handle
+        if self.handle is not None:
+            return self.snapshot_by_hwnd(filename, self.handle)
+        # snapshot in full screen
         screen = get_screen_shot()
         if filename:
             aircv.imwrite(filename, screen)

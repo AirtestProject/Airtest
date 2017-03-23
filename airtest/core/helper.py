@@ -2,6 +2,7 @@
 import os
 import time
 import functools
+import aircv
 from airtest.core import device
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
 from airtest.core.settings import Settings as ST
@@ -14,7 +15,6 @@ class G(object):
     SCREEN = None
     DEVICE = None
     DEVICE_LIST = []
-    KEEP_CAPTURE = False
     RECENT_CAPTURE = None
     RECENT_CAPTURE_PATH = None
     WATCHER = {}
@@ -37,7 +37,7 @@ class MoaPic(object):
     find_all: 是否寻找所有满足条件的结果.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], new_snapshot=True, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
         self.filename = filename
         self.filepath = filename if os.path.isabs(filename) else os.path.join(ST.BASE_DIR, filename)
         # 结果可信阈值优先取脚本参数传入的阈值，其次是utils.py中设置的
@@ -45,6 +45,7 @@ class MoaPic(object):
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
+        self.new_snapshot = new_snapshot
         self.find_inside = find_inside or ST.FIND_INSIDE
         self.find_outside = find_outside or ST.FIND_OUTSIDE
         self.whole_screen = whole_screen or ST.WHOLE_SCREEN
@@ -56,6 +57,10 @@ class MoaPic(object):
     def __repr__(self):
         return "MoaPic(%s)" % self.filepath
 
+    def get_search_img(self):
+        """获取搜索图像(cv2格式)."""
+        return aircv.imread(self.filepath)
+
 
 class MoaScreen(object):
     """保存截屏及截屏相关的参数."""
@@ -66,6 +71,42 @@ class MoaScreen(object):
         self.offset = offset
         self.wnd_pos = wnd_pos
         self.src_resolution = src_resolution
+
+    @classmethod
+    def create_by_query(cls, screen, query):
+        """求取图像匹配的截屏数据类."""
+        # 第一步: 获取截屏
+        if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
+            # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
+            # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
+            wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
+        else:
+            wnd_pos = None  # 没有所谓的窗口偏移，设为None
+            # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
+            # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
+            screen = aircv.mask_image(screen, query.find_outside)
+
+        # 检查截屏:
+        if not screen.any():
+            G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
+            screen, img_src, offset = None, None, None
+        else:
+            # 调试状态下，展示图像识别时的截屏图片：
+            if ST.DEBUG and screen is not None:
+                aircv.show(screen)
+
+            # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
+            img_src, offset = aircv.crop_image(screen, query.find_inside)
+
+        src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+
+        return cls(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
+
+    def predict_area(self):
+        pass
+
+    def fix_cv_pos(self):
+        pass
 
 
 class MoaText(object):

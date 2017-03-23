@@ -16,31 +16,29 @@ from aircv.utils import checkImageParamInput, generate_result
 from airtest.core.error import *  # noqa
 from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
-from airtest.core.utils import TargetPos
+from airtest.core.utils import TargetPos, cocos_min_strategy
 
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
-def device_snapshot(filename="screen.png", windows_hwnd=None):
-    """设备截屏."""
+def device_snapshot():
+    """设备截屏，并且以时间戳为默认命名，但是不存盘."""
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    G.RECENT_CAPTURE_PATH = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
+    filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
     # write filepath into log:
     if ST.SCREEN_DIR:
         log_in_func({"screen": os.path.join(ST.SCREEN_DIR, filename)})
     # device snapshot: default not save
-    if windows_hwnd:
-        screen = G.DEVICE.snapshot_by_hwnd(filename=None, hwnd_to_snap=windows_hwnd)
-    else:
-        screen = G.DEVICE._snapshot_impl(filename=None)
+    screen = G.DEVICE.snapshot(filename=None)
     # 使用screen更新RECENT_CAPTURE
     G.RECENT_CAPTURE = screen
-    return screen
+    G.RECENT_CAPTURE_PATH = filepath
+    return screen, filepath
 
 
 @logwrap
 def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, threshold=None, find_all=False):
-    """keep looking for pic until timeout, execute intervalfunc if pic not found."""
+    """Keep looking for pic until timeout, execute intervalfunc if pic not found."""
     G.LOGGING.info("Try finding:\n%s", query)
 
     # 优先用指定版threshold(如assert_exists)，其次用脚本中传来的threshold
@@ -51,7 +49,11 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
     start_time = time.time()
     while True:
         # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
-        source = _get_source(query)
+        if query.new_snapshot:
+            screen, filepath = device_snapshot()
+        else:
+            screen, filepath = G.RECENT_CAPTURE, G.RECENT_CAPTURE_PATH
+        source = MoaScreen.create_by_query(screen, query)
 
         if source.screen is None:
             ret = None
@@ -59,11 +61,11 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
             ret = _get_img_match_result(source, query)
 
         if ret:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
+            aircv.imwrite(filepath, source.screen)
             return ret
 
         if intervalfunc is not None:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
+            aircv.imwrite(filepath, source.screen)
             intervalfunc()
         for name, func in G.WATCHER.items():
             G.LOGGING.info("exec watcher %s", name)
@@ -71,80 +73,53 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
-            aircv.imwrite(G.RECENT_CAPTURE_PATH, source.screen)
+            aircv.imwrite(filepath, source.screen)
             raise MoaNotFoundError('Picture %s not found in screen' % query)
         else:
             time.sleep(interval)
             continue
 
 
-def no_resize(w_a, h_a, resolution_a, resolution_b, design_resolution):
-    """无缩放策略."""
-    return w_a, h_a
+# def _get_device_screen():
+#     """获取设备屏幕图像."""
+#     if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
+#         screen = G.RECENT_CAPTURE
+#     else:
+#         screen = device_snapshot()
+
+#     return screen
 
 
-def cocos_min_strategy(w, h, sch_resolution, src_resolution, design_resolution):
-    """图像缩放规则: COCOS中的MIN策略."""
-    # 输入参数: w-h待缩放图像的宽高，sch_resolution为待缩放图像的来源分辨率
-    #           src_resolution 待适配屏幕的分辨率  design_resolution 软件的设计分辨率
-    # 需要分别算出对设计分辨率的缩放比，进而算出src\sch有效缩放比。
-    if design_resolution == []:
-        design_resolution = ST.DESIGN_RESOLUTION
-    scale_sch = min(1.0 * sch_resolution[0] / design_resolution[0], 1.0 * sch_resolution[1] / design_resolution[1])
-    scale_src = min(1.0 * src_resolution[0] / design_resolution[0], 1.0 * src_resolution[1] / design_resolution[1])
-    scale = scale_src / scale_sch
-    h_re, w_re = int(h * scale), int(w * scale)
-    return w_re, h_re
+# def _get_source(query):
+#     """求取图像匹配的截屏数据类."""
+#     # 第一步: 获取截屏
+#     if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
+#         # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
+#         screen = _get_device_screen()
+#         # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
+#         wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
+#     else:
+#         wnd_pos = None  # 没有所谓的窗口偏移，设为None
+#         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
+#         screen = _get_device_screen()
+#         # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
+#         screen = aircv.mask_image(screen, query.find_outside)
 
+#     # 检查截屏:
+#     if not screen.any():
+#         G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
+#         screen, img_src, offset = None, None, None
+#     else:
+#         # 调试状态下，展示图像识别时的截屏图片：
+#         if ST.DEBUG and screen is not None:
+#             aircv.show(screen)
 
-def _get_search_img(query):
-    """获取搜索图像(cv2格式)."""
-    if not isinstance(query, MoaPic):
-        query = MoaPic(query)
+#         # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
+#         img_src, offset = aircv.crop_image(screen, query.find_inside)
 
-    return aircv.imread(query.filepath)
+#     src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
 
-
-def _get_device_screen(windows_hwnd=None):
-    """获取设备屏幕图像."""
-    if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
-        screen = G.RECENT_CAPTURE
-    else:
-        screen = device_snapshot(windows_hwnd=windows_hwnd)
-
-    return screen
-
-
-def _get_source(query):
-    """求取图像匹配的截屏数据类."""
-    # 第一步: 获取截屏
-    if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
-        # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
-        screen = _get_device_screen(windows_hwnd=G.DEVICE.handle)
-        # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
-        wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
-    else:
-        wnd_pos = None  # 没有所谓的窗口偏移，设为None
-        # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
-        screen = _get_device_screen()
-        # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
-        screen = aircv.mask_image(screen, query.find_outside)
-
-    # 检查截屏:
-    if not screen.any():
-        G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
-        screen, img_src, offset = None, None, None
-    else:
-        # 调试状态下，展示图像识别时的截屏图片：
-        if ST.DEBUG and screen is not None:
-            aircv.show(screen)
-
-        # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
-        img_src, offset = aircv.crop_image(screen, query.find_inside)
-
-    src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
-
-    return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
+#     return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
 
 
 def _get_img_match_result(source, query):
@@ -154,7 +129,7 @@ def _get_img_match_result(source, query):
         cv_ret = _cv_match(source, query)
     except aircv.Error:
         cv_ret = None
-    except Exception as err:
+    except Exception:
         traceback.print_exc()
         cv_ret = None
 
@@ -190,7 +165,7 @@ def _cv_match(source, query):
                 G.LOGGING.debug("method: sift match")
                 ret_in_pre = find_sift_in_predicted_area(source, query)
                 if not ret_in_pre:
-                    img_src, img_sch = source.img_src, _get_search_img(query)
+                    img_src, img_sch = source.img_src, query.get_search_img()
                     ret_in_pre = aircv.find_sift(img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
             else:
                 G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
@@ -208,7 +183,7 @@ def _calibrate_ret(ret, query, offset=None, wnd_pos=None):
         if offset:
             one_ret = _refresh_result_pos(one_ret, offset)
         if wnd_pos:
-            _log_in_func({"wnd_pos": wnd_pos})
+            log_in_func({"wnd_pos": wnd_pos})
             one_ret = _refresh_result_pos(one_ret, wnd_pos)
         # 返回识别区域校正后的结果:
         return one_ret
@@ -260,7 +235,7 @@ def template_after_resize(source, query):
 def find_sift_in_predicted_area(source, query):
     '''在预测区域内进行sift查找.'''
     # 提取截图
-    im_search = _get_search_img(query)
+    im_search = query.get_search_img()
     # 第一步：定位im_source中的预测区域:
     img_src, left_top_pos = _get_predicted_area(source, query)
 
@@ -280,7 +255,7 @@ def _resize_im_search(query, src_resolution, target_img=None):
     if target_img is not None:
         im_search = target_img
     else:
-        im_search = _get_search_img(query)
+        im_search = query.get_search_img()
     sch_resolution = query.resolution
     # src_resolution = source.src_resolution
     design_resolution = ST.DESIGN_RESOLUTION
@@ -302,62 +277,23 @@ def _resize_im_search(query, src_resolution, target_img=None):
         return resized_im_search
 
 
-def _get_predicted_area(source, query):
-    """从im_source中提取出预测区域."""
-    # 提取预测参数:
-    im_source = source.img_src
-    src_resolution = source.src_resolution
-    op_pos = query.record_pos
-    radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
 
-    # 预测操作位置: (按照比例进行点预测) clk_x, clk_y是规划为比例的
-    clk_x, clk_y = op_pos
-    # 如果没有传递
-    if src_resolution:
-        res_x, res_y = src_resolution
-    else:
-        res_y, res_x = im_source.shape[:2]
-    prePos_x, prePos_y = clk_x * res_x + 0.5 * res_x, clk_y * res_x + 0.5 * res_y
+# def _pos_fix(ret, left_top_pos):
+#     """用于在预测区(给出了其左上角点)查找成功后，进行最终的结果偏移对齐."""
+#     left_top_x, left_top_y = left_top_pos
+#     # 在预测区域内进行图像查找时，需要转换到整张图片内的坐标，再进行左上角的位置校准:
+#     # 进行识别中心result的偏移:
+#     result_pos = list(ret.get('result'))
+#     result = [i + j for (i, j) in zip(left_top_pos, result_pos)]
+#     # 进行识别区域rectangle的偏移:
+#     rectangle = []
+#     for point in ret.get('rectangle'):
+#         tmpoint = [i + j for (i, j) in zip(left_top_pos, point)]  # 进行位置相对left_top_pos进行偏移
+#         rectangle.append(tuple(tmpoint))
+#     # 重置偏移后的识别中心、识别区域:
+#     ret['result'], ret['rectangle'] = tuple(result), tuple(rectangle)
 
-    def safe_xy(val, min_val, max_val):
-        return min(max(min_val, val), max_val)
-
-    # 再以预测点为中心，进行范围提取:
-    start_x = int(safe_xy(prePos_x - radius_x, 0, res_x - 1))
-    end_x = int(safe_xy(prePos_x + radius_x, 0, res_x - 1))
-    start_y = int(safe_xy(prePos_y - radius_y, 0, res_y - 1))
-    end_y = int(safe_xy(prePos_y + radius_y, 0, res_y - 1))
-
-    # 调试代码: 输出调试信息.
-    G.LOGGING.debug("predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)" % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y})
-
-    # 如果发现预测区域完全在图像外，预测区域将只剩下一条像素，预测失败，直接raise:
-    if start_x == end_x or start_y == end_y:
-        raise PredictAreaNoneError("Predict has just one pixel !")
-
-    # 预测区域正常，则截取预测区域，并将预测区域在源图像中的位置一并返回:
-    img_src = im_source[start_y:end_y, start_x:end_x]
-    left_top_pos = (start_x, start_y)
-
-    return img_src, left_top_pos
-
-
-def _pos_fix(ret, left_top_pos):
-    """用于在预测区(给出了其左上角点)查找成功后，进行最终的结果偏移对齐."""
-    left_top_x, left_top_y = left_top_pos
-    # 在预测区域内进行图像查找时，需要转换到整张图片内的坐标，再进行左上角的位置校准:
-    # 进行识别中心result的偏移:
-    result_pos = list(ret.get('result'))
-    result = [i + j for (i, j) in zip(left_top_pos, result_pos)]
-    # 进行识别区域rectangle的偏移:
-    rectangle = []
-    for point in ret.get('rectangle'):
-        tmpoint = [i + j for (i, j) in zip(left_top_pos, point)]  # 进行位置相对left_top_pos进行偏移
-        rectangle.append(tuple(tmpoint))
-    # 重置偏移后的识别中心、识别区域:
-    ret['result'], ret['rectangle'] = tuple(result), tuple(rectangle)
-
-    return ret
+#     return ret
 
 
 def _refresh_result_pos(pre_result, left_top_pos):
@@ -387,7 +323,7 @@ def mask_template_in_predicted_area(source, query):
 
 def mask_template_after_resize(source, query):
     """带有mask的跨分辨率template图像匹配, 带有ignore-focus区域. find_all未启用."""
-    im_search = _get_search_img(query)
+    im_search = query.get_search_img()
     im_source = source.img_src
     ignore, focus = query.ignore, query.focus
     resize_strategy = ST.RESIZE_METHOD or cocos_min_strategy
@@ -482,7 +418,7 @@ def _get_image_target_area(im_source, result={}):
 def _cal_confi_only_in_focus(target_img, query, src_resolution, resize_strategy):
     """将focus中的rect逐个进行可信度计算，再按面积加权平均."""
     # 提取参数:
-    im_search = _get_search_img(query)
+    im_search = query.get_search_img()
     focus_list = query.focus
     sch_resolution = query.resolution
     rgb = query.rgb
@@ -520,7 +456,7 @@ def cal_average_confidence(confidenceList, areaList):
 def _cal_confi_outside_ignore(target_img, query, src_resolution, resize_strategy):
     """将原始im_search分成细分块，将ignore区域外的细分块逐个进行可信度计算."""
     # 提取参数:
-    im_search = _get_search_img(query)
+    im_search = query.get_search_img()
     ignore_list = query.ignore
     sch_resolution = query.resolution
     rgb = query.rgb

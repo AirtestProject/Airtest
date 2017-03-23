@@ -7,3 +7,4 @@ from airtest.core.utils.retry import retries
 from airtest.core.utils.safesocket import SafeSocket
 from airtest.core.utils.transform import TargetPos
 from airtest.core.utils.snippet import is_list, is_str, split_cmd
+from airtest.core.utils.cvutils import cocos_min_strategy
