@@ -1,5 +1,10 @@
 # coding=utf-8
 
+"""本文件用于存放一些计算函数，比如图像适配、搜索区域预测."""
+
+# from airtest.core.helper import G
+from airtest.core.error import MoaError
+
 
 def no_resize(w_a, h_a, resolution_a, resolution_b, design_resolution):
     """无缩放策略."""
@@ -18,14 +23,8 @@ def cocos_min_strategy(w, h, sch_resolution, src_resolution, design_resolution):
     return w_re, h_re
 
 
-def predict_area(source, query):
-    """从im_source中提取出预测区域."""
-    # 提取预测参数:
-    im_source = source.img_src
-    src_resolution = source.src_resolution
-    op_pos = query.record_pos
-    radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
-
+def predict_area(im_source, op_pos, radius_x, radius_y, src_resolution=None):
+    """根据参数进行screen的预测区域."""
     # 预测操作位置: (按照比例进行点预测) clk_x, clk_y是规划为比例的
     clk_x, clk_y = op_pos
     # 如果没有传递
@@ -44,15 +43,15 @@ def predict_area(source, query):
     start_y = int(safe_xy(prePos_y - radius_y, 0, res_y - 1))
     end_y = int(safe_xy(prePos_y + radius_y, 0, res_y - 1))
 
-    # 调试代码: 输出调试信息.
-    G.LOGGING.debug("predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)" % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y})
+    # 输出调试信息.
+    log_info = "predict rect:  X (%(start_x)s:%(end_x)s)   Y (%(start_y)s:%(end_y)s)" % {"start_x": start_x, "end_x":end_x, "start_y": start_y, "end_y": end_y}
 
     # 如果发现预测区域完全在图像外，预测区域将只剩下一条像素，预测失败，直接raise:
     if start_x == end_x or start_y == end_y:
-        raise PredictAreaNoneError("Predict has just one pixel !")
+        raise MoaError("Predict area has just one pixel !")
 
     # 预测区域正常，则截取预测区域，并将预测区域在源图像中的位置一并返回:
     img_src = im_source[start_y:end_y, start_x:end_x]
     left_top_pos = (start_x, start_y)
 
-    return img_src, left_top_pos
+    return img_src, left_top_pos, log_info

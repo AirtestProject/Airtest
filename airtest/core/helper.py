@@ -4,7 +4,7 @@ import time
 import functools
 import aircv
 from airtest.core import device
-from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger
+from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
 
 
@@ -73,40 +73,90 @@ class MoaScreen(object):
         self.src_resolution = src_resolution
 
     @classmethod
-    def create_by_query(cls, screen, query):
+    def create_by_query(cls, screen, find_inside, find_outside, whole_screen, op_pos):
+    # def create_by_query(cls, screen, query):
         """求取图像匹配的截屏数据类."""
         # 第一步: 获取截屏
-        if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
+        if not whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
             # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
             # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
             wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
         else:
             wnd_pos = None  # 没有所谓的窗口偏移，设为None
-            # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
             # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
-            screen = aircv.mask_image(screen, query.find_outside)
+            screen = aircv.mask_image(screen, find_outside)
 
         # 检查截屏:
         if not screen.any():
             G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
-            screen, img_src, offset = None, None, None
+            screen, img_src, offset, src_resolution = None, None, None, []
         else:
-            # 调试状态下，展示图像识别时的截屏图片：
-            if ST.DEBUG and screen is not None:
-                aircv.show(screen)
-
-            # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
-            img_src, offset = aircv.crop_image(screen, query.find_inside)
-
-        src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+            # 截屏分辨率(注意: 可能游戏分辨率与设备分辨率会有不同.)
+            src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+            # 第二步: 封装截屏
+            if find_inside:
+                # 如果有find_inside，就在find_inside内进行识别
+                img_src, offset = aircv.crop_image(screen, find_inside)
+            else:
+                # 如果没有find_inside，就提取预测区域，进行识别
+                radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
+                img_src, offset, log_info = predict_area(screen, op_pos, radius_x, radius_y, src_resolution)
+                G.LOGGING.debug(log_info)  # 输出预测区域的调试信息
 
         return cls(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
 
-    def predict_area(self):
+
+class CvPosFix(object):
+
+    def __init__(self):
         pass
 
-    def fix_cv_pos(self):
-        pass
+    @classmethod
+    def fix_cv_pos(cls, cv_ret, left_top_pos):
+        """根据结果类型，进行cv识别结果校正."""
+        if isinstance(cv_ret, dict):
+            result = cls._fix_one_cv_pos(cv_ret, left_top_pos)
+        elif isinstance(cv_ret, list):
+            result = [cls._fix_one_cv_pos(item, left_top_pos) for item in cv_ret]
+        else:
+            pass
+
+        return result
+
+    @classmethod
+    def _fix_one_cv_pos(cls, ret, left_top_pos):
+        """用于修正cv的识别结果."""
+        left_top_x, left_top_y = left_top_pos
+        # 在预测区域内进行图像查找时，需要转换到整张图片内的坐标，再进行左上角的位置校准:
+        # 进行识别中心result的偏移:
+        result_pos = list(ret.get('result'))
+        result = [i + j for (i, j) in zip(left_top_pos, result_pos)]
+        # 进行识别区域rectangle的偏移:
+        rectangle = []
+        for point in ret.get('rectangle'):
+            tmpoint = [i + j for (i, j) in zip(left_top_pos, point)]  # 进行位置相对left_top_pos进行偏移
+            rectangle.append(tuple(tmpoint))
+        # 重置偏移后的识别中心、识别区域:
+        ret['result'], ret['rectangle'] = tuple(result), tuple(rectangle)
+
+        return ret
+
+    @classmethod
+    def cal_target_pos(cls, cv_ret, target_pos):
+        # 这个是脚本语句的target_pos的点击偏移处理:
+        if isinstance(cv_ret, dict):
+            # 非find_all模式，返回的是一个dict，则正常返回即可
+            ret_pos = TargetPos().getXY(cv_ret, target_pos)
+            return ret_pos
+        elif isinstance(cv_ret, list):
+            # find_all模式找到的是一个结果列表，处理后返回ret_pos_list
+            ret_pos_list = []
+            for one_ret in cv_ret:
+                ret_pos = TargetPos().getXY(one_ret, query.target_pos)
+                ret_pos_list.append(ret_pos)
+            return ret_pos_list
+        else:
+            return cv_ret
 
 
 class MoaText(object):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """"Airtest图像识别专用."""
+
 import os
 import cv2
 import numpy as np
@@ -14,9 +15,9 @@ from aircv.sift import find_sift
 from aircv.utils import checkImageParamInput, generate_result
 
 from airtest.core.error import *  # noqa
-from airtest.core.helper import G, MoaPic, MoaScreen, MoaText, log_in_func, logwrap, get_platform, platform
+from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
-from airtest.core.utils import TargetPos, cocos_min_strategy
+from airtest.core.utils import TargetPos, cocos_min_strategy, predict_area
 
 
 @logwrap
@@ -40,25 +41,30 @@ def device_snapshot():
 def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, threshold=None, find_all=False):
     """Keep looking for pic until timeout, execute intervalfunc if pic not found."""
     G.LOGGING.info("Try finding:\n%s", query)
-
     # 优先用指定版threshold(如assert_exists)，其次用脚本中传来的threshold
     query.threshold = threshold or query.threshold
     # 优先使用指定的find_all参数，比如find_all()指定find_all=True
     query.find_all = find_all or query.find_all
 
+    # 循环查找,获取截图所在的设备操作位置: (注意截屏保存的时机.)
     start_time = time.time()
     while True:
-        # 获取截图所在的设备操作位置: (注意截屏保存的时机.)
+        # 获取截屏图像:(每次循环均重新获取截屏，在执行操作位置计算)
         if query.new_snapshot:
             screen, filepath = device_snapshot()
         else:
             screen, filepath = G.RECENT_CAPTURE, G.RECENT_CAPTURE_PATH
-        source = MoaScreen.create_by_query(screen, query)
+        # 求取截屏类:
+        source = MoaScreen.create_by_query(screen, query.find_inside, query.find_outside, query.whole_screen, query.record_pos)
+        # 调试状态下，为用户展示图像识别时的截屏图片：
+        if ST.DEBUG and source.img_src is not None:
+            aircv.show(source.img_src)
 
+        # 计算根据图像计算操作位置:
         if source.screen is None:
             ret = None
         else:
-            ret = _get_img_match_result(source, query)
+            ret = _get_operate_pos(source, query)
 
         if ret:
             aircv.imwrite(filepath, source.screen)
@@ -80,49 +86,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
             continue
 
 
-# def _get_device_screen():
-#     """获取设备屏幕图像."""
-#     if G.KEEP_CAPTURE and (G.RECENT_CAPTURE is not None):
-#         screen = G.RECENT_CAPTURE
-#     else:
-#         screen = device_snapshot()
-
-#     return screen
-
-
-# def _get_source(query):
-#     """求取图像匹配的截屏数据类."""
-#     # 第一步: 获取截屏
-#     if not query.whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
-#         # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
-#         screen = _get_device_screen()
-#         # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
-#         wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
-#     else:
-#         wnd_pos = None  # 没有所谓的窗口偏移，设为None
-#         # 其他情况：手机回放或者windows全屏回放时，使用之前的截屏方法( 截屏offset为0 )
-#         screen = _get_device_screen()
-#         # 暂时只在全屏截取时才启用find_outside，主要关照IDE调试脚本情形
-#         screen = aircv.mask_image(screen, query.find_outside)
-
-#     # 检查截屏:
-#     if not screen.any():
-#         G.LOGGING.warning("Bad screen capture, check if screen is clocked !")
-#         screen, img_src, offset = None, None, None
-#     else:
-#         # 调试状态下，展示图像识别时的截屏图片：
-#         if ST.DEBUG and screen is not None:
-#             aircv.show(screen)
-
-#         # 第二步: 封装截屏 (将offset和screen和wnd_pos都封装进去？？)——现在还没有封装哦~
-#         img_src, offset = aircv.crop_image(screen, query.find_inside)
-
-#     src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
-
-#     return MoaScreen(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
-
-
-def _get_img_match_result(source, query):
+def _get_operate_pos(source, query):
     """求取目标操作位置."""
     # 第一步: 图像识别
     try:
@@ -137,116 +101,93 @@ def _get_img_match_result(source, query):
     # 将识别结果写入log文件:
     log_in_func({"cv": cv_ret})
 
-    # 第二步: 矫正识别区域结果，并处理偏移target_pos，并求取实际操作位置
-    offset, wnd_pos = getattr(source, "offset"), getattr(source, "wnd_pos")
-    ret_pos = _calibrate_ret(cv_ret, query, offset, wnd_pos)
-
-    return ret_pos
+    # 第二步: 进行wnd_pos校正，并处理偏移target_pos，并求取实际操作位置
+    if not cv_ret:
+        return None
+    else:
+        # 有识别结果，校正wnd_pos
+        if source.wnd_pos:
+            log_in_func({"wnd_pos": wnd_pos})
+            cv_ret = CvPosFix.fix_cv_pos(cv_ret, source.wnd_pos)
+        # 校正target_pos,返回点击位置点
+        return CvPosFix.cal_target_pos(cv_ret, query.target_pos)
 
 
 def _cv_match(source, query):
-    """调用功能函数，执行图像匹配."""
+    """选定图像识别方法，并执行图像匹配."""
     ret = None
     if query.ignore or query.focus:
         # 带有mask的模板匹配方法:
         G.LOGGING.debug("method: template match (with ignore & focus rects)")
-        ret_in_pre = mask_template_in_predicted_area(source, query)
-        ret = ret_in_pre or mask_template_after_resize(source, query)
+        ret = mask_template_in_predicted_area(source, query)
+        # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
+        if not ret and not query.find_inside:
+            ret = mask_template_after_resize(source, query, find_in_screen=True)
     else:
         # 根据cv_strategy配置进行匹配:
         for method in ST.CVSTRATEGY:
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
                 G.LOGGING.debug("method: template match")
-                ret_in_pre = template_in_predicted_area(source, query)
-                ret = ret_in_pre or template_after_resize(source, query)
+                ret = template_in_predicted_area(source, query)
+                # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
+                if not ret and not query.find_inside:
+                    ret = template_after_resize(source, query, find_in_screen=True)
             elif method == "sift":
                 # sift匹配，默认pre，其次全屏
                 G.LOGGING.debug("method: sift match")
-                ret_in_pre = find_sift_in_predicted_area(source, query)
-                if not ret_in_pre:
-                    img_src, img_sch = source.img_src, query.get_search_img()
-                    ret_in_pre = aircv.find_sift(img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
+                ret = find_sift_in_predicted_area(source, query)
+                # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
+                if not ret and not query.find_inside:
+                    screen, img_sch = source.screen, query.get_search_img()
+                    ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
             else:
                 G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
 
-            # 使用某个识别方法找到后，就直接返回，不再继续循环下去:
+            # 使用ST.CVSTRATEGY中某个识别方法找到后，就直接返回，不再继续循环下去:
             if ret:
                 return ret
 
     return ret
 
 
-def _calibrate_ret(ret, query, offset=None, wnd_pos=None):
-    """进行识别结果进行整体偏移矫正,以及target_pos的矫正,返回点击位置."""
-    def cal_ret(one_ret, offset, wnd_pos):
-        if offset:
-            one_ret = _refresh_result_pos(one_ret, offset)
-        if wnd_pos:
-            log_in_func({"wnd_pos": wnd_pos})
-            one_ret = _refresh_result_pos(one_ret, wnd_pos)
-        # 返回识别区域校正后的结果:
-        return one_ret
-
-    if not ret:
-        # 没找到结果，直接返回None,以便_loop_find执行未找到的逻辑
-        return None
-    elif isinstance(ret, list):
-        # 如果是find_all模式，则找到的是一个结果列表，处理后返回ret_pos_list
-        ret_pos_list = []
-        for one_ret in ret:  # 对结果列表中的每一个结果都进行一次结果偏移的处理
-            one_ret = cal_ret(one_ret, offset, wnd_pos)
-            # 这个是脚本语句的target_pos的点击偏移处理:
-            ret_pos = TargetPos().getXY(one_ret, query.target_pos)
-            ret_pos_list.append(ret_pos)
-        return ret_pos_list
-    else:
-        # 非find_all模式，返回的是一个dict，则正常返回即可
-        ret = cal_ret(ret, offset, wnd_pos)
-        ret_pos = TargetPos().getXY(ret, query.target_pos)
-        return ret_pos
-
-
 def template_in_predicted_area(source, query):
     '''带区域预测的模板匹配.'''
-    # 第一步：定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(source, query)
-    source.img_src = img_src  # 更新待识别图像为预测区域的图像
-
-    # 第二步：在预测区域内，进行跨分辨率识别，调用find_template_after_resize:
+    # 第一步：在预测区域内，进行跨分辨率识别，调用find_template_after_resize:
     pre_result = template_after_resize(source, query)
 
-    # 第三步：对结果进行位置校正:
-    return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
+    # 第二步：对结果进行offset位置校正:
+    return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
 
 
-def template_after_resize(source, query):
+def template_after_resize(source, query, find_in_screen=False):
     '''跨分辨率template图像匹配.'''
+    # 默认在预测区域(或find_inside区域)进行搜索,指定全局时才在screen内搜索:
+    im_source = source.screen if find_in_screen else source.img_src
+
     # 第一步：先对im_search进行跨分辨率适配resize
     img_sch = _resize_im_search(query, source.src_resolution)
 
     # 第二步：图像识别得到结果(可选择寻找结果集合)
     if query.find_all:
-        return find_all_template(source.img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
+        return find_all_template(im_source, img_sch, threshold=query.threshold, rgb=query.rgb)
     else:
-        return find_template(source.img_src, img_sch, threshold=query.threshold, rgb=query.rgb)
+        return find_template(im_source, img_sch, threshold=query.threshold, rgb=query.rgb)
 
 
 def find_sift_in_predicted_area(source, query):
     '''在预测区域内进行sift查找.'''
     # 提取截图
     im_search = query.get_search_img()
-    # 第一步：定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(source, query)
 
-    # 第二步：在预测区域内进行基于sift的识别，调用find_sift:
-    if not img_src.any():
+    # 第一步：在预测区域内进行基于sift的识别，调用find_sift:
+    if not source.img_src.any():
         pre_result = None
     else:
-        pre_result = find_sift(img_src, im_search, threshold=query.threshold, rgb=query.rgb)
+        pre_result = find_sift(source.img_src, im_search, threshold=query.threshold, rgb=query.rgb)
 
-    # 第三步：对结果进行位置校正:
-    return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
+    # 第二步：对结果进行位置校正:
+    return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
 
 
 def _resize_im_search(query, src_resolution, target_img=None):
@@ -277,54 +218,20 @@ def _resize_im_search(query, src_resolution, target_img=None):
         return resized_im_search
 
 
-
-# def _pos_fix(ret, left_top_pos):
-#     """用于在预测区(给出了其左上角点)查找成功后，进行最终的结果偏移对齐."""
-#     left_top_x, left_top_y = left_top_pos
-#     # 在预测区域内进行图像查找时，需要转换到整张图片内的坐标，再进行左上角的位置校准:
-#     # 进行识别中心result的偏移:
-#     result_pos = list(ret.get('result'))
-#     result = [i + j for (i, j) in zip(left_top_pos, result_pos)]
-#     # 进行识别区域rectangle的偏移:
-#     rectangle = []
-#     for point in ret.get('rectangle'):
-#         tmpoint = [i + j for (i, j) in zip(left_top_pos, point)]  # 进行位置相对left_top_pos进行偏移
-#         rectangle.append(tuple(tmpoint))
-#     # 重置偏移后的识别中心、识别区域:
-#     ret['result'], ret['rectangle'] = tuple(result), tuple(rectangle)
-
-#     return ret
-
-
-def _refresh_result_pos(pre_result, left_top_pos):
-    """根据所给的偏移坐标，更新识别结果."""
-    left_top_x, left_top_y = left_top_pos
-    # 分别针对单个和多个结果的情况，进行指定
-    if isinstance(pre_result, dict):
-        result = _pos_fix(pre_result, left_top_pos)
-    elif isinstance(pre_result, list):
-        result = [_pos_fix(item, left_top_pos) for item in pre_result]
-
-    return result
-
-
 def mask_template_in_predicted_area(source, query):
     """带预测区域的mask-template."""
-    # 第一步: 定位im_source中的预测区域:
-    img_src, left_top_pos = _get_predicted_area(source, query)
-    source.img_src = img_src  # 更新待识别图像为预测区域的图像
-
-    # 第二步：在预测区域内，进行跨分辨率识别，调用mask_template_after_resize
+    # 第一步：在预测区域内，进行跨分辨率识别，调用mask_template_after_resize
     pre_result = mask_template_after_resize(source, query)
 
-    # 第三步：对结果进行位置校正:
-    return _refresh_result_pos(pre_result, left_top_pos) if pre_result else None
+    # 第二步：对结果进行位置校正:
+    return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
 
 
-def mask_template_after_resize(source, query):
+def mask_template_after_resize(source, query, find_in_screen=False):
     """带有mask的跨分辨率template图像匹配, 带有ignore-focus区域. find_all未启用."""
     im_search = query.get_search_img()
-    im_source = source.img_src
+    # 默认在预测区域(或者find_inside区域)进行搜索,只有指定全局时才在screen内搜索:
+    im_source = source.screen if find_in_screen else source.img_src
     ignore, focus = query.ignore, query.focus
     resize_strategy = ST.RESIZE_METHOD or cocos_min_strategy
 
