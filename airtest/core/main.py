@@ -700,7 +700,7 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android", "IOS"])
-def install(filepath, package):
+def install(filepath, package=''):
     return DEVICE.install_app(filepath, package)
 
 
