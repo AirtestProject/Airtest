@@ -181,13 +181,8 @@ def amclear(package):
 
 @logwrap
 @platform(on=["Android", "IOS"])
-<<<<<<< HEAD
 def install(filepath, package=None):
     return G.DEVICE.install_app(filepath, package)
-=======
-def install(filepath, package=''):
-    return DEVICE.install_app(filepath, package)
->>>>>>> ca2a01019bc9038f97658d772e36fc233b27f0f5
 
 
 @logwrap

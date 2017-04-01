@@ -86,8 +86,10 @@ def run_script(args):
         ST.set_logdir(args.log)
     else:
         print "do not save log & screen"
+    set_logfile()
+    set_screendir()
 
-    _on_init_done()
+    on_device_ready()
     # set root script as basedir
     # SCRIPT_STACK.append(args.script)
     try:
@@ -104,7 +106,7 @@ def run_script(args):
         exec_script(args.script, scope=globals(), root=True)
     except:
         err = traceback.format_exc()
-        log("error", {"script_exception": err})
+        # log("error", {"traceback": err}, False)
         raise
     finally:
         # execute post script, whether pre & script succeed or not
@@ -115,11 +117,10 @@ def run_script(args):
                     set_current(i)
                     exec_script(args.post, scope=globals(), root=True)
             except:
-                log("error", {"post_exception": traceback.format_exc()})
+                # log("error", {"traceback": traceback.format_exc()}, False)
                 traceback.print_exc()
 
 
-@logwrap
 def exec_script(scriptname, scope=None, root=False, code=None):
     """
     execute script: root or submodule
@@ -192,36 +193,47 @@ def _sub_dir_name(scriptname):
     return dirname
 
 
+def set_logfile():
+    if ST.LOG_DIR:
+        filepath = os.path.join(ST.LOG_DIR, ST.LOG_FILE)
+        G.LOGGING.info("set_logfile %s", repr(os.path.realpath(filepath)))
+        G.LOGGER.set_logfile(filepath)
+
+
+def set_screendir():
+    dirpath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR)
+    shutil.rmtree(dirpath, ignore_errors=True)
+    if not os.path.isdir(dirpath):
+        os.mkdir(dirpath)
+
+
 def set_scripthome(dirpath):
     global SCRIPTHOME
     SCRIPTHOME = dirpath
 
 
 def get_globals(key):
-    return getattr(core.main, key)
+    # return getattr(core.main, key)
+    return getattr(ST, key)
 
 
 def set_globals(key, value):
-    setattr(core.main, key, value)
+    # setattr(core.main, key, value)
+    setattr(ST, key, value)
 
 
 def device():
-    return get_globals("DEVICE")
+    # return get_globals("DEVICE")
+    return G.DEVICE
 
 
-def _on_init_done():
+def on_device_ready():
     """to be overwritten by users"""
     pass
 
 
 def _exec_script_for_forever(args, script, code=None):
-    # IDE使用的文件路径被命令行下的编码处理过，需要解码
-    try:
-        charset = sys.stdin.encoding
-        script = script.decode(charset)
-    except:
-        pass
-
+    script = script.decode(sys.stdin.encoding)
     ST.set_basedir(script)
 
     try:
