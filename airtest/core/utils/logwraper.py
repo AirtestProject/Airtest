@@ -1,7 +1,8 @@
 # _*_ coding:UTF-8 _*_
+import os
+import sys
 import json
 import time
-import sys
 import functools
 import traceback
 
@@ -24,7 +25,7 @@ class MoaLogger(object):
             self.logfd = None
         else:
             self.handle_stacked_log()
-            self.logfile = logfile
+            self.logfile = os.path.realpath(logfile)
             self.logfd = open(self.logfile, "w")
 
     @staticmethod

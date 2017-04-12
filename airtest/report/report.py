@@ -286,7 +286,7 @@ class MoaLogDisplay(object):
         data['static_root'] = self.static_root
         data['author'] = self.author
         return self._render(template_name, **data)     
-        
+
 
 def get_script_name(path):
 
@@ -302,7 +302,7 @@ def safe_percent(a, b):
         return round(a * 100.0 / b, 1)
     else:
         return 0
-        
+
 def get_file_author(file_path):
     if not os.path.exists(file_path):
         print "get_file_author, file_path %s not existed"%file_path
@@ -335,7 +335,7 @@ def main(args):
     # script filepath
     path = args.script.decode(sys.getfilesystemencoding())
     basename = os.path.basename(path).split(".")[0]
-    py_file = path+"/"+basename+".py"
+    py_file = path + "/" + basename + ".py"
     author = get_file_author(py_file)
     # output html filepath
     outfile = args.outfile
@@ -366,7 +366,6 @@ def main(args):
         with open(outfile, 'w') as f:
             f.write(html)
 
-        
+
 if __name__ == "__main__":
     main()
-

@@ -10,6 +10,7 @@ from urllib import unquote
 from airtest.core.main import *
 from airtest.core.error import MinicapError, MinitouchError, AdbError
 from airtest.core.helper import log, logwrap
+from airtest.core.settings import Settings as ST
 
 
 SCRIPT_STACK = []
@@ -69,13 +70,10 @@ def run_script(args):
         for kv in args.kwargs.split(","):
             k, v = kv.split("=")
             if k == "findoutside":  # if extra arg is findoutside, set airtest-FINDOUTSIDE
-                set_find_outside(v)
+                # set_find_outside(v)
+                ST.set_find_outside(v)
             else:
                 globals()[k] = v
-
-    # run script in forever mode, read input & exec
-    if args.forever:
-        run_forever(args)
 
     # run script
     if args.log is True:
@@ -88,6 +86,10 @@ def run_script(args):
         print "do not save log & screen"
     set_logfile()
     set_screendir()
+
+    # run script in forever mode, read input & exec
+    if args.forever:
+        run_forever(args)
 
     on_device_ready()
     # set root script as basedir
@@ -167,6 +169,7 @@ def exec_script(scriptname, scope=None, root=False, code=None):
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
     # exec code
     if scope:
+        # exec(compile(code, scriptname, 'exec')) in scope
         exec(compile(code, scriptname, 'exec')) in scope
     else:
         exec(compile(code, scriptname, 'exec')) in globals()
@@ -233,7 +236,12 @@ def on_device_ready():
 
 
 def _exec_script_for_forever(args, script, code=None):
-    script = script.decode(sys.stdin.encoding)
+
+    # --------------------------------------------------------------报错..
+    charset = sys.stdin.encoding or 'utf8'
+    script = script.decode(charset)
+
+    # script = script.decode(sys.stdin.encoding)
     ST.set_basedir(script)
 
     try:

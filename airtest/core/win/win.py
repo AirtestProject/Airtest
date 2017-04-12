@@ -6,7 +6,7 @@ import win32process
 import win32com.client
 from PIL import ImageGrab
 
-from airtest.aircv import aircv
+import aircv
 from airtest.core.device import Device
 
 from winsendkey import SendKeys

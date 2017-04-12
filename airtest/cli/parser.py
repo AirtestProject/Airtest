@@ -40,7 +40,6 @@ def run_parser(ap):
 def main():
     ap = get_parser()
     args = ap.parse_args()
-
     if args.action == "info":
         print(get_script_info(args.script))
     elif args.action == "report":
@@ -50,4 +49,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()

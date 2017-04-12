@@ -137,7 +137,7 @@ def set_windows(handle=None, window_title=None):
 
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
     # set no resize on windows as default
-    ST.RESIZE_METHOD = ST.RESIZE_METHOD or aircv.no_resize
+    ST.RESIZE_METHOD = ST.RESIZE_METHOD
 
 
 @platform(on=["Android", "Windows", "IOS"])

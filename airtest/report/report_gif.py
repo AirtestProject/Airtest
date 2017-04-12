@@ -38,7 +38,6 @@ def gen_gif(imgdir, steps, output="log.gif"):
                 if step[2].has_key("wnd_pos"):
                     wnd_pos = step[2].get("wnd_pos")
                     ret = step[2].get("ret")
-                    # print "-=-=-=-=-=-=-=-=:", wnd_pos, ret
                     target_pos = (ret[0] - wnd_pos[0], ret[1] - wnd_pos[1])
                 else:
                     target_pos = step[2].get("ret")
