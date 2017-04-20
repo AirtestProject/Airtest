@@ -12,7 +12,7 @@ import aircv
 from aircv.error import *  # noqa
 from aircv.template import find_all_template, find_template, _get_target_rectangle
 from aircv.sift import find_sift
-from aircv.utils import checkImageParamInput, generate_result
+from aircv.utils import check_image_param_input, generate_result
 
 from airtest.core.error import *  # noqa
 from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, MoaText, log_in_func, logwrap, get_platform, platform
