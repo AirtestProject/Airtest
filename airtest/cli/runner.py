@@ -98,7 +98,7 @@ def run_script(args):
         # execute pre script
         if args.pre:
             ST.set_basedir(args.pre)
-            for i in range(len(DEVICE_LIST)):  # pre for all devices
+            for i in range(len(G.DEVICE_LIST)):  # pre for all devices
                 set_current(i)
                 exec_script(args.pre, scope=globals(), root=True)
 
@@ -115,7 +115,7 @@ def run_script(args):
         if args.post:
             try:
                 ST.set_basedir(args.post)
-                for i in range(len(DEVICE_LIST)):  # post for all devices
+                for i in range(len(G.DEVICE_LIST)):  # post for all devices
                     set_current(i)
                     exec_script(args.post, scope=globals(), root=True)
             except:
