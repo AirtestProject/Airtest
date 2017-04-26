@@ -297,7 +297,8 @@ class AutomatorWrapper(object):
 
 
 def UiAutomator():
-    if not airtest.core.main.DEVICE:
+    current_device = airtest.cli.runner.device()
+    if not current_device:
         set_serialno()
-    dev = AutomatorDevice(airtest.core.main.DEVICE.serialno)
+    dev = AutomatorDevice(current_device.serialno)
     return AutomatorWrapper(dev)
