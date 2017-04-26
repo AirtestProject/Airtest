@@ -8,7 +8,6 @@ import fnmatch
 import aircv
 from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
-from airtest.core.utils import is_str
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
@@ -192,7 +191,7 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename=None, windows_hwnd=None):
+def snapshot(filename=None):
     """capture device screen and save it into file."""
     screen, default_filepath = device_snapshot()
     if not filename:
@@ -225,7 +224,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     timeout = timeout or ST.FIND_TIMEOUT
-    if is_str(v) or isinstance(v, (MoaPic, MoaText)):
+    if isinstance(v, (MoaPic, MoaText)):
         try:
             pos = loop_find(v, timeout=timeout)
         except MoaNotFoundError:
@@ -272,16 +271,15 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
         else:
             raise Exception("invalid params for swipe")
     else:
-        if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
+        if isinstance(v1, (MoaPic, MoaText)):
             pos1 = loop_find(v1)
         else:
             pos1 = v1
 
         if v2:
-            if (is_str(v2) or isinstance(v2, MoaText)):
-                keep_capture()
+            if isinstance(v2, (MoaPic, MoaText)):
+                v2.new_snapshot = False
                 pos2 = loop_find(v2)
-                keep_capture(False)
             else:
                 pos2 = v2
         elif vector:
@@ -299,7 +297,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
 @moapicwrap
 @platform(on=["Android", "Windows"])
 def operate(v, route, timeout=ST.FIND_TIMEOUT, delay=0):
-    if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+    if isinstance(v2, (MoaPic, MoaText)):
         pos = loop_find(v, timeout=timeout)
     else:
         pos = v
