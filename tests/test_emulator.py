@@ -23,6 +23,10 @@ class TestAndroidOnEmulator(unittest.TestCase):
         ]
         parser.main()
 
+    def test_ime(self):
+        a = Android("192.168.56.101:5555", shell_ime=False)
+        a.text("haha")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -719,7 +719,7 @@ class Minitouch(object):
         elif args["type"] == "up":
             cmd = "u 0\nc\n"
         else:
-            raise RuntimeError("invalid operate args: %s"%args)
+            raise RuntimeError("invalid operate args: %s" % args)
         self.handle(cmd)
 
     def safe_send(self, data):
@@ -758,7 +758,7 @@ class Minitouch(object):
         header = ""
         while True:
             try:
-                header += s.sock.recv(4096) # size is not strict, so use raw socket.recv
+                header += s.sock.recv(4096)  # size is not strict, so use raw socket.recv
             except socket.timeout:
                 raise RuntimeError("minitouch setup client error")
             if header.count('\n') >= 3:
@@ -799,7 +799,7 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, shell_ime=True, init_ime=False):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
@@ -810,10 +810,9 @@ class Android(Device):
             self._init_display(props)
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
-        if init_ime:
-            self.ime = AdbKeyboardIme(self)
+        self.shell_ime = shell_ime
+        if shell_ime and init_ime:
             self.toggle_shell_ime()
-            reg_cleanup(self.ime.end)
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -1024,19 +1023,27 @@ class Android(Device):
         self.keyevent("HOME")
 
     def text(self, text, enter=True):
-        if getattr(self, "ime", None):
+        if self.shell_ime:
+            # 开启shell_ime
+            if not hasattr(self, "ime"):
+                self.toggle_shell_ime()
+            # shell_ime用于输入中文
             text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
-            # 游戏输入时，输入有效内容后点击Enter确认，如不需要，text置为False即可。
-            if enter:
-                self.adb.shell(["input", "keyevent", "ENTER"])
         else:
             self.adb.shell(["input", "text", text])
+        # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
+        if enter:
+            self.adb.shell(["input", "keyevent", "ENTER"])
 
     def toggle_shell_ime(self, on=True):
         """切换到shell的输入法，用于text"""
+        self.shell_ime = True
+        if not hasattr(self, "ime"):
+            self.ime = AdbKeyboardIme(self)
         if on:
             self.ime.start()
+            reg_cleanup(self.ime.end)
         else:
             self.ime.end()
 
@@ -1044,7 +1051,7 @@ class Android(Device):
     def touch(self, pos, **kwargs):
         duration = kwargs.get('duration', 0.01)
         times = kwargs.get('times', 1)
-        pos = map(lambda x: x/PROJECTIONRATE, pos)
+        pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
             if self.minitouch:
