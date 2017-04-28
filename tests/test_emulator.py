@@ -15,10 +15,14 @@ KWARGS = "PKG=%s,APK=%s,SCRIPTHOME=%s" % (TEST_PKG, TEST_APK, THIS_DIR)
 class TestAndroidOnEmulator(unittest.TestCase):
 
     def test_run(self):
-        sys.argv = [sys.argv[0], "run", TEST_OWL, '--setsn', '192.168.56.101:5555', '--kwargs', KWARGS, '--log']
+        sys.argv = [
+            sys.argv[0], "run", TEST_OWL,
+            '--setsn', '192.168.56.101:5555',
+            "--nominicap", "--nominitouch",
+            '--kwargs', KWARGS, '--log'
+        ]
         parser.main()
 
 
 if __name__ == '__main__':
     unittest.main()
-

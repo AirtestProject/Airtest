@@ -153,12 +153,12 @@ class ADB(object):
     def shell(self, cmds, not_wait=False):
         """
         adb shell
-        not_wait: 
+        not_wait:
             return subprocess if True
             return output if False
         """
         if isinstance(cmds, basestring):
-            cmds = 'shell '+ cmds
+            cmds = 'shell ' + cmds
         else:
             cmds = ['shell'] + list(cmds)
         if not_wait:
@@ -191,12 +191,7 @@ class ADB(object):
         if no_rebind:
             cmds += ['--no-rebind']
         self.cmd(cmds + [local, remote])
-        def try_remove_forward():
-            try:
-                self.remove_forward(local)
-            except:
-                pass
-        reg_cleanup(try_remove_forward)
+        reg_cleanup(self.remove_forward, local)
 
     def get_forwards(self):
         """adb forward --list"""
@@ -227,7 +222,7 @@ class ADB(object):
         times = 100
         for i in range(times):
             port = self._get_forward_local()
-            if "tcp:%s"%port not in localports:
+            if "tcp:%s" % port not in localports:
                 return port
         raise RuntimeError("No available adb forward local port for %s times" % (times))
 
@@ -813,11 +808,6 @@ class Android(Device):
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         if init_display:
             self._init_display(props)
-            # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
-            # if self.sdk_version == 17:
-            #     print "minicap_stream mode not available on sdk 17"
-            #     minicap_stream = False
-            # minicap version > 2 解决了17的问题，先注释掉看看
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
@@ -836,7 +826,7 @@ class Android(Device):
         # 每次运行时均获取设备的有效区域，此处进行一次get_display_info，但此函数在GT-N7100设备上报错，因此加上兼容：
         try:
             self.get_display_info()
-        except Exception, e:
+        except Exception:
             traceback.print_exc()
 
         self.orientationWatcher()
@@ -996,10 +986,15 @@ class Android(Device):
         screen = aircv.utils.string_2_img(screen)
 
         # 保证方向是正的
-        if ensure_orientation and self.sdk_version <= 16 and self.size["orientation"]:
-            h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
-            if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
+        if ensure_orientation and self.size["orientation"]:
+            # minicap截图根据sdk_version不一样
+            if self.minicap and self.sdk_version <= 16:
+                h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
+                if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+                    screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
+            # adb 截图总是要根据orientation旋转
+            elif not self.minicap:
+                screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
         return screen

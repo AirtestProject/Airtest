@@ -31,13 +31,15 @@ def run_script(args):
 
     if args.setsn is not None:
         print "set_serialno", args.setsn
+        minicap = not args.nominicap
+        minitouch = not args.nominitouch
         if args.setsn == "":
             for i in range(args.devcount):
                 # auto choose one serialno
-                set_serialno()
+                set_serialno(minicap=minicap, minitouch=minitouch)
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn)
+                set_serialno(sn, minicap=minicap, minitouch=minitouch)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng
