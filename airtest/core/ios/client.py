@@ -80,13 +80,13 @@ class IOS(Device):
         self._refresh_display_info(screen)
         return screen
 
-    def touch(self, pos, **kwargs):
-        coord = pos[0] / self._wda_sca, pos[1] / self._wda_sca
-        times = kwargs.get('times', 1)
+    def touch(self, pos, times=1, duration=0.01):
+        x, y = pos[0] / self._wda_sca, pos[1] / self._wda_sca
         if times == 2:
-            self.session.double_tap(*coord)
+            self.session.double_tap(x, y)
         else:
-            [self.session.tap(*coord) for _ in range(times)]
+            for _ in range(times):
+                self.session.tap(x, y)
 
     def swipe(self, fpos, tpos, duration=0.5, step=4):
         self.session.swipe(fpos[0] / self._wda_sca, fpos[1] / self._wda_sca,

@@ -218,7 +218,7 @@ def get_platform():
     for name, cls in device.DEV_TYPE_DICT.items():
         if G.DEVICE.__class__ == cls:
             return name
-    return None 
+    return None
 
 
 def platform(on=["Android"]):
@@ -244,3 +244,12 @@ def register_device(dev):
 def delay_after_operation(secs):
     delay = secs or ST.OPDELAY
     time.sleep(delay)
+
+
+def set_default_st(pltf):
+    if pltf == "Windows":
+        ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
+        # set no resize on windows as default
+        ST.RESIZE_METHOD = ST.RESIZE_METHOD
+    elif pltf in ("Android", "IOS"):
+        ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID

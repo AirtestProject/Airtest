@@ -12,7 +12,7 @@ from airtest.core.device import Device
 from winsendkey import SendKeys
 from keyboard import key_input
 from mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
-from window_mgr import WindowMgr, get_screen_shot, get_resolution, get_window_pos
+from window_mgr import WindowMgr, get_screen_shot, get_resolution
 
 
 class Windows(Device):
@@ -77,11 +77,12 @@ class Windows(Device):
     def keyevent(self, keyname, escape=False, combine=[]):
         key_input(keyname, escape=escape, combine=combine)
 
-    def text(self, text, with_spaces=True, with_tabs=False, with_newlines=False):
+    def text(self, text, enter=False, with_spaces=True, with_tabs=False, with_newlines=False):
         SendKeys(text.decode("utf-8"), with_spaces=with_spaces, with_tabs=with_tabs, with_newlines=with_newlines)
+        if enter:
+            self.keyevent("enter", escape=True)
 
-    def touch(self, pos, **kwargs):
-        right_click = kwargs.get('right_click', False)
+    def touch(self, pos, right_click=False):
         mouse_click(pos, right_click)
 
     def swipe(self, p1, p2, duration=0.8):

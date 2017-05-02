@@ -1048,9 +1048,7 @@ class Android(Device):
             self.ime.end()
 
     @autoretry
-    def touch(self, pos, **kwargs):
-        duration = kwargs.get('duration', 0.01)
-        times = kwargs.get('times', 1)
+    def touch(self, pos, times=1, duration=0.01):
         pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):

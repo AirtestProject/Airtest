@@ -11,7 +11,8 @@ from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
-    get_platform, platform, register_device, delay_after_operation
+    get_platform, platform, register_device, delay_after_operation, set_default_st
+from airtest.core.device import DEV_TYPE_DICT
 try:
     from airtest.core import win
 except ImportError as e:
@@ -92,7 +93,6 @@ def set_emulator(emu_name='bluestacks', sn=None, addr=None):
             break
         if sn is None:
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
-    #dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     if not emu_name:
         emu_name = 'bluestacks'
     dev = android.Emulator(emu_name, sn, addr=addr)
@@ -137,6 +137,17 @@ def set_windows(handle=None, window_title=None):
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
     # set no resize on windows as default
     ST.RESIZE_METHOD = ST.RESIZE_METHOD
+
+
+def set_device(pltf, uid=None, *args, **kwargs):
+    """用这个接口替代set_android/set_uuid/set_windows"""
+    try:
+        cls = DEV_TYPE_DICT[pltf]
+    except KeyError:
+        raise MoaError("platform should be in %s" % DEV_TYPE_DICT.keys())
+    device = cls(uid, *args, **kwargs)
+    register_device(device)
+    set_default_st(pltf)
 
 
 @platform(on=["Android", "Windows", "IOS"])
@@ -251,10 +262,11 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     else:
         G.LOGGING.debug('touchpos: %s', pos)
 
-    kwargs = {'times': times, 'duration': duration}
-    if right_click:
-        kwargs['right_click'] = right_click
-    G.DEVICE.touch(pos, **kwargs)
+    if get_platform() == "Windows":
+        G.DEVICE.touch(pos, times, duration, right_click)
+    else:
+        G.DEVICE.touch(pos, times, duration)
+
     delay_after_operation(delay)
 
 
@@ -297,7 +309,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
 @moapicwrap
 @platform(on=["Android", "Windows"])
 def operate(v, route, timeout=ST.FIND_TIMEOUT, delay=0):
-    if isinstance(v2, (MoaPic, MoaText)):
+    if isinstance(v, (MoaPic, MoaText)):
         pos = loop_find(v, timeout=timeout)
     else:
         pos = v
@@ -324,44 +336,32 @@ def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False, ctrl=False):
-    """模拟设备的按键功能, times为点击次数. """
-    key_temp = keyname.lower()
-    for i in range(times):
-        if keyname == "-delete":
-            text(keyname)
-            continue
-        # 如果是非 -delete 的输入，则按照之前的逻辑进行设备输入:
-        if get_platform() == "Windows":
-            G.DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
-        else:
-            G.DEVICE.keyevent(keyname)
+    """模拟设备的按键功能, times为点击次数.
+        shift/ctrl/combine only works on windows
+    """
+    if get_platform() == "Windows":
+        G.DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
+    else:
+        G.DEVICE.keyevent(keyname)
     delay_after_operation(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def text(text, delay=0, clear=False, enter=True):
-    text_temp = text.lower()
-    if clear is True:
-        if get_platform() == "Windows":
+    """
+        输入文字
+        clear: 输入前清空输入框
+        enter: 输入后执行enter操作
+    """
+    device_platform = get_platform()
+    if clear:
+        if device_platform == "Windows":
             for i in range(20):
                 G.DEVICE.keyevent('backspace', escape=True)
         else:
             G.DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
-
-    if text_temp == "-delete":
-        # 如果文本是“-delete”，那么删除一个字符
-        if get_platform() == "Windows":
-            G.DEVICE.keyevent('backspace', escape=True)
-        else:
-            G.DEVICE.keyevent('KEYCODE_DEL')
-    else:
-        # 如果是android设备，则传入enter参数( 输入后是否执行enter操作 )
-        if get_platform() == "Windows":
-            G.DEVICE.text(text)
-        else:
-            G.DEVICE.text(text, enter=enter)
-
+    G.DEVICE.text(text, enter=enter)
     delay_after_operation(delay)
 
 
@@ -374,8 +374,7 @@ def sleep(secs=1.0):
 @moapicwrap
 def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or ST.FIND_TIMEOUT
-    pos = loop_find(
-        v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
+    pos = loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
 
 
@@ -386,7 +385,7 @@ def exists(v, timeout=0):
     try:
         pos = loop_find(v, timeout=timeout)
         return pos
-    except MoaNotFoundError as e:
+    except MoaNotFoundError:
         return False
 
 
