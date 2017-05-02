@@ -274,14 +274,18 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
 @moapicwrap
 @platform(on=["Android", "Windows", "IOS"])
 def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
+    """滑动，共有3种参数方式：
+       1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
+       2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
+       3. swipe(v1, target_poses) v1是滑动区域，target_poses是(t1,t2)，t1是起始位置，t2是终止位置，数值为图片九宫格
+
+    """
     if target_poses:
-        if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
-            v1.target_pos = target_poses[0]
-            pos1 = loop_find(v1)
-            v1.target_pos = target_poses[1]
-            pos2 = loop_find(v1)
-        else:
-            raise Exception("invalid params for swipe")
+        v1.target_pos = target_poses[0]
+        pos1 = loop_find(v1)
+        v1.new_snapshot = False
+        v1.target_pos = target_poses[1]
+        pos2 = loop_find(v1)
     else:
         if isinstance(v1, (MoaPic, MoaText)):
             pos1 = loop_find(v1)
