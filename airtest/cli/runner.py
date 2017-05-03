@@ -160,7 +160,6 @@ def exec_script(scriptname, scope=None, root=False, code=None):
             traceback.print_exc()
             code = ""
 
-
     # handle submodule script
     if not root:
         # copy submodule's images into sub_dir
@@ -222,12 +221,12 @@ def set_scripthome(dirpath):
 
 
 def get_globals(key):
-    # return getattr(core.main, key)
     return getattr(ST, key)
 
 
 def set_globals(key, value):
-    # setattr(core.main, key, value)
+    if callable(value):
+        value = staticmethod(value)
     setattr(ST, key, value)
 
 

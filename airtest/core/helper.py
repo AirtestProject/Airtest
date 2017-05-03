@@ -250,6 +250,6 @@ def set_default_st(pltf):
     if pltf == "Windows":
         ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
         # set no resize on windows as default
-        ST.RESIZE_METHOD = ST.RESIZE_METHOD
+        ST.RESIZE_METHOD = None
     elif pltf in ("Android", "IOS"):
         ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
