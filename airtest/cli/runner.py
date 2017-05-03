@@ -212,6 +212,10 @@ def set_screendir():
         os.mkdir(dirpath)
 
 
+def set_threshold(value):
+    ST.set_threshold(value)
+
+
 def set_scripthome(dirpath):
     global SCRIPTHOME
     SCRIPTHOME = dirpath

@@ -278,7 +278,6 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
        3. swipe(v1, target_poses) v1是滑动区域，target_poses是(t1,t2)，t1是起始位置，t2是终止位置，数值为图片九宫格
-
     """
     if target_poses:
         v1.target_pos = target_poses[0]
