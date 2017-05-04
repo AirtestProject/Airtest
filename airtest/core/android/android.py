@@ -38,6 +38,8 @@ class ADB(object):
         self.adb_server_addr = server_addr or self.default_server()
         self.set_serialno(serialno)
         self._props_cache = {}
+        self._forward_local_using = []
+        reg_cleanup(self._cleanup_forwards)
 
     @staticmethod
     def default_server():
@@ -191,7 +193,9 @@ class ADB(object):
         if no_rebind:
             cmds += ['--no-rebind']
         self.cmd(cmds + [local, remote])
-        reg_cleanup(self.remove_forward, local)
+        # register for cleanup atexit
+        if local not in self._forward_local_using:
+            self._forward_local_using.append(local)
 
     def get_forwards(self):
         """adb forward --list"""
@@ -233,6 +237,9 @@ class ADB(object):
         else:
             cmds = ["forward", "--remove-all"]
         self.cmd(cmds)
+        # unregister for cleanup
+        if local in self._forward_local_using:
+            self._forward_local_using.remove(local)
 
     def install(self, filepath, overinstall=False):
         """adb install, if overinstall then adb install -r xxx"""
@@ -290,6 +297,10 @@ class ADB(object):
                 yield line
         nbsp.kill()
         logcat_proc.kill()
+
+    def _cleanup_forwards(self):
+        for local in self._forward_local_using[:]:
+            self.remove_forward(local)
 
 
 class Minicap(object):
