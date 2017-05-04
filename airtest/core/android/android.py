@@ -1058,11 +1058,11 @@ class Android(Device):
                 self.adb.touch(pos)
 
     @autoretry
-    def swipe(self, p1, p2, duration=0.5):
+    def swipe(self, p1, p2, duration=0.5, steps=5):
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
-            self.minitouch.swipe(p1, p2, duration=duration)
+            self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)

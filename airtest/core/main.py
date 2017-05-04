@@ -273,7 +273,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
 @logwrap
 @moapicwrap
 @platform(on=["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
+def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5, steps=5):
     """滑动，共有3种参数方式：
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
@@ -304,7 +304,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
             raise Exception("no enouph params for swipe")
-    G.DEVICE.swipe(pos1, pos2, duration=duration)
+    G.DEVICE.swipe(pos1, pos2, duration=duration, steps=steps)
     delay_after_operation(delay)
 
 

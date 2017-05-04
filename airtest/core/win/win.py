@@ -85,8 +85,8 @@ class Windows(Device):
     def touch(self, pos, right_click=False):
         mouse_click(pos, right_click)
 
-    def swipe(self, p1, p2, duration=0.8):
-        mouse_drag(p1, p2, duration=duration)  # windows拖拽时间固定为0.8s
+    def swipe(self, p1, p2, duration=0.8, steps=5):
+        mouse_drag(p1, p2, duration=duration, steps=steps)  # windows拖拽时间固定为0.8s
 
     def find_window(self, wildcard):
         """

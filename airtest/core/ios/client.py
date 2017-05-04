@@ -88,7 +88,7 @@ class IOS(Device):
             for _ in range(times):
                 self.session.tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0.5, step=4):
+    def swipe(self, fpos, tpos, duration=0.5, step=5):
         self.session.swipe(fpos[0] / self._wda_sca, fpos[1] / self._wda_sca,
                            tpos[0] / self._wda_sca, tpos[1] / self._wda_sca, step)
 
