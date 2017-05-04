@@ -12,7 +12,7 @@ if six.PY3:
 else:
     from urlparse import urljoin
 
-from airtest.aircv import aircv
+import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError
 from airtest.core.utils.logger import get_logger
@@ -37,6 +37,7 @@ class IOS(Device):
         # use to click/swipe/close app/get wda size
         self.driver = wda.Client(addr)
         self.udid = self.driver.status()['udid']
+        self.serialno = self.udid
         self._size = {'width': 0, 'height': 0}
         self._wda_sca = 1
 
@@ -79,15 +80,15 @@ class IOS(Device):
         self._refresh_display_info(screen)
         return screen
 
-    def touch(self, pos, **kwargs):
-        coord = pos[0] / self._wda_sca, pos[1] / self._wda_sca
-        times = kwargs.get('times', 1)
+    def touch(self, pos, times=1, duration=0.01):
+        x, y = pos[0] / self._wda_sca, pos[1] / self._wda_sca
         if times == 2:
-            self.session.double_tap(*coord)
+            self.session.double_tap(x, y)
         else:
-            [self.session.tap(*coord) for _ in range(times)]
+            for _ in range(times):
+                self.session.tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0.5, step=4):
+    def swipe(self, fpos, tpos, duration=0.5, step=5):
         self.session.swipe(fpos[0] / self._wda_sca, fpos[1] / self._wda_sca,
                            tpos[0] / self._wda_sca, tpos[1] / self._wda_sca, step)
 
@@ -273,16 +274,17 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS('http://10.251.93.160:8100')
+    ios = IOS('http://10.251.81.173:8100/')
     ios.wake()
-    ios._try_to_finish_alert('dismiss')
+    # ios._try_to_finish_alert('dismiss')
     print ios.list_app()
-    ios.uninstall_app('com.netease.oa2')
-    # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr', com.netease.mhxyhtb)
-    ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')
-    ios.start_app('com.netease.oa2')
-    ios.uninstall_app('com.netease.oa2')
-    print time.time() - start
+    print ios.start_app('com.netease.mhxyhtb')
+    # ios.uninstall_app('com.netease.oa2')
+    # # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr', com.netease.mhxyhtb)
+    # ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')
+    # ios.start_app('com.netease.oa2')
+    # ios.uninstall_app('com.netease.oa2')
+    # print time.time() - start
     # ios.start_app('com.netease.mhxyhtb')
     # ios.stop_app('com.netease.mhxyhtb')
     # print ios.getCurrentScreenResolution()

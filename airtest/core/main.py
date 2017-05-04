@@ -8,11 +8,11 @@ import fnmatch
 import aircv
 from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
-from airtest.core.utils import is_str
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
-    get_platform, platform, register_device, delay_after_operation
+    get_platform, platform, register_device, delay_after_operation, set_default_st
+from airtest.core.device import DEV_TYPE_DICT
 try:
     from airtest.core import win
 except ImportError as e:
@@ -93,7 +93,6 @@ def set_emulator(emu_name='bluestacks', sn=None, addr=None):
             break
         if sn is None:
             raise MoaError("Device[%s] not found in %s" % (sn, addr))
-    #dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
     if not emu_name:
         emu_name = 'bluestacks'
     dev = android.Emulator(emu_name, sn, addr=addr)
@@ -138,6 +137,17 @@ def set_windows(handle=None, window_title=None):
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
     # set no resize on windows as default
     ST.RESIZE_METHOD = ST.RESIZE_METHOD
+
+
+def set_device(pltf, uid=None, *args, **kwargs):
+    """用这个接口替代set_android/set_uuid/set_windows"""
+    try:
+        cls = DEV_TYPE_DICT[pltf]
+    except KeyError:
+        raise MoaError("platform should be in %s" % DEV_TYPE_DICT.keys())
+    device = cls(uid, *args, **kwargs)
+    register_device(device)
+    set_default_st(pltf)
 
 
 @platform(on=["Android", "Windows", "IOS"])
@@ -192,7 +202,7 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename=None, windows_hwnd=None):
+def snapshot(filename=None):
     """capture device screen and save it into file."""
     screen, default_filepath = device_snapshot()
     if not filename:
@@ -225,7 +235,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     @param offset: {'x':10,'y':10,'percent':True}
     '''
     timeout = timeout or ST.FIND_TIMEOUT
-    if is_str(v) or isinstance(v, (MoaPic, MoaText)):
+    if isinstance(v, (MoaPic, MoaText)):
         try:
             pos = loop_find(v, timeout=timeout)
         except MoaNotFoundError:
@@ -252,36 +262,39 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
     else:
         G.LOGGING.debug('touchpos: %s', pos)
 
-    kwargs = {'times': times, 'duration': duration}
-    if right_click:
-        kwargs['right_click'] = right_click
-    G.DEVICE.touch(pos, **kwargs)
+    if get_platform() == "Windows":
+        G.DEVICE.touch(pos, times, duration, right_click)
+    else:
+        G.DEVICE.touch(pos, times, duration)
+
     delay_after_operation(delay)
 
 
 @logwrap
 @moapicwrap
 @platform(on=["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
+def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5, steps=5):
+    """滑动，共有3种参数方式：
+       1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
+       2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
+       3. swipe(v1, target_poses) v1是滑动区域，target_poses是(t1,t2)，t1是起始位置，t2是终止位置，数值为图片九宫格
+    """
     if target_poses:
-        if len(target_poses) == 2 and isinstance(target_poses[0], int) and isinstance(target_poses[1], int):
-            v1.target_pos = target_poses[0]
-            pos1 = loop_find(v1)
-            v1.target_pos = target_poses[1]
-            pos2 = loop_find(v1)
-        else:
-            raise Exception("invalid params for swipe")
+        v1.target_pos = target_poses[0]
+        pos1 = loop_find(v1)
+        v1.new_snapshot = False
+        v1.target_pos = target_poses[1]
+        pos2 = loop_find(v1)
     else:
-        if is_str(v1) or isinstance(v1, MoaPic) or isinstance(v1, MoaText):
+        if isinstance(v1, (MoaPic, MoaText)):
             pos1 = loop_find(v1)
         else:
             pos1 = v1
 
         if v2:
-            if (is_str(v2) or isinstance(v2, MoaText)):
-                keep_capture()
+            if isinstance(v2, (MoaPic, MoaText)):
+                v2.new_snapshot = False
                 pos2 = loop_find(v2)
-                keep_capture(False)
             else:
                 pos2 = v2
         elif vector:
@@ -291,7 +304,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
             raise Exception("no enouph params for swipe")
-    G.DEVICE.swipe(pos1, pos2, duration=duration)
+    G.DEVICE.swipe(pos1, pos2, duration=duration, steps=steps)
     delay_after_operation(delay)
 
 
@@ -299,7 +312,7 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5):
 @moapicwrap
 @platform(on=["Android", "Windows"])
 def operate(v, route, timeout=ST.FIND_TIMEOUT, delay=0):
-    if is_str(v) or isinstance(v, MoaPic) or isinstance(v, MoaText):
+    if isinstance(v, (MoaPic, MoaText)):
         pos = loop_find(v, timeout=timeout)
     else:
         pos = v
@@ -326,44 +339,32 @@ def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False, ctrl=False):
-    """模拟设备的按键功能, times为点击次数. """
-    key_temp = keyname.lower()
-    for i in range(times):
-        if keyname == "-delete":
-            text(keyname)
-            continue
-        # 如果是非 -delete 的输入，则按照之前的逻辑进行设备输入:
-        if get_platform() == "Windows":
-            G.DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
-        else:
-            G.DEVICE.keyevent(keyname)
+    """模拟设备的按键功能, times为点击次数.
+        shift/ctrl/combine only works on windows
+    """
+    if get_platform() == "Windows":
+        G.DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
+    else:
+        G.DEVICE.keyevent(keyname)
     delay_after_operation(delay)
 
 
 @logwrap
 @platform(on=["Android", "Windows", "IOS"])
 def text(text, delay=0, clear=False, enter=True):
-    text_temp = text.lower()
-    if clear is True:
-        if get_platform() == "Windows":
+    """
+        输入文字
+        clear: 输入前清空输入框
+        enter: 输入后执行enter操作
+    """
+    device_platform = get_platform()
+    if clear:
+        if device_platform == "Windows":
             for i in range(20):
                 G.DEVICE.keyevent('backspace', escape=True)
         else:
             G.DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
-
-    if text_temp == "-delete":
-        # 如果文本是“-delete”，那么删除一个字符
-        if get_platform() == "Windows":
-            G.DEVICE.keyevent('backspace', escape=True)
-        else:
-            G.DEVICE.keyevent('KEYCODE_DEL')
-    else:
-        # 如果是android设备，则传入enter参数( 输入后是否执行enter操作 )
-        if get_platform() == "Windows":
-            G.DEVICE.text(text)
-        else:
-            G.DEVICE.text(text, enter=enter)
-
+    G.DEVICE.text(text, enter=enter)
     delay_after_operation(delay)
 
 
@@ -376,8 +377,7 @@ def sleep(secs=1.0):
 @moapicwrap
 def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or ST.FIND_TIMEOUT
-    pos = loop_find(
-        v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
+    pos = loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
 
 
@@ -388,7 +388,7 @@ def exists(v, timeout=0):
     try:
         pos = loop_find(v, timeout=timeout)
         return pos
-    except MoaNotFoundError as e:
+    except MoaNotFoundError:
         return False
 
 

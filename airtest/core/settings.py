@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from airtest.core.utils.decouple import config, undefined
+from airtest.core.utils import cocos_min_strategy
 
 
 class SConfig(object):
@@ -28,7 +29,7 @@ class Settings(object):
     LOG_DIR = SConfig(".")
     LOG_FILE = SConfig("log.txt")
     SCREEN_DIR = SConfig("img_record")
-    RESIZE_METHOD = SConfig(None)
+    RESIZE_METHOD = staticmethod(cocos_min_strategy)
     SCRIPTHOME = SConfig(None)
     SRC_RESOLUTION = SConfig([])  # to be move to DEVICE
     CVSTRATEGY = SConfig(None)

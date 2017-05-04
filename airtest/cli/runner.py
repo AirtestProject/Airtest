@@ -31,13 +31,15 @@ def run_script(args):
 
     if args.setsn is not None:
         print "set_serialno", args.setsn
+        minicap = not args.nominicap
+        minitouch = not args.nominitouch
         if args.setsn == "":
             for i in range(args.devcount):
                 # auto choose one serialno
-                set_serialno()
+                set_serialno(minicap=minicap, minitouch=minitouch)
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn)
+                set_serialno(sn, minicap=minicap, minitouch=minitouch)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng
@@ -98,7 +100,7 @@ def run_script(args):
         # execute pre script
         if args.pre:
             ST.set_basedir(args.pre)
-            for i in range(len(DEVICE_LIST)):  # pre for all devices
+            for i in range(len(G.DEVICE_LIST)):  # pre for all devices
                 set_current(i)
                 exec_script(args.pre, scope=globals(), root=True)
 
@@ -115,7 +117,7 @@ def run_script(args):
         if args.post:
             try:
                 ST.set_basedir(args.post)
-                for i in range(len(DEVICE_LIST)):  # post for all devices
+                for i in range(len(G.DEVICE_LIST)):  # post for all devices
                     set_current(i)
                     exec_script(args.post, scope=globals(), root=True)
             except:
@@ -157,7 +159,6 @@ def exec_script(scriptname, scope=None, root=False, code=None):
         except Exception as err:
             traceback.print_exc()
             code = ""
-
 
     # handle submodule script
     if not root:
@@ -210,18 +211,22 @@ def set_screendir():
         os.mkdir(dirpath)
 
 
+def set_threshold(value):
+    ST.set_threshold(value)
+
+
 def set_scripthome(dirpath):
     global SCRIPTHOME
     SCRIPTHOME = dirpath
 
 
 def get_globals(key):
-    # return getattr(core.main, key)
     return getattr(ST, key)
 
 
 def set_globals(key, value):
-    # setattr(core.main, key, value)
+    if callable(value):
+        value = staticmethod(value)
     setattr(ST, key, value)
 
 

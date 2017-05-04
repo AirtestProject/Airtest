@@ -17,8 +17,8 @@ setup(
     keywords=['automation', 'test', 'android', 'opencv'],
     packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist']),
     package_data={
-        'android_deps': ["*.apk", "airtest/core/libs", "airtest/core/adb"],
-        'html_statics': ["moa/report"]
+        'android_deps': ["*.apk", "airtest/core/stf_libs", "airtest/core/adb"],
+        'html_statics': ["airtest/report"]
     },
     install_requires=reqs,
     classifiers=[

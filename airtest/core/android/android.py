@@ -153,12 +153,12 @@ class ADB(object):
     def shell(self, cmds, not_wait=False):
         """
         adb shell
-        not_wait: 
+        not_wait:
             return subprocess if True
             return output if False
         """
         if isinstance(cmds, basestring):
-            cmds = 'shell '+ cmds
+            cmds = 'shell ' + cmds
         else:
             cmds = ['shell'] + list(cmds)
         if not_wait:
@@ -191,12 +191,7 @@ class ADB(object):
         if no_rebind:
             cmds += ['--no-rebind']
         self.cmd(cmds + [local, remote])
-        def try_remove_forward():
-            try:
-                self.remove_forward(local)
-            except:
-                pass
-        reg_cleanup(try_remove_forward)
+        reg_cleanup(self.remove_forward, local)
 
     def get_forwards(self):
         """adb forward --list"""
@@ -227,7 +222,7 @@ class ADB(object):
         times = 100
         for i in range(times):
             port = self._get_forward_local()
-            if "tcp:%s"%port not in localports:
+            if "tcp:%s" % port not in localports:
                 return port
         raise RuntimeError("No available adb forward local port for %s times" % (times))
 
@@ -636,17 +631,24 @@ class Minitouch(object):
         from_x, from_y = self.__transform_xy(from_x, from_y)
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
+        # 在最后抬起手之前额外等多一个stable interval，以让卷动稳定
+        stable_interval = 0.1
+        if duration > 2 * stable_interval:
+            duration -= stable_interval
+        else:
+            stable_interval = 0
+
         interval = float(duration)/(steps+1)
         self.handle("d 0 %d %d 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
             self.handle("m 0 %d %d 50\nc\n" % (
-                from_x+(to_x-from_x)*i/steps, 
-                from_y+(to_y-from_y)*i/steps)
-            )
+                from_x+(to_x-from_x)*i/steps,
+                from_y+(to_y-from_y)*i/steps,
+            ))
             time.sleep(interval)
         self.handle("m 0 %d %d 50\nc\n" % (to_x, to_y))
-        time.sleep(interval)
+        time.sleep(interval + stable_interval)
         self.handle("u 0\nc\n")
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
@@ -724,7 +726,7 @@ class Minitouch(object):
         elif args["type"] == "up":
             cmd = "u 0\nc\n"
         else:
-            raise RuntimeError("invalid operate args: %s"%args)
+            raise RuntimeError("invalid operate args: %s" % args)
         self.handle(cmd)
 
     def safe_send(self, data):
@@ -763,7 +765,7 @@ class Minitouch(object):
         header = ""
         while True:
             try:
-                header += s.sock.recv(4096) # size is not strict, so use raw socket.recv
+                header += s.sock.recv(4096)  # size is not strict, so use raw socket.recv
             except socket.timeout:
                 raise RuntimeError("minitouch setup client error")
             if header.count('\n') >= 3:
@@ -804,7 +806,7 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, init_ime=True):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, shell_ime=True, init_ime=False):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
@@ -813,17 +815,11 @@ class Android(Device):
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         if init_display:
             self._init_display(props)
-            # 目前几台设备不能用stream_mode，他们的特点是sdk=17，先这样写看看
-            # if self.sdk_version == 17:
-            #     print "minicap_stream mode not available on sdk 17"
-            #     minicap_stream = False
-            # minicap version > 2 解决了17的问题，先注释掉看看
             self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
-        if init_ime:
-            self.ime = AdbKeyboardIme(self)
+        self.shell_ime = shell_ime
+        if shell_ime and init_ime:
             self.toggle_shell_ime()
-            reg_cleanup(self.ime.end)
 
     def _init_display(self, props=None):
         # read props from outside or cached source, to save init time
@@ -836,7 +832,7 @@ class Android(Device):
         # 每次运行时均获取设备的有效区域，此处进行一次get_display_info，但此函数在GT-N7100设备上报错，因此加上兼容：
         try:
             self.get_display_info()
-        except Exception, e:
+        except Exception:
             traceback.print_exc()
 
         self.orientationWatcher()
@@ -996,10 +992,15 @@ class Android(Device):
         screen = aircv.utils.string_2_img(screen)
 
         # 保证方向是正的
-        if ensure_orientation and self.sdk_version <= 16 and self.size["orientation"]:
-            h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
-            if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                screen = aircv.rotate(screen, self.size["orientation"]*90, clockwise=False)
+        if ensure_orientation and self.size["orientation"]:
+            # minicap截图根据sdk_version不一样
+            if self.minicap and self.sdk_version <= 16:
+                h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
+                if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+                    screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
+            # adb 截图总是要根据orientation旋转
+            elif not self.minicap:
+                screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
         return screen
@@ -1029,27 +1030,33 @@ class Android(Device):
         self.keyevent("HOME")
 
     def text(self, text, enter=True):
-        if getattr(self, "ime", None):
+        if self.shell_ime:
+            # 开启shell_ime
+            if not hasattr(self, "ime"):
+                self.toggle_shell_ime()
+            # shell_ime用于输入中文
             text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
-            # 游戏输入时，输入有效内容后点击Enter确认，如不需要，text置为False即可。
-            if enter:
-                self.adb.shell(["input", "keyevent", "ENTER"])
         else:
             self.adb.shell(["input", "text", text])
+        # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
+        if enter:
+            self.adb.shell(["input", "keyevent", "ENTER"])
 
     def toggle_shell_ime(self, on=True):
         """切换到shell的输入法，用于text"""
+        self.shell_ime = True
+        if not hasattr(self, "ime"):
+            self.ime = AdbKeyboardIme(self)
         if on:
             self.ime.start()
+            reg_cleanup(self.ime.end)
         else:
             self.ime.end()
 
     @autoretry
-    def touch(self, pos, **kwargs):
-        duration = kwargs.get('duration', 0.01)
-        times = kwargs.get('times', 1)
-        pos = map(lambda x: x/PROJECTIONRATE, pos)
+    def touch(self, pos, times=1, duration=0.01):
+        pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
             if self.minitouch:
@@ -1058,11 +1065,11 @@ class Android(Device):
                 self.adb.touch(pos)
 
     @autoretry
-    def swipe(self, p1, p2, duration=0.5):
+    def swipe(self, p1, p2, duration=0.5, steps=5):
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
-            self.minitouch.swipe(p1, p2, duration=duration)
+            self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
