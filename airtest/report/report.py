@@ -16,6 +16,7 @@ SCREENDIR = "img_record"
 class MoaLogDisplay(object):
     """change Moa log to html display """
     scale = 0.5
+
     def __init__(self, script_root="", log_root="", static_root="", author=""):
         """ logpath """
         self.log = []
@@ -25,14 +26,13 @@ class MoaLogDisplay(object):
         self.run_start = None
         self.run_end = None
         self.author = author
-        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists')
+        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.uiautomator_img_type = ('click', 'long_click', 'ui.swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'end', 'assert')
         self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, LOGFILE)
         with open(self.logfile,'rb')as f:
             for line in f.readlines():
                 self.log.append(json.loads(line)) 
-
 
     def analyse(self):
         """ 进一步解析成模板可显示的内容 """
@@ -74,14 +74,14 @@ class MoaLogDisplay(object):
         return step
 
     def translate(self, step):
-        """ 
-           按照depth = 1 的name来分类
-           touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
-                                3=screenshot 2= _loop_find  1=本身操作
-           keyevent,text,sleep 和图片无关，直接显示一条说明就可以 
-                                1= 本身
-           server_call没有log
-           assert 类似于exist
+        """
+        按照depth = 1 的name来分类
+        touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
+                            3=screenshot 2= _loop_find  1=本身操作
+        keyevent,text,sleep 和图片无关，直接显示一条说明就可以
+                            1= 本身
+        server_call没有log
+        assert 类似于exist
         """
         scale = MoaLogDisplay.scale
         self.scale = scale
@@ -91,17 +91,21 @@ class MoaLogDisplay(object):
             return None
 
         if step['type'] in self.img_type or step['type'] in self.uiautomator_img_type:
-            #一般来说会有截图 没有这层就无法找到截图了
+            # 一般来说会有截图 没有这层就无法找到截图了
             st = 3
-            while (st in step):
+            while st in step:
                 if 'screen' in step[st]:
                     step['screenshot'] = os.path.join(self.log_root, step[st]['screen'])
                     break
                 st += 1
             if 'screenshot' not in step:
                 step['target_pos'] = step[1].get('args')
-            if step.get(2):
-                if  step['type'] in self.img_type:
+
+            if step['type'] == 'snapshot':
+                # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
+                step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+            elif step.get(2):
+                if step['type'] in self.img_type:
                     step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
                     step['resolution'] = step[2]['args'][0]['resolution']
             
@@ -113,8 +117,8 @@ class MoaLogDisplay(object):
 
                         # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
                         #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
-                        if step[2].has_key("wnd_pos"):
-                            wnd_pos = step[2].get('wnd_pos')
+                        if 'wnd_pos' in step[2]:
+                            wnd_pos = step[2]['wnd_pos']
                             # mark_pos = (step['target_pos'][0] - step["wnd_pos"][0], step[2]['target_pos'][1] - step[2]["wnd_pos"][1])
                             mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
                         else:
@@ -131,21 +135,21 @@ class MoaLogDisplay(object):
                         step['top'] = round(mark_pos[1])
                         step['left'] = round(mark_pos[0])
 
-            #swipe 需要显示一个方向
+            # swipe 需要显示一个方向
             if step['type'] == 'swipe':
                 vector = step[1]["kwargs"].get("vector")
                 if vector:
                     step['swipe'] = self.dis_vector(vector)
 
-            #print step['type']
+            # print step['type']
             if step['type'] in ['assert_exists', 'assert_not_exists']:
                 args = step[1]["args"]
                 if len(args) >= 2:
                     step['assert'] = args[1]
 
             if step['type'] == 'exists':
-                #ret 为false表示图片没有找到
-                step['exists_ret'] = u"不" if step[1].get('ret',False) == False else "" 
+                # ret 为false表示图片没有找到
+                step['exists_ret'] = u"不" if step[1].get('ret', False) == False else ""
 
         elif step['type'] in ['text', 'sleep', 'keyevent']:
             step[step['type']] = step[1]['args'][0]
@@ -165,7 +169,7 @@ class MoaLogDisplay(object):
             step['desc'] = u'server_call [ "%s" ] ' %(args[0])
             step['title'] = self.func_title(step)
             return step
-        
+
         step['desc'] = self.func_desc(step)
         step['title'] = self.func_title(step)
         return step
@@ -175,14 +179,13 @@ class MoaLogDisplay(object):
             return ''
         
         return round(p*100, 1)
-        
-    
+
     def div_rect(self, r, offset=None):
         if not r:
             return {}
         
-        xs = [ p[0] for p in r]
-        ys = [ p[1] for p in r]
+        xs = [p[0] for p in r]
+        ys = [p[1] for p in r]
         
         left = min(xs)
         top = min(ys)
@@ -200,41 +203,41 @@ class MoaLogDisplay(object):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            #"snapshot":"截图",
-            #"_loop_find":"寻找目标位置",
-            "touch":u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos','')),
-            "swipe":u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos','')), step.get('swipe','')),
+            # "snapshot":"截图",
+            # "_loop_find":"寻找目标位置",
+            "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos','')),
+            "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos','')), step.get('swipe','')),
 
-            "wait":u"等待目标图片出现",
-            "exists":u"图片%s存在" % step.get('exists_ret', ''),
+            "wait": u"等待目标图片出现",
+            "exists": u"图片%s存在" % step.get('exists_ret', ''),
 
-            "text":u"输入文字:%s" % step.get('text',''),
-            "keyevent":u"点击[%s]按键" % step.get('keyevent',''),
-            "sleep":u"等待%s秒" % step.get('sleep',''),
+            "text": u"输入文字:%s" % step.get('text',''),
+            "keyevent": u"点击[%s]按键" % step.get('keyevent',''),
+            "sleep": u"等待%s秒" % step.get('sleep',''),
 
-            "assert_exists":u"目标图片应当存在",
-            "assert_not_exists":u"目标图片应当不存在",
+            "assert_exists": u"目标图片应当存在",
+            "assert_not_exists": u"目标图片应当不存在",
 
+            "snapshot": step[1]['args'][0],
         }
 
-        return desc.get(name, '%s%s' % (name,step[1]['args']))
+        return desc.get(name, '%s%s' % (name, step[1]['args']))
 
     def func_title(self, step):
         title = {
-            "touch":u"点击",
-            "swipe":u"滑动",
-            "wait":u"等待",
-            "exists":u"根据图片是否存在选择分支",
-            "text":u"输入",
-            "keyevent":u"按键",
-            "sleep":u"sleep",
-            "server_call":u"调用服务器方法",
-            "assert_exists":u"验证图片存在",
-            "assert_not_exists":u"验证图片不存在", 
+            "touch": u"点击",
+            "swipe": u"滑动",
+            "wait": u"等待",
+            "exists": u"根据图片是否存在选择分支",
+            "text": u"输入",
+            "keyevent": u"按键",
+            "sleep": u"sleep",
+            "server_call": u"调用服务器方法",
+            "assert_exists": u"验证图片存在",
+            "assert_not_exists": u"验证图片不存在",
 
-            "assert_equal":u"验证相等", 
-            "assert_not_equal":u"验证不相等", 
-
+            "assert_equal": u"验证相等",
+            "assert_not_equal": u"验证不相等",
         }
         name = step['type']
         return title.get(name, name)
@@ -255,7 +258,6 @@ class MoaLogDisplay(object):
             b = u'下'
 
         return a+b
-
 
     def _render(self, template_name, **template_vars):
         """ 用jinja2输出html 
@@ -297,11 +299,13 @@ def get_script_name(path):
 
     return ''
 
+
 def safe_percent(a, b):
     if b:
         return round(a * 100.0 / b, 1)
     else:
         return 0
+
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):

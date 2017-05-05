@@ -642,13 +642,6 @@ class Minitouch(object):
         from_x, from_y = self.__transform_xy(from_x, from_y)
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
-        # 在最后抬起手之前额外等多一个stable interval，以让卷动稳定
-        stable_interval = 0.1
-        if duration > 2 * stable_interval:
-            duration -= stable_interval
-        else:
-            stable_interval = 0
-
         interval = float(duration)/(steps+1)
         self.handle("d 0 %d %d 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
@@ -658,8 +651,9 @@ class Minitouch(object):
                 from_y+(to_y-from_y)*i/steps,
             ))
             time.sleep(interval)
-        self.handle("m 0 %d %d 50\nc\n" % (to_x, to_y))
-        time.sleep(interval + stable_interval)
+        for i in range(10):
+            self.handle("m 0 %d %d 50\nc\n" % (to_x, to_y))
+        time.sleep(interval)
         self.handle("u 0\nc\n")
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
