@@ -89,13 +89,14 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
 def _get_operate_pos(source, query):
     """求取目标操作位置."""
     # 第一步: 图像识别
-    try:
-        cv_ret = _cv_match(source, query)
-    except aircv.Error:
-        cv_ret = None
-    except Exception:
-        traceback.print_exc()
-        cv_ret = None
+    cv_ret = _cv_match(source, query)
+    # try:
+    #     cv_ret = _cv_match(source, query)
+    # except aircv.Error:
+    #     cv_ret = None
+    # except Exception:
+    #     traceback.print_exc()
+    #     cv_ret = None
 
     G.LOGGING.debug("match result: %s", cv_ret)
     # 将识别结果写入log文件:
@@ -128,19 +129,41 @@ def _cv_match(source, query):
         for method in ST.CVSTRATEGY:
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
-                G.LOGGING.debug("method: template match")
-                ret = template_in_predicted_area(source, query)
+                G.LOGGING.debug("[method] template match")
+                try:
+                    ret = template_in_predicted_area(source, query)
+                except aircv.Error:
+                    ret = None
+
                 # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
                 if not ret and not query.find_inside:
-                    ret = template_after_resize(source, query, find_in_screen=True)
+                    try:
+                        ret = template_after_resize(source, query, find_in_screen=True)
+                    except aircv.Error:
+                        ret = None
+
+                G.LOGGING.debug(" ->tpl result: %s" % ret)
             elif method == "sift":
                 # sift匹配，默认pre，其次全屏
-                G.LOGGING.debug("method: sift match")
-                ret = find_sift_in_predicted_area(source, query)
+                G.LOGGING.debug("[method] sift match")
+                try:
+                    ret = find_sift_in_predicted_area(source, query)
+                    # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
+                    if not ret and not query.find_inside:
+                        screen, img_sch = source.screen, query.get_search_img()
+                        ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
+                except aircv.Error:
+                    ret = None
+
                 # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
                 if not ret and not query.find_inside:
                     screen, img_sch = source.screen, query.get_search_img()
-                    ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
+                    try:
+                        ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
+                    except aircv.Error:
+                        ret = None
+
+                G.LOGGING.debug(" ->sift result: %s" % ret)
             else:
                 G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
 
@@ -211,7 +234,7 @@ def _resize_im_search(query, src_resolution, target_img=None):
         w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution, design_resolution)
 
         # 调试代码: 输出调试信息.
-        G.LOGGING.debug("cross resolution: (%s, %s)=>(%s, %s),  resize: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
+        G.LOGGING.debug("resize: (%s, %s)->(%s, %s), resolution: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
 
         # 进行图片缩放:
         resized_im_search = cv2.resize(im_search, (w_re, h_re))
