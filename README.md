@@ -9,11 +9,15 @@
 
 ## Development
 1. 安装aircv
+```
 git clone -b open-source ssh://git@git-qa.gz.netease.com:32200/airtest-projects/aircv.git
 pip install -e aircv
+```
 1. 安装airtest
+```
 git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
 pip install -e airtest
+```
 
 
 ## Use as a python package
@@ -39,8 +43,8 @@ uninstall("package_name_of_your_apk")
 ## 命令行工具
 因为脚本中包含图片资源，所以我们设计了.owl的目录结构，用IDE可以方便地录制.owl脚本。为了不依赖IDE运行脚本，同时支持跨平台运行，我们提供了命令行工具：将设备初始化、配置等平台相关操作用命令行参数传入，脚本中只包含平台无关的操作逻辑和断言。
 
-使用方法参考:
-
+```
+// 使用方法
 > python -m airtest -h
 // 运行脚本
 > python -m airtest run
@@ -48,7 +52,7 @@ uninstall("package_name_of_your_apk")
 > python -m airtest report
 // 获取脚本信息
 > python -m airtest info
-
+```
 
 ## 基本接口说明
 
