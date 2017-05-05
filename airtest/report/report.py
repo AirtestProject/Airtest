@@ -16,6 +16,7 @@ SCREENDIR = "img_record"
 class MoaLogDisplay(object):
     """change Moa log to html display """
     scale = 0.5
+
     def __init__(self, script_root="", log_root="", static_root="", author=""):
         """ logpath """
         self.log = []
@@ -32,7 +33,6 @@ class MoaLogDisplay(object):
         with open(self.logfile,'rb')as f:
             for line in f.readlines():
                 self.log.append(json.loads(line)) 
-
 
     def analyse(self):
         """ 进一步解析成模板可显示的内容 """
@@ -74,14 +74,14 @@ class MoaLogDisplay(object):
         return step
 
     def translate(self, step):
-        """ 
-           按照depth = 1 的name来分类
-           touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
-                                3=screenshot 2= _loop_find  1=本身操作
-           keyevent,text,sleep 和图片无关，直接显示一条说明就可以 
-                                1= 本身
-           server_call没有log
-           assert 类似于exist
+        """
+        按照depth = 1 的name来分类
+        touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
+                            3=screenshot 2= _loop_find  1=本身操作
+        keyevent,text,sleep 和图片无关，直接显示一条说明就可以
+                            1= 本身
+        server_call没有log
+        assert 类似于exist
         """
         scale = MoaLogDisplay.scale
         self.scale = scale
@@ -100,7 +100,11 @@ class MoaLogDisplay(object):
                 st += 1
             if 'screenshot' not in step:
                 step['target_pos'] = step[1].get('args')
-            if step.get(2):
+
+            if step['type'] == 'snapshot':
+                # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
+                step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+            elif step.get(2):
                 if step['type'] in self.img_type:
                     step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
                     step['resolution'] = step[2]['args'][0]['resolution']
@@ -113,8 +117,8 @@ class MoaLogDisplay(object):
 
                         # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
                         #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
-                        if step[2].has_key("wnd_pos"):
-                            wnd_pos = step[2].get('wnd_pos')
+                        if 'wnd_pos' in step[2]:
+                            wnd_pos = step[2]['wnd_pos']
                             # mark_pos = (step['target_pos'][0] - step["wnd_pos"][0], step[2]['target_pos'][1] - step[2]["wnd_pos"][1])
                             mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
                         else:
@@ -165,7 +169,7 @@ class MoaLogDisplay(object):
             step['desc'] = u'server_call [ "%s" ] ' %(args[0])
             step['title'] = self.func_title(step)
             return step
-        
+
         step['desc'] = self.func_desc(step)
         step['title'] = self.func_title(step)
         return step
@@ -214,9 +218,10 @@ class MoaLogDisplay(object):
             "assert_exists": u"目标图片应当存在",
             "assert_not_exists": u"目标图片应当不存在",
 
+            "snapshot": step[1]['args'][0],
         }
 
-        return desc.get(name, '%s%s' % (name,step[1]['args']))
+        return desc.get(name, '%s%s' % (name, step[1]['args']))
 
     def func_title(self, step):
         title = {
@@ -233,7 +238,6 @@ class MoaLogDisplay(object):
 
             "assert_equal": u"验证相等",
             "assert_not_equal": u"验证不相等",
-
         }
         name = step['type']
         return title.get(name, name)
