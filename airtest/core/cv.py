@@ -9,7 +9,7 @@ import numpy as np
 import traceback
 import time
 import aircv
-from aircv.error import *  # noqa
+# from aircv.error import *  # noqa
 from aircv.template import find_all_template, find_template, _get_target_rectangle
 from aircv.sift import find_sift
 from aircv.utils import check_image_param_input, generate_result
