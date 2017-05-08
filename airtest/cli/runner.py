@@ -23,6 +23,7 @@ TPLEXT = ".png"
 
 
 def run_script(args):
+    globals()["args"] = args
     # loading util file
     if args.utilfile:
         if os.path.isfile(args.utilfile):
