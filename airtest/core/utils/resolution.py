@@ -6,12 +6,12 @@
 from airtest.core.error import MoaError
 
 
-def no_resize(w_a, h_a, resolution_a, resolution_b, design_resolution):
+def no_resize(w_a, h_a, resolution_a, resolution_b):
     """无缩放策略."""
     return w_a, h_a
 
 
-def cocos_min_strategy(w, h, sch_resolution, src_resolution, design_resolution):
+def cocos_min_strategy(w, h, sch_resolution, src_resolution, design_resolution=(960, 640)):
     """图像缩放规则: COCOS中的MIN策略."""
     # 输入参数: w-h待缩放图像的宽高，sch_resolution为待缩放图像的来源分辨率
     #           src_resolution 待适配屏幕的分辨率  design_resolution 软件的设计分辨率

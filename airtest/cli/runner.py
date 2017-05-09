@@ -11,6 +11,10 @@ from airtest.core.main import *
 from airtest.core.error import MinicapError, MinitouchError, AdbError
 from airtest.core.helper import log, logwrap
 from airtest.core.settings import Settings as ST
+try:
+    from minitest.qa import UI, MO, QC, Base as minitest
+except ImportError as e:
+    minitest = None
 
 
 SCRIPT_STACK = []
@@ -19,6 +23,7 @@ TPLEXT = ".png"
 
 
 def run_script(args):
+    globals()["args"] = args
     # loading util file
     if args.utilfile:
         if os.path.isfile(args.utilfile):
@@ -41,6 +46,8 @@ def run_script(args):
             for sn in args.setsn.split(","):
                 set_serialno(sn, minicap=minicap, minitouch=minitouch)
         set_current(0)
+        if minitest:
+            minitest.set_global()
 
     if args.setudid is not None:  # modified by gzlongqiumeng
         print "set_udid", args.setudid
