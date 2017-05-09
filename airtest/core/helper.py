@@ -99,7 +99,11 @@ class MoaScreen(object):
             else:
                 # 如果没有find_inside，就提取预测区域，进行识别
                 radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
-                img_src, offset, log_info = predict_area(screen, op_pos, radius_x, radius_y, src_resolution)
+                if op_pos:
+                    img_src, offset, log_info = predict_area(screen, op_pos, radius_x, radius_y, src_resolution)
+                else:
+                    # find_all语句是没有record_pos参数的,此时不要进行预测:
+                    img_src, offset, log_info = screen, (0, 0), "no prediction without record_pos"
                 G.LOGGING.debug(log_info)  # 输出预测区域的调试信息
 
         return cls(screen=screen, img_src=img_src, offset=offset, wnd_pos=wnd_pos, src_resolution=src_resolution)
