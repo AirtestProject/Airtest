@@ -17,7 +17,7 @@ from aircv.utils import check_image_param_input, generate_result
 from airtest.core.error import *  # noqa
 from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, MoaText, log_in_func, logwrap, get_platform, platform
 from airtest.core.settings import Settings as ST
-from airtest.core.utils import TargetPos, predict_area
+from airtest.core.utils import TargetPos, predict_area, cocos_min_strategy
 
 
 @logwrap
@@ -222,8 +222,8 @@ def _resize_im_search(query, src_resolution, target_img=None):
         im_search = query.get_search_img()
     sch_resolution = query.resolution
     # src_resolution = source.src_resolution
-    design_resolution = ST.DESIGN_RESOLUTION
     resize_strategy = ST.RESIZE_METHOD
+
 
     # 如果分辨率一致，则不需要进行im_search的适配:
     if tuple(sch_resolution) == tuple(src_resolution) or resize_strategy is None:
@@ -231,7 +231,7 @@ def _resize_im_search(query, src_resolution, target_img=None):
     else:
         # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
         h, w = im_search.shape[:2]
-        w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution, design_resolution)
+        w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution)
 
         # 调试代码: 输出调试信息.
         G.LOGGING.debug("resize: (%s, %s)->(%s, %s), resolution: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
