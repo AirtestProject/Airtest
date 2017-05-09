@@ -60,6 +60,7 @@ def mouse_dclick(x=None,y=None):
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
 
 def mouse_move(x,y):
+    x, y = int(x), int(y)  # 只接受int
     windll.user32.SetCursorPos(x, y)
 
 def mouse_drag((x0, y0), (x1, y1), duration=0.3, steps=10):

@@ -263,7 +263,7 @@ def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_cl
         G.LOGGING.debug('touchpos: %s', pos)
 
     if get_platform() == "Windows":
-        G.DEVICE.touch(pos, times, duration, right_click)
+        G.DEVICE.touch(pos, right_click)
     else:
         G.DEVICE.touch(pos, times, duration)
 
