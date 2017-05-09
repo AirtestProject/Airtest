@@ -155,7 +155,7 @@ class CvPosFix(object):
             # find_all模式找到的是一个结果列表，处理后返回ret_pos_list
             ret_pos_list = []
             for one_ret in cv_ret:
-                ret_pos = TargetPos().getXY(one_ret, query.target_pos)
+                ret_pos = TargetPos().getXY(one_ret, target_pos)
                 ret_pos_list.append(ret_pos)
             return ret_pos_list
         else:
