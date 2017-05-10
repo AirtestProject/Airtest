@@ -289,9 +289,14 @@ def get_screen_shot(output="screenshot.png"):
     return img
 
 
-def get_resolution():
-    w = win32api.GetSystemMetrics(0)
-    h = win32api.GetSystemMetrics(1)
+def get_resolution(hwnd=None):
+    if hwnd:
+        rect = win32gui.GetWindowRect(hwnd)
+        w = abs(rect[2] - rect[0])
+        h = abs(rect[3] - rect[1])
+    else:
+        w = win32api.GetSystemMetrics(0)
+        h = win32api.GetSystemMetrics(1)
     return w, h
 
 

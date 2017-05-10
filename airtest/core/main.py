@@ -298,12 +298,25 @@ def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5, st
             else:
                 pos2 = v2
         elif vector:
-            if (vector[0] <= 1 and vector[1] <= 1):
+            if vector[0] <= 1 and vector[1] <= 1:
                 w, h = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+
+                # 减去windows窗口的边框
+                if ST.FIND_INSIDE and get_platform() == "Windows" and G.DEVICE.handle:
+                    w -= 2 * ST.FIND_INSIDE[0]
+                    h -= ST.FIND_INSIDE[0] + ST.FIND_INSIDE[1]
                 vector = (int(vector[0] * w), int(vector[1] * h))
             pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
         else:
             raise Exception("no enouph params for swipe")
+
+    if ST.FIND_INSIDE and get_platform() == "Windows" and G.DEVICE.handle:
+        wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
+        # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
+        pos1 = (wnd_pos[0] + ST.FIND_INSIDE[0] + pos1[0],
+                wnd_pos[1] + ST.FIND_INSIDE[1] + pos1[1])
+        pos2 = (wnd_pos[0] + ST.FIND_INSIDE[0] + pos2[0],
+                wnd_pos[1] + ST.FIND_INSIDE[1] + pos2[1])
     G.DEVICE.swipe(pos1, pos2, duration=duration, steps=steps)
     delay_after_operation(delay)
 

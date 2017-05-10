@@ -139,7 +139,7 @@ class Windows(Device):
         self.winmgr.set_window_pos(x, y)
 
     def getCurrentScreenResolution(self):
-        return get_resolution()
+        return get_resolution(self.handle)
 
     def operate(self, args):
         if args["type"] == "down":
