@@ -283,13 +283,14 @@ def mask_template_after_resize(source, query, find_in_screen=False):
             confidence = _cal_confi_outside_ignore(target_img, query, source.src_resolution, resize_strategy)
     else:
         # 没有ignore区域，但是有focus区域，先找到img_sch的最优匹配，然后计算focus区域可信度
+        result = find_template(im_source, img_sch, threshold=0, rgb=query.rgb)
+        if not result:
+            return None
         if focus:
-            result = find_template(im_source, img_sch, threshold=0, rgb=query.rgb)
             target_img = _get_image_target_area(im_source, result)
             confidence = _cal_confi_only_in_focus(target_img, query, source.src_resolution, resize_strategy)
         else:
             # 既没有focus，也没有ignore，默认为基础的template匹配
-            result = find_template(im_source, img_sch, threshold=0, rgb=query.rgb)
             confidence = result.get("confidence", 0)
 
     # 校验可信度:
@@ -370,7 +371,10 @@ def _cal_confi_only_in_focus(target_img, query, src_resolution, resize_strategy)
         area = (focus_rect[2] - focus_rect[0]) * (focus_rect[3] - focus_rect[1])
         # 计算focus单个区块的可信度:
         ret = find_template(target_img, focus_area, threshold=0, rgb=query.rgb)
-        confidence = ret.get("confidence", 0)
+        if ret:
+            confidence = ret.get("confidence", 0)
+        else:
+            confidence = 0
         # 记录各个foux_area的相应数据
         area_list.append(area)
         confidence_list.append(confidence)
@@ -415,7 +419,10 @@ def _cal_confi_outside_ignore(target_img, query, src_resolution, resize_strategy
             # 记录各个ignore_area的相应数据
             area_list.append(area)
             ret = find_template(target_img, ignore_area, threshold=0, rgb=query.rgb)
-            confidence = ret.get("confidence", 0)
+            if ret:
+                confidence = ret.get("confidence", 0)
+            else:
+                confidence = 0
             confidence_list.append(confidence)
 
     # 第三步: 计算加权可信度
