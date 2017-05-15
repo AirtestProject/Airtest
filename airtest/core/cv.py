@@ -222,8 +222,7 @@ def _resize_im_search(query, src_resolution, target_img=None):
         im_search = query.get_search_img()
     sch_resolution = query.resolution
     # src_resolution = source.src_resolution
-    resize_strategy = ST.RESIZE_METHOD
-
+    resize_strategy = ST.RESIZE_METHOD.__func__
 
     # 如果分辨率一致，则不需要进行im_search的适配:
     if tuple(sch_resolution) == tuple(src_resolution) or resize_strategy is None:
