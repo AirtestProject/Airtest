@@ -222,7 +222,7 @@ def _resize_im_search(query, src_resolution, target_img=None):
         im_search = query.get_search_img()
     sch_resolution = query.resolution
     # src_resolution = source.src_resolution
-    resize_strategy = ST.RESIZE_METHOD
+    resize_strategy = ST().RESIZE_METHOD
 
 
     # 如果分辨率一致，则不需要进行im_search的适配:
@@ -352,7 +352,6 @@ def _cal_confi_only_in_focus(target_img, query, src_resolution, resize_strategy)
     focus_list = query.focus
     sch_resolution = query.resolution
     rgb = query.rgb
-    design_resolution = ST.DESIGN_RESOLUTION
 
     # 注意:这里的focus小区域坐标均相对于原始的im_search，所以传入参数必须是原始大小的im_search
     # 第一步: 分别取出focus的区块，然后依次进行simple_tpl，求出可信度,并记录下面积
@@ -390,7 +389,6 @@ def _cal_confi_outside_ignore(target_img, query, src_resolution, resize_strategy
     ignore_list = query.ignore
     sch_resolution = query.resolution
     rgb = query.rgb
-    design_resolution = ST.DESIGN_RESOLUTION
 
     # 第一步: 获取细分块
     atom_rect_list = _generate_arom_rect_list(im_search, ignore_list)
