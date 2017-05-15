@@ -135,8 +135,8 @@ def set_windows(handle=None, window_title=None):
     register_device(dev)
 
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
-    # set no resize on windows as default
-    ST.RESIZE_METHOD = ST.RESIZE_METHOD
+    # # set no resize on windows as default (会导致函数的调用报错！)
+    # ST.RESIZE_METHOD = ST.RESIZE_METHOD
 
 
 def set_device(pltf, uid=None, *args, **kwargs):
