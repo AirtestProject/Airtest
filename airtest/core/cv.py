@@ -301,7 +301,7 @@ def mask_template_after_resize(source, query, find_in_screen=False):
 def template_with_mask(im_source, img_sch, ignore_mask):
     """mask-template方法. img_sch已进行缩放."""
     # 第一步：校验图像输入
-    checkImageParamInput(im_source, img_sch, check_size_flag=True)
+    check_image_param_input(im_source, img_sch, check_size_flag=True)
 
     # 第二步：进行匹配# template-TM_CCORR_NORMED 方法的结果矩阵:
     h, w = img_sch.shape[:2]
