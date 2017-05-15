@@ -376,7 +376,8 @@ def _cal_confi_only_in_focus(target_img, query, src_resolution, resize_strategy)
             confidence = 0
         # 记录各个foux_area的相应数据
         area_list.append(area)
-        confidence_list.append(confidence)
+        # confidence_list.append(confidence)
+        confidence_list.append((confidence + 1) / 2)
 
     # 第二步: 计算加权可信度
     return cal_average_confidence(confidence_list, area_list)
@@ -422,7 +423,8 @@ def _cal_confi_outside_ignore(target_img, query, src_resolution, resize_strategy
                 confidence = ret.get("confidence", 0)
             else:
                 confidence = 0
-            confidence_list.append(confidence)
+            # confidence_list.append(confidence)
+            confidence_list.append((confidence + 1) / 2)
 
     # 第三步: 计算加权可信度
     return cal_average_confidence(confidence_list, area_list)
