@@ -270,7 +270,10 @@ def mask_template_after_resize(source, query, find_in_screen=False):
         ignore_mask = _resize_im_search(query, source.src_resolution, target_img=origin_mask_img)
         # 根据缩放后的im_search、缩放后的mask图像，在im_source中获取初步识别区域的图像:
         result = template_with_mask(im_source, img_sch, ignore_mask)
-        target_img = _get_image_target_area(im_source, result)  # 截图在截屏中的目标区域
+        if result:
+            target_img = _get_image_target_area(im_source, result)  # 截图在截屏中的目标区域
+        else:
+            return None
 
         if focus:
             # 截图既包含ignore, 又包含focus: 则在初始结果中进行focus区域的可信度计算:
@@ -301,7 +304,10 @@ def mask_template_after_resize(source, query, find_in_screen=False):
 def template_with_mask(im_source, img_sch, ignore_mask):
     """mask-template方法. img_sch已进行缩放."""
     # 第一步：校验图像输入
-    check_image_param_input(im_source, img_sch, check_size_flag=True)
+    try:
+        check_image_param_input(im_source, img_sch, check_size_flag=True)
+    except aircv.Error:
+        return None
 
     # 第二步：进行匹配# template-TM_CCORR_NORMED 方法的结果矩阵:
     h, w = img_sch.shape[:2]
