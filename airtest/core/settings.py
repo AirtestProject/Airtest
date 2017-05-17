@@ -33,6 +33,7 @@ class Settings(object):
     SCRIPTHOME = SConfig(None)
     SRC_RESOLUTION = SConfig([])  # to be move to DEVICE
     CVSTRATEGY = SConfig(None)
+    PREDICTION = SConfig(False)
     CVSTRATEGY_ANDROID = SConfig(["tpl", "sift"])
     CVSTRATEGY_WINDOWS = SConfig(["tpl", "sift"])
     FIND_INSIDE = SConfig(None)

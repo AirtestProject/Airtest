@@ -130,30 +130,28 @@ def _cv_match(source, query):
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
                 G.LOGGING.debug("[method] template match")
-                try:
-                    ret = template_in_predicted_area(source, query)
-                except aircv.Error:
-                    ret = None
+                if ST.PREDICTION:
+                    try:
+                        ret = template_in_predicted_area(source, query)
+                    except aircv.Error:
+                        pass
 
                 # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
                 if not ret and not query.find_inside:
                     try:
                         ret = template_after_resize(source, query, find_in_screen=True)
                     except aircv.Error:
-                        ret = None
+                        pass
 
                 G.LOGGING.debug(" ->tpl result: %s" % ret)
             elif method == "sift":
                 # sift匹配，默认pre，其次全屏
                 G.LOGGING.debug("[method] sift match")
+                # sift默认提供预测区域内查找:
                 try:
                     ret = find_sift_in_predicted_area(source, query)
-                    # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
-                    if not ret and not query.find_inside:
-                        screen, img_sch = source.screen, query.get_search_img()
-                        ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
                 except aircv.Error:
-                    ret = None
+                    pass
 
                 # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
                 if not ret and not query.find_inside:
@@ -161,11 +159,11 @@ def _cv_match(source, query):
                     try:
                         ret = aircv.find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
                     except aircv.Error:
-                        ret = None
+                        pass
 
                 G.LOGGING.debug(" ->sift result: %s" % ret)
             else:
-                G.LOGGING.warning("skip method in %s  CV_STRATEGY", method)
+                G.LOGGING.warning("skip method in CV_STRATEGY: %s", method)
 
             # 使用ST.CVSTRATEGY中某个识别方法找到后，就直接返回，不再继续循环下去:
             if ret:
