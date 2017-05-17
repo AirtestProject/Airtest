@@ -178,7 +178,7 @@ class MoaLogDisplay(object):
         if not p:
             return ''
         
-        return round(p*100, 1)
+        return round(p * 100, 1)
 
     def div_rect(self, r, offset=None):
         if not r:
@@ -197,7 +197,7 @@ class MoaLogDisplay(object):
             left = left + offset[0]
             top = top + offset[1]
         
-        return {'left':left, 'top':top, 'width':w, 'height':h}
+        return {'left': left, 'top': top, 'width': w, 'height': h}
 
     def func_desc(self, step):
         """ 把对应函数(depth=1)的name显示成中文 """
@@ -205,20 +205,20 @@ class MoaLogDisplay(object):
         desc = {
             # "snapshot":"截图",
             # "_loop_find":"寻找目标位置",
-            "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos','')),
-            "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos','')), step.get('swipe','')),
+            "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
+            "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos', '')), step.get('swipe', '')),
 
             "wait": u"等待目标图片出现",
             "exists": u"图片%s存在" % step.get('exists_ret', ''),
 
-            "text": u"输入文字:%s" % step.get('text',''),
-            "keyevent": u"点击[%s]按键" % step.get('keyevent',''),
-            "sleep": u"等待%s秒" % step.get('sleep',''),
+            "text": u"输入文字:%s" % step.get('text', ''),
+            "keyevent": u"点击[%s]按键" % step.get('keyevent', ''),
+            "sleep": u"等待%s秒" % step.get('sleep', ''),
 
             "assert_exists": u"目标图片应当存在",
             "assert_not_exists": u"目标图片应当不存在",
 
-            "snapshot": step[1]['args'][0],
+            # "snapshot": step[1]['args'][0],
         }
 
         return desc.get(name, '%s%s' % (name, step[1]['args']))

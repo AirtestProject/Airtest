@@ -17,6 +17,7 @@ except ImportError as e:
     minitest = None
 
 
+SCRIPTHOME = None
 SCRIPT_STACK = []
 SCRIPTEXT = ".owl"
 TPLEXT = ".png"
