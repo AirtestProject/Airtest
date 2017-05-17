@@ -229,6 +229,8 @@ def _resize_im_search(query, src_resolution, target_img=None):
         # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
         h, w = im_search.shape[:2]
         w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution)
+        # 确保w_re和h_re > 0, 至少有1个像素:
+        w_re, h_re = max(1, w_re), max(1, h_re)
 
         # 调试代码: 输出调试信息.
         G.LOGGING.debug("resize: (%s, %s)->(%s, %s), resolution: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
