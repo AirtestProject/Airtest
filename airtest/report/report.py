@@ -107,7 +107,8 @@ class MoaLogDisplay(object):
             elif step.get(2):
                 if step['type'] in self.img_type:
                     step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
-                    step['resolution'] = step[2]['args'][0]['resolution']
+                    step['resolution'] = step[2]['args'][0].get("resolution", None)
+                    step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
                 if not step['trace']:
                     step['target_pos'] = step[2].get('ret')

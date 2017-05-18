@@ -228,9 +228,13 @@
               </div>
               <div class="col-xs-9">
                 <img class="crop_image" src="{{step.image_to_find}}" title="{{step.image_to_find}}">
+                <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
+                <p class="desc">record_pos: {{step.record_pos}}, resolution: {{step.resolution}}</p>
               </div>
+
             </div> 
             {% endif %} 
+
             <div class="row">  
               <div class="col-xs-3">
                 <div class="point">
