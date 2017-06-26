@@ -6,8 +6,10 @@ import time
 import traceback
 from pprint import pprint
 
+import airtest.cli.runner
 import airtest.core.main
-from airtest.core.main import set_serialno, snapshot, logwrap, _log_in_func
+from airtest.core.main import set_serialno, snapshot, logwrap
+from airtest.core.helper import log_in_func,G
 from uiautomator import AutomatorDevice
 
 
@@ -66,10 +68,11 @@ def genlog(action, params, uiobj=None):
         action = 'ui.swipe'
 
     pprint(log)
+
     @logwrap
     def command_layer(action, params):
         traverse_layer(action, params)
-        _log_in_func({"name": action, 'ret': None})
+        log_in_func({"name": action, 'ret': None})
 
     @logwrap
     def traverse_layer(action, params):
@@ -87,7 +90,7 @@ def genlog(action, params, uiobj=None):
             else:  # 点击中间位置
                 x, y = (l + r) / 2, (b + t) / 2
 
-            _log_in_func({
+            log_in_func({
                 "cv": {"confidence": 1, "result": [x, y], "rectangle": [[l, t], [l, b], [r, b], [r, t]]},
                 'ret': [x, y],
             })
@@ -158,6 +161,7 @@ class AutomatorWrapper(object):
                 log.append({'primary-action': action})
             else:
                 log.append({'action': action})
+        
 
         attr = getattr(self.obj, action)
         if callable(attr) or assertion:
@@ -300,5 +304,6 @@ def UiAutomator():
     current_device = airtest.cli.runner.device()
     if not current_device:
         set_serialno()
+    current_device = airtest.cli.runner.device()
     dev = AutomatorDevice(current_device.serialno)
     return AutomatorWrapper(dev)

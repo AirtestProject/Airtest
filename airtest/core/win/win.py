@@ -9,10 +9,10 @@ from PIL import ImageGrab
 import aircv
 from airtest.core.device import Device
 
-from winsendkey import SendKeys
-from keyboard import key_input
-from mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
-from window_mgr import WindowMgr, get_screen_shot, get_resolution
+from airtest.core.win.winsendkey import SendKeys
+from airtest.core.win.keyboard import key_input
+from airtest.core.win.mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
+from airtest.core.win.window_mgr import WindowMgr, get_screen_shot, get_resolution
 
 
 class Windows(Device):
@@ -135,7 +135,10 @@ class Windows(Device):
     def get_window_pos(self):
         return self.winmgr.get_window_pos()
 
-    def set_window_pos(self, (x, y)):
+    # PEP 3113 -- Removal of Tuple Parameter Unpacking
+    # https://www.python.org/dev/peps/pep-3113/
+    def set_window_pos(self, tuple_xy):
+        x, y = tuple_xy
         self.winmgr.set_window_pos(x, y)
 
     def getCurrentScreenResolution(self):

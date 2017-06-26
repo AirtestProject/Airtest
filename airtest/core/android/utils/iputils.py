@@ -3,7 +3,7 @@ __author__ = 'lxn3032'
 
 
 import re
-
+from functools import reduce
 
 ip_pattern = re.compile(r'(\d+\.){3}\d+')
 ip2int = lambda ip: reduce(lambda a, b: (a << 8) + b, map(int, ip.split('.')), 0)
@@ -54,5 +54,5 @@ def get_subnet_mask_len(adb):
         return matcher.group(2)
     else:
         # 获取不到网段长度就默认取17
-        print '[iputils WARNING] fail to get subnet mask len. use 17 as default.'
+        print('[iputils WARNING] fail to get subnet mask len. use 17 as default.')
         return '17'

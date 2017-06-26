@@ -2,7 +2,8 @@
 import sys
 import time
 from threading import Thread, Event
-from Queue import Queue, Empty
+from airtest.core.utils.compat import queue 
+#from queue import Queue, Empty
 
 
 class NonBlockingStreamReader:
@@ -16,7 +17,7 @@ class NonBlockingStreamReader:
         print_output: if True, print when readline
         '''
         self._s = stream
-        self._q = Queue()
+        self._q = queue.Queue()
         self._lastline = None
         self.name = name or id(self)
 
@@ -33,14 +34,14 @@ class NonBlockingStreamReader:
                         if print_new_line and line == self._lastline:
                             continue
                         self._lastline = line
-                        print "[nbsp][%s]%s" % (self.name, repr(line.strip()))
+                        print("[nbsp][%s]%s" % (self.name, repr(line.strip())))
                         sys.stdout.flush()
                 elif kill_event.is_set():
                     break
                 elif raise_EOF:
                     raise UnexpectedEndOfStream
                 else:
-                    print "EndOfStream"
+                    print("EndOfStream")
                     break
 
         self._kill_event = Event()
@@ -51,7 +52,7 @@ class NonBlockingStreamReader:
     def readline(self, timeout=None):
         try:
             return self._q.get(block=timeout is not None, timeout=timeout)
-        except Empty:
+        except queue.Empty:
             return None
 
     def read(self, timeout=0):
@@ -62,7 +63,7 @@ class NonBlockingStreamReader:
             if line is None:
                 break
             lines.append(line)
-        return "".join(lines)
+        return b"".join(lines)
 
     def kill(self):
         self._kill_event.set()

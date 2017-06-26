@@ -1,0 +1,320 @@
+.. _api:
+
+Developer Interface
+===================
+
+.. module:: airtest
+
+This part of the documentation covers all the interfaces of airtest. For
+parts where airtest depends on external libraries, we document the most
+important right here and provide links to the canonical documentation.
+
+
+Main Interface
+--------------
+
+
+Exceptions
+----------
+
+.. autoexception:: airtest.core.error.MoaError
+.. autoexception:: airtest.core.error.MoaNotFoundError
+.. autoexception:: airtest.core.error.MoaScriptParamError
+.. autoexception:: airtest.core.error.ICmdError
+.. autoexception:: airtest.core.error.MinicapError
+.. autoexception:: airtest.core.error.MinitouchError
+
+基本接口说明
+--------------
+
+set\_serialno(sn=None)
+^^^^^^^^^^^^^^^^^^^^^^^^
+    设置手机的序列号, 支持*匹配。如果adb连接了多台手机，默认取第一台
+
+
+
+..  autofunction:: airtest.core.main.set_serialno  
+::
+
+    set_serialno('cff*')
+        
+set\_udid(udid=None)
+^^^^^^^^^^^^^^^^^^^^^^^^
+    设置ios device的序列号, 支持*匹配。如果usb连接了多台手机，默认取第一台
+
+..  autofunction:: airtest.core.main.set_udid  
+::
+
+        set_udid('cff*')
+
+set\_basedir(base\_dir)
+^^^^^^^^^^^^^^^^^^^^^^^^
+    设置你的工作目录，日志，图片都会以这个基准去查找
+..  autofunction:: airtest.core.setting.set_basedir
+::
+
+        set_basedir('cff*')
+
+
+
+set\_logfile(filename, inbase=True)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    设置日志文件的路径，如果inbase为true的话，日志会保存到basedir目录下
+..  autofunction:: airtest.cli.runner.set_logfile
+::
+
+        set_logfile('cff*')
+
+
+
+set_scripthome(dirpath)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    设置脚本根目录，用于exec_script
+..  autofunction:: airtest.cli.runner.set_scripthome
+
+
+
+set_globals(key, value)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    设置moa里面的一些全局变量
+..  autofunction:: airtest.cli.runner.set_globals
+
+
+
+log(tag, data)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    data一定是需要json.dumps支持的格式才行.
+
+shell(cmd, shell=True)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    执行shell命令，然后返回
+..  autofunction:: airtest.core.main.shell
+::
+
+        print shell('echo hello')
+        # output: hello
+
+
+amstart(package)    
+^^^^^^^^^^^^^^^^^^^^
+>*android only( add adaptation for ios device, package is appid)*
+
+    am: android manager的简称
+
+
+..  autofunction:: airtest.core.main.amstart
+::
+
+        amstart('com.netease.moa') # 启动应用
+
+
+
+amstop(package)
+^^^^^^^^^^^^^^^^^^^^^
+>*android only( add adaptation for ios device, package is appid)*
+
+    强制停止应用，等同于`am force-stop <package>`
+
+..  autofunction:: airtest.core.main.amstart
+::
+        amstart('com.netease.moa') # 启动应用
+
+
+ amclear(package)
+ ^^^^^^^^^^^^^^^^^^^
+>*android only*
+
+    清空应用中的数据，等同于`pm clear <package>`
+
+..  autofunction:: airtest.core.main.amclear
+
+
+install(filepath)
+^^^^^^^^^^^^^^^^^^^^^^^
+>*android only( add adaptation for ios device)*
+
+    安装apk
+
+..  autofunction:: airtest.core.main.install
+
+
+uninstall(package)
+^^^^^^^^^^^^^^^^^^^^^^^
+>*android only( add adaptation for ios device)*
+
+    卸载apk
+
+..  autofunction:: airtest.core.main.uninstall
+
+
+
+### snapshot(filename="screen.png")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    保存手机上的截图到filename这个文件。然后返回图像的二进制内容
+
+..  autofunction:: airtest.core.main.snapshot
+
+
+
+wake()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>*android only*
+
+    点亮手机屏幕
+
+..  autofunction:: airtest.core.main.wake
+
+
+home()
+^^^^^^^^^^^^^^^^^
+>*android only*
+
+    点击手机home键
+
+..  autofunction:: airtest.core.main.home
+
+
+touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    点击屏幕中的目标，参数如下：
+
+        v 目标，有三种形态：坐标、图片、文字，详见MoaPic
+
+        timeout 超时时间
+
+        delay 操作后延迟时间
+
+        offset 点击坐标偏移，可以是坐标或者是屏幕百分比。offset={"percent": True, "x": 20, "y": 20}
+
+        safe 没找到图片是否忽略错误，默认False，会报MoaError
+
+..  autofunction:: airtest.core.main.touch
+
+
+
+
+ swipe(v1, v2=None, vector=None)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    滑动操作，两种形态：
+
+        swipe(v1, v2) 从起点目标滑动到终点目标
+
+        swipe(v1, vector=(x, y)) 从起点目标滑动一个向量。vector=(dx/w, dy/h)
+
+
+..  autofunction:: airtest.core.main.swipe
+
+
+
+
+operate(v, route, timeout=TIMEOUT, delay=OPDELAY)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    长操作，在起点处按下，按照一个线路滑动，最终松开
+
+        v 起点目标
+
+        route 滑动线路 [(dx1, dy1, dt1), (dx2, dy2, dt2), (dx3, dy3, dt3)...]  其中(dx, dy)与swipe参数vector相同
+        
+        timeout 同上
+        
+        delay 同上
+
+..  autofunction:: airtest.core.main.operate
+
+
+keyevent(keyname)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
+    按键输入
+
+        keyname 安卓参考：http://developer.android.com/reference/android/view/KeyEvent.html
+
+    注意：windows按键和android按键不同
+
+..  autofunction:: airtest.core.main.keyevent
+
+
+text(text)
+^^^^^^^^^^^^^^^^    
+    文字输入
+
+    注意：windows可以输入中文，android暂时不行
+
+..  autofunction:: airtest.core.main.text
+
+
+sleep(secs=1.0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    等待时间
+
+..  autofunction:: airtest.core.main.sleep
+
+
+wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    等待目标出现
+
+        v 目标
+
+        timeout 超时时间
+
+        safe 超时是否继续，默认为False即会报错
+
+        interval 等待目标的间隔时间
+
+        intervalfunc 等待目标的间隔中的回调函数
+
+..  autofunction:: airtest.core.main.wait
+
+
+exists(v, timeout=1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    判断目标是否存在，返回True/False
+
+..  autofunction:: airtest.core.main.exists
+
+
+assert_exists(v, msg="", timeout=TIMEOUT)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
+    断言目标存在，如果超时时间内不存在则抛出AssertionError
+
+        v 目标
+
+        msg 断言信息
+
+        timeout 超时时间
+
+..  autofunction:: airtest.core.main.assert_exists
+
+
+
+assert_not_exists(v, msg="", timeout=2)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    断言目标不存在，如果超时时间内存在则抛出AssertionError，参数同上
+
+..  autofunction:: airtest.core.main.assert_not_exists
+
+
+
+
+assert_equal(first, second, msg="")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
+    断言first和second相等，不等则抛出AssertionError
+
+..  autofunction:: airtest.core.main.assert_equal
+
+
+MoaPic(filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[])
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
+    一个隐藏的类，所有图片目标在moa中都会转换为MoaPic实例，参数如下：
+        filename    图片名
+        rect        所在区域(x0, y0, x1, y1)，默认全屏，不建议给这个参数
+        threshold   识别阈值，默认阈值为0.6，较低，可以按需修改
+        target_pos  目标图片的点击位置，默认点击目标中点，可以填1-9表示不同位置，小键盘排布
+        record_pos  记录下的录制坐标，用于辅助图像识别
+        resolution  记录下的屏幕分辨率，用于辅助图像识别
+
+..  autoclass:: airtest.core.helper.MoaPic

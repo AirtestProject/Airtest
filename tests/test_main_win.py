@@ -40,8 +40,8 @@ class TestAirtestOnWindows(unittest.TestCase):
         os.remove("test.png")
 
     def test_touch(self):
-        touch((1, 1))
         touch((20, 20), right_click=True)
+        touch((1, 1))
 
 
 if __name__ == '__main__':

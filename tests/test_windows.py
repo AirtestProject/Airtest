@@ -126,7 +126,7 @@ class TestWindows(unittest.TestCase):
         self.windows.keyevent(" ")
         self.windows.keyevent("~")
         self.windows.keyevent("A")
-        self.windows.keyevent("f4", combine="alt", escape=True)
+        self.windows.keyevent("a", combine="ctrl", escape=True)
 
     def test_text(self):
         self.windows.start_app("calc")

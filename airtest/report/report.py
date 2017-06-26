@@ -2,12 +2,10 @@
 # -*- coding:utf8 -*-
 import json
 import os
-import sys
-import time
+import io
 import argparse
 import jinja2
-from report_gif import gen_gif
-
+from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
 SCREENDIR = "img_record"
@@ -30,9 +28,12 @@ class MoaLogDisplay(object):
         self.uiautomator_img_type = ('click', 'long_click', 'ui.swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'end', 'assert')
         self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, LOGFILE)
-        with open(self.logfile,'rb')as f:
+        self._load()
+
+    def _load(self):
+        with io.open(self.logfile, encoding="utf-8")as f:
             for line in f.readlines():
-                self.log.append(json.loads(line)) 
+                self.log.append(json.loads(line))
 
     def analyse(self):
         """ 进一步解析成模板可显示的内容 """
@@ -48,9 +49,9 @@ class MoaLogDisplay(object):
 
             if log['depth'] in temp:
                 temp[log['depth']].update(log)
-            else:    
+            else:
                 temp[log['depth']] = log
-                
+
             if log['depth'] == 1:
                 #depth到1才是一个完整操作语句，转换成模板需要的数据
                 #exists 中间有报错也是正常的 以depth = 1 为准
@@ -310,19 +311,19 @@ def safe_percent(a, b):
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):
-        print "get_file_author, file_path %s not existed"%file_path
+        print("get_file_author, file_path %s not existed" % file_path)
         return
 
     try:
-        fp = open(file_path, 'r+')
+        fp = io.open(file_path, encoding="utf-8")
     except IOError:
-        print "read file %s error" %file_path
+        print("read file %s error" % file_path)
         return
-        
+
     author = ''
     for line in fp:
         if '__author__' in line and '=' in line:
-            author = line.split('=')[-1].strip()[1:-1].decode("utf-8")
+            author = line.split('=')[-1].strip()[1:-1]
             break
     return author
 
@@ -338,7 +339,7 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
-    path = args.script.decode(sys.getfilesystemencoding())
+    path = args.script
     basename = os.path.basename(path).split(".")[0]
     py_file = path + "/" + basename + ".py"
     author = get_file_author(py_file)
@@ -346,7 +347,7 @@ def main(args):
     outfile = args.outfile
     # static file root
     if args.static_root is not None:
-        static_root = args.static_root.decode(sys.getfilesystemencoding())
+        static_root = args.static_root
     else:
         static_root = os.path.dirname(__file__)
     if not static_root.endswith(os.path.sep):
@@ -359,6 +360,13 @@ def main(args):
 
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
+    print(path)
+    print(log_root)
+    print(static_root)
+    # TODO:  File "c:\python27\lib\site-packages\nose\plugins\xunit.py", line 129, in write
+    # UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
+
+    # print(author)
     rpt = MoaLogDisplay(path, log_root, static_root, author)
 
     # gen gif
@@ -367,10 +375,15 @@ def main(args):
         gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif)
     # gen html report
     else:
-        html = rpt.render(tpl).encode('utf8')
-        with open(outfile, 'w') as f:
+        html = rpt.render(tpl)
+        with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
 
 
 if __name__ == "__main__":
-    main()
+    #single runner
+    import argparse
+    ap = argparse.ArgumentParser()
+    args = get_parger(ap).parse_args()
+
+    main(args)

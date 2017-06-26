@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from images2gif import writeGif
+from airtest.report.images2gif import writeGif
 from PIL import Image, ImageDraw
 import sys
 import os
 import json
 
 
-def draw_circle(img, (x, y), r=20):
+def draw_circle(img, tup_xy, r=20):
+    x,y=tup_xy
     draw = ImageDraw.Draw(img)
     draw.ellipse((x - r, y - r, x + r, y + r), fill='blue', outline='blue')
     return img
@@ -15,7 +16,7 @@ def draw_circle(img, (x, y), r=20):
 def gen_gif(imgdir, steps, output="log.gif"):
     file_names = sorted((fn for fn in os.listdir(imgdir) if fn.endswith('.jpg')))
     if not file_names:
-        print "no jpg image found"
+        print("no jpg image found")
         return
 
     # count duration of each frame by filename
@@ -59,4 +60,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print "warning! deprecated! use 'report_one.py --gif' instead"
+    print ("warning! deprecated! use 'report_one.py --gif' instead")
