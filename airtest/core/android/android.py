@@ -1018,6 +1018,7 @@ class Android(Device):
         self.adb.shell(["input", "keyevent", keyname])
 
     def wake(self):
+        self.home()
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
 
         # todo:
