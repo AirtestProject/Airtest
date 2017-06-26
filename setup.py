@@ -15,9 +15,9 @@ setup(
     url='http://git-qa.gz.netease.com/gzliuxin/airtest',
     license='MIT',
     keywords=['automation', 'test', 'android', 'opencv'],
-    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist']),
+    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist', 'new_test']),
     package_data={
-        'android_deps': ["*.apk", "airtest/core/stf_libs", "airtest/core/adb"],
+        'android_deps': ["*.apk", "airtest/core/android/stf_libs", "airtest/core/android/adb"],
         'html_statics': ["airtest/report"]
     },
     install_requires=reqs,

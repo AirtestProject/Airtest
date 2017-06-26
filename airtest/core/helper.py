@@ -6,7 +6,7 @@ import aircv
 from airtest.core import device
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
-
+from airtest.core.utils.compat import PY3 
 
 class G(object):
     """globals variables"""
@@ -208,7 +208,14 @@ def moapicwrap(f):
         picname = args[0]
         picargs = {}
         opargs = {}
-        for k, v in kwargs.iteritems():
+
+        if not PY3:
+            iterlist=kwargs.iteritems()
+        else:
+            iterlist=kwargs.items()
+
+
+        for k, v in iterlist:
             if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
                 picargs[k] = v
             else:

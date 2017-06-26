@@ -17,7 +17,7 @@ class TargetPos(object):
             return cvret["result"]
         rect = cvret.get("rectangle")
         if not rect:
-            print "could not get rectangle, use mid point instead"
+            print("could not get rectangle, use mid point instead")
             return cvret["result"]
         w = rect[2][0] - rect[0][0]
         h = rect[2][1] - rect[0][1]
@@ -38,5 +38,5 @@ class TargetPos(object):
         elif pos == self.DOWN:
             return rect[2][0] - w / 2, rect[2][1]
         else:
-            print "invalid target_pos:%s, use mid point instead" % pos
+            print("invalid target_pos:%s, use mid point instead" % pos)
             return cvret["result"]

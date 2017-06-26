@@ -11,16 +11,15 @@ import socket
 import struct
 import threading
 import platform
-import Queue
 import random
 import traceback
 import aircv
-import axmlparserpy.apk as apkparser
 from airtest.core.device import Device
-from airtest.core.error import MoaError, AdbError, MinicapError, MinitouchError
-from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger
+from airtest.core.error import MoaError, AdbError, AdbShellError, MinicapError, MinitouchError
+from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger, get_std_encoding
 from airtest.core.android.ime_helper import AdbKeyboardIme
-from constant import *
+from airtest.core.android.constant import *
+from airtest.core.utils.compat import apkparser, PY3, queue
 ADBPATH = get_adb_path()
 LOGGING = get_logger('android')
 
@@ -65,7 +64,7 @@ class ADB(object):
         device: specify -s serialno if True
         """
         cmds = split_cmd(cmds)
-        if cmds == ["start-server"]:
+        if cmds[0] == "start-server":
             raise RuntimeError("please use self.start_server instead")
 
         host, port = self.adb_server_addr
@@ -75,6 +74,8 @@ class ADB(object):
                 raise RuntimeError("please set_serialno first")
             prefix += ['-s', self.serialno]
         cmds = prefix + cmds
+        cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
+
         LOGGING.debug(" ".join(cmds))
 
         proc = subprocess.Popen(
@@ -85,13 +86,18 @@ class ADB(object):
         )
         return proc
 
-    def cmd(self, cmds, device=True):
+    def cmd(self, cmds, device=True, not_decode=False):
         """
         get adb cmd output
         device: specify -s serialno if True
         """
         proc = self.start_cmd(cmds, device)
         stdout, stderr = proc.communicate()
+
+        if not_decode is False:
+            stdout = stdout.decode(get_std_encoding(sys.stdout))
+            stderr = stderr.decode(get_std_encoding(sys.stderr))
+
         if proc.returncode > 0:
             raise AdbError(stdout, stderr)
         return stdout
@@ -131,6 +137,10 @@ class ADB(object):
         """get device's adb status"""
         proc = self.start_cmd("get-state")
         stdout, stderr = proc.communicate()
+
+        stdout = stdout.decode(get_std_encoding(sys.stdout))
+        stderr = stderr.decode(get_std_encoding(sys.stdout))
+
         if proc.returncode == 0:
             return stdout.strip()
         elif "not found" in stderr:
@@ -152,25 +162,48 @@ class ADB(object):
         else:
             raise MoaError("device not ready")
 
-    def shell(self, cmds, not_wait=False):
+    def raw_shell(self, cmds, not_wait=False):
+        cmds = ['shell'] + split_cmd(cmds)
+        if not_wait:
+            return self.start_cmd(cmds)
+        out = self.cmd(cmds, not_decode=True)
+        return out.decode(ADB_SHELL_ENCODING)
+
+    def shell(self, cmd, not_wait=False):
         """
         adb shell
         not_wait:
             return subprocess if True
             return output if False
         """
-        if isinstance(cmds, basestring):
-            cmds = 'shell ' + cmds
+        if not_wait is True:
+            return self.raw_shell(cmd, not_wait)
+        if self.sdk_version < SDK_VERISON_NEW:
+            # for sdk_version < 25, adb shell do not raise error
+            # https://stackoverflow.com/questions/9379400/adb-error-codes
+            cmd = split_cmd(cmd) + [";", "echo", "$?"]
+            out = self.raw_shell(cmd)
+            out = out.strip().splitlines()
+            stdout = "\n".join(out[:-1])
+            returncode = int(out[-1])
+            if returncode > 0:
+                raise AdbShellError("", stdout)
+            return stdout
         else:
-            cmds = ['shell'] + list(cmds)
-        if not_wait:
-            return self.start_cmd(cmds)
-        else:
-            return self.cmd(cmds)
+            try:
+                out = self.raw_shell(cmd)
+            except AdbError as err:
+                # adb connection error
+                if re.match('error: device \'\w+\' not found', err.stdout.rstrip()):
+                    raise
+                else:
+                    raise AdbShellError(err.stdout, err.stderr)
+            else:
+                return out
 
     def getprop(self, key, strip=True):
         """adb shell getprop"""
-        prop = self.shell(['getprop', key])
+        prop = self.raw_shell(['getprop', key])
         if strip:
             prop = prop.rstrip('\r\n')
         return prop
@@ -245,13 +278,18 @@ class ADB(object):
         """adb install, if overinstall then adb install -r xxx"""
         if not os.path.isfile(filepath):
             raise RuntimeError("%s is not valid file" % filepath)
-        if not overinstall:
-            proc = self.start_cmd(['install', filepath])
-        else:
-            proc = self.start_cmd(['install', '-r', filepath])
 
-        nbsp = NonBlockingStreamReader(proc.stdout, name="adb_install")
-        proc.wait()
+        filename = os.path.basename(filepath)
+        device_dir = "/data/local/tmp"
+        device_path = "%s/%s" % (device_dir, filename)
+
+        out = self.cmd(["push", filepath, device_dir])
+        print(out)
+
+        if not overinstall:
+            self.shell(['pm', 'install', device_path])
+        else:
+            self.shell(['pm', 'install', '-r', device_path])
 
     def uninstall(self, package):
         """adb uninstall"""
@@ -259,20 +297,23 @@ class ADB(object):
 
     def snapshot(self):
         """take a screenshot"""
-        raw = self.shell(['screencap', '-p'])
-        if platform.system() == "Windows":
-            link_breaker = "\r\r\n"
-        else:
-            link_breaker = "\r\n"
-        return raw.replace(link_breaker, "\n")
+        raw = self.cmd('shell screencap -p', not_decode=True)
+        return raw.replace(self.line_breaker, b"\n")
 
-    def touch(self, (x, y)):
+    # PEP 3113 -- Removal of Tuple Parameter Unpacking
+    # https://www.python.org/dev/peps/pep-3113/
+    def touch(self, tuple_xy):
         """touch screen"""
+        x, y = tuple_xy
         self.shell('input tap %d %d' % (x, y))
         time.sleep(0.1)
 
-    def swipe(self, (x0, y0), (x1, y1), duration=500):
+    def swipe(self, tuple_x0y0, tuple_x1y1, duration=500):
         """swipe screen"""
+        # prot python 3
+        x0, y0 = tuple_x0y0
+        x1, y1 = tuple_x1y1
+
         version = self.sdk_version
         if version <= 15:
             raise MoaError('swipe: API <= 15 not supported (version=%d)' % version)
@@ -297,10 +338,33 @@ class ADB(object):
                 yield line
         nbsp.kill()
         logcat_proc.kill()
+        return
+
+    def exists_file(self, filepath):
+        try:
+            out = self.shell(["ls", filepath])
+        except AdbShellError:
+            return False
+        else:
+            return not("No such file or directory" in out)
 
     def _cleanup_forwards(self):
         for local in self._forward_local_using[:]:
             self.remove_forward(local)
+
+    @property
+    def line_breaker(self):
+        if platform.system() == "Windows":
+            if self.sdk_version >= SDK_VERISON_NEW:
+                line_breaker = b"\r\n"
+            else:
+                line_breaker = b"\r\r\n"
+        else:
+            if self.sdk_version >= SDK_VERISON_NEW:
+                line_breaker = b"\n"
+            else:
+                line_breaker = b"\r\n"
+        return line_breaker
 
 
 class Minicap(object):
@@ -325,10 +389,9 @@ class Minicap(object):
 
     def install(self, reinstall=False):
         """install or upgrade minicap"""
-        existence_test = self.adb.shell("ls /data/local/tmp/minicap /data/local/tmp/minicap.so").strip().splitlines()
-        if not reinstall and "/data/local/tmp/minicap" in existence_test \
-                         and "/data/local/tmp/minicap.so" in existence_test:
-            output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v")
+        if not reinstall and self.adb.exists_file("/data/local/tmp/minicap") \
+                         and self.adb.exists_file("/data/local/tmp/minicap.so"):
+            output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v 2>&1")
             try:
                 version = int(output.split(":")[1])
             except (ValueError, IndexError):
@@ -339,8 +402,10 @@ class Minicap(object):
             else:
                 LOGGING.debug(output)
                 LOGGING.debug('upgrading minicap to lastest version:%s', self.VERSION)
-
-        self.adb.shell("rm /data/local/tmp/minicap*")
+        try:
+            self.adb.shell("rm /data/local/tmp/minicap*")
+        except AdbShellError:
+            pass
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
         rel = self.adb.getprop("ro.build.version.release")
@@ -351,11 +416,11 @@ class Minicap(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
-        self.adb.cmd("push %s %s/minicap" % (path, device_dir)) 
+        self.adb.cmd("push %s %s/minicap" % (path, device_dir))
         self.adb.shell("chmod 755 %s/minicap" % (device_dir))
 
         path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' % (sdk, abi)).replace("\\", r"\\")
-        self.adb.cmd("push %s %s" % (path, device_dir))    
+        self.adb.cmd("push %s %s" % (path, device_dir))
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
         LOGGING.info("minicap install finished")
 
@@ -401,7 +466,7 @@ class Minicap(object):
         self.localport, device_port = set_up_forward()
         other_opt = "-l" if lazy else ""
         proc = self.adb.shell(
-            "LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s" % (
+            "LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" % (
                 device_port,
                 real_width, real_height,
                 proj_width, proj_height,
@@ -413,7 +478,7 @@ class Minicap(object):
             line = nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("minicap setup error")
-            if "Server start" in line:
+            if b"Server start" in line:
                 break
 
         if proc.poll() is not None:
@@ -445,15 +510,13 @@ class Minicap(object):
         """
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
-        raw_data = self.adb.shell(
-            "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" %
-            (real_width, real_height, proj_width, proj_height, real_orientation)
+        raw_data = self.adb.cmd(
+            "shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" %
+            (real_width, real_height, proj_width, proj_height, real_orientation),
+            not_decode=True,
         )
-        if platform.system() == "Windows":
-            link_breaker = "\r\r\n"
-        else:
-            link_breaker = "\r\n"
-        jpg_data = raw_data.split("for JPG encoder"+link_breaker)[-1].replace(link_breaker, "\n")
+
+        jpg_data = raw_data.split(b"for JPG encoder"+self.adb.line_breaker)[-1].replace(self.adb.line_breaker, b"\n")
         return jpg_data
 
     def get_frames(self, max_cnt=1000000000, adb_port=None, lazy=False):
@@ -473,7 +536,7 @@ class Minicap(object):
         cnt = 0
         while cnt <= max_cnt:
             if lazy:
-                s.send("1")
+                s.send(b"1")
             cnt += 1
             # recv header, count frame_size
             if MINICAPTIMEOUT is not None:
@@ -499,7 +562,11 @@ class Minicap(object):
         """init minicap stream if stream_mode"""
         if self.stream_mode:
             self.frame_gen = self.get_frames(lazy=True)
-            LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
+            if not PY3:
+                LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
+            else:
+                # for py 3
+                LOGGING.debug("minicap header: %s", str(self.frame_gen.__next__()))
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
@@ -507,7 +574,13 @@ class Minicap(object):
             if self.frame_gen is None:
                 self.init_stream()
             try:
-                frame = self.frame_gen.next()
+
+                # support py 3
+                if not PY3:
+                    frame = self.frame_gen.next()
+                else:
+                    frame = self.frame_gen.__next__()
+
                 return frame
             except Exception as err:
                 raise MinicapError(err)
@@ -538,8 +611,7 @@ class Minitouch(object):
             self.setup_client()
 
     def install(self, reinstall=False):
-        output = self.adb.shell("ls /data/local/tmp/minitouch").strip()
-        if not reinstall and output == '/data/local/tmp/minitouch':
+        if not reinstall and self.adb.exists_file('/data/local/tmp/minitouch'):
             LOGGING.debug("install_minitouch skipped")
             return
 
@@ -553,7 +625,7 @@ class Minitouch(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
-        self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir)) 
+        self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir))
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
         LOGGING.info("install_minitouch finished")
 
@@ -565,7 +637,7 @@ class Minitouch(object):
         width, height = self.size['physical_width'], self.size['physical_height']
         # print '__transform', x, y
         # print self.size
-        if width > height and self.size['orientation'] in [1,3]:
+        if width > height and self.size['orientation'] in [1, 3]:
             width, height = height, width
 
         nx = x * self.max_x / width
@@ -585,13 +657,16 @@ class Minitouch(object):
             self.adb.forward("tcp:%s" % localport, "localabstract:%s" % deviceport)
             return localport, deviceport
 
-        self.localport, deviceport  = set_up_forward()
-        p = self.adb.shell("/data/local/tmp/minitouch -n '%s'" % deviceport, not_wait=True)
+        self.localport, deviceport = set_up_forward()
+        p = self.adb.shell("/data/local/tmp/minitouch -n '%s' 2>&1" % deviceport, not_wait=True)
         self.nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:
             line = self.nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("minitouch setup error")
+
+            line = line.decode(get_std_encoding(sys.stdout))
+
             # 识别出setup成功的log，并匹配出max_x, max_y
             m = re.match("Type \w touch device .+ \((\d+)x(\d+) with \d+ contacts\) detected on .+ \(.+\)", line)
             if m:
@@ -609,7 +684,7 @@ class Minitouch(object):
         self.server_proc = p
         return p
 
-    def touch(self, (x, y), duration=0.01):
+    def touch(self, tuple_xy, duration=0.01):
         """
         d 0 10 10 50
         c 
@@ -617,12 +692,13 @@ class Minitouch(object):
         u 0 
         c 
         """
+        x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
-        self.handle("d 0 %d %d 50\nc\n" % (x, y))
+        self.handle(b"d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
-        self.handle("u 0\nc\n")
+        self.handle(b"u 0\nc\n")
 
-    def swipe(self, (from_x, from_y), (to_x, to_y), duration=0.8, steps=5):
+    def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
         d 0 0 0 50
         c
@@ -639,22 +715,26 @@ class Minitouch(object):
         u 0
         c
         """
+
+        from_x, from_y = tuple_from_xy
+        to_x, to_y = tuple_to_xy
+
         from_x, from_y = self.__transform_xy(from_x, from_y)
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration)/(steps+1)
-        self.handle("d 0 %d %d 50\nc\n" % (from_x, from_y))
+        self.handle(b"d 0 %d %d 50\nc\n" % (from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            self.handle("m 0 %d %d 50\nc\n" % (
+            self.handle(b"m 0 %d %d 50\nc\n" % (
                 from_x+(to_x-from_x)*i/steps,
                 from_y+(to_y-from_y)*i/steps,
             ))
             time.sleep(interval)
         for i in range(10):
-            self.handle("m 0 %d %d 50\nc\n" % (to_x, to_y))
+            self.handle(b"m 0 %d %d 50\nc\n" % (to_x, to_y))
         time.sleep(interval)
-        self.handle("u 0\nc\n")
+        self.handle(b"u 0\nc\n")
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
@@ -690,28 +770,28 @@ class Minitouch(object):
             x0, y0 = w / 2, h / 2
         else:
             raise RuntimeError("center should be None or list/tuple, not %s" % repr(center))
-        
+
         x1, y1 = x0 - w * percent / 2, y0 - h * percent / 2
         x2, y2 = x0 + w * percent / 2, y0 + h * percent / 2
         cmds = []
         if in_or_out == 'in':
-            cmds.append("d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
+            cmds.append(b"d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
             for i in range(1, steps):
-                cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
                     x1+(x0-x1)*i/steps, y1+(y0-y1)*i/steps,
                     x2+(x0-x2)*i/steps, y2+(y0-y2)*i/steps
                 ))
-            cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
-            cmds.append("u 0\nu 1\nc\n")
+            cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
+            cmds.append(b"u 0\nu 1\nc\n")
         elif in_or_out == 'out':
-            cmds.append("d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
+            cmds.append(b"d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
             for i in range(1, steps):
-                cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
                     x0+(x1-x0)*i/steps, y0+(y1-y0)*i/steps,
                     x0+(x2-x0)*i/steps, y0+(y2-y0)*i/steps
                 ))
-            cmds.append("m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
-            cmds.append("u 0\nu 1\nc\n")
+            cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
+            cmds.append(b"u 0\nu 1\nc\n")
         else:
             raise RuntimeError("center should be 'in' or 'out', not %s" % repr(in_or_out))
 
@@ -724,12 +804,15 @@ class Minitouch(object):
         cmd = ""
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
-            cmd = "d 0 %d %d 50\nc\n" % (x, y)
+            # support py 3
+            cmd = b"d 0 %d %d 50\nc\n" % (x, y)
         elif args["type"] == "move":
             x, y = self.__transform_xy(args["x"], args["y"])
-            cmd = "m 0 %d %d 50\nc\n" % (x, y)
+            # support py 3
+            cmd = b"m 0 %d %d 50\nc\n" % (x, y)
         elif args["type"] == "up":
-            cmd = "u 0\nc\n"
+            # support py 3
+            cmd = b"u 0\nc\n"
         else:
             raise RuntimeError("invalid operate args: %s" % args)
         self.handle(cmd)
@@ -746,7 +829,7 @@ class Minitouch(object):
             self.safe_send(cmd)
 
     def setup_client_backend(self):
-        self.backend_queue = Queue.Queue()
+        self.backend_queue = queue.Queue()
         self.backend_stop_event = threading.Event()
         self.setup_client()
         t = threading.Thread(target=self._backend_worker)
@@ -767,13 +850,13 @@ class Minitouch(object):
         s = SafeSocket()
         s.connect(("localhost", self.localport))
         s.sock.settimeout(2)
-        header = ""
+        header = b""
         while True:
             try:
                 header += s.sock.recv(4096)  # size is not strict, so use raw socket.recv
             except socket.timeout:
                 raise RuntimeError("minitouch setup client error")
-            if header.count('\n') >= 3:
+            if header.count(b'\n') >= 3:
                 break
         LOGGING.debug("minitouch header:%s", repr(header))
         self.client = s
@@ -788,21 +871,81 @@ class Minitouch(object):
             self.server_proc.kill()
 
 
-def autoretry(func):
-    def f(self, *args, **kwargs):
-        def fail_hook(tries_remaining, e, mydelay):
-            try:
-                self.reconnect()
-            except:
-                traceback.print_exc()
+class Javacap(object):
 
-        @retries(1, hook=fail_hook)
-        def f_with_retries(self, *args, **kwargs):
-            return func(self, *args, **kwargs)
+    """another screencap class, slower than mincap, but better compatibility"""
 
-        ret = f_with_retries(self, *args, **kwargs)
-        return ret
-    return f
+    APP_PATH = "com.netease.nie.yosemite"
+    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Agent"
+    DEVICE_PORT = "moa_javacap"
+
+    def __init__(self, serialno, adb=None, localport=9999):
+        self.serialno = serialno
+        self.adb = adb or ADB(self.serialno)
+        self.localport = localport
+        self.frame_gen = None
+
+    def get_path(self):
+        output = self.adb.shell(['pm', 'path', self.APP_PATH])
+        if 'package:' not in output:
+            raise MoaError('package not found, output:[%s]' % output)
+        return output.split(":")[1].strip()
+
+    def _setup(self):
+        # setup forward
+        @retries(3)
+        def set_up_forward():
+            localport = self.localport or self.adb.get_available_forward_local()
+            self.adb.forward("tcp:%s" % localport, "localabstract:%s" % self.DEVICE_PORT)
+            return localport
+
+        self.localport = set_up_forward()
+        # setup agent proc
+        apkpath = self.get_path()
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "-S100", "-N%s" % self.DEVICE_PORT]
+        proc = self.adb.shell(cmds, not_wait=True)
+        reg_cleanup(proc.kill)
+        # check proc output
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="javacap_sever")
+        while True:
+            line = nbsp.readline(timeout=5.0)
+            if line is None:
+                raise RuntimeError("javacap setup error")
+            if "Agent listens on" in line:
+                break
+            if "Address already in use" in line:
+                break
+
+    def get_frames(self):
+        self._setup()
+        s = SafeSocket()
+        s.connect(("localhost", self.localport))
+        t = s.recv(24)
+        # minicap info
+        yield struct.unpack("<2B5I2B", t)
+
+        while True:
+            # recv header, count frame_size
+            if MINICAPTIMEOUT is not None:
+                header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            else:
+                header = s.recv(4)
+            if header is None:
+                LOGGING.error("javacap header is None")
+                # recv timeout, if not frame updated, maybe screen locked
+                yield None
+            else:
+                frame_size = struct.unpack("<I", header)[0]
+                # recv image data
+                one_frame = s.recv(frame_size)
+                yield one_frame
+        s.close()
+
+    def get_frame(self):
+        if self.frame_gen is None:
+            self.frame_gen = self.get_frames()
+            LOGGING.debug("javacap header: %s", str(self.frame_gen.next()))
+        return self.frame_gen.next()
 
 
 class Android(Device):
@@ -811,65 +954,43 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, minicap_stream=True, minitouch=True, shell_ime=True, init_ime=False):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, minicap=True, minicap_stream=True, minitouch=True, javacap=False, shell_ime=True):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
         self.adb.start_server()
         self.adb.wait_for_device()
+        self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
-        if init_display:
-            self._init_display(props)
-            self.minicap = Minicap(serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
-            self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
+        # init some time consuming env for later use
+        self._init_thread = self._init(self._init_display, minicap, minicap_stream, minitouch, javacap)
         self.shell_ime = shell_ime
-        if shell_ime and init_ime:
-            self.toggle_shell_ime()
 
-    def _init_display(self, props=None):
-        # read props from outside or cached source, to save init time
-        self.props = props or self._load_props()
+    def _init(self, target, *args, **kwargs):
+        t = threading.Thread(target=target, name=target.__name__, args=args, kwargs=kwargs)
+        t.daemon = True
+        t.start()
+        return t
 
-        if "display_info" in self.props:
-            self.size = self.props["display_info"]
-            # self.refreshOrientationInfo()
-
-        # 每次运行时均获取设备的有效区域，此处进行一次get_display_info，但此函数在GT-N7100设备上报错，因此加上兼容：
-        try:
-            self.get_display_info()
-        except Exception:
-            traceback.print_exc()
-
+    def _init_display(self, minicap, minicap_stream, minitouch, javacap):
+        self.get_display_info()
+        self._init_cap(minicap, minicap_stream, javacap)
+        self._init_touch(minitouch)
         self.orientationWatcher()
-        # 注意，minicap在sdk<=16时只能截竖屏的图(无论是否横竖屏)，>=17后才可以截横屏的图
-        self.sdk_version = self.props.get("sdk_version") or self.adb.sdk_version
-        self._dump_props()
 
-    def _load_props(self):
-        try:
-            props = self.adb.shell("cat %s" % self._props_tmp)
-            LOGGING.debug("load props:\n%s", props)
-            props = json.loads(props)
-        except ValueError as err:
-            # traceback.print_exc()
-            LOGGING.debug("load props failed:%s", err.message)
-            props = {}
-        return props
+    def _init_cap(self, minicap=True, minicap_stream=True, javacap=False):
+        self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
+        self.javacap = Javacap(self.serialno, adb=self.adb) if javacap else None
 
-    def _dump_props(self):
-        data = {
-            "display_info": self.size,
-            "sdk_version": self.sdk_version,
-        }
-        data = json.dumps(data).replace(r'"', r'\"')
-        self.adb.shell(r"echo %s > %s" % (data, self._props_tmp))
+    def _init_touch(self, minitouch):
+        self.minitouch = Minitouch(self.serialno, size=self.size, adb=self.adb) if minitouch else None
 
     def _init_requirement_apk(self, apk_path, package):
-        apk_version = int(apkparser.APK(apk_path).androidversion_code)
+        apk_version = apkparser.version(apk_path)
         installed_version = self._get_installed_apk_version(package)
         LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
         if not installed_version or apk_version > installed_version:
-            self.install_app(apk_path, package)
+            self.install_app(apk_path, package, overinstall=True)
 
     def _get_installed_apk_version(self, package):
         package_info = self.shell(['dumpsys', 'package', package])
@@ -900,7 +1021,10 @@ class Android(Device):
         return packages
 
     def path_app(self, package):
-        output = self.adb.shell(['pm', 'path', package])
+        try:
+            output = self.adb.shell(['pm', 'path', package])
+        except AdbShellError:
+            output = ""
         if 'package:' not in output:
             raise MoaError('package not found, output:[%s]' % output)
         return output.split(":")[1].strip()
@@ -948,7 +1072,7 @@ class Android(Device):
         overinstall: 不管应用在不在，直接覆盖安装；
         reinstall: 如果在则先卸载再安装，不在则直接安装。
         """
-        package = package or apkparser.APK(filepath).get_package()
+        package = package or apkparser.packagename(filepath)
         reinstall = kwargs.get('reinstall', False)
         overinstall = kwargs.get('overinstall', False)
         check = kwargs.get('check', True)
@@ -968,9 +1092,6 @@ class Android(Device):
         # 唤醒设备
         self.wake()
 
-        # http://phone.nie.netease.com:7100/#!/control/JTJ4C15710038858
-        # 为了兼容上面那台设备，先调换下面两句的执行顺序，观察一下其他设备
-        # by liuxin 2016.6.17
         self.enable_accessibility_service()
 
         # rm all apks in /data/local/tmp to get enouph space
@@ -987,10 +1108,13 @@ class Android(Device):
 
     def snapshot(self, filename=None, ensure_orientation=True):
         """default not write into file."""
+        self._init_thread.join()
         if self.minicap and self.minicap.stream_mode:
             screen = self.minicap.get_frame_from_stream()
         elif self.minicap:
             screen = self.minicap.get_frame()
+        elif self.javacap:
+            screen = self.javacap.get_frame()
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
@@ -1010,8 +1134,8 @@ class Android(Device):
             aircv.imwrite(filename, screen)
         return screen
 
-    def shell(self, *args):
-        return self.adb.shell(*args)
+    def shell(self, *args, **kwargs):
+        return self.adb.shell(*args, **kwargs)
 
     def keyevent(self, keyname):
         keyname = keyname.upper()
@@ -1040,7 +1164,7 @@ class Android(Device):
             if not hasattr(self, "ime"):
                 self.toggle_shell_ime()
             # shell_ime用于输入中文
-            text = text.decode("utf-8").encode(sys.stdin.encoding or sys.getfilesystemencoding())
+            text = text.decode("utf-8")
             self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
         else:
             self.adb.shell(["input", "text", text])
@@ -1059,8 +1183,8 @@ class Android(Device):
         else:
             self.ime.end()
 
-    @autoretry
     def touch(self, pos, times=1, duration=0.01):
+        self._init_thread.join()
         pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
@@ -1069,8 +1193,8 @@ class Android(Device):
             else:
                 self.adb.touch(pos)
 
-    @autoretry
     def swipe(self, p1, p2, duration=0.5, steps=5):
+        self._init_thread.join()
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
@@ -1079,8 +1203,8 @@ class Android(Device):
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
 
-    @autoretry
     def operate(self, tar):
+        self._init_thread.join()
         x, y = tar.get("x"), tar.get("y")
         if (x, y) != (None, None):
             x, y = self._transformPointByOrientation((x, y))
@@ -1105,6 +1229,7 @@ class Android(Device):
         if not getattr(self, "recording_proc", None):
             raise MoaError("start_recording first")
         self.recording_proc.kill()
+        self.recording_proc.wait()
         self.recording_proc = None
         self.adb.pull(self.recording_file, output)
 
@@ -1158,7 +1283,6 @@ class Android(Device):
     def get_display_info(self):
         self.size = self.getPhysicalDisplayInfo()
         self.size["orientation"] = self.getDisplayOrientation()
-        print self.size
         self.size["rotation"] = self.size["orientation"] * 90
         self.size["max_x"], self.size["max_y"] = self.getEventInfo()
         return self.size
@@ -1181,6 +1305,7 @@ class Android(Device):
         return max_x, max_y
 
     def getCurrentScreenResolution(self):
+        self._init_thread.join()
         w, h = self.size["width"], self.size["height"]
         if self.size["orientation"] in [1, 3]:
             w, h = h, w
@@ -1200,10 +1325,12 @@ class Android(Device):
             info["physical_width"], info["physical_height"] = info["width"], info["height"]
         # 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):
         mRestrictedScreen = self._getRestrictedScreen()
-        if mRestrictedScreen:            info["width"], info["height"] = mRestrictedScreen
+        if mRestrictedScreen:
+            info["width"], info["height"] = mRestrictedScreen
         # 因为获取mRestrictedScreen跟设备的横纵向状态有关，所以此处进行高度、宽度的自定义设定:
         if info["width"] > info["height"]:
             info["height"], info["width"] = info["width"], info["height"]
+        # WTF???????????????????????????????????????????
         # 如果是特殊的设备，进行特殊处理：
         special_device_list = ["5fde825d043782fc", "320496728874b1a5"]
         if self.adb.serialno in special_device_list:
@@ -1217,7 +1344,7 @@ class Android(Device):
         # 获取设备有效内容的分辨率(屏幕内含有软按键、S6 Edge等设备，进行黑边去除.)
         result = None
         # 根据设备序列号拿到对应的mRestrictedScreen参数：
-        dumpsys_info = self.adb.cmd("shell dumpsys window", device=True)
+        dumpsys_info = self.adb.shell("dumpsys window")
         match = re.search(r'mRestrictedScreen=.+', dumpsys_info)
         if match:
             infoline = match.group(0).strip()  # like 'mRestrictedScreen=(0,0) 720x1184'
@@ -1228,8 +1355,20 @@ class Android(Device):
         return result
 
     def _getPhysicalDisplayInfo(self):
+        phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
+        out = self.adb.shell('dumpsys display')
+        m = phyDispRE.search(out)
+        if m:
+            displayInfo = {}
+            for prop in ['width','height']:
+                displayInfo[prop] = int(m.group(prop))
+            for prop in ['density']:
+                # In mPhysicalDisplayInfo density is already a factor, no need to calculate
+                displayInfo[prop] = float(m.group(prop))
+            return displayInfo
+
         ''' Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density'''
-        phyDispRE = re.compile('Physical size: (?P<width>)x(?P<height>).*Physical density: (?P<density>)', re.MULTILINE)
+        phyDispRE = re.compile('Physical size: (?P<width>\d+)x(?P<height>\d+).*Physical density: (?P<density>\d+)', re.S)
         m = phyDispRE.search(self.adb.shell('wm size; wm density'))
         if m:
             displayInfo = {}
@@ -1239,39 +1378,26 @@ class Android(Device):
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
-        phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
-        for line in self.adb.shell('dumpsys display').splitlines():
-            m = phyDispRE.search(line, 0)
-            if m:
-                displayInfo = {}
-                for prop in [ 'width', 'height' ]:
-                    displayInfo[prop] = int(m.group(prop))
-                for prop in [ 'density' ]:
-                    # In mPhysicalDisplayInfo density is already a factor, no need to calculate
-                    displayInfo[prop] = float(m.group(prop))
-                return displayInfo
-
         # This could also be mSystem or mOverscanScreen
         phyDispRE = re.compile('\s*mUnrestrictedScreen=\((?P<x>\d+),(?P<y>\d+)\) (?P<width>\d+)x(?P<height>\d+)')
         # This is known to work on older versions (i.e. API 10) where mrestrictedScreen is not available
         dispWHRE = re.compile('\s*DisplayWidth=(?P<width>\d+) *DisplayHeight=(?P<height>\d+)')
-        for line in self.adb.shell('dumpsys window').splitlines():
-            m = phyDispRE.search(line, 0)
-            if not m:
-                m = dispWHRE.search(line, 0)
-            if m:
-                displayInfo = {}
-                for prop in [ 'width', 'height' ]:
-                    displayInfo[prop] = int(m.group(prop))
-                for prop in [ 'density' ]:
-
-                    d = self.__getDisplayDensity(None, strip=True)
-                    if d:
-                        displayInfo[prop] = d
-                    else:
-                        # No available density information
-                        displayInfo[prop] = -1.0
-                return displayInfo
+        out = self.adb.shell('dumpsys window')
+        m = phyDispRE.search(out, 0)
+        if not m:
+            m = dispWHRE.search(out, 0)
+        if m:
+            displayInfo = {}
+            for prop in ['width','height']:
+                displayInfo[prop] = int(m.group(prop))
+            for prop in ['density']:
+                d = self.__getDisplayDensity(None, strip=True)
+                if d:
+                    displayInfo[prop] = d
+                else:
+                    # No available density information
+                    displayInfo[prop] = -1.0
+            return displayInfo
 
     def __getDisplayDensity(self, key, strip=True):
         BASE_DPI = 160.0
@@ -1303,7 +1429,9 @@ class Android(Device):
         # return -1
         return 0 if self.size["height"] > self.size['width'] else 1
 
-    def _transformPointByOrientation(self, (x, y)):
+    def _transformPointByOrientation(self, tuple_xy):
+
+        x, y = tuple_xy
         """图片坐标转换为物理坐标，即相对于手机物理左上角的坐标(minitouch点击的是物理坐标)."""
         x, y = XYTransformer.up_2_ori(
             (x, y),
@@ -1342,9 +1470,8 @@ class Android(Device):
         reg_cleanup(self.ow_proc.kill)
 
         def _refresh_by_ow():
-            
             line = self.ow_proc.stdout.readline()
-            if line == "":
+            if line == b"":
                 if LOGGING is not None:  # may be None atexit
                     LOGGING.error("orientationWatcher has ended")
                 return None
@@ -1361,7 +1488,7 @@ class Android(Device):
                 if getattr(self, "ow_callback", None):
                     self.ow_callback(ori, *self.ow_callback_args)
 
-        _refresh_by_ow()
+        # _refresh_by_ow()  # do not refresh blockingly
         self._t = threading.Thread(target=_refresh_orientation, args=(self, ))
         self._t.daemon = True
         self._t.start()
@@ -1370,15 +1497,6 @@ class Android(Device):
         """方向变化的时候的回调函数，第一个参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback = ow_callback
         self.ow_callback_args = ow_callback_args
-
-    def reconnect(self):
-        self.adb.disconnect()
-        self.adb._setup()
-        self.minitouch.setup_server()
-        if self.minitouch.backend:
-            self.minitouch.setup_client_backend()
-        else:
-            self.minitouch.setup_client()
 
     def logcat(self, *args, **kwargs):
         return self.adb.logcat(*args, **kwargs)
@@ -1393,7 +1511,10 @@ class XYTransformer(object):
     upright<-->original
     """
     @staticmethod
-    def up_2_ori((x, y), (w, h), orientation):
+    def up_2_ori(tuple_xy, tuple_wh, orientation):
+        x, y = tuple_xy
+        w, h = tuple_wh
+
         if orientation == 1:
             x, y = w - y, x
         elif orientation == 2:
@@ -1403,7 +1524,11 @@ class XYTransformer(object):
         return x, y
 
     @staticmethod
-    def ori_2_up((x, y), (w, h), orientation):
+    def ori_2_up(tuple_xy, tuple_wh, orientation):
+        x, y = tuple_xy
+        w, h = tuple_wh
+
+
         if orientation == 1:
             x, y = y, w - x
         elif orientation == 2:

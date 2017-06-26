@@ -18,8 +18,9 @@ class MetaSettings(type):
         cls = type.__new__(meta, name, bases, class_dict)
         return cls
 
-
-class Settings(object):
+# Python 3 change way of using metaclass
+from six import with_metaclass
+class Settings(with_metaclass(MetaSettings,object)):
 
     __metaclass__ = MetaSettings
 

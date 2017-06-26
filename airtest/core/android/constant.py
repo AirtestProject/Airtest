@@ -13,3 +13,5 @@ ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 YOSEMITE_APK = os.path.join(THISPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
+ADB_SHELL_ENCODING = 'utf-8'
+SDK_VERISON_NEW = 25

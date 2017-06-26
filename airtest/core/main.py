@@ -356,7 +356,13 @@ def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False,
         shift/ctrl/combine only works on windows
     """
     if get_platform() == "Windows":
-        G.DEVICE.keyevent(keyname, escape, combine, shift, ctrl)
+        if not combine:
+            combine = []
+        if ctrl:
+            combine.append("ctrl")
+        if shift:
+            combine.append("shift")
+        G.DEVICE.keyevent(keyname, escape, combine)
     else:
         G.DEVICE.keyevent(keyname)
     delay_after_operation(delay)

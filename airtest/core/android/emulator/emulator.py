@@ -57,7 +57,7 @@ class Emulator(Android):
         self.size["max_x"], self.size["max_y"] = self.getEventInfo()
 
         hwnd = self.emulator_hwnd
-        print 'hwnd', hwnd
+        print('hwnd', hwnd)
         rect = win32gui.GetClientRect(hwnd)
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
@@ -92,7 +92,7 @@ class Emulator(Android):
             # 如果模拟器已经被嵌入到IDE里的话，会找不到句柄的，要重新搜索IDE下面的子窗口句柄才能找到
             self.emulator_hwnd = EmulatorHelper.find_emu_embed_airtestide(self.emulator_name) or 0
         if not self.emulator_hwnd or not self.emulator_name:
-            print 'please launch a emulator first'
+            print('please launch a emulator first')
 
     def wake(self):
         """
@@ -145,7 +145,7 @@ class Emulator(Android):
         try:
             rect = win32gui.GetClientRect(hwnd)
         except:
-            print "snapshot failed"
+            print("snapshot failed")
             raise RuntimeError("please launch a emulator first ")
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
@@ -177,7 +177,7 @@ class Emulator(Android):
         app = QtGui.QApplication(sys.argv)
         # getWindowRect取得的是整个窗口的RECT坐标，left, top, right, bottom
         client_hwnd = self.emulator_hwnd
-        print "snapshot_win", client_hwnd, filename
+        print("snapshot_win", client_hwnd, filename)
         rect = win32gui.GetClientRect(client_hwnd)
         width = abs(rect[2] - rect[0])
         height = abs(rect[3] - rect[1])
@@ -198,9 +198,9 @@ class Emulator(Android):
         gdi.DeleteObject(hBitmap)
 
         ctypes.windll.user32.ReleaseDC(client_hwnd, targetDC)
-        print flashImage.save(filename)
+        print(flashImage.save(filename))
         img = cv2.imread(filename)
-        print img
+        print(img)
         return img
 
     def snapshot(self, filename="tmp.png", ensure_orientation=True):

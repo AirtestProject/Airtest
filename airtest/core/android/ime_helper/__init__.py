@@ -19,12 +19,13 @@ class CustomIme(object):
         self.adb = android_device.adb
         self.apk_path = apk_path
         self.service_name = service_name
-        self.default_ime = self.adb.shell("settings get secure default_input_method")
+        self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
         self.ime_list = self._get_ime_list()
 
     def _get_ime_list(self):
         out = self.adb.shell("ime list -a")
-        m = re.findall("(.*?/.*?):.*?mId.*?flags.*?\s+", out, re.S)
+        # m = re.findall("(.*?/.*?):.*?mId.*?flags.*?\s+", out, re.S)
+        m = re.findall("mId=(.*?/.*?) ", out)
         return m
 
     def __enter__(self):
@@ -38,12 +39,14 @@ class CustomIme(object):
             self.device.enable_accessibility_service()
             self.adb.cmd("install -r %s" % self.apk_path)
             self.device.disable_accessibility_service()
-        self.adb.shell("ime enable %s" % self.service_name)
-        self.adb.shell("ime set %s" % self.service_name)
+        if self.default_ime != self.service_name:
+            self.adb.shell("ime enable %s" % self.service_name)
+            self.adb.shell("ime set %s" % self.service_name)
 
     def end(self):
-        self.adb.shell("ime disable %s" % self.service_name)
-        self.adb.shell("ime set %s" % self.default_ime)
+        if self.default_ime != self.service_name:
+            self.adb.shell("ime disable %s" % self.service_name)
+            self.adb.shell("ime set %s" % self.default_ime)
 
 
 class AdbKeyboardIme(CustomIme):

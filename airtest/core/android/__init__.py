@@ -1,4 +1,4 @@
-from android import ADB, Minicap, Minitouch, Android
+from airtest.core.android.android import ADB, Minicap, Minitouch, Android
 
 try:
     from emulator.emulator import Emulator
