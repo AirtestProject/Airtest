@@ -164,7 +164,6 @@ def exec_script(scriptname, scope=None, root=False, code=None):
             if not PY3:
                 code = code.encode("utf-8")
 
-
     # handle submodule script
     if not root:
         # copy submodule's images into sub_dir
@@ -175,10 +174,9 @@ def exec_script(scriptname, scope=None, root=False, code=None):
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
     # exec code
     if scope:
-        # exec(compile(code, scriptname, 'exec')) in scope
-        exec(compile(code, scriptname, 'exec')) in scope
+        exec(compile(code, scriptpath, 'exec')) in scope
     else:
-        exec(compile(code, scriptname, 'exec')) in globals()
+        exec(compile(code, scriptpath, 'exec')) in globals()
     # finish exec
     SCRIPT_STACK.pop()
     return scriptpath
