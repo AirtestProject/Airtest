@@ -14,10 +14,10 @@ class MetaDevice(type):
         register_class(name, cls)
         return cls
 
-
-class Device(object):
+from six import with_metaclass
+class Device(with_metaclass(MetaDevice,object)):
     """base class for test device"""
-    __metaclass__ = MetaDevice
+    # __metaclass__ = MetaDevice
 
     def __init__(self):
         super(Device, self).__init__()

@@ -35,6 +35,7 @@ class TestReportOnAndroid(unittest.TestCase):
         if os.path.exists(OUTPUT_GIF):
             os.remove(OUTPUT_GIF)
 
+
     def test_cli(self):
         cmd = "python -m airtest.report.report_one %s" % (TEST_OWL,)
         proc = subprocess.Popen(cmd, shell=True)

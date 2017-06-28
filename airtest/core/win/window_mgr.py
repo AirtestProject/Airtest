@@ -113,7 +113,12 @@ class WindowMgr(object):
         def _wnd_enum_callback(hwnd, h_wnd=None):
             if hwnd == h_wnd:
                 window_title = win32gui.GetWindowText(hwnd)
-                window_title = window_title.decode("gbk")
+
+                # fix py 3
+                try:
+                    window_title = window_title.decode("gbk")
+                except AttributeError:
+                    pass 
                 self._wnd_title_toget = window_title
                 # print window_title.encode("utf8")
 
@@ -133,11 +138,16 @@ class WindowMgr(object):
     def _window_enum_callback(self, hwnd, wildcard):
         '''Pass to win32gui.EnumWindows() to check all the opened windows'''
         window_title = win32gui.GetWindowText(hwnd)
+
         try:
             window_title = window_title.decode("gbk")
         except:
             import chardet
-            print "-*-*- windows-title codec:", chardet.detect(window_title)
+            # support py3
+            if isinstance(window_title, bytes):
+                print("-*-*- windows-title codec:", chardet.detect(window_title))
+            else:
+                pass
         # print "%s %s" % (repr(window_title), repr(wildcard))
         if window_title:
             try:
@@ -147,7 +157,9 @@ class WindowMgr(object):
             if m is not None:
                 self._handle_found = hwnd
                 self._handle_list_found.append(hwnd)
-                print window_title.encode("utf8")
+
+                # "UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)" 
+                #print(window_title.encode("utf8"))
 
     def find_window_wildcard(self, wildcard):
         self._handle_found = None
@@ -233,6 +245,8 @@ class WindowMgr(object):
     def set_foreground(self):
         """put the window in the foreground"""
         # 如果窗口最小化，那么需要将窗口正常显示出来:
+        if not self.handle:
+            return
         if win32gui.IsIconic(self.handle):
             win32gui.ShowWindow(self.handle, 4)
         time.sleep(0.01)
@@ -241,14 +255,17 @@ class WindowMgr(object):
 
     def get_window_pos(self):
         """get window pos in (x0, y0, x1, y1)"""
-        return win32gui.GetWindowRect(self.handle)
+        if self.handle:
+            return win32gui.GetWindowRect(self.handle)
 
     def set_window_pos(self,x,y):
         rec = self.get_window_pos()
-        return win32gui.SetWindowPos(self.handle,win32con.HWND_TOP,x,y,rec[2]-rec[0],rec[3]-rec[1],0)
+        if self.handle:
+            return win32gui.SetWindowPos(self.handle,win32con.HWND_TOP,x,y,rec[2]-rec[0],rec[3]-rec[1],0)
 
     def get_window_title(self):
-        return win32gui.GetWindowText(self.handle)
+        if self.handle:    
+            return win32gui.GetWindowText(self.handle)
 
 
 # windows双屏-单屏的截图支持
@@ -303,7 +320,7 @@ def get_resolution(hwnd=None):
 def get_window_pos(window_title):
     w = WindowMgr()
     w.find_window_wildcard(window_title)
-    window = w._handle
+    window = w._handle_found
     if not window:
         raise Exception("window not found")
     pos = win32gui.GetWindowRect(window)

@@ -9,9 +9,12 @@ class SafeSocket(object):
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         else:
             self.sock = sock
-        self.buf = ""
+        self.buf = b""
 
-    def connect(self, (host, port)):
+    # PEP 3113 -- Removal of Tuple Parameter Unpacking
+    # https://www.python.org/dev/peps/pep-3113/
+    def connect(self, tuple_hp):
+        host, port = tuple_hp
         self.sock.connect((host, port))
 
     def send(self, msg):
@@ -25,7 +28,7 @@ class SafeSocket(object):
     def recv(self, size):
         while len(self.buf) < size:
             trunk = self.sock.recv(min(size-len(self.buf), 4096))
-            if trunk == "":
+            if trunk == b"":
                 raise socket.error("socket connection broken")
             self.buf += trunk
         ret, self.buf = self.buf[:size], self.buf[size:]
@@ -45,7 +48,7 @@ class SafeSocket(object):
         self.sock.settimeout(0)
         try:
             ret = self.recv(size)
-        except socket.error, e:
+        except(socket.error) as e:
             #10035 no data when nonblocking
             if e.args[0] == 10035: #errno.EWOULDBLOCK: 尼玛errno似乎不一致
                 ret = None

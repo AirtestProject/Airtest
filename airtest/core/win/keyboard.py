@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """模拟键盘输入."""
 
-from keycode import VK_CODE, SHIFT_KCODE
+from airtest.core.win.keycode import VK_CODE, SHIFT_KCODE
 import time
 import win32api
 import win32con

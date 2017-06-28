@@ -233,7 +233,7 @@ class IOS(Device):
             self.refreshOrientationInfo()
             self._size["height"], self._size["width"] = h, w
             self._wda_sca = 1.0 * min(self._size["height"], self._size["width"]) / min(self.session.window_size())
-            print self._size
+            print(self._size)
         return self._size
 
     def _try_to_finish_alert(self, method, times=1, interval=2):
@@ -277,8 +277,8 @@ if __name__ == "__main__":
     ios = IOS('http://10.251.81.173:8100/')
     ios.wake()
     # ios._try_to_finish_alert('dismiss')
-    print ios.list_app()
-    print ios.start_app('com.netease.mhxyhtb')
+    print(ios.list_app())
+    print(ios.start_app('com.netease.mhxyhtb'))
     # ios.uninstall_app('com.netease.oa2')
     # # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr', com.netease.mhxyhtb)
     # ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')

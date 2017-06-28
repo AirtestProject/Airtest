@@ -3,17 +3,7 @@ import os
 import sys
 import string
 from shlex import shlex
-
-
-# Useful for very coarse version differentiation.
-PY3 = sys.version_info[0] == 3
-
-if PY3:
-    from configparser import ConfigParser
-    text_type = str
-else:
-    from ConfigParser import SafeConfigParser as ConfigParser
-    text_type = unicode
+from airtest.core.utils.compat import ConfigParser, text_type
 
 
 class UndefinedValueError(Exception):

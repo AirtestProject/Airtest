@@ -718,8 +718,10 @@ def main():
         print(keys)
 
         for k in keys:
-            k.Run()
-            time.sleep(.1)
+            # TODO: need fix "AttributeError: 'str' object has no attribute 'Run'"
+            if not isinstance(k, str):
+                k.Run()
+                time.sleep(.1)
         print()
 
 if __name__ == "__main__":

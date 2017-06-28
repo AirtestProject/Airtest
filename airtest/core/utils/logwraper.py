@@ -38,7 +38,7 @@ class MoaLogger(object):
     def log(self, tag, data, in_stack=True):
         ''' Not thread safe '''
         if self.debug:
-            print tag, data
+            print(tag, data)
 
         if in_stack:
             depth = len(self.running_stack)
@@ -60,6 +60,7 @@ class MoaLogger(object):
 
 def Logwrap(f, logger):
     LOGGER = logger
+
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -76,7 +77,7 @@ def Logwrap(f, logger):
             raise
         else:
             time_used = time.time() - start
-            print '>'*len(LOGGER.running_stack), f.__name__, 'Time used:', "%.3f" % time_used, "s"
+            print('>'*len(LOGGER.running_stack), f.__name__, 'Time used:', "%.3f" % time_used, "s")
             sys.stdout.flush()
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(LOGGER.extra_log)

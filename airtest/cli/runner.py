@@ -4,17 +4,17 @@
 import re
 import os
 import sys
+import io
 import shutil
 import traceback
-from urllib import unquote
+
+# Support python 3
+from airtest.core.utils.compat import unquote, PY3
+
 from airtest.core.main import *
 from airtest.core.error import MinicapError, MinitouchError, AdbError
 from airtest.core.helper import log, logwrap
 from airtest.core.settings import Settings as ST
-try:
-    from minitest.qa import UI, MO, QC, Base as minitest
-except ImportError as e:
-    minitest = None
 
 
 SCRIPTHOME = None
@@ -28,15 +28,15 @@ def run_script(args):
     # loading util file
     if args.utilfile:
         if os.path.isfile(args.utilfile):
-            print "try loading:", args.utilfile
+            print("try loading:", args.utilfile)
             sys.path.append(os.path.dirname(args.utilfile))
             utilcontent = open(args.utilfile).read()
             exec(compile(utilcontent, args.utilfile, 'exec')) in globals()
         else:
-            print "file does not exist:", os.path.abspath(args.utilfile)
+            print("file does not exist:", os.path.abspath(args.utilfile))
 
     if args.setsn is not None:
-        print "set_serialno", args.setsn
+        print("set_serialno", args.setsn)
         minicap = not args.nominicap
         minitouch = not args.nominitouch
         if args.setsn == "":
@@ -47,16 +47,14 @@ def run_script(args):
             for sn in args.setsn.split(","):
                 set_serialno(sn, minicap=minicap, minitouch=minitouch)
         set_current(0)
-        if minitest:
-            minitest.set_global()
 
     if args.setudid is not None:  # modified by gzlongqiumeng
-        print "set_udid", args.setudid
+        print("set_udid", args.setudid)
         udid = args.setudid if isinstance(args.setudid, str) else None
         set_udid(udid)
 
     if args.setwin is not None:
-        print "set_windows", args.setwin
+        print("set_windows", args.setwin)
         if args.setwin == "":
             for i in range(args.devcount):
                 # auto choose one window
@@ -67,7 +65,7 @@ def run_script(args):
         set_current(0)
 
     if args.setemulator:
-        print "set_emulator", args.setemulator  # add by zq
+        print("set_emulator", args.setemulator)  # add by zq
         emu_name = args.setemulator if isinstance(args.setemulator, str) else None
         if args.setadb:
             addr = args.setadb.split(":")
@@ -76,7 +74,7 @@ def run_script(args):
             set_emulator(emu_name)
 
     if args.kwargs:
-        print "load kwargs", repr(args.kwargs)
+        print("load kwargs", repr(args.kwargs))
         for kv in args.kwargs.split(","):
             k, v = kv.split("=")
             if k == "findoutside":  # if extra arg is findoutside, set airtest-FINDOUTSIDE
@@ -87,13 +85,13 @@ def run_script(args):
 
     # run script
     if args.log is True:
-        print "save log & screen in script dir"
+        print("save log & screen in script dir")
         ST.set_logdir(args.script)
     elif args.log:
-        print "save log & screen in '%s'" % args.log
+        print("save log & screen in '%s'" % args.log)
         ST.set_logdir(args.log)
     else:
-        print "do not save log & screen"
+        print("do not save log & screen")
     set_logfile()
     set_screendir()
 
@@ -155,18 +153,17 @@ def exec_script(scriptname, scope=None, root=False, code=None):
     SCRIPT_STACK.append(scriptname)
 
     # start exec
-    print "exec_script", scriptpath
+    print("exec_script", scriptpath)
     # read code
     if code is None:
         pyfilename = os.path.basename(scriptname).replace(SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
-        # code = open(pyfilepath).read()
-        try:
-            with open(pyfilepath) as pyfile:
-                code = pyfile.read()
-        except Exception as err:
-            traceback.print_exc()
-            code = ""
+
+        with io.open(pyfilepath, encoding="utf-8") as pyfile:
+            code = pyfile.read()
+            if not PY3:
+                code = code.encode("utf-8")
+
 
     # handle submodule script
     if not root:
@@ -262,36 +259,36 @@ def _exec_script_for_forever(args, script, code=None):
     except (MinitouchError, MinicapError, AdbError) as e:
         raise e
     except:
-        print "exec script error", repr(script)
+        print("exec script error", repr(script))
         sys.stderr.write(traceback.format_exc())
     else:
-        print "exec script end", repr(script)
+        print("exec script end", repr(script))
 
 
 def run_forever(args):
     """run script interactively in forever mode, to reduce env setup time"""
     while True:
-        print "wait for stdin..."
+        print("wait for stdin...")
         sys.stdout.flush()
         input_line = sys.stdin.readline().strip()
-        print 'get input_line', input_line
+        print('get input_line', input_line)
         if input_line.startswith("c "):
             _, script, code = input_line.split(" ")
             code = unquote(code)  # decode code
-            print "exec code %s" % repr(code)
+            print("exec code %s" % repr(code))
 
             _exec_script_for_forever(args, script, code=code)
         elif input_line.startswith("f "):
             _, script = input_line.split(" ")
             script = input_line.strip()[2:]
-            print "exec script %s" % repr(script)
+            print("exec script %s" % repr(script))
 
             _exec_script_for_forever(args, script)
         elif input_line == "exit":
-            print "end of stdin"
+            print("end of stdin")
             sys.exit(0)
         else:
-            print "invalid input %s" % repr(input_line)
+            print("invalid input %s" % repr(input_line))
 
         sys.stdout.flush()
         sys.stderr.flush()

@@ -25,6 +25,9 @@ def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
         def f2(*args, **kwargs):
             mydelay = delay
             tries = range(max_tries)
+            #support Python conver range obj to list obj
+            tries = list(tries)
+            
             tries.reverse()
             for tries_remaining in tries:
                 try:

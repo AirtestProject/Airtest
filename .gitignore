@@ -59,3 +59,10 @@ screen.png
 log.txt
 img_record
 tests/test_owl.owl/*_sub/
+
+#docs
+docs/_build
+
+#pipenv
+Pipfile
+Pipfile.lock

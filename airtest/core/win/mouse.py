@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from ctypes import *
-from keycode import VK_CODE, SHIFT_KCODE
+from airtest.core.win.keycode import VK_CODE, SHIFT_KCODE
 import time
 import win32con
 import win32api
@@ -63,7 +63,12 @@ def mouse_move(x,y):
     x, y = int(x), int(y)  # 只接受int
     windll.user32.SetCursorPos(x, y)
 
-def mouse_drag((x0, y0), (x1, y1), duration=0.3, steps=10):
+# PEP 3113 -- Removal of Tuple Parameter Unpacking
+# https://www.python.org/dev/peps/pep-3113/
+def mouse_drag(tuple_x0y0, tuple_x1y1, duration=0.3, steps=10):
+    x0, y0 = tuple_x0y0
+    x1, y1 = tuple_x1y1
+
     mouse_move(x0, y0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
     interval = float(duration) / (steps + 1)
