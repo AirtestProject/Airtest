@@ -14,7 +14,13 @@ def extarct_param(param_name, pyfilecontent):
     if search_result is not None:
         result_item = search_result.group()
         result_str = result_item.split("=")[-1].strip(" \'\"\r\n")
-        return result_str.encode("utf8")
+        # 部分owl脚本提取后编码出错，此处做一下错误兼容
+        try:
+            result_str = result_str.encode("utf-8")
+        except:
+            pass
+
+        return result_str
     else:
         return ""
 
