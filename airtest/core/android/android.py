@@ -185,7 +185,11 @@ class ADB(object):
             out = self.raw_shell(cmd)
             out = out.strip().splitlines()
             stdout = "\n".join(out[:-1])
-            returncode = int(out[-1])
+            try:
+                # cat命令没有返回值
+                returncode = int(out[-1])
+            except ValueError:
+                returncode = 0
             if returncode > 0:
                 raise AdbShellError("", stdout)
             return stdout
