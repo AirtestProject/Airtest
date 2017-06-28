@@ -1,9 +1,10 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 __author__ = 'wjjn3033'
 
 import os
 import re
 import json
+import traceback
 
 
 def extarct_param(param_name, pyfilecontent):
@@ -14,12 +15,6 @@ def extarct_param(param_name, pyfilecontent):
     if search_result is not None:
         result_item = search_result.group()
         result_str = result_item.split("=")[-1].strip(" \'\"\r\n")
-        # 部分owl脚本提取后编码出错，此处做一下错误兼容
-        try:
-            result_str = result_str.encode("utf-8")
-        except:
-            pass
-
         return result_str
     else:
         return ""
@@ -33,13 +28,14 @@ def get_script_info(script_path):
     try:
         with open(pyfilepath) as pyfile:
             pyfilecontent = pyfile.read()
-            # extract params value from script:
-            author = extarct_param("__author__", pyfilecontent)
-            title = extarct_param("__title__", pyfilecontent)
-            desc = extarct_param("__desc__", pyfilecontent)
-    except:
+    except Exception:
+        traceback.print_exc()
         author, title, desc = "", "", ""
+    else:
+        # extract params value from script:
+        author = extarct_param("__author__", pyfilecontent)
+        title = extarct_param("__title__", pyfilecontent)
+        desc = extarct_param("__desc__", pyfilecontent)
 
     result_json = {"author": author, "title": title, "desc": desc}
-    # return json.dumps(result_json, ensure_ascii=False)
     return json.dumps(result_json)
