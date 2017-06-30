@@ -182,14 +182,15 @@ class ADB(object):
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
             cmd = split_cmd(cmd) + [";", "echo", "$?"]
-            out = self.raw_shell(cmd)
-            out = out.strip().splitlines()
-            stdout = "\n".join(out[:-1])
+            out = self.raw_shell(cmd).rstrip()
             try:
-                # cat命令没有返回值
+                # 返回值解析错误
                 returncode = int(out[-1])
             except ValueError:
                 returncode = 0
+                stdout = out
+            else:
+                stdout = out[:-1]
             if returncode > 0:
                 raise AdbShellError("", stdout)
             return stdout
