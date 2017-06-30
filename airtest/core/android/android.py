@@ -1240,13 +1240,12 @@ class Android(Device):
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
-        lines = dat.replace('\r', '').splitlines()
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(lines[1])
+        m = activityRE.search(dat)
         if m:
             return (m.group(1), m.group(2), m.group(3))
         else:
-            warnings.warn("NO MATCH:" + lines[1])
+            warnings.warn("NO MATCH:" + dat)
             return None
 
     def get_top_activity_name(self):
