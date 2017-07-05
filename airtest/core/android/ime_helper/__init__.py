@@ -53,9 +53,7 @@ class CustomIme(object):
     def start(self):
         if self.service_name not in self.ime_list:
             if self.apk_path:
-                self.device.enable_accessibility_service()
-                self.adb.cmd("install -r %s" % self.apk_path)
-                self.device.disable_accessibility_service()
+                self.device.install_app(self.apk_path)
         if self.default_ime != self.service_name:
             self.adb.shell("ime enable %s" % self.service_name)
             self.adb.shell("ime set %s" % self.service_name)
