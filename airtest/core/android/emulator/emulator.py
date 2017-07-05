@@ -3,7 +3,8 @@
 
 import win32gui
 import re
-from airtest.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch, AdbKeyboardIme
+from airtest.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch
+from airtest.core.android.ime_helper import AdbKeyboardIme
 from airtest.aircv import aircv
 from android_emulator import EmulatorHelper
 

@@ -1166,14 +1166,15 @@ class Android(Device):
 
     def text(self, text, enter=True):
         if self.shell_ime:
-            # 开启shell_ime
-            if not hasattr(self, "ime"):
-                self.toggle_shell_ime()
             # shell_ime用于输入中文
-            text = text.decode("utf-8")
-            self.adb.shell("am broadcast -a ADB_INPUT_TEXT --es msg '%s'" % text)
+            if not hasattr(self, "ime"):
+
+                # 开启shell_ime
+                self.toggle_shell_ime()
+            self.ime.text(text)
         else:
             self.adb.shell(["input", "text", text])
+
         # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])

@@ -1,3 +1,6 @@
+# coding=utf-8
+
+
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch
 from airtest.core.error import MoaError
 import axmlparserpy.apk as apkparser
@@ -93,7 +96,7 @@ class TestAndroid(unittest.TestCase):
         self.android.home()
     
     def test_text(self):
-        self.android.text('test text')
+        self.android.text(r'text adb +.-*/\\ 中文')
 
     def test_toggle_shell_ime(self):
         self.android.toggle_shell_ime()
