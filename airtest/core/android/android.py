@@ -17,7 +17,7 @@ import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, AdbShellError, MinicapError, MinitouchError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger, get_std_encoding
-from airtest.core.android.ime_helper import AdbKeyboardIme
+from airtest.core.android.ime_helper import YosemiteIme
 from airtest.core.android.constant import *
 from airtest.core.utils.compat import apkparser, PY3, queue
 ADBPATH = get_adb_path()
@@ -1183,7 +1183,7 @@ class Android(Device):
         """切换到shell的输入法，用于text"""
         self.shell_ime = True
         if not hasattr(self, "ime"):
-            self.ime = AdbKeyboardIme(self)
+            self.ime = YosemiteIme(self)
         if on:
             self.ime.start()
             reg_cleanup(self.ime.end)

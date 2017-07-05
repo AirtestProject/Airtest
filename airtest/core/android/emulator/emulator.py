@@ -4,7 +4,7 @@
 import win32gui
 import re
 from airtest.core.android.android import Android, DEFAULT_ADB_SERVER, ADB, Minitouch
-from airtest.core.android.ime_helper import AdbKeyboardIme
+from airtest.core.android.ime_helper import YosemiteIme
 from airtest.aircv import aircv
 from android_emulator import EmulatorHelper
 
@@ -33,7 +33,7 @@ class Emulator(Android):
             self._init_display(props)
             self.minitouch = Minitouch(serialno, size=self.size, adb=self.adb) if minitouch else None
         if init_ime:
-            self.ime = AdbKeyboardIme(self)
+            self.ime = YosemiteIme(self)
             self.toggle_shell_ime()
 
     def _init_display(self, props=None):

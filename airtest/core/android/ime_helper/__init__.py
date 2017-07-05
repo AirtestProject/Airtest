@@ -67,21 +67,11 @@ class CustomIme(object):
         raise NotImplementedError
 
 
-# deprecated
-class AdbKeyboardIme(CustomIme):
-    """支持中文输入"""
-    def __init__(self, android_device):
-        super(AdbKeyboardIme, self).__init__(android_device, ADBKEYBOARD_IME_PATH, ADBKEYBOARD_SERVICE)
-
-    def text(self, value):
-        value = ensure_unicode(value)
-        self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
-
-
 class YosemiteIme(CustomIme):
     def __init__(self, android_device):
         super(YosemiteIme, self).__init__(android_device, None, YOSEMITE_IME_SERVICE)
 
     def text(self, value):
+        # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
