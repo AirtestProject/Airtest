@@ -692,10 +692,10 @@ class Minitouch(object):
     def touch(self, tuple_xy, duration=0.01):
         """
         d 0 10 10 50
-        c 
-        <wait in your own code>  
-        u 0 
-        c 
+        c
+        <wait in your own code>
+        u 0
+        c
         """
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
@@ -968,7 +968,7 @@ class Android(Device):
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         # init some time consuming env for later use
-        self._init_thread = self._init(self._init_display, minicap, minicap_stream, minitouch, javacap)
+        self._init_display(minicap, minicap_stream, minitouch, javacap)
         self.shell_ime = shell_ime
 
     def _init(self, target, *args, **kwargs):
@@ -1113,7 +1113,6 @@ class Android(Device):
 
     def snapshot(self, filename=None, ensure_orientation=True):
         """default not write into file."""
-        self._init_thread.join()
         if self.minicap and self.minicap.stream_mode:
             screen = self.minicap.get_frame_from_stream()
         elif self.minicap:
@@ -1191,7 +1190,6 @@ class Android(Device):
             self.ime.end()
 
     def touch(self, pos, times=1, duration=0.01):
-        self._init_thread.join()
         pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
@@ -1201,7 +1199,6 @@ class Android(Device):
                 self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5):
-        self._init_thread.join()
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
@@ -1211,7 +1208,6 @@ class Android(Device):
             self.adb.swipe(p1, p2, duration=duration)
 
     def operate(self, tar):
-        self._init_thread.join()
         x, y = tar.get("x"), tar.get("y")
         if (x, y) != (None, None):
             x, y = self._transformPointByOrientation((x, y))
@@ -1311,7 +1307,6 @@ class Android(Device):
         return max_x, max_y
 
     def getCurrentScreenResolution(self):
-        self._init_thread.join()
         w, h = self.size["width"], self.size["height"]
         if self.size["orientation"] in [1, 3]:
             w, h = h, w
