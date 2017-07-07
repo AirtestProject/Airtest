@@ -15,3 +15,5 @@ YOSEMITE_APK = os.path.join(THISPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
 ADB_SHELL_ENCODING = 'utf-8'
 SDK_VERISON_NEW = 25
+POCO_APK = os.path.join(THISPATH, "apks", "pocoservice.apk")
+POCO_SERVICE = "com.netease.open.pocoservice"

@@ -13,6 +13,7 @@ import threading
 import platform
 import random
 import traceback
+import requests
 import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, AdbShellError, MinicapError, MinitouchError
@@ -267,6 +268,12 @@ class ADB(object):
             if "tcp:%s" % port not in localports:
                 return port
         raise RuntimeError("No available adb forward local port for %s times" % (times))
+
+    @retries(3)
+    def setup_forward(self, device_port):
+        localport = self.get_available_forward_local()
+        self.forward("tcp:%s" % localport, device_port)
+        return localport, device_port
 
     def remove_forward(self, local=None):
         """adb forward --remove"""
@@ -1507,6 +1514,23 @@ class Android(Device):
 
     def pinch(self, *args, **kwargs):
         return self.minitouch.pinch(*args, **kwargs)
+
+    def start_poco_service(self):
+        # check installed
+        try:
+            self.check_app(POCO_SERVICE)
+        except:
+            self.install_app(POCO_APK)
+        self.shell("settings put secure enabled_accessibility_services com.netease.open.pocoservice/.MyAccessibilityService")
+        self.shell("settings put secure accessibility_enabled 1")
+        local, remote = self.adb.setup_forward("tcp:10080")
+        self.poco_service_port = local
+
+    def get_ui_by_poco(self):
+        if getattr(self, "poco_service_port", None) is None:
+            self.start_poco_service()
+        r = requests.get("http://localhost:%s/hierarchy" % self.poco_service_port)
+        return r.text
 
 
 class XYTransformer(object):
