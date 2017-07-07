@@ -1096,7 +1096,7 @@ class Android(Device):
 
         # 唤醒设备
         self.wake()
-
+        # 用accessibility点掉所有安装确认窗口
         self.enable_accessibility_service()
 
         # rm all apks in /data/local/tmp to get enouph space
@@ -1107,6 +1107,9 @@ class Android(Device):
             self.adb.install(filepath, overinstall=overinstall)
         if check:
             self.check_app(package)
+
+        # rm all apks in /data/local/tmp to free space
+        self.adb.shell("rm -f /data/local/tmp/*.apk")
 
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
