@@ -13,6 +13,7 @@ import threading
 import platform
 import random
 import traceback
+import requests
 import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, AdbShellError, MinicapError, MinitouchError
@@ -267,6 +268,12 @@ class ADB(object):
             if "tcp:%s" % port not in localports:
                 return port
         raise RuntimeError("No available adb forward local port for %s times" % (times))
+
+    @retries(3)
+    def setup_forward(self, device_port):
+        localport = self.get_available_forward_local()
+        self.forward("tcp:%s" % localport, device_port)
+        return localport, device_port
 
     def remove_forward(self, local=None):
         """adb forward --remove"""
@@ -692,10 +699,10 @@ class Minitouch(object):
     def touch(self, tuple_xy, duration=0.01):
         """
         d 0 10 10 50
-        c 
-        <wait in your own code>  
-        u 0 
-        c 
+        c
+        <wait in your own code>
+        u 0
+        c
         """
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
@@ -968,7 +975,7 @@ class Android(Device):
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         # init some time consuming env for later use
-        self._init_thread = self._init(self._init_display, minicap, minicap_stream, minitouch, javacap)
+        self._init_display(minicap, minicap_stream, minitouch, javacap)
         self.shell_ime = shell_ime
 
     def _init(self, target, *args, **kwargs):
@@ -1096,7 +1103,7 @@ class Android(Device):
 
         # 唤醒设备
         self.wake()
-
+        # 用accessibility点掉所有安装确认窗口
         self.enable_accessibility_service()
 
         # rm all apks in /data/local/tmp to get enouph space
@@ -1108,12 +1115,14 @@ class Android(Device):
         if check:
             self.check_app(package)
 
+        # rm all apks in /data/local/tmp to free space
+        self.adb.shell("rm -f /data/local/tmp/*.apk")
+
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
 
     def snapshot(self, filename=None, ensure_orientation=True):
         """default not write into file."""
-        self._init_thread.join()
         if self.minicap and self.minicap.stream_mode:
             screen = self.minicap.get_frame_from_stream()
         elif self.minicap:
@@ -1191,7 +1200,6 @@ class Android(Device):
             self.ime.end()
 
     def touch(self, pos, times=1, duration=0.01):
-        self._init_thread.join()
         pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
@@ -1201,7 +1209,6 @@ class Android(Device):
                 self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5):
-        self._init_thread.join()
         p1 = self._transformPointByOrientation(p1)
         p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
@@ -1211,7 +1218,6 @@ class Android(Device):
             self.adb.swipe(p1, p2, duration=duration)
 
     def operate(self, tar):
-        self._init_thread.join()
         x, y = tar.get("x"), tar.get("y")
         if (x, y) != (None, None):
             x, y = self._transformPointByOrientation((x, y))
@@ -1311,7 +1317,6 @@ class Android(Device):
         return max_x, max_y
 
     def getCurrentScreenResolution(self):
-        self._init_thread.join()
         w, h = self.size["width"], self.size["height"]
         if self.size["orientation"] in [1, 3]:
             w, h = h, w
@@ -1509,6 +1514,23 @@ class Android(Device):
 
     def pinch(self, *args, **kwargs):
         return self.minitouch.pinch(*args, **kwargs)
+
+    def start_poco_service(self):
+        # check installed
+        try:
+            self.check_app(POCO_SERVICE)
+        except:
+            self.install_app(POCO_APK)
+        self.shell("settings put secure enabled_accessibility_services com.netease.open.pocoservice/.MyAccessibilityService")
+        self.shell("settings put secure accessibility_enabled 1")
+        local, remote = self.adb.setup_forward("tcp:10080")
+        self.poco_service_port = local
+
+    def get_ui_by_poco(self):
+        if getattr(self, "poco_service_port", None) is None:
+            self.start_poco_service()
+        r = requests.get("http://localhost:%s/hierarchy" % self.poco_service_port)
+        return r.text
 
 
 class XYTransformer(object):
