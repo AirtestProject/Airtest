@@ -3,12 +3,9 @@ __author__ = 'lxn3032'
 
 
 import re
-import os
 import six
 
 
-ADBKEYBOARD_IME_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], "AdbKeyboard.apk")
-ADBKEYBOARD_SERVICE = "com.android.adbkeyboard/.AdbIME"
 YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
 
 
