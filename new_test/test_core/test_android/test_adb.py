@@ -114,9 +114,6 @@ class TestADB(unittest.TestCase):
     def test_get_status(self):
         self.assertIsNotNone(self.adb.get_status())
 
-
-
-
     # need real phone
     def test_wait_for_device(self):
         self.adb.wait_for_device()
