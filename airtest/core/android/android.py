@@ -888,7 +888,7 @@ class Javacap(object):
     """another screencap class, slower than mincap, but better compatibility"""
 
     APP_PATH = "com.netease.nie.yosemite"
-    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Agent"
+    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
     DEVICE_PORT = "moa_javacap"
 
     def __init__(self, serialno, adb=None, localport=9999):
@@ -914,7 +914,7 @@ class Javacap(object):
         self.localport = set_up_forward()
         # setup agent proc
         apkpath = self.get_path()
-        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "-S100", "-N%s" % self.DEVICE_PORT]
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT]
         proc = self.adb.shell(cmds, not_wait=True)
         reg_cleanup(proc.kill)
         # check proc output
@@ -923,10 +923,10 @@ class Javacap(object):
             line = nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("javacap setup error")
-            if "Agent listens on" in line:
+            if "Capture server listening on" in line:
                 break
             if "Address already in use" in line:
-                break
+                raise RuntimeError("javacap setup error")
 
     def get_frames(self):
         self._setup()
