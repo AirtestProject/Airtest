@@ -74,6 +74,31 @@ class MoaLogDisplay(object):
 
         return step
 
+    def analyse_snapshot(self):
+        """
+        单独提取所有snapshot标签
+        Returns
+        -------
+        [{"msg": "截图描述", "snapshot": "截图文件所在路径"}]
+        """
+        ret = []
+        step = {}
+        for log in self.log:
+            log.update(log["data"])
+            if log['depth'] in step:
+                step[log['depth']].update(log)
+            else:
+                step[log['depth']] = log
+
+            if log['depth'] == 1:
+                if step[1]['name'] == 'snapshot':
+                    #snapshot = os.path.join(self.log_root, step[2]['screen'])
+                    snapshot = step[2]['screen']
+                    msg = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
+                    ret.append({'snapshot': snapshot, 'msg': msg})
+                step = {}
+        return ret
+
     def translate(self, step):
         """
         按照depth = 1 的name来分类
@@ -104,7 +129,9 @@ class MoaLogDisplay(object):
 
             if step['type'] == 'snapshot':
                 # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
-                step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+                #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+                step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
+                step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
                 if step['type'] in self.img_type:
                     step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
@@ -205,7 +232,7 @@ class MoaLogDisplay(object):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            # "snapshot":"截图",
+            "snapshot": u"截图描述：%s" % step.get('text', ''),
             # "_loop_find":"寻找目标位置",
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos', '')), step.get('swipe', '')),
@@ -334,6 +361,7 @@ def get_parger(ap):
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
+    ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
     return ap
 
 
@@ -370,7 +398,13 @@ def main(args):
     rpt = MoaLogDisplay(path, log_root, static_root, author)
 
     # gen gif
-    if args.gif is not None:
+    if args.snapshot:
+        snapshots = rpt.analyse_snapshot()
+        if snapshots:
+            print(json.dumps(snapshots))
+        else:
+            print(json.dumps([]))
+    elif args.gif is not None:
         steps = rpt.analyse()
         gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif)
     # gen html report
