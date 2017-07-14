@@ -43,14 +43,18 @@ def gen_gif(imgdir, steps, output="log.gif"):
                 else:
                     target_pos = step[2].get("ret")
                     # target_pos = step.get("target_pos")
-        if target_pos is not None:
+        if target_pos is not None and len(target_pos) > 0 and target_pos[0]:
             draw_circle(img, target_pos)
         images.append(img)
 
     # images = [Image.open(fn) for fn in file_names]
     # images = [draw_circle(img, 20, 40) for img in images]
 
-    writeGif(output, images, duration=duration)
+    #writeGif(output, images, duration=duration)
+    # images2gif库有点问题，直接用PIL的库save就能写成gif图了，只是损失一些色彩和精度
+    # 注意Pillow版本最好大于3.x，2.x版本的可能不支持直接导出成gif
+    first_im = images[0]
+    first_im.save(output, save_all=True, append_images=images, duration=500)
 
 
 def main():
