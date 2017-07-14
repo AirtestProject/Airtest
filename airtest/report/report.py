@@ -362,6 +362,7 @@ def get_parger(ap):
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
+    ap.add_argument("--test", nargs='?', const=True, default=False)
     return ap
 
 
@@ -406,12 +407,25 @@ def main(args):
             print(json.dumps([]))
     elif args.gif is not None:
         steps = rpt.analyse()
-        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif)
+        if args.gif == "log.gif":
+            output = os.path.join(log_root, "report.gif")
+        else:
+            output = args.gif
+        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=output)
     # gen html report
     else:
         html = rpt.render(tpl)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
+    """
+    elif args.test:
+        pass
+        tpl = jinja_environment.get_template("new_report_template.html")
+        html = rpt.render(tpl)
+        with io.open(outfile, 'w', encoding="utf-8") as f:
+            f.write(html)
+    """
+
 
 
 if __name__ == "__main__":
