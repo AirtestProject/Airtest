@@ -45,6 +45,9 @@ def gen_gif(imgdir, steps, output="log.gif"):
                     # target_pos = step.get("target_pos")
         if target_pos is not None and len(target_pos) > 0 and target_pos[0]:
             draw_circle(img, target_pos)
+        w, h = img.size
+        # 生成的gif图片太大，按照原图的30%来缩小
+        img.thumbnail((w*0.3, h*0.3))
         images.append(img)
 
     # images = [Image.open(fn) for fn in file_names]
@@ -54,7 +57,7 @@ def gen_gif(imgdir, steps, output="log.gif"):
     # images2gif库有点问题，直接用PIL的库save就能写成gif图了，只是损失一些色彩和精度
     # 注意Pillow版本最好大于3.x，2.x版本的可能不支持直接导出成gif
     first_im = images[0]
-    first_im.save(output, save_all=True, append_images=images, duration=500)
+    first_im.save(output, save_all=True, append_images=images, duration=500, loop=0)
 
 
 def main():
