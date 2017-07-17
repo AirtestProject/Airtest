@@ -246,11 +246,12 @@ class MoaLogDisplay(object):
 
             "assert_exists": u"目标图片应当存在",
             "assert_not_exists": u"目标图片应当不存在",
+            "traceback": u"异常信息",
 
             # "snapshot": step[1]['args'][0],
         }
 
-        return desc.get(name, '%s%s' % (name, step[1]['args']))
+        return desc.get(name, '%s%s' % (name, step[1]['args'] if 'args' in step[1] else ""))
 
     def func_title(self, step):
         title = {

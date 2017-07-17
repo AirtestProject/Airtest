@@ -116,7 +116,7 @@ def run_script(args):
         exec_script(args.script, scope=globals(), root=True)
     except:
         err = traceback.format_exc()
-        # log("error", {"traceback": err}, False)
+        log("error", {"traceback": err, "name": "traceback"}, False)
         raise
     finally:
         # execute post script, whether pre & script succeed or not
@@ -127,7 +127,7 @@ def run_script(args):
                     set_current(i)
                     exec_script(args.post, scope=globals(), root=True)
             except:
-                # log("error", {"traceback": traceback.format_exc()}, False)
+                log("error", {"traceback": traceback.format_exc(), "name": "traceback"}, False)
                 traceback.print_exc()
 
 
