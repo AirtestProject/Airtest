@@ -21,6 +21,7 @@ class MoaLogDisplay(object):
         self.script_root = script_root
         self.log_root = log_root
         self.static_root = static_root
+        self.test_result = None
         self.run_start = None
         self.run_end = None
         self.author = author
@@ -29,6 +30,7 @@ class MoaLogDisplay(object):
         self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, LOGFILE)
         self._load()
+        self.error_str = ""
 
     def _load(self):
         with io.open(self.logfile, encoding="utf-8")as f:
@@ -57,11 +59,17 @@ class MoaLogDisplay(object):
                 #exists 中间有报错也是正常的 以depth = 1 为准
                 temp['end_time'] = log['time']
                 if log['tag'] == "error":
+                    # 假如有trace，把异常的信息临时记下来，如果是重复的异常就不重复显示在页面上了
+                    if self.error_str and self.error_str == log['data'].get('error_str'):
+                        continue
+                    else:
+                        self.error_str = log['data'].get('error_str') or ''
                     temp['trace'] = True
                     temp['traceback'] = log['data']['traceback']
                     self.test_result = False
                 else:
                     temp['trace'] = False
+
                 temp = self.translate(temp)
                 if temp is not None:
                     step.append(temp)
