@@ -361,8 +361,9 @@ def get_parger(ap):
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
+    ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
-    ap.add_argument("--test", nargs='?', const=True, default=False)
+    ap.add_argument("--new_report", nargs='?', const=True, default=False)
     return ap
 
 
@@ -407,18 +408,23 @@ def main(args):
             print(json.dumps([]))
     elif args.gif is not None:
         steps = rpt.analyse()
-        if args.gif == "log.gif":
-            output = os.path.join(log_root, "report.gif")
+        if args.gif_size:
+            try:
+                gif_size = float(args.gif_size)
+                if 0.0 > gif_size or gif_size > 1.0:
+                    gif_size = 0.3
+            except ValueError:
+                gif_size = 0.3
         else:
-            output = args.gif
-        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=output)
+            gif_size = 0.3
+        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
     # gen html report
     else:
         html = rpt.render(tpl)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
     """
-    elif args.test:
+    elif args.new_report:
         pass
         tpl = jinja_environment.get_template("new_report_template.html")
         html = rpt.render(tpl)
