@@ -114,7 +114,6 @@ def run_script(args):
         ST.set_basedir(args.script)
         set_current(0)
         exec_script(args.script, scope=globals(), root=True)
-        raise Exception("test123")
     except Exception, e:
         err = traceback.format_exc()
         log("error", {"traceback": err, "name": "traceback", "error_str": str(e)}, False)
