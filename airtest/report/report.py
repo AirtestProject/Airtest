@@ -33,9 +33,13 @@ class MoaLogDisplay(object):
         self.error_str = ""
 
     def _load(self):
-        with io.open(self.logfile, encoding="utf-8")as f:
-            for line in f.readlines():
-                self.log.append(json.loads(line))
+        try:
+            # 假如log.txt不存在，以前是直接抛出异常，现在改为读不到文件就设置log为空，看看会不会有什么问题
+            with io.open(self.logfile, encoding="utf-8")as f:
+                for line in f.readlines():
+                    self.log.append(json.loads(line))
+        except:
+            self.log = []
 
     def analyse(self):
         """ 进一步解析成模板可显示的内容 """
