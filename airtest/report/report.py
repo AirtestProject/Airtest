@@ -399,9 +399,6 @@ def main(args):
 
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
-    print(path)
-    print(log_root)
-    print(static_root)
     # TODO:  File "c:\python27\lib\site-packages\nose\plugins\xunit.py", line 129, in write
     # UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
 
