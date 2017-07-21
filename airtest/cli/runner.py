@@ -270,6 +270,7 @@ def run_forever(args):
         sys.stdout.flush()
         input_line = sys.stdin.readline().strip()
         print('get input_line', input_line)
+        input_line = input_line.decode(sys.stdin.encoding or sys.getfilesystemencoding())
         if input_line.startswith("c "):
             _, script, code = input_line.split(" ")
             code = unquote(code)  # decode code

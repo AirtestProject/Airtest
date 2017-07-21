@@ -104,7 +104,6 @@ class MoaLogDisplay(object):
 
             if log['depth'] == 1:
                 if step[1]['name'] == 'snapshot':
-                    #snapshot = os.path.join(self.log_root, step[2]['screen'])
                     snapshot = step[2]['screen']
                     msg = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
                     ret.append({'snapshot': snapshot, 'msg': msg})
@@ -351,8 +350,15 @@ def safe_percent(a, b):
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):
-        print("get_file_author, file_path %s not existed" % file_path)
-        return
+        # 假如是中文路径，可以进行decode再尝试查找一次
+        # 但是windows下用ide运行脚本默认是utf8编码，所以这里尝试用utf8来解码一次
+        try:
+            file_path = file_path.decode("utf-8")
+        except:
+            pass
+        if not os.path.exists(file_path):
+            print("get_file_author, file_path %s not existed" % repr(file_path))
+            return
 
     try:
         fp = io.open(file_path, encoding="utf-8")
@@ -384,7 +390,7 @@ def main(args):
     # script filepath
     path = args.script
     basename = os.path.basename(path).split(".")[0]
-    py_file = path + "/" + basename + ".py"
+    py_file = os.path.join(path, basename + ".py")
     author = get_file_author(py_file)
     # output html filepath
     outfile = args.outfile
