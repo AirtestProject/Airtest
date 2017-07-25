@@ -5,6 +5,7 @@ import os
 import io
 import argparse
 import jinja2
+from collections import defaultdict
 from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
@@ -43,7 +44,13 @@ class MoaLogDisplay(object):
         step = []
         temp = {}
         self.test_result = True
+        current_step = 'main_script'
+        all_step = defaultdict(list)
         for log in self.log:
+            if log["depth"] == 0 and log.get("tag") in ["main_script", "pre_script", "post_script"]:
+                # 根据脚本执行的pre,main,post，将log区分开
+                current_step = log.get("tag", "main_script")
+
             #拆分成每一个步骤，并且加上traceback的标志
             #depth相同，后来的数据直接覆盖（目前只有截图数据会这样）
             log.update(log["data"])
@@ -73,10 +80,12 @@ class MoaLogDisplay(object):
 
                 temp = self.translate(temp)
                 if temp is not None:
+                    all_step[current_step].append(temp)
                     step.append(temp)
                 temp = {}
 
         self.step = step
+        self.all_step = all_step
         if step:
             self.run_start = step[0].get('start_time')
             self.run_end = step[-1].get('end_time')
@@ -142,7 +151,11 @@ class MoaLogDisplay(object):
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
                 if step['type'] in self.img_type:
-                    step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                    # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
+                    image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                    if not os.path.exists(image_path):
+                        image_path = step[2]['args'][0]['filepath']
+                    step['image_to_find'] = image_path
                     step['resolution'] = step[2]['args'][0].get("resolution", None)
                     step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
@@ -315,6 +328,7 @@ class MoaLogDisplay(object):
 
         data = {}
         data['steps'] = self.analyse()
+        data['all_steps'] = self.all_step
         data['host'] = self.script_root
         data['img_type'] = self.img_type
         data['uiautomator_img_type'] = self.uiautomator_img_type

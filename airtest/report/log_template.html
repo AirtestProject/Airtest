@@ -25,11 +25,14 @@
 
 
     <style>
+    .pre_script h2.header, .post_script h2.header{
+        background-color: rgba(52, 152, 219, 0.5);
+    }
     h2.header {
-      background-color: #3498db;
-      color:white;
-      padding: 10px;
-      margin-bottom: 10px;
+        background-color: #3498db;
+        color: white;
+        padding: 10px;
+        margin-bottom: 10px;
     }
 
     h2 {
@@ -212,79 +215,84 @@
             <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
           </div>
 
-          {% for step in steps %}
-          <div class="material moa" data-trace="{{step.trace}}" id="{{loop.index}}">
+          {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
+          {% for t in step_type %}
+            {% for step in all_steps[t] %}
+          <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{loop.index}}">
 
-            <h2 class="header">Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
+            <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
             <hr>
-            {% if step.type in img_type or step.type in uiautomator_img_type %}
-            {% if step.type in img_type %}
-            <div class="row">
-              <div class="col-xs-3">
-                <div class="point">
-                  <span class="glyphicon glyphicon-play"></span>
-                </div>
-                <label>目标图片</label>
-              </div>
-              <div class="col-xs-9">
-                <img class="crop_image" src="{{step.image_to_find}}" title="{{step.image_to_find}}">
-                <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
-                <p class="desc">record_pos: {{step.record_pos}}, resolution: {{step.resolution}}</p>
-              </div>
+            <div class="step_content">
+                {% if step.type in img_type or step.type in uiautomator_img_type %}
+                {% if step.type in img_type %}
+                <div class="row">
+                  <div class="col-xs-3">
+                    <div class="point">
+                      <span class="glyphicon glyphicon-play"></span>
+                    </div>
+                    <label>目标图片</label>
+                  </div>
+                  <div class="col-xs-9">
+                    <img class="crop_image" src="{{step.image_to_find}}" title="{{step.image_to_find}}">
+                    <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
+                    <p class="desc">record_pos: {{step.record_pos}}, resolution: {{step.resolution}}</p>
+                  </div>
 
-            </div> 
-            {% endif %} 
-
-            <div class="row">  
-              <div class="col-xs-3">
-                <div class="point">
-                  <span class="glyphicon glyphicon-play"></span>
                 </div>
-                <label>运行时屏幕截图</label>
-              </div>
-              <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
-              <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
-                <div class="screen_holder">
-                  <img class="fancybox scale" src="{{step.screenshot}}" title="{{step.screenshot}}">
-                  {% if not step.trace and step.target_pos %}
-                  <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{step.top}}" data-left="{{step.left}}" style="top:{{step.top}}px;left:{{step.left}}px;">
-                  <!-- rect area -->
-                    {% if step.rect %}
-                    <div class="rect" {% for k,v in step.rect.items() %}data-{{k}}="{{v}}"{% endfor %}></div>
-                    {% endif %}
+                {% endif %}
+
+                <div class="row">
+                  <div class="col-xs-3">
+                    <div class="point">
+                      <span class="glyphicon glyphicon-play"></span>
+                    </div>
+                    <label>运行时屏幕截图</label>
+                  </div>
+                  <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
+                  <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
+                    <div class="screen_holder">
+                      <img class="fancybox scale" src="{{step.screenshot}}" title="{{step.screenshot}}">
+                      {% if not step.trace and step.target_pos %}
+                      <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{step.top}}" data-left="{{step.left}}" style="top:{{step.top}}px;left:{{step.left}}px;">
+                      <!-- rect area -->
+                        {% if step.rect %}
+                        <div class="rect" {% for k,v in step.rect.items() %}data-{{k}}="{{v}}"{% endfor %}></div>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    <br />
+                    <div class="screen_place"></div>
+                  </div>
+                </div>
+                  {% if step.confidence %}
+                  <p class="desc"><span class="point glyphicon glyphicon-play"></span>匹配度: {{step.confidence}}%</p>
                   {% endif %}
-                </div>
-                <br />
-                <div class="screen_place"></div>
-              </div>  
-            </div>
-              {% if step.confidence %}
-              <p class="desc"><span class="point glyphicon glyphicon-play"></span>匹配度: {{step.confidence}}%</p>            
-              {% endif %}
-            <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
-            {% else %}
-            <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
-            {% endif %}
+                <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
+                {% else %}
+                <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
+                {% endif %}
 
-            {% if not step.trace %}            
-            <div class="alert alert-success">
-              <span class="glyphicon glyphicon-ok"></span>
-              执行成功
-            </div>
-            {% else %}
-            <div class="alert alert-danger">
-              <span class="glyphicon glyphicon-alert"></span>
-              执行失败
-            </div>
-            
-            <div>
-              <pre><code class="python">
-{{step.traceback}}            
-              </code></pre>
-            </div>
-            {% endif %}
+                {% if not step.trace %}
+                <div class="alert alert-success">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  执行成功
+                </div>
+                {% else %}
+                <div class="alert alert-danger">
+                  <span class="glyphicon glyphicon-alert"></span>
+                  执行失败
+                </div>
+
+                <div>
+                  <pre><code class="python">
+                {{step.traceback}}
+                  </code></pre>
+                </div>
+                {% endif %}
+            </div><!-- step content -->
           </div>
           {% endfor %}
+        {% endfor %}
 
           <!-- 导航栏 -->
           <div class="fast-nav-step">
@@ -352,7 +360,7 @@
           //console.log($(this).attr("src"));
           $(this).attr("src", 'report.gif?timestamp=' + new Date().getTime());
           //console.log($(this).attr("src"));
-        }.bind(this), 1000)
+        }.bind(this), 5000)
         return
       }
 
@@ -437,6 +445,11 @@
       scale_img(scale)
     });
     $(window).resize();
+
+    $(".pre_script .step_content, .post_script .step_content").hide();
+    $(".pre_script h2, .post_script h2").click(function(){
+        $(this).parent().find(".step_content").toggle();
+    })
   });
   </script>
 
