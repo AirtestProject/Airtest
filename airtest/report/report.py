@@ -361,15 +361,9 @@ def safe_percent(a, b):
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):
-        # 假如是中文路径，可以进行decode再尝试查找一次
-        # 但是windows下用ide运行脚本默认是utf8编码，所以这里尝试用utf8来解码一次
-        try:
-            file_path = file_path.decode("utf-8")
-        except:
-            pass
-        if not os.path.exists(file_path):
-            print("get_file_author, file_path %s not existed" % repr(file_path))
-            return
+        # 中文路径脚本，编码来源比较复杂，从ide启动与从不同终端启动编码各不相同，可以暂不显示作者名称，不影响报告的显示
+        print("get_file_author, file_path %s not existed" % repr(file_path))
+        return
 
     try:
         fp = io.open(file_path, encoding="utf-8")
