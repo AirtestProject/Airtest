@@ -172,7 +172,7 @@ class ADB(object):
             return out.decode(ADB_SHELL_ENCODING)
         except UnicodeDecodeError:
             warnings.warn("shell output decode fail. repr={}".format(repr(out)))
-            return repr(out)
+            return unicode(repr(out))
 
     def shell(self, cmd, not_wait=False):
         """
