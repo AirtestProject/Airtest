@@ -28,7 +28,7 @@ Environment initialization
 """
 
 
-def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
+def set_serialno(sn=None, cap_method="javacap", addr=None):
     '''
     auto set if only one device
     support filepath match pattern, eg: c123*
@@ -62,7 +62,7 @@ def set_serialno(sn=None, minicap=True, minitouch=True, addr=None):
                 raise MoaError("Device[%s] not found in %s" % (sn, addr))
         return sn
     sn = get_available_sn(sn)
-    dev = android.Android(sn, addr=addr, minicap=minicap, minitouch=minitouch)
+    dev = android.Android(sn, addr=addr, cap_method=cap_method)
     register_device(dev)
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
     return sn

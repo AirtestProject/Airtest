@@ -42,10 +42,10 @@ def run_script(args):
         if args.setsn == "":
             for i in range(args.devcount):
                 # auto choose one serialno
-                set_serialno(minicap=minicap, minitouch=minitouch)
+                set_serialno()
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn, minicap=minicap, minitouch=minitouch)
+                set_serialno(sn)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng
