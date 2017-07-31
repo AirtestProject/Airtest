@@ -893,7 +893,7 @@ class Javacap(object):
     """another screencap class, slower than mincap, but better compatibility"""
 
     APP_PATH = "com.netease.nie.yosemite"
-    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Agent"
+    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
     DEVICE_PORT = "moa_javacap"
 
     def __init__(self, serialno, adb=None, localport=9999):
@@ -919,7 +919,7 @@ class Javacap(object):
         self.localport = set_up_forward()
         # setup agent proc
         apkpath = self.get_path()
-        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "-S100", "-N%s" % self.DEVICE_PORT]
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT, "-lazy"]
         proc = self.adb.shell(cmds, not_wait=True)
         reg_cleanup(proc.kill)
         # check proc output
@@ -928,10 +928,10 @@ class Javacap(object):
             line = nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("javacap setup error")
-            if "Agent listens on" in line:
+            if "Capture server listening on" in line:
                 break
             if "Address already in use" in line:
-                break
+                raise RuntimeError("javacap setup error")
 
     def get_frames(self):
         self._setup()
@@ -942,6 +942,7 @@ class Javacap(object):
         yield struct.unpack("<2B5I2B", t)
 
         while True:
+            s.send(b"1")
             # recv header, count frame_size
             if MINICAPTIMEOUT is not None:
                 header = s.recv_with_timeout(4, MINICAPTIMEOUT)
@@ -971,7 +972,7 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, minicap=True, minicap_stream=True, minitouch=True, javacap=False, shell_ime=True):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, cap_method="minicap_stream", shell_ime=True):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
@@ -980,7 +981,7 @@ class Android(Device):
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         # init some time consuming env for later use
-        self._init_display(minicap, minicap_stream, minitouch, javacap)
+        self._init_display(cap_method)
         self.shell_ime = shell_ime
 
     def _init(self, target, *args, **kwargs):
@@ -989,17 +990,25 @@ class Android(Device):
         t.start()
         return t
 
-    def _init_display(self, minicap, minicap_stream, minitouch, javacap):
+    def _init_display(self, cap_method):
         self.get_display_info()
-        self._init_cap(minicap, minicap_stream, javacap)
-        self._init_touch(minitouch)
+        self._init_cap(cap_method)
+        self._init_touch(True)
         self.orientationWatcher()
 
-    def _init_cap(self, minicap=True, minicap_stream=True, javacap=False):
-        self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
-        self.javacap = Javacap(self.serialno, adb=self.adb) if javacap else None
+    def _init_cap(self, cap_method):
+        self.cap_method = cap_method
+        if cap_method == "minicap":
+            self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=False)
+        elif cap_method == "minicap_stream":
+            self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=True)
+        elif cap_method == "javacap":
+            self.javacap = Javacap(self.serialno, adb=self.adb)
+        else:
+            print("cap_method %s not found, use adb screencap" % cap_method)
+            self.cap_method = None
 
-    def _init_touch(self, minitouch):
+    def _init_touch(self, minitouch=True):
         self.minitouch = Minitouch(self.serialno, size=self.size, adb=self.adb) if minitouch else None
 
     def _init_requirement_apk(self, apk_path, package):
@@ -1128,11 +1137,11 @@ class Android(Device):
 
     def snapshot(self, filename=None, ensure_orientation=True):
         """default not write into file."""
-        if self.minicap and self.minicap.stream_mode:
+        if self.cap_method == "minicap_stream":
             screen = self.minicap.get_frame_from_stream()
-        elif self.minicap:
+        if self.cap_method == "minicap":
             screen = self.minicap.get_frame()
-        elif self.javacap:
+        elif self.cap_method == "javacap":
             screen = self.javacap.get_frame()
         else:
             screen = self.adb.snapshot()
@@ -1142,12 +1151,12 @@ class Android(Device):
         # 保证方向是正的
         if ensure_orientation and self.size["orientation"]:
             # minicap截图根据sdk_version不一样
-            if self.minicap and self.sdk_version <= 16:
+            if self.cap_method in ("minicap", "minicap_stream") and self.sdk_version <= 16:
                 h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
             # adb 截图总是要根据orientation旋转
-            elif not self.minicap:
+            elif self.cap_method is None:
                 screen = aircv.rotate(screen, self.size["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
@@ -1163,17 +1172,7 @@ class Android(Device):
     def wake(self):
         self.home()
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
-
-        # todo:
-        # 1. 还需要按power键吗？
-        # 2. 如果非锁屏状态，上面步骤可以省略
-
-        # 1. release apk里面有，不需要按电源键了，
-        # 2. is_screenon有些设备不起效
-        # if not self.is_screenon():
-        #     self.keyevent("POWER")
-
-        self.keyevent("HOME")
+        self.home()
 
     def home(self):
         self.keyevent("HOME")
