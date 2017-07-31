@@ -893,7 +893,7 @@ class Javacap(object):
     """another screencap class, slower than mincap, but better compatibility"""
 
     APP_PATH = "com.netease.nie.yosemite"
-    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
+    SCREENCAP_SERVICE = "com.netease.nie.yosemite.Agent"
     DEVICE_PORT = "moa_javacap"
 
     def __init__(self, serialno, adb=None, localport=9999):
@@ -919,7 +919,7 @@ class Javacap(object):
         self.localport = set_up_forward()
         # setup agent proc
         apkpath = self.get_path()
-        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT, "-lazy"]
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "-S100", "-N%s" % self.DEVICE_PORT]
         proc = self.adb.shell(cmds, not_wait=True)
         reg_cleanup(proc.kill)
         # check proc output
@@ -928,10 +928,10 @@ class Javacap(object):
             line = nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("javacap setup error")
-            if "Capture server listening on" in line:
+            if "Agent listens on" in line:
                 break
             if "Address already in use" in line:
-                raise RuntimeError("javacap setup error")
+                break
 
     def get_frames(self):
         self._setup()
@@ -942,7 +942,6 @@ class Javacap(object):
         yield struct.unpack("<2B5I2B", t)
 
         while True:
-            s.send(b"1")
             # recv header, count frame_size
             if MINICAPTIMEOUT is not None:
                 header = s.recv_with_timeout(4, MINICAPTIMEOUT)
@@ -972,7 +971,7 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, cap_method="minicap_stream", shell_ime=True):
+    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, minicap=True, minicap_stream=True, minitouch=True, javacap=False, shell_ime=True):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=addr)
@@ -981,7 +980,7 @@ class Android(Device):
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
         # init some time consuming env for later use
-        self._init_display(cap_method)
+        self._init_display(minicap, minicap_stream, minitouch, javacap)
         self.shell_ime = shell_ime
 
     def _init(self, target, *args, **kwargs):
@@ -990,25 +989,17 @@ class Android(Device):
         t.start()
         return t
 
-    def _init_display(self, cap_method):
+    def _init_display(self, minicap, minicap_stream, minitouch, javacap):
         self.get_display_info()
-        self._init_cap(cap_method)
-        self._init_touch(True)
+        self._init_cap(minicap, minicap_stream, javacap)
+        self._init_touch(minitouch)
         self.orientationWatcher()
 
-    def _init_cap(self, cap_method):
-        self.cap_method = cap_method
-        if cap_method == "minicap":
-            self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=False)
-        elif cap_method == "minicap_stream":
-            self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=True)
-        elif cap_method == "javacap":
-            self.javacap = Javacap(self.serialno, adb=self.adb) if javacap else None
-        else:
-            print("cap_method %s not found, use adb screencap" % cap_method)
-            self.cap_method = None
+    def _init_cap(self, minicap=True, minicap_stream=True, javacap=False):
+        self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=minicap_stream) if minicap else None
+        self.javacap = Javacap(self.serialno, adb=self.adb) if javacap else None
 
-    def _init_touch(self, minitouch=True):
+    def _init_touch(self, minitouch):
         self.minitouch = Minitouch(self.serialno, size=self.size, adb=self.adb) if minitouch else None
 
     def _init_requirement_apk(self, apk_path, package):
