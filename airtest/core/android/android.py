@@ -293,7 +293,8 @@ class ADB(object):
 
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
-        device_path = "%s/%s" % (device_dir, filename)
+        # 如果apk名称包含空格，需要用引号括起来
+        device_path = '\"%s/%s\"' % (device_dir, filename)
 
         out = self.cmd(["push", filepath, device_dir])
         print(out)

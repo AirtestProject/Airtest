@@ -108,15 +108,18 @@ def run_script(args):
             ST.set_basedir(args.pre)
             for i in range(len(G.DEVICE_LIST)):  # pre for all devices
                 set_current(i)
+                # TODO: 假如路径有中文
+                log("pre_script", {"script": args.pre})
                 exec_script(args.pre, scope=globals(), root=True)
 
         # execute script
         ST.set_basedir(args.script)
         set_current(0)
+        log("main_script", {"script": args.script})
         exec_script(args.script, scope=globals(), root=True)
-    except:
+    except Exception, e:
         err = traceback.format_exc()
-        # log("error", {"traceback": err}, False)
+        log("error", {"traceback": err, "name": "traceback", "error_str": str(e)}, False)
         raise
     finally:
         # execute post script, whether pre & script succeed or not
@@ -125,9 +128,10 @@ def run_script(args):
                 ST.set_basedir(args.post)
                 for i in range(len(G.DEVICE_LIST)):  # post for all devices
                     set_current(i)
+                    log("post_script", {"script": args.pre})
                     exec_script(args.post, scope=globals(), root=True)
             except:
-                # log("error", {"traceback": traceback.format_exc()}, False)
+                log("error", {"traceback": traceback.format_exc(), "name": "traceback"}, False)
                 traceback.print_exc()
 
 
@@ -270,6 +274,7 @@ def run_forever(args):
         sys.stdout.flush()
         input_line = sys.stdin.readline().strip()
         print('get input_line', input_line)
+        input_line = input_line.decode(sys.stdin.encoding or sys.getfilesystemencoding())
         if input_line.startswith("c "):
             _, script, code = input_line.split(" ")
             code = unquote(code)  # decode code
