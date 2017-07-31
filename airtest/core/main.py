@@ -202,7 +202,7 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename=None):
+def snapshot(filename=None, msg=""):
     """capture device screen and save it into file."""
     screen, default_filepath = device_snapshot()
     if not filename:

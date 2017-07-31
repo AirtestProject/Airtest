@@ -68,8 +68,8 @@ def Logwrap(f, logger):
         LOGGER.running_stack.append(fndata)
         try:
             res = f(*args, **kwargs)
-        except Exception:
-            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start}
+        except Exception, e:
+            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start, "error_str": str(e)}
             fndata.update(data)
             fndata.update(LOGGER.extra_log)
             LOGGER.log("error", fndata)

@@ -8,7 +8,7 @@ from airtest.cli.runner import run_script
 
 def get_parser():
     ap = argparse.ArgumentParser()
-    subparsers = ap.add_subparsers(dest="action", help="run/info/report")
+    subparsers = ap.add_subparsers(dest="action", help="run/info/snapshot/report")
     # subparser run
     ap_run = subparsers.add_parser("run", help="run script")
     run_parser(ap_run)
@@ -18,6 +18,9 @@ def get_parser():
     # subparser report
     ap_report = subparsers.add_parser("report", help="generate report of script")
     report_parser(ap_report)
+    # subparser snapshot
+    ap_screen = subparsers.add_parser("snapshot", help="get snapshot list of script")
+    ap_screen.add_argument("script", help="script filename")
     return ap
 
 
@@ -44,6 +47,8 @@ def main():
     args = ap.parse_args()
     if args.action == "info":
         print(get_script_info(args.script))
+    elif args.action == "snapshot":
+        print(get_script_info(args.script, 'snapshot'))
     elif args.action == "report":
         report_main(args)
     elif args.action == "run":

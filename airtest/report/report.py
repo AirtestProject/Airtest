@@ -5,6 +5,7 @@ import os
 import io
 import argparse
 import jinja2
+from collections import defaultdict
 from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
@@ -21,6 +22,7 @@ class MoaLogDisplay(object):
         self.script_root = script_root
         self.log_root = log_root
         self.static_root = static_root
+        self.test_result = None
         self.run_start = None
         self.run_end = None
         self.author = author
@@ -29,8 +31,10 @@ class MoaLogDisplay(object):
         self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, LOGFILE)
         self._load()
+        self.error_str = ""
 
     def _load(self):
+        # 假如log.txt不存在，以前是直接抛出异常，现在改为读不到文件就设置log为空，看看会不会有什么问题
         with io.open(self.logfile, encoding="utf-8")as f:
             for line in f.readlines():
                 self.log.append(json.loads(line))
@@ -40,7 +44,13 @@ class MoaLogDisplay(object):
         step = []
         temp = {}
         self.test_result = True
+        current_step = 'main_script'
+        all_step = defaultdict(list)
         for log in self.log:
+            if log["depth"] == 0 and log.get("tag") in ["main_script", "pre_script", "post_script"]:
+                # 根据脚本执行的pre,main,post，将log区分开
+                current_step = log.get("tag", "main_script")
+
             #拆分成每一个步骤，并且加上traceback的标志
             #depth相同，后来的数据直接覆盖（目前只有截图数据会这样）
             log.update(log["data"])
@@ -57,22 +67,54 @@ class MoaLogDisplay(object):
                 #exists 中间有报错也是正常的 以depth = 1 为准
                 temp['end_time'] = log['time']
                 if log['tag'] == "error":
+                    # 假如有trace，把异常的信息临时记下来，如果是重复的异常就不重复显示在页面上了
+                    if self.error_str and self.error_str == log['data'].get('error_str'):
+                        continue
+                    else:
+                        self.error_str = log['data'].get('error_str') or ''
                     temp['trace'] = True
                     temp['traceback'] = log['data']['traceback']
                     self.test_result = False
                 else:
                     temp['trace'] = False
+
                 temp = self.translate(temp)
                 if temp is not None:
+                    all_step[current_step].append(temp)
                     step.append(temp)
                 temp = {}
 
         self.step = step
+        self.all_step = all_step
         if step:
             self.run_start = step[0].get('start_time')
             self.run_end = step[-1].get('end_time')
 
         return step
+
+    def analyse_snapshot(self):
+        """
+        单独提取所有snapshot标签
+        Returns
+        -------
+        [{"msg": "截图描述", "snapshot": "截图文件所在路径"}]
+        """
+        ret = []
+        step = {}
+        for log in self.log:
+            log.update(log["data"])
+            if log['depth'] in step:
+                step[log['depth']].update(log)
+            else:
+                step[log['depth']] = log
+
+            if log['depth'] == 1:
+                if step[1]['name'] == 'snapshot':
+                    snapshot = step[2]['screen']
+                    msg = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
+                    ret.append({'snapshot': snapshot, 'msg': msg})
+                step = {}
+        return ret
 
     def translate(self, step):
         """
@@ -104,10 +146,16 @@ class MoaLogDisplay(object):
 
             if step['type'] == 'snapshot':
                 # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
-                step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+                #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+                step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
+                step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
                 if step['type'] in self.img_type:
-                    step['image_to_find'] = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                    # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
+                    image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                    if not os.path.exists(image_path):
+                        image_path = step[2]['args'][0]['filepath']
+                    step['image_to_find'] = image_path
                     step['resolution'] = step[2]['args'][0].get("resolution", None)
                     step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
@@ -205,7 +253,7 @@ class MoaLogDisplay(object):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            # "snapshot":"截图",
+            "snapshot": u"截图描述：%s" % step.get('text', ''),
             # "_loop_find":"寻找目标位置",
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos', '')), step.get('swipe', '')),
@@ -219,11 +267,12 @@ class MoaLogDisplay(object):
 
             "assert_exists": u"目标图片应当存在",
             "assert_not_exists": u"目标图片应当不存在",
+            "traceback": u"异常信息",
 
             # "snapshot": step[1]['args'][0],
         }
 
-        return desc.get(name, '%s%s' % (name, step[1]['args']))
+        return desc.get(name, '%s%s' % (name, step[1]['args'] if 'args' in step[1] else ""))
 
     def func_title(self, step):
         title = {
@@ -279,6 +328,7 @@ class MoaLogDisplay(object):
 
         data = {}
         data['steps'] = self.analyse()
+        data['all_steps'] = self.all_step
         data['host'] = self.script_root
         data['img_type'] = self.img_type
         data['uiautomator_img_type'] = self.uiautomator_img_type
@@ -311,8 +361,15 @@ def safe_percent(a, b):
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):
-        print("get_file_author, file_path %s not existed" % file_path)
-        return
+        # 假如是中文路径，可以进行decode再尝试查找一次
+        # 但是windows下用ide运行脚本默认是utf8编码，所以这里尝试用utf8来解码一次
+        try:
+            file_path = file_path.decode("utf-8")
+        except:
+            pass
+        if not os.path.exists(file_path):
+            print("get_file_author, file_path %s not existed" % repr(file_path))
+            return
 
     try:
         fp = io.open(file_path, encoding="utf-8")
@@ -334,6 +391,9 @@ def get_parger(ap):
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
+    ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
+    ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
+    ap.add_argument("--new_report", nargs='?', const=True, default=False)
     return ap
 
 
@@ -341,7 +401,7 @@ def main(args):
     # script filepath
     path = args.script
     basename = os.path.basename(path).split(".")[0]
-    py_file = path + "/" + basename + ".py"
+    py_file = os.path.join(path, basename + ".py")
     author = get_file_author(py_file)
     # output html filepath
     outfile = args.outfile
@@ -360,9 +420,6 @@ def main(args):
 
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
-    print(path)
-    print(log_root)
-    print(static_root)
     # TODO:  File "c:\python27\lib\site-packages\nose\plugins\xunit.py", line 129, in write
     # UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
 
@@ -370,14 +427,38 @@ def main(args):
     rpt = MoaLogDisplay(path, log_root, static_root, author)
 
     # gen gif
-    if args.gif is not None:
+    if args.snapshot:
+        snapshots = rpt.analyse_snapshot()
+        if snapshots:
+            print(json.dumps(snapshots))
+        else:
+            print(json.dumps([]))
+    elif args.gif is not None:
         steps = rpt.analyse()
-        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif)
+        if args.gif_size:
+            try:
+                gif_size = float(args.gif_size)
+                if 0.0 > gif_size or gif_size > 1.0:
+                    gif_size = 0.3
+            except ValueError:
+                gif_size = 0.3
+        else:
+            gif_size = 0.3
+        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
     # gen html report
     else:
         html = rpt.render(tpl)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
+    """
+    elif args.new_report:
+        pass
+        tpl = jinja_environment.get_template("new_report_template.html")
+        html = rpt.render(tpl)
+        with io.open(outfile, 'w', encoding="utf-8") as f:
+            f.write(html)
+    """
+
 
 
 if __name__ == "__main__":
