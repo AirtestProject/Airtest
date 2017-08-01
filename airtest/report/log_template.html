@@ -195,14 +195,14 @@
             <h2 class="header">Assert 测试点汇总</h2>
             <hr>
             <div class="row">
-            {% for step in steps %}
+            {% for step in all_steps['main_script'] %}
               {% if step.assert %}
                 <div class="col-xs-4 assert">
                   测试点 
                   {% if step.trace %}
-                  <a class="a-circle bg-red" href="#{{loop.index}}">{{loop.index}}</a>
+                  <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                   {% else %}
-                  <a class="a-circle bg-green" href="#{{loop.index}}">{{loop.index}}</a> 
+                  <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                   {% endif %}
                   预期结果:{{step.assert}}
                 </div>
@@ -218,7 +218,7 @@
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
           {% for t in step_type %}
             {% for step in all_steps[t] %}
-          <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{loop.index}}">
+          <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
             <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
             <hr>
@@ -300,11 +300,11 @@
               <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
             </label>
             <div id="nav_steps">
-              {% for step in steps %}
+              {% for step in all_steps['main_script'] %}
                 {% if step.trace %}
-                <a class="a-circle bg-red" href="#{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                 {% else %}
-                <a class="a-circle bg-green" href="#{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                 {% endif %}
               {% endfor %}
               <a class="a-circle bg-green" href="#">Top</a>
