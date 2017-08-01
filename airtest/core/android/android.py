@@ -915,7 +915,7 @@ class Javacap(object):
         self.localport = set_up_forward()
         # setup agent proc
         apkpath = self.get_path()
-        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT, "-lazy"]
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT, "-lazy", "2>&1"]
         proc = self.adb.shell(cmds, not_wait=True)
         reg_cleanup(proc.kill)
         # check proc output
