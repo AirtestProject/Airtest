@@ -5,7 +5,6 @@ import os
 THISPATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
 SDK_VERISON_NEW = 24
-ORIENTATION_MAP = {0: 0, 1: 90, 2: 180, 3: 270}
 DEBUG = True
 STFLIB = os.path.join(THISPATH, "stf_libs")
 ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")

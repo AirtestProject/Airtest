@@ -19,15 +19,15 @@ class Minicap(object):
     VERSION = 4
     CAPTIMEOUT = None
 
-    def __init__(self, serialno, size=None, projection=1, localport=None, adb=None, stream=True):
+    def __init__(self, serialno, projection=1, localport=None, adb=None, stream=True):
         self.serialno = serialno
         self.localport = localport
         self.server_proc = None
         self.projection = projection
         self.adb = adb or ADB(serialno)
-        # get_display_info may segfault, so use size info from adb dumpsys
-        self.size = size or self.get_display_info()
         self.install()
+        self._display_info = None
+        self.current_rotation = None
         self.stream_mode = stream
         self.frame_gen = None
         self.stream_lock = threading.Lock()
@@ -69,12 +69,19 @@ class Minicap(object):
         self.adb.shell("chmod 755 %s/minicap.so" % (device_dir))
         LOGGING.info("minicap install finished")
 
+    @property
+    def display_info(self):
+        if not self._display_info:
+            # get_display_info may segfault, so use size info from adb dumpsys
+            self._display_info = self.adb.display_info or self.get_display_info()
+        return self._display_info
+
     def _get_params(self, use_ori_size=False):
         """get minicap start params, and count projection"""
         # minicap截屏时，需要截取全屏图片:
-        real_width = self.size["physical_width"]
-        real_height = self.size["physical_height"]
-        real_orientation = self.size["rotation"]
+        real_width = self.display_info["physical_width"]
+        real_height = self.display_info["physical_height"]
+        real_orientation = self.display_info["rotation"]
 
         if use_ori_size or not self.projection:
             proj_width, proj_height = real_width, real_height
@@ -132,6 +139,7 @@ class Minicap(object):
             raise RuntimeError("minicap setup error")
         reg_cleanup(proc.kill)
         self.server_proc = proc
+        self.current_rotation = real_orientation
         self.nbsp = nbsp
 
     def get_display_info(self):
@@ -143,7 +151,7 @@ class Minicap(object):
         display_info = json.loads(display_info)
         if display_info['width'] > display_info['height'] and display_info['rotation'] in [90, 270]:
             display_info['width'], display_info['height'] = display_info['height'], display_info['width']
-        self.size = display_info
+        self.display_info = display_info
         return display_info
 
     def get_frame(self, use_ori_size=True):
@@ -232,6 +240,9 @@ class Minicap(object):
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
+        if rotation == self.current_rotation:
+            LOGGING.debug("update_rotation is the same with current_rotation %s" % rotation)
+            return
         with self.stream_lock:
-            self.size["rotation"] = rotation
+            self.display_info["rotation"] = rotation
             self.frame_gen = None

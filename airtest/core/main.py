@@ -28,7 +28,7 @@ Environment initialization
 """
 
 
-def set_serialno(sn=None, cap_method="javacap"):
+def set_serialno(sn=None, cap_method="minicap_stream"):
     '''
     auto set if only one device
     support filepath match pattern, eg: c123*

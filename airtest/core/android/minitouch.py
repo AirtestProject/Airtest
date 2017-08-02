@@ -15,12 +15,11 @@ LOGGING = get_logger('minitouch')
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, size=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER):
+    def __init__(self, serialno, localport=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
         self.max_x, self.max_y = None, None
-        self.size = size
         self.adb = adb or ADB(serialno, server_addr=adb_addr)
         self.localport = localport
         self.backend = backend
@@ -30,6 +29,7 @@ class Minitouch(object):
     def _get_ready(self):
         if self._is_ready:
             return
+        self.display_info = self.adb.display_info
         self.setup_server()
         if self.backend:
             self.setup_client_backend()
@@ -58,13 +58,13 @@ class Minitouch(object):
 
     def __transform_xy(self, x, y):
         # 根据设备方向、长宽来转换xy值
-        if not (self.size and self.size['max_x'] and self.size['max_y']):
+        if not (self.display_info and self.display_info['max_x'] and self.display_info['max_y']):
             return x, y
 
-        width, height = self.size['physical_width'], self.size['physical_height']
+        width, height = self.display_info['physical_width'], self.display_info['physical_height']
         # print '__transform', x, y
-        # print self.size
-        if width > height and self.size['orientation'] in [1, 3]:
+        # print self.display_info
+        if width > height and self.display_info['orientation'] in [1, 3]:
             width, height = height, width
 
         nx = x * self.max_x / width
@@ -192,7 +192,7 @@ class Minitouch(object):
         c
         """
         self._get_ready()
-        w, h = self.size['width'], self.size['height']
+        w, h = self.display_info['width'], self.display_info['height']
         if isinstance(center, (list, tuple)):
             x0, y0 = center
         elif center is None:

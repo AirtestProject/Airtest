@@ -1,10 +1,8 @@
 # coding=utf-8
-__author__ = 'lxn3032'
-
-
 import re
 import six
 
+__author__ = 'lxn3032'
 
 YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
 
