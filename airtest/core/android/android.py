@@ -12,8 +12,6 @@ import struct
 import threading
 import platform
 import random
-import traceback
-import requests
 import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbError, AdbShellError, MinicapError, MinitouchError
@@ -21,7 +19,6 @@ from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup,
 from airtest.core.android.ime_helper import YosemiteIme
 from airtest.core.android.constant import *
 from airtest.core.utils.compat import apkparser, PY3, queue
-ADBPATH = get_adb_path()
 LOGGING = get_logger('android')
 
 
@@ -34,10 +31,10 @@ class ADB(object):
     status_offline = "offline"
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
-        self.adb_path = adb_path or ADBPATH
+        self.adb_path = adb_path or get_adb_path()
         self.adb_server_addr = server_addr or self.default_server()
         self.set_serialno(serialno)
-        self._props_cache = {}
+        self._sdk_version = None
         self._forward_local_using = []
         reg_cleanup(self._cleanup_forwards)
 
@@ -217,10 +214,10 @@ class ADB(object):
     @property
     def sdk_version(self):
         """adb shell get sdk version"""
-        keyname = 'ro.build.version.sdk'
-        if keyname not in self._props_cache:
-            self._props_cache[keyname] = int(self.getprop(keyname))
-        return self._props_cache[keyname]
+        if self._sdk_version is None:
+            keyname = 'ro.build.version.sdk'
+            self._sdk_version = int(self.getprop(keyname))
+        return self._sdk_version
 
     def pull(self, remote, local):
         """adb pull"""
@@ -398,7 +395,6 @@ class Minicap(object):
         self.stream_mode = stream
         self.frame_gen = None
         self.stream_lock = threading.Lock()
-        self.init_stream()
 
     def install(self, reinstall=False):
         """install or upgrade minicap"""
@@ -572,14 +568,14 @@ class Minicap(object):
         pass
 
     def init_stream(self):
-        """init minicap stream if stream_mode"""
-        if self.stream_mode:
-            self.frame_gen = self.get_frames(lazy=True)
-            if not PY3:
-                LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
-            else:
-                # for py 3
-                LOGGING.debug("minicap header: %s", str(self.frame_gen.__next__()))
+        """init minicap stream and set stream_mode"""
+        self.stream_mode = True
+        self.frame_gen = self.get_frames(lazy=True)
+        if not PY3:
+            LOGGING.debug("minicap header: %s", str(self.frame_gen.next()))
+        else:
+            # for py 3
+            LOGGING.debug("minicap header: %s", str(self.frame_gen.__next__()))
 
     def get_frame_from_stream(self):
         """get one frame from minicap stream"""
@@ -615,13 +611,19 @@ class Minitouch(object):
         self.size = size
         self.adb = adb or ADB(serialno, server_addr=adb_addr)
         self.localport = localport
-        self.install()
-        self.setup_server()
         self.backend = backend
-        if backend:
+        self.install()
+        self._is_ready = False
+
+    def _get_ready(self):
+        if self._is_ready:
+            return
+        self.setup_server()
+        if self.backend:
             self.setup_client_backend()
         else:
             self.setup_client()
+        self._is_ready = True
 
     def install(self, reinstall=False):
         if not reinstall and self.adb.exists_file('/data/local/tmp/minitouch'):
@@ -705,6 +707,7 @@ class Minitouch(object):
         u 0
         c
         """
+        self._get_ready()
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
         self.handle(b"d 0 %d %d 50\nc\n" % (x, y))
@@ -728,7 +731,7 @@ class Minitouch(object):
         u 0
         c
         """
-
+        self._get_ready()
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
 
@@ -776,6 +779,7 @@ class Minitouch(object):
         u 1
         c
         """
+        self._get_ready()
         w, h = self.size['width'], self.size['height']
         if isinstance(center, (list, tuple)):
             x0, y0 = center
@@ -814,6 +818,7 @@ class Minitouch(object):
             time.sleep(interval)
 
     def operate(self, args):
+        self._get_ready()
         cmd = ""
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
@@ -968,36 +973,27 @@ class Android(Device):
 
     _props_tmp = "/data/local/tmp/moa_props.tmp"
 
-    def __init__(self, serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, cap_method="minicap_stream", shell_ime=True):
+    def __init__(self, serialno=None, cap_method="minicap_stream", shell_ime=True):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
-        self.adb = ADB(self.serialno, server_addr=addr)
+        self.adb = ADB(self.serialno)
         self.adb.start_server()
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
-        # init some time consuming env for later use
-        self._init_display(cap_method)
-        self.shell_ime = shell_ime
-
-    def _init(self, target, *args, **kwargs):
-        t = threading.Thread(target=target, name=target.__name__, args=args, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-        return t
-
-    def _init_display(self, cap_method):
-        self.get_display_info()
+        self._size = None
         self._init_cap(cap_method)
         self._init_touch(True)
-        self.orientationWatcher()
+        self.shell_ime = shell_ime
 
     def _init_cap(self, cap_method):
         self.cap_method = cap_method
         if cap_method == "minicap":
             self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=False)
+            self.orientationWatcher()
         elif cap_method == "minicap_stream":
             self.minicap = Minicap(self.serialno, size=self.size, adb=self.adb, stream=True)
+            self.orientationWatcher()
         elif cap_method == "javacap":
             self.javacap = Javacap(self.serialno, adb=self.adb)
         else:
@@ -1135,7 +1131,7 @@ class Android(Device):
         """default not write into file."""
         if self.cap_method == "minicap_stream":
             screen = self.minicap.get_frame_from_stream()
-        if self.cap_method == "minicap":
+        elif self.cap_method == "minicap":
             screen = self.minicap.get_frame()
         elif self.cap_method == "javacap":
             screen = self.javacap.get_frame()
@@ -1289,15 +1285,21 @@ class Android(Device):
         self.adb.shell('input keyevent MENU')
         self.adb.shell('input keyevent BACK')
 
+    @property
+    def size(self):
+        if self._size is None:
+            self._size = self.get_display_info()
+        return self._size
+
     def getprop(self, key, strip=True):
         return self.adb.getprop(key, strip)
 
     def get_display_info(self):
-        self.size = self.getPhysicalDisplayInfo()
-        self.size["orientation"] = self.getDisplayOrientation()
-        self.size["rotation"] = self.size["orientation"] * 90
-        self.size["max_x"], self.size["max_y"] = self.getEventInfo()
-        return self.size
+        size = self.getPhysicalDisplayInfo()
+        size["orientation"] = self.getDisplayOrientation()
+        size["rotation"] = size["orientation"] * 90
+        size["max_x"], size["max_y"] = self.getEventInfo()
+        return size
 
     def getEventInfo(self):
         ret = self.adb.shell('getevent -p').split('\n')
@@ -1461,9 +1463,8 @@ class Android(Device):
         LOGGING.debug("refreshOrientationInfo:%s", ori)
         self.size["orientation"] = ori
         self.size["rotation"] = ori * 90
-        if getattr(self, "minicap", None) and self.minicap:
+        if getattr(self, "minicap", None):
             self.minicap.update_rotation(self.size["rotation"])
-            # self.minicap.get_display_info()
 
     def _initOrientationWatcher(self):
         try:
@@ -1477,8 +1478,6 @@ class Android(Device):
         return p
 
     def orientationWatcher(self):
-        self.ow_proc = self._initOrientationWatcher()
-        reg_cleanup(self.ow_proc.kill)
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
@@ -1492,6 +1491,8 @@ class Android(Device):
             return ori
 
         def _refresh_orientation(self):
+            self.ow_proc = self._initOrientationWatcher()
+            reg_cleanup(self.ow_proc.kill)
             while True:
                 ori = _refresh_by_ow()
                 if ori is None:
@@ -1514,23 +1515,6 @@ class Android(Device):
 
     def pinch(self, *args, **kwargs):
         return self.minitouch.pinch(*args, **kwargs)
-
-    def start_poco_service(self):
-        # check installed
-        try:
-            self.check_app(POCO_SERVICE)
-        except:
-            self.install_app(POCO_APK)
-        self.shell("settings put secure enabled_accessibility_services com.netease.open.pocoservice/.MyAccessibilityService")
-        self.shell("settings put secure accessibility_enabled 1")
-        local, remote = self.adb.setup_forward("tcp:10080")
-        self.poco_service_port = local
-
-    def get_ui_by_poco(self):
-        if getattr(self, "poco_service_port", None) is None:
-            self.start_poco_service()
-        r = requests.get("http://localhost:%s/hierarchy" % self.poco_service_port)
-        return r.text
 
 
 class XYTransformer(object):

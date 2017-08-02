@@ -28,15 +28,14 @@ Environment initialization
 """
 
 
-def set_serialno(sn=None, cap_method="javacap", addr=None):
+def set_serialno(sn=None, cap_method="javacap"):
     '''
     auto set if only one device
     support filepath match pattern, eg: c123*
     '''
-    addr = addr or ST.ADDRESS
 
     def get_available_sn(sn):
-        devs = android.ADB(server_addr=addr).devices(state='device')
+        devs = android.ADB().devices(state='device')
         if not sn:
             # if len(devs) > 1:
             #     print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
@@ -59,10 +58,10 @@ def set_serialno(sn=None, cap_method="javacap", addr=None):
                 sn = serialno
                 break
             if sn is None:
-                raise MoaError("Device[%s] not found in %s" % (sn, addr))
+                raise MoaError("Device[%s] not found" % (sn))
         return sn
     sn = get_available_sn(sn)
-    dev = android.Android(sn, addr=addr, cap_method=cap_method)
+    dev = android.Android(sn, cap_method=cap_method)
     register_device(dev)
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
     return sn
