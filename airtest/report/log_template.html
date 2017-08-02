@@ -160,6 +160,10 @@
       transition: max-height 0.15s ease-out;
     }
 
+    #nav_steps .nav_pre_script, #nav_steps .nav_post_script{
+        background-color: rgb(153, 203, 237) !important;
+    }
+
     div.assert {
       padding-left: 20px;
     }
@@ -300,13 +304,15 @@
               <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
             </label>
             <div id="nav_steps">
-              {% for step in all_steps['main_script'] %}
+            {% for t in step_type %}
+              {% for step in all_steps[t] %}
                 {% if step.trace %}
-                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-red" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
                 {% else %}
-                <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-green nav_{{ t }}" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
                 {% endif %}
               {% endfor %}
+            {% endfor %}
               <a class="a-circle bg-green" href="#">Top</a>
             </div>
           </div>
@@ -448,6 +454,8 @@
     $(".pre_script .step_content, .post_script .step_content").hide();
     $(".pre_script h2, .post_script h2").click(function(){
         $(this).parent().find(".step_content").toggle();
+        var h = $(this).parent().find("img.fancybox").height();
+        $(this).parent().find('.screen_holder').siblings('.screen_place').height(h*scale);
     })
   });
   </script>
