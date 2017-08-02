@@ -8,7 +8,7 @@ from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbShellError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_logger
 from airtest.core.android.ime_helper import YosemiteIme
-from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE, PROJECTIONRATE
+from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -246,7 +246,6 @@ class Android(Device):
             self.ime.end()
 
     def touch(self, pos, times=1, duration=0.01):
-        pos = map(lambda x: x / PROJECTIONRATE, pos)
         pos = self._transformPointByOrientation(pos)
         for _ in range(times):
             if self.minitouch:

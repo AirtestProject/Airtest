@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from airtest.core.android.adb import ADB
 from airtest.core.error import AdbShellError, MinicapError
-from airtest.core.android.constant import PROJECTIONRATE, STFLIB, MINICAPTIMEOUT
+from airtest.core.android.constant import STFLIB
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger
 from airtest.core.utils.compat import PY3
 import threading
@@ -17,8 +17,9 @@ class Minicap(object):
     """quick screenshot from minicap  https://github.com/openstf/minicap"""
 
     VERSION = 4
+    CAPTIMEOUT = None
 
-    def __init__(self, serialno, size=None, projection=PROJECTIONRATE, localport=None, adb=None, stream=True):
+    def __init__(self, serialno, size=None, projection=1, localport=None, adb=None, stream=True):
         self.serialno = serialno
         self.localport = localport
         self.server_proc = None
@@ -183,8 +184,8 @@ class Minicap(object):
                 s.send(b"1")
             cnt += 1
             # recv header, count frame_size
-            if MINICAPTIMEOUT is not None:
-                header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            if self.CAPTIMEOUT is not None:
+                header = s.recv_with_timeout(4, self.CAPTIMEOUT)
             else:
                 header = s.recv(4)
             if header is None:

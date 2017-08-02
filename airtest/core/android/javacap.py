@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from airtest.core.error import MoaError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger
-from airtest.core.android.constant import MINICAPTIMEOUT
 from airtest.core.android.adb import ADB
 import struct
 LOGGING = get_logger('javacap')
@@ -14,6 +13,7 @@ class Javacap(object):
     APP_PATH = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
     DEVICE_PORT = "moa_javacap"
+    CAPTIMEOUT = None
 
     def __init__(self, serialno, adb=None, localport=9999):
         self.serialno = serialno
@@ -63,8 +63,8 @@ class Javacap(object):
         while True:
             s.send(b"1")
             # recv header, count frame_size
-            if MINICAPTIMEOUT is not None:
-                header = s.recv_with_timeout(4, MINICAPTIMEOUT)
+            if self.CAPTIMEOUT is not None:
+                header = s.recv_with_timeout(4, self.CAPTIMEOUT)
             else:
                 header = s.recv(4)
             if header is None:

@@ -9,7 +9,7 @@ import os
 import re
 from airtest.core.error import MoaError, AdbError, AdbShellError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger, get_std_encoding
-from airtest.core.android.constant import DEFAULT_ADB_SERVER, ADB_SHELL_ENCODING, SDK_VERISON_NEW
+from airtest.core.android.constant import DEFAULT_ADB_SERVER, SDK_VERISON_NEW
 LOGGING = get_logger('android')
 
 
@@ -20,6 +20,7 @@ class ADB(object):
 
     status_device = "device"
     status_offline = "offline"
+    SHELL_ENCODING = "utf-8"
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
         self.adb_path = adb_path or get_adb_path()
@@ -157,7 +158,7 @@ class ADB(object):
         if not_wait:
             return self.start_cmd(cmds)
         out = self.cmd(cmds, not_decode=True)
-        return out.decode(ADB_SHELL_ENCODING)
+        return out.decode(self.SHELL_ENCODING)
 
     def shell(self, cmd, not_wait=False):
         """
