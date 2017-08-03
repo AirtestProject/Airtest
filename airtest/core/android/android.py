@@ -280,27 +280,32 @@ class Android(Device):
             tar.update({"x": x, "y": y})
         self.minitouch.operate(tar)
 
-    def start_recording(self, max_time=180, savefile="/sdcard/screen.mp4"):
+    def start_recording(self, max_time=180):
         if getattr(self, "recording_proc", None):
             raise MoaError("recording_proc has already started")
-        p = self.adb.shell(["screenrecord", savefile, "--time-limit", str(max_time)], not_wait=True)
+        pkg_path = self.path_app(YOSEMITE_PACKAGE)
+        p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --start-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
-        info = nbsp.read(0.5)
-        LOGGING.debug(info)
-        nbsp.kill()
-        if p.poll() is not None:
-            LOGGING.error("start_recording error:%s", p.communicate())
-            return
-        self.recording_proc = p
-        self.recording_file = savefile
+        while True:
+            line = nbsp.readline(timeout=5)
+            if line is None:
+                raise RuntimeError("recording setup error")
+            m = re.match("start result: 录制开始! 文件路径:(.*\.mp4)", line.strip())
+            if m:
+                output = m.group(1)
+                self.recording_proc = p
+                self.recording_file = output
+                return True
+        raise RuntimeError("recording setup error")
 
     def stop_recording(self, output="screen.mp4"):
-        if not getattr(self, "recording_proc", None):
-            raise MoaError("start_recording first")
-        self.recording_proc.kill()
-        self.recording_proc.wait()
-        self.recording_proc = None
+        # if not getattr(self, "recording_proc", None):
+        #     raise MoaError("start_recording first")
+        pkg_path = self.path_app(YOSEMITE_PACKAGE)
+        p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
+        p.wait()
         self.adb.pull(self.recording_file, output)
+        self.recording_proc = None
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
@@ -376,3 +381,4 @@ class Android(Device):
 
     def pinch(self, *args, **kwargs):
         return self.minitouch.pinch(*args, **kwargs)
+
