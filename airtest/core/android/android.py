@@ -191,7 +191,7 @@ class ADB(object):
             try:
                 # 返回值解析错误
                 returncode = int(out[-1])
-            except ValueError:
+            except (ValueError, IndexError):
                 returncode = 0
                 stdout = out
             else:
