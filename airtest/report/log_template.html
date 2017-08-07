@@ -224,7 +224,7 @@
             <hr>
             <div class="step_content">
                 {% if step.type in img_type or step.type in uiautomator_img_type %}
-                {% if step.type in img_type %}
+                {% if step.type in img_type and step.image_to_find %}
                 <div class="row">
                   <div class="col-xs-3">
                     <div class="point">
