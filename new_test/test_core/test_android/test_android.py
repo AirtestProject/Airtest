@@ -188,7 +188,7 @@ class TestAndroid(unittest.TestCase):
 
     def test_start_recording(self):
         if self.android.adb.sdk_version >= 20:
-            self.android.start_recording(max_time=30)
+            self.android.start_recording(max_time=30, bit_rate=500000)
             time.sleep(3)
             self.android.stop_recording()
             self.assertIs(os.path.exists("screen.mp4"), True)
