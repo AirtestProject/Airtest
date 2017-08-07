@@ -80,7 +80,7 @@ class MoaLogDisplay(object):
                     temp['trace'] = False
 
                 # poco语句的判定标准是，depth只有1，且上一个步骤是截图步骤
-                if prev_type == 'snapshot' and 2 not in temp:
+                if prev_type == 'snapshot' and 2 not in temp and temp['type'] in self.img_type:
                     temp = self.translate_poco_step(temp, step[-1])
                     if len(all_step[current_step]) > 0:
                         all_step[current_step][-1] = temp
