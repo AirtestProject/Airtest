@@ -4,7 +4,6 @@
 """
 import os
 import time
-import fnmatch
 import aircv
 from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
@@ -33,67 +32,7 @@ def set_serialno(sn=None, cap_method="minicap_stream", adbhost=None):
     auto set if only one device
     support filepath match pattern, eg: c123*
     '''
-    # def get_available_sn(sn):
-    #     devs = android.ADB().devices(state='device')
-    #     if not sn:
-    #         # if len(devs) > 1:
-    #         #     print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
-    #         # elif len(devs) == 0:
-    #         if len(devs) == 0:
-    #             raise MoaError("no device, please check your adb connection")
-    #         devs = [d[0] for d in devs]
-    #         devs_in_moa = [d.serialno for d in G.DEVICE_LIST]
-    #         try:
-    #             another_sn = (set(devs) - set(devs_in_moa)).pop()
-    #         except KeyError:
-    #             raise MoaError("no more device to add")
-    #         sn = another_sn
-    #     else:
-    #         for (serialno, st) in devs:
-    #             if not fnmatch.fnmatch(serialno, sn):
-    #                 continue
-    #             if st != 'device':
-    #                 raise MoaError("Device status not good: %s" % (st,))
-    #             sn = serialno
-    #             break
-    #         if sn is None:
-    #             raise MoaError("Device[%s] not found" % (sn))
-    #     return sn
-    # sn = get_available_sn(sn)
     dev = android.Android(sn, cap_method=cap_method, adbhost=adbhost)
-    register_device(dev)
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
-    return sn
-
-
-def set_emulator(emu_name='bluestacks', sn=None, addr=None):
-    '''
-    auto set if only one device
-    support filepath match pattern, eg: c123*
-    '''
-    if not android.Emulator:
-        raise RuntimeError("Emulator module available on Windows only")
-    addr = addr or ST.ADDRESS
-    if not sn:
-        devs = android.ADB(server_addr=addr).devices(state='device')
-        if len(devs) > 1:
-            ("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
-        elif len(devs) == 0:
-            raise MoaError("no device, please check your adb connection")
-        sn = devs[0][0]
-    else:
-        for (serialno, st) in android.ADB(server_addr=addr).devices(state='device'):
-            if not fnmatch.fnmatch(serialno, sn):
-                continue
-            if st != 'device':
-                raise MoaError("Device status not good: %s" % (st,))
-            sn = serialno
-            break
-        if sn is None:
-            raise MoaError("Device[%s] not found in %s" % (sn, addr))
-    if not emu_name:
-        emu_name = 'bluestacks'
-    dev = android.Emulator(emu_name, sn, addr=addr)
     register_device(dev)
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
     return sn
@@ -120,12 +59,7 @@ def set_windows(handle=None, window_title=None):
         devs = dev.find_window_list(window_title)
         if not devs:
             raise MoaError("no window found with title: '%s'" % window_title)
-        devs_in_moa = [d.handle for d in G.DEVICE_LIST]
-        try:
-            another_dev = (set(devs) - set(devs_in_moa)).pop()
-        except KeyError:
-            raise MoaError("no more device to add")
-        dev.set_handle(another_dev)
+        dev.set_handle(devs[0])
     else:
         G.LOGGING.info("handle not set, use entire screen")
     if dev.handle:
