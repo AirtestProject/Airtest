@@ -312,13 +312,16 @@ class Android(Device):
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
         p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         p.wait()
-        m = re.match("stop result: Stop ok! File path:(.*\.mp4)", p.stdout.read().strip())
-        if not m:
-            raise MoaError("start_recording first")
-        self.recording_file = m.group(1)
-        self.adb.pull(self.recording_file, output)
-        self.adb.shell("rm %s" % self.recording_file)
         self.recording_proc = None
+        for line in p.stdout.readlines():
+            m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
+            if m:
+                self.recording_file = m.group(1)
+                self.adb.pull(self.recording_file, output)
+                self.adb.shell("rm %s" % self.recording_file)
+                return
+        raise MoaError("start_recording first")
+        
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')

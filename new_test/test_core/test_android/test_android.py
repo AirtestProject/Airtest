@@ -187,7 +187,7 @@ class TestAndroid(unittest.TestCase):
         self.android.operate({"type": "up"})
 
     def test_start_recording(self):
-        if self.android.adb.sdk_version >= 20:
+        if self.android.adb.sdk_version >= 19:
             self.android.start_recording(max_time=30, bit_rate=500000)
             time.sleep(3)
             self.android.stop_recording()
@@ -195,7 +195,7 @@ class TestAndroid(unittest.TestCase):
             os.remove("screen.mp4")
 
     def test_start_recording_error(self):
-        if self.android.adb.sdk_version >= 20:
+        if self.android.adb.sdk_version >= 19:
             try:
                 self.android.start_recording(max_time=30)
                 time.sleep(3)
