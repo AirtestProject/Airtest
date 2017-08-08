@@ -36,16 +36,15 @@ def run_script(args):
             print("file does not exist:", os.path.abspath(args.utilfile))
 
     if args.setsn is not None:
-        print("set_serialno", args.setsn)
-        minicap = not args.nominicap
-        minitouch = not args.nominitouch
+        print("set_serialno", args.setsn, args.capmethod)
+        capmethod = args.capmethod
         if args.setsn == "":
             for i in range(args.devcount):
                 # auto choose one serialno
-                set_serialno(minicap=minicap, minitouch=minitouch)
+                set_serialno(cap_method=capmethod)
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn, minicap=minicap, minitouch=minitouch)
+                set_serialno(sn, cap_method=capmethod)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng

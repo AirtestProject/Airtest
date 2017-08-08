@@ -192,7 +192,7 @@ class Android(Device):
             screen = self.minicap.get_frame_from_stream()
         elif self.cap_method == "minicap":
             screen = self.minicap.get_frame()
-        elif self.javacap:
+        elif self.cap_method == "javacap":
             screen = self.javacap.get_frame()
         else:
             screen = self.adb.snapshot()
@@ -202,7 +202,7 @@ class Android(Device):
         # 保证方向是正的
         if ensure_orientation and self.display_info["orientation"]:
             # minicap截图根据sdk_version不一样
-            if self.minicap and self.sdk_version <= 16:
+            if self.cap_method in ("minicap", "minicap_stream") and self.sdk_version <= 16:
                 h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
