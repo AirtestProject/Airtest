@@ -33,7 +33,6 @@ def set_serialno(sn=None, cap_method="minicap_stream", adbhost=None):
     auto set if only one device
     support filepath match pattern, eg: c123*
     '''
-
     # def get_available_sn(sn):
     #     devs = android.ADB().devices(state='device')
     #     if not sn:

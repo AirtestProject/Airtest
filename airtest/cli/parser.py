@@ -27,6 +27,7 @@ def get_parser():
 def run_parser(ap):
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
+    ap.add_argument("--device", help="set dev by url string", nargs="?", action="append")
     ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
     ap.add_argument("--setudid", help="set ios device udid", nargs="?", const="")
     ap.add_argument("--setwin", help="set dev by windows handle", nargs="?", const="")
