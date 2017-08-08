@@ -45,6 +45,7 @@ class MoaLogDisplay(object):
         temp = {}
         self.test_result = True
         current_step = 'main_script'
+        prev_type = ''
         all_step = defaultdict(list)
         for log in self.log:
             if log["depth"] == 0 and log.get("tag") in ["main_script", "pre_script", "post_script"]:
@@ -78,10 +79,19 @@ class MoaLogDisplay(object):
                 else:
                     temp['trace'] = False
 
-                temp = self.translate(temp)
-                if temp is not None:
-                    all_step[current_step].append(temp)
-                    step.append(temp)
+                # poco语句的判定标准是，depth只有1，且上一个步骤是截图步骤
+                if prev_type == 'snapshot' and 2 not in temp and log.get("name") in self.img_type:
+                    temp = self.translate_poco_step(temp, step[-1])
+                    if len(all_step[current_step]) > 0:
+                        all_step[current_step][-1] = temp
+                        step[-1] = temp
+                else:
+                    temp = self.translate(temp)
+                    if temp is not None:
+                        all_step[current_step].append(temp)
+                        step.append(temp)
+
+                prev_type = temp['type']
                 temp = {}
 
         self.step = step
@@ -190,6 +200,7 @@ class MoaLogDisplay(object):
                 vector = step[1]["kwargs"].get("vector")
                 if vector:
                     step['swipe'] = self.dis_vector(vector)
+                    step['vector'] = vector
 
             # print step['type']
             if step['type'] in ['assert_exists', 'assert_not_exists']:
@@ -224,6 +235,43 @@ class MoaLogDisplay(object):
         step['title'] = self.func_title(step)
         return step
 
+    def translate_poco_step(self, step, prev_step=None):
+        """
+        处理poco的相关操作，参数与airtest的不同，由一个截图和一个操作构成，需要合成一个步骤
+        Parameters
+        ----------
+        step 一个完整的操作，如click
+        prev_step 前一个步骤，应该是截图
+
+        Returns
+        -------
+
+        """
+        ret = {}
+        if prev_step:
+            ret.update(prev_step)
+        ret['type'] = step[1].get("name", "")
+        if step.get('trace'):
+            ret['trace'] = step['trace']
+            ret['traceback'] = step.get('traceback')
+        if ret['type'] == 'touch':
+            if step[1]['args'] and len(step[1]['args'][0]) == 2:
+                pos = step[1]['args'][0]
+                ret['target_pos'] = [int(pos[0]), int(pos[1])]
+                ret['top'] = ret['target_pos'][1]
+                ret['left'] = ret['target_pos'][0]
+        elif ret['type'] == 'swipe':
+            # swipe 需要显示一个方向
+            if step['type'] == 'swipe':
+                vector = step[1]["kwargs"].get("vector")
+                if vector:
+                    step['swipe'] = self.dis_vector(vector)
+                    step['vector'] = vector
+
+        ret['desc'] = self.func_desc_poco(ret)
+        ret['title'] = self.func_title(ret)
+        return ret
+
     def to_percent(self, p):
         if not p:
             return ''
@@ -256,7 +304,7 @@ class MoaLogDisplay(object):
             "snapshot": u"截图描述：%s" % step.get('text', ''),
             # "_loop_find":"寻找目标位置",
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
-            "swipe": u"从目标坐标点%s向着%s滑动" % (repr(step.get('target_pos', '')), step.get('swipe', '')),
+            "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
 
             "wait": u"等待目标图片出现",
             "exists": u"图片%s存在" % step.get('exists_ret', ''),
@@ -272,7 +320,17 @@ class MoaLogDisplay(object):
             # "snapshot": step[1]['args'][0],
         }
 
-        return desc.get(name, '%s%s' % (name, step[1]['args'] if 'args' in step[1] else ""))
+        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
+
+    def func_desc_poco(self, step):
+        """ 把对应的poco操作显示成中文"""
+        desc = {
+            "touch": u"点击UI组件 {name}".format(name=step.get("text", "")),
+        }
+        if step['type'] in desc:
+            return desc.get(step['type'])
+        else:
+            return self.func_desc(step)
 
     def func_title(self, step):
         title = {
@@ -286,7 +344,7 @@ class MoaLogDisplay(object):
             "server_call": u"调用服务器方法",
             "assert_exists": u"验证图片存在",
             "assert_not_exists": u"验证图片不存在",
-
+            "snapshot": u"截图",
             "assert_equal": u"验证相等",
             "assert_not_equal": u"验证不相等",
         }
@@ -295,19 +353,18 @@ class MoaLogDisplay(object):
 
     def dis_vector(self, v):
 
-        x = int(v[0])
-        y = int(v[1])
+        x = v[0]
+        y = v[1]
         a = ''
         b = ''
         if x > 0:
             a = u'右'
         if x < 0:
             a = u'左'
-        if y > 0:
-            b = u'上'
         if y < 0:
+            b = u'上'
+        if y > 0:
             b = u'下'
-
         return a+b
 
     def _render(self, template_name, **template_vars):
@@ -361,15 +418,9 @@ def safe_percent(a, b):
 
 def get_file_author(file_path):
     if not os.path.exists(file_path):
-        # 假如是中文路径，可以进行decode再尝试查找一次
-        # 但是windows下用ide运行脚本默认是utf8编码，所以这里尝试用utf8来解码一次
-        try:
-            file_path = file_path.decode("utf-8")
-        except:
-            pass
-        if not os.path.exists(file_path):
-            print("get_file_author, file_path %s not existed" % repr(file_path))
-            return
+        # 中文路径脚本，编码来源比较复杂，从ide启动与从不同终端启动编码各不相同，可以暂不显示作者名称，不影响报告的显示
+        print("get_file_author, file_path %s not existed" % repr(file_path))
+        return
 
     try:
         fp = io.open(file_path, encoding="utf-8")

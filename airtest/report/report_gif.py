@@ -38,14 +38,17 @@ def gen_gif(imgdir, steps, output="log.gif", size=0.3):
         target_pos = None
         for step in steps:
             if f in step.get("screenshot", ""):
-                # 如果loop_find中含有wnd_pos变量，则为窗口切图后的匹配，图片位置=操作位置-窗口位置:
-                if step[2].has_key("wnd_pos"):
-                    wnd_pos = step[2].get("wnd_pos")
-                    ret = step[2].get("ret")
-                    target_pos = (ret[0] - wnd_pos[0], ret[1] - wnd_pos[1])
+                if 2 in step:
+                    # 如果loop_find中含有wnd_pos变量，则为窗口切图后的匹配，图片位置=操作位置-窗口位置:
+                    if step[2].has_key("wnd_pos"):
+                        wnd_pos = step[2].get("wnd_pos")
+                        ret = step[2].get("ret")
+                        target_pos = (ret[0] - wnd_pos[0], ret[1] - wnd_pos[1])
+                    else:
+                        target_pos = step[2].get("ret")
+                        # target_pos = step.get("target_pos")
                 else:
-                    target_pos = step[2].get("ret")
-                    # target_pos = step.get("target_pos")
+                    target_pos = step.get("target_pos", None)
         if target_pos is not None and len(target_pos) > 0 and target_pos[0]:
             draw_circle(img, target_pos)
         w, h = img.size

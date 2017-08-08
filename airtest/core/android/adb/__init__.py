@@ -2,6 +2,7 @@
 import subprocess
 import threading
 import platform
+import warnings
 import random
 import time
 import sys
@@ -159,7 +160,11 @@ class ADB(object):
         if not_wait:
             return self.start_cmd(cmds)
         out = self.cmd(cmds, not_decode=True)
-        return out.decode(self.SHELL_ENCODING)
+        try:
+            return out.decode(self.SHELL_ENCODING)
+        except UnicodeDecodeError:
+            warnings.warn("shell output decode {} fail. repr={}".format(self.SHELL_ENCODING, repr(out)))
+            return unicode(repr(out))
 
     def shell(self, cmd, not_wait=False):
         """
@@ -173,16 +178,16 @@ class ADB(object):
         if self.sdk_version < SDK_VERISON_NEW:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
-            cmd = split_cmd(cmd) + [";", "echo", "$?"]
+            cmd = split_cmd(cmd) + [";", "echo", "---$?---"]
             out = self.raw_shell(cmd).rstrip()
-            try:
-                # 返回值解析错误
-                returncode = int(out[-1])
-            except ValueError:
-                returncode = 0
+            m = re.match("(.*)---(\d+)---$", out, re.DOTALL)
+            if not m:
+                warnings.warn("return code not matched")
                 stdout = out
+                returncode = 0
             else:
-                stdout = out[:-1]
+                stdout = m.group(1)
+                returncode = int(m.group(2))
             if returncode > 0:
                 raise AdbShellError("", stdout)
             return stdout
