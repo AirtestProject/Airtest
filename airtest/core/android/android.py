@@ -21,10 +21,10 @@ class Android(Device):
 
     """Android Client"""
 
-    def __init__(self, serialno=None, cap_method="minicap_stream", shell_ime=True):
+    def __init__(self, serialno=None, cap_method="minicap_stream", shell_ime=True, adbhost=None):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
-        self.adb = ADB(self.serialno)
+        self.adb = ADB(self.serialno, server_addr=adbhost)
         self.adb.start_server()
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
