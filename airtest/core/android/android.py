@@ -320,7 +320,7 @@ class Android(Device):
                 self.adb.pull(self.recording_file, output)
                 self.adb.shell("rm %s" % self.recording_file)
                 return
-        raise MoaError("start_recording first")      
+        raise MoaError("start_recording first")
 
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
