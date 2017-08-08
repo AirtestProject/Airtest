@@ -168,7 +168,11 @@ class ADB(object):
         if not_wait:
             return self.start_cmd(cmds)
         out = self.cmd(cmds, not_decode=True)
-        return out.decode(ADB_SHELL_ENCODING)
+        try:
+            return out.decode(ADB_SHELL_ENCODING)
+        except UnicodeDecodeError:
+            warnings.warn("shell output decode fail. repr={}".format(repr(out)))
+            return unicode(repr(out))
 
     def shell(self, cmd, not_wait=False):
         """
@@ -187,7 +191,7 @@ class ADB(object):
             try:
                 # 返回值解析错误
                 returncode = int(out[-1])
-            except ValueError:
+            except (ValueError, IndexError):
                 returncode = 0
                 stdout = out
             else:
