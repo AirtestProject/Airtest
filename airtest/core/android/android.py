@@ -288,17 +288,19 @@ class Android(Device):
             tar.update({"x": x, "y": y})
         self.minitouch.operate(tar)
 
-    def start_recording(self, max_time=180):
+    def start_recording(self, max_time=1800, bit_rate=None):
         if getattr(self, "recording_proc", None):
             raise MoaError("recording_proc has already started")
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
-        p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --start-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
+        max_time_param = "-Dduration=%d" % max_time if max_time else ""
+        bit_rate_param = "-Dbitrate=%d" % bit_rate if bit_rate else ""
+        p = self.adb.shell('CLASSPATH=%s exec app_process %s %s /system/bin %s.Recorder --start-record' % (pkg_path, max_time_param, bit_rate_param,YOSEMITE_PACKAGE), not_wait=True)
         nbsp = NonBlockingStreamReader(p.stdout)
         while True:
             line = nbsp.readline(timeout=5)
             if line is None:
                 raise RuntimeError("recording setup error")
-            m = re.match("start result: 录制开始! 文件路径:(.*\.mp4)", line.strip())
+            m = re.match("start result: Record start success! File path:(.*\.mp4)", line.strip())
             if m:
                 output = m.group(1)
                 self.recording_proc = p
@@ -307,12 +309,13 @@ class Android(Device):
         raise RuntimeError("recording setup error")
 
     def stop_recording(self, output="screen.mp4"):
-        # if not getattr(self, "recording_proc", None):
-        #     raise MoaError("start_recording first")
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
         p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         p.wait()
+        if "stop result: stop ok" not in p.stdout.read():
+            raise MoaError("start_recording first")
         self.adb.pull(self.recording_file, output)
+        self.adb.shell("rm %s" % self.recording_file)
         self.recording_proc = None
 
     def get_top_activity_name_and_pid(self):
