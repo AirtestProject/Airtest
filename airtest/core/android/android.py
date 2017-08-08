@@ -25,7 +25,7 @@ class Android(Device):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=adbhost)
-        self.adb.start_server()
+        # self.adb.start_server()
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)

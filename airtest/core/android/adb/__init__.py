@@ -46,10 +46,8 @@ class ADB(object):
         self.connect()
 
     def start_server(self):
-        """adb start-server, cannot assign any -H -P -s"""
-        if self.adb_server_addr[0] not in ("localhost", "127.0.0.1"):
-            raise RuntimeError("cannot start-server on other host")
-        return subprocess.check_call([self.adb_path, "start-server"])
+        """adb start-server"""
+        return self.cmd("start-server")
 
     def start_cmd(self, cmds, device=True):
         """
@@ -57,9 +55,6 @@ class ADB(object):
         device: specify -s serialno if True
         """
         cmds = split_cmd(cmds)
-        if cmds[0] == "start-server":
-            raise RuntimeError("please use self.start_server instead")
-
         host, port = self.adb_server_addr
         prefix = [self.adb_path, '-H', host, '-P', str(port)]
         if device:
