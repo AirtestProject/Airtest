@@ -26,7 +26,7 @@ class MoaLogDisplay(object):
         self.run_start = None
         self.run_end = None
         self.author = author
-        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot', 'poco_touch')
+        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.uiautomator_img_type = ('click', 'long_click', 'ui.swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'end', 'assert')
         self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, LOGFILE)
@@ -80,7 +80,7 @@ class MoaLogDisplay(object):
                     temp['trace'] = False
 
                 # poco语句的判定标准是，depth只有1，且上一个步骤是截图步骤
-                if prev_type == 'snapshot' and 2 not in temp and temp.get("name") in self.img_type:
+                if prev_type == 'snapshot' and 2 not in temp and log.get("name") in self.img_type:
                     temp = self.translate_poco_step(temp, step[-1])
                     if len(all_step[current_step]) > 0:
                         all_step[current_step][-1] = temp
@@ -250,17 +250,17 @@ class MoaLogDisplay(object):
         ret = {}
         if prev_step:
             ret.update(prev_step)
-        ret['type'] = "poco_" + step[1].get("name", "")
+        ret['type'] = step[1].get("name", "")
         if step.get('trace'):
             ret['trace'] = step['trace']
             ret['traceback'] = step.get('traceback')
-        if ret['type'] == 'poco_touch':
+        if ret['type'] == 'touch':
             if step[1]['args'] and len(step[1]['args'][0]) == 2:
                 pos = step[1]['args'][0]
                 ret['target_pos'] = [int(pos[0]), int(pos[1])]
                 ret['top'] = ret['target_pos'][1]
                 ret['left'] = ret['target_pos'][0]
-        elif ret['type'] == 'poco_swipe':
+        elif ret['type'] == 'swipe':
             # swipe 需要显示一个方向
             if step['type'] == 'swipe':
                 vector = step[1]["kwargs"].get("vector")
@@ -269,7 +269,7 @@ class MoaLogDisplay(object):
                     step['vector'] = vector
 
         ret['desc'] = self.func_desc_poco(ret)
-        ret['title'] = self.func_title_poco(ret)
+        ret['title'] = self.func_title(ret)
         return ret
 
     def to_percent(self, p):
@@ -325,12 +325,11 @@ class MoaLogDisplay(object):
     def func_desc_poco(self, step):
         """ 把对应的poco操作显示成中文"""
         desc = {
-            "poco_touch": u"使用POCO点击UI组件 {name}".format(name=step.get("text")),
+            "touch": u"点击UI组件 {name}".format(name=step.get("text", "")),
         }
         if step['type'] in desc:
             return desc.get(step['type'])
         else:
-            step['type'] = step['type'].replace("poco_", "")
             return self.func_desc(step)
 
     def func_title(self, step):
@@ -351,16 +350,6 @@ class MoaLogDisplay(object):
         }
         name = step['type']
         return title.get(name, name)
-
-    def func_title_poco(self, step):
-        """对应的poco title"""
-        title = {
-            "poco_touch": u"点击",
-        }
-        if step['type'] in title:
-            return title.get(step['type'])
-        else:
-            return self.func_title(step)
 
     def dis_vector(self, v):
 
