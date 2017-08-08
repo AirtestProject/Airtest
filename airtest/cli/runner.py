@@ -44,7 +44,12 @@ def run_script(args):
                 set_serialno(cap_method=capmethod)
         else:
             for sn in args.setsn.split(","):
-                set_serialno(sn, cap_method=capmethod)
+                if ":" in sn:
+                    # parse sn on remote adb host
+                    host, port, sn = sn.split(":")
+                    set_serialno(sn, cap_method=capmethod, adbhost=(host, port))
+                else:
+                    set_serialno(sn, cap_method=capmethod)
         set_current(0)
 
     if args.setudid is not None:  # modified by gzlongqiumeng

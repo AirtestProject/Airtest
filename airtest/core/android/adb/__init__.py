@@ -25,7 +25,7 @@ class ADB(object):
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
         self.adb_path = adb_path or get_adb_path()
-        self.adb_server_addr = server_addr or self.default_server()
+        self.adb_server_addr = server_addr  #  or self.default_server()
         self.set_serialno(serialno)
         self._sdk_version = None
         self._line_breaker = None
@@ -47,6 +47,7 @@ class ADB(object):
 
     def start_server(self):
         """adb start-server"""
+        # return subprocess.check_call([self.adb_path, "start-server"])
         return self.cmd("start-server")
 
     def start_cmd(self, cmds, device=True):
@@ -55,8 +56,10 @@ class ADB(object):
         device: specify -s serialno if True
         """
         cmds = split_cmd(cmds)
-        host, port = self.adb_server_addr
-        prefix = [self.adb_path, '-H', host, '-P', str(port)]
+        prefix = [self.adb_path]
+        if self.adb_server_addr:
+            host, port = self.adb_server_addr
+            prefix += ['-H', host, '-P', str(port)]
         if device:
             if not self.serialno:
                 raise RuntimeError("please set_serialno first")
@@ -98,7 +101,7 @@ class ADB(object):
         """adb devices"""
         patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
         device_list = []
-        self.start_server()
+        # self.start_server()
         output = self.cmd("devices", device=False)
         for line in output.splitlines():
             line = line.strip()

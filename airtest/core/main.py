@@ -28,40 +28,40 @@ Environment initialization
 """
 
 
-def set_serialno(sn=None, cap_method="minicap_stream"):
+def set_serialno(sn=None, cap_method="minicap_stream", adbhost=None):
     '''
     auto set if only one device
     support filepath match pattern, eg: c123*
     '''
 
-    def get_available_sn(sn):
-        devs = android.ADB().devices(state='device')
-        if not sn:
-            # if len(devs) > 1:
-            #     print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
-            # elif len(devs) == 0:
-            if len(devs) == 0:
-                raise MoaError("no device, please check your adb connection")
-            devs = [d[0] for d in devs]
-            devs_in_moa = [d.serialno for d in G.DEVICE_LIST]
-            try:
-                another_sn = (set(devs) - set(devs_in_moa)).pop()
-            except KeyError:
-                raise MoaError("no more device to add")
-            sn = another_sn
-        else:
-            for (serialno, st) in devs:
-                if not fnmatch.fnmatch(serialno, sn):
-                    continue
-                if st != 'device':
-                    raise MoaError("Device status not good: %s" % (st,))
-                sn = serialno
-                break
-            if sn is None:
-                raise MoaError("Device[%s] not found" % (sn))
-        return sn
-    sn = get_available_sn(sn)
-    dev = android.Android(sn, cap_method=cap_method)
+    # def get_available_sn(sn):
+    #     devs = android.ADB().devices(state='device')
+    #     if not sn:
+    #         # if len(devs) > 1:
+    #         #     print("more than one device, auto choose one, to specify serialno: set_serialno(sn)")
+    #         # elif len(devs) == 0:
+    #         if len(devs) == 0:
+    #             raise MoaError("no device, please check your adb connection")
+    #         devs = [d[0] for d in devs]
+    #         devs_in_moa = [d.serialno for d in G.DEVICE_LIST]
+    #         try:
+    #             another_sn = (set(devs) - set(devs_in_moa)).pop()
+    #         except KeyError:
+    #             raise MoaError("no more device to add")
+    #         sn = another_sn
+    #     else:
+    #         for (serialno, st) in devs:
+    #             if not fnmatch.fnmatch(serialno, sn):
+    #                 continue
+    #             if st != 'device':
+    #                 raise MoaError("Device status not good: %s" % (st,))
+    #             sn = serialno
+    #             break
+    #         if sn is None:
+    #             raise MoaError("Device[%s] not found" % (sn))
+    #     return sn
+    # sn = get_available_sn(sn)
+    dev = android.Android(sn, cap_method=cap_method, adbhost=adbhost)
     register_device(dev)
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
     return sn
