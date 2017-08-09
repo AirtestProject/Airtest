@@ -34,6 +34,13 @@ class ADB(object):
         self._forward_local_using = []
         reg_cleanup(self._cleanup_forwards)
 
+    @property
+    def host(self):
+        if self.adb_server_addr:
+            return self.adb_server_addr[0]
+        else:
+            return "localhost"
+
     @staticmethod
     def default_server():
         """get default adb server"""

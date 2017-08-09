@@ -278,7 +278,7 @@ class Minitouch(object):
         3. prepare to send
         """
         s = SafeSocket()
-        s.connect(("localhost", self.localport))
+        s.connect((self.adb.host, self.localport))
         s.sock.settimeout(2)
         header = b""
         while True:
