@@ -181,7 +181,7 @@ class Minicap(object):
         self._setup(adb_port, lazy=lazy)
         s = SafeSocket()
         adb_port = adb_port or self.localport
-        s.connect(("localhost", adb_port))
+        s.connect((self.adb.host, adb_port))
         t = s.recv(24)
         # minicap info
         yield struct.unpack("<2B5I2B", t)

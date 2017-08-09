@@ -31,6 +31,8 @@ class RotationWatcher(object):
             self.start()
 
     def start(self):
+        self.ow_proc = self._setup()
+        reg_cleanup(self.ow_proc.kill)
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
@@ -43,8 +45,6 @@ class RotationWatcher(object):
             return ori
 
         def _run():
-            self.ow_proc = self._setup()
-            reg_cleanup(self.ow_proc.kill)
             while True:
                 ori = _refresh_by_ow()
                 if ori is None:

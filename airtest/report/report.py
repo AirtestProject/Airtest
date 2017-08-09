@@ -162,9 +162,16 @@ class MoaLogDisplay(object):
             elif step.get(2):
                 if step['type'] in self.img_type:
                     # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
-                    image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
-                    if not os.path.exists(image_path):
+                    if len(step[2]['args']) and 'filename' in step[2]['args'][0]:
+                        image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                    else:
+                        image_path = ""
+                    if not os.path.isfile(image_path) and 'filepath' in step[2]['args'][0]:
                         image_path = step[2]['args'][0]['filepath']
+                    elif step.get("trace"):
+                        step['desc'] = self.func_desc(step)
+                        step['title'] = self.func_title(step)
+                        return step
                     step['image_to_find'] = image_path
                     step['resolution'] = step[2]['args'][0].get("resolution", None)
                     step['record_pos'] = step[2]['args'][0].get("record_pos", None)

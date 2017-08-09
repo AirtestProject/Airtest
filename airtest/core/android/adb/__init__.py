@@ -30,8 +30,16 @@ class ADB(object):
         self._sdk_version = None
         self._line_breaker = None
         self._display_info = None
+        self._display_info_lock = threading.Lock()
         self._forward_local_using = []
         reg_cleanup(self._cleanup_forwards)
+
+    @property
+    def host(self):
+        if self.adb_server_addr:
+            return self.adb_server_addr[0]
+        else:
+            return "localhost"
 
     @staticmethod
     def default_server():
@@ -377,8 +385,10 @@ class ADB(object):
 
     @property
     def display_info(self):
+        self._display_info_lock.acquire()
         if not self._display_info:
             self._display_info = self.get_display_info()
+        self._display_info_lock.release()
         return self._display_info
 
     def get_display_info(self):
