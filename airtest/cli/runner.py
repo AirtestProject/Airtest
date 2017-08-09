@@ -15,7 +15,6 @@ from airtest.core.main import *
 from airtest.core.error import MinicapError, MinitouchError, AdbError
 from airtest.core.helper import log, logwrap
 from airtest.core.settings import Settings as ST
-from urlparse import urlparse, parse_qsl
 
 
 SCRIPTHOME = None
@@ -35,24 +34,6 @@ def run_script(args):
             exec(compile(utilcontent, args.utilfile, 'exec')) in globals()
         else:
             print("file does not exist:", os.path.abspath(args.utilfile))
-
-    def init_device(uri):
-        d = urlparse(uri)
-        platform = d.scheme
-        host = d.netloc
-        uuid = d.path.lstrip("/")
-        params = dict(parse_qsl(d.query))
-
-        if platform == "android":
-            if host:
-                params["adbhost"] = host.split(":")
-            set_serialno(uuid, **params)
-        elif platform == "ios":
-            set_udid(uuid, **params)
-        elif platform == "windows":
-            set_windows(uuid, **params)
-        else:
-            raise RuntimeError("unknown platform %s" % platform)
 
     if isinstance(args.device, list):
         for device in args.device:

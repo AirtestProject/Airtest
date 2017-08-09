@@ -12,6 +12,7 @@ from airtest.core.cv import loop_find, device_snapshot
 from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
     get_platform, platform, register_device, delay_after_operation, set_default_st
 from airtest.core.device import DEV_TYPE_DICT
+from urlparse import urlparse, parse_qsl
 try:
     from airtest.core import win
 except ImportError as e:
@@ -69,6 +70,28 @@ def set_windows(handle=None, window_title=None):
     ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
     # # set no resize on windows as default (会导致函数的调用报错！)
     # ST.RESIZE_METHOD = ST.RESIZE_METHOD
+
+
+def init_device(uri):
+    """用uri连接设备
+    android://adbhost:adbport/serialno?p1=v1
+    """
+    d = urlparse(uri)
+    platform = d.scheme
+    host = d.netloc
+    uuid = d.path.lstrip("/")
+    params = dict(parse_qsl(d.query))
+
+    if platform == "android":
+        if host:
+            params["adbhost"] = host.split(":")
+        set_serialno(uuid, **params)
+    elif platform == "ios":
+        set_udid(uuid, **params)
+    elif platform == "windows":
+        set_windows(uuid, **params)
+    else:
+        raise RuntimeError("unknown platform %s" % platform)
 
 
 def set_device(pltf, uid=None, *args, **kwargs):
