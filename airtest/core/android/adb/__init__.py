@@ -17,8 +17,6 @@ LOGGING = get_logger('android')
 class ADB(object):
     """adb client for one serialno"""
 
-    _forward_local = 11111
-
     status_device = "device"
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
@@ -256,13 +254,18 @@ class ADB(object):
         """
         random a forward local port, use forward --no-rebind to try forward
         """
-        port = cls._forward_local
-        cls._forward_local += random.randint(1, 100)
-        return port
+        return random.randint(11111, 20000)
 
     @retries(3)
     def setup_forward(self, device_port):
+        """
+        setup adb forward with a random local port, try bind at most 3 times
+        device_port can be a string or a function(localport)
+        eg: "tcp:5001" or "localabstract:{}".format
+        """
         localport = self.get_available_forward_local()
+        if callable(device_port):
+            device_port = device_port(localport)
         self.forward("tcp:%s" % localport, device_port)
         return localport, device_port
 

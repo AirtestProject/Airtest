@@ -77,14 +77,8 @@ class Minitouch(object):
             self.server_proc.kill()
             self.server_proc = None
 
-        @retries(3)
-        def set_up_forward():
-            localport = adb_port or self.localport or self.adb.get_available_forward_local()
-            deviceport = "minitouch_%s" % localport
-            self.adb.forward("tcp:%s" % localport, "localabstract:%s" % deviceport)
-            return localport, deviceport
-
-        self.localport, deviceport = set_up_forward()
+        self.localport, deviceport = self.adb.setup_forward("localabstract:minitouch_{}".format)
+        deviceport = deviceport[len("localabstract:"):]
         p = self.adb.shell("/data/local/tmp/minitouch -n '%s' 2>&1" % deviceport, not_wait=True)
         self.nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:

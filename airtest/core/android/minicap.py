@@ -107,18 +107,12 @@ class Minicap(object):
 
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
 
-        @retries(3)
-        def set_up_forward():
-            localport = adb_port or self.localport or self.adb.get_available_forward_local()
-            device_port = "moa_minicap_%s" % localport
-            self.adb.forward("tcp:%s" % localport, "localabstract:%s" % device_port)
-            return localport, device_port
-
-        self.localport, device_port = set_up_forward()
+        self.localport, deviceport = self.adb.setup_forward("localabstract:minicap_{}".format)
+        deviceport = deviceport[len("localabstract:"):]
         other_opt = "-l" if lazy else ""
         proc = self.adb.shell(
             "LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" % (
-                device_port,
+                deviceport,
                 real_width, real_height,
                 proj_width, proj_height,
                 real_orientation, other_opt),
