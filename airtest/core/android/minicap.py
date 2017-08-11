@@ -233,9 +233,9 @@ class Minicap(object):
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
-        if rotation == self.current_rotation:
-            LOGGING.debug("update_rotation is the same with current_rotation %s" % rotation)
-            return
         with self.stream_lock:
+            if str(rotation) == str(self.current_rotation):
+                LOGGING.debug("update_rotation is the same with current_rotation %s" % rotation)
+                return
             self.display_info["rotation"] = rotation
             self.frame_gen = None
