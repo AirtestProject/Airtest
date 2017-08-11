@@ -252,24 +252,13 @@ class ADB(object):
             yield serialno, local, remote
 
     @classmethod
-    def _get_forward_local(cls):
+    def get_available_forward_local(cls):
+        """
+        random a forward local port, use forward --no-rebind to try forward
+        """
         port = cls._forward_local
         cls._forward_local += random.randint(1, 100)
         return port
-
-    def get_available_forward_local(self):
-        """
-        1. do not repeat in different process, by check forward list(latency exists when setting up)
-        2. do not repeat in one process, by cls._forward_local
-        """
-        forwards = self.get_forwards()
-        localports = [i[1] for i in forwards]
-        times = 100
-        for i in range(times):
-            port = self._get_forward_local()
-            if "tcp:%s" % port not in localports:
-                return port
-        raise RuntimeError("No available adb forward local port for %s times" % (times))
 
     @retries(3)
     def setup_forward(self, device_port):

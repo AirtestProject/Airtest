@@ -110,7 +110,6 @@ class Minicap(object):
         @retries(3)
         def set_up_forward():
             localport = adb_port or self.localport or self.adb.get_available_forward_local()
-            # localport = 11154
             device_port = "moa_minicap_%s" % localport
             self.adb.forward("tcp:%s" % localport, "localabstract:%s" % device_port)
             return localport, device_port
