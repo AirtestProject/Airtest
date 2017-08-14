@@ -166,15 +166,16 @@ class MoaLogDisplay(object):
                         image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
                     else:
                         image_path = ""
-                    if not os.path.isfile(image_path) and 'filepath' in step[2]['args'][0]:
+                    if not os.path.isfile(image_path) and step[2]['args'] and len(step[2]['args']) > 0 and 'filepath' in step[2]['args'][0]:
                         image_path = step[2]['args'][0]['filepath']
                     if not os.path.isfile(image_path) and step.get("trace"):
                         step['desc'] = self.func_desc(step)
                         step['title'] = self.func_title(step)
                         return step
                     step['image_to_find'] = image_path
-                    step['resolution'] = step[2]['args'][0].get("resolution", None)
-                    step['record_pos'] = step[2]['args'][0].get("record_pos", None)
+                    if step[2]['args'] and len(step[2]['args']) > 0:
+                        step['resolution'] = step[2]['args'][0].get("resolution", None)
+                        step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
                 if not step['trace']:
                     step['target_pos'] = step[2].get('ret')
