@@ -19,7 +19,7 @@ class RotationWatcher(object):
         try:
             apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
         except MoaError:
-            self.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
+            self.android.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
             apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
         p = self.android.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
         if p.poll() is not None:
