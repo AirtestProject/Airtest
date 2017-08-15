@@ -394,8 +394,17 @@ class MoaLogDisplay(object):
         template = env.get_template(template_name)
         return template.render(**template_vars)
 
-    def render(self, template_name):
-
+    def render(self, template_name, record_name=[]):
+        records = []
+        # 录屏文件如果存在，就放进html里
+        for f in record_name:
+            p = os.path.join(self.log_root, f)
+            ext = os.path.splitext(f)[1]
+            if not ext:
+                p = p + ".mp4"
+            if os.path.isfile(p) and os.path.splitext(p)[1] in [".mp4", ".MP4"]:
+                records.append(p)
+        print records
         data = {}
         data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
@@ -409,6 +418,7 @@ class MoaLogDisplay(object):
         data['run_start'] = self.run_start
         data['static_root'] = self.static_root
         data['author'] = self.author
+        data['records'] = records
         return self._render(template_name, **data)     
 
 
@@ -457,6 +467,7 @@ def get_parger(ap):
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
     ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
+    ap.add_argument("--record", help="add screen record to log.html", nargs="+")
     ap.add_argument("--new_report", nargs='?', const=True, default=False)
     return ap
 
@@ -511,7 +522,11 @@ def main(args):
         gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
     # gen html report
     else:
-        html = rpt.render(tpl)
+        if args.record:
+            record = args.record
+        else:
+            record = []
+        html = rpt.render(tpl, record_name=record)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
     """
