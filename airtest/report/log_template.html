@@ -359,6 +359,10 @@
 
   <script>
   $(function() {
+      iframe = document.getElementById("myframe");
+      if (iframe) {
+          iframe.setAttribute("allowfullscreen", "allowfullscreen");
+      }
     $("#expand_nav_step").hide(); // init
     $("#collapse_nav_step").click(function() {
       $("#nav_steps").addClass('collapsed');
