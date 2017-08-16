@@ -398,13 +398,16 @@ class MoaLogDisplay(object):
         records = []
         # 录屏文件如果存在，就放进html里
         for f in record_name:
-            p = os.path.join(self.log_root, f)
             ext = os.path.splitext(f)[1]
             if not ext:
-                p = p + ".mp4"
-            if os.path.isfile(p) and os.path.splitext(p)[1] in [".mp4", ".MP4"]:
-                records.append(p)
-        print records
+                f = f + ".mp4"
+            if os.path.splitext(f)[1] not in [".mp4", ".MP4"]:
+                continue
+            if os.path.isfile(f):
+                records.append(f)
+            elif os.path.isfile(os.path.join(self.log_root, f)):
+                records.append(os.path.join(self.log_root, f))
+
         data = {}
         data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
