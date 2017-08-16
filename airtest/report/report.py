@@ -397,6 +397,8 @@ class MoaLogDisplay(object):
     def render(self, template_name, record_name=[]):
         records = []
         # 录屏文件如果存在，就放进html里
+        print "files", os.listdir(".")
+        print "log_root", self.log_root, os.listdir(self.log_root)
         for f in record_name:
             ext = os.path.splitext(f)[1]
             if not ext:
