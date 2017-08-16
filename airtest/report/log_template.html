@@ -359,9 +359,9 @@
 
   <script>
   $(function() {
-      iframe = document.getElementById("myframe");
+      iframe = window.frameElement;
       if (iframe) {
-          iframe.setAttribute("allowfullscreen", "allowfullscreen");
+          window.frameElement.setAttribute("allowfullscreen", "allowfullscreen")
       }
     $("#expand_nav_step").hide(); // init
     $("#collapse_nav_step").click(function() {
