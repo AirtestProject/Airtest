@@ -397,6 +397,7 @@ class MoaLogDisplay(object):
     def render(self, template_name, record_name=[]):
         records = []
         # 录屏文件如果存在，就放进html里
+        print "records", record_name
         print "files", os.listdir(".")
         print "log_root", self.log_root, os.listdir(self.log_root)
         for f in record_name:
@@ -405,6 +406,7 @@ class MoaLogDisplay(object):
                 f = f + ".mp4"
             if os.path.splitext(f)[1] not in [".mp4", ".MP4"]:
                 continue
+            print "record_file", f
             if os.path.isfile(f):
                 records.append(f)
             elif os.path.isfile(os.path.join(self.log_root, f)):
