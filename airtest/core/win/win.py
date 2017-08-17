@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import win32gui
 import win32process
 import win32com.client
 from PIL import ImageGrab
@@ -124,7 +125,13 @@ class Windows(Device):
         self.set_hwnd_focus()
 
     def set_hwnd_focus(self):
-        """根据handle获取窗口焦点，使得键盘事件对该窗口生效."""
+        """窗口置前."""
+        if self.handle:
+            # 将窗口置于最前:
+            win32gui.SetForegroundWindow(self.handle)
+
+    def setFocus(self):
+        """强制导向输入焦点."""
         if self.handle:
             _, pid = win32process.GetWindowThreadProcessId(self.handle)
             shell = win32com.client.Dispatch("WScript.Shell")
