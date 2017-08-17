@@ -219,17 +219,11 @@ class Minicap(object):
         with self.stream_lock:
             if self.frame_gen is None:
                 self.init_stream()
-            try:
-
-                # support py 3
-                if not PY3:
-                    frame = self.frame_gen.next()
-                else:
-                    frame = self.frame_gen.__next__()
-
-                return frame
-            except Exception as err:
-                raise MinicapError(err)
+            if not PY3:
+                frame = self.frame_gen.next()
+            else:
+                frame = self.frame_gen.__next__()
+            return frame
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
