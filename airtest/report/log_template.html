@@ -68,6 +68,7 @@
     img#gif{
       max-width: 100%;
       min-height: 50px;
+      max-height: 380px;
     }
     
     div.rect {
@@ -167,6 +168,10 @@
     div.assert {
       padding-left: 20px;
     }
+    .gif-wrap {
+        max-height: 400px;
+        text-align: center;
+    }
 
     </style>
   </head>
@@ -215,9 +220,25 @@
             </div>
           </div>
 
-          <div class="material moa">
+         <div class="row gif-wrap">
+          <div class="col-md-6">
             <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
           </div>
+
+          <div class="col-md-6">
+            {% if records %}
+              {% for r in records %}
+                <div align="center" class="embed-responsive embed-responsive-16by9">
+                    <video class="embed-responsive-item" controls>
+                        <source src="{{ r }}" type="video/mp4">
+                    </video>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p>暂无设备录屏信息</p>
+            {% endif %}
+          </div>
+         </div><!-- /.gif -->
 
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
           {% for t in step_type %}

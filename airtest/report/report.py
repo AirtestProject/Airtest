@@ -166,15 +166,16 @@ class MoaLogDisplay(object):
                         image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
                     else:
                         image_path = ""
-                    if not os.path.isfile(image_path) and 'filepath' in step[2]['args'][0]:
+                    if not os.path.isfile(image_path) and step[2]['args'] and len(step[2]['args']) > 0 and 'filepath' in step[2]['args'][0]:
                         image_path = step[2]['args'][0]['filepath']
                     if not os.path.isfile(image_path) and step.get("trace"):
                         step['desc'] = self.func_desc(step)
                         step['title'] = self.func_title(step)
                         return step
                     step['image_to_find'] = image_path
-                    step['resolution'] = step[2]['args'][0].get("resolution", None)
-                    step['record_pos'] = step[2]['args'][0].get("record_pos", None)
+                    if step[2]['args'] and len(step[2]['args']) > 0:
+                        step['resolution'] = step[2]['args'][0].get("resolution", None)
+                        step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
                 if not step['trace']:
                     step['target_pos'] = step[2].get('ret')
@@ -393,7 +394,19 @@ class MoaLogDisplay(object):
         template = env.get_template(template_name)
         return template.render(**template_vars)
 
-    def render(self, template_name):
+    def render(self, template_name, record_name=[]):
+        records = []
+        # 录屏文件如果存在，就放进html里
+        for f in record_name:
+            ext = os.path.splitext(f)[1]
+            if not ext:
+                f = f + ".mp4"
+            if os.path.splitext(f)[1] not in [".mp4", ".MP4"]:
+                continue
+            if os.path.isfile(f):
+                records.append(f)
+            elif os.path.isfile(os.path.join(self.log_root, f)):
+                records.append(os.path.join(self.log_root, f))
 
         data = {}
         data['steps'] = self.analyse()
@@ -408,6 +421,7 @@ class MoaLogDisplay(object):
         data['run_start'] = self.run_start
         data['static_root'] = self.static_root
         data['author'] = self.author
+        data['records'] = records
         return self._render(template_name, **data)     
 
 
@@ -456,6 +470,7 @@ def get_parger(ap):
     ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
     ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
+    ap.add_argument("--record", help="add screen record to log.html", nargs="+")
     ap.add_argument("--new_report", nargs='?', const=True, default=False)
     return ap
 
@@ -510,7 +525,11 @@ def main(args):
         gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
     # gen html report
     else:
-        html = rpt.render(tpl)
+        if args.record:
+            record = args.record
+        else:
+            record = []
+        html = rpt.render(tpl, record_name=record)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
     """

@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import win32gui
 import win32process
 import win32com.client
 from PIL import ImageGrab
@@ -116,15 +117,17 @@ class Windows(Device):
         return self.winmgr.find_window_list(wildcard)
 
     def set_handle(self, handle):
+        """设置窗口的handle."""
         self.handle = handle
         self.winmgr.handle = handle
 
     def set_foreground(self):
+        """将对应的窗口置到最前."""
         self.winmgr.set_foreground()
-        self.set_hwnd_focus()
 
     def set_hwnd_focus(self):
-        """根据handle获取窗口焦点，使得键盘事件对该窗口生效."""
+        """强制导向输入焦点."""
+        # 这里会向窗口发送UP+ENTER键:
         if self.handle:
             _, pid = win32process.GetWindowThreadProcessId(self.handle)
             shell = win32com.client.Dispatch("WScript.Shell")
