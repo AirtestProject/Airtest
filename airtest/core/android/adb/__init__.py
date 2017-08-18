@@ -23,7 +23,7 @@ class ADB(object):
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
         self.adb_path = adb_path or get_adb_path()
-        self.adb_server_addr = server_addr  #  or self.default_server()
+        self.adb_server_addr = server_addr
         self.set_serialno(serialno)
         self._sdk_version = None
         self._line_breaker = None
@@ -34,10 +34,7 @@ class ADB(object):
 
     @property
     def host(self):
-        if self.adb_server_addr:
-            return self.adb_server_addr[0]
-        else:
-            return "localhost"
+        return self.adb_server_addr[0] if self.adb_server_addr else "localhost"
 
     @property
     def port(self):
