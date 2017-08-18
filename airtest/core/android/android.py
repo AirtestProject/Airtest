@@ -313,11 +313,13 @@ class Android(Device):
                 return True
         raise RuntimeError("recording setup error")
 
-    def stop_recording(self, output="screen.mp4"):
+    def stop_recording(self, output="screen.mp4", is_interrupted=False):
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
         p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         p.wait()
         self.recording_proc = None
+        if is_interrupted:
+            return
         for line in p.stdout.readlines():
             m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
             if m:

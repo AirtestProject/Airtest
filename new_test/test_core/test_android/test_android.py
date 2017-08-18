@@ -213,6 +213,12 @@ class TestAndroid(unittest.TestCase):
         with self.assertRaises(MoaError):
             self.android.stop_recording()
 
+    def test_interrupt_recording(self):
+        self.android.start_recording(max_time=30)
+        time.sleep(3)
+        self.android.stop_recording(is_interrupted=True)
+        self.assertIs(os.path.exists("screen.mp4"), False)
+
     def test_get_top_activity_name_and_pid(self):
         res = self.android.get_top_activity_name_and_pid()
         if res:
@@ -273,4 +279,3 @@ class TestAndroid(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     #print TEST_APK
-    
