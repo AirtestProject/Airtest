@@ -39,6 +39,10 @@ class ADB(object):
         else:
             return "localhost"
 
+    @property
+    def port(self):
+        return self.adb_server_addr[1] if self.adb_server_addr else 5037
+
     @staticmethod
     def default_server():
         """get default adb server"""
