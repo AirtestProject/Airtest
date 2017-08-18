@@ -100,7 +100,7 @@ class ADB(object):
         return stdout
 
     def version(self):
-        """adb version, 1.0.36 for windows, 1.0.32 for linux/mac"""
+        """adb version 1.0.39"""
         return self.cmd("version", device=False).strip()
 
     def devices(self, state=None):
