@@ -3,6 +3,11 @@ import os
 
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_ADB_PATH = {
+    "Windows": os.path.join("windows", "adb.exe"),
+    "Darwin": os.path.join("mac", "adb"),
+    "Linux": os.path.join("linux", "adb")
+}
 DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
 SDK_VERISON_NEW = 24
 DEBUG = True
