@@ -12,10 +12,9 @@ class Javacap(object):
 
     APP_PATH = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
-    DEVICE_PORT = "moa_javacap"
     CAPTIMEOUT = None
 
-    def __init__(self, serialno, adb=None, localport=9999):
+    def __init__(self, serialno, adb=None, localport=19998):
         self.serialno = serialno
         self.adb = adb or ADB(self.serialno)
         self.localport = localport
@@ -29,16 +28,11 @@ class Javacap(object):
 
     def _setup(self):
         # setup forward
-        @retries(3)
-        def set_up_forward():
-            localport = self.localport or self.adb.get_available_forward_local()
-            self.adb.forward("tcp:%s" % localport, "localabstract:%s" % self.DEVICE_PORT)
-            return localport
-
-        self.localport = set_up_forward()
+        self.localport, deviceport = self.adb.setup_forward("localabstract:javacap_{}".format)
+        deviceport = deviceport[len("localabstract:"):]
         # setup agent proc
         apkpath = self.get_path()
-        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % self.DEVICE_PORT, "-lazy", "2>&1"]
+        cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % deviceport, "-lazy", "2>&1"]
         proc = self.adb.shell(cmds, not_wait=True)
         reg_cleanup(proc.kill)
         # check proc output
@@ -55,7 +49,7 @@ class Javacap(object):
     def get_frames(self):
         self._setup()
         s = SafeSocket()
-        s.connect(("localhost", self.localport))
+        s.connect((self.adb.host, self.localport))
         t = s.recv(24)
         # minicap info
         yield struct.unpack("<2B5I2B", t)

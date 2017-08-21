@@ -9,8 +9,8 @@ import sys
 import os
 import re
 from airtest.core.error import MoaError, AdbError, AdbShellError
-from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_adb_path, retries, split_cmd, get_logger, get_std_encoding
-from airtest.core.android.constant import DEFAULT_ADB_SERVER, SDK_VERISON_NEW
+from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, retries, split_cmd, get_logger, get_std_encoding
+from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH
 LOGGING = get_logger('android')
 
 
@@ -22,9 +22,10 @@ class ADB(object):
     SHELL_ENCODING = "utf-8"
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
-        self.adb_path = adb_path or get_adb_path()
-        self.adb_server_addr = server_addr  #  or self.default_server()
-        self.set_serialno(serialno)
+        self.serialno = serialno
+        self.adb_path = adb_path or self.get_adb_path()
+        self.set_cmd_options(server_addr)
+        self.connect()
         self._sdk_version = None
         self._line_breaker = None
         self._display_info = None
@@ -32,24 +33,26 @@ class ADB(object):
         self._forward_local_using = []
         reg_cleanup(self._cleanup_forwards)
 
-    @property
-    def host(self):
-        if self.adb_server_addr:
-            return self.adb_server_addr[0]
-        else:
-            return "localhost"
-
     @staticmethod
-    def default_server():
-        """get default adb server"""
-        host = DEFAULT_ADB_SERVER[0]
-        port = os.environ.get("ANDROID_ADB_SERVER_PORT", DEFAULT_ADB_SERVER[1])
-        return (host, port)
+    def get_adb_path():
+        system = platform.system()
+        base_path = os.path.dirname(os.path.realpath(__file__))
+        adb_path = os.path.join(base_path, DEFAULT_ADB_PATH[system])
+        # overwrite uiautomator adb
+        if "ANDROID_HOME" in os.environ:
+            del os.environ["ANDROID_HOME"]
+        os.environ["PATH"] = os.path.dirname(adb_path) + os.pathsep + os.environ["PATH"]
+        return adb_path
 
-    def set_serialno(self, serialno):
-        """set serialno after init"""
-        self.serialno = serialno
-        self.connect()
+    def set_cmd_options(self, server_addr=None):
+        """set adb cmd options -H -P"""
+        self.host = server_addr[0] if server_addr else "127.0.0.1"
+        self.port = server_addr[1] if server_addr else 5037
+        self.cmd_options = [self.adb_path]
+        if self.host not in ("localhost", "127.0.0.1"):
+            self.cmd_options += ['-H', self.host]
+        if self.port != 5037:
+            self.cmd_options += ['-P', str(self.port)]
 
     def start_server(self):
         """adb start-server"""
@@ -62,15 +65,12 @@ class ADB(object):
         device: specify -s serialno if True
         """
         cmds = split_cmd(cmds)
-        prefix = [self.adb_path]
-        if self.adb_server_addr:
-            host, port = self.adb_server_addr
-            prefix += ['-H', host, '-P', str(port)]
+        cmd_options = self.cmd_options
         if device:
             if not self.serialno:
-                raise RuntimeError("please set_serialno first")
-            prefix += ['-s', self.serialno]
-        cmds = prefix + cmds
+                raise RuntimeError("please set serialno first")
+            cmd_options = cmd_options + ['-s', self.serialno]
+        cmds = cmd_options + cmds
         cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
 
         LOGGING.debug(" ".join(cmds))
@@ -100,7 +100,7 @@ class ADB(object):
         return stdout
 
     def version(self):
-        """adb version, 1.0.36 for windows, 1.0.32 for linux/mac"""
+        """adb version 1.0.39"""
         return self.cmd("version", device=False).strip()
 
     def devices(self, state=None):
