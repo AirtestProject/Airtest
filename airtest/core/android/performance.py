@@ -11,6 +11,7 @@ import functools
 import sys
 import subprocess
 import copy
+from collections import defaultdict
 from airtest.core.error import PerformanceError, AdbShellError
 from airtest.core.utils import split_cmd, get_std_encoding, get_logger
 
@@ -180,6 +181,9 @@ class Performance(object):
 
     def save_data(self):
         # 把收集到的数据先放在队列里，取出来之后再写入log文件
+        if not self.collector:
+            LOGGING.error("Collect data failed.")
+            return []
         while not self.collector.result_queue.empty():
             self.result.append(self.collector.result_queue.get())
         result = self.result
@@ -214,9 +218,10 @@ class Collector(object):
         self.adb = adb
         self.package_name = package_name
         self._pid = pid
+        self._uid = ""
 
         self.collect_time = int(time.time())
-        self.prev_cpu_time = None
+        self.prev_temp_data = defaultdict(dict)
         self.stop_event = stop_event
 
     @pfmlog
@@ -229,6 +234,12 @@ class Collector(object):
             return ""
 
     def battery(self):
+        """
+        当前电量获取
+        Returns
+        -------
+
+        """
         output = self.adb.shell("dumpsys battery")
         get_level = find_value(r"[Ll][Ee][Vv][Ee][Ll][\s\:]*(?P<level>\d+)", output)
         if get_level:
@@ -236,6 +247,12 @@ class Collector(object):
         return ""
 
     def cpu_kel(self):
+        """
+        cpu核心数量的获取
+        Returns
+        -------
+
+        """
         output = self.adb.shell("cat /proc/cpuinfo")
         return len(re.findall("processor", output))
 
@@ -292,15 +309,73 @@ class Collector(object):
 
     @pfmlog
     def cpu(self):
+        """
+        CPU使用率的计算
+        1．采样两个足够短的时间间隔的cpu快照与进程快照，
+        a) 每一个cpu快照均为(user、nice、system、idle、iowait、irq、softirq、stealstolen、guest)的9元组;
+        b) 每一个进程快照均为 (utime、stime、cutime、cstime)的4元组；
+        2．计算出两个时刻的总的cpu时间与进程的cpu时间，分别记作：totalCpuTime1、totalCpuTime2、processCpuTime1、processCpuTime2
+        3．计算该进程的cpu使用率pcpu = 100*( processCpuTime2 – processCpuTime1) / (totalCpuTime2 – totalCpuTime1) (按100%计算，如果是多核情况下还需乘以cpu的个数);
+        Returns
+        -------
+
+        """
         process_cpu_time = self.process_cpu_time()
         if process_cpu_time == 0:
             return 0
         total_cpu_time = self.total_cpu_time()
-        if not getattr(self, 'prev_cpu_time', None):
-            self.prev_cpu_time = (process_cpu_time, total_cpu_time)
+        if not self.prev_temp_data['cpu']:
+            self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
+                                          'time': self.collect_time}
             return None
         else:
-            dt_process_time = process_cpu_time - self.prev_cpu_time[0]
-            dt_total_time = total_cpu_time - self.prev_cpu_time[1]
+            prev_cpu_time = self.prev_temp_data['cpu']
+            dt_process_time = process_cpu_time - prev_cpu_time['process_cpu_time']
+            dt_total_time = total_cpu_time - prev_cpu_time['total_cpu_time']
             cpu = 100 * ((dt_process_time * 1.0) / dt_total_time)
+            self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
+                                          'time': self.collect_time}
             return cpu
+
+    def uid(self):
+        if self._uid:
+            return self._uid
+        output = self.adb.shell("cat /proc/{pid}/status".format(pid=self._pid))
+        get_uid = find_value(r"[Uu]id[\s\:]*(?P<uid>\d+)", output)
+        if get_uid:
+            if get_uid and get_uid.get("uid"):
+                self._uid = get_uid.get("uid")
+                return self._uid
+        return ""
+
+    @pfmlog
+    def net_flow(self):
+        """
+        上下行流量
+        Returns (当前流量 - 上一个时间点的流量) / (时间差) / 1024 = n KB/s
+        -------
+
+        """
+        uid = self.uid()
+        if uid:
+            output = self.adb.shell("cat /proc/net/xt_qtaguid/stats")
+            rx_bytes = 0
+            tx_bytes = 0
+            for line in output.split("\n"):
+                if uid in line:
+                    bytes = line.split()
+                    rx_bytes += int(bytes[5])
+                    tx_bytes += int(bytes[7])
+            prev_net_flow = self.prev_temp_data['net']
+            ret = rx_bytes + tx_bytes
+            if not prev_net_flow:
+                self.prev_temp_data['net'] = {'bytes': ret, 'time': self.collect_time}
+                return None
+            else:
+                self.prev_temp_data['net'] = {'bytes': ret, 'time': self.collect_time}
+                if self.collect_time != prev_net_flow['time']:
+                    # 流量/时间
+                    return round((ret - prev_net_flow['bytes'])*1.0 / ((self.collect_time - prev_net_flow['time']) * 1024), 2)
+                else:
+                    return ret - prev_net_flow['bytes']
+        return None
