@@ -213,7 +213,7 @@ class Performance(object):
 class Collector(object):
     """ 收集数据专用 """
     def __init__(self, adb, package_name, pid, stop_event=None):
-        self.collect_method = [self.pss, self.cpu, ]
+        self.collect_method = [self.pss, self.cpu, self.net_flow]
         self.result_queue = Queue.Queue()
         self.adb = adb
         self.package_name = package_name
@@ -298,7 +298,7 @@ class Collector(object):
                 irq = res[6].decode()
                 softirq = res[7].decode()
                 result = int(user) + int(nice) + int(system) + int(idle) + int(iowait) + int(irq) + int(softirq)
-                print "total_cpu_time: ", result
+                print "total_cpu_time: ", result, repr(output.split("\n")[0])
                 return result
 
     def process_cpu_time(self):
