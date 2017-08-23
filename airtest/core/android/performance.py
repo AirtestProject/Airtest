@@ -71,7 +71,7 @@ def cmd_without_log(adb, cmds, device=True):
 
 
 class Performance(object):
-    def __init__(self, adb, package_name, log_file="pfm.txt", interval=1):
+    def __init__(self, adb, package_name, log_file="pfm.txt", interval=2):
         """
         收集性能数据
         Parameters
@@ -143,7 +143,7 @@ class Performance(object):
             while not self.stop_event.is_set():
                 # 在开始获取数据前，保证进程已启动
                 if not self._pid:
-                    if failure_count > 5:
+                    if failure_count > 20:
                         raise PerformanceError("Please start app first")
                     self._init_collector()
                     if not self._pid:
@@ -224,6 +224,23 @@ class Collector(object):
         self.prev_temp_data = defaultdict(dict)
         self.stop_event = stop_event
 
+    def _init_data(self):
+        """
+        重启app之后可能需要重置数据
+        Returns
+        -------
+
+        """
+        self.pid()
+        self.prev_temp_data = defaultdict(dict)
+
+    def pid(self):
+        output = self.adb.shell("dumpsys meminfo {package_name}".format(package_name=self.package_name))
+        get_pid = find_value(r"pid (?P<pid>\d+)", output)
+        if get_pid and get_pid.get("pid"):
+            self._pid = get_pid.get("pid")
+            return self._pid
+
     @pfmlog
     def pss(self):
         output = self.adb.shell("dumpsys meminfo {package_name}".format(package_name=self.package_name))
@@ -281,6 +298,7 @@ class Collector(object):
                 irq = res[6].decode()
                 softirq = res[7].decode()
                 result = int(user) + int(nice) + int(system) + int(idle) + int(iowait) + int(irq) + int(softirq)
+                print "total_cpu_time: ", result
                 return result
 
     def process_cpu_time(self):
@@ -296,6 +314,7 @@ class Collector(object):
             output = self.adb.shell("cat /proc/{pid}/stat".format(pid=self._pid))
         except AdbShellError:
             LOGGING.error("No such file: /proc/{pid}/stat".format(pid=self._pid))
+            self._init_data()
             return 0
         res = output.split()
         if len(res) < 17:
