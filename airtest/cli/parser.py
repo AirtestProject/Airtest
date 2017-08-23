@@ -39,6 +39,7 @@ def run_parser(ap):
     ap.add_argument("--forever", help="run in forever mode, read stdin and exec", action="store_true")
     ap.add_argument("--pre", help="run before script, setup environment")
     ap.add_argument("--post", help="run after script, clean up environment, will run whether script success or fail")
+    ap.add_argument("--performance", help="collect performance data", nargs="?", const=True, default=False)
     return ap
 
 
