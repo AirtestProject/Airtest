@@ -333,6 +333,8 @@ class Collector(object):
             dt_process_time = process_cpu_time - prev_cpu_time['process_cpu_time']
             dt_total_time = total_cpu_time - prev_cpu_time['total_cpu_time']
             cpu = 100 * ((dt_process_time * 1.0) / dt_total_time)
+            if cpu < 0:
+                LOGGING.error("cpu data error: %s" % (repr(prev_cpu_time) + "," + str(process_cpu_time) + "," + str(total_cpu_time)))
             self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
                                           'time': self.collect_time}
             return cpu
