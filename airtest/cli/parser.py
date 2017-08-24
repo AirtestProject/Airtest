@@ -11,7 +11,7 @@ def get_parser():
     subparsers = ap.add_subparsers(dest="action", help="run/info/snapshot/report")
     # subparser run
     ap_run = subparsers.add_parser("run", help="run script")
-    run_parser(ap_run)
+    runner_parser(ap_run)
     # subparser info
     ap_info = subparsers.add_parser("info", help="get & print author/title/desc info of script")
     ap_info.add_argument("script", help="script filename")
@@ -24,7 +24,7 @@ def get_parser():
     return ap
 
 
-def run_parser(ap):
+def runner_parser(ap):
     ap.add_argument("script", help="script filename")
     ap.add_argument("--utilfile", help="utils filepath to implement your own funcs")
     ap.add_argument("--device", help="set dev by url string", nargs="?", action="append")
@@ -41,21 +41,3 @@ def run_parser(ap):
     ap.add_argument("--post", help="run after script, clean up environment, will run whether script success or fail")
     ap.add_argument("--performance", help="collect performance data", nargs="?", const=True, default=False)
     return ap
-
-
-def main():
-    ap = get_parser()
-    args = ap.parse_args()
-    if args.action == "info":
-        print(get_script_info(args.script))
-    elif args.action == "snapshot":
-        print(get_script_info(args.script, 'snapshot'))
-    elif args.action == "report":
-        report_main(args)
-    elif args.action == "run":
-        run_script(args)
-
-
-if __name__ == '__main__':
-
-    main()

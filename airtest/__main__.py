@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from airtest.cli.parser import main
+from airtest.cli.__main__ import main
 
 
-main()
+if __name__ == '__main__':
+    main()

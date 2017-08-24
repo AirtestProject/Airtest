@@ -105,6 +105,10 @@ def set_device(pltf, uid=None, *args, **kwargs):
     set_default_st(pltf)
 
 
+def device():
+    return G.DEVICE
+
+
 @platform(on=["Android", "Windows", "IOS"])
 def set_current(index):
     try:
