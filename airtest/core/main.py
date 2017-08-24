@@ -20,7 +20,9 @@ Environment initialization
 
 
 def init_device(dev):
-    """初始化设备，加入全局环境"""
+    """初始化设备，加入全局环境, eg:
+    init_device(Android())
+    """
     G.DEVICE = dev
     G.DEVICE_LIST.append(dev)
 

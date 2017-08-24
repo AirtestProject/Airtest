@@ -21,18 +21,23 @@ class AirtestCase(unittest.TestCase):
     def setUpClass(cls):
         # init devices
         if isinstance(args.device, list):
-            for device in args.device:
-                connect_device(device)
+            devices = args.device
         elif args.device:
-            connect_device(args.device)
+            devices = [args.device]
+        for device in devices:
+            connect_device(device)
+
+        cls.script = args.script
+        cls.pre = args.pre
+        cls.post = args.post
 
         # set basedir to find tpl
-        G.BASEDIR = args.script
+        G.BASEDIR = cls.script
 
         # set logfile and screendir
         if args.log is True:
             print("save log & screen in script dir")
-            ST.LOG_DIR = args.script
+            ST.LOG_DIR = cls.script
         elif args.log:
             print("save log & screen in '%s'" % args.log)
             ST.LOG_DIR = args.log
@@ -52,14 +57,23 @@ class AirtestCase(unittest.TestCase):
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
 
+        # add user defined global varibles
+        if args.kwargs:
+            print("load kwargs", repr(args.kwargs))
+            for kv in args.kwargs.split(","):
+                k, v = kv.split("=")
+                cls.scope[k] = v
+
     def setUp(self):
-        pass
+        if self.pre:
+            self.exec_other_script(self.pre)
 
     def tearDown(self):
-        pass
+        if self.post:
+            self.exec_other_script(self.post)
 
     def runTest(self):
-        scriptpath = args.script
+        scriptpath = self.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         code = open(pyfilepath).read()
@@ -91,7 +105,7 @@ class AirtestCase(unittest.TestCase):
 
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
-        sub_dirpath = os.path.join(args.script, sub_dir)
+        sub_dirpath = os.path.join(cls.script, sub_dir)
         _copy_script(scriptpath, sub_dirpath)
         # read code
         pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
