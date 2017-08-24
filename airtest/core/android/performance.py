@@ -329,7 +329,7 @@ class Collector(object):
 
     @pfmlog
     def cpu(self):
-        return self.cpu_cal3()
+        return self.cpu_cal()
 
     def cpu_cal(self):
         """
@@ -339,65 +339,8 @@ class Collector(object):
         b) 每一个进程快照均为 (utime、stime、cutime、cstime)的4元组；
         2．计算出两个时刻的总的cpu时间与进程的cpu时间，分别记作：totalCpuTime1、totalCpuTime2、processCpuTime1、processCpuTime2
         3．计算该进程的cpu使用率pcpu = 100*( processCpuTime2 – processCpuTime1) / (totalCpuTime2 – totalCpuTime1) (按100%计算，如果是多核情况下还需乘以cpu的个数);
-        Returns
-        -------
 
-        """
-        process_cpu_time = self.process_cpu_time()
-        if process_cpu_time == 0:
-            return 0
-        total_cpu_time = self.total_cpu_time()
-        if not self.prev_temp_data['cpu']:
-            self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
-                                          'time': self.collect_time}
-            return None
-        else:
-            prev_cpu_time = self.prev_temp_data['cpu']
-            dt_process_time = process_cpu_time - prev_cpu_time['process_cpu_time']
-            dt_total_time = total_cpu_time - prev_cpu_time['total_cpu_time']
-            cpu = 100 * ((dt_process_time * 1.0) / dt_total_time)
-            if cpu < 0:
-                LOGGING.error("cpu data error: %s" % (repr(prev_cpu_time) + "," + str(process_cpu_time) + "," + str(total_cpu_time)))
-            self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
-                                          'time': self.collect_time}
-            return cpu
-
-    def cpu_cal2(self):
-        """
-        假如计算出来的cpu占用率是负数，就等0.5秒重新再尝试取一次
-        Returns
-        -------
-
-        """
-        count = 50
-        while count > 0:
-            process_cpu_time = self.process_cpu_time()
-            if process_cpu_time == 0:
-                return 0
-            total_cpu_time = self.total_cpu_time()
-            if not self.prev_temp_data['cpu']:
-                self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
-                                              'time': self.collect_time}
-                return None
-            else:
-                prev_cpu_time = self.prev_temp_data['cpu']
-                dt_process_time = process_cpu_time - prev_cpu_time['process_cpu_time']
-                dt_total_time = total_cpu_time - prev_cpu_time['total_cpu_time']
-                cpu = 100 * ((dt_process_time * 1.0) / dt_total_time)
-                self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
-                                              'time': self.collect_time}
-
-                if cpu < 0.1:
-                    LOGGING.error("cpu data error: %s" % (repr(prev_cpu_time) + "," + str(process_cpu_time) + "," + str(total_cpu_time)))
-                    count -= 1
-                    time.sleep(0.2)
-                    continue
-                return cpu
-        return None
-
-    def cpu_cal3(self):
-        """
-        在获取cpu时间的时候，取数值时间片设为0.1秒，在sdk版本较低的手机上似乎需要除以cpu核心数
+        这里取时间片=0.1s，计算结果如果为负就重新再取，尝试5次，返回结果除以核心数*100%，取小数点后2位
         Returns
         -------
 
@@ -419,7 +362,7 @@ class Collector(object):
             if cpu < 0.001:
                 LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
                 continue
-            return cpu
+            return round(cpu/self._cpu_kernel, 2)
         return None
 
     def cpu_info(self):
@@ -431,7 +374,6 @@ class Collector(object):
         """
         output = self.adb.shell("dumpsys cpuinfo")
         cpu_usage = find_value(r"(?P<usage>\d+)%\s*"+str(self._pid) + "\/", output)
-        #return round(float(cpu_usage["usage"])/self._cpu_kernel, 2) if cpu_usage else None
         return cpu_usage["usage"] if cpu_usage else None
 
     def cpu_top(self):
