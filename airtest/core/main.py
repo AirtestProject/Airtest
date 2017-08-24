@@ -9,9 +9,8 @@ from airtest.core import android
 from airtest.core.error import MoaError, MoaNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot
-from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
-    get_platform, platform, register_device, delay_after_operation, set_default_st
-from airtest.core.device import DEV_TYPE_DICT
+from airtest.core.helper import G, MoaPic, MoaText, logwrap, moapicwrap, \
+    get_platform, platform, register_device, delay_after_operation
 from urlparse import urlparse, parse_qsl
 try:
     from airtest.core import win
@@ -35,7 +34,6 @@ def set_serialno(sn=None, cap_method="minicap_stream", adbhost=None):
     '''
     dev = android.Android(sn, cap_method=cap_method, adbhost=adbhost)
     register_device(dev)
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
     return sn
 
 
@@ -46,13 +44,11 @@ def set_udid(udid):
     '''
     dev = ios.client.IOS(udid)
     register_device(dev)
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
 
 
 def set_windows(handle=None, window_title=None):
     if win is None:
         raise RuntimeError("win module is not available")
-    window_title = window_title or ST.WINDOW_TITLE
     dev = win.Windows()
     if handle:
         dev.set_handle(int(handle))
@@ -66,10 +62,6 @@ def set_windows(handle=None, window_title=None):
     if dev.handle:
         dev.set_foreground()
     register_device(dev)
-
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
-    # # set no resize on windows as default (会导致函数的调用报错！)
-    # ST.RESIZE_METHOD = ST.RESIZE_METHOD
 
 
 def init_device(uri):
@@ -92,17 +84,6 @@ def init_device(uri):
         set_windows(uuid, **params)
     else:
         raise RuntimeError("unknown platform %s" % platform)
-
-
-def set_device(pltf, uid=None, *args, **kwargs):
-    """用这个接口替代set_android/set_uuid/set_windows"""
-    try:
-        cls = DEV_TYPE_DICT[pltf]
-    except KeyError:
-        raise MoaError("platform should be in %s" % DEV_TYPE_DICT.keys())
-    device = cls(uid, *args, **kwargs)
-    register_device(device)
-    set_default_st(pltf)
 
 
 def device():

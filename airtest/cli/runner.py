@@ -8,10 +8,12 @@ import shutil
 from airtest.core.main import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST
+from copy import copy
 
 
 class AirtestCase(unittest.TestCase):
 
+    SCRIPTHOME = "."
     SCRIPTEXT = ".owl"
     TPLEXT = ".png"
 
@@ -24,19 +26,30 @@ class AirtestCase(unittest.TestCase):
         elif args.device:
             init_device(args.device)
 
+        # set basedir to find tpl
+        G.BASEDIR = args.script
+
         # set logfile and screendir
         if args.log is True:
             print("save log & screen in script dir")
-            ST.set_logdir(args.script)
+            ST.LOG_DIR = args.script
         elif args.log:
             print("save log & screen in '%s'" % args.log)
-            ST.set_logdir(args.log)
+            ST.LOG_DIR = args.log
         else:
-            print("do not save log & screen")
-        set_logfile()
-        set_screendir()
+            print("save log in cwd as default")
+        # set log file
+        logfile = os.path.join(ST.LOG_DIR, ST.LOG_FILE)
+        print("set_logfile %s", repr(os.path.realpath(logfile)))
+        G.LOGGER.set_logfile(logfile)
+        # make screen dir
+        dirpath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR)
+        shutil.rmtree(dirpath, ignore_errors=True)
+        if not os.path.isdir(dirpath):
+            os.mkdir(dirpath)
 
-        cls.scope = globals()
+        # setup script exec scope
+        cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
 
     def setUp(self):
@@ -50,8 +63,8 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         code = open(pyfilepath).read()
-        ST.set_basedir(args.script)
-        exec(compile(code, pyfilepath, 'exec')) in self.__class__.scope
+        self.scope["__file__"] = pyfilepath
+        exec(compile(code, pyfilepath, 'exec')) in self.scope
 
     @classmethod
     def exec_other_script(cls, scriptpath):
@@ -73,6 +86,9 @@ class AirtestCase(unittest.TestCase):
                 dstfile = os.path.join(dst, f)
                 shutil.copy(srcfile, dstfile)
 
+        # find script in SCRIPTHOME
+        scriptpath = os.path.join(cls.SCRIPTHOME, scriptpath)
+
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
         sub_dirpath = os.path.join(args.script, sub_dir)
@@ -84,20 +100,6 @@ class AirtestCase(unittest.TestCase):
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
         exec(compile(code, pyfilepath, 'exec')) in cls.scope
-
-
-def set_logfile():
-    if ST.LOG_DIR:
-        filepath = os.path.join(ST.LOG_DIR, ST.LOG_FILE)
-        G.LOGGING.info("set_logfile %s", repr(os.path.realpath(filepath)))
-        G.LOGGER.set_logfile(filepath)
-
-
-def set_screendir():
-    dirpath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR)
-    shutil.rmtree(dirpath, ignore_errors=True)
-    if not os.path.isdir(dirpath):
-        os.mkdir(dirpath)
 
 
 def run_script(parsed_args, testcaseClass=AirtestCase):
