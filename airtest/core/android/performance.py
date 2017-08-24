@@ -219,6 +219,8 @@ class Collector(object):
         self.package_name = package_name
         self._pid = pid
         self._uid = ""
+        self._sdk_version = adb.sdk_version
+        self._cpu_kernel = self.cpu_kel()
 
         self.collect_time = int(time.time())
         self.prev_temp_data = defaultdict(dict)
@@ -298,7 +300,6 @@ class Collector(object):
                 irq = res[6].decode()
                 softirq = res[7].decode()
                 result = int(user) + int(nice) + int(system) + int(idle) + int(iowait) + int(irq) + int(softirq)
-                print "total_cpu_time: ", result, repr(output.split("\n")[0])
                 return result
 
     def process_cpu_time(self):
@@ -328,6 +329,9 @@ class Collector(object):
 
     @pfmlog
     def cpu(self):
+        return self.cpu_cal2()
+
+    def cpu_cal(self):
         """
         CPU使用率的计算
         1．采样两个足够短的时间间隔的cpu快照与进程快照，
@@ -357,6 +361,62 @@ class Collector(object):
             self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
                                           'time': self.collect_time}
             return cpu
+
+    def cpu_cal2(self):
+        """
+        假如计算出来的cpu占用率是负数，就等0.5秒重新再尝试取一次
+        Returns
+        -------
+
+        """
+        count = 50
+        while count > 0:
+            process_cpu_time = self.process_cpu_time()
+            if process_cpu_time == 0:
+                return 0
+            total_cpu_time = self.total_cpu_time()
+            if not self.prev_temp_data['cpu']:
+                self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
+                                              'time': self.collect_time}
+                return None
+            else:
+                prev_cpu_time = self.prev_temp_data['cpu']
+                dt_process_time = process_cpu_time - prev_cpu_time['process_cpu_time']
+                dt_total_time = total_cpu_time - prev_cpu_time['total_cpu_time']
+                cpu = 100 * ((dt_process_time * 1.0) / dt_total_time)
+                self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
+                                              'time': self.collect_time}
+
+                if cpu < 0:
+                    LOGGING.error("cpu data error: %s" % (repr(prev_cpu_time) + "," + str(process_cpu_time) + "," + str(total_cpu_time)))
+                    count -= 1
+                    time.sleep(0.2)
+                    continue
+                return cpu
+        return None
+
+    def cpu_info(self):
+        """
+        用dumpsys cpuinfo的指令获取cpu占用率，需要除以cpu核心数，而且数值的更新较慢
+        Returns
+        -------
+
+        """
+        output = self.adb.shell("dumpsys cpuinfo")
+        cpu_usage = find_value(r"(?P<usage>\d+)%\s*"+str(self._pid) + "\/", output)
+        #return round(float(cpu_usage["usage"])/self._cpu_kernel, 2) if cpu_usage else None
+        return cpu_usage["usage"] if cpu_usage else None
+
+    def cpu_top(self):
+        """
+        用top指令去获取cpu占用率，速度最慢
+        Returns
+        -------
+
+        """
+        output = self.adb.shell("top -n 1")
+        cpu_usage = find_value(r"{pid}\s+\d+\s+(?P<usage>\d+)%\s+".format(pid=str(self._pid)), output)
+        return cpu_usage["usage"] if cpu_usage else None
 
     def uid(self):
         if self._uid:
