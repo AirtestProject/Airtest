@@ -14,7 +14,7 @@ def main():
         from airtest.report.report import main as report_main
         report_main(args)
     elif args.action == "run":
-        from airtest.cli.unitrunner import run_script
+        from airtest.cli.runner import run_script
         run_script(args)
 
 

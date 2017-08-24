@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import re
 import shutil
 
 from airtest.core.main import *  # noqa
@@ -34,9 +35,9 @@ class AirtestCase(unittest.TestCase):
             print("do not save log & screen")
         set_logfile()
         set_screendir()
-        ST.set_basedir(args.script)
 
         cls.scope = globals()
+        cls.scope["exec_script"] = cls.exec_other_script
 
     def setUp(self):
         pass
@@ -48,8 +49,41 @@ class AirtestCase(unittest.TestCase):
         scriptpath = args.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
-        pyfiledata = open(pyfilepath).read()
-        exec(compile(pyfiledata, pyfilepath, 'exec')) in self.scope
+        code = open(pyfilepath).read()
+        ST.set_basedir(args.script)
+        exec(compile(code, pyfilepath, 'exec')) in self.__class__.scope
+
+    @classmethod
+    def exec_other_script(cls, scriptpath):
+        """run other script in test script"""
+
+        def _sub_dir_name(scriptname):
+            dirname = os.path.splitdrive(os.path.normpath(scriptname))[-1]
+            dirname = dirname.strip(os.path.sep).replace(os.path.sep, "_").replace(cls.SCRIPTEXT, "_sub")
+            return dirname
+
+        def _copy_script(src, dst):
+            if os.path.isdir(dst):
+                shutil.rmtree(dst, ignore_errors=True)
+            os.mkdir(dst)
+            for f in os.listdir(src):
+                srcfile = os.path.join(src, f)
+                if not (os.path.isfile(srcfile) and f.endswith(cls.TPLEXT)):
+                    continue
+                dstfile = os.path.join(dst, f)
+                shutil.copy(srcfile, dstfile)
+
+        # copy submodule's images into sub_dir
+        sub_dir = _sub_dir_name(scriptpath)
+        sub_dirpath = os.path.join(args.script, sub_dir)
+        _copy_script(scriptpath, sub_dirpath)
+        # read code
+        pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
+        pyfilepath = os.path.join(scriptpath, pyfilename)
+        code = open(pyfilepath).read()
+        # replace tpl filepath with filepath in sub_dir
+        code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
+        exec(compile(code, pyfilepath, 'exec')) in cls.scope
 
 
 def set_logfile():
@@ -67,16 +101,8 @@ def set_screendir():
 
 
 def run_script(parsed_args, testcaseClass=AirtestCase):
-    global args  # make it global to be used in AirtestCase & test scripts
+    global args  # make it global delibrately to be used in AirtestCase & test scripts
     args = parsed_args
     suite = unittest.TestSuite()
     suite.addTest(testcaseClass())
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-if __name__ == '__main__':
-    from airtest.cli.parser import argparse, runner_parser
-    ap = argparse.ArgumentParser()
-    ap = runner_parser(ap)
-    args = ap.parse_args()
-    run_script(args)
