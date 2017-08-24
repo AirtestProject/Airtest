@@ -396,20 +396,31 @@ class Collector(object):
         return None
 
     def cpu_cal3(self):
-        process_cpu_time1 = self.process_cpu_time()
-        if process_cpu_time1 == 0:
-            return 0
-        total_cpu_time1 = self.total_cpu_time()
+        """
+        在获取cpu时间的时候，取数值时间片设为0.1秒，在sdk版本较低的手机上似乎需要除以cpu核心数
+        Returns
+        -------
 
-        time.sleep(0.2)
-        process_cpu_time2 = self.process_cpu_time()
-        total_cpu_time2 = self.total_cpu_time()
-        dt_process_time = process_cpu_time2 - process_cpu_time1
-        dt_total_time = total_cpu_time2 - total_cpu_time1
-        cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
-        if cpu < 0:
-            LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
-        return cpu
+        """
+        count = 5
+        while count > 0:
+            process_cpu_time1 = self.process_cpu_time()
+            if process_cpu_time1 == 0:
+                return 0
+            total_cpu_time1 = self.total_cpu_time()
+
+            time.sleep(0.1)
+            process_cpu_time2 = self.process_cpu_time()
+            total_cpu_time2 = self.total_cpu_time()
+            dt_process_time = process_cpu_time2 - process_cpu_time1
+            dt_total_time = total_cpu_time2 - total_cpu_time1
+
+            cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
+            if cpu < 0.001:
+                LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
+                continue
+            return cpu
+        return None
 
     def cpu_info(self):
         """
