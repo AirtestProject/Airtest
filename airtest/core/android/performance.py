@@ -329,7 +329,7 @@ class Collector(object):
 
     @pfmlog
     def cpu(self):
-        return self.cpu_cal2()
+        return self.cpu_cal3()
 
     def cpu_cal(self):
         """
@@ -387,13 +387,29 @@ class Collector(object):
                 self.prev_temp_data['cpu'] = {'process_cpu_time': process_cpu_time, 'total_cpu_time': total_cpu_time,
                                               'time': self.collect_time}
 
-                if cpu < 0:
+                if cpu < 0.1:
                     LOGGING.error("cpu data error: %s" % (repr(prev_cpu_time) + "," + str(process_cpu_time) + "," + str(total_cpu_time)))
                     count -= 1
                     time.sleep(0.2)
                     continue
                 return cpu
         return None
+
+    def cpu_cal3(self):
+        process_cpu_time1 = self.process_cpu_time()
+        if process_cpu_time1 == 0:
+            return 0
+        total_cpu_time1 = self.total_cpu_time()
+
+        time.sleep(0.2)
+        process_cpu_time2 = self.process_cpu_time()
+        total_cpu_time2 = self.total_cpu_time()
+        dt_process_time = process_cpu_time2 - process_cpu_time1
+        dt_total_time = total_cpu_time2 - total_cpu_time1
+        cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
+        if cpu < 0:
+            LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
+        return cpu
 
     def cpu_info(self):
         """
