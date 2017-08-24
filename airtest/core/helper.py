@@ -6,7 +6,7 @@ import aircv
 from airtest.core import device
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
-from airtest.core.utils.compat import PY3 
+from airtest.core.utils.compat import PY3
 
 
 class G(object):
