@@ -22,9 +22,9 @@ class AirtestCase(unittest.TestCase):
         # init devices
         if isinstance(args.device, list):
             for device in args.device:
-                init_device(device)
+                connect_device(device)
         elif args.device:
-            init_device(args.device)
+            connect_device(args.device)
 
         # set basedir to find tpl
         G.BASEDIR = args.script

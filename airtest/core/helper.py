@@ -248,11 +248,6 @@ def platform(on=["Android"]):
     return decorator
 
 
-def register_device(dev):
-    G.DEVICE = dev
-    G.DEVICE_LIST.append(dev)
-
-
 def delay_after_operation(secs):
     delay = secs or ST.OPDELAY
     time.sleep(delay)

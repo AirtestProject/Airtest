@@ -3,8 +3,9 @@
 __author__ = "刘欣"
 
 import os
+PWD = os.path.dirname(__file__)
 PKG = "org.cocos2d.blackjack"
-APK = os.path.join(ST.BASE_DIR, "blackjack-release-signed.apk")
+APK = os.path.join(PWD, "blackjack-release-signed.apk")
 install(APK)
 amstop(PKG)
 wake()
