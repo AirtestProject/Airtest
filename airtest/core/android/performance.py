@@ -245,6 +245,17 @@ class Collector(object):
 
     @pfmlog
     def pss(self):
+        """
+        USS	Unique Set Size	物理内存	进程独占的内存
+        PSS	Proportional Set Size	物理内存	PSS= USS+ 按比例包含共享库
+        RSS	Resident Set Size	物理内存	RSS= USS+ 包含共享库
+        VSS	Virtual Set Size	虚拟内存	VSS= RSS+ 未分配实际物理内存
+
+        此处取pss,单位是KB
+        Returns
+        -------
+
+        """
         output = self.adb.shell("dumpsys meminfo {package_name}".format(package_name=self.package_name))
         get_pss = find_value(r"[Tt][Oo][Tt][Aa][Ll]\s+(?P<pss>\d+)", output)
         if get_pss:
@@ -289,6 +300,7 @@ class Collector(object):
         """
         output = self.adb.shell("cat /proc/stat")
         res = output.split()
+        line = output.split("\n")[0].split()
 
         for info in res:
             if info.decode() == "cpu":
@@ -296,10 +308,13 @@ class Collector(object):
                 nice = res[2].decode()
                 system = res[3].decode()
                 idle = res[4].decode()
-                iowait = res[5].decode()
-                irq = res[6].decode()
-                softirq = res[7].decode()
-                result = int(user) + int(nice) + int(system) + int(idle) + int(iowait) + int(irq) + int(softirq)
+                if len(line) >= 8:
+                    iowait = res[5].decode()
+                    irq = res[6].decode()
+                    softirq = res[7].decode()
+                    result = int(user) + int(nice) + int(system) + int(idle) + int(iowait) + int(irq) + int(softirq)
+                else:
+                    result = int(user) + int(nice) + int(system) + int(idle)
                 return result
 
     def process_cpu_time(self):
@@ -402,7 +417,7 @@ class Collector(object):
     def net_flow(self):
         """
         上下行流量
-        Returns (当前流量 - 上一个时间点的流量) / (时间差) / 1024 = n KB/s
+        Returns (当前流量 - 上一个时间点的流量) / (时间差)  = n B/s
         -------
 
         """
@@ -425,7 +440,7 @@ class Collector(object):
                 self.prev_temp_data['net'] = {'bytes': ret, 'time': self.collect_time}
                 if self.collect_time != prev_net_flow['time']:
                     # 流量/时间
-                    return round((ret - prev_net_flow['bytes'])*1.0 / ((self.collect_time - prev_net_flow['time']) * 1024), 2)
+                    return round((ret - prev_net_flow['bytes'])*1.0 / (self.collect_time - prev_net_flow['time']), 2)
                 else:
                     return ret - prev_net_flow['bytes']
         return None
