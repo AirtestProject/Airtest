@@ -428,7 +428,7 @@ class MoaLogDisplay(object):
         data['records'] = records
         data['pfm_devices'] = pfm_devices
         data['pfm_trace'] = pfm_trace
-        data['pfm_path'] = pfm_path
+        data['pfm_path'] = pfm_path.encode("string-escape") if pfm_path else ""
         return self._render(template_name, **data)     
 
 

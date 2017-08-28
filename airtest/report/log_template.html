@@ -573,9 +573,9 @@
             jsLoader.onfailure=function () {
                 console.log("failed");
                 json_load = true;
-                jsLoader.load("pfm.json");
+                jsLoader.load("{{ pfm_path }}pfm.json");
             }
-            jsLoader.load("pfm_local.json");
+            jsLoader.load("{{ pfm_path }}pfm_local.json");
         </script>
     <!--script src="{{ static_root }}js/echarts/pfm_charts.js"></script-->
     {% endif %}
