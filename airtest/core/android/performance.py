@@ -40,6 +40,7 @@ def pfmlog(func):
         else:
             if data is not None:
                 # 读到的数据可能为0或者None, 0也要记录下来，但是None不需要记录
+                # 不过在最后的图表上，缺失的数据都会补0
                 args[0].result_queue.put({"name": func.__name__, "value": data, "time": log_time})
         return data
     return log_it

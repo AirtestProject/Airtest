@@ -7,6 +7,7 @@ import argparse
 import jinja2
 from collections import defaultdict
 from airtest.report.report_gif import gen_gif
+from airtest.report.report_pfm import gen_pfm_json
 
 LOGFILE = "log.txt"
 SCREENDIR = "img_record"
@@ -408,6 +409,9 @@ class MoaLogDisplay(object):
             elif os.path.isfile(os.path.join(self.log_root, f)):
                 records.append(os.path.join(self.log_root, f))
 
+        # 生成性能数据log的json文件
+        pfm_devices, pfm_trace = gen_pfm_json(self.log_root)
+
         data = {}
         data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
@@ -422,6 +426,8 @@ class MoaLogDisplay(object):
         data['static_root'] = self.static_root
         data['author'] = self.author
         data['records'] = records
+        data['pfm_devices'] = pfm_devices
+        data['pfm_trace'] = pfm_trace
         return self._render(template_name, **data)     
 
 

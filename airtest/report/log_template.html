@@ -22,7 +22,8 @@
     <link href="{{static_root}}css/animate.css" rel="stylesheet">
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
-
+    <script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>
+    <script src="{{ static_root }}js/echarts/shine.js"></script>
 
     <style>
     .pre_script h2.header, .post_script h2.header{
@@ -220,6 +221,7 @@
             </div>
           </div>
 
+        <!-- gif和录屏 -->
          <div class="row gif-wrap">
           <div class="col-md-6">
             <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
@@ -239,6 +241,12 @@
             {% endif %}
           </div>
          </div><!-- /.gif -->
+
+        <!-- 性能图 -->
+        {% for pfm in pfm_devices %}
+            <br/>
+            <div class="pfm_chart" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}"></div>
+        {% endfor %}
 
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
           {% for t in step_type %}
@@ -488,7 +496,8 @@
   <script>
   $(window).resize();
   </script>
-
+    <script type="text/javascript" src="pfm.json"></script>
+    <script src="{{ static_root }}js/echarts/pfm_charts.js"></script>
   </body>
 </html>
 
