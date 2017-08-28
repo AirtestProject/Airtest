@@ -496,8 +496,10 @@
   <script>
   $(window).resize();
   </script>
-    <script type="text/javascript" src="pfm.json"></script>
+    {% if pfm_path %}
+    <script type="text/javascript" src="{{ pfm_path }}"></script>
     <script src="{{ static_root }}js/echarts/pfm_charts.js"></script>
+    {% endif %}
   </body>
 </html>
 

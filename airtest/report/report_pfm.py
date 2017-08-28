@@ -35,12 +35,14 @@ def gen_pfm_json(log_path):
         ret.append(data)
         if trace:
             trace_list.extend(trace)
+    if not ret:
+        return [], [], ""
     content = "json_data=" + json.dumps(ret)
     output = os.path.join(log_path, "pfm.json")
     with open(output, "w+") as f:
         f.write(content)
     print "pfm_json_data", os.path.abspath(output)
-    return devices, trace_list
+    return devices, trace_list, output
 
 
 def trans_log_json(log="pfm.txt"):
