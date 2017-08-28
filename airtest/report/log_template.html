@@ -497,7 +497,21 @@
   $(window).resize();
   </script>
     {% if pfm_path %}
-    <script type="application/javascript" src="{{ pfm_path }}"></script>
+    <script type="application/javascript" src="{{ pfm_path }}/pfm_local.json"></script>
+        <script type="application/javascript">
+            $.ajax({
+                url: "{{ pfm_path }}/pfm.json",
+                type: "GET",
+                dataType: 'json',
+                success: function (data, status, error) {
+                  console.log('success', data);
+                  json_data = data;
+                },
+                error: function (data, status, error) {
+                  console.log('error', data, status, error);
+                }
+            });
+        </script>
     <script src="{{ static_root }}js/echarts/pfm_charts.js"></script>
     {% endif %}
   </body>

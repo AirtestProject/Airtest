@@ -37,10 +37,12 @@ def gen_pfm_json(log_path):
     if not ret:
         return [], [], ""
     content = "json_data=" + json.dumps(ret)
-    output = os.path.join(log_path, "pfm.json")
+    output = os.path.join(log_path, "pfm_local.json")
     with open(output, "w+") as f:
         f.write(content)
-    return devices, trace_list, output
+    with open(os.path.join(log_path, "pfm.json"), "w+") as f:
+        f.write(json.dumps(ret))
+    return devices, trace_list, log_path
 
 
 def trans_log_json(log="pfm.txt"):
