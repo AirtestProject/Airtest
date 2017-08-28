@@ -22,6 +22,7 @@ def gen_pfm_json(log_path):
     ret = []
     devices = []
     trace_list = []
+    print "pfm_json_log", log_path
 
     for f in os.listdir(log_path):
         f_match = re.match(log_pattern, f)
@@ -38,6 +39,7 @@ def gen_pfm_json(log_path):
     output = os.path.join(log_path, "pfm.json")
     with open(output, "w+") as f:
         f.write(content)
+    print "pfm_json_data", os.path.abspath(output)
     return devices, trace_list
 
 
