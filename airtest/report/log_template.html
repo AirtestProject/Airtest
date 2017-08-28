@@ -572,8 +572,13 @@
             };
             jsLoader.onfailure=function () {
                 console.log("failed");
-                json_load = true;
-                jsLoader.load("{{ pfm_path }}pfm.json");
+                if (json_load == false) {
+                    json_load = true;
+                    $.getJSON("{{ pfm_path }}pfm.json", function (data) {
+                        json_data = data;
+                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js");
+                    });
+                }
             }
             jsLoader.load("{{ pfm_path }}pfm_local.json");
         </script>
