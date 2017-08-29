@@ -423,7 +423,7 @@ class MoaLogDisplay(object):
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
         data['run_start'] = self.run_start
-        data['static_root'] = self.static_root.encode('string-escape')
+        data['static_root'] = self.static_root.encode('string-escape') if isinstance(self.static_root, str) else self.static_root
         data['author'] = self.author
         data['records'] = records
         data['pfm_devices'] = pfm_devices

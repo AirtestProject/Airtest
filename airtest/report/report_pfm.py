@@ -4,6 +4,7 @@
 import json
 import os
 import re
+import traceback
 from collections import defaultdict
 
 
@@ -38,10 +39,14 @@ def gen_pfm_json(log_path):
         return [], [], ""
     content = "json_data=" + json.dumps(ret)
     output = os.path.join(log_path, "pfm_local.json")
-    with open(output, "w+") as f:
-        f.write(content)
-    with open(os.path.join(log_path, "pfm.json"), "w+") as f:
-        f.write(json.dumps(ret))
+    try:
+        with open(output, "w+") as f:
+            f.write(content)
+        with open(os.path.join(log_path, "pfm.json"), "w+") as f:
+            f.write(json.dumps(ret))
+    except:
+        print traceback.format_exc()
+        return [], [], ""
     return devices, trace_list, log_path
 
 

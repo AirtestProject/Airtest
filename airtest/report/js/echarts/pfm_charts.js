@@ -121,12 +121,12 @@ function load_data() {
         console.log("test");
     } else {
         $.each(json_data, function(i, n) {
-            if (n.serialno == "") {
+            if (n.serialno === "") {
                 var myChart = echarts.init(document.getElementById('pfm'), 'shine');
-                option.title.text = '性能数据监控';
+                option.title.text = '设备性能数据监控';
             } else {
                 var myChart = echarts.init(document.getElementById('pfm_' + n.serialno), 'shine');
-                option.title.text = n.serialno + '性能数据监控';
+                option.title.text = '设备' + n.serialno + '性能数据监控';
             }
             option.xAxis.data = n.times;
             option.series[0].data = n.cpu;
