@@ -11,6 +11,7 @@ import functools
 import sys
 import subprocess
 import copy
+import logging
 from collections import defaultdict
 from airtest.core.error import PerformanceError, AdbShellError
 from airtest.core.utils import split_cmd, get_std_encoding, get_logger
@@ -26,6 +27,16 @@ def find_value(pattern, content):
 
 
 def pfmlog(func):
+    """
+    记录性能数据的装饰器，把返回值加上时间信息变成一条log，插入到结果队列中
+    Parameters
+    ----------
+    func 调用的cpu/pss等方法
+
+    Returns
+    -------
+
+    """
     @functools.wraps(func)
     def log_it(*args, **kwargs):
         log_time = getattr(args[0], 'collect_time', int(time.time())) if args[0] else int(time.time())
@@ -114,6 +125,8 @@ class Performance(object):
                 pass
 
     def start(self):
+        # log级别设成INFO，不打出DEBUG级别的log
+        LOGGING.setLevel(logging.INFO)
         # 最好等到已经启动应用后再开始数据收集
         if not self.collector_thread:
             if self.stop_event.is_set():
@@ -131,6 +144,29 @@ class Performance(object):
             self.save_data()
             LOGGING.info("stop data collection")
 
+    def start_forever(self):
+        """
+        命令行状态下，想要一直开着数据收集线程，又要支持用ctrl+c终止收集，逻辑跟普通的方式有点小区别
+        Returns
+        -------
+
+        """
+        # log级别设成debug，会定期打一些数据出来，方便在命令行下查看结果
+        LOGGING.setLevel(logging.DEBUG)
+        if not self.collector_thread:
+            try:
+                if self.stop_event.is_set():
+                    self.stop_event.clear()
+                self.collector_thread = threading.Thread(target=self.collect_data)
+                self.collector_thread.start()
+                LOGGING.info("begin data collection...")
+                while True:
+                    time.sleep(100)
+            except (KeyboardInterrupt, SystemExit):
+                print '\n! Received keyboard interrupt, quitting threads.\n'
+                self.stop_event.set()
+                sys.exit()
+
     def collect_data(self):
         """
         数据收集
@@ -144,7 +180,7 @@ class Performance(object):
             while not self.stop_event.is_set():
                 # 在开始获取数据前，保证进程已启动
                 if not self._pid:
-                    if failure_count > 20:
+                    if failure_count > 60:
                         raise PerformanceError("Please start app first")
                     self._init_collector()
                     if not self._pid:
@@ -189,6 +225,7 @@ class Performance(object):
             self.result.append(self.collector.result_queue.get())
         result = self.result
         self.result = []
+        LOGGING.debug(repr(result))
         try:
             with open(self.result_file, "a") as f:
                 for i in result:
@@ -445,3 +482,69 @@ class Collector(object):
                 else:
                     return ret - prev_net_flow['bytes']
         return None
+
+
+def pfm_parger(ap):
+    """
+    命令行运行参数
+    运行范例： 本地设备python -m airtest performance com.netease.my --outfile pfm.txt --setsn xxx(只有一台可不写）
+    Parameters
+    ----------
+    ap
+
+    Returns
+    -------
+
+    """
+    ap.add_argument("package", help="package name")
+    ap.add_argument("--device", help="set dev by url string", nargs="?", const="")
+    ap.add_argument("--setsn", help="set dev by serialno", nargs="?", const="")
+    ap.add_argument("--outfile", help="output performance log file ", default="pfm.txt")
+    return ap
+
+
+def init_device_uri(uri):
+    from urlparse import urlparse, parse_qsl
+    d = urlparse(uri)
+    platform = d.scheme
+    host = d.netloc
+    uuid = d.path.lstrip("/")
+    params = dict(parse_qsl(d.query))
+    if platform != "android":
+        raise RuntimeError("unsupported platform")
+    if host:
+        params["adbhost"] = host.split(":")
+    return init_device_serialno(uuid, **params)
+
+
+def init_device_serialno(serialno=None, adbhost=None):
+    from airtest.core.android.adb import ADB
+    if not serialno:
+        serialno = ADB().devices(state="device")[0][0]
+    adb = ADB(serialno, server_addr=adbhost)
+    adb.wait_for_device()
+    return adb
+
+
+def performance_main(args):
+    print args
+    package_name = args.package
+    if not package_name:
+        raise PerformanceError("package name is required!")
+    if args.setsn:
+        adb = init_device_serialno(args.setsn)
+    elif args.device:
+        adb = init_device_uri(args.device)
+    else:
+        adb = init_device_serialno()
+    log_file = args.outfile if args.outfile else "pfm.txt"
+    pfm = Performance(adb, package_name, log_file=log_file)
+    pfm.start_forever()
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser()
+    args = pfm_parger(ap).parse_args()
+
+    performance_main(args)
