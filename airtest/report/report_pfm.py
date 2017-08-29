@@ -5,6 +5,7 @@ import json
 import os
 import re
 import traceback
+import time
 from collections import defaultdict
 
 
@@ -79,11 +80,15 @@ def trans_log_json(log="pfm.txt"):
                 transback_content.append(item["value"])
                 continue
             try:
-                data[item["time"]][item["name"]] = func_dict[item["name"]](item["value"]) if item["name"] in func_dict else item["value"]
+                t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(item["time"])))
             except:
-                data[item["time"]][item["name"]] = 0
-            if item["time"] not in times:
-                times.append(item["time"])
+                t = item["time"]
+            try:
+                data[t][item["name"]] = func_dict[item["name"]](item["value"]) if item["name"] in func_dict else item["value"]
+            except:
+                data[t][item["name"]] = 0
+            if t not in times:
+                times.append(t)
 
     for t in times:
         for k in func_dict.keys():
