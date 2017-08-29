@@ -488,6 +488,9 @@ def pfm_parger(ap):
     """
     命令行运行参数
     运行范例： 本地设备python -m airtest performance com.netease.my --outfile pfm.txt --setsn xxx(只有一台可不写）
+    远程设备用uri访问：
+    python -m airtest performance com.netease.my --device android://10.250.199.230:5039/0815f8485f032404
+
     Parameters
     ----------
     ap

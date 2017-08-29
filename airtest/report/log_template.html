@@ -200,6 +200,9 @@
             {% else %}
             <h4>作者：佚名</h4>
             {% endif %}
+            {% if pfm_devices %}
+                <h4>设备：{% for d in pfm_devices %}{{ d }}&nbsp;&nbsp;&nbsp;{% endfor %}</h4>
+            {% endif %}
             <h4>{{run_start}} -- {{run_end}}</h4>
 
             <h2 class="header">Assert 测试点汇总</h2>
