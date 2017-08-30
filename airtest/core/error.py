@@ -55,6 +55,13 @@ class AdbShellError(AdbError):
     pass
 
 
+class DeviceConnectionError(BaseError):
+    """
+        device connection error
+    """
+    pass
+
+
 class ICmdError(Exception):
     """
         This is ICmdError Error

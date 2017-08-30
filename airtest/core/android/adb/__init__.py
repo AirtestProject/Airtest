@@ -8,7 +8,7 @@ import time
 import sys
 import os
 import re
-from airtest.core.error import MoaError, AdbError, AdbShellError
+from airtest.core.error import MoaError, AdbError, AdbShellError, DeviceConnectionError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, retries, split_cmd, get_logger, get_std_encoding
 from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH
 LOGGING = get_logger('android')
@@ -96,7 +96,13 @@ class ADB(object):
             stderr = stderr.decode(get_std_encoding(sys.stderr))
 
         if proc.returncode > 0:
-            raise AdbError(stdout, stderr)
+            # adb connection error
+            if re.match('error: device \'\w+\' not found', stderr.rstrip()):
+                raise DeviceConnectionError(stderr)
+            elif re.search('error: cannot connect to daemon at [\w\:\s]+ Connection timed out', stderr):
+                raise DeviceConnectionError(stderr)
+            else:
+                raise AdbError(stdout, stderr)
         return stdout
 
     def version(self):
@@ -157,7 +163,7 @@ class ADB(object):
         if ret == 0:
             timer.cancel()
         else:
-            raise MoaError("device not ready")
+            raise DeviceConnectionError("device not ready")
 
     def raw_shell(self, cmds, not_wait=False):
         cmds = ['shell'] + split_cmd(cmds)
@@ -199,11 +205,7 @@ class ADB(object):
             try:
                 out = self.raw_shell(cmd)
             except AdbError as err:
-                # adb connection error
-                if re.match('error: device \'\w+\' not found', err.stdout.rstrip()):
-                    raise
-                else:
-                    raise AdbShellError(err.stdout, err.stderr)
+                raise AdbShellError(err.stdout, err.stderr)
             else:
                 return out
 
