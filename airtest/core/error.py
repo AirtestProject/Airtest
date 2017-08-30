@@ -75,9 +75,14 @@ class MinicapError(BaseError):
     """    
     pass
 
+
 class MinitouchError(BaseError):
     """
         This is MinitouchError Error
         When Minicap have something wrong
     """    
+    pass
+
+
+class PerformanceError(BaseError):
     pass

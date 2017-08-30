@@ -4,6 +4,8 @@ from airtest.report.report import get_parger as report_parser
 from airtest.report.report import main as report_main
 from airtest.cli.info import get_script_info
 from airtest.cli.runner import run_script
+from airtest.core.android.performance import performance_main
+from airtest.core.android.performance import pfm_parger
 
 
 def get_parser():
@@ -21,6 +23,9 @@ def get_parser():
     # subparser snapshot
     ap_screen = subparsers.add_parser("snapshot", help="get snapshot list of script")
     ap_screen.add_argument("script", help="script filename")
+    # performance
+    ap_pfm = subparsers.add_parser("performance", help="start performance data collection")
+    pfm_parger(ap_pfm)
     return ap
 
 
@@ -54,6 +59,8 @@ def main():
         report_main(args)
     elif args.action == "run":
         run_script(args)
+    elif args.action == "performance":
+        performance_main(args)
 
 
 if __name__ == '__main__':

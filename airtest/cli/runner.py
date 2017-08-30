@@ -104,10 +104,18 @@ def run_script(args):
     if args.forever:
         run_forever(args)
 
+    if args.performance:
+        print("set_performance", args.performance)
+        if args.performance and isinstance(args.performance, str):
+            for dev in G.DEVICE_LIST:
+                log_file = os.path.join(ST.LOG_DIR, "pfm_{serialno}.txt".format(serialno=dev.serialno)) if ST.LOG_DIR else "pfm_{serialno}.txt".format(serialno=dev.serialno)
+                dev.init_performance(args.performance, log_file)
+
     on_device_ready()
     # set root script as basedir
     # SCRIPT_STACK.append(args.script)
     try:
+        collect_performance_data('start')
         # execute pre script
         if args.pre:
             ST.set_basedir(args.pre)
@@ -122,6 +130,7 @@ def run_script(args):
         set_current(0)
         log("main_script", {"script": args.script})
         exec_script(args.script, scope=globals(), root=True)
+        collect_performance_data('stop')
     except Exception as e:
         err = traceback.format_exc()
         log("error", {"traceback": err, "name": "traceback", "error_str": e}, False)
@@ -138,6 +147,7 @@ def run_script(args):
             except:
                 log("error", {"traceback": traceback.format_exc(), "name": "traceback"}, False)
                 traceback.print_exc()
+        collect_performance_data('stop')
 
 
 def exec_script(scriptname, scope=None, root=False, code=None):
@@ -300,3 +310,13 @@ def run_forever(args):
 
         sys.stdout.flush()
         sys.stderr.flush()
+
+
+def collect_performance_data(status='start'):
+    # start or stop collect data
+    for dev in G.DEVICE_LIST:
+        if dev.performance:
+            if status == 'start':
+                dev.performance.start()
+            else:
+                dev.performance.stop()
