@@ -97,9 +97,7 @@ class ADB(object):
 
         if proc.returncode > 0:
             # adb connection error
-            if re.match('error: device \'\w+\' not found', stderr.rstrip()):
-                raise DeviceConnectionError(stderr)
-            elif re.search('error: cannot connect to daemon at [\w\:\s]+ Connection timed out', stderr):
+            if re.search(DeviceConnectionError.DEVICE_CONNECTION_ERROR, stderr):
                 raise DeviceConnectionError(stderr)
             else:
                 raise AdbError(stdout, stderr)
