@@ -84,7 +84,10 @@ def trans_log_json(log="pfm.txt"):
             except:
                 t = item["time"]
             try:
-                data[t][item["name"]] = func_dict[item["name"]](item["value"]) if item["name"] in func_dict else item["value"]
+                if item["value"]:
+                    data[t][item["name"]] = func_dict[item["name"]](item["value"]) if item["name"] in func_dict else item["value"]
+                else:
+                    data[t][item["name"]] = ""
             except:
                 data[t][item["name"]] = 0
             if t not in times:
