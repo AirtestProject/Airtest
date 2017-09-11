@@ -256,7 +256,7 @@
             {% for step in all_steps[t] %}
           <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
-            <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
+            <h2 class="header" data-stepid="{{ t }}_{{ loop.index }}"><span class="step_title">[{{ t[:-7] }}]Step {{loop.index}} {{step.title}}</span> [<span class="step_time">{{step.start_time}}</span>]</h2>
             <hr>
             <div class="step_content">
                 {% if step.type in img_type or step.type in uiautomator_img_type %}
