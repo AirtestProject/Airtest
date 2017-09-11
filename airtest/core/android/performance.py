@@ -532,7 +532,6 @@ def init_device_serialno(serialno=None, adbhost=None):
 
 
 def performance_main(args):
-    print args
     package_name = args.package
     if not package_name:
         raise PerformanceError("package name is required!")
