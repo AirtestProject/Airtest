@@ -545,7 +545,7 @@
                 json_load = true;
                 if (chart_load === false) {
                     chart_load = true;
-                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js")
+                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js")
                 }
             };
             jsLoader.onfailure=function () {
@@ -553,7 +553,7 @@
                     json_load = true;
                     $.getJSON("{{ pfm_path }}pfm.json", function (data) {
                         json_data = data;
-                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js");
+                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js");
                     });
                 }
             };
