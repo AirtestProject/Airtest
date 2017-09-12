@@ -121,4 +121,6 @@ def run_script(parsed_args, testcaseClass=AirtestCase):
     args = parsed_args
     suite = unittest.TestSuite()
     suite.addTest(testcaseClass())
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    if not result.wasSuccessful():
+        exit(-1)
