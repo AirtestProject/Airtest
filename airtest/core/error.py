@@ -55,6 +55,14 @@ class AdbShellError(AdbError):
     pass
 
 
+class DeviceConnectionError(BaseError):
+    """
+        device connection error
+    """
+    DEVICE_CONNECTION_ERROR = r"error:\s*((device \'\w+\' not found)|(cannot connect to daemon at [\w\:\s\.]+ Connection timed out))"
+    pass
+
+
 class ICmdError(Exception):
     """
         This is ICmdError Error
@@ -75,9 +83,14 @@ class MinicapError(BaseError):
     """    
     pass
 
+
 class MinitouchError(BaseError):
     """
         This is MinitouchError Error
         When Minicap have something wrong
     """    
+    pass
+
+
+class PerformanceError(BaseError):
     pass

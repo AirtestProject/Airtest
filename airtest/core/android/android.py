@@ -13,6 +13,7 @@ from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
+from airtest.core.android.performance import Performance
 from airtest.core.utils.compat import apkparser
 LOGGING = get_logger('android')
 
@@ -34,6 +35,7 @@ class Android(Device):
         self._init_cap(cap_method)
         self._init_touch(True)
         self.shell_ime = shell_ime
+        self.performance = None
 
     def _init_cap(self, cap_method):
         self.cap_method = cap_method
@@ -74,6 +76,9 @@ class Android(Device):
             self.display_info["rotation"] = ori * 90
 
         self.rw.reg_callback(refresh_ori)
+
+    def init_performance(self, pkg_name, pfm_log="pfm.txt"):
+        self.performance = Performance(self.adb, pkg_name, log_file=pfm_log)
 
     def list_app(self, third_only=False):
         """
@@ -313,11 +318,13 @@ class Android(Device):
                 return True
         raise RuntimeError("recording setup error")
 
-    def stop_recording(self, output="screen.mp4"):
+    def stop_recording(self, output="screen.mp4", is_interrupted=False):
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
         p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         p.wait()
         self.recording_proc = None
+        if is_interrupted:
+            return
         for line in p.stdout.readlines():
             m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
             if m:
