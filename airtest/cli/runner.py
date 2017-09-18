@@ -66,10 +66,12 @@ class AirtestCase(unittest.TestCase):
 
     def setUp(self):
         if self.pre:
+            log("pre_script", {"script": self.pre})
             self.exec_other_script(self.pre)
 
     def tearDown(self):
         if self.post:
+            log("post_script", {"script": self.pre})
             self.exec_other_script(self.post)
 
     def runTest(self):
