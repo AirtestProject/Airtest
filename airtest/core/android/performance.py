@@ -239,7 +239,8 @@ class Performance(object):
 class Collector(object):
     """ 收集数据专用 """
     def __init__(self, adb, package_name, stop_event=None):
-        self.collect_method = [self.pss, self.cpu, self.net_flow]
+        #self.collect_method = [self.pss, self.cpu, self.net_flow]
+        self.collect_method = [self.cpu_freq]
         self.result_queue = Queue.Queue()
         self.adb = adb
         self.package_name = package_name
@@ -483,6 +484,20 @@ class Collector(object):
                 else:
                     return ret - prev_net_flow['bytes']
         return None
+
+    def cpu_freq(self):
+        def cur_freq(i):
+            cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i))
+            print i, cpu
+        t_list = []
+        print "-----------"
+        for i in range(0, 8):
+            t = threading.Thread(target=cur_freq, args=(i,))
+            t_list.append(t)
+            t.start()
+        for t in t_list:
+            t.join()
+        print "*************"
 
 
 # 命令行启动性能数据收集

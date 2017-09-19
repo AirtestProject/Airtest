@@ -90,13 +90,6 @@ option = {
             position: 'right',
             nameGap: 27,
             offset: 80,
-            /*
-            axisLine: {
-                lineStyle: {
-                    color: colors[1]
-                }
-            },
-            */
             axisLabel: {
                 formatter: '{value}' + unit[1]
             }
@@ -117,21 +110,29 @@ option = {
             type:'line',
             yAxisIndex: 0,
             xAxisIndex: 0,
-            data:[]
+            markLine: {
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'middle',
+                        formatter: '视频当前播放位置'
+                    }
+                },
+                animation: false,
+                data: []
+            }
         },
         {
             name:'pss内存占用',
             type:'line',
             yAxisIndex: 1,
-            xAxisIndex: 0,
-            data:[]
+            xAxisIndex: 0
         },
         {
             name:'net网络流量',
             type:'line',
             yAxisIndex: 2,
-            xAxisIndex: 0,
-            data:[]
+            xAxisIndex: 0
         }
     ]
 };
@@ -164,6 +165,9 @@ function load_data() {
             option.xAxis[1].data = steps;
             myChart.setOption(option);
             //myChart.on('click', click_listener);
+            if (i === (json_data.length - 1)) {
+                recordMarkLine();
+            }
         })
 
     }
@@ -174,14 +178,17 @@ load_data();
 function get_time(time) {
     // 传入一个时间点，得到当前时间点的操作步骤是哪一步
     var t = new Date(time);
-    var ret = {time: t, title: time, sid: "" };
+    var ret = {time: t, title: time, sid: "", index: 0};
+    var index = 0;
     $(time_list).each(function(i, n){
         if (n.time <= t) {
             ret = n;
+            index = i;
         } else {
             return true;
         }
     });
+    ret.index = index;
     return ret;
 }
 
@@ -248,5 +255,80 @@ function click_listener(params) {
     var get_step = get_time(params.name);
     if (get_step.title !== "") {
         console.log(get_step.sid);
+    }
+}
+
+function setMarkLine(xValue, charts) {
+    // 在图上加一条竖直的mark line，可以标记当前时间点位置
+    //var chartIns = echarts.getInstanceByDom(document.getElementById('pfm'));
+    var op = {
+        series: {
+            markLine: {
+                data: [{
+                    xAxis: xValue
+                }]
+            }
+        }
+    };
+    $.each(charts, function(i, n) {
+        n.setOption(op);
+    });
+}
+
+function recordMarkLine() {
+    var charts = [];
+    $(".pfm_chart").each(function(i, n){
+        var c = echarts.getInstanceByDom(document.getElementById($(this).attr("id")));
+        charts.push(c);
+    });
+    if (charts.length === 0) {
+        return true;
+    }
+    var xAxis = charts[0].getOption().xAxis[0].data;
+    if ((xAxis.length < 2) && (xAxis.length > 0)) {
+        setMarkLine(xAxis[0], charts);
+    } else {
+        var i = 0;
+        // 视频起始时间
+        var startTime = new Date(xAxis[0]);
+        var endTime = new Date(xAxis[xAxis.length - 1]);
+        //var curTime = new Date(xAxis[i]);
+        var curXTime = new Date(xAxis[i + 1]);
+        $(".device-record").on("timeupdate", function(event) {
+            // 根据视频的播放时间来移动图像上的markline
+            if (i === 0) {
+                setMarkLine(xAxis[0], charts);
+            }
+            var ctime = this.currentTime;
+            var curTime = new Date(startTime.getTime() + ctime * 1000);
+            if (curTime > endTime) {
+                // 视频播放到最右超过脚本时间时，重置计数器
+                i = 0;
+                curXTime = new Date(xAxis[i + 1]);
+                return true;
+            }
+            if (i >= xAxis.length) {
+                return true;
+            }
+            while (curTime >= curXTime ) {
+                i += 1;
+                setMarkLine(xAxis[i], charts);
+                if (i < xAxis.length) {
+                    curXTime = new Date(xAxis[i + 1]);
+                } else {
+                    break;
+                }
+            }
+            // 手工调整时间前移的情况
+            while ((curTime < curXTime) && i > 0) {
+                var prevTime = new Date(xAxis[i - 1]);
+                if (curTime > prevTime) {
+                    break;
+                }
+                curXTime = new Date(xAxis[i]);
+                i -= 1;
+                setMarkLine(xAxis[i], charts);
+            }
+        })
     }
 }

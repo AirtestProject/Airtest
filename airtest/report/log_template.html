@@ -169,10 +169,15 @@
     div.assert {
       padding-left: 20px;
     }
+    /*
     .gif-wrap {
         max-height: 400px;
         text-align: center;
     }
+    */
+     video {
+         max-height: 680px;
+     }
 
     </style>
   </head>
@@ -226,23 +231,24 @@
 
         <!-- gif和录屏 -->
          <div class="row gif-wrap">
-          <div class="col-md-6">
-            <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
-          </div>
-
-          <div class="col-md-6">
-            {% if records %}
+         {% if not records %}
+            <div class="col-md-6">
+                <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
+            </div>
+            <div class="col-md-6">
+                <p>暂无设备录屏信息</p>
+            </div>
+         {% else %}
+          <div class="col-md-12">
               {% for r in records %}
                 <div align="center" class="embed-responsive embed-responsive-16by9">
-                    <video class="embed-responsive-item" controls>
+                    <video class="embed-responsive-item device-record" controls>
                         <source src="{{ r }}" type="video/mp4">
                     </video>
                 </div>
               {% endfor %}
-            {% else %}
-              <p>暂无设备录屏信息</p>
-            {% endif %}
           </div>
+         {% endif %}
          </div><!-- /.gif -->
 
         <!-- 性能图 -->
@@ -331,7 +337,7 @@
 
           <!-- 导航栏 -->
           <div class="fast-nav-step">
-            <label>步骤导航123
+            <label>步骤导航
               <button class="btn btn-info btn-sm" id="collapse_nav_step"><i class="glyphicon glyphicon-chevron-down"></i></button>
               <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
             </label>
@@ -546,6 +552,7 @@
                 if (chart_load === false) {
                     chart_load = true;
                     // v2是测试版本js，版本稳定后可以修改回正常的pfm_charts.js
+                    console.log("456")
                     jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js")
                 }
             };
@@ -554,6 +561,7 @@
                     json_load = true;
                     $.getJSON("{{ pfm_path }}pfm.json", function (data) {
                         json_data = data;
+                        console.log("123");
                         jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js");
                     });
                 }
