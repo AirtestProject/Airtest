@@ -140,12 +140,10 @@ class Android(Device):
         self.adb.shell(cmd)
 
     def enable_accessibility_service(self):
-        self.adb.shell('settings put secure enabled_accessibility_services com.netease.accessibility/com.netease.accessibility.MyAccessibilityService:com.netease.testease/com.netease.testease.service.MyAccessibilityService')
-        self.adb.shell('settings put secure accessibility_enabled 1')
+        pass
 
     def disable_accessibility_service(self):
-        self.adb.shell('settings put secure accessibility_enabled 0')
-        self.adb.shell('settings put secure enabled_accessibility_services 0')
+        pass
 
     def install_app(self, filepath, package=None, **kwargs):
         """
@@ -172,8 +170,6 @@ class Android(Device):
 
         # 唤醒设备
         self.wake()
-        # 用accessibility点掉所有安装确认窗口
-        self.enable_accessibility_service()
 
         # rm all apks in /data/local/tmp to get enouph space
         self.adb.shell("rm -f /data/local/tmp/*.apk")
