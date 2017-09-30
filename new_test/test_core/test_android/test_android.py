@@ -229,13 +229,6 @@ class TestAndroid(unittest.TestCase):
         if res:
             self.assertIsInstance(res, str_class)
 
-    def test_enable_accessibility_service(self):
-        self.android.enable_accessibility_service()
-
-    def test_disable_accessibility_service(self):
-        self.android.disable_accessibility_service()
-
-
     def test_is_keyboard_shown(self):
         self.android.is_keyboard_shown()
 

@@ -193,9 +193,9 @@ def exec_script(scriptname, scope=None, root=False, code=None):
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
     # exec code
     if scope:
-        exec(compile(code, scriptpath, 'exec')) in scope
+        exec(compile(code, pyfilepath, 'exec')) in scope
     else:
-        exec(compile(code, scriptpath, 'exec')) in globals()
+        exec(compile(code, pyfilepath, 'exec')) in globals()
     # finish exec
     SCRIPT_STACK.pop()
     return scriptpath
