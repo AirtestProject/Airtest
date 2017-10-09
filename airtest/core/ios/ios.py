@@ -28,7 +28,7 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, addr):
+    def __init__(self, addr='http://localhost:8100/'):
         super(IOS, self).__init__()
         self.addr = addr
 
@@ -101,11 +101,11 @@ class IOS(Device):
 if __name__ == "__main__":
     start = time.time()
     ios = IOS('http://localhost:8100/')
-    ios.snapshot("aaa2.png")
+    # ios.snapshot("aaa2.png")
     ios.start_app("com.tencent.xin")
     # ios.touch((300, 100))
     ios.touch((320, 1100))
     # ios.text("abc")
-    ios.home()
-    ios.stop_app()
+    # ios.home()
+    # ios.stop_app()
     # ios.swipe((100, 100), (800, 100))

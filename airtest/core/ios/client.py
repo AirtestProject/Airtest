@@ -28,7 +28,7 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, addr):
+    def __init__(self, addr="http://localhost:8100/"):
         super(IOS, self).__init__()
         self.addr = addr
 
@@ -36,7 +36,8 @@ class IOS(Device):
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
         self.driver = wda.Client(addr)
-        self.udid = self.driver.status()['udid']
+        print(self.driver.status())
+        self.udid = "111" #self.driver.status()['udid']
         self.serialno = self.udid
         self._size = {'width': 0, 'height': 0}
         self._wda_sca = 1
@@ -274,11 +275,11 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS('http://10.251.81.173:8100/')
-    ios.wake()
+    ios = IOS()
+    ios.home()
     # ios._try_to_finish_alert('dismiss')
-    print(ios.list_app())
-    print(ios.start_app('com.netease.mhxyhtb'))
+    # print(ios.list_app())
+    # print(ios.start_app('com.netease.mhxyhtb'))
     # ios.uninstall_app('com.netease.oa2')
     # # ios.install_app('https://adl.netease.com/d/g/xyq/c/htb?from=qr', com.netease.mhxyhtb)
     # ios.install_app('itms-services://?action=download-manifest&url=https://m.oa.netease.com/IOS/newOA_iOS8.plist', 'com.netease.oa2')
