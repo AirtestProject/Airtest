@@ -137,6 +137,34 @@ option = {
     ]
 };
 
+// option_cpu
+option_cpu = {
+    title: {
+        text: 'CPU数据监控'
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+        }
+    },
+    grid: {
+        top: 80
+    },
+    legend: {
+        data:[]
+    },
+    xAxis: [{
+            type: 'category',
+            data: [1, 2,3,4, 5,6,7]
+        }],
+    yAxis: [{
+            type: 'value'
+    }],
+    series: [
+    ]
+};
+
 time_list = [];
 function load_data() {
 
@@ -152,10 +180,14 @@ function load_data() {
         $.each(json_data, function(i, n) {
             if (n.serialno === "") {
                 var myChart = echarts.init(document.getElementById('pfm'), 'shine');
+                var myChartCpu = echarts.init(document.getElementById('pfm_cpu'), 'shine');
                 option.title.text = '设备性能数据监控';
+                option_cpu.title.text = 'CPU数据监控';
             } else {
                 var myChart = echarts.init(document.getElementById('pfm_' + n.serialno), 'shine');
+                var myChartCpu = echarts.init(document.getElementById('pfm_' + n.serialno + '_cpu'), 'shine');
                 option.title.text = '设备' + n.serialno + '性能数据监控';
+                option_cpu.title.text = '设备' + n.serialno + 'CPU数据监控';
             }
             option.xAxis[0].data = n.times;
             option.series[0].data = n.cpu;
@@ -164,10 +196,23 @@ function load_data() {
             var steps = get_steps(n.times, time_list);
             option.xAxis[1].data = steps;
             myChart.setOption(option);
-            //myChart.on('click', click_listener);
             if (i === (json_data.length - 1)) {
                 recordMarkLine();
             }
+            // option cpu
+            option_cpu.xAxis[0].data = n.times;
+            option_cpu.series = [];
+            option_cpu.legend.data = [];
+            $.each(Object.keys(n.cpu_freq), function(i, key){
+                option_cpu.series.push({
+                    name: '核心' + key,
+                    type: 'bar',
+                    stack: '总量',
+                    data: n.cpu_freq[key]
+                });
+                option_cpu.legend.data.push('核心' + key);
+            });
+            myChartCpu.setOption(option_cpu);
         })
 
     }

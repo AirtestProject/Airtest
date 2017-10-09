@@ -63,15 +63,16 @@ def trans_log_json(log="pfm.txt"):
 
     """
     data = defaultdict(lambda: defaultdict(lambda: 0))
-    ret = {"cpu": [], "pss": [], "net_flow": [],
+    ret = {"cpu": [], "pss": [], "net_flow": [], "cpu_freq": {},
            "keys": ["cpu", "pss", "net_flow"],
-           "title": log}
+           "title": log, "cpu_freq_data": {}}
     times = []
     transback_content = []
     func_dict = {
         "cpu": cpu,
         "pss": pss,
         "net_flow": net_flow,
+        "cpu_freq": cpu_freq,
     }
     with open(log) as f:
         for item in f.readlines():
@@ -85,7 +86,8 @@ def trans_log_json(log="pfm.txt"):
                 t = item["time"]
             try:
                 if item["value"] != "":
-                    data[t][item["name"]] = func_dict[item["name"]](item["value"]) if item["name"] in func_dict else item["value"]
+                    value = json.loads(item["value"])
+                    data[t][item["name"]] = func_dict[item["name"]](value) if item["name"] in func_dict else value
                 else:
                     data[t][item["name"]] = ""
             except:
@@ -95,7 +97,14 @@ def trans_log_json(log="pfm.txt"):
 
     for t in times:
         for k in func_dict.keys():
-            ret[k].append(data[t][k])
+            if k != 'cpu_freq':
+                ret[k].append(data[t][k])
+            else:
+                for kernel, freq in data[t]["cpu_freq"].items():
+                    if kernel not in ret["cpu_freq"]:
+                        ret["cpu_freq"][kernel] = [freq]
+                    else:
+                        ret["cpu_freq"][kernel].append(freq)
     ret["times"] = times
     return ret, transback_content
 
@@ -130,3 +139,39 @@ def net_flow(value):
 
     """
     return round(float(value)/1024.0, 2)
+
+
+def cpu_freq(value):
+    """
+
+    Parameters
+    ----------
+    value
+
+    Returns
+    -------
+
+    """
+    return value
+
+
+def cpu_kernel(value):
+    """
+    计算活跃CPU核心数
+    Parameters
+    ----------
+    value
+
+    Returns
+    -------
+
+    """
+    count = 0
+    print value, type(value)
+    if isinstance(value, dict):
+        for i in value.values():
+            if i != "0" and i != 0:
+                count += 1
+        return count
+    else:
+        return 1

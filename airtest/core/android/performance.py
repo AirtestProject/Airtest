@@ -52,7 +52,7 @@ def pfmlog(func):
             if data is None:
                 # 读到的数据可能为0或者None, 0代表取到数据是0，但是None代表取不到数据/数据为空/数据异常，也记下来，用""来代替
                 data = ""
-            args[0].result_queue.put({"name": func.__name__, "value": data, "time": log_time})
+            args[0].result_queue.put({"name": func.__name__, "value": json.dumps(data), "time": log_time})
         return data
     return log_it
 
@@ -239,8 +239,7 @@ class Performance(object):
 class Collector(object):
     """ 收集数据专用 """
     def __init__(self, adb, package_name, stop_event=None):
-        #self.collect_method = [self.pss, self.cpu, self.net_flow]
-        self.collect_method = [self.cpu_freq]
+        self.collect_method = [self.pss, self.cpu, self.net_flow, self.cpu_freq]
         self.result_queue = Queue.Queue()
         self.adb = adb
         self.package_name = package_name
@@ -411,9 +410,14 @@ class Collector(object):
 
             cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
             if cpu < 0.001:
-                LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
+                LOGGING.error("cpu data error: %s, %s" % (str(total_cpu_time1), str(total_cpu_time2)))
                 continue
-            return round(cpu/self._cpu_kernel, 2)
+            ret = round(cpu/self._cpu_kernel, 2)
+            if ret > 100:
+                LOGGING.error("cpu data error: %s, %s, %s, %s" % (str(total_cpu_time1), str(total_cpu_time2),
+                                                                  str(dt_total_time), str(dt_process_time)))
+                continue
+            return ret
         return None
 
     def cpu_info(self):
@@ -485,19 +489,26 @@ class Collector(object):
                     return ret - prev_net_flow['bytes']
         return None
 
+    @pfmlog
     def cpu_freq(self):
+        ret = defaultdict(lambda: "0")
+
         def cur_freq(i):
-            cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i))
-            print i, cpu
+            online = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/online" % str(i))
+            if "1" in online:
+                cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i)).strip()
+                ret[i] = cpu if cpu.isdigit() else "0"
+            else:
+                ret[i] = "0"
+
         t_list = []
-        print "-----------"
-        for i in range(0, 8):
+        for i in range(0, self._cpu_kernel):
             t = threading.Thread(target=cur_freq, args=(i,))
             t_list.append(t)
             t.start()
         for t in t_list:
             t.join()
-        print "*************"
+        return ret
 
 
 # 命令行启动性能数据收集

@@ -255,6 +255,8 @@
         {% for pfm in pfm_devices %}
             <br/>
             <div class="pfm_chart" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}"></div>
+            <br/>
+            <div class="pfm_chart_cpu" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}_cpu"></div>
         {% endfor %}
 
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
