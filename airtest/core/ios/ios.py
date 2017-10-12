@@ -5,6 +5,7 @@
 import requests
 import six
 import time
+import json
 import wda
 
 if six.PY3:
@@ -19,6 +20,8 @@ from airtest.core.utils.logger import get_logger
 
 
 logger = get_logger("ios")
+DEFAULT_ADDR = "http://10.254.28.108:8100/"
+# DEFAULT_ADDR = "http://localhost:8100/"
 
 
 class IOS(Device):
@@ -28,7 +31,7 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, addr='http://localhost:8100/'):
+    def __init__(self, addr=DEFAULT_ADDR):
         super(IOS, self).__init__()
         self.addr = addr
 
@@ -59,11 +62,18 @@ class IOS(Device):
 
     def touch(self, pos, times=1, duration=0.01):
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-        if times == 2:
-            self.session.double_tap(x, y)
-        else:
-            for _ in range(times):
-                self.session.tap(x, y)
+        # if times == 2:
+        #     self.session.double_tap(x, y)
+        # else:
+        #     for _ in range(times):
+        #         self.session.tap(x, y)
+        r = requests.get(urljoin(self.addr, "status"))
+        sid = r.json()["sessionId"]
+        url = urljoin(self.addr, "session/%s/wda/tap/0" % sid)
+        print(url, x, y)
+        r = requests.post(url, json={"x": x, "y": y})
+        print(r.json())
+        return r
 
     def swipe(self, fpos, tpos, duration=0.5):
         self.session.swipe(fpos[0] * self._touch_factor, fpos[1] * self._touch_factor,
@@ -92,7 +102,7 @@ class IOS(Device):
         self.driver.session(package)
 
     def stop_app(self, package):
-        self.driver.session.close()
+        self.driver.session().close()
 
     def external_ip(self):
         return self.driver.status()['ios']['ip']
@@ -100,11 +110,13 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS('http://localhost:8100/')
+    ios = IOS()
     # ios.snapshot("aaa2.png")
-    ios.start_app("com.tencent.xin")
-    # ios.touch((300, 100))
-    ios.touch((320, 1100))
+    # ios.touch((242 * 2 + 10, 484 * 2 + 20))
+    ios.stop_app(111)
+    # ios.start_app("com.tencent.xin")
+    ios.touch((88, 88))
+    # ios.stop_app(111)
     # ios.text("abc")
     # ios.home()
     # ios.stop_app()

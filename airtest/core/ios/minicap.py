@@ -18,7 +18,7 @@ class MinicapIOS(object):
         self.udid = udid or list_devices()[0]
         print(repr(self.udid))
         self.port = port
-        self.resolution = "400x600"
+        self.resolution = "320x568"
         self.executable = os.path.join(os.path.dirname(__file__), "ios_minicap")
         self.server_proc = None
 
@@ -29,13 +29,13 @@ class MinicapIOS(object):
         reg_cleanup(proc.kill)
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
         while True:
-            line = nbsp.readline(timeout=5.0)
+            line = nbsp.readline(timeout=10.0)
             if line is None:
                 raise RuntimeError("minicap setup error")
             if b"== Banner ==" in line:
                 break
         if proc.poll() is not None:
-            raise RuntimeError("minicap setup error")
+            logging.warn("Minicap server already started, use old one")
         self.server_proc = proc
 
     def get_frames(self):
@@ -69,7 +69,7 @@ class MinicapIOS(object):
 def list_devices():
     cmd = "system_profiler SPUSBDataType"
     ret = subprocess.check_output(cmd, shell=True).strip() or None
-    m = re.findall(r"[iPhone|iPad].*?Serial Number: (\w+)", ret, re.DOTALL)
+    m = re.findall(r"(?:iPhone|iPad).*?Serial Number: (\w+)", ret, re.DOTALL)
     print(m)
     return m
 

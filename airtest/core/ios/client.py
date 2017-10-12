@@ -36,8 +36,7 @@ class IOS(Device):
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
         self.driver = wda.Client(addr)
-        print(self.driver.status())
-        self.udid = "111" #self.driver.status()['udid']
+        self.udid = self.driver.status()['udid']
         self.serialno = self.udid
         self._size = {'width': 0, 'height': 0}
         self._wda_sca = 1
