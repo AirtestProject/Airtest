@@ -2,17 +2,13 @@
 from six import with_metaclass
 
 
-DEV_TYPE_DICT = {}
-
-
-def register_class(name, cls):
-    DEV_TYPE_DICT[name] = cls
-
-
 class MetaDevice(type):
+
+    REPO = {}
+
     def __new__(meta, name, bases, class_dict):
         cls = type.__new__(meta, name, bases, class_dict)
-        register_class(name, cls)
+        meta.REPO[name] = cls
         return cls
 
 

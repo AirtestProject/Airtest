@@ -4,27 +4,17 @@
 """
 import os
 import time
-from airtest import aircv
-from airtest.core.error import MoaNotFoundError
-from airtest.core.settings import Settings as ST
-from airtest.core.cv import loop_find, device_snapshot
-from airtest.core.helper import G, MoaPic, MoaText, logwrap, moapicwrap, \
-    get_platform, platform, delay_after_operation
 from urlparse import urlparse, parse_qsl
-from airtest.core import Android, IOS, Windows
-
+from airtest import aircv
+from airtest.core.cv import loop_find, device_snapshot
+from airtest.core.error import MoaNotFoundError
+from airtest.core.helper import G, MoaPic, logwrap, device_platform, on_platform, delay_after_operation
+from airtest.core.settings import Settings as ST
+from airtest.core.device import MetaDevice
 
 """
-Environment initialization
+Device setup
 """
-
-
-def init_device(dev):
-    """初始化设备，加入全局环境, eg:
-    init_device(Android())
-    """
-    G.DEVICE = dev
-    G.DEVICE_LIST.append(dev)
 
 
 def connect_device(uri):
@@ -37,33 +27,28 @@ def connect_device(uri):
     uuid = d.path.lstrip("/")
     params = dict(parse_qsl(d.query))
 
-    if platform == "android":
-        if host:
-            params["adbhost"] = host.split(":")
-        dev = Android(uuid, **params)
-    elif platform == "ios":
-        dev = IOS(uuid, **params)
-    elif platform == "windows":
-        dev = Windows(uuid, **params)
-        if dev.handle:
-            dev.set_foreground()
-    else:
-        raise RuntimeError("unknown platform %s" % platform)
-    init_device(dev)
+    if host:
+        params["host"] = host.split(":")
+
+    for name, cls in MetaDevice.REPO.items():
+        if platform == name.lower():
+            dev = cls(uuid, **params)
+            G.add_device(dev)
+            return
+
+    raise RuntimeError("unknown platform %s" % platform)
 
 
 def device():
     return G.DEVICE
 
 
-@platform(on=["Android", "Windows", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def set_current(index):
     try:
         G.DEVICE = G.DEVICE_LIST[index]
     except IndexError:
         raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
-    if Windows and get_platform() == "Windows":
-        G.DEVICE.set_foreground()
 
 
 """
@@ -72,225 +57,134 @@ Device operation
 
 
 @logwrap
-@platform(on=["Android"])
+@on_platform(["Android"])
 def shell(cmd):
     return G.DEVICE.shell(cmd)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
-def amstart(package, activity=None):
+@on_platform(["Android", "IOS"])
+def start_app(package, activity=None):
     G.DEVICE.start_app(package, activity)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
-def amstop(package):
+@on_platform(["Android", "IOS"])
+def stop_app(package):
     G.DEVICE.stop_app(package)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
-def amclear(package):
+@on_platform(["Android", "IOS"])
+def clear_app(package):
     G.DEVICE.clear_app(package)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
+@on_platform(["Android", "IOS"])
 def install(filepath, package=None):
     return G.DEVICE.install_app(filepath, package)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
+@on_platform(["Android", "IOS"])
 def uninstall(package):
     return G.DEVICE.uninstall_app(package)
 
 
 @logwrap
-def snapshot(filename=None, msg=""):
+def snapshot(filename, msg=""):
     """capture device screen and save it into file."""
-    screen, default_filepath = device_snapshot()
-    if not filename:
-        filepath = default_filepath
-    elif not os.path.isabs(filename):
+    if not os.path.isabs(filename):
         filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
     else:
         filepath = filename
-    aircv.imwrite(filepath, screen)
+    G.DEVICE.snapshot(filepath)
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
+@on_platform(["Android", "IOS"])
 def wake():
     G.DEVICE.wake()
 
 
 @logwrap
-@platform(on=["Android", "IOS"])
+@on_platform(["Android", "IOS"])
 def home():
     G.DEVICE.home()
 
 
 @logwrap
-@moapicwrap
-@platform(on=["Android", "Windows", "IOS"])
-def touch(v, timeout=0, delay=0, offset=None, if_exists=False, times=1, right_click=False, duration=0.01):
-    '''
-    @param if_exists: touch only if the target pic exists
-    @param offset: {'x':10,'y':10,'percent':True}
-    '''
+@on_platform(["Android", "Windows", "IOS"])
+def touch(v, timeout=0, **kwargs):
     timeout = timeout or ST.FIND_TIMEOUT
-    if isinstance(v, (MoaPic, MoaText)):
+    if isinstance(v, MoaPic):
         try:
             pos = loop_find(v, timeout=timeout)
         except MoaNotFoundError:
-            if if_exists:
-                return False
             raise
     else:
         pos = v
-        # 互通版需求：点击npc，传入FIND_INSIDE参数作为touch位置矫正(此时的v非img_name_str、非MoaPic、MoaText)
-        if ST.FIND_INSIDE and get_platform() == "Windows" and G.DEVICE.handle:
-            wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
-            # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
-            pos = (wnd_pos[0] + ST.FIND_INSIDE[0] + pos[0],
-                   wnd_pos[1] + ST.FIND_INSIDE[1] + pos[1])
 
-    if offset:
-        if offset['percent']:
-            w, h = G.DEVICE.size['width'], G.DEVICE.size['height']
-            pos = (pos[0] + offset['x'] * w / 100,
-                   pos[1] + offset['y'] * h / 100)
-        else:
-            pos = (pos[0] + offset['x'], pos[1] + offset['y'])
-        G.LOGGING.debug('touchpos after offset %s', pos)
-    else:
-        G.LOGGING.debug('touchpos: %s', pos)
-
-    if get_platform() == "Windows":
-        G.DEVICE.touch(pos, right_click)
-    else:
-        G.DEVICE.touch(pos, times, duration)
-
-    delay_after_operation(delay)
+    G.DEVICE.touch(pos, **kwargs)
+    delay_after_operation()
 
 
 @logwrap
-@moapicwrap
-@platform(on=["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, delay=0, vector=None, target_poses=None, duration=0.5, steps=5):
-    """滑动，共有3种参数方式：
+@on_platform(["Android", "Windows", "IOS"])
+def swipe(v1, v2=None, vector=None, **kwargs):
+    """滑动，共有2种参数方式：
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
-       3. swipe(v1, target_poses) v1是滑动区域，target_poses是(t1,t2)，t1是起始位置，t2是终止位置，数值为图片九宫格
     """
-    if target_poses:
-        v1.target_pos = target_poses[0]
+    if isinstance(v1, MoaPic):
         pos1 = loop_find(v1)
-        v1.new_snapshot = False
-        v1.target_pos = target_poses[1]
-        pos2 = loop_find(v1)
     else:
-        if isinstance(v1, (MoaPic, MoaText)):
-            pos1 = loop_find(v1)
+        pos1 = v1
+
+    if v2:
+        if isinstance(v2, MoaPic):
+            v2.new_snapshot = False
+            pos2 = loop_find(v2)
         else:
-            pos1 = v1
+            pos2 = v2
+    elif vector:
+        if vector[0] <= 1 and vector[1] <= 1:
+            w, h = G.DEVICE.getCurrentScreenResolution()
+            vector = (int(vector[0] * w), int(vector[1] * h))
+        pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
+    else:
+        raise Exception("no enouph params for swipe")
 
-        if v2:
-            if isinstance(v2, (MoaPic, MoaText)):
-                v2.new_snapshot = False
-                pos2 = loop_find(v2)
-            else:
-                pos2 = v2
-        elif vector:
-            if vector[0] <= 1 and vector[1] <= 1:
-                w, h = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
-
-                # 减去windows窗口的边框
-                if ST.FIND_INSIDE and get_platform() == "Windows" and G.DEVICE.handle:
-                    w -= 2 * ST.FIND_INSIDE[0]
-                    h -= ST.FIND_INSIDE[0] + ST.FIND_INSIDE[1]
-                vector = (int(vector[0] * w), int(vector[1] * h))
-            pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
-        else:
-            raise Exception("no enouph params for swipe")
-
-    if ST.FIND_INSIDE and get_platform() == "Windows" and G.DEVICE.handle:
-        wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
-        # 操作坐标 = 窗口坐标 + 有效画面在窗口内的偏移坐标 + 传入的有效画面中的坐标
-        pos1 = (wnd_pos[0] + ST.FIND_INSIDE[0] + pos1[0],
-                wnd_pos[1] + ST.FIND_INSIDE[1] + pos1[1])
-        pos2 = (wnd_pos[0] + ST.FIND_INSIDE[0] + pos2[0],
-                wnd_pos[1] + ST.FIND_INSIDE[1] + pos2[1])
-    G.DEVICE.swipe(pos1, pos2, duration=duration, steps=steps)
-    delay_after_operation(delay)
+    G.DEVICE.swipe(pos1, pos2, **kwargs)
+    delay_after_operation()
 
 
 @logwrap
-@moapicwrap
-@platform(on=["Android", "Windows"])
-def operate(v, route, timeout=ST.FIND_TIMEOUT, delay=0):
-    if isinstance(v, (MoaPic, MoaText)):
-        pos = loop_find(v, timeout=timeout)
-    else:
-        pos = v
-
-    G.DEVICE.operate({"type": "down", "x": pos[0], "y": pos[1]})
-    for vector in route:
-        if (vector[0] <= 1 and vector[1] <= 1):
-            w, h = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
-            vector = [vector[0] * w, vector[1] * h, vector[2]]
-        pos2 = (pos[0] + vector[0], pos[1] + vector[1])
-        G.DEVICE.operate({"type": "move", "x": pos2[0], "y": pos2[1]})
-        time.sleep(vector[2])
-    G.DEVICE.operate({"type": "up"})
-    delay_after_operation(delay)
-
-
-@logwrap
-@platform(on=["Android"])
-def pinch(in_or_out='in', center=None, percent=0.5, delay=0):
+@on_platform(["Android"])
+def pinch(in_or_out='in', center=None, percent=0.5):
     G.DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
-    delay_after_operation(delay)
+    delay_after_operation()
 
 
 @logwrap
-@platform(on=["Android", "Windows", "IOS"])
-def keyevent(keyname, escape=False, combine=None, delay=0, times=1, shift=False, ctrl=False):
-    """模拟设备的按键功能, times为点击次数.
-        shift/ctrl/combine only works on windows
+@on_platform(["Android", "Windows", "IOS"])
+def keyevent(keyname, **kwargs):
+    """模拟设备的按键功能.
     """
-    if get_platform() == "Windows":
-        if not combine:
-            combine = []
-        if ctrl:
-            combine.append("ctrl")
-        if shift:
-            combine.append("shift")
-        G.DEVICE.keyevent(keyname, escape, combine)
-    else:
-        G.DEVICE.keyevent(keyname)
-    delay_after_operation(delay)
+    G.DEVICE.keyevent(keyname, **kwargs)
+    delay_after_operation()
 
 
 @logwrap
-@platform(on=["Android", "Windows", "IOS"])
-def text(text, delay=0, clear=False, enter=True):
+@on_platform(["Android", "Windows", "IOS"])
+def text(text, enter=True):
     """
         输入文字
-        clear: 输入前清空输入框
         enter: 输入后执行enter操作
     """
-    device_platform = get_platform()
-    if clear:
-        if device_platform == "Windows":
-            for i in range(20):
-                G.DEVICE.keyevent('backspace', escape=True)
-        else:
-            G.DEVICE.shell(" && ".join(["input keyevent KEYCODE_DEL"] * 30))
     G.DEVICE.text(text, enter=enter)
-    delay_after_operation(delay)
+    delay_after_operation()
 
 
 @logwrap
@@ -299,7 +193,6 @@ def sleep(secs=1.0):
 
 
 @logwrap
-@moapicwrap
 def wait(v, timeout=0, interval=0.5, intervalfunc=None):
     timeout = timeout or ST.FIND_TIMEOUT
     pos = loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
@@ -307,7 +200,6 @@ def wait(v, timeout=0, interval=0.5, intervalfunc=None):
 
 
 @logwrap
-@moapicwrap
 def exists(v, timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
@@ -318,7 +210,6 @@ def exists(v, timeout=0):
 
 
 @logwrap
-@moapicwrap
 def find_all(v, timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
@@ -327,29 +218,12 @@ def find_all(v, timeout=0):
         return []
 
 
-@logwrap
-@platform(on=["Android"])
-def logcat(grep_str="", extra_args="", read_timeout=10):
-    return G.DEVICE.logcat(grep_str, extra_args, read_timeout)
-
-
-@logwrap
-def add_watcher(name, func):
-    G.WATCHER[name] = func
-
-
-@logwrap
-def remove_watcher(name):
-    G.WATCHER.pop(name)
-
-
 """
 Assert functions
 """
 
 
 @logwrap
-@moapicwrap
 def assert_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT
     try:
@@ -360,7 +234,6 @@ def assert_exists(v, msg="", timeout=0):
 
 
 @logwrap
-@moapicwrap
 def assert_not_exists(v, msg="", timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:

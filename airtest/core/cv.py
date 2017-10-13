@@ -15,13 +15,13 @@ from airtest.aircv.sift import find_sift
 from airtest.aircv.utils import check_image_param_input, generate_result
 
 from airtest.core.error import *  # noqa
-from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, MoaText, log_in_func, logwrap, get_platform, platform
+from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, log_in_func, logwrap, device_platform, on_platform
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos, predict_area, cocos_min_strategy
 
 
 @logwrap
-@platform(on=["Android", "Windows", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def device_snapshot():
     """设备截屏，并且以时间戳为默认命名，但是不存盘."""
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
@@ -73,9 +73,6 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
         if intervalfunc is not None:
             aircv.imwrite(filepath, source.screen)
             intervalfunc()
-        for name, func in G.WATCHER.items():
-            G.LOGGING.info("exec watcher %s", name)
-            func()
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:

@@ -1,21 +1,18 @@
 #!/usr/bin/env
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import sys
 import io
+import re
 import shutil
+import sys
 import traceback
 
+from airtest.core.error import MinicapError, MinitouchError, AdbError
+from airtest.core.helper import log
+from airtest.core.main import *
+from airtest.core.settings import Settings as ST
 # Support python 3
 from airtest.core.utils.compat import unquote, PY3
-
-from airtest.core.main import *
-from airtest.core.error import MinicapError, MinitouchError, AdbError
-from airtest.core.helper import log, logwrap
-from airtest.core.settings import Settings as ST
-
 
 SCRIPTHOME = None
 SCRIPT_STACK = []
@@ -37,9 +34,9 @@ def run_script(args):
 
     if isinstance(args.device, list):
         for device in args.device:
-            init_device(device)
+            add_device(device)
     elif args.device:
-        init_device(args.device)
+        add_device(args.device)
 
     if args.setsn is not None:
         print("set_serialno", args.setsn, args.capmethod)

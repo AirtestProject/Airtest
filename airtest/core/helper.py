@@ -7,6 +7,7 @@ from airtest.core import device
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
 from airtest.core.utils.compat import PY3
+from airtest.core.device import MetaDevice
 
 
 class G(object):
@@ -19,7 +20,14 @@ class G(object):
     DEVICE_LIST = []
     RECENT_CAPTURE = None
     RECENT_CAPTURE_PATH = None
-    WATCHER = {}
+
+    @classmethod
+    def add_device(cls, dev):
+        """初始化设备，加入全局环境, eg:
+        init_device(Android())
+        """
+        cls.DEVICE = dev
+        cls.DEVICE_LIST.append(dev)
 
 
 class MoaPic(object):
@@ -78,7 +86,7 @@ class MoaScreen(object):
     # def create_by_query(cls, screen, query):
         """求取图像匹配的截屏数据类."""
         # 第一步: 获取截屏
-        if not whole_screen and get_platform() == "Windows" and G.DEVICE.handle:
+        if not whole_screen and device_platform() == "Windows" and G.DEVICE.handle:
             # win平非全屏识别、且指定句柄的情况:使用hwnd获取有效图像
             # 获取窗口相对于屏幕坐标系的坐标(用于操作坐标的转换)
             wnd_pos = G.DEVICE.get_wnd_pos_by_hwnd(G.DEVICE.handle)
@@ -164,22 +172,6 @@ class CvPosFix(object):
             return cv_ret
 
 
-class MoaText(object):
-    """autogen Text with aircv
-        Deprecated!
-    """
-
-    def __init__(self, text, font=u"微软雅黑", size=70, inverse=True):
-        self.info = dict(text=text, font=font, size=size, inverse=inverse)
-        self.img = textgen.gen_text(text, font, size, inverse)
-        # self.img.save("text.png")
-        self.threshold = THRESHOLD
-        self.target_pos = TargetPos.MID
-
-    def __repr__(self):
-        return "MoaText(%s)" % repr(self.info)
-
-
 """
 helper functions
 """
@@ -199,55 +191,28 @@ def logwrap(f):
     return Logwrap(f, G.LOGGER)
 
 
-def moapicwrap(f):
-    """
-    put pic & related cv params into MoaPic object
-    """
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        if not is_str(args[0]):
-            return f(*args, **kwargs)
-        picname = args[0]
-        picargs = {}
-        opargs = {}
-
-        if not PY3:
-            iterlist = kwargs.iteritems()
-        else:
-            iterlist = kwargs.items()
-
-        for k, v in iterlist:
-            if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
-                picargs[k] = v
-            else:
-                opargs[k] = v
-        pictarget = MoaPic(picname, **picargs)
-        return f(pictarget, *args[1:], **opargs)
-    return wrapper
-
-
-def get_platform():
-    for name, cls in device.DEV_TYPE_DICT.items():
+def device_platform():
+    for name, cls in MetaDevice.REPO.items():
         if G.DEVICE.__class__ == cls:
             return name
     return None
 
 
-def platform(on=["Android"]):
+def on_platform(platforms):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            pf = get_platform()
+            pf = device_platform()
             if pf is None:
                 raise RuntimeError("Device not initialized yet.")
-            if pf not in on:
-                raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, on))
+            if pf not in platforms:
+                raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, platforms))
             r = f(*args, **kwargs)
             return r
         return wrapper
     return decorator
 
 
-def delay_after_operation(secs):
-    delay = secs or ST.OPDELAY
-    time.sleep(delay)
+def delay_after_operation():
+    time.sleep(ST.OPDELAY)
+

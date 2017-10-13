@@ -7,9 +7,9 @@ PWD = os.path.dirname(__file__)
 PKG = "org.cocos2d.blackjack"
 APK = os.path.join(PWD, "blackjack-release-signed.apk")
 install(APK)
-amstop(PKG)
+stop_app(PKG)
 wake()
-amstart(PKG)
+start_app(PKG)
 sleep(2)
 touch(MoaPic(r"tpl1499240443959.png", record_pos=(0.22, -0.165), resolution=(2560, 1536)))
 
@@ -20,4 +20,4 @@ p = wait(MoaPic(r"tpl1499240490986.png", record_pos=(-0.443, -0.273), resolution
 
 touch(p)
 sleep(2)
-amstop(PKG)
+stop_app(PKG)

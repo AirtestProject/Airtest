@@ -13,7 +13,6 @@ from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
-from airtest.core.android.performance import Performance
 from airtest.core.utils.compat import apkparser
 LOGGING = get_logger('android')
 
@@ -76,9 +75,6 @@ class Android(Device):
             self.display_info["rotation"] = ori * 90
 
         self.rw.reg_callback(refresh_ori)
-
-    def init_performance(self, pkg_name, pfm_log="pfm.txt"):
-        self.performance = Performance(self.adb, pkg_name, log_file=pfm_log)
 
     def list_app(self, third_only=False):
         """
