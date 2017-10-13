@@ -15,7 +15,7 @@ LOGGING = get_logger('android')
 
 
 class ADB(object):
-    """adb client for one serialno"""
+    """adb client"""
 
     status_device = "device"
     status_offline = "offline"
@@ -280,10 +280,8 @@ class ADB(object):
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
 
-    def install(self, filepath, overinstall=False):
-        """adb install, if overinstall then adb install -r xxx"""
-        if not os.path.isfile(filepath):
-            raise RuntimeError("%s is not valid file" % filepath)
+    def install(self, filepath, replace=False):
+        """adb install, if replace then adb install -r xxx"""
 
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
@@ -293,7 +291,7 @@ class ADB(object):
         out = self.cmd(["push", filepath, device_dir])
         print(out)
 
-        if not overinstall:
+        if not replace:
             self.shell(['pm', 'install', device_path])
         else:
             self.shell(['pm', 'install', '-r', device_path])
@@ -522,5 +520,110 @@ class ADB(object):
             return int(m.group(1))
 
         # We couldn't obtain the orientation
-        # return -1
+        # Guess by height > width
         return 0 if self.display_info["height"] > self.display_info['width'] else 1
+
+
+    def get_top_activity_name_and_pid(self):
+        dat = self.shell('dumpsys activity top')
+        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        m = activityRE.search(dat)
+        if m:
+            return (m.group(1), m.group(2), m.group(3))
+        else:
+            warnings.warn("NO MATCH:" + dat)
+            return None
+
+    def get_top_activity_name(self):
+        tanp = self.get_top_activity_name_and_pid()
+        if tanp:
+            return tanp[0] + '/' + tanp[1]
+        else:
+            return None
+
+    def is_keyboard_shown(self):
+        dim = self.shell('dumpsys input_method')
+        if dim:
+            return "mInputShown=true" in dim
+        return False
+
+    def is_screenon(self):
+        screenOnRE = re.compile('mScreenOnFully=(true|false)')
+        m = screenOnRE.search(self.shell('dumpsys window policy'))
+        if m:
+            return (m.group(1) == 'true')
+        raise MoaError("Couldn't determine screen ON state")
+
+    def is_locked(self):
+        """not work on xiaomi 2s"""
+        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
+        m = lockScreenRE.search(self.shell('dumpsys window policy'))
+        if not m:
+            raise MoaError("Couldn't determine screen lock state")
+        return (m.group(1) == 'true')
+
+    def unlock(self):
+        """not work on many devices"""
+        self.shell('input keyevent MENU')
+        self.shell('input keyevent BACK')
+
+    def get_package_version(self, package):
+        package_info = self.shell(['dumpsys', 'package', package])
+        matcher = re.search(r'versionCode=(\d+)', package_info)
+        if matcher:
+            return int(matcher.group(1))
+        return None
+
+    def list_app(self, third_only=False):
+        """
+        pm list packages: prints all packages, optionally only
+          those whose package name contains the text in FILTER.  Options:
+            -f: see their associated file.
+            -d: filter to only show disabled packages.
+            -e: filter to only show enabled packages.
+            -s: filter to only show system packages.
+            -3: filter to only show third party packages.
+            -i: see the installer for the packages.
+            -u: also include uninstalled packages.
+        """
+        cmd = ["pm", "list", "packages"]
+        if third_only:
+            cmd.append("-3")
+        output = self.shell(cmd)
+        packages = output.splitlines()
+        # remove all empty string; "package:xxx" -> "xxx"
+        packages = [p.split(":")[1] for p in packages if p]
+        return packages
+
+    def path_app(self, package):
+        try:
+            output = self.shell(['pm', 'path', package])
+        except AdbShellError:
+            output = ""
+        if 'package:' not in output:
+            raise MoaError('package not found, output:[%s]' % output)
+        return output.split(":")[1].strip()
+
+    def check_app(self, package):
+        output = self.shell(['dumpsys', 'package', package]).strip()
+        if package not in output:
+            raise MoaError('package "{}" not found'.format(package))
+        return 'package:{}'.format(package)
+
+    def start_app(self, package, activity=None):
+        if not activity:
+            self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+        else:
+            self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
+
+    def stop_app(self, package):
+        self.shell(['am', 'force-stop', package])
+
+    def clear_app(self, package):
+        self.shell(['pm', 'clear', package])
+
+    def uninstall_app_pm(self, package, keepdata=False):
+        cmd = ['pm', 'uninstall', package]
+        if keepdata:
+            cmd.append('-k')
+        self.adb.shell(cmd)

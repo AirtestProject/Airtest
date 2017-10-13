@@ -21,7 +21,7 @@ class Android(Device):
 
     """Android Client"""
 
-    def __init__(self, serialno=None, cap_method="minicap_stream", shell_ime=True, adbhost=None):
+    def __init__(self, serialno=None, adbhost=None, cap_method="minicap_stream", shell_ime=True):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.adb = ADB(self.serialno, server_addr=adbhost)
@@ -34,7 +34,6 @@ class Android(Device):
         self._init_cap(cap_method)
         self._init_touch(True)
         self.shell_ime = shell_ime
-        self.performance = None
 
     def _init_cap(self, cap_method):
         self.cap_method = cap_method
@@ -53,17 +52,10 @@ class Android(Device):
 
     def _init_requirement_apk(self, apk_path, package):
         apk_version = apkparser.version(apk_path)
-        installed_version = self._get_installed_apk_version(package)
+        installed_version = self.adb.get_package_version(package)
         LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
         if not installed_version or apk_version > installed_version:
-            self.install_app(apk_path, package, overinstall=True)
-
-    def _get_installed_apk_version(self, package):
-        package_info = self.shell(['dumpsys', 'package', package])
-        matcher = re.search(r'versionCode=(\d+)', package_info)
-        if matcher:
-            return int(matcher.group(1))
-        return None
+            self.install_app(apk_path, replace=True)
 
     def _init_rw(self):
         self.rw = RotationWatcher(self)
@@ -77,107 +69,25 @@ class Android(Device):
         self.rw.reg_callback(refresh_ori)
 
     def list_app(self, third_only=False):
-        """
-        pm list packages: prints all packages, optionally only
-          those whose package name contains the text in FILTER.  Options:
-            -f: see their associated file.
-            -d: filter to only show disbled packages.
-            -e: filter to only show enabled packages.
-            -s: filter to only show system packages.
-            -3: filter to only show third party packages.
-            -i: see the installer for the packages.
-            -u: also include uninstalled packages.
-        """
-        cmd = ["pm", "list", "packages"]
-        if third_only:
-            cmd.append("-3")
-        output = self.adb.shell(cmd)
-        packages = output.splitlines()
-        # remove all empty string; "package:xxx" -> "xxx"
-        packages = [p.split(":")[1] for p in packages if p]
-        return packages
+        return self.adb.list_app(third_only)
 
     def path_app(self, package):
-        try:
-            output = self.adb.shell(['pm', 'path', package])
-        except AdbShellError:
-            output = ""
-        if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]' % output)
-        return output.split(":")[1].strip()
+        return self.adb.path_app(package)
 
     def check_app(self, package):
-        if '.' not in package:
-            raise MoaError('invalid package "{}"'.format(package))
-        output = self.shell(['dumpsys', 'package', package]).strip()
-        if package not in output:
-            raise MoaError('package "{}" not found'.format(package))
-        return 'package:{}'.format(package)
+        return self.adb.check_app(package)
 
     def start_app(self, package, activity=None):
-        self.check_app(package)
-        if not activity:
-            self.adb.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
-        else:
-            self.adb.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
+        return self.adb.start_app(package, activity)
 
     def stop_app(self, package):
-        self.check_app(package)
-        self.adb.shell(['am', 'force-stop', package])
+        return self.adb.stop_app(package)
 
     def clear_app(self, package):
-        self.check_app(package)
-        self.adb.shell(['pm', 'clear', package])
+        return self.adb.clear_app(package)
 
-    def uninstall_app_pm(self, package, keepdata=False):
-        cmd = ['pm', 'uninstall', package]
-        if keepdata:
-            cmd.append('-k')
-        self.adb.shell(cmd)
-
-    def enable_accessibility_service(self):
-        pass
-
-    def disable_accessibility_service(self):
-        pass
-
-    def install_app(self, filepath, package=None, **kwargs):
-        """
-        安装应用
-        overinstall: 不管应用在不在，直接覆盖安装；
-        reinstall: 如果在则先卸载再安装，不在则直接安装。
-        """
-        package = package or apkparser.packagename(filepath)
-        reinstall = kwargs.get('reinstall', False)
-        overinstall = kwargs.get('overinstall', False)
-        check = kwargs.get('check', True)
-
-        # 先解析apk，看是否存在已安装的app
-        packages = self.list_app()
-        if package in packages and not overinstall:
-            # 如果reinstall=True，先卸载掉之前的apk，防止签名不一致导致的无法覆盖
-            if reinstall:
-                LOGGING.info("package:%s already exists, uninstall first", package)
-                self.uninstall_app(package)
-            # 否则直接return True
-            else:
-                LOGGING.info("package:%s already exists, skip reinstall", package)
-                return True
-
-        # 唤醒设备
-        self.wake()
-
-        # rm all apks in /data/local/tmp to get enouph space
-        self.adb.shell("rm -f /data/local/tmp/*.apk")
-        if not overinstall:
-            self.adb.install(filepath)
-        else:
-            self.adb.install(filepath, overinstall=overinstall)
-        if check:
-            self.check_app(package)
-
-        # rm all apks in /data/local/tmp to free space
-        self.adb.shell("rm -f /data/local/tmp/*.apk")
+    def install_app(self, filepath, replace=False):
+        self.adb.install(filepath, replace=replace)
 
     def uninstall_app(self, package):
         return self.adb.uninstall(package)
@@ -214,22 +124,11 @@ class Android(Device):
         return self.adb.shell(*args, **kwargs)
 
     def keyevent(self, keyname):
-        keyname = keyname.upper()
-        self.adb.shell(["input", "keyevent", keyname])
+        self.adb.shell(["input", "keyevent", keyname.upper()])
 
     def wake(self):
         self.home()
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
-
-        # todo:
-        # 1. 还需要按power键吗？
-        # 2. 如果非锁屏状态，上面步骤可以省略
-
-        # 1. release apk里面有，不需要按电源键了，
-        # 2. is_screenon有些设备不起效
-        # if not self.is_screenon():
-        #     self.keyevent("POWER")
-
         self.keyevent("HOME")
 
     def home(self):
@@ -239,7 +138,6 @@ class Android(Device):
         if self.shell_ime:
             # shell_ime用于输入中文
             if not hasattr(self, "ime"):
-
                 # 开启shell_ime
                 self.toggle_shell_ime()
             self.ime.text(text)
@@ -327,47 +225,28 @@ class Android(Device):
         raise MoaError("start_recording first")
 
     def get_top_activity_name_and_pid(self):
-        dat = self.adb.shell('dumpsys activity top')
-        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(dat)
-        if m:
-            return (m.group(1), m.group(2), m.group(3))
-        else:
-            warnings.warn("NO MATCH:" + dat)
-            return None
+        """not working on all devices"""
+        return self.get_top_activity_name_and_pid()
 
     def get_top_activity_name(self):
-        tanp = self.get_top_activity_name_and_pid()
-        if tanp:
-            return tanp[0] + '/' + tanp[1]
-        else:
-            return None
+        """not working on all devices"""
+        return self.adb.get_top_activity_name()
 
     def is_keyboard_shown(self):
-        dim = self.adb.shell('dumpsys input_method')
-        if dim:
-            return "mInputShown=true" in dim
-        return False
+        """not working on all devices"""
+        return self.adb.is_keyboard_shown()
 
     def is_screenon(self):
-        screenOnRE = re.compile('mScreenOnFully=(true|false)')
-        m = screenOnRE.search(self.adb.shell('dumpsys window policy'))
-        if m:
-            return (m.group(1) == 'true')
-        raise MoaError("Couldn't determine screen ON state")
+        """not working on all devices"""
+        return self.adb.is_screenon()
 
     def is_locked(self):
-        """not work on xiaomi 2s"""
-        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
-        m = lockScreenRE.search(self.adb.shell('dumpsys window policy'))
-        if not m:
-            raise MoaError("Couldn't determine screen lock state")
-        return (m.group(1) == 'true')
+        """not working on all devices"""
+        return self.adb.is_locked()
 
     def unlock(self):
-        """not work on many devices"""
-        self.adb.shell('input keyevent MENU')
-        self.adb.shell('input keyevent BACK')
+        """not working on many devices"""
+        return self.adb.unlock()
 
     @property
     def display_info(self):
@@ -380,6 +259,7 @@ class Android(Device):
         return self.adb.get_display_info()
 
     def getCurrentScreenResolution(self):
+        # 注意黑边问题，需要用安卓接口获取区分两种分辨率
         w, h = self.display_info["width"], self.display_info["height"]
         if self.display_info["orientation"] in [1, 3]:
             w, h = h, w

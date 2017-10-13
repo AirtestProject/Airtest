@@ -82,8 +82,8 @@ def clear_app(package):
 
 @logwrap
 @on_platform(["Android", "IOS"])
-def install(filepath, package=None):
-    return G.DEVICE.install_app(filepath, package)
+def install(filepath):
+    return G.DEVICE.install_app(filepath)
 
 
 @logwrap

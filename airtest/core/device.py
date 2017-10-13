@@ -27,10 +27,10 @@ class Device(with_metaclass(MetaDevice, object)):
     def touch(self, pos, **kwargs):
         raise NotImplementedError
 
-    def swipe(self):
+    def swipe(self, p1, p2, **kwargs):
         raise NotImplementedError
 
-    def keyevent(self, key):
+    def keyevent(self, key, **kwargs):
         raise NotImplementedError
 
     def text(self, text, enter=True):
@@ -48,7 +48,7 @@ class Device(with_metaclass(MetaDevice, object)):
     def list_app(self, third_only=True):
         raise NotImplementedError
 
-    def install_app(self, uri, package, **kwargs):
+    def install_app(self, uri, **kwargs):
         raise NotImplementedError
 
     def uninstall_app(self, package):

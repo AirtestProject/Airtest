@@ -73,9 +73,6 @@ class AirtestCase(unittest.TestCase):
                 cls.scope[k] = v
 
     def setUp(self):
-        for dev in G.DEVICE_LIST:
-            if dev.performance:
-                dev.performance.start()
         if self.pre:
             log("pre_script", {"script": self.pre})
             self.exec_other_script(self.pre)
@@ -84,9 +81,6 @@ class AirtestCase(unittest.TestCase):
         if self.post:
             log("post_script", {"script": self.pre})
             self.exec_other_script(self.post)
-        for dev in G.DEVICE_LIST:
-            if dev.performance:
-                dev.performance.stop()
 
     def runTest(self):
         scriptpath = self.script
@@ -118,7 +112,6 @@ class AirtestCase(unittest.TestCase):
 
         # find script in SCRIPTHOME
         scriptpath = os.path.join(cls.SCRIPTHOME, scriptpath)
-
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
         sub_dirpath = os.path.join(cls.script, sub_dir)

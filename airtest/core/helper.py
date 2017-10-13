@@ -55,8 +55,8 @@ class MoaPic(object):
         self.record_pos = record_pos
         self.resolution = resolution
         self.new_snapshot = new_snapshot
-        self.find_inside = find_inside or ST.FIND_INSIDE
-        self.find_outside = find_outside or ST.FIND_OUTSIDE
+        self.find_inside = find_inside
+        self.find_outside = find_outside
         self.whole_screen = whole_screen
         self.ignore = ignore
         self.focus = focus
@@ -101,7 +101,7 @@ class MoaScreen(object):
             screen, img_src, offset, src_resolution = None, None, None, []
         else:
             # 截屏分辨率(注意: 可能游戏分辨率与设备分辨率会有不同.)
-            src_resolution = ST.SRC_RESOLUTION or G.DEVICE.getCurrentScreenResolution()
+            src_resolution = G.DEVICE.getCurrentScreenResolution()
             # 第二步: 封装截屏
             if find_inside:
                 # 如果有find_inside，就在find_inside内进行识别
