@@ -4,7 +4,7 @@
 """
 import os
 import time
-import aircv
+from airtest import aircv
 from airtest.core.error import MoaNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot

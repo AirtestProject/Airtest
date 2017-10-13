@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import re
 import warnings
-import aircv
+from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.error import MoaError, AdbShellError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_logger
