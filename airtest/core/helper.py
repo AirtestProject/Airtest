@@ -6,10 +6,12 @@ import aircv
 from airtest.core import device
 from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
-from airtest.core.utils.compat import PY3 
+from airtest.core.utils.compat import PY3
+
 
 class G(object):
     """globals variables"""
+    BASEDIR = None
     LOGGER = MoaLogger(None)
     LOGGING = get_logger("main")
     SCREEN = None
@@ -39,7 +41,7 @@ class MoaPic(object):
 
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=[], new_snapshot=True, find_inside=None, find_outside=None, whole_screen=False, ignore=None, focus=None, rgb=False, find_all=False):
         self.filename = filename
-        self.filepath = filename if os.path.isabs(filename) else os.path.join(ST.BASE_DIR, filename)
+        self.filepath = os.path.join(G.BASEDIR, filename)
         self.threshold = threshold or ST.THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
@@ -47,7 +49,7 @@ class MoaPic(object):
         self.new_snapshot = new_snapshot
         self.find_inside = find_inside or ST.FIND_INSIDE
         self.find_outside = find_outside or ST.FIND_OUTSIDE
-        self.whole_screen = whole_screen or ST.WHOLE_SCREEN
+        self.whole_screen = whole_screen
         self.ignore = ignore
         self.focus = focus
         self.rgb = rgb
@@ -98,7 +100,7 @@ class MoaScreen(object):
                 img_src, offset = aircv.crop_image(screen, find_inside)
             else:
                 # 如果没有find_inside，就提取预测区域，进行识别
-                radius_x, radius_y = ST.RADIUS_X, ST.RADIUS_Y
+                radius_x, radius_y = 250, 250
                 if op_pos:
                     img_src, offset, log_info = predict_area(screen, op_pos, radius_x, radius_y, src_resolution)
                 else:
@@ -210,10 +212,9 @@ def moapicwrap(f):
         opargs = {}
 
         if not PY3:
-            iterlist=kwargs.iteritems()
+            iterlist = kwargs.iteritems()
         else:
-            iterlist=kwargs.items()
-
+            iterlist = kwargs.items()
 
         for k, v in iterlist:
             if k in ["whole_screen", "find_inside", "find_outside", "ignore", "focus", "threshold", "target_pos", "record_pos", "resolution", "rgb"]:
@@ -247,20 +248,6 @@ def platform(on=["Android"]):
     return decorator
 
 
-def register_device(dev):
-    G.DEVICE = dev
-    G.DEVICE_LIST.append(dev)
-
-
 def delay_after_operation(secs):
     delay = secs or ST.OPDELAY
     time.sleep(delay)
-
-
-def set_default_st(pltf):
-    if pltf == "Windows":
-        ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
-        # set no resize on windows as default
-        ST.RESIZE_METHOD = None
-    elif pltf in ("Android", "IOS"):
-        ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID

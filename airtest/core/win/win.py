@@ -18,10 +18,18 @@ from airtest.core.win.window_mgr import WindowMgr, get_screen_shot, get_resoluti
 
 class Windows(Device):
     """Windows Client"""
-    def __init__(self, handle=None):
+    def __init__(self, handle=None, window_title=None):
         self.winmgr = WindowMgr()
         self.handle = handle
-        self.window_title = None
+        self.window_title = window_title
+        self._set_window_by_title()
+
+    def _set_window_by_title(self):
+        if self.window_title:
+            handles = self.find_window_list(self.window_title)
+            if not handles:
+                raise RuntimeError("no window found with title: '%s'" % self.window_title)
+            self.handle = handles[0]
 
     def shell(self, cmd):
         return subprocess.check_output(cmd, shell=True)

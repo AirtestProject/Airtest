@@ -5,22 +5,13 @@
 import os
 import time
 import aircv
-from airtest.core import android
-from airtest.core.error import MoaError, MoaNotFoundError
+from airtest.core.error import MoaNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import loop_find, device_snapshot
-from airtest.core.helper import G, MoaPic, MoaText, log_in_func, logwrap, moapicwrap, \
-    get_platform, platform, register_device, delay_after_operation, set_default_st
-from airtest.core.device import DEV_TYPE_DICT
+from airtest.core.helper import G, MoaPic, MoaText, logwrap, moapicwrap, \
+    get_platform, platform, delay_after_operation
 from urlparse import urlparse, parse_qsl
-try:
-    from airtest.core import win
-except ImportError as e:
-    win = None
-try:
-    from airtest.core import ios
-except ImportError as e:
-    ios = None
+from airtest.core import Android, IOS, Windows
 
 
 """
@@ -28,52 +19,16 @@ Environment initialization
 """
 
 
-def set_serialno(sn=None, cap_method="minicap_stream", adbhost=None):
-    '''
-    auto set if only one device
-    support filepath match pattern, eg: c123*
-    '''
-    dev = android.Android(sn, cap_method=cap_method, adbhost=adbhost)
-    register_device(dev)
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
-    return sn
+def init_device(dev):
+    """初始化设备，加入全局环境, eg:
+    init_device(Android())
+    """
+    G.DEVICE = dev
+    G.DEVICE_LIST.append(dev)
 
 
-def set_udid(udid):
-    '''
-    auto set if only one device
-    support filepath match patten, eg: c123*
-    '''
-    dev = ios.client.IOS(udid)
-    register_device(dev)
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_ANDROID
-
-
-def set_windows(handle=None, window_title=None):
-    if win is None:
-        raise RuntimeError("win module is not available")
-    window_title = window_title or ST.WINDOW_TITLE
-    dev = win.Windows()
-    if handle:
-        dev.set_handle(int(handle))
-    elif window_title:
-        devs = dev.find_window_list(window_title)
-        if not devs:
-            raise MoaError("no window found with title: '%s'" % window_title)
-        dev.set_handle(devs[0])
-    else:
-        G.LOGGING.info("handle not set, use entire screen")
-    if dev.handle:
-        dev.set_foreground()
-    register_device(dev)
-
-    ST.CVSTRATEGY = ST.CVSTRATEGY or ST.CVSTRATEGY_WINDOWS
-    # # set no resize on windows as default (会导致函数的调用报错！)
-    # ST.RESIZE_METHOD = ST.RESIZE_METHOD
-
-
-def init_device(uri):
-    """用uri连接设备
+def connect_device(uri):
+    """用uri连接设备, eg:
     android://adbhost:adbport/serialno?p1=v1
     """
     d = urlparse(uri)
@@ -85,24 +40,20 @@ def init_device(uri):
     if platform == "android":
         if host:
             params["adbhost"] = host.split(":")
-        set_serialno(uuid, **params)
+        dev = Android(uuid, **params)
     elif platform == "ios":
-        set_udid(uuid, **params)
+        dev = IOS(uuid, **params)
     elif platform == "windows":
-        set_windows(uuid, **params)
+        dev = Windows(uuid, **params)
+        if dev.handle:
+            dev.set_foreground()
     else:
         raise RuntimeError("unknown platform %s" % platform)
+    init_device(dev)
 
 
-def set_device(pltf, uid=None, *args, **kwargs):
-    """用这个接口替代set_android/set_uuid/set_windows"""
-    try:
-        cls = DEV_TYPE_DICT[pltf]
-    except KeyError:
-        raise MoaError("platform should be in %s" % DEV_TYPE_DICT.keys())
-    device = cls(uid, *args, **kwargs)
-    register_device(device)
-    set_default_st(pltf)
+def device():
+    return G.DEVICE
 
 
 @platform(on=["Android", "Windows", "IOS"])
@@ -111,7 +62,7 @@ def set_current(index):
         G.DEVICE = G.DEVICE_LIST[index]
     except IndexError:
         raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
-    if win and get_platform() == "Windows":
+    if Windows and get_platform() == "Windows":
         G.DEVICE.set_foreground()
 
 
@@ -429,7 +380,3 @@ def assert_equal(first, second, msg=""):
 def assert_not_equal(first, second, msg=""):
     if first == second:
         raise AssertionError("%s and %s are equal" % (first, second))
-
-
-if __name__ == '__main__':
-    set_windows()
