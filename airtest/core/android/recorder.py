@@ -48,10 +48,11 @@ class Recorder(object):
                 self.recording_proc = p
                 self.recording_file = output
                 return True
+
         raise RuntimeError("recording setup error")
 
     def stop_recording(self, output="screen.mp4", is_interrupted=False):
-        pkg_path = self.path_app(YOSEMITE_PACKAGE)
+        pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
         p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
         p.wait()
         self.recording_proc = None

@@ -3,11 +3,8 @@ import os
 import time
 import functools
 import aircv
-from airtest.core import device
-from airtest.core.utils import Logwrap, AirtestLogger, TargetPos, is_str, get_logger, predict_area
+from airtest.core.utils import Logwrap, AirtestLogger, TargetPos, get_logger, predict_area
 from airtest.core.settings import Settings as ST
-from airtest.core.utils.compat import PY3
-from airtest.core.device import MetaDevice
 
 
 class G(object):
@@ -192,10 +189,21 @@ def logwrap(f):
 
 
 def device_platform():
-    for name, cls in MetaDevice.REPO.items():
-        if G.DEVICE.__class__ == cls:
-            return name
-    return None
+    return G.DEVICE.__class__.__name__
+
+
+def import_device_cls(platform):
+    """lazy import device class"""
+    platform = platform.lower()
+    if platform == "android":
+        from android import Android as cls
+    elif platform == "windows":
+        from win import Windows as cls
+    elif platform == "ios":
+        from ios import IOS as cls
+    else:
+        raise RuntimeError("Unknown platform: %s" % platform)
+    return cls
 
 
 def on_platform(platforms):
@@ -215,4 +223,3 @@ def on_platform(platforms):
 
 def delay_after_operation():
     time.sleep(ST.OPDELAY)
-

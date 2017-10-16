@@ -152,7 +152,7 @@ class Android(Device):
 
     def get_top_activity_name_and_pid(self):
         """not working on all devices"""
-        return self.get_top_activity_name_and_pid()
+        return self.adb.get_top_activity_name_and_pid()
 
     def get_top_activity_name(self):
         """not working on all devices"""
@@ -188,6 +188,12 @@ class Android(Device):
         if self.display_info["orientation"] in [1, 3]:
             w, h = h, w
         return w, h
+
+    def start_recording(self, *args, **kwargs):
+        self.recorder.start_recording(*args, **kwargs)
+
+    def stop_recording(self, *args, **kwargs):
+        self.recorder.stop_recording(*args, **kwargs)
 
     def _register_rotation_watcher(self):
         """auto refresh android.display when rotation changed"""

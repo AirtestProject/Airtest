@@ -5,15 +5,14 @@
 import os
 import time
 from urlparse import urlparse, parse_qsl
-from airtest import aircv
-from airtest.core.cv import loop_find, device_snapshot
+from airtest.core.cv import loop_find
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, Target, logwrap, device_platform, on_platform, delay_after_operation
+from airtest.core.helper import G, Target, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
-from airtest.core.device import MetaDevice
+
 
 """
-Device setup
+Device Setup
 """
 
 
@@ -30,13 +29,10 @@ def connect_device(uri):
     if host:
         params["host"] = host.split(":")
 
-    for name, cls in MetaDevice.REPO.items():
-        if platform == name.lower():
-            dev = cls(uuid, **params)
-            G.add_device(dev)
-            return
-
-    raise RuntimeError("unknown platform %s" % platform)
+    cls = import_device_cls(platform)
+    dev = cls(uuid, **params)
+    G.add_device(dev)
+    return dev
 
 
 def device():
@@ -52,7 +48,7 @@ def set_current(index):
 
 
 """
-Device operation
+Device Operations
 """
 
 
@@ -219,7 +215,7 @@ def find_all(v, timeout=0):
 
 
 """
-Assert functions
+Assertions
 """
 
 

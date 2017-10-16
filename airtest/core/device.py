@@ -4,11 +4,11 @@ from six import with_metaclass
 
 class MetaDevice(type):
 
-    REPO = {}
+    REGISTRY = {}
 
     def __new__(meta, name, bases, class_dict):
         cls = type.__new__(meta, name, bases, class_dict)
-        meta.REPO[name] = cls
+        meta.REGISTRY[name] = cls
         return cls
 
 
@@ -18,16 +18,16 @@ class Device(with_metaclass(MetaDevice, object)):
     def __init__(self):
         super(Device, self).__init__()
 
-    def shell(self):
+    def shell(self, *args, **kwargs):
         raise NotImplementedError
 
     def snapshot(self, *args, **kwargs):
         raise NotImplementedError
 
-    def touch(self, pos, **kwargs):
+    def touch(self, target, **kwargs):
         raise NotImplementedError
 
-    def swipe(self, p1, p2, **kwargs):
+    def swipe(self, t1, t2, **kwargs):
         raise NotImplementedError
 
     def keyevent(self, key, **kwargs):
@@ -45,7 +45,7 @@ class Device(with_metaclass(MetaDevice, object)):
     def clear_app(self, package):
         raise NotImplementedError
 
-    def list_app(self, third_only=True):
+    def list_app(self, **kwargs):
         raise NotImplementedError
 
     def install_app(self, uri, **kwargs):
