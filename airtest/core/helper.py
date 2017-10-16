@@ -4,7 +4,7 @@ import time
 import functools
 import aircv
 from airtest.core import device
-from airtest.core.utils import Logwrap, MoaLogger, TargetPos, is_str, get_logger, predict_area
+from airtest.core.utils import Logwrap, AirtestLogger, TargetPos, is_str, get_logger, predict_area
 from airtest.core.settings import Settings as ST
 from airtest.core.utils.compat import PY3
 from airtest.core.device import MetaDevice
@@ -13,7 +13,7 @@ from airtest.core.device import MetaDevice
 class G(object):
     """globals variables"""
     BASEDIR = None
-    LOGGER = MoaLogger(None)
+    LOGGER = AirtestLogger(None)
     LOGGING = get_logger("main")
     SCREEN = None
     DEVICE = None
@@ -30,7 +30,7 @@ class G(object):
         cls.DEVICE_LIST.append(dev)
 
 
-class MoaPic(object):
+class Target(object):
     """
     picture as touch/swipe/wait/exists target and extra info for cv match
     filename: pic filename
@@ -64,14 +64,14 @@ class MoaPic(object):
         self.find_all = find_all
 
     def __repr__(self):
-        return "MoaPic(%s)" % self.filepath
+        return "Target(%s)" % self.filepath
 
     def get_search_img(self):
         """获取搜索图像(cv2格式)."""
         return aircv.imread(self.filepath)
 
 
-class MoaScreen(object):
+class Screen(object):
     """保存截屏及截屏相关的参数."""
 
     def __init__(self, screen=None, img_src=None, offset=None, wnd_pos=None, src_resolution=None):

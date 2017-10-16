@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger
 from airtest.core.android.adb import ADB
 import struct
@@ -23,7 +23,7 @@ class Javacap(object):
     def get_path(self):
         output = self.adb.shell(['pm', 'path', self.APP_PATH])
         if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]' % output)
+            raise AirtestError('package not found, output:[%s]' % output)
         return output.split(":")[1].strip()
 
     def _setup(self):

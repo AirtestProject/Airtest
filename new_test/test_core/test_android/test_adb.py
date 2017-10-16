@@ -3,7 +3,7 @@ import sys
 sys.path.append("..\\..\\..\\")
 import os
 
-from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError, AdbShellError
+from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, AirtestError, AdbShellError
 from airtest.core.android.android import apkparser
 
 from airtest.core.utils.compat import str_class
@@ -208,7 +208,7 @@ class TestADB(unittest.TestCase):
 
         # TODO try to mock sdk_version:
         '''
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             with mock.patch.object(self.adb,'sdk_version', new=PropertyMock(return_value=15)):
                 self.adb.swipe((0, 0), (10, 10))
 

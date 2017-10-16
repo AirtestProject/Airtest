@@ -7,10 +7,10 @@ import functools
 import traceback
 
 
-class MoaLogger(object):
+class AirtestLogger(object):
     """logger """
     def __init__(self, logfile, debug=False):
-        super(MoaLogger, self).__init__()
+        super(AirtestLogger, self).__init__()
         self.logfile = None
         self.logfd = None
         self.debug = debug
@@ -68,7 +68,7 @@ def Logwrap(f, logger):
         LOGGER.running_stack.append(fndata)
         try:
             res = f(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             data = {"traceback": traceback.format_exc(), "time_used": time.time()-start, "error_str": str(e)}
             fndata.update(data)
             fndata.update(LOGGER.extra_log)

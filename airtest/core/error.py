@@ -12,24 +12,24 @@ class BaseError(Exception):
         return repr(self.value)
 
 
-class MoaError(BaseError):
+class AirtestError(BaseError):
     """
-        This is Moa Error
+        This is Airtest Error
     """
     pass
 
 
-class MoaNotFoundError(MoaError):
+class TargetNotFoundError(AirtestError):
     """
-        This is MoaNotFoundError Error
+        This is TargetNotFoundError Error
         When something is not found
     """
     pass
 
 
-class MoaScriptParamError(MoaError):
+class ScriptParamError(AirtestError):
     """
-        This is MoaScriptParamError Error
+        This is ScriptParamError Error
         When something goes wrong
     """
     pass

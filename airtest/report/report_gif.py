@@ -62,13 +62,3 @@ def gen_gif(imgdir, steps, output="log.gif", size=0.3):
     # 注意Pillow版本最好大于3.x，2.x版本的可能不支持直接导出成gif
     first_im = images[0]
     first_im.save(output, save_all=True, append_images=images, duration=1200, loop=0)
-
-
-def main():
-    path = sys.argv[1].decode(sys.getfilesystemencoding())
-    steps = MoaLogDisplay(path + "/log.txt").analyse()
-    gen_gif(path + "/img_record", steps)
-
-
-if __name__ == '__main__':
-    print ("warning! deprecated! use 'report_one.py --gif' instead")

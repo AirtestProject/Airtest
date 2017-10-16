@@ -28,14 +28,14 @@ def get_adb_path():
     system = platform.system()
     base_path = os.path.dirname(os.path.realpath(__file__))
     base_path = os.path.join(base_path, "..", "android", "adb")
-    moa_adb_path = {
+    builtin_adb_path = {
         "Windows": os.path.join("windows", "adb.exe"),
         "Darwin": os.path.join("mac", "adb"),
         "Linux": os.path.join("linux", "adb")
     }
-    moa_adb = os.path.join(base_path, moa_adb_path[system])
+    adb_path = os.path.join(base_path, builtin_adb_path[system])
     # overwrite uiautomator adb
     if "ANDROID_HOME" in os.environ:
         del os.environ["ANDROID_HOME"]
-    os.environ["PATH"] = os.path.dirname(moa_adb) + os.pathsep + os.environ["PATH"]
-    return moa_adb
+    os.environ["PATH"] = os.path.dirname(adb_path) + os.pathsep + os.environ["PATH"]
+    return adb_path

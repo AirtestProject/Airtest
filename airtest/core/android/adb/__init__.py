@@ -8,7 +8,7 @@ import time
 import sys
 import os
 import re
-from airtest.core.error import MoaError, AdbError, AdbShellError, DeviceConnectionError
+from airtest.core.error import AirtestError, AdbError, AdbShellError, DeviceConnectionError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, retries, split_cmd, get_logger, get_std_encoding
 from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH
 LOGGING = get_logger('android')
@@ -152,7 +152,7 @@ class ADB(object):
     def wait_for_device(self, timeout=5):
         """
         adb wait-for-device
-        if timeout, raise MoaError
+        if timeout, raise AirtestError
         """
         proc = self.start_cmd("wait-for-device")
         timer = threading.Timer(timeout, proc.kill)
@@ -321,7 +321,7 @@ class ADB(object):
 
         version = self.sdk_version
         if version <= 15:
-            raise MoaError('swipe: API <= 15 not supported (version=%d)' % version)
+            raise AirtestError('swipe: API <= 15 not supported (version=%d)' % version)
         elif version <= 17:
             self.shell('input swipe %d %d %d %d' % (x0, y0, x1, y1))
         else:
@@ -552,14 +552,14 @@ class ADB(object):
         m = screenOnRE.search(self.shell('dumpsys window policy'))
         if m:
             return (m.group(1) == 'true')
-        raise MoaError("Couldn't determine screen ON state")
+        raise AirtestError("Couldn't determine screen ON state")
 
     def is_locked(self):
         """not work on xiaomi 2s"""
         lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
         m = lockScreenRE.search(self.shell('dumpsys window policy'))
         if not m:
-            raise MoaError("Couldn't determine screen lock state")
+            raise AirtestError("Couldn't determine screen lock state")
         return (m.group(1) == 'true')
 
     def unlock(self):
@@ -601,13 +601,13 @@ class ADB(object):
         except AdbShellError:
             output = ""
         if 'package:' not in output:
-            raise MoaError('package not found, output:[%s]' % output)
+            raise AirtestError('package not found, output:[%s]' % output)
         return output.split(":")[1].strip()
 
     def check_app(self, package):
         output = self.shell(['dumpsys', 'package', package]).strip()
         if package not in output:
-            raise MoaError('package "{}" not found'.format(package))
+            raise AirtestError('package "{}" not found'.format(package))
         return 'package:{}'.format(package)
 
     def start_app(self, package, activity=None):

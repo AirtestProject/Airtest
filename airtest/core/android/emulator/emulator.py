@@ -13,7 +13,7 @@ class Emulator(Android):
     """ android emulator
     注意init第一个参数是模拟器的名字
     """
-    _props_tmp = "/data/local/tmp/moa_props.tmp"
+    _props_tmp = "/data/local/tmp/airtest_props.tmp"
 
     def __init__(self, emulator_name='bluestacks', serialno=None, addr=DEFAULT_ADB_SERVER, init_display=True, props=None, minicap=True, \
                  minicap_stream=False, minitouch=True, init_ime=False):

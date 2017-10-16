@@ -14,7 +14,7 @@ else:
 
 import aircv
 from airtest.core.device import Device
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 from airtest.core.utils.logger import get_logger
 
 
@@ -123,13 +123,13 @@ class IOS(Device):
 
     def start_app(self, package, activity=None):
         """
-        Launch app by bundleId. A MoaError will raise if given bundleId not exists.
+        Launch app by bundleId. A AirtestError will raise if given bundleId not exists.
         """
         current_package = self.session.bundle_id
         logger.info("current app(bundleId) is {}, will launch {}".format(current_package, package))
         if current_package != package:
             if package not in self.list_app():
-                raise MoaError('Fail to start app({}) because of not installed.'.format(package))
+                raise AirtestError('Fail to start app({}) because of not installed.'.format(package))
             self.driver.session(package)
             self._try_to_finish_alert('accept')
 
@@ -176,7 +176,7 @@ class IOS(Device):
             if purchase_button_text == u'下载':
                 purchase_button.tap()
             else:
-                raise MoaError("{} are not purchased from app store. "
+                raise AirtestError("{} are not purchased from app store. "
                                "please purchase and trust the publisher first.".format(uri))
         self._wait_until_app_installed(package)
 
@@ -185,13 +185,13 @@ class IOS(Device):
         if package in installed_apps:
             r = requests.delete(urljoin(self.addr, urljoin('/api/v1/packages/', package)))
             if r.status_code != 200 or not r.json()['success']:
-                raise MoaError("fail to uninstall with network error. App(bundleId) is {}. status_code={}, text={}"
-                               .format(package, r.status_code, r.text))
+                raise AirtestError("fail to uninstall with network error. App(bundleId) is {}. status_code={}, text={}"
+                                   .format(package, r.status_code, r.text))
             if package not in self.list_app():
                 return True
             else:
-                raise MoaError("fail to uninstall, app still exists. App(bundleId) is {}. status_code={}, text={}"
-                               .format(package, r.status_code, r.text))
+                raise AirtestError("fail to uninstall, app still exists. App(bundleId) is {}. status_code={}, text={}"
+                                   .format(package, r.status_code, r.text))
 
     def getPhysicalDisplayInfo(self):
         raise NotImplementedError
@@ -266,7 +266,7 @@ class IOS(Device):
             else:
                 self._try_to_finish_alert('accept')
                 time.sleep(check_interval)
-        raise MoaError('Fail to install because of timeout. timeout={}'.format(timeout))
+        raise AirtestError('Fail to install because of timeout. timeout={}'.format(timeout))
 
     def get_device_external_ip(self):
         return self.driver.status()['ios']['ip']

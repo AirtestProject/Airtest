@@ -13,8 +13,8 @@ LOGFILE = "log.txt"
 SCREENDIR = "img_record"
 
 
-class MoaLogDisplay(object):
-    """change Moa log to html display """
+class LogToHtml(object):
+    """Convert log to html display """
     scale = 0.5
 
     def __init__(self, script_root="", log_root="", static_root="", author=""):
@@ -137,7 +137,7 @@ class MoaLogDisplay(object):
         server_call没有log
         assert 类似于exist
         """
-        scale = MoaLogDisplay.scale
+        scale = LogToHtml.scale
         self.scale = scale
         step['type'] = step[1]['name']
         
@@ -509,7 +509,7 @@ def main(args):
     # UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
 
     # print(author)
-    rpt = MoaLogDisplay(path, log_root, static_root, author)
+    rpt = LogToHtml(path, log_root, static_root, author)
 
     # gen gif
     if args.snapshot:
@@ -537,6 +537,7 @@ def main(args):
         else:
             record = []
         html = rpt.render(tpl, record_name=record)
+        print(outfile)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
     """

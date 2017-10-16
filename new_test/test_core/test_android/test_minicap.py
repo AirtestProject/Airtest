@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..\\..\\..\\")
 
-from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError
+from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, AirtestError
 from airtest.core.android.android import Minicap
 import unittest
 import subprocess

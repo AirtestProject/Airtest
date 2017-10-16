@@ -13,7 +13,7 @@ from mock import patch, Mock
 import win32gui
 import numpy
 import time
-from airtest.core.error import MoaError, AdbError, AdbShellError
+from airtest.core.error import AirtestError, AdbError, AdbShellError
 
 TEST_APK = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Rabbit.apk')
 

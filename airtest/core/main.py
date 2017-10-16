@@ -7,8 +7,8 @@ import time
 from urlparse import urlparse, parse_qsl
 from airtest import aircv
 from airtest.core.cv import loop_find, device_snapshot
-from airtest.core.error import MoaNotFoundError
-from airtest.core.helper import G, MoaPic, logwrap, device_platform, on_platform, delay_after_operation
+from airtest.core.error import TargetNotFoundError
+from airtest.core.helper import G, Target, logwrap, device_platform, on_platform, delay_after_operation
 from airtest.core.settings import Settings as ST
 from airtest.core.device import MetaDevice
 
@@ -118,10 +118,10 @@ def home():
 @on_platform(["Android", "Windows", "IOS"])
 def touch(v, timeout=0, **kwargs):
     timeout = timeout or ST.FIND_TIMEOUT
-    if isinstance(v, MoaPic):
+    if isinstance(v, Target):
         try:
             pos = loop_find(v, timeout=timeout)
-        except MoaNotFoundError:
+        except TargetNotFoundError:
             raise
     else:
         pos = v
@@ -137,13 +137,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
     """
-    if isinstance(v1, MoaPic):
+    if isinstance(v1, Target):
         pos1 = loop_find(v1)
     else:
         pos1 = v1
 
     if v2:
-        if isinstance(v2, MoaPic):
+        if isinstance(v2, Target):
             v2.new_snapshot = False
             pos2 = loop_find(v2)
         else:
@@ -205,7 +205,7 @@ def exists(v, timeout=0):
     try:
         pos = loop_find(v, timeout=timeout)
         return pos
-    except MoaNotFoundError:
+    except TargetNotFoundError:
         return False
 
 
@@ -214,7 +214,7 @@ def find_all(v, timeout=0):
     timeout = timeout or ST.FIND_TIMEOUT_TMP
     try:
         return loop_find(v, timeout=timeout, find_all=True)
-    except MoaNotFoundError:
+    except TargetNotFoundError:
         return []
 
 
@@ -229,7 +229,7 @@ def assert_exists(v, msg="", timeout=0):
     try:
         pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
         return pos
-    except MoaNotFoundError:
+    except TargetNotFoundError:
         raise AssertionError("%s does not exist in screen" % v)
 
 
@@ -239,7 +239,7 @@ def assert_not_exists(v, msg="", timeout=0):
     try:
         pos = loop_find(v, timeout=timeout)
         raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
-    except MoaNotFoundError:
+    except TargetNotFoundError:
         pass
 
 

@@ -15,7 +15,7 @@ from airtest.aircv.sift import find_sift
 from airtest.aircv.utils import check_image_param_input, generate_result
 
 from airtest.core.error import *  # noqa
-from airtest.core.helper import G, MoaPic, MoaScreen, CvPosFix, log_in_func, logwrap, device_platform, on_platform
+from airtest.core.helper import G, Target, Screen, CvPosFix, log_in_func, logwrap, device_platform, on_platform
 from airtest.core.settings import Settings as ST
 from airtest.core.utils import TargetPos, predict_area, cocos_min_strategy
 
@@ -55,7 +55,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
         else:
             screen, filepath = G.RECENT_CAPTURE, G.RECENT_CAPTURE_PATH
         # 求取截屏类:
-        source = MoaScreen.create_by_query(screen, query.find_inside, query.find_outside, query.whole_screen, query.record_pos)
+        source = Screen.create_by_query(screen, query.find_inside, query.find_outside, query.whole_screen, query.record_pos)
         # 调试状态下，为用户展示图像识别时的截屏图片：
         if ST.DEBUG and source.img_src is not None:
             aircv.show(source.img_src)
@@ -77,7 +77,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, interval=0.5, intervalfunc=None, t
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
             aircv.imwrite(filepath, source.screen)
-            raise MoaNotFoundError('Picture %s not found in screen' % query)
+            raise TargetNotFoundError('Picture %s not found in screen' % query)
         else:
             time.sleep(interval)
             continue
@@ -127,11 +127,6 @@ def _cv_match(source, query):
             if method == "tpl":
                 # 普通的模板匹配: (默认pre，其次全屏)
                 G.LOGGING.debug("[method] template match")
-                if ST.PREDICTION:
-                    try:
-                        ret = template_in_predicted_area(source, query)
-                    except aircv.Error:
-                        pass
 
                 # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
                 if not ret and not query.find_inside:

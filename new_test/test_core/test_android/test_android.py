@@ -15,7 +15,7 @@ from airtest.core.android.android import Android, ADB, Minicap, Minitouch, AdbSh
 from airtest.core.android.android import apkparser, XYTransformer
 from airtest.core.utils.compat import str_class
 
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 
 
 from new_test.adbmock import adbmock
@@ -77,7 +77,7 @@ class TestAndroid(unittest.TestCase):
 
 
     def test_path_app_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.path_app('com.netease.this.is.error')
 
 
@@ -86,7 +86,7 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.check_app(package), str_class)
 
     def test_check_app_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.check_app('com.netease.this.is.error')
 
     def test_install_start_stop_uninstall(self):
@@ -201,7 +201,7 @@ class TestAndroid(unittest.TestCase):
                 time.sleep(3)
                 self.android.start_recording(max_time=30)
             except (Exception) as e:
-                self.assertIsInstance(e, MoaError)
+                self.assertIsInstance(e, AirtestError)
             finally:
                 try:
                     self.android.stop_recording()
@@ -210,7 +210,7 @@ class TestAndroid(unittest.TestCase):
                     pass
 
     def test_stop_recording_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.stop_recording()
 
     def test_interrupt_recording(self):

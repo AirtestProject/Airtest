@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import threading
 import traceback
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 from airtest.core.utils import reg_cleanup, get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger('rotation')
@@ -18,7 +18,7 @@ class RotationWatcher(object):
     def _setup(self):
         try:
             apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
-        except MoaError:
+        except AirtestError:
             self.android.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
             apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
         p = self.android.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)

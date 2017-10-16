@@ -15,7 +15,7 @@ else:
 
 import aircv
 from airtest.core.device import Device
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 from airtest.core.utils.logger import get_logger
 
 

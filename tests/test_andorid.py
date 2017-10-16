@@ -2,7 +2,7 @@
 
 
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch
-from airtest.core.error import MoaError
+from airtest.core.error import AirtestError
 import axmlparserpy.apk as apkparser
 import os
 import time
@@ -50,7 +50,7 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.path_app(package), str)
 
     def test_path_app_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.path_app('com.netease.this.is.error')
 
     def test_check_app(self):
@@ -58,7 +58,7 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.check_app(package), str)
 
     def test_check_app_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.check_app('com.netease.this.is.error')
 
     def test_install_start_stop_uninstall(self):
@@ -129,7 +129,7 @@ class TestAndroid(unittest.TestCase):
                 time.sleep(3)
                 self.android.start_recording(max_time=30)
             except Exception, e:
-                self.assertIsInstance(e, MoaError)
+                self.assertIsInstance(e, AirtestError)
             finally:
                 try:
                     self.android.stop_recording()
@@ -138,7 +138,7 @@ class TestAndroid(unittest.TestCase):
                     pass
 
     def test_stop_recording_error(self):
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             self.android.stop_recording()
 
     def test_get_top_activity_name_and_pid(self):

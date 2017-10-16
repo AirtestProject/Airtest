@@ -4,7 +4,7 @@ import re
 import warnings
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.error import MoaError, AdbShellError
+from airtest.core.error import AirtestError, AdbShellError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_logger
 from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE
@@ -178,7 +178,7 @@ class Android(Device):
 
     def start_recording(self, max_time=1800, bit_rate=None, vertical=None):
         if getattr(self, "recording_proc", None):
-            raise MoaError("recording_proc has already started")
+            raise AirtestError("recording_proc has already started")
         pkg_path = self.path_app(YOSEMITE_PACKAGE)
         max_time_param = "-Dduration=%d" % max_time if max_time else ""
         bit_rate_param = "-Dbitrate=%d" % bit_rate if bit_rate else ""
@@ -215,7 +215,7 @@ class Android(Device):
                 self.adb.pull(self.recording_file, output)
                 self.adb.shell("rm %s" % self.recording_file)
                 return
-        raise MoaError("start_recording first")
+        raise AirtestError("start_recording first")
 
     def get_top_activity_name_and_pid(self):
         """not working on all devices"""

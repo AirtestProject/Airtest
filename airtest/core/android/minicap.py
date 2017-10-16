@@ -157,7 +157,7 @@ class Minicap(object):
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
         raw_data = self.adb.cmd(
-            "shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" %
+            "shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
             (real_width, real_height, proj_width, proj_height, real_orientation),
             not_decode=True,
         )

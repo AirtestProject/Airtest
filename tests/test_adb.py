@@ -1,5 +1,5 @@
 # encoding=utf-8
-from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, MoaError
+from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, AirtestError
 import unittest
 import subprocess
 
@@ -66,7 +66,7 @@ class TestADBWithDevice(unittest.TestCase):
     def test_wait_for_device(self):
         self.adb.wait_for_device()
 
-        with self.assertRaises(MoaError):
+        with self.assertRaises(AirtestError):
             ADB("wtf").wait_for_device()
 
     def test_connect(self):
