@@ -281,8 +281,15 @@ class ADB(object):
             self._forward_local_using.remove(local)
 
     def install(self, filepath, replace=False):
-        """adb install, if replace then adb install -r xxx"""
+        if not replace:
+            cmds = ["install", filepath]
+        else:
+            cmds = ["install", "-r", filepath]
+        out = self.cmd(cmds)
+        return out
 
+    def pm_install(self, filepath, replace=False):
+        """adb push & pm install, compatibility is better than adb install"""
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
         # 如果apk名称包含空格，需要用引号括起来

@@ -25,7 +25,7 @@ class Minicap(object):
         self.server_proc = None
         self.projection = projection
         self.adb = adb or ADB(serialno)
-        self.install()
+        # self.install()  # 在init的时候不install，调用的时候才install
         self._display_info = None
         self.current_rotation = None
         self.stream_mode = stream
@@ -96,14 +96,17 @@ class Minicap(object):
 
     def _setup(self, adb_port=None, lazy=False):
         """setup minicap process on device"""
-        # 可能需要改变参数重新setup，所以之前setup过的先关掉
         if self.server_proc:
+            # 可能需要改变参数重新setup，所以之前setup过的先关掉
             LOGGING.debug("****************resetup****************")
             sys.stdout.flush()
             self.server_proc.kill()
             self.nbsp.kill()
             self.server_proc = None
             self.adb.remove_forward("tcp:%s" % self.localport)
+        else:
+            # try install when first setup
+            self.install()
 
         real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
 

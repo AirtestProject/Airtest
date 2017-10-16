@@ -101,7 +101,7 @@ class Screen(object):
             screen, img_src, offset, src_resolution = None, None, None, []
         else:
             # 截屏分辨率(注意: 可能游戏分辨率与设备分辨率会有不同.)
-            src_resolution = G.DEVICE.getCurrentScreenResolution()
+            src_resolution = G.DEVICE.get_current_resolution()
             # 第二步: 封装截屏
             if find_inside:
                 # 如果有find_inside，就在find_inside内进行识别

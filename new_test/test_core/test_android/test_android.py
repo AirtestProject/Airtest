@@ -239,7 +239,7 @@ class TestAndroid(unittest.TestCase):
         self.android.unlock()
 
     def test_getCurrentScreenResolution(self):
-        result=self.android.getCurrentScreenResolution()
+        result=self.android.get_current_resolution()
         self.assertIsInstance(result,tuple)
 
     # TODO: fix reconnect method and run this case

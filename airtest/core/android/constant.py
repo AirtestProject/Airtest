@@ -16,3 +16,20 @@ ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 YOSEMITE_APK = os.path.join(THISPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
+
+
+class CAP_METHOD(object):
+    MINICAP = "MINICAP"
+    MINICAP_STREAM = "MINICAP_STREAM"
+    ADBCAP = "ADBCAP"
+    JAVACAP = "JAVACAP"
+
+
+class TOUCH_METHOD(object):
+    MINITOUCH = "MINITOUCH"
+    ADBTOUCH = "ADBTOUCH"
+
+
+class IME_METHOD(object):
+    ADBIME = "ADBIME"
+    YOSEMITEIME = "YOSEMITEIME"

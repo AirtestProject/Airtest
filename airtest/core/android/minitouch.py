@@ -23,12 +23,12 @@ class Minitouch(object):
         self.adb = adb or ADB(serialno, server_addr=adb_addr)
         self.localport = localport
         self.backend = backend
-        self.install()
         self._is_ready = False
 
     def _get_ready(self):
         if self._is_ready:
             return
+        self.install()
         self.display_info = self.adb.display_info
         self.setup_server()
         if self.backend:

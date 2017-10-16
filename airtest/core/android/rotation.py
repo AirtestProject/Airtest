@@ -9,26 +9,26 @@ LOGGING = get_logger('rotation')
 
 class RotationWatcher(object):
 
-    def __init__(self, android):
-        self.android = android
+    def __init__(self, adb):
+        self.adb = adb
         self.ow_proc = None
         self.ow_callback = []
         self._t = None
 
-    def _setup(self):
-        try:
-            apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
-        except AirtestError:
-            self.android.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
-            apk_path = self.android.path_app(ROTATIONWATCHER_PACKAGE)
-        p = self.android.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
-        if p.poll() is not None:
-            raise RuntimeError("orientationWatcher setup error")
-        return p
-
     def get_ready(self):
         if not self._t:
             self.start()
+
+    def _setup(self):
+        try:
+            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
+        except AirtestError:
+            self.adb.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
+            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
+        p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
+        if p.poll() is not None:
+            raise RuntimeError("orientationWatcher setup error")
+        return p
 
     def start(self):
         self.ow_proc = self._setup()

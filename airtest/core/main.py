@@ -150,7 +150,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
             pos2 = v2
     elif vector:
         if vector[0] <= 1 and vector[1] <= 1:
-            w, h = G.DEVICE.getCurrentScreenResolution()
+            w, h = G.DEVICE.get_current_resolution()
             vector = (int(vector[0] * w), int(vector[1] * h))
         pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
     else:
