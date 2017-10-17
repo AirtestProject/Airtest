@@ -140,15 +140,16 @@ class LogToHtml(object):
         scale = LogToHtml.scale
         self.scale = scale
         step['type'] = step[1]['name']
-        
+
         if step['type'] in self.uiautomator_ignore_type:
             return None
 
         if step['type'] in self.img_type or step['type'] in self.uiautomator_img_type:
             # 一般来说会有截图 没有这层就无法找到截图了
-            st = 3
+            st = 2
             while st in step:
                 if 'screen' in step[st]:
+                    print(self.log_root, step[st]['screen'])
                     step['screenshot'] = os.path.join(self.log_root, step[st]['screen'])
                     break
                 st += 1
@@ -158,6 +159,7 @@ class LogToHtml(object):
             if step['type'] == 'snapshot':
                 # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
                 #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
+                print(self.log_root, step[st]['screen'], 111)
                 step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):

@@ -8,7 +8,7 @@ LOGGING = get_logger('javacap')
 
 class Javacap(object):
 
-    """another screencap class, slower than mincap, but better compatibility"""
+    """another screencap class, slower than minicap, but better compatibility"""
 
     APP_PATH = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"

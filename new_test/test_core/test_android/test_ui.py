@@ -2,11 +2,9 @@
 import sys
 sys.path.append("..\\..\\..\\")
 
-from airtest.core.android.ui import AutomatorWrapper, UiAutomator
+from playground.ui import AutomatorWrapper, UiAutomator
 import unittest
 import subprocess
-import mock
-from mock import patch, Mock
 from new_test.adbmock import adbmock
 
 

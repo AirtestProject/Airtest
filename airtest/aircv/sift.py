@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 
 from .error import *  # noqa
-from .utils import generate_result, check_image_param_input
-from .cal_confidence import cal_ccoeff_confidence
+from .utils import generate_result, check_source_larger_than_search
+from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 # SIFT识别特征点匹配，参数设置:
 FLANN_INDEX_KDTREE = 0
@@ -17,35 +17,18 @@ FILTER_RATIO = 0.59
 ONE_POINT_CONFI = 0.5
 
 
-def mask_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
-    """基于sift查找多个目标区域的方法."""
-    # 求出特征点后，im_source中获得match的那些点进行聚类
-    raise NotImplementedError("mask_sift is in progress!")
-
-
-def find_all_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
-    """基于sift查找多个目标区域的方法."""
-    # 求出特征点后，im_source中获得match的那些点进行聚类
-    raise NotImplementedError("find_all_sift is in progress!")
-
-
 def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
     """基于sift进行图像识别，只筛选出最优区域."""
     # 第一步：校验图像输入
-    try:
-        check_image_param_input(im_source, im_search)
-    except:
-        # import traceback
-        # traceback.print_exc()
-        return None
+    check_source_larger_than_search(im_source, im_search)
 
     # 第二步：获取特征点集并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src
     kp_sch, kp_src, good = _get_key_points(im_source, im_search, good_ratio)
 
     # 第三步：根据匹配点对(good),提取出来识别区域:
     if len(good) == 0:
-        # 匹配点对为0,无法提取识别区域,直接弹出异常：
-        raise NoneGoodError("NoneGoodError: 0 feature points matched in SCH & SRC images!")
+        # 匹配点对为0,无法提取识别区域：
+        return None
     elif len(good) == 1:
         # 匹配点对为1，可信度赋予设定值，并直接返回:
         return _handle_one_good_points(kp_src, good, threshold) if ONE_POINT_CONFI >= threshold else None
@@ -65,11 +48,7 @@ def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_R
             middle_point, pypts, w_h_range = _handle_three_good_points(im_source, im_search, kp_src, kp_sch, good)
     else:
         # 匹配点对 >= 4个，使用单矩阵映射求出目标区域，据此算出可信度：
-        try:
-            middle_point, pypts, w_h_range = _many_good_pts(im_source, im_search, kp_sch, kp_src, good)
-        except Exception as e:
-            print(e)
-            return None
+        middle_point, pypts, w_h_range = _many_good_pts(im_source, im_search, kp_sch, kp_src, good)
 
     # 第四步：根据识别区域，求出结果可信度，并将结果进行返回:
     # 对识别结果进行合理性校验: 小于5个像素的，或者缩放超过5倍的，一律视为不合法直接raise.
@@ -78,12 +57,23 @@ def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_R
     x_min, x_max, y_min, y_max, w, h = w_h_range
     target_img = im_source[y_min:y_max, x_min:x_max]
     resize_img = cv2.resize(target_img, (w, h))
-    confidence = cal_ccoeff_confidence(im_search, resize_img, threshold, rgb=rgb, sift=True)
+    confidence = _cal_sift_confidence(im_search, resize_img, threshold, rgb=rgb)
 
     best_match = generate_result(middle_point, pypts, confidence)
     print("[aircv][sift] threshold=%s, result=%s" % (threshold, best_match))
-
     return best_match if confidence >= threshold else None
+
+
+def mask_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
+    """基于sift查找多个目标区域的方法."""
+    # 求出特征点后，im_source中获得match的那些点进行聚类
+    raise NotImplementedError
+
+
+def find_all_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
+    """基于sift查找多个目标区域的方法."""
+    # 求出特征点后，im_source中获得match的那些点进行聚类
+    raise NotImplementedError
 
 
 def _init_sift():
@@ -274,3 +264,13 @@ def _target_error_check(w_h_range):
     # 如果矩形识别区域的宽和高，与sch_img的宽高差距超过5倍(屏幕像素差不可能有5倍)，认定为识别错误。
     if tar_width < 0.2 * w or tar_width > 5 * w or tar_height < 0.2 * h or tar_height > 5 * h:
         raise SiftResultCheckError("Taget area is 5 times bigger or 0.2 times smaller than sch_img.")
+
+
+def _cal_sift_confidence(im_search, resize_img, threshold, rgb=False):
+    if rgb:
+        confidence = cal_rgb_confidence(im_search, resize_img, threshold)
+    else:
+        confidence = cal_ccoeff_confidence(im_search, resize_img)
+    # sift的confidence要放水
+    confidence = (1 + confidence) / 2
+    return confidence

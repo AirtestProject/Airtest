@@ -14,14 +14,14 @@ class BaseError(Exception):
 
 class AirtestError(BaseError):
     """
-        This is Airtest Error
+        This is Airtest BaseError
     """
     pass
 
 
 class TargetNotFoundError(AirtestError):
     """
-        This is TargetNotFoundError Error
+        This is TargetNotFoundError BaseError
         When something is not found
     """
     pass
@@ -29,7 +29,7 @@ class TargetNotFoundError(AirtestError):
 
 class ScriptParamError(AirtestError):
     """
-        This is ScriptParamError Error
+        This is ScriptParamError BaseError
         When something goes wrong
     """
     pass
@@ -37,7 +37,7 @@ class ScriptParamError(AirtestError):
 
 class AdbError(Exception):
     """
-        This is AdbError Error
+        This is AdbError BaseError
         When ADB have something wrong
     """
     def __init__(self, stdout, stderr):
@@ -65,7 +65,7 @@ class DeviceConnectionError(BaseError):
 
 class ICmdError(Exception):
     """
-        This is ICmdError Error
+        This is ICmdError BaseError
         When ICmd have something wrong
     """    
     def __init__(self, stdout, stderr):
@@ -78,7 +78,7 @@ class ICmdError(Exception):
 
 class MinicapError(BaseError):
     """
-        This is MinicapError Error
+        This is MinicapError BaseError
         When Minicap have something wrong
     """    
     pass
@@ -86,7 +86,7 @@ class MinicapError(BaseError):
 
 class MinitouchError(BaseError):
     """
-        This is MinitouchError Error
+        This is MinitouchError BaseError
         When Minicap have something wrong
     """    
     pass

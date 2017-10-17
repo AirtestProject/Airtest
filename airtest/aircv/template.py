@@ -10,23 +10,16 @@
 
 
 import cv2
-from .utils import generate_result, check_image_param_input, img_mat_rgb_2_gray
-from .cal_confidence import cal_ccoeff_confidence
+from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
+from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 
 def find_template(im_source, im_search, threshold=0.8, rgb=False):
     """函数功能：找到最优结果."""
     # 第一步：校验图像输入
-    try:
-        check_image_param_input(im_source, im_search, check_size_flag=True)
-    except:
-        # import traceback
-        # traceback.print_exc()
-        return None
-
+    check_source_larger_than_search(im_source, im_search)
     # 第二步：计算模板匹配的结果矩阵res
     res = _get_template_result_matrix(im_source, im_search)
-
     # 第三步：依次获取匹配结果
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     h, w = im_search.shape[:2]
@@ -35,21 +28,14 @@ def find_template(im_source, im_search, threshold=0.8, rgb=False):
     # 求取识别位置: 目标中心 + 目标区域:
     middle_point, rectangle = _get_target_rectangle(max_loc, w, h)
     best_match = generate_result(middle_point, rectangle, confidence)
-
     print("[aircv][template] threshold=%s, result=%s" % (threshold, best_match))
-
     return best_match if confidence >= threshold else None
 
 
 def find_all_template(im_source, im_search, threshold=0.8, rgb=False, max_count=10):
     """根据输入图片和参数设置,返回所有的图像识别结果."""
     # 第一步：校验图像输入
-    try:
-        check_image_param_input(im_source, im_search, check_size_flag=True)
-    except:
-        # import traceback
-        # traceback.print_exc()
-        return None
+    check_source_larger_than_search(im_source, im_search)
 
     # 第二步：计算模板匹配的结果矩阵res
     res = _get_template_result_matrix(im_source, im_search)
@@ -81,16 +67,13 @@ def find_all_template(im_source, im_search, threshold=0.8, rgb=False, max_count=
 
 def _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, threshold, rgb):
     """根据结果矩阵求出confidence."""
-    # 注意
     # 求取可信度:
     if rgb:
         # 如果有颜色校验,对目标区域进行BGR三通道校验:
         img_crop = im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
-        confidence = cal_ccoeff_confidence(img_crop, im_search, threshold, rgb=rgb)
+        confidence = cal_rgb_confidence(img_crop, im_search, threshold)
     else:
-        # 校准本轮结果中的最优可信度:( 从区间[-1,1]转换成区间[0,1] )
-        # confidence = (max_val + 1) / 2
-        confidence = max_val  # template不需要放水
+        confidence = max_val
 
     return confidence
 

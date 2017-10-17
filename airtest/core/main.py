@@ -5,9 +5,9 @@
 import os
 import time
 from urlparse import urlparse, parse_qsl
-from airtest.core.cv import loop_find
+from airtest.core.cv import Template, loop_find, cv_match_all
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, Target, logwrap, on_platform, import_device_cls, delay_after_operation
+from airtest.core.helper import G, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
 
 
@@ -114,7 +114,7 @@ def home():
 @on_platform(["Android", "Windows", "IOS"])
 def touch(v, timeout=0, **kwargs):
     timeout = timeout or ST.FIND_TIMEOUT
-    if isinstance(v, Target):
+    if isinstance(v, Template):
         try:
             pos = loop_find(v, timeout=timeout)
         except TargetNotFoundError:
@@ -128,20 +128,20 @@ def touch(v, timeout=0, **kwargs):
 
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, vector=None, **kwargs):
+def swipe(v1, v2=None, vector=None, timeout=0, **kwargs):
     """滑动，共有2种参数方式：
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
     """
-    if isinstance(v1, Target):
-        pos1 = loop_find(v1)
+    if isinstance(v1, Template):
+        timeout = timeout or ST.FIND_TIMEOUT
+        pos1 = loop_find(v1, timeout=timeout)
     else:
         pos1 = v1
 
     if v2:
-        if isinstance(v2, Target):
-            v2.new_snapshot = False
-            pos2 = loop_find(v2)
+        if isinstance(v2, Template):
+            pos2 = loop_find(v2, timeout=ST.FIND_TIMEOUT_TMP)
         else:
             pos2 = v2
     elif vector:
@@ -206,12 +206,9 @@ def exists(v, timeout=0):
 
 
 @logwrap
-def find_all(v, timeout=0):
-    timeout = timeout or ST.FIND_TIMEOUT_TMP
-    try:
-        return loop_find(v, timeout=timeout, find_all=True)
-    except TargetNotFoundError:
-        return []
+def find_all(v):
+    screen = G.DEVICE.snapshot()
+    return cv_match_all(screen, v)
 
 
 """

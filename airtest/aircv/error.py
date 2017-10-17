@@ -3,91 +3,57 @@
 
 """
 Declaration:
-    Define all Error Classes used in aircv.py.
+    Define all BaseError Classes used in aircv.py.
 """
 
 
-class Error(Exception):
+class BaseError(Exception):
     """Base class for exceptions in this module."""
 
+    def __init__(self, message=""):
+        self.message = message
+
+
+class InvalidImageInputError(BaseError):
+    """Image file not exist."""
     pass
 
 
-class InvalidImageInputError(Error):
-    """Image file not exist."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
-
-
-class TemplateInputError(Error):
+class TemplateInputError(BaseError):
     """Resolution input is not right."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
 
 
-class PredictAreaNoneError(Error):
+class PredictAreaNoneError(BaseError):
     """Resolution input is not right."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
 
 
-class NoneGoodError(Error):
+class NoSiftFeatureMatched(BaseError):
     """After sift, find no good points."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
 
 
-class NoSIFTModuleError(Error):
+class NoSIFTModuleError(BaseError):
     """Resolution input is not right."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
 
 
-class NoSiftMatchPointError(Error):
-    """Exception raised for errors 0 sift points found in the input images.
-
-    Attributes:
-        message -- explanation of the error.
-    """
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+class NoSiftMatchPointError(BaseError):
+    """Exception raised for errors 0 sift points found in the input images."""
+    pass
 
 
-class SiftResultCheckError(Error):
-    """Exception raised for errors 0 sift points found in the input images.
-
-    Attributes:
-        message -- explanation of the error.
-    """
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+class SiftResultCheckError(BaseError):
+    """Exception raised for errors 0 sift points found in the input images."""
+    pass
 
 
-class HomographyError(Error):
+class HomographyError(BaseError):
     """In homography, find no mask, should kill points which is duplicate."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
 
 
-class InvalidCropTargetError(Error):
+class InvalidCropTargetError(BaseError):
     """Image file not exist."""
-
-    def __init__(self, message):
-        """Init."""
-        self.message = message
+    pass
