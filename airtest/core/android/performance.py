@@ -49,10 +49,10 @@ def pfmlog(func):
                 args[0].stop_event.set()
             raise
         else:
-            if data is not None:
-                # 读到的数据可能为0或者None, 0也要记录下来，但是None不需要记录
-                # 不过在最后的图表上，缺失的数据都会补0
-                args[0].result_queue.put({"name": func.__name__, "value": data, "time": log_time})
+            if data is None:
+                # 读到的数据可能为0或者None, 0代表取到数据是0，但是None代表取不到数据/数据为空/数据异常，也记下来，用""来代替
+                data = ""
+            args[0].result_queue.put({"name": func.__name__, "value": json.dumps(data), "time": log_time})
         return data
     return log_it
 
@@ -96,7 +96,6 @@ class Performance(object):
         # adb初始化
         self._init_adb(adb)
         self.package_name = package_name
-        self._pid = ""
         self.result_file = log_file
         self.interval = interval
 
@@ -117,12 +116,10 @@ class Performance(object):
         self.adb.start_cmd = functools.partial(cmd_without_log, self.adb)
 
     def _init_collector(self):
-        # 初始化数据收集对象，但是要先获取到对应的pid才能开始收集数据
-        self.pid()
-        if self._pid:
-            self.collector = Collector(self.adb, self.package_name, self._pid, self.stop_event)
-            with open(self.result_file, "w") as f:
-                pass
+        # 初始化数据收集对象
+        self.collector = Collector(self.adb, self.package_name, self.stop_event)
+        with open(self.result_file, "w") as f:
+            pass
 
     def start(self):
         # log级别设成INFO，不打出DEBUG级别的log
@@ -160,12 +157,17 @@ class Performance(object):
                 self.collector_thread = threading.Thread(target=self.collect_data)
                 self.collector_thread.start()
                 LOGGING.info("begin data collection...")
+                # 用这个方式来保证线程一直执行不中断...
                 while True:
                     time.sleep(100)
             except (KeyboardInterrupt, SystemExit):
                 print '\n! Received keyboard interrupt, quitting threads.\n'
                 self.stop_event.set()
                 sys.exit()
+            except:
+                print "\nexception occurred!\n"
+                self.stop_event.set()
+                raise
 
     def collect_data(self):
         """
@@ -175,18 +177,11 @@ class Performance(object):
 
         """
         count = 0
-        failure_count = 0
         try:
             while not self.stop_event.is_set():
-                # 在开始获取数据前，保证进程已启动
-                if not self._pid:
-                    if failure_count > 60:
-                        raise PerformanceError("Please start app first")
-                    self._init_collector()
-                    if not self._pid:
-                        failure_count += 1
-                        time.sleep(1)
-                    continue
+                if not self.collector.pid:
+                    # 如果进程未启动，尝试去获取一下pid
+                    self.collector.get_pid()
                 thread_list = []
                 # 用同一个时间作为数据记录时间，方便后期同步数据
                 self.collector.collect_time = int(time.time())
@@ -240,22 +235,15 @@ class Performance(object):
             raise
         return result
 
-    def pid(self):
-        output = self.adb.shell("dumpsys meminfo {package_name}".format(package_name=self.package_name))
-        get_pid = find_value(r"pid (?P<pid>\d+)", output)
-        if get_pid and get_pid.get("pid"):
-            self._pid = get_pid.get("pid")
-            return self._pid
-
 
 class Collector(object):
     """ 收集数据专用 """
-    def __init__(self, adb, package_name, pid, stop_event=None):
-        self.collect_method = [self.pss, self.cpu, self.net_flow]
+    def __init__(self, adb, package_name, stop_event=None):
+        self.collect_method = [self.pss, self.cpu, self.net_flow, self.cpu_freq]
         self.result_queue = Queue.Queue()
         self.adb = adb
         self.package_name = package_name
-        self._pid = pid
+        self._pid = None
         self._uid = ""
         self._sdk_version = adb.sdk_version
         self._cpu_kernel = self.cpu_kel()
@@ -264,6 +252,10 @@ class Collector(object):
         self.prev_temp_data = defaultdict(dict)
         self.stop_event = stop_event
 
+    @property
+    def pid(self):
+        return self._pid
+
     def _init_data(self):
         """
         重启app之后可能需要重置数据
@@ -271,10 +263,11 @@ class Collector(object):
         -------
 
         """
-        self.pid()
+        self.get_pid()
+        self._uid = ""
         self.prev_temp_data = defaultdict(dict)
 
-    def pid(self):
+    def get_pid(self):
         output = self.adb.shell("dumpsys meminfo {package_name}".format(package_name=self.package_name))
         get_pid = find_value(r"pid (?P<pid>\d+)", output)
         if get_pid and get_pid.get("pid"):
@@ -299,7 +292,7 @@ class Collector(object):
         if get_pss:
             return get_pss.get("pss")
         else:
-            return ""
+            return None
 
     def battery(self):
         """
@@ -312,7 +305,7 @@ class Collector(object):
         get_level = find_value(r"[Ll][Ee][Vv][Ee][Ll][\s\:]*(?P<level>\d+)", output)
         if get_level:
             return get_level.get("level")
-        return ""
+        return None
 
     def cpu_kel(self):
         """
@@ -363,13 +356,15 @@ class Collector(object):
         cutime  所有已死线程在用户态运行的时间，单位为jiffies
         cstime  所有已死在核心态运行的时间，单位为jiffies
         """
+        if not self.pid:
+            return None
         # 如果获取不到pid相关的数据，说明已经没有在运行，返回0或者抛出异常
         try:
-            output = self.adb.shell("cat /proc/{pid}/stat".format(pid=self._pid))
+            output = self.adb.shell("cat /proc/{pid}/stat".format(pid=self.pid))
         except AdbShellError:
-            LOGGING.error("No such file: /proc/{pid}/stat".format(pid=self._pid))
+            LOGGING.error("No such file: /proc/{pid}/stat".format(pid=self.pid))
             self._init_data()
-            return 0
+            return None
         res = output.split()
         if len(res) < 17:
             raise PerformanceError("Get process cpu time failed! data: " + repr(res))
@@ -401,21 +396,29 @@ class Collector(object):
         count = 5
         while count > 0:
             process_cpu_time1 = self.process_cpu_time()
-            if process_cpu_time1 == 0:
-                return 0
+            if not process_cpu_time1:
+                return None
             total_cpu_time1 = self.total_cpu_time()
 
             time.sleep(0.1)
             process_cpu_time2 = self.process_cpu_time()
+            if not process_cpu_time2:
+                return None
             total_cpu_time2 = self.total_cpu_time()
             dt_process_time = process_cpu_time2 - process_cpu_time1
             dt_total_time = total_cpu_time2 - total_cpu_time1
 
             cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
             if cpu < 0.001:
-                LOGGING.error("cpu data error: %s, %s" %(str(total_cpu_time1), str(total_cpu_time2)))
+                LOGGING.error("cpu data error: %s, %s" % (str(total_cpu_time1), str(total_cpu_time2)))
+                count -= 1
                 continue
-            return round(cpu/self._cpu_kernel, 2)
+            ret = round(cpu/self._cpu_kernel, 2)
+            if ret > 100:
+                LOGGING.error("cpu data error: %s, %s, %s, %s" % (str(total_cpu_time1), str(total_cpu_time2),
+                                                                  str(dt_total_time), str(dt_process_time)))
+                continue
+            return ret
         return None
 
     def cpu_info(self):
@@ -426,7 +429,7 @@ class Collector(object):
 
         """
         output = self.adb.shell("dumpsys cpuinfo")
-        cpu_usage = find_value(r"(?P<usage>\d+)%\s*"+str(self._pid) + "\/", output)
+        cpu_usage = find_value(r"(?P<usage>\d+)%\s*"+str(self.pid) + "\/", output)
         return cpu_usage["usage"] if cpu_usage else None
 
     def cpu_top(self):
@@ -437,18 +440,22 @@ class Collector(object):
 
         """
         output = self.adb.shell("top -n 1")
-        cpu_usage = find_value(r"{pid}\s+\d+\s+(?P<usage>\d+)%\s+".format(pid=str(self._pid)), output)
+        cpu_usage = find_value(r"{pid}\s+\d+\s+(?P<usage>\d+)%\s+".format(pid=str(self.pid)), output)
         return cpu_usage["usage"] if cpu_usage else None
 
     def uid(self):
         if self._uid:
             return self._uid
-        output = self.adb.shell("cat /proc/{pid}/status".format(pid=self._pid))
-        get_uid = find_value(r"[Uu]id[\s\:]*(?P<uid>\d+)", output)
-        if get_uid:
-            if get_uid and get_uid.get("uid"):
-                self._uid = get_uid.get("uid")
-                return self._uid
+        if self.pid:
+            try:
+                output = self.adb.shell("cat /proc/{pid}/status".format(pid=self.pid))
+            except AdbShellError:
+                return ""
+            get_uid = find_value(r"[Uu]id[\s\:]*(?P<uid>\d+)", output)
+            if get_uid:
+                if get_uid and get_uid.get("uid"):
+                    self._uid = get_uid.get("uid")
+                    return self._uid
         return ""
 
     @pfmlog
@@ -483,7 +490,29 @@ class Collector(object):
                     return ret - prev_net_flow['bytes']
         return None
 
+    @pfmlog
+    def cpu_freq(self):
+        ret = defaultdict(lambda: "0")
 
+        def cur_freq(i):
+            online = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/online" % str(i))
+            if "1" in online:
+                cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i)).strip()
+                ret[i] = cpu if cpu.isdigit() else "0"
+            else:
+                ret[i] = "0"
+
+        t_list = []
+        for i in range(0, self._cpu_kernel):
+            t = threading.Thread(target=cur_freq, args=(i,))
+            t_list.append(t)
+            t.start()
+        for t in t_list:
+            t.join()
+        return ret
+
+
+# 命令行启动性能数据收集
 def pfm_parger(ap):
     """
     命令行运行参数
@@ -530,7 +559,6 @@ def init_device_serialno(serialno=None, adbhost=None):
 
 
 def performance_main(args):
-    print args
     package_name = args.package
     if not package_name:
         raise PerformanceError("package name is required!")

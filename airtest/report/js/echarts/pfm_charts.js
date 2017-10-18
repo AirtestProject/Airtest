@@ -1,5 +1,4 @@
-﻿
-// 基于准备好的dom，初始化echarts实例
+﻿// 基于准备好的dom，初始化echarts实例
 //var myChart = echarts.init(document.getElementById('pfm_chart'), 'shine');
 
 //var colors = ['#5793f3', '#d14a61', '#675bba'];
