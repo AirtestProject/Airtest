@@ -554,8 +554,7 @@
                 if (chart_load === false) {
                     chart_load = true;
                     // v2是测试版本js，版本稳定后可以修改回正常的pfm_charts.js
-                    console.log("456")
-                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js")
+                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js")
                 }
             };
             jsLoader.onfailure=function () {
@@ -563,8 +562,7 @@
                     json_load = true;
                     $.getJSON("{{ pfm_path }}pfm.json", function (data) {
                         json_data = data;
-                        console.log("123");
-                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js");
+                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js");
                     });
                 }
             };
