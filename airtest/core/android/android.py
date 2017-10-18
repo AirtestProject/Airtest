@@ -1,11 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import re
-import warnings
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.error import AirtestError, AdbShellError
-from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, get_logger
+from airtest.core.utils import get_logger
 from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.core.android.adb import ADB
@@ -19,7 +16,7 @@ LOGGING = get_logger('android')
 
 class Android(Device):
 
-    """Android Client"""
+    """Android Device"""
 
     def __init__(self, serialno=None, adbhost=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,

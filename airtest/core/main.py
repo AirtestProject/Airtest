@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    api definition
+Airtest is a automated test framework for games, cross platform and based on image recognition.
 """
 import os
 import time
@@ -17,8 +17,11 @@ Device Setup
 
 
 def connect_device(uri):
-    """用uri连接设备, eg:
-    android://adbhost:adbport/serialno?p1=v1
+    """
+    Initialize device with uri.
+
+    :param uri: eg: android://adbhost:adbport/serialno?p1=v1
+    :return: device instance
     """
     d = urlparse(uri)
     platform = d.scheme
@@ -36,11 +39,22 @@ def connect_device(uri):
 
 
 def device():
+    """
+    Get current active device.
+
+    :return: current device instance
+    """
     return G.DEVICE
 
 
 @on_platform(["Android", "Windows", "IOS"])
 def set_current(index):
+    """
+    Set current active device.
+
+    :param index: index of initialized device instance
+    :return: None
+    """
     try:
         G.DEVICE = G.DEVICE_LIST[index]
     except IndexError:
@@ -55,42 +69,85 @@ Device Operations
 @logwrap
 @on_platform(["Android"])
 def shell(cmd):
+    """
+    Execute shell command on device. Android only.
+
+    :param cmd: command line, e.g. "ls /data/local/tmp"
+    :return: output of shell cmd
+    """
     return G.DEVICE.shell(cmd)
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def start_app(package, activity=None):
+    """
+    Start app on device.
+
+    :param package: package name of the app, e.g. "com.netease.my"
+    :param activity: activity to start, default as None to start main activity
+    :return: None
+    """
     G.DEVICE.start_app(package, activity)
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def stop_app(package):
+    """
+    Stop app on device.
+
+    :param package: package name of the app, same with `start_app`
+    :return: None
+    """
     G.DEVICE.stop_app(package)
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def clear_app(package):
+    """
+    Clear data of an app on device.
+
+    :param package: package name of the app, same with `start_app`
+    :return: None
+    """
     G.DEVICE.clear_app(package)
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def install(filepath):
+    """
+    Install app on device.
+
+    :param filepath: filepath of the app on host machine
+    :return: None
+    """
     return G.DEVICE.install_app(filepath)
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def uninstall(package):
+    """
+    Uninstall app on device.
+
+    :param package: package name of the app, same with `start_app`
+    :return: None
+    """
     return G.DEVICE.uninstall_app(package)
 
 
 @logwrap
 def snapshot(filename, msg=""):
-    """capture device screen and save it into file."""
+    """
+    Get the screenshot of the device and save to file.
+
+    :param filename: filename to save the screenshot. Save to ST.LOG_DIR if it's a relative path
+    :param msg: message of the screenshot, will be displayed in the report
+    :return: None
+    """
     if not os.path.isabs(filename):
         filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
     else:
@@ -101,22 +158,38 @@ def snapshot(filename, msg=""):
 @logwrap
 @on_platform(["Android", "IOS"])
 def wake():
+    """
+    Wake up and unlock the device. May not work on some models.
+
+    :return: None
+    """
     G.DEVICE.wake()
 
 
 @logwrap
 @on_platform(["Android", "IOS"])
 def home():
+    """
+    Return to the home screen of the device.
+
+    :return: None
+    """
     G.DEVICE.home()
 
 
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
-def touch(v, timeout=0, **kwargs):
-    timeout = timeout or ST.FIND_TIMEOUT
+def touch(v, **kwargs):
+    """
+    Touch on device screen.
+
+    :param v: target to touch, either a Template instance or absolute coordinates (x, y)
+    :param kwargs: platform specific kwargs, please refer to corresponding docs
+    :return: None
+    """
     if isinstance(v, Template):
         try:
-            pos = loop_find(v, timeout=timeout)
+            pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
         except TargetNotFoundError:
             raise
     else:
@@ -128,14 +201,25 @@ def touch(v, timeout=0, **kwargs):
 
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, vector=None, timeout=0, **kwargs):
-    """滑动，共有2种参数方式：
+def swipe(v1, v2=None, vector=None, **kwargs):
+    """
+    Swipe on device screen.
+
+    two way of assigning the params:
+    1. swipe(v1, v2)   swipe from v1 to v2
+    2. swipe(v1, vector) swipe starts at v1 and move along the vector.
+    :param v1: start point of swipe, either a Template instance of absolute coordinates
+    :param v2: end point of swipe, either a Template instance of absolute coordinates
+    :param vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
+    :param kwargs: platform specific kwargs, please refer to corresponding docs
+    :return: None
+
+    滑动，共有2种参数方式：
        1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
        2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
     """
     if isinstance(v1, Template):
-        timeout = timeout or ST.FIND_TIMEOUT
-        pos1 = loop_find(v1, timeout=timeout)
+        pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
     else:
         pos1 = v1
 
@@ -159,6 +243,14 @@ def swipe(v1, v2=None, vector=None, timeout=0, **kwargs):
 @logwrap
 @on_platform(["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5):
+    """
+    Pinch on device screen. Android Only.
+
+    :param in_or_out: pinch in or pinch out, enum in ["in", "out"]
+    :param center: center of pinch action, default as None to be center of screen
+    :param percent: percentage of screen of pinch action, default to be 0.5
+    :return: None
+    """
     G.DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
     delay_after_operation()
 
@@ -166,7 +258,12 @@ def pinch(in_or_out='in', center=None, percent=0.5):
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
 def keyevent(keyname, **kwargs):
-    """模拟设备的按键功能.
+    """
+    Input keyboard event on device.
+
+    :param keyname: platform specific keyname
+    :param kwargs: platform specific kwargs
+    :return: None
     """
     G.DEVICE.keyevent(keyname, **kwargs)
     delay_after_operation()
@@ -176,7 +273,14 @@ def keyevent(keyname, **kwargs):
 @on_platform(["Android", "Windows", "IOS"])
 def text(text, enter=True):
     """
-        输入文字
+    Input text on device.
+
+    text input widget must be active first.
+    :param text: text to input, unicode supported
+    :param enter: input keyevent Enter after text input
+    :return: None
+    """
+    """
         enter: 输入后执行enter操作
     """
     G.DEVICE.text(text, enter=enter)
@@ -185,21 +289,41 @@ def text(text, enter=True):
 
 @logwrap
 def sleep(secs=1.0):
+    """
+    time.sleep, will be displayed in report.
+
+    :param secs: seconds to sleep
+    :return: None
+    """
     time.sleep(secs)
 
 
 @logwrap
-def wait(v, timeout=0, interval=0.5, intervalfunc=None):
+def wait(v, timeout=None, interval=0.5, intervalfunc=None):
+    """
+    Wait for Template on device screen.
+
+    :param v: target to wait, instance of Template
+    :param timeout: timeout of wait, default as None to be ST.FIND_TIMEOUT
+    :param interval: interval seconds after cv match when waiting
+    :param intervalfunc: interval function to be called after each cv match when target not found
+    :return: coordinates of the target found. raise TargetNotFoundError after timeout
+    """
     timeout = timeout or ST.FIND_TIMEOUT
     pos = loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
     return pos
 
 
 @logwrap
-def exists(v, timeout=0):
-    timeout = timeout or ST.FIND_TIMEOUT_TMP
+def exists(v):
+    """
+    Return if the target exists on device screen.
+
+    :param v: target to find
+    :return: False if not exists else coordinates of target
+    """
     try:
-        pos = loop_find(v, timeout=timeout)
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
         return pos
     except TargetNotFoundError:
         return False
@@ -207,6 +331,12 @@ def exists(v, timeout=0):
 
 @logwrap
 def find_all(v):
+    """
+    Find all pos of the target on device screen.
+
+    :param v: target to find
+    :return: list of coordinates, [(x, y), (x1, y1), ...]
+    """
     screen = G.DEVICE.snapshot()
     return cv_match_all(screen, v)
 
@@ -217,32 +347,60 @@ Assertions
 
 
 @logwrap
-def assert_exists(v, msg="", timeout=0):
-    timeout = timeout or ST.FIND_TIMEOUT
+def assert_exists(v, msg=""):
+    """
+    Assert target exists on device screen.
+
+    :param v: target to find
+    :param msg: message of assertion, will be displayed in the report
+    :return: coordinates of the target found. raise AssertionError if assertion failed
+    """
     try:
-        pos = loop_find(v, timeout=timeout, threshold=ST.THRESHOLD_STRICT)
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT)
         return pos
     except TargetNotFoundError:
-        raise AssertionError("%s does not exist in screen" % v)
+        raise AssertionError("%s does not exist in screen, message: %s" % (v, msg))
 
 
 @logwrap
-def assert_not_exists(v, msg="", timeout=0):
-    timeout = timeout or ST.FIND_TIMEOUT_TMP
+def assert_not_exists(v, msg=""):
+    """
+    Assert target does not exist on device screen.
+
+    :param v: target to find
+    :param msg: message of assertion, will be displayed in the report
+    :return: None. raise AssertionError if assertion failed
+    """
     try:
-        pos = loop_find(v, timeout=timeout)
-        raise AssertionError("%s exists unexpectedly at pos: %s" % (v, pos))
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
+        raise AssertionError("%s exists unexpectedly at pos: %s, message: %s" % (v, pos, msg))
     except TargetNotFoundError:
         pass
 
 
 @logwrap
 def assert_equal(first, second, msg=""):
+    """
+    Assert first and second are equal.
+
+    :param first: first value
+    :param second: second value
+    :param msg: message of assertion, will be displayed in the report
+    :return: None, raise AssertionError if assertion failed
+    """
     if first != second:
-        raise AssertionError("%s and %s are not equal" % (first, second))
+        raise AssertionError("%s and %s are not equal, message: %s" % (first, second, msg))
 
 
 @logwrap
 def assert_not_equal(first, second, msg=""):
+    """
+    Assert first and second are not equal.
+
+    :param first: first value
+    :param second: second value
+    :param msg: message of assertion, will be displayed in the report
+    :return: None, raise AssertionError if assertion failed
+    """
     if first == second:
-        raise AssertionError("%s and %s are equal" % (first, second))
+        raise AssertionError("%s and %s are equal, message: %s" % (first, second, msg))
