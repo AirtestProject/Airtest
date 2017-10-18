@@ -411,6 +411,7 @@ class Collector(object):
             cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
             if cpu < 0.001:
                 LOGGING.error("cpu data error: %s, %s" % (str(total_cpu_time1), str(total_cpu_time2)))
+                count -= 1
                 continue
             ret = round(cpu/self._cpu_kernel, 2)
             if ret > 100:
