@@ -6,13 +6,6 @@ airtest\.report package
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-
-    airtest.report.images2gif
-
 Submodules
 ----------
 
@@ -20,5 +13,4 @@ Submodules
 
    airtest.report.report
    airtest.report.report_gif
-   airtest.report.report_pfm
 

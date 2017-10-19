@@ -8,8 +8,6 @@ def main():
     if args.action == "info":
         from airtest.cli.info import get_script_info
         print(get_script_info(args.script))
-    elif args.action == "snapshot":
-        print(get_script_info(args.script, 'snapshot'))
     elif args.action == "report":
         from airtest.report.report import main as report_main
         report_main(args)

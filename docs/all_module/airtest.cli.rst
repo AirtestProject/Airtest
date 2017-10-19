@@ -12,7 +12,6 @@ Submodules
 .. toctree::
 
    airtest.cli.info
-   airtest.cli.oldrunner
    airtest.cli.parser
    airtest.cli.runner
 

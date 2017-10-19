@@ -124,11 +124,11 @@ class AirtestCase(unittest.TestCase):
         exec(compile(code, pyfilepath, 'exec')) in cls.scope
 
 
-def run_script(parsed_args, testcaseClass=AirtestCase):
+def run_script(parsed_args, testcase_cls=AirtestCase):
     global args  # make it global delibrately to be used in AirtestCase & test scripts
     args = parsed_args
     suite = unittest.TestSuite()
-    suite.addTest(testcaseClass())
+    suite.addTest(testcase_cls())
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         exit(-1)

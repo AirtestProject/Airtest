@@ -7,23 +7,14 @@
 Welcome to Airtest documentation!
 ==================================
 
-Airtest自动化测试框架
-^^^^^^^^^^^^^^^^^^^^^^
-
-*   基于图像匹配，适合做游戏的自动化测试，同样也可以用作App
-*   支持Windows/Android/iOS
-*   提供[IDE](http://init.nie.netease.com/airtest_home/)，0上手成本，支持完整的工作流程：录制、回放、生成报告
-*   同样作为Python库，可以用作其他测试框架的底层，提供跨平台的模拟操作、断言、报告生成等功能
-
-
 Airtest: Automated Testing Framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *   Based on image recognition
-*   Focus on game's automation, also can be used on apps
-*   Support Windows & Android, iOS is in progress
-*   Platform transparent api: simulated input, assertion, report generation
-*   Used with AirtestIDE out of box, full production environment: record->replay->report
+*   Focusing on game's automation, also applicable to apps
+*   Support Windows & Android, iOS support is in progress
+*   Platform transparent Api: simulated input, assertion, report generation
+*   Used with AirtestIDE out of box, complete production workflow: record->replay->report
 
 
 Quickstart 
@@ -32,7 +23,7 @@ Quickstart
 .. toctree::
    :maxdepth: 1
 
-   readme
+   ../README
 
 
 Main API
@@ -42,6 +33,18 @@ Main API
    :maxdepth: 1
 
    all_module/airtest.core.main
+
+
+
+Platform Specific API
+=================
+
+.. toctree::
+   :maxdepth: 1
+
+   all_module/airtest.core.android
+   all_module/airtest.core.ios
+   all_module/airtest.core.win
 
 
 Modules Content 

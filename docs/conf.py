@@ -36,7 +36,7 @@ import os
 sys.path.insert(0, os.path.abspath('..'))
 
 import airtest
-
+from recommonmark.parser import CommonMarkParser
 
 
 
@@ -56,6 +56,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
+source_parsers = {'.md': CommonMarkParser}
 source_suffix = ['.rst', '.md']
 
 # The master toctree document.
@@ -111,7 +112,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 
 # -- Options for HTMLHelp output ------------------------------------------

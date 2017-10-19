@@ -13,7 +13,6 @@ Subpackages
 
     airtest.core.android
     airtest.core.ios
-    airtest.core.utils
     airtest.core.win
 
 Submodules

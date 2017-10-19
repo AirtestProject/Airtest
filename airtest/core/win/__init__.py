@@ -1,1 +1,1 @@
-from airtest.core.win.win import Windows
+from .win import Windows

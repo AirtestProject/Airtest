@@ -1,4 +1,1 @@
-# coding: utf-8
-#
-
-from client import IOS
+from .ios import IOS

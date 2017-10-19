@@ -10,8 +10,8 @@ import os
 import re
 from airtest.core.error import AirtestError, AdbError, AdbShellError, DeviceConnectionError
 from airtest.core.utils import NonBlockingStreamReader, reg_cleanup, retries, split_cmd, get_logger, get_std_encoding
-from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH
-LOGGING = get_logger('android')
+from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH, IP_PATTERN
+LOGGING = get_logger('adb')
 
 
 class ADB(object):
@@ -306,6 +306,12 @@ class ADB(object):
         """adb uninstall"""
         return self.cmd(['uninstall', package])
 
+    def pm_uninstall(self, package, keepdata=False):
+        cmd = ['pm', 'uninstall', package]
+        if keepdata:
+            cmd.append('-k')
+        self.adb.shell(cmd)
+
     def snapshot(self):
         """take a screenshot"""
         raw = self.cmd('shell screencap -p', not_decode=True)
@@ -529,7 +535,6 @@ class ADB(object):
         # Guess by height > width
         return 0 if self.display_info["height"] > self.display_info['width'] else 1
 
-
     def get_top_activity_name_and_pid(self):
         dat = self.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
@@ -628,8 +633,67 @@ class ADB(object):
     def clear_app(self, package):
         self.shell(['pm', 'clear', package])
 
-    def uninstall_app_pm(self, package, keepdata=False):
-        cmd = ['pm', 'uninstall', package]
-        if keepdata:
-            cmd.append('-k')
-        self.adb.shell(cmd)
+    def get_ip_address(adb):
+        try:
+            res = adb.shell('netcfg | grep wlan0')
+        except AdbShellError:
+            res = ''
+        matcher = re.search(r' ((\d+\.){3}\d+)/\d+', res)
+        if matcher:
+            return matcher.group(1)
+        else:
+            try:
+                res = adb.shell('ifconfig')
+            except AdbShellError:
+                res = ''
+            matcher = re.search(r'wlan0.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
+            if matcher:
+                return matcher.group(1)
+            else:
+                try:
+                    res = adb.shell('getprop dhcp.wlan0.ipaddress')
+                except AdbShellError:
+                    res = ''
+                matcher = IP_PATTERN.search(res)
+                if matcher:
+                    return matcher.group(0)
+        return None
+
+    def get_gateway_address(self):
+        ip2int = lambda ip: reduce(lambda a, b: (a << 8) + b, map(int, ip.split('.')), 0)
+        int2ip = lambda n: '.'.join([str(n >> (i << 3) & 0xFF) for i in range(0, 4)[::-1]])
+        try:
+            res = self.shell('getprop dhcp.wlan0.gateway')
+        except AdbShellError:
+            res = ''
+        matcher = IP_PATTERN.search(res)
+        if matcher:
+            return matcher.group(0)
+        else:
+            try:
+                res = self.shell('netcfg | grep wlan0')
+            except AdbShellError:
+                res = ''
+            matcher = re.search(r' ((\d+\.){3}\d+/\d+) ', res)
+            if matcher:
+                ip, mask_len = matcher.group(1).split('/')
+                mask_len = int(mask_len)
+            else:
+                # 获取不到网关就默认按照ip前17位+1
+                ip, mask_len = self.get_ip_address(), 17
+
+            gateway = (ip2int(ip) & (((1 << mask_len) - 1) << (32 - mask_len))) + 1
+            return int2ip(gateway)
+
+    def get_subnet_mask_len(self):
+        try:
+            res = self.shell('netcfg | grep wlan0')
+        except AdbShellError:
+            pass
+        else:
+            matcher = re.search(r' (\d+\.){3}\d+/(\d+) ', res)
+            if matcher:
+                return int(matcher.group(2))
+        # 获取不到网段长度就默认取17
+        print('[iputils WARNING] fail to get subnet mask len. use 17 as default.')
+        return 17

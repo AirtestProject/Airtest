@@ -11,7 +11,6 @@ Submodules
 
 .. toctree::
 
-   airtest.core.ios.client
    airtest.core.ios.ios
    airtest.core.ios.minicap
 

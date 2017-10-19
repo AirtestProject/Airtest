@@ -13,15 +13,13 @@ if six.PY3:
 else:
     from urlparse import urljoin
 
-import aircv
+from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.error import AirtestError
 from airtest.core.utils.logger import get_logger
 
 
 logger = get_logger("ios")
-DEFAULT_ADDR = "http://10.254.28.108:8100/"
-# DEFAULT_ADDR = "http://localhost:8100/"
+DEFAULT_ADDR = "http://localhost:8100/"
 
 
 class IOS(Device):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+import re
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_ADB_PATH = {
@@ -16,6 +16,7 @@ ROTATIONWATCHER_APK = os.path.join(THISPATH, "apks", "RotationWatcher.apk")
 ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 YOSEMITE_APK = os.path.join(THISPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
+IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
 
 class CAP_METHOD(object):

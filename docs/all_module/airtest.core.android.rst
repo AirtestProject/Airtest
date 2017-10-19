@@ -12,8 +12,6 @@ Subpackages
 .. toctree::
 
     airtest.core.android.adb
-    airtest.core.android.emulator
-    airtest.core.android.utils
 
 Submodules
 ----------
