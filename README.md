@@ -12,11 +12,6 @@ Automated Testing Framework
 *   Used with AirtestIDE out of box, production workflow supported: record->replay->report
 
 
-# Documentation
-
-[here](./docs/_build/html/index.html)
-
-
 # Install
 
 ```shell
@@ -52,6 +47,8 @@ uninstall("package_name_of_your_apk")
 # Command line usage
 
 We use `.owl` structure to organize code and image resources in test case. With the help of Airtest IDE, you can easily record test cases in `.owl`. This command line tool is provided to run test cases without IDE on different host machine. Device setup is supported by command line arguments, so your test code can be totally platform transparent. 
+
+Play cli with the sample: ```/airtest/playground/test_blackjack.owl```
 
 ```shell
 # run test case

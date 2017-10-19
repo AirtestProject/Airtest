@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Airtest is a automated test framework for games, cross platform and based on image recognition.
+Airtest Main Api
 """
 import os
 import time
 from airtest.core.utils.compat import PY3
-if PY3:
-    from urllib.parse import urlparse, parse_qsl
-else:
-    from urlparse import urlparse, parse_qsl
 from airtest.core.cv import Template, loop_find, cv_match_all
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
+if PY3:
+    from urllib.parse import urlparse, parse_qsl
+else:
+    from urlparse import urlparse, parse_qsl
 
 
 """
@@ -24,8 +24,17 @@ def connect_device(uri):
     """
     Initialize device with uri.
 
-    :param uri: eg: android://adbhost:adbport/serialno?p1=v1
-    :return: device instance
+    e.g.
+        * ``android:///``   # local adb device using default params
+        * ``android://192.168.55.55:5037/1234566?cap_method=javacap&touch_method=adb``
+        * ``windows:///``   # local windows application
+        * ``ios:///``   # ios device
+
+    Args:
+        uri: android://adbhost:adbport/serialno?param=value
+
+    Returns:
+        device instance
     """
     d = urlparse(uri)
     platform = d.scheme
@@ -209,18 +218,18 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Swipe on device screen.
 
-    two way of assigning the params:
-    1. swipe(v1, v2)   swipe from v1 to v2
-    2. swipe(v1, vector) swipe starts at v1 and move along the vector.
-    :param v1: start point of swipe, either a Template instance of absolute coordinates
-    :param v2: end point of swipe, either a Template instance of absolute coordinates
-    :param vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
-    :param kwargs: platform specific kwargs, please refer to corresponding docs
-    :return: None
+    two way of assigning the params
+        * ``swipe(v1, v2=Template(...))``   swipe from v1 to v2
+        * ``swipe(v1, vector=(x, y))`` swipe starts at v1 and move along the vector.
 
-    滑动，共有2种参数方式：
-       1. swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片
-       2. swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标
+    Args:
+        v1: start point of swipe, either a Template instance of absolute coordinates
+        v2: end point of swipe, either a Template instance of absolute coordinates
+        vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
+        **kwargs: platform specific kwargs, please refer to corresponding docs
+
+    Returns:
+        None
     """
     if isinstance(v1, Template):
         pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)

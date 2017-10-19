@@ -37,7 +37,7 @@ Main API
 
 
 Platform Specific API
-=================
+========================
 
 .. toctree::
    :maxdepth: 1

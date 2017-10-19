@@ -47,7 +47,10 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.imgmath',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.napoleon',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -173,5 +176,8 @@ texinfo_documents = [
 
 # default is alphabetical, we trust source sequence
 autodoc_member_order = 'bysource'
+# remove leading package.module names
 add_module_names = False
-
+# napoleaon ext
+napoleon_use_param = True
+napoleon_use_rtype = True
