@@ -148,6 +148,20 @@ option_cpu = {
             type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
         }
     },
+    dataZoom: [
+    {
+        show: true,
+        realtime: true,
+        start: 0,
+        end: 100,
+        xAxisIndex: [0]
+    },
+    {
+        type: 'inside',
+        realtime: true,
+        start: 0,
+        end: 100
+    }],
     grid: {
         top: 80
     },
@@ -253,6 +267,9 @@ function get_steps(x_times, step_times) {
     var ret = [];
     var times_len = times.length;
     // 非常规情况，假如生成的log与脚本并不能同时对应上，直接把x轴内容返回
+    if (step_times.length < 1) {
+        return x_times;
+    }
     if ((times[times_len - 1] < step_times[0].time) || (times[0] > step_times[step_times.length - 1])) {
         return x_times;
     }
