@@ -1,0 +1,812 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Developer Interface &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="airtest  documentation" href="index.html"/>
+        <link rel="next" title="airtest package" href="all_module/airtest.html"/>
+        <link rel="prev" title="Install" href="readme.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#id1">自动化测试框架</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-interface">Main Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">基本接口说明</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#set-serialno-sn-none">set_serialno(sn=None)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-udid-udid-none">set_udid(udid=None)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-basedir-base-dir">set_basedir(base_dir)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-logfile-filename-inbase-true">set_logfile(filename, inbase=True)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-scripthome-dirpath">set_scripthome(dirpath)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-globals-key-value">set_globals(key, value)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-tag-data">log(tag, data)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shell-cmd-shell-true">shell(cmd, shell=True)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#amstart-package">amstart(package)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#amstop-package">amstop(package)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-filepath">install(filepath)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#uninstall-package">uninstall(package)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#snapshot-filename-screen-png">### snapshot(filename=”screen.png”)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wake">wake()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#home">home()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touch-v-timeout-timeout-delay-opdelay-offset-none-safe-false">touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operate-v-route-timeout-timeout-delay-opdelay">operate(v, route, timeout=TIMEOUT, delay=OPDELAY)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keyevent-keyname">keyevent(keyname)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-text">text(text)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sleep-secs-1-0">sleep(secs=1.0)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wait-v-timeout-10-safe-false-interval-cvinterval-intervalfunc-none">wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exists-v-timeout-1">exists(v, timeout=1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assert-exists-v-msg-timeout-timeout">assert_exists(v, msg=”“, timeout=TIMEOUT)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assert-not-exists-v-msg-timeout-2">assert_not_exists(v, msg=”“, timeout=2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assert-equal-first-second-msg">assert_equal(first, second, msg=”“)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#moapic-filename-rect-none-threshold-threshold-target-pos-targetpos-mid-record-pos-none-resolution">MoaPic(filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[])</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="all_module/airtest.html">airtest package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">airtest</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Developer Interface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest">
+<span id="developer-interface"></span><span id="api"></span><h1>Developer Interface<a class="headerlink" href="#module-airtest" title="Permalink to this headline">¶</a></h1>
+<p>This part of the documentation covers all the interfaces of airtest. For
+parts where airtest depends on external libraries, we document the most
+important right here and provide links to the canonical documentation.</p>
+<div class="section" id="main-interface">
+<h2>Main Interface<a class="headerlink" href="#main-interface" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="airtest.core.error.ICmdError">
+<em class="property">exception </em><code class="descclassname">airtest.core.error.</code><code class="descname">ICmdError</code><span class="sig-paren">(</span><em>stdout</em>, <em>stderr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/error.html#ICmdError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.error.ICmdError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is ICmdError BaseError
+When ICmd have something wrong</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="airtest.core.error.MinicapError">
+<em class="property">exception </em><code class="descclassname">airtest.core.error.</code><code class="descname">MinicapError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/error.html#MinicapError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.error.MinicapError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is MinicapError BaseError
+When Minicap have something wrong</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="airtest.core.error.MinitouchError">
+<em class="property">exception </em><code class="descclassname">airtest.core.error.</code><code class="descname">MinitouchError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/error.html#MinitouchError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.error.MinitouchError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is MinitouchError BaseError
+When Minicap have something wrong</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h2>基本接口说明<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="set-serialno-sn-none">
+<h3>set_serialno(sn=None)<a class="headerlink" href="#set-serialno-sn-none" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置手机的序列号, 支持*匹配。如果adb连接了多台手机，默认取第一台</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">set_serialno</span><span class="p">(</span><span class="s1">&#39;cff*&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-udid-udid-none">
+<h3>set_udid(udid=None)<a class="headerlink" href="#set-udid-udid-none" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置ios device的序列号, 支持*匹配。如果usb连接了多台手机，默认取第一台</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">set_udid</span><span class="p">(</span><span class="s1">&#39;cff*&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-basedir-base-dir">
+<h3>set_basedir(base_dir)<a class="headerlink" href="#set-basedir-base-dir" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置你的工作目录，日志，图片都会以这个基准去查找</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">set_basedir</span><span class="p">(</span><span class="s1">&#39;cff*&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-logfile-filename-inbase-true">
+<h3>set_logfile(filename, inbase=True)<a class="headerlink" href="#set-logfile-filename-inbase-true" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置日志文件的路径，如果inbase为true的话，日志会保存到basedir目录下</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">set_logfile</span><span class="p">(</span><span class="s1">&#39;cff*&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-scripthome-dirpath">
+<h3>set_scripthome(dirpath)<a class="headerlink" href="#set-scripthome-dirpath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置脚本根目录，用于exec_script</div></blockquote>
+</div>
+<div class="section" id="set-globals-key-value">
+<h3>set_globals(key, value)<a class="headerlink" href="#set-globals-key-value" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>设置moa里面的一些全局变量</div></blockquote>
+</div>
+<div class="section" id="log-tag-data">
+<h3>log(tag, data)<a class="headerlink" href="#log-tag-data" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>data一定是需要json.dumps支持的格式才行.</div></blockquote>
+</div>
+<div class="section" id="shell-cmd-shell-true">
+<h3>shell(cmd, shell=True)<a class="headerlink" href="#shell-cmd-shell-true" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>执行shell命令，然后返回</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.shell">
+<code class="descclassname">airtest.core.main.</code><code class="descname">shell</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute shell command on device. Android only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cmd</strong> – command line, e.g. “ls /data/local/tmp”</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">output of shell cmd</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span> <span class="n">shell</span><span class="p">(</span><span class="s1">&#39;echo hello&#39;</span><span class="p">)</span>
+<span class="c1"># output: hello</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="amstart-package">
+<h3>amstart(package)<a class="headerlink" href="#amstart-package" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only( add adaptation for ios device, package is appid)*</p>
+<blockquote>
+<div>am: android manager的简称</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">amstart</span><span class="p">(</span><span class="s1">&#39;com.netease.moa&#39;</span><span class="p">)</span> <span class="c1"># 启动应用</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="amstop-package">
+<h3>amstop(package)<a class="headerlink" href="#amstop-package" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only( add adaptation for ios device, package is appid)*</p>
+<blockquote>
+<div>强制停止应用，等同于`am force-stop &lt;package&gt;`</div></blockquote>
+<dl class="docutils">
+<dt>::</dt>
+<dd><blockquote class="first last">
+<div>amstart(‘com.netease.moa’) # 启动应用</div></blockquote>
+</dd>
+</dl>
+<p>&gt;*android only*</p>
+<blockquote>
+<div>清空应用中的数据，等同于`pm clear &lt;package&gt;`</div></blockquote>
+</div>
+<div class="section" id="install-filepath">
+<h3>install(filepath)<a class="headerlink" href="#install-filepath" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only( add adaptation for ios device)*</p>
+<blockquote>
+<div>安装apk</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.install">
+<code class="descclassname">airtest.core.main.</code><code class="descname">install</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.install" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install app on device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> – filepath of the app on host machine</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="uninstall-package">
+<h3>uninstall(package)<a class="headerlink" href="#uninstall-package" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only( add adaptation for ios device)*</p>
+<blockquote>
+<div>卸载apk</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.uninstall">
+<code class="descclassname">airtest.core.main.</code><code class="descname">uninstall</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#uninstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.uninstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uninstall app on device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> – package name of the app, same with <cite>start_app</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="snapshot-filename-screen-png">
+<h3>### snapshot(filename=”screen.png”)<a class="headerlink" href="#snapshot-filename-screen-png" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>保存手机上的截图到filename这个文件。然后返回图像的二进制内容</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.snapshot">
+<code class="descclassname">airtest.core.main.</code><code class="descname">snapshot</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the screenshot of the device and save to file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> – filename to save the screenshot. Save to ST.LOG_DIR if it’s a relative path</li>
+<li><strong>msg</strong> – message of the screenshot, will be displayed in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="wake">
+<h3>wake()<a class="headerlink" href="#wake" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only*</p>
+<blockquote>
+<div>点亮手机屏幕</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.wake">
+<code class="descclassname">airtest.core.main.</code><code class="descname">wake</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#wake"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.wake" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wake up and unlock the device. May not work on some models.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="home">
+<h3>home()<a class="headerlink" href="#home" title="Permalink to this headline">¶</a></h3>
+<p>&gt;*android only*</p>
+<blockquote>
+<div>点击手机home键</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.home">
+<code class="descclassname">airtest.core.main.</code><code class="descname">home</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#home"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return to the home screen of the device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="touch-v-timeout-timeout-delay-opdelay-offset-none-safe-false">
+<h3>touch(v, timeout=TIMEOUT, delay=OPDELAY, offset=None, safe=False)<a class="headerlink" href="#touch-v-timeout-timeout-delay-opdelay-offset-none-safe-false" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>点击屏幕中的目标，参数如下：</p>
+<blockquote>
+<div><p>v 目标，有三种形态：坐标、图片、文字，详见MoaPic</p>
+<p>timeout 超时时间</p>
+<p>delay 操作后延迟时间</p>
+<p>offset 点击坐标偏移，可以是坐标或者是屏幕百分比。offset={“percent”: True, “x”: 20, “y”: 20}</p>
+<p>safe 没找到图片是否忽略错误，默认False，会报MoaError</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.touch">
+<code class="descclassname">airtest.core.main.</code><code class="descname">touch</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Touch on device screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to touch, either a Template instance or absolute coordinates (x, y)</li>
+<li><strong>kwargs</strong> – platform specific kwargs, please refer to corresponding docs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>swipe(v1, v2=None, vector=None)</p>
+</dd></dl>
+
+<hr class="docutils" />
+<blockquote>
+<div><p>滑动操作，两种形态：</p>
+<blockquote>
+<div><p>swipe(v1, v2) 从起点目标滑动到终点目标</p>
+<p>swipe(v1, vector=(x, y)) 从起点目标滑动一个向量。vector=(dx/w, dy/h)</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.swipe">
+<code class="descclassname">airtest.core.main.</code><code class="descname">swipe</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#swipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.swipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swipe on device screen.</p>
+<p>two way of assigning the params:
+1. swipe(v1, v2)   swipe from v1 to v2
+2. swipe(v1, vector) swipe starts at v1 and move along the vector.
+:param v1: start point of swipe, either a Template instance of absolute coordinates
+:param v2: end point of swipe, either a Template instance of absolute coordinates
+:param vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
+:param kwargs: platform specific kwargs, please refer to corresponding docs
+:return: None</p>
+<dl class="docutils">
+<dt>滑动，共有2种参数方式：</dt>
+<dd><ol class="first last arabic simple">
+<li>swipe(v1, v2) v1/v2分别是起始点和终止点，可以是(x,y)坐标或者是图片</li>
+<li>swipe(v1, vector) v1是起始点，vector是滑动向量，向量数值小于1会被当作屏幕百分比，否则是坐标</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="operate-v-route-timeout-timeout-delay-opdelay">
+<h3>operate(v, route, timeout=TIMEOUT, delay=OPDELAY)<a class="headerlink" href="#operate-v-route-timeout-timeout-delay-opdelay" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>长操作，在起点处按下，按照一个线路滑动，最终松开</p>
+<blockquote>
+<div><p>v 起点目标</p>
+<p>route 滑动线路 [(dx1, dy1, dt1), (dx2, dy2, dt2), (dx3, dy3, dt3)…]  其中(dx, dy)与swipe参数vector相同</p>
+<p>timeout 同上</p>
+<p>delay 同上</p>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="keyevent-keyname">
+<h3>keyevent(keyname)<a class="headerlink" href="#keyevent-keyname" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>按键输入</p>
+<blockquote>
+<div>keyname 安卓参考：<a class="reference external" href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a></div></blockquote>
+<p>注意：windows按键和android按键不同</p>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.keyevent">
+<code class="descclassname">airtest.core.main.</code><code class="descname">keyevent</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#keyevent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.keyevent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input keyboard event on device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>keyname</strong> – platform specific keyname</li>
+<li><strong>kwargs</strong> – platform specific kwargs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="text-text">
+<h3>text(text)<a class="headerlink" href="#text-text" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>文字输入</p>
+<p>注意：windows可以输入中文，android暂时不行</p>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.text">
+<code class="descclassname">airtest.core.main.</code><code class="descname">text</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input text on device.</p>
+<p>text input widget must be active first.
+:param text: text to input, unicode supported
+:param enter: input keyevent Enter after text input
+:return: None</p>
+</dd></dl>
+
+</div>
+<div class="section" id="sleep-secs-1-0">
+<h3>sleep(secs=1.0)<a class="headerlink" href="#sleep-secs-1-0" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>等待时间</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.sleep">
+<code class="descclassname">airtest.core.main.</code><code class="descname">sleep</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#sleep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>time.sleep, will be displayed in report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secs</strong> – seconds to sleep</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="wait-v-timeout-10-safe-false-interval-cvinterval-intervalfunc-none">
+<h3>wait(v, timeout=10, safe=False, interval=CVINTERVAL, intervalfunc=None)<a class="headerlink" href="#wait-v-timeout-10-safe-false-interval-cvinterval-intervalfunc-none" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>等待目标出现</p>
+<blockquote>
+<div><p>v 目标</p>
+<p>timeout 超时时间</p>
+<p>safe 超时是否继续，默认为False即会报错</p>
+<p>interval 等待目标的间隔时间</p>
+<p>intervalfunc 等待目标的间隔中的回调函数</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.wait">
+<code class="descclassname">airtest.core.main.</code><code class="descname">wait</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for Template on device screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to wait, instance of Template</li>
+<li><strong>timeout</strong> – timeout of wait, default as None to be ST.FIND_TIMEOUT</li>
+<li><strong>interval</strong> – interval seconds after cv match when waiting</li>
+<li><strong>intervalfunc</strong> – interval function to be called after each cv match when target not found</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coordinates of the target found. raise TargetNotFoundError after timeout</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="exists-v-timeout-1">
+<h3>exists(v, timeout=1)<a class="headerlink" href="#exists-v-timeout-1" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>判断目标是否存在，返回True/False</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.exists">
+<code class="descclassname">airtest.core.main.</code><code class="descname">exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return if the target exists on device screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> – target to find</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">False if not exists else coordinates of target</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="assert-exists-v-msg-timeout-timeout">
+<h3>assert_exists(v, msg=”“, timeout=TIMEOUT)<a class="headerlink" href="#assert-exists-v-msg-timeout-timeout" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>断言目标存在，如果超时时间内不存在则抛出AssertionError</p>
+<blockquote>
+<div><p>v 目标</p>
+<p>msg 断言信息</p>
+<p>timeout 超时时间</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.assert_exists">
+<code class="descclassname">airtest.core.main.</code><code class="descname">assert_exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#assert_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.assert_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert target exists on device screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to find</li>
+<li><strong>msg</strong> – message of assertion, will be displayed in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coordinates of the target found. raise AssertionError if assertion failed</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="assert-not-exists-v-msg-timeout-2">
+<h3>assert_not_exists(v, msg=”“, timeout=2)<a class="headerlink" href="#assert-not-exists-v-msg-timeout-2" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>断言目标不存在，如果超时时间内存在则抛出AssertionError，参数同上</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.assert_not_exists">
+<code class="descclassname">airtest.core.main.</code><code class="descname">assert_not_exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#assert_not_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.assert_not_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert target does not exist on device screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to find</li>
+<li><strong>msg</strong> – message of assertion, will be displayed in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None. raise AssertionError if assertion failed</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="assert-equal-first-second-msg">
+<h3>assert_equal(first, second, msg=”“)<a class="headerlink" href="#assert-equal-first-second-msg" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>断言first和second相等，不等则抛出AssertionError</div></blockquote>
+<dl class="function">
+<dt id="airtest.core.main.assert_equal">
+<code class="descclassname">airtest.core.main.</code><code class="descname">assert_equal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/airtest/core/main.html#assert_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.main.assert_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert first and second are equal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>first</strong> – first value</li>
+<li><strong>second</strong> – second value</li>
+<li><strong>msg</strong> – message of assertion, will be displayed in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None, raise AssertionError if assertion failed</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="moapic-filename-rect-none-threshold-threshold-target-pos-targetpos-mid-record-pos-none-resolution">
+<h3>MoaPic(filename, rect=None, threshold=THRESHOLD, target_pos=TargetPos.MID, record_pos=None, resolution=[])<a class="headerlink" href="#moapic-filename-rect-none-threshold-threshold-target-pos-targetpos-mid-record-pos-none-resolution" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="docutils">
+<dt>一个隐藏的类，所有图片目标在moa中都会转换为MoaPic实例，参数如下：</dt>
+<dd>filename    图片名
+rect        所在区域(x0, y0, x1, y1)，默认全屏，不建议给这个参数
+threshold   识别阈值，默认阈值为0.6，较低，可以按需修改
+target_pos  目标图片的点击位置，默认点击目标中点，可以填1-9表示不同位置，小键盘排布
+record_pos  记录下的录制坐标，用于辅助图像识别
+resolution  记录下的屏幕分辨率，用于辅助图像识别</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="all_module/airtest.html" class="btn btn-neutral float-right" title="airtest package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readme.html" class="btn btn-neutral" title="Install" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.helper module &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../index.html"/>
+        <link rel="up" title="airtest.core package" href="airtest.core.html"/>
+        <link rel="next" title="airtest.core.settings module" href="airtest.core.settings.html"/>
+        <link rel="prev" title="airtest.core.error module" href="airtest.core.error.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">Airtest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../README.html#features">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../README.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../README.html#use-as-a-python-package">Use as a python package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../README.html#command-line-usage">Command line usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.main.html">airtest.core.main module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.html">airtest package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.aircv.html">airtest.aircv package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.cli.html">airtest.cli package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="airtest.core.html">airtest.core package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="airtest.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="airtest.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.report.html">airtest.report package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="airtest.html">airtest package</a> &raquo;</li>
+        
+          <li><a href="airtest.core.html">airtest.core package</a> &raquo;</li>
+        
+      <li>airtest.core.helper module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/all_module/airtest.core.helper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest.core.helper">
+<span id="airtest-core-helper-module"></span><h1>airtest.core.helper module<a class="headerlink" href="#module-airtest.core.helper" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="airtest.core.helper.G">
+<em class="property">class </em><code class="descname">G</code><a class="reference internal" href="../_modules/airtest/core/helper.html#G"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.G" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>globals variables</p>
+<dl class="attribute">
+<dt id="airtest.core.helper.G.BASEDIR">
+<code class="descname">BASEDIR</code><em class="property"> = None</em><a class="headerlink" href="#airtest.core.helper.G.BASEDIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.LOGGER">
+<code class="descname">LOGGER</code><em class="property"> = &lt;airtest.core.utils.logwraper.AirtestLogger object&gt;</em><a class="headerlink" href="#airtest.core.helper.G.LOGGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.LOGGING">
+<code class="descname">LOGGING</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#airtest.core.helper.G.LOGGING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.SCREEN">
+<code class="descname">SCREEN</code><em class="property"> = None</em><a class="headerlink" href="#airtest.core.helper.G.SCREEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.DEVICE">
+<code class="descname">DEVICE</code><em class="property"> = None</em><a class="headerlink" href="#airtest.core.helper.G.DEVICE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.DEVICE_LIST">
+<code class="descname">DEVICE_LIST</code><em class="property"> = []</em><a class="headerlink" href="#airtest.core.helper.G.DEVICE_LIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.RECENT_CAPTURE">
+<code class="descname">RECENT_CAPTURE</code><em class="property"> = None</em><a class="headerlink" href="#airtest.core.helper.G.RECENT_CAPTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.helper.G.RECENT_CAPTURE_PATH">
+<code class="descname">RECENT_CAPTURE_PATH</code><em class="property"> = None</em><a class="headerlink" href="#airtest.core.helper.G.RECENT_CAPTURE_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="airtest.core.helper.G.add_device">
+<em class="property">classmethod </em><code class="descname">add_device</code><span class="sig-paren">(</span><em>dev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#G.add_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.G.add_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>初始化设备，加入全局环境, eg:
+init_device(Android())</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.log">
+<code class="descname">log</code><span class="sig-paren">(</span><em>tag</em>, <em>data</em>, <em>in_stack=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.log_in_func">
+<code class="descname">log_in_func</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#log_in_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.log_in_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.logwrap">
+<code class="descname">logwrap</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#logwrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.logwrap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.device_platform">
+<code class="descname">device_platform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#device_platform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.device_platform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.import_device_cls">
+<code class="descname">import_device_cls</code><span class="sig-paren">(</span><em>platform</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#import_device_cls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.import_device_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>lazy import device class</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.on_platform">
+<code class="descname">on_platform</code><span class="sig-paren">(</span><em>platforms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#on_platform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.on_platform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.helper.delay_after_operation">
+<code class="descname">delay_after_operation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/helper.html#delay_after_operation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.helper.delay_after_operation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="airtest.core.settings.html" class="btn btn-neutral float-right" title="airtest.core.settings module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="airtest.core.error.html" class="btn btn-neutral" title="airtest.core.error module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,523 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.ios.client &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Airtest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.main.html">airtest.core.main module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.core.ios.client</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.core.ios.client</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">wda</span>
+
+<span class="k">if</span> <span class="n">six</span><span class="o">.</span><span class="n">PY3</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urljoin</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urljoin</span>
+
+<span class="kn">import</span> <span class="nn">aircv</span>
+<span class="kn">from</span> <span class="nn">airtest.core.device</span> <span class="k">import</span> <span class="n">Device</span>
+<span class="kn">from</span> <span class="nn">airtest.core.error</span> <span class="k">import</span> <span class="n">AirtestError</span>
+<span class="kn">from</span> <span class="nn">airtest.core.utils.logger</span> <span class="k">import</span> <span class="n">get_logger</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;ios&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="IOS"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS">[docs]</a><span class="k">class</span> <span class="nc">IOS</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ios client</span>
+<span class="sd">        # befor this you have to run WebDriverAgent</span>
+<span class="sd">        # xcodebuild -project path/to/WebDriverAgent.xcodeproj -scheme WebDriverAgentRunner -destination &quot;id=$(idevice_id -l)&quot; test</span>
+<span class="sd">        # iproxy $port 8100 $udid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="s2">&quot;http://localhost:8100/&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>
+
+        <span class="c1"># wda driver, use to home, start app</span>
+        <span class="c1"># init wda session, updata when start app</span>
+        <span class="c1"># use to click/swipe/close app/get wda size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">wda</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">status</span><span class="p">()[</span><span class="s1">&#39;udid&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">udid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># take a snapshot to refresh display info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refreshOrientationInfo</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+
+<div class="viewcode-block" id="IOS.shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.shell">[docs]</a>    <span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="IOS.wake"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.wake">[docs]</a>    <span class="k">def</span> <span class="nf">wake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO: 需要优化速度，按了home键并解了锁，如果没有进入到home而是回到某个应用的话，会白白等待20秒。</span>
+        <span class="c1"># 需要判断当前是否解锁完成和是否处于home</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>  <span class="c1"># active screen backlight</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>  <span class="c1"># slide to unlock</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>  <span class="c1"># enter SpringBoard if other app is running</span>
+        <span class="k">except</span> <span class="n">wda</span><span class="o">.</span><span class="n">WDAError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="IOS.home"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.home">[docs]</a>    <span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="IOS.snapshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+        
+    <span class="k">def</span> <span class="nf">_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        take snapshot</span>
+<span class="sd">        filename: save screenshot to filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="s2">&quot;tmp.png&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># wda 截图不用考虑朝向</span>
+
+        <span class="c1"># 输出cv2对象</span>
+        <span class="n">screen</span> <span class="o">=</span> <span class="n">aircv</span><span class="o">.</span><span class="n">string_2_img</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_display_info</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">screen</span>
+
+<div class="viewcode-block" id="IOS.touch"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span>
+        <span class="k">if</span> <span class="n">times</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">double_tap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">tap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IOS.swipe"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.swipe">[docs]</a>    <span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpos</span><span class="p">,</span> <span class="n">tpos</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">swipe</span><span class="p">(</span><span class="n">fpos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span><span class="p">,</span> <span class="n">fpos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span><span class="p">,</span>
+                           <span class="n">tpos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span><span class="p">,</span> <span class="n">tpos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IOS.keyevent"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.keyevent">[docs]</a>    <span class="k">def</span> <span class="nf">keyevent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;HOME&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">EVENT_CODE_TABLE</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;ENTER&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;KEYCODE_DEL&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\b</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">EVENT_CODE_TABLE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_keys</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IOS.text"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;you need to click textfield first&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">enter</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_keys</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_send_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+        <span class="n">ex</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="c1"># try N times waiting for keyboard present</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">except</span> <span class="n">wda</span><span class="o">.</span><span class="n">WDAError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">ex</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">raise</span> <span class="n">ex</span>
+
+<div class="viewcode-block" id="IOS.start_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.start_app">[docs]</a>    <span class="k">def</span> <span class="nf">start_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Launch app by bundleId. A AirtestError will raise if given bundleId not exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">bundle_id</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;current app(bundleId) is </span><span class="si">{}</span><span class="s2">, will launch </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_package</span><span class="p">,</span> <span class="n">package</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">current_package</span> <span class="o">!=</span> <span class="n">package</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_app</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s1">&#39;Fail to start app(</span><span class="si">{}</span><span class="s1">) because of not installed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_try_to_finish_alert</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IOS.stop_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.stop_app">[docs]</a>    <span class="k">def</span> <span class="nf">stop_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop current top activity app.</span>
+<span class="sd">        Do nothing if the top activity&#39;s bundle id is not equal to package</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">bundle_id</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;current app(bundleId) is </span><span class="si">{}</span><span class="s2">, will stop </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_package</span><span class="p">,</span> <span class="n">package</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="IOS.clear_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.clear_app">[docs]</a>    <span class="k">def</span> <span class="nf">clear_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">upload_file_path</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="IOS.list_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.list_app">[docs]</a>    <span class="k">def</span> <span class="nf">list_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">third_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">urljoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="s1">&#39;/api/v1/packages&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">packages</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;bundleId&#39;</span><span class="p">],</span> <span class="n">packages</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;fail to connect to wda when fetching package list. &quot;</span>
+                           <span class="s2">&quot;status_code=</span><span class="si">{}</span><span class="s2">, content=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="IOS.install_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.install_app">[docs]</a>    <span class="k">def</span> <span class="nf">install_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">uri</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wake</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="s1">&#39;com.apple.mobilesafari&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_try_to_finish_alert</span><span class="p">(</span><span class="s1">&#39;dismiss&#39;</span><span class="p">)</span>
+        <span class="n">url_control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;Button&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;URL&#39;</span><span class="p">)</span>
+        <span class="n">url_control</span><span class="o">.</span><span class="n">tap</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_try_to_finish_alert</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">)</span>  <span class="c1"># 是否打开App Store？</span>
+        <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.plist&#39;</span><span class="p">):</span>
+            <span class="c1"># 通过plist安装，是否安装？</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;install via .plist&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_try_to_finish_alert</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 通过AppStore下载安装</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;install via App Store&#39;</span><span class="p">)</span>
+            <span class="n">purchase_button</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;Button&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PurchaseButton&#39;</span><span class="p">)</span>
+            <span class="n">purchase_button_text</span> <span class="o">=</span> <span class="n">purchase_button</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">purchase_button_text</span> <span class="o">==</span> <span class="sa">u</span><span class="s1">&#39;下载&#39;</span><span class="p">:</span>
+                <span class="n">purchase_button</span><span class="o">.</span><span class="n">tap</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> are not purchased from app store. &quot;</span>
+                               <span class="s2">&quot;please purchase and trust the publisher first.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uri</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_until_app_installed</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IOS.uninstall_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.uninstall_app">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="n">installed_apps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_app</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">package</span> <span class="ow">in</span> <span class="n">installed_apps</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">urljoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="n">urljoin</span><span class="p">(</span><span class="s1">&#39;/api/v1/packages/&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;fail to uninstall with network error. App(bundleId) is </span><span class="si">{}</span><span class="s2">. status_code=</span><span class="si">{}</span><span class="s2">, text=</span><span class="si">{}</span><span class="s2">&quot;</span>
+                                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_app</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;fail to uninstall, app still exists. App(bundleId) is </span><span class="si">{}</span><span class="s2">. status_code=</span><span class="si">{}</span><span class="s2">, text=</span><span class="si">{}</span><span class="s2">&quot;</span>
+                                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="IOS.getPhysicalDisplayInfo"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.getPhysicalDisplayInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getPhysicalDisplayInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="IOS.getDisplayOrientation"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.getDisplayOrientation">[docs]</a>    <span class="k">def</span> <span class="nf">getDisplayOrientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return orientation code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="IOS.getCurrentScreenResolution"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.getCurrentScreenResolution">[docs]</a>    <span class="k">def</span> <span class="nf">getCurrentScreenResolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the resolution(w, h) of snapshot real size</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            w, h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="IOS.refreshOrientationInfo"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.refreshOrientationInfo">[docs]</a>    <span class="k">def</span> <span class="nf">refreshOrientationInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ori</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        update dev orientation</span>
+<span class="sd">        Orientation will keep up to date automatically in this class impl</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;PORTRAIT&#39;</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;rotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">90</span></div>
+
+    <span class="k">def</span> <span class="nf">_refresh_display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">        display info as &lt;dict&gt;</span>
+<span class="sd">          rotation: &lt;int&gt; in degrees</span>
+<span class="sd">          height, width: &lt;int&gt; logic pixels of screen output, not the touch panel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># 当画面确实发生了旋转才需要重新获取一次，否则不用刷新</span>
+        <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">screen</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refreshOrientationInfo</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wda_sca</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">window_size</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+
+    <span class="k">def</span> <span class="nf">_try_to_finish_alert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">session</span><span class="p">()</span><span class="o">.</span><span class="n">alert</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+                <span class="n">fn</span><span class="p">()</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="n">wda</span><span class="o">.</span><span class="n">WDAError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">success</span>
+
+    <span class="k">def</span> <span class="nf">_get_alert_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">session</span><span class="p">()</span><span class="o">.</span><span class="n">alert</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">except</span> <span class="n">wda</span><span class="o">.</span><span class="n">WDAError</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_wait_until_app_installed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
+        <span class="n">check_interval</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_app</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_try_to_finish_alert</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">check_interval</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s1">&#39;Fail to install because of timeout. timeout=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+
+<div class="viewcode-block" id="IOS.get_device_external_ip"><a class="viewcode-back" href="../../../../all_module/airtest.core.ios.client.html#airtest.core.ios.client.IOS.get_device_external_ip">[docs]</a>    <span class="k">def</span> <span class="nf">get_device_external_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">status</span><span class="p">()[</span><span class="s1">&#39;ios&#39;</span><span class="p">][</span><span class="s1">&#39;ip&#39;</span><span class="p">]</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">ios</span> <span class="o">=</span> <span class="n">IOS</span><span class="p">()</span>
+    <span class="n">ios</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+    <span class="c1"># ios._try_to_finish_alert(&#39;dismiss&#39;)</span>
+    <span class="c1"># print(ios.list_app())</span>
+    <span class="c1"># print(ios.start_app(&#39;com.netease.mhxyhtb&#39;))</span>
+    <span class="c1"># ios.uninstall_app(&#39;com.netease.oa2&#39;)</span>
+    <span class="c1"># # ios.install_app(&#39;https://adl.netease.com/d/g/xyq/c/htb?from=qr&#39;, com.netease.mhxyhtb)</span>
+    <span class="c1"># ios.install_app(&#39;itms-services://?action=download-manifest&amp;url=https://m.oa.netease.com/IOS/newOA_iOS8.plist&#39;, &#39;com.netease.oa2&#39;)</span>
+    <span class="c1"># ios.start_app(&#39;com.netease.oa2&#39;)</span>
+    <span class="c1"># ios.uninstall_app(&#39;com.netease.oa2&#39;)</span>
+    <span class="c1"># print time.time() - start</span>
+    <span class="c1"># ios.start_app(&#39;com.netease.mhxyhtb&#39;)</span>
+    <span class="c1"># ios.stop_app(&#39;com.netease.mhxyhtb&#39;)</span>
+    <span class="c1"># print ios.getCurrentScreenResolution()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

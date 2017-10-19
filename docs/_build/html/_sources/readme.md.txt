@@ -12,11 +12,6 @@ Automated Testing Framework
 *   Used with AirtestIDE out of box, production workflow supported: record->replay->report
 
 
-# Documentation
-
-[here](./docs/_build/html/index.html)
-
-
 # Install
 
 ```shell
