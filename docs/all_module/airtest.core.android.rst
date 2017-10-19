@@ -1,47 +1,31 @@
 airtest\.core\.android package
 ==============================
 
+.. automodule:: airtest.core.android
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
 .. toctree::
 
+    airtest.core.android.adb
     airtest.core.android.emulator
-    airtest.core.android.ime_helper
     airtest.core.android.utils
 
 Submodules
 ----------
 
-airtest\.core\.android\.android module
---------------------------------------
+.. toctree::
 
-.. automodule:: airtest.core.android.android
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   airtest.core.android.android
+   airtest.core.android.constant
+   airtest.core.android.ime
+   airtest.core.android.javacap
+   airtest.core.android.minicap
+   airtest.core.android.minitouch
+   airtest.core.android.recorder
+   airtest.core.android.rotation
 
-airtest\.core\.android\.constant module
----------------------------------------
-
-.. automodule:: airtest.core.android.constant
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-airtest\.core\.android\.ui module
----------------------------------
-
-.. automodule:: airtest.core.android.ui
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: airtest.core.android
-    :members:
-    :undoc-members:
-    :show-inheritance:
