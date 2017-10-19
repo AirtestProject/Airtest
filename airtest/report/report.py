@@ -3,11 +3,9 @@
 import json
 import os
 import io
-import argparse
 import jinja2
 from collections import defaultdict
 from airtest.report.report_gif import gen_gif
-from airtest.report.report_pfm import gen_pfm_json
 
 LOGFILE = "log.txt"
 SCREENDIR = "img_record"
@@ -149,7 +147,6 @@ class LogToHtml(object):
             st = 2
             while st in step:
                 if 'screen' in step[st]:
-                    print(self.log_root, step[st]['screen'])
                     step['screenshot'] = os.path.join(self.log_root, step[st]['screen'])
                     break
                 st += 1
@@ -159,7 +156,6 @@ class LogToHtml(object):
             if step['type'] == 'snapshot':
                 # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
                 #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
-                print(self.log_root, step[st]['screen'], 111)
                 step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
@@ -411,9 +407,6 @@ class LogToHtml(object):
             elif os.path.isfile(os.path.join(self.log_root, f)):
                 records.append(os.path.join(self.log_root, f))
 
-        # 生成性能数据log的json文件
-        pfm_devices, pfm_trace, pfm_path = gen_pfm_json(self.log_root)
-
         data = {}
         data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
@@ -425,13 +418,10 @@ class LogToHtml(object):
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
         data['run_start'] = self.run_start
-        data['static_root'] = self.static_root.encode('string-escape') if isinstance(self.static_root, str) else self.static_root
+        data['static_root'] = self.static_root  # .encode('string-escape') if isinstance(self.static_root, str) else self.static_root
         data['author'] = self.author
         data['records'] = records
-        data['pfm_devices'] = pfm_devices
-        data['pfm_trace'] = pfm_trace
-        data['pfm_path'] = pfm_path.encode("string-escape") if pfm_path else ""
-        return self._render(template_name, **data)     
+        return self._render(template_name, **data)
 
 
 def get_script_name(path):

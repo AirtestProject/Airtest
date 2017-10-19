@@ -200,9 +200,6 @@
             {% else %}
             <h4>作者：佚名</h4>
             {% endif %}
-            {% if pfm_devices %}
-                <h4>设备：{% for d in pfm_devices %}{{ d }}&nbsp;&nbsp;&nbsp;{% endfor %}</h4>
-            {% endif %}
             <h4>{{run_start}} -- {{run_end}}</h4>
 
             <h2 class="header">Assert 测试点汇总</h2>
@@ -244,12 +241,6 @@
             {% endif %}
           </div>
          </div><!-- /.gif -->
-
-        <!-- 性能图 -->
-        {% for pfm in pfm_devices %}
-            <br/>
-            <div class="pfm_chart" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}"></div>
-        {% endfor %}
 
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
           {% for t in step_type %}
@@ -499,67 +490,6 @@
   <script>
   $(window).resize();
   </script>
-    {% if pfm_path %}
-        <script type="application/javascript">
-            // 动态加载js
-            function JsLoader(){
-                this.load=function(url){
-                         //获取所有的<script>标记
-                         var ss=document.getElementsByTagName("script");
-                         //判断指定的文件是否已经包含，如果已包含则触发onsuccess事件并返回
-                         for (i=0;i<ss.length;i++){
-                             if (ss[i].src && ss[i].src.indexOf(url)!=-1){
-                                 this.onsuccess();
-                                 return;
-                             }
-                         }
-                         //创建script结点,并将其属性设为外联javascript文件
-                         s=document.createElement("script");
-                         s.type="text/javascript";
-                         s.src=url;
-                         //获取head结点，并将<script>插入到其中
-                         var head=document.getElementsByTagName("head")[0];
-                         head.appendChild(s);
-
-                         //获取自身的引用
-                         var self=this;
-                         //对于IE浏览器，使用readystatechange事件判断是否载入成功
-                         //对于其他浏览器，使用onload事件判断载入是否成功
-                         //s.onload=s.onreadystatechange=function(){
-                         s.onload=s.onreadystatechange=function(){
-                             //在此函数中this指针指的是s结点对象，而不是JsLoader实例,
-                             //所以必须用self来调用onsuccess事件，下同。
-                             if (this.readyState && this.readyState=="loading") return;
-                             self.onsuccess();
-                         }
-                         s.onerror=function(){
-                             head.removeChild(s);
-                             self.onfailure();
-                         }
-                     }
-                }
-            var jsLoader=new JsLoader();
-            var chart_load = false;
-            var json_load = false;
-            jsLoader.onsuccess=function(){
-                json_load = true;
-                if (chart_load === false) {
-                    chart_load = true;
-                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js")
-                }
-            };
-            jsLoader.onfailure=function () {
-                if (json_load === false) {
-                    json_load = true;
-                    $.getJSON("{{ pfm_path }}pfm.json", function (data) {
-                        json_data = data;
-                        jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts.js");
-                    });
-                }
-            };
-            jsLoader.load("{{ pfm_path }}pfm_local.json");
-        </script>
-    {% endif %}
   </body>
 </html>
 

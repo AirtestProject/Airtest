@@ -172,5 +172,5 @@ texinfo_documents = [
 
 # default is alphabetical, we trust source sequence
 autodoc_member_order = 'bysource'
-
+add_module_names = False
 
