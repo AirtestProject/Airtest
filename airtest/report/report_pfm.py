@@ -46,7 +46,7 @@ def gen_pfm_json(log_path):
         with open(os.path.join(log_path, "pfm.json"), "w+") as f:
             f.write(json.dumps(ret))
     except:
-        print traceback.format_exc()
+        traceback.print_exc()
         return [], [], ""
     return devices, trace_list, log_path
 

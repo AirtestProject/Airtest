@@ -53,11 +53,11 @@ def import_device_cls(platform):
     """lazy import device class"""
     platform = platform.lower()
     if platform == "android":
-        from android import Android as cls
+        from .android import Android as cls
     elif platform == "windows":
-        from win import Windows as cls
+        from .win import Windows as cls
     elif platform == "ios":
-        from ios import IOS as cls
+        from .ios import IOS as cls
     else:
         raise RuntimeError("Unknown platform: %s" % platform)
     return cls

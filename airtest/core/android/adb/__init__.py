@@ -71,10 +71,9 @@ class ADB(object):
                 raise RuntimeError("please set serialno first")
             cmd_options = cmd_options + ['-s', self.serialno]
         cmds = cmd_options + cmds
-        cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
-
         LOGGING.debug(" ".join(cmds))
 
+        cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -280,7 +279,7 @@ class ADB(object):
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
 
-    def install(self, filepath, replace=False):
+    def install_app(self, filepath, replace=False):
         if not replace:
             cmds = ["install", filepath]
         else:
@@ -303,7 +302,7 @@ class ADB(object):
         else:
             self.shell(['pm', 'install', '-r', device_path])
 
-    def uninstall(self, package):
+    def uninstall_app(self, package):
         """adb uninstall"""
         return self.cmd(['uninstall', package])
 

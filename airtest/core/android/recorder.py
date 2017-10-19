@@ -3,7 +3,7 @@ import re
 from airtest.core.error import AirtestError
 from airtest.core.utils import NonBlockingStreamReader, get_logger
 from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE
-from airtest.core.utils.compat import apkparser
+from airtest.core.android.apkparser.apk import APK
 LOGGING = get_logger('recorder')
 
 
@@ -16,11 +16,11 @@ class Recorder(object):
         self.recording_proc = None
 
     def get_ready(self):
-        self._init_requirement_apk(YOSEMITE_APK, YOSEMITE_PACKAGE)
+        self._install_apk_upgrade(YOSEMITE_APK, YOSEMITE_PACKAGE)
 
-    def _init_requirement_apk(self, apk_path, package):
-        apk_version = apkparser.version(apk_path)
-        installed_version = self.adb.get_package_version(package)
+    def _install_apk_upgrade(self, apk_path, package):
+        apk_version = int(APK(apk_path).androidversion_code)
+        installed_version = int(self.adb.get_package_version(package))
         LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
         if not installed_version or apk_version > installed_version:
             self.adb.install_app(apk_path, replace=True)

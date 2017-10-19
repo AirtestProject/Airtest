@@ -59,22 +59,19 @@ class Android(Device):
         return self.adb.clear_app(package)
 
     def install_app(self, filepath, replace=False):
-        self.adb.install(filepath, replace=replace)
+        self.adb.install_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
-        return self.adb.uninstall(package)
+        return self.adb.uninstall_app(package)
 
     def snapshot(self, filename=None, ensure_orientation=True):
         """default not write into file."""
         if self.cap_method == CAP_METHOD.MINICAP_STREAM:
             self.rotation_watcher.get_ready()
-            # self.minicap.get_ready()
             screen = self.minicap.get_frame_from_stream()
         elif self.cap_method == CAP_METHOD.MINICAP:
-            # self.minicap.get_ready()
             screen = self.minicap.get_frame()
         elif self.cap_method == CAP_METHOD.JAVACAP:
-            # self.javacap.get_ready()
             screen = self.javacap.get_frame()
         else:
             screen = self.adb.snapshot()

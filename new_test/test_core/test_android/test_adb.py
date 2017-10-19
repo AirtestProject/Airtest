@@ -177,20 +177,20 @@ class TestADB(unittest.TestCase):
 
         try:
             # uninstall first
-            self.adb.uninstall(TEST_PKG)
+            self.adb.uninstall_app(TEST_PKG)
         except AdbShellError as e:
             pass
 
 
-        self.adb.install(TEST_APK)
-        self.adb.install(TEST_APK,overinstall=True)
+        self.adb.install_app(TEST_APK)
+        self.adb.install_app(TEST_APK, overinstall=True)
         with self.assertRaises(RuntimeError):
-            self.adb.install("sdfasdfsf")
+            self.adb.install_app("sdfasdfsf")
 
 
     # need real phone
     def test_uninstall(self):
-        output=self.adb.uninstall(TEST_PKG)
+        output=self.adb.uninstall_app(TEST_PKG)
         self.assertIsInstance(output, str_class)
         #self.cmd.devices()
 
