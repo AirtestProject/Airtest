@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.win.window_mgr &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Airtest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.main.html">airtest.core.main module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.core.win.window_mgr</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.core.win.window_mgr</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+
+<span class="kn">import</span> <span class="nn">win32ui</span>
+<span class="kn">import</span> <span class="nn">win32gui</span>
+<span class="kn">import</span> <span class="nn">win32con</span>
+<span class="kn">import</span> <span class="nn">win32api</span>
+
+
+<div class="viewcode-block" id="WindowMgr"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr">[docs]</a><span class="k">class</span> <span class="nc">WindowMgr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;Encapsulates some calls to the winapi for window management&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_found</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_list_found</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="WindowMgr.snapshot_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.snapshot_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;tmp.png&quot;</span><span class="p">):</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="c1"># pos = (rect[0], rect[1])</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># print &quot;in winutils.py WindowMgr():&quot;, pos, width, height</span>
+        <span class="n">hwndDC</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowDC</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="n">mfcDC</span> <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateDCFromHandle</span><span class="p">(</span><span class="n">hwndDC</span><span class="p">)</span>
+        <span class="n">saveDC</span> <span class="o">=</span> <span class="n">mfcDC</span><span class="o">.</span><span class="n">CreateCompatibleDC</span><span class="p">()</span>
+
+        <span class="n">saveBitMap</span> <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateBitmap</span><span class="p">()</span>
+        <span class="n">saveBitMap</span><span class="o">.</span><span class="n">CreateCompatibleBitmap</span><span class="p">(</span><span class="n">mfcDC</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="n">saveDC</span><span class="o">.</span><span class="n">SelectObject</span><span class="p">(</span><span class="n">saveBitMap</span><span class="p">)</span>
+        <span class="n">saveDC</span><span class="o">.</span><span class="n">BitBlt</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">mfcDC</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">win32con</span><span class="o">.</span><span class="n">SRCCOPY</span><span class="p">)</span>
+        <span class="n">saveBitMap</span><span class="o">.</span><span class="n">SaveBitmapFile</span><span class="p">(</span><span class="n">saveDC</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="WindowMgr.crop_screen_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.crop_screen_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">crop_screen_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;tmp.png&quot;</span><span class="p">):</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">screen</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">min</span><span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">x_min</span> <span class="o">&gt;</span> <span class="n">w</span><span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">y_min</span> <span class="o">&gt;</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">x_max</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y_max</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;hwnd area is out of screen, cannot get its image.&quot;</span><span class="p">)</span>
+        <span class="n">img_crop</span> <span class="o">=</span> <span class="n">screen</span><span class="p">[</span><span class="n">y_min</span><span class="p">:</span><span class="n">y_max</span><span class="p">,</span> <span class="n">x_min</span><span class="p">:</span><span class="n">x_max</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">img_crop</span></div>
+
+<div class="viewcode-block" id="WindowMgr.get_wnd_pos_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.get_wnd_pos_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">get_wnd_pos_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">use_crop_screen</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">use_crop_screen</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pos</span></div>
+
+<div class="viewcode-block" id="WindowMgr.get_childhwnd_list_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.get_childhwnd_list_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">get_childhwnd_list_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">child_hwnd_list</span><span class="p">,</span> <span class="n">w_h</span><span class="p">):</span>
+        <span class="c1"># 传入当前的child_hwnd_list，去除当前已经不在hwnd内的child_hwnd</span>
+        <span class="c1">#     如果发现全都不在了，那么就使用w_h进行查找新的child_hwnd_list</span>
+        <span class="c1">#     如果发现w_h的也不在了，那么就按照w_h的比例相同的原则进行查找，还没有，就报错...</span>
+
+        <span class="c1"># 第一步:根据父窗口的hwnd，将子窗口的hwnd、信息[x,y,w,h]一一提取出来：</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">win32gui</span><span class="o">.</span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_child_hwnd_in_target_wnd</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># 该父窗口没有子窗口，直接return [].</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="c1"># 第二步：找到子窗口hwnd是否存在，剔除不存在的子窗口，如果child_hwnd_list中仍然有子窗口存在，直接返回：</span>
+        <span class="n">all_child_hwnd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">c_hwnd</span> <span class="ow">in</span> <span class="n">child_hwnd_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c_hwnd</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_child_hwnd_list</span><span class="p">:</span>
+                <span class="n">child_hwnd_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">c_hwnd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">child_hwnd_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">child_hwnd_list</span>
+        <span class="c1"># 第三步：发现child_hwnd_list已变成[]，根据w_h重新查找一遍：</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_child_hwnd_list</span><span class="p">:</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="o">==</span> <span class="n">w_h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">height</span> <span class="o">==</span> <span class="n">w_h</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">child_hwnd_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">child_hwnd_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">child_hwnd_list</span>
+        <span class="c1"># 第四步：发现child_hwnd_list仍为[]，则根据w_h的宽高比重新查找一遍：</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_child_hwnd_list</span><span class="p">:</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">height</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">w_h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">height</span> <span class="o">-</span> <span class="n">w_h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">w_h</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">0.00001</span><span class="p">:</span>
+                    <span class="n">child_hwnd_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">child_hwnd_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">child_hwnd_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;no child_hwnd found, cannot get the precise pos of record-area! (from winutils.py)&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_find_child_hwnd_in_target_wnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">lparam</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;本函数用于将单个父窗口的所有子窗口存入self.wnd_rect_origin&#39;&#39;&#39;</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">IsWindowVisible</span><span class="p">(</span><span class="n">hwnd</span><span class="p">):</span>
+            <span class="c1"># 将目标父窗口中的子窗口hwnd和rect一一加入目标self.target_child_hwnd_dict：</span>
+            <span class="c1"># self.target_child_hwnd_dict[hwnd] = rect</span>
+            <span class="c1"># 将[x,y,w,h]存入child_hwnd_dict的value内：</span>
+            <span class="n">rect_xywh</span> <span class="o">=</span> <span class="p">[</span><span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="c1"># hwnd_data = {&quot;title&quot;: title, &quot;resolution&quot;: reso, &quot;target_child_hwnd_list&quot;: rect_xywh}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_child_hwnd_dict</span><span class="p">[</span><span class="n">hwnd</span><span class="p">]</span> <span class="o">=</span> <span class="n">rect_xywh</span>
+            
+<div class="viewcode-block" id="WindowMgr.find_window"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.find_window">[docs]</a>    <span class="k">def</span> <span class="nf">find_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">window_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;find a window by its class_name&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">FindWindow</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">window_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WindowMgr.find_hwnd_title"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.find_hwnd_title">[docs]</a>    <span class="k">def</span> <span class="nf">find_hwnd_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_wnd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;获取指定hwnd的title.&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">_wnd_enum_callback</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">h_wnd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">hwnd</span> <span class="o">==</span> <span class="n">h_wnd</span><span class="p">:</span>
+                <span class="n">window_title</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowText</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+
+                <span class="c1"># fix py 3</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">window_title</span> <span class="o">=</span> <span class="n">window_title</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;gbk&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="k">pass</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">_wnd_title_toget</span> <span class="o">=</span> <span class="n">window_title</span>
+                <span class="c1"># print window_title.encode(&quot;utf8&quot;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wnd_title_toget</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">win32gui</span><span class="o">.</span><span class="n">EnumWindows</span><span class="p">(</span><span class="n">_wnd_enum_callback</span><span class="p">,</span> <span class="n">h_wnd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wnd_title_toget</span></div>
+
+<div class="viewcode-block" id="WindowMgr.find_all_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.find_all_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">find_all_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;获取所有一级窗口的hwnd.&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">_wnd_enum_callback</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">test_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_hwnd_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_hwnd_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">win32gui</span><span class="o">.</span><span class="n">EnumWindows</span><span class="p">(</span><span class="n">_wnd_enum_callback</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_hwnd_list</span></div>
+
+    <span class="k">def</span> <span class="nf">_window_enum_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Pass to win32gui.EnumWindows() to check all the opened windows&#39;&#39;&#39;</span>
+        <span class="n">window_title</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowText</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">window_title</span> <span class="o">=</span> <span class="n">window_title</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;gbk&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">chardet</span>
+            <span class="c1"># support py3</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">window_title</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-*-*- windows-title codec:&quot;</span><span class="p">,</span> <span class="n">chardet</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">window_title</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="c1"># print &quot;%s %s&quot; % (repr(window_title), repr(wildcard))</span>
+        <span class="k">if</span> <span class="n">window_title</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">wildcard</span><span class="p">,</span> <span class="n">window_title</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_handle_found</span> <span class="o">=</span> <span class="n">hwnd</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_handle_list_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+
+                <span class="c1"># &quot;UnicodeEncodeError: &#39;ascii&#39; codec can&#39;t encode characters in position 0-1: ordinal not in range(128)&quot; </span>
+                <span class="c1">#print(window_title.encode(&quot;utf8&quot;))</span>
+
+<div class="viewcode-block" id="WindowMgr.find_window_wildcard"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.find_window_wildcard">[docs]</a>    <span class="k">def</span> <span class="nf">find_window_wildcard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_found</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">win32gui</span><span class="o">.</span><span class="n">EnumWindows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_window_enum_callback</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_found</span></div>
+
+<div class="viewcode-block" id="WindowMgr.find_window_list"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.find_window_list">[docs]</a>    <span class="k">def</span> <span class="nf">find_window_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_list_found</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">win32gui</span><span class="o">.</span><span class="n">EnumWindows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_window_enum_callback</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_list_found</span></div>
+
+    <span class="c1"># def find_window_wildcard(self, wildcard):</span>
+    <span class="c1">#     self._handle_found = None</span>
+    <span class="c1">#     # win32gui.EnumWindows(self._window_enum_callback, wildcard)</span>
+    <span class="c1">#     self.find_hwnd_from_all_hwnd_info(wildcard)</span>
+    <span class="c1">#     return self._handle_found</span>
+
+    <span class="c1"># def find_window_list(self, wildcard):</span>
+    <span class="c1">#     self._handle_list_found = []</span>
+    <span class="c1">#     # win32gui.EnumWindows(self._window_enum_callback, wildcard)</span>
+    <span class="c1">#     self.find_hwnd_from_all_hwnd_info(wildcard)</span>
+    <span class="c1">#     return self._handle_list_found</span>
+
+    <span class="c1"># def find_hwnd_from_all_hwnd_info(self, wildcard):</span>
+    <span class="c1">#     self.all_hwnd_info_list = self.get_all_hwnd_info()</span>
+    <span class="c1">#     for hwnd_info in self.all_hwnd_info_list:</span>
+    <span class="c1">#         window_title, hwnd = hwnd_info[&quot;title&quot;], hwnd_info[&quot;hwnd&quot;]</span>
+    <span class="c1">#         if window_title:</span>
+    <span class="c1">#             try:</span>
+    <span class="c1">#                 m = re.search(wildcard, window_title)</span>
+    <span class="c1">#             except:</span>
+    <span class="c1">#                 m = None</span>
+    <span class="c1">#             if m != None:</span>
+    <span class="c1">#                 self._handle_found = hwnd</span>
+    <span class="c1">#                 self._handle_list_found.append(hwnd)</span>
+    <span class="c1">#                 # print window_title.encode(&quot;utf8&quot;)</span>
+
+    <span class="c1"># def get_all_hwnd_info(self):</span>
+    <span class="c1">#     all_hwnd_info_list = []  # 用于存储所有的窗口信息dict的列表</span>
+    <span class="c1">#     all_parent_hwnd = self.get_main_windows()</span>
+    <span class="c1">#     for parent_hwnd in all_parent_hwnd:</span>
+    <span class="c1">#         rect = win32gui.GetWindowRect(parent_hwnd)</span>
+    <span class="c1">#         window_title = win32gui.GetWindowText(parent_hwnd)</span>
+    <span class="c1">#         window_title = window_title.decode(&quot;gbk&quot;)</span>
+    <span class="c1">#         info = {&quot;rect&quot;: rect, &quot;title&quot;: window_title, &quot;hwnd&quot;: parent_hwnd, &quot;is_parent&quot;: 1}</span>
+    <span class="c1">#         all_hwnd_info_list.append(info)</span>
+
+    <span class="c1">#         try:</span>
+    <span class="c1">#             win32gui.EnumChildWindows(parent_hwnd, self.find_child_hwnd_in_parent_wnd, None)</span>
+    <span class="c1">#         except:</span>
+    <span class="c1">#             pass</span>
+    <span class="c1">#     for i in all_hwnd_info_list:</span>
+    <span class="c1">#         if i[&quot;title&quot;]:</span>
+    <span class="c1">#             # print i[&quot;hwnd&quot;], i[&quot;title&quot;].encode(&quot;utf8&quot;)</span>
+    <span class="c1">#             pass</span>
+    <span class="c1">#     return all_hwnd_info_list</span>
+
+    <span class="c1"># def get_main_windows(self):</span>
+    <span class="c1">#     &#39;&#39;&#39;</span>
+    <span class="c1">#         获取一级窗口: Returns windows in z-order (top first)</span>
+    <span class="c1">#     &#39;&#39;&#39;</span>
+    <span class="c1">#     user32 = windll.user32</span>
+    <span class="c1">#     wndList = []</span>
+    <span class="c1">#     top = user32.GetTopWindow(None)</span>
+    <span class="c1">#     if not top:</span>
+    <span class="c1">#         return wndList</span>
+    <span class="c1">#     wndList.append(top)</span>
+    <span class="c1">#     while True:</span>
+    <span class="c1">#         next = user32.GetWindow(wndList[-1], win32con.GW_HWNDNEXT)</span>
+    <span class="c1">#         if not next:</span>
+    <span class="c1">#             break</span>
+    <span class="c1">#         wndList.append(next)</span>
+    <span class="c1">#     return wndList</span>
+
+    <span class="c1"># def find_child_hwnd_in_parent_wnd(self, hwnd, lparam):</span>
+    <span class="c1">#     &quot;&quot;&quot;遍历子窗口回调函数&quot;&quot;&quot;</span>
+    <span class="c1">#     rect = win32gui.GetWindowRect(hwnd)</span>
+    <span class="c1">#     window_title = win32gui.GetWindowText(hwnd)</span>
+    <span class="c1">#     window_title = window_title.decode(&quot;gbk&quot;)</span>
+    <span class="c1">#     info = {&quot;rect&quot;: rect, &quot;title&quot;: window_title, &quot;hwnd&quot;: hwnd, &quot;is_parent&quot;: 0}</span>
+    <span class="c1">#     all_hwnd_info_list.append(info)</span>
+
+<div class="viewcode-block" id="WindowMgr.set_foreground"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.set_foreground">[docs]</a>    <span class="k">def</span> <span class="nf">set_foreground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;put the window in the foreground&quot;&quot;&quot;</span>
+        <span class="c1"># 如果窗口最小化，那么需要将窗口正常显示出来:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">IsIconic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">):</span>
+            <span class="n">win32gui</span><span class="o">.</span><span class="n">ShowWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>
+            <span class="n">win32gui</span><span class="o">.</span><span class="n">SetForegroundWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WindowMgr.get_window_pos"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.get_window_pos">[docs]</a>    <span class="k">def</span> <span class="nf">get_window_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get window pos in (x0, y0, x1, y1)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WindowMgr.set_window_pos"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.set_window_pos">[docs]</a>    <span class="k">def</span> <span class="nf">set_window_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_window_pos</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">SetWindowPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">,</span><span class="n">win32con</span><span class="o">.</span><span class="n">HWND_TOP</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">rec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">rec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">rec</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">rec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WindowMgr.get_window_title"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.WindowMgr.get_window_title">[docs]</a>    <span class="k">def</span> <span class="nf">get_window_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>    
+            <span class="k">return</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># windows双屏-单屏的截图支持</span>
+<div class="viewcode-block" id="get_screen_shot"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.get_screen_shot">[docs]</a><span class="k">def</span> <span class="nf">get_screen_shot</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;screenshot.png&quot;</span><span class="p">):</span>
+    <span class="n">hwnd</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetDesktopWindow</span><span class="p">()</span>
+    <span class="c1"># print hwnd</span>
+    <span class="c1"># you can use this to capture only a specific window</span>
+    <span class="c1">#l, t, r, b = win32gui.GetWindowRect(hwnd)</span>
+    <span class="c1">#w = r - l</span>
+    <span class="c1">#h = b - t</span>
+
+    <span class="c1"># get complete virtual screen including all monitors</span>
+    <span class="n">SM_XVIRTUALSCREEN</span> <span class="o">=</span> <span class="mi">76</span>
+    <span class="n">SM_YVIRTUALSCREEN</span> <span class="o">=</span> <span class="mi">77</span>
+    <span class="n">SM_CXVIRTUALSCREEN</span> <span class="o">=</span> <span class="mi">78</span>
+    <span class="n">SM_CYVIRTUALSCREEN</span> <span class="o">=</span> <span class="mi">79</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">vscreenwidth</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="n">SM_CXVIRTUALSCREEN</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">vscreenheigth</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="n">SM_CYVIRTUALSCREEN</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">vscreenx</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="n">SM_XVIRTUALSCREEN</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">vscreeny</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="n">SM_YVIRTUALSCREEN</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="n">w</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">h</span>
+    <span class="c1"># print l, t, r, b, &#39; -&gt; &#39;, w, h</span>
+
+    <span class="n">hwndDC</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowDC</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+    <span class="n">mfcDC</span>  <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateDCFromHandle</span><span class="p">(</span><span class="n">hwndDC</span><span class="p">)</span>
+    <span class="n">saveDC</span> <span class="o">=</span> <span class="n">mfcDC</span><span class="o">.</span><span class="n">CreateCompatibleDC</span><span class="p">()</span>
+
+    <span class="n">saveBitMap</span> <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateBitmap</span><span class="p">()</span>
+    <span class="n">saveBitMap</span><span class="o">.</span><span class="n">CreateCompatibleBitmap</span><span class="p">(</span><span class="n">mfcDC</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">saveDC</span><span class="o">.</span><span class="n">SelectObject</span><span class="p">(</span><span class="n">saveBitMap</span><span class="p">)</span>
+    <span class="n">saveDC</span><span class="o">.</span><span class="n">BitBlt</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span>  <span class="n">mfcDC</span><span class="p">,</span>  <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span>  <span class="n">win32con</span><span class="o">.</span><span class="n">SRCCOPY</span><span class="p">)</span>
+    <span class="n">saveBitMap</span><span class="o">.</span><span class="n">SaveBitmapFile</span><span class="p">(</span><span class="n">saveDC</span><span class="p">,</span>  <span class="s2">&quot;screencapture.bmp&quot;</span><span class="p">)</span>
+    <span class="c1"># get screencapture in cv2 format</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;screencapture.bmp&quot;</span><span class="p">)</span>
+    <span class="c1"># delete temp file:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;screencapture.bmp&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="get_resolution"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.get_resolution">[docs]</a><span class="k">def</span> <span class="nf">get_resolution</span><span class="p">(</span><span class="n">hwnd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">hwnd</span><span class="p">:</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span></div>
+
+
+<div class="viewcode-block" id="get_window_pos"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.window_mgr.html#airtest.core.win.window_mgr.get_window_pos">[docs]</a><span class="k">def</span> <span class="nf">get_window_pos</span><span class="p">(</span><span class="n">window_title</span><span class="p">):</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">WindowMgr</span><span class="p">()</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">find_window_wildcard</span><span class="p">(</span><span class="n">window_title</span><span class="p">)</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">_handle_found</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">window</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;window not found&quot;</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

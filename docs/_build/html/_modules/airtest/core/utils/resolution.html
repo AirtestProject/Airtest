@@ -174,12 +174,12 @@
 <span class="kn">from</span> <span class="nn">airtest.core.error</span> <span class="k">import</span> <span class="n">AirtestError</span>
 
 
-<div class="viewcode-block" id="no_resize"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.resolution.html#airtest.core.settings.no_resize">[docs]</a><span class="k">def</span> <span class="nf">no_resize</span><span class="p">(</span><span class="n">w_a</span><span class="p">,</span> <span class="n">h_a</span><span class="p">,</span> <span class="n">resolution_a</span><span class="p">,</span> <span class="n">resolution_b</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">no_resize</span><span class="p">(</span><span class="n">w_a</span><span class="p">,</span> <span class="n">h_a</span><span class="p">,</span> <span class="n">resolution_a</span><span class="p">,</span> <span class="n">resolution_b</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;无缩放策略.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">w_a</span><span class="p">,</span> <span class="n">h_a</span></div>
+    <span class="k">return</span> <span class="n">w_a</span><span class="p">,</span> <span class="n">h_a</span>
 
 
-<div class="viewcode-block" id="cocos_min_strategy"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.resolution.html#airtest.core.settings.cocos_min_strategy">[docs]</a><span class="k">def</span> <span class="nf">cocos_min_strategy</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sch_resolution</span><span class="p">,</span> <span class="n">src_resolution</span><span class="p">,</span> <span class="n">design_resolution</span><span class="o">=</span><span class="p">(</span><span class="mi">960</span><span class="p">,</span> <span class="mi">640</span><span class="p">)):</span>
+<span class="k">def</span> <span class="nf">cocos_min_strategy</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sch_resolution</span><span class="p">,</span> <span class="n">src_resolution</span><span class="p">,</span> <span class="n">design_resolution</span><span class="o">=</span><span class="p">(</span><span class="mi">960</span><span class="p">,</span> <span class="mi">640</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;图像缩放规则: COCOS中的MIN策略.&quot;&quot;&quot;</span>
     <span class="c1"># 输入参数: w-h待缩放图像的宽高，sch_resolution为待缩放图像的来源分辨率</span>
     <span class="c1">#           src_resolution 待适配屏幕的分辨率  design_resolution 软件的设计分辨率</span>
@@ -188,10 +188,10 @@
     <span class="n">scale_src</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">src_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">design_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">src_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">design_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">scale</span> <span class="o">=</span> <span class="n">scale_src</span> <span class="o">/</span> <span class="n">scale_sch</span>
     <span class="n">h_re</span><span class="p">,</span> <span class="n">w_re</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">scale</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">w_re</span><span class="p">,</span> <span class="n">h_re</span></div>
+    <span class="k">return</span> <span class="n">w_re</span><span class="p">,</span> <span class="n">h_re</span>
 
 
-<div class="viewcode-block" id="predict_area"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.resolution.html#airtest.core.settings.predict_area">[docs]</a><span class="k">def</span> <span class="nf">predict_area</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">op_pos</span><span class="p">,</span> <span class="n">radius_x</span><span class="p">,</span> <span class="n">radius_y</span><span class="p">,</span> <span class="n">src_resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">predict_area</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">op_pos</span><span class="p">,</span> <span class="n">radius_x</span><span class="p">,</span> <span class="n">radius_y</span><span class="p">,</span> <span class="n">src_resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;根据参数进行screen的预测区域.&quot;&quot;&quot;</span>
     <span class="c1"># 预测操作位置: (按照比例进行点预测) clk_x, clk_y是规划为比例的</span>
     <span class="n">clk_x</span><span class="p">,</span> <span class="n">clk_y</span> <span class="o">=</span> <span class="n">op_pos</span>
@@ -223,7 +223,7 @@
         <span class="c1"># 输出调试信息.</span>
         <span class="n">log_info</span> <span class="o">=</span> <span class="s2">&quot;predict rect:  X (</span><span class="si">%(start_x)s</span><span class="s2">:</span><span class="si">%(end_x)s</span><span class="s2">)   Y (</span><span class="si">%(start_y)s</span><span class="s2">:</span><span class="si">%(end_y)s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">{</span><span class="s2">&quot;start_x&quot;</span><span class="p">:</span> <span class="n">start_x</span><span class="p">,</span> <span class="s2">&quot;end_x&quot;</span><span class="p">:</span><span class="n">end_x</span><span class="p">,</span> <span class="s2">&quot;start_y&quot;</span><span class="p">:</span> <span class="n">start_y</span><span class="p">,</span> <span class="s2">&quot;end_y&quot;</span><span class="p">:</span> <span class="n">end_y</span><span class="p">}</span>
 
-    <span class="k">return</span> <span class="n">img_src</span><span class="p">,</span> <span class="n">left_top_pos</span><span class="p">,</span> <span class="n">log_info</span></div>
+    <span class="k">return</span> <span class="n">img_src</span><span class="p">,</span> <span class="n">left_top_pos</span><span class="p">,</span> <span class="n">log_info</span>
 </pre></div>
 
            </div>

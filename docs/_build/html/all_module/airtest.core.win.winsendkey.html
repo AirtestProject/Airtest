@@ -193,8 +193,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="airtest-core-win-winsendkey-module">
-<h1>airtest.core.win.winsendkey module<a class="headerlink" href="#airtest-core-win-winsendkey-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-airtest.core.win.winsendkey">
+<span id="airtest-core-win-winsendkey-module"></span><h1>airtest.core.win.winsendkey module<a class="headerlink" href="#module-airtest.core.win.winsendkey" title="Permalink to this headline">¶</a></h1>
+<p>Check that SendInput can work the way we want it to</p>
+<p>The tips and tricks at <a class="reference external" href="http://www.pinvoke.net/default.aspx/user32.sendinput">http://www.pinvoke.net/default.aspx/user32.sendinput</a>
+is useful!</p>
+<dl class="exception">
+<dt id="airtest.core.win.winsendkey.KeySequenceError">
+<em class="property">exception </em><code class="descname">KeySequenceError</code><a class="reference internal" href="../_modules/airtest/core/win/winsendkey.html#KeySequenceError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.win.winsendkey.KeySequenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Exception raised when a key sequence string has a syntax error</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.win.winsendkey.SendKeys">
+<code class="descname">SendKeys</code><span class="sig-paren">(</span><em>keys</em>, <em>pause=0.05</em>, <em>with_spaces=False</em>, <em>with_tabs=False</em>, <em>with_newlines=False</em>, <em>turn_off_numlock=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/win/winsendkey.html#SendKeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.win.winsendkey.SendKeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the keys and type them</p>
+</dd></dl>
+
 </div>
 
 

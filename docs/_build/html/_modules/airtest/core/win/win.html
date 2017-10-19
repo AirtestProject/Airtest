@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.win.win &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Airtest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.main.html">airtest.core.main module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.core.win.win</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.core.win.win</h1><div class="highlight"><pre>
+<span></span><span class="c1"># _*_ coding:UTF-8 _*_</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">win32gui</span>
+<span class="kn">import</span> <span class="nn">win32process</span>
+<span class="kn">import</span> <span class="nn">win32com.client</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">ImageGrab</span>
+
+<span class="kn">import</span> <span class="nn">aircv</span>
+<span class="kn">from</span> <span class="nn">airtest.core.device</span> <span class="k">import</span> <span class="n">Device</span>
+
+<span class="kn">from</span> <span class="nn">airtest.core.win.winsendkey</span> <span class="k">import</span> <span class="n">SendKeys</span>
+<span class="kn">from</span> <span class="nn">airtest.core.win.keyboard</span> <span class="k">import</span> <span class="n">key_input</span>
+<span class="kn">from</span> <span class="nn">airtest.core.win.mouse</span> <span class="k">import</span> <span class="n">mouse_click</span><span class="p">,</span> <span class="n">mouse_drag</span><span class="p">,</span> <span class="n">mouse_down</span><span class="p">,</span> <span class="n">mouse_up</span><span class="p">,</span> <span class="n">mouse_move</span>
+<span class="kn">from</span> <span class="nn">airtest.core.win.window_mgr</span> <span class="k">import</span> <span class="n">WindowMgr</span><span class="p">,</span> <span class="n">get_screen_shot</span><span class="p">,</span> <span class="n">get_resolution</span>
+
+
+<div class="viewcode-block" id="Windows"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows">[docs]</a><span class="k">class</span> <span class="nc">Windows</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Windows Client&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span> <span class="o">=</span> <span class="n">WindowMgr</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">handle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_title</span> <span class="o">=</span> <span class="n">window_title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_window_by_title</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_set_window_by_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_title</span><span class="p">:</span>
+            <span class="n">handles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_window_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_title</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">handles</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;no window found with title: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_title</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">handles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Windows.shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.shell">[docs]</a>    <span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.snapshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;default not write into file.&quot;&quot;&quot;</span>
+        <span class="c1"># snapshot in window handle</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_by_hwnd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
+        <span class="c1"># snapshot in full screen</span>
+        <span class="n">screen</span> <span class="o">=</span> <span class="n">get_screen_shot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">aircv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">screen</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">screen</span></div>
+
+<div class="viewcode-block" id="Windows.snapshot_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.snapshot_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;tmp.png&quot;</span><span class="p">,</span> <span class="n">hwnd_to_snap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_crop_screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            根据窗口句柄进行截图，如果发现窗口句柄已经不在则直接返回None.</span>
+<span class="sd">            返回值还包括窗口左上角的位置.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 如果当前的hwnd不存在，直接返回None</span>
+        <span class="n">hwnd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_all_hwnd</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">hwnd_to_snap</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hwnd_list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;hwnd not exist in system !&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># print &quot;snapshot_by_hwnd in win.py&quot;, hwnd, filename</span>
+            <span class="k">if</span> <span class="n">use_crop_screen</span><span class="p">:</span>  <span class="c1"># 小马电脑上有问题，暂时启用crop_screen_by_hwnd=True：</span>
+                <span class="n">screen</span> <span class="o">=</span> <span class="n">get_screen_shot</span><span class="p">()</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">crop_screen_by_hwnd</span><span class="p">(</span><span class="n">screen</span><span class="p">,</span> <span class="n">hwnd</span><span class="o">=</span><span class="n">hwnd_to_snap</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">snapshot_by_hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="o">=</span><span class="n">hwnd_to_snap</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="n">aircv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Windows.get_wnd_pos_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.get_wnd_pos_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">get_wnd_pos_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">use_crop_screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; 根据窗口句柄，返回窗口左上角的位置. &quot;&quot;&quot;</span>
+        <span class="c1"># 如果使用的是use_crop_screen的方法，计算wnd_pos时就不能有负数了：</span>
+        <span class="c1">#     否则在窗口左边在屏幕外时，将会有实际操作的左偏移：</span>
+        <span class="n">wnd_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">get_wnd_pos_by_hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">use_crop_screen</span><span class="o">=</span><span class="n">use_crop_screen</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wnd_pos</span></div>
+
+<div class="viewcode-block" id="Windows.get_childhwnd_list_by_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.get_childhwnd_list_by_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">get_childhwnd_list_by_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">child_hwnd_list</span><span class="p">,</span> <span class="n">w_h</span><span class="p">):</span>
+        <span class="c1"># 传入当前的child_hwnd_list，去除当前已经不在hwnd内的child_hwnd</span>
+        <span class="c1">#     如果发现全都不在了，那么就使用w_h进行查找新的child_hwnd_list</span>
+        <span class="c1">#     如果发现w_h的也不在了，那么就按照w_h的比例相同的原则进行查找，还没有，就报错...</span>
+        <span class="n">new_child_hwnd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">get_childhwnd_list_by_hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">child_hwnd_list</span><span class="p">,</span> <span class="n">w_h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_child_hwnd_list</span></div>
+
+    <span class="c1"># def keyevent(self, keyname, escape=False, combine=None, shift=False, ctrl=False, alt=False):</span>
+    <span class="c1">#     key_input(keyname, escape=escape, combine=combine, shift=shift, ctrl=ctrl, alt=alt)</span>
+
+<div class="viewcode-block" id="Windows.keyevent"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.keyevent">[docs]</a>    <span class="k">def</span> <span class="nf">keyevent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyname</span><span class="p">,</span> <span class="n">escape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="n">key_input</span><span class="p">(</span><span class="n">keyname</span><span class="p">,</span> <span class="n">escape</span><span class="o">=</span><span class="n">escape</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="n">combine</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.text"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">with_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_tabs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">with_newlines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">SendKeys</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">with_spaces</span><span class="o">=</span><span class="n">with_spaces</span><span class="p">,</span> <span class="n">with_tabs</span><span class="o">=</span><span class="n">with_tabs</span><span class="p">,</span> <span class="n">with_newlines</span><span class="o">=</span><span class="n">with_newlines</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">enter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="s2">&quot;enter&quot;</span><span class="p">,</span> <span class="n">escape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.touch"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">right_click</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">mouse_click</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">right_click</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.swipe"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.swipe">[docs]</a>    <span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">mouse_drag</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>  <span class="c1"># windows拖拽时间固定为0.8s</span></div>
+
+<div class="viewcode-block" id="Windows.find_window"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.find_window">[docs]</a>    <span class="k">def</span> <span class="nf">find_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        遍历所有window按re.match来查找wildcard，并设置为当前handle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_title</span> <span class="o">=</span> <span class="n">wildcard</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">find_window_wildcard</span><span class="p">(</span><span class="n">wildcard</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.find_hwnd_title"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.find_hwnd_title">[docs]</a>    <span class="k">def</span> <span class="nf">find_hwnd_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hwnd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取指定hwnd的title.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">find_hwnd_title</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="c1"># print &quot;in win.py : find_hwnd_title()&quot;, title.encode(&quot;utf8&quot;)</span>
+        <span class="k">return</span> <span class="n">title</span></div>
+
+<div class="viewcode-block" id="Windows.find_all_hwnd"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.find_all_hwnd">[docs]</a>    <span class="k">def</span> <span class="nf">find_all_hwnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取当前的所有窗口队列.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hwnd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">find_all_hwnd</span><span class="p">()</span>  <span class="c1"># 获取所有的窗口句柄</span>
+        <span class="c1"># print &quot;in win.py : find_hwnd_title()&quot;, title.encode(&quot;utf8&quot;)</span>
+        <span class="k">return</span> <span class="n">hwnd_list</span></div>
+
+<div class="viewcode-block" id="Windows.find_window_list"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.find_window_list">[docs]</a>    <span class="k">def</span> <span class="nf">find_window_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_title</span> <span class="o">=</span> <span class="n">wildcard</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">find_window_list</span><span class="p">(</span><span class="n">wildcard</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.set_handle"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.set_handle">[docs]</a>    <span class="k">def</span> <span class="nf">set_handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;设置窗口的handle.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">handle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">handle</span></div>
+
+<div class="viewcode-block" id="Windows.set_foreground"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.set_foreground">[docs]</a>    <span class="k">def</span> <span class="nf">set_foreground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;将对应的窗口置到最前.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">set_foreground</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Windows.set_hwnd_focus"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.set_hwnd_focus">[docs]</a>    <span class="k">def</span> <span class="nf">set_hwnd_focus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;强制导向输入焦点.&quot;&quot;&quot;</span>
+        <span class="c1"># 这里会向窗口发送UP+ENTER键:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">win32process</span><span class="o">.</span><span class="n">GetWindowThreadProcessId</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
+            <span class="n">shell</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="s2">&quot;WScript.Shell&quot;</span><span class="p">)</span>
+            <span class="n">shell</span><span class="o">.</span><span class="n">AppActivate</span><span class="p">(</span><span class="s1">&#39;Console2&#39;</span><span class="p">)</span>
+            <span class="n">shell</span><span class="o">.</span><span class="n">SendKeys</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{UP}{ENTER}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">shell</span><span class="o">.</span><span class="n">AppActivate</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.get_window_pos"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.get_window_pos">[docs]</a>    <span class="k">def</span> <span class="nf">get_window_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">get_window_pos</span><span class="p">()</span></div>
+
+    <span class="c1"># PEP 3113 -- Removal of Tuple Parameter Unpacking</span>
+    <span class="c1"># https://www.python.org/dev/peps/pep-3113/</span>
+<div class="viewcode-block" id="Windows.set_window_pos"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.set_window_pos">[docs]</a>    <span class="k">def</span> <span class="nf">set_window_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_xy</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">winmgr</span><span class="o">.</span><span class="n">set_window_pos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.getCurrentScreenResolution"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.getCurrentScreenResolution">[docs]</a>    <span class="k">def</span> <span class="nf">getCurrentScreenResolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_resolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.operate"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.operate">[docs]</a>    <span class="k">def</span> <span class="nf">operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;down&quot;</span><span class="p">:</span>
+            <span class="n">mouse_down</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;move&quot;</span><span class="p">:</span>
+            <span class="n">mouse_move</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;up&quot;</span><span class="p">:</span>
+            <span class="n">mouse_up</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;invalid operate args: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.start_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.start_app">[docs]</a>    <span class="k">def</span> <span class="nf">start_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">&#39;start &quot;&quot; &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Windows.stop_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.stop_app">[docs]</a>    <span class="k">def</span> <span class="nf">stop_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;taskkill /FI &quot;WINDOWTITLE eq </span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">title</span>
+        <span class="k">elif</span> <span class="n">pid</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;taskkill /PID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span>
+        <span class="k">elif</span> <span class="n">image</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;taskkill /IM </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">image</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<span class="c1">#if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#    import time</span>
+<span class="c1">#    w = Windows()</span>
+<span class="c1">#    # w.snapshot()</span>
+<span class="c1">#    # w.keyevent(&quot;enter&quot;, escape=True)</span>
+<span class="c1">#    # w.text(&quot;nimei&quot;)</span>
+<span class="c1">#    # w.touch((10, 10))</span>
+<span class="c1">#    # w.swipe((10,10), (200,200))</span>
+<span class="c1">#    w.set_handle(w.find_window(u&quot;QA平台&quot;))</span>
+<span class="c1">#    w.set_foreground()</span>
+<span class="c1">#    print w.get_window_pos()</span>
+<span class="c1">#    time.sleep(1)</span>
+<span class="c1">#    # w.set_window_pos((0, 0))</span>
+<span class="c1">#    w2 = Windows()</span>
+<span class="c1">#    w.set_handle(w2.find_window(&quot;GitHub&quot;))</span>
+<span class="c1">#    w2.set_foreground()</span>
+<span class="c1">#    time.sleep(1)</span>
+<span class="c1">#    w.set_foreground()</span>
+<span class="c1">#    time.sleep(1)</span>
+<span class="c1">#    w2.set_foreground()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

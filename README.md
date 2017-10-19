@@ -31,8 +31,8 @@ from airtest.core.main import *
 connect_device("Android:///")
 
 # start your script here
-aminstall("path/to/your/apk")
-amstart("package_name_of_your_apk")
+install("path/to/your/apk")
+start_app("package_name_of_your_apk")
 snapshot()
 touch((100, 100))
 touch("image_of_a_button.png")
@@ -46,7 +46,7 @@ uninstall("package_name_of_your_apk")
 
 # Command line usage
 
-We use `.owl` structure to organize code and image resources in test case. With the help of Airtest IDE, you can easily record test cases in `.owl`. This command line tool is provided to run test cases without IDE on different host machine. Device setup is supported by command line arguments, so your test code can be totally platform transparent. 
+We use `.owl` directory structure to organize code and image resources in test case. With the help of Airtest IDE, you can easily record test cases in `.owl`. This command line tool is provided to run test cases without IDE on different host machine. Device setup is supported by command line arguments, so your test code can be totally platform transparent. 
 
 Play cli with the sample: ```/airtest/playground/test_blackjack.owl```
 

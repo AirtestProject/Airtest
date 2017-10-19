@@ -175,7 +175,7 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 
 
-<div class="viewcode-block" id="AirtestLogger"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.logwraper.html#airtest.core.helper.AirtestLogger">[docs]</a><span class="k">class</span> <span class="nc">AirtestLogger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">AirtestLogger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;logger &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">AirtestLogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -187,14 +187,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_logfile</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
         <span class="c1"># atexit.register(self.handle_stacked_log)</span>
 
-<div class="viewcode-block" id="AirtestLogger.set_logfile"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.logwraper.html#airtest.core.helper.AirtestLogger.set_logfile">[docs]</a>    <span class="k">def</span> <span class="nf">set_logfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_logfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">logfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">handle_stacked_log</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_dumper</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
@@ -203,7 +203,7 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="AirtestLogger.log"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.logwraper.html#airtest.core.helper.AirtestLogger.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">in_stack</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">in_stack</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Not thread safe &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -215,18 +215,18 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;tag&#39;</span><span class="p">:</span> <span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="n">depth</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dumper</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logfd</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
-<div class="viewcode-block" id="AirtestLogger.handle_stacked_log"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.logwraper.html#airtest.core.helper.AirtestLogger.handle_stacked_log">[docs]</a>    <span class="k">def</span> <span class="nf">handle_stacked_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle_stacked_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># 处理stack中的log</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_stack</span><span class="p">:</span>
             <span class="c1"># 先取最后一个，记了log之后再pop，避免depth错误</span>
             <span class="n">log_stacked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">log_stacked</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">running_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="Logwrap"><a class="viewcode-back" href="../../../../all_module/airtest.core.utils.logwraper.html#airtest.core.helper.Logwrap">[docs]</a><span class="k">def</span> <span class="nf">Logwrap</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">Logwrap</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
     <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logger</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -254,7 +254,7 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">extra_log</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="n">res</span>
-    <span class="k">return</span> <span class="n">wrapper</span></div>
+    <span class="k">return</span> <span class="n">wrapper</span>
 </pre></div>
 
            </div>
