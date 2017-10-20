@@ -58,13 +58,6 @@ class AirtestCase(unittest.TestCase):
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
 
-        # performance
-        if args.performance and isinstance(args.performance, str):
-            for dev in G.DEVICE_LIST:
-                log_file = os.path.join(ST.LOG_DIR, "pfm_{serialno}.txt".format(
-                    serialno=dev.serialno)) if ST.LOG_DIR else "pfm_{serialno}.txt".format(serialno=dev.serialno)
-                dev.init_performance(args.performance, log_file)
-
         # add user defined global varibles
         if args.kwargs:
             print("load kwargs", repr(args.kwargs))

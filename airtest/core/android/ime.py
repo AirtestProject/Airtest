@@ -25,14 +25,12 @@ def ensure_unicode(value):
 
 class CustomIme(object):
 
-    def __init__(self, android_device, apk_path, service_name):
+    def __init__(self, adb, apk_path, service_name):
         super(CustomIme, self).__init__()
-        self.device = android_device
-        self.adb = android_device.adb  # android restricted
+        self.adb = adb
         self.apk_path = apk_path
         self.service_name = service_name
-        self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
-        self.ime_list = self._get_ime_list()
+        self.started = False
 
     def _get_ime_list(self):
         out = self.adb.shell("ime list -a")
@@ -46,17 +44,21 @@ class CustomIme(object):
         self.end()
 
     def start(self):
+        self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
+        self.ime_list = self._get_ime_list()
         if self.service_name not in self.ime_list:
             if self.apk_path:
                 self.device.install_app(self.apk_path)
         if self.default_ime != self.service_name:
             self.adb.shell("ime enable %s" % self.service_name)
             self.adb.shell("ime set %s" % self.service_name)
+        self.started = True
 
     def end(self):
         if self.default_ime != self.service_name:
             self.adb.shell("ime disable %s" % self.service_name)
             self.adb.shell("ime set %s" % self.default_ime)
+        self.started = False
 
     def text(self, value):
         raise NotImplementedError
@@ -67,6 +69,8 @@ class YosemiteIme(CustomIme):
         super(YosemiteIme, self).__init__(android_device, None, YOSEMITE_IME_SERVICE)
 
     def text(self, value):
+        if not self.started:
+            self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))

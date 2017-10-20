@@ -109,7 +109,6 @@ class Android(Device):
 
     def text(self, text, enter=True):
         if self.ime_method == IME_METHOD.YOSEMITEIME:
-            self.yosemite_ime.get_ready()
             self.yosemite_ime.text(text)
         else:
             self.adb.shell(["input", "text", text])
