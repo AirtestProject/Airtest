@@ -7,7 +7,7 @@ PY3 = sys.version_info[0] == 3
 
 if PY3:
     from configparser import ConfigParser
-    from urllib.parse import unquote
+    from urllib.parse import unquote, urlparse, parse_qsl
     import queue
 
     text_type = str
@@ -19,6 +19,7 @@ else:
     from ConfigParser import SafeConfigParser as ConfigParser
     import Queue as queue
     from urllib import unquote
+    from urlparse import urlparse, parse_qsl
 
     text_type = unicode
     str_class = basestring

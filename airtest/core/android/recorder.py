@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import re
-from airtest.core.error import AirtestError
-from airtest.core.utils import NonBlockingStreamReader, get_logger
 from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE
-from airtest.core.android.apkparser.apk import APK
+from airtest.core.error import AirtestError
+from airtest.utils.apkparser import APK
+from airtest.utils.logger import get_logger
+from airtest.utils.nbsp import NonBlockingStreamReader
 LOGGING = get_logger('recorder')
 
 

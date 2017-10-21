@@ -112,6 +112,7 @@ class TestAndroid(unittest.TestCase):
             time.sleep(3)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
+            os.remove(filepath)
 
     def test_start_recording_error(self):
         if self.android.sdk_version >= 19:

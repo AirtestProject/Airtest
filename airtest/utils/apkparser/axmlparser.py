@@ -19,8 +19,8 @@
 
 from . import bytecode
 from . import typeconstants as tc
-from .stringblock import StringBlock
 from .bytecode import SV
+from .stringblock import StringBlock
 
 
 class AXMLParser:

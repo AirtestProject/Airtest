@@ -1,6 +1,7 @@
 # _*_ coding:UTF-8 _*_
-from airtest.core.utils.compat import str_class
+import atexit
 import sys
+from .compat import str_class
 
 
 def split_cmd(cmds):
@@ -15,3 +16,7 @@ def split_cmd(cmds):
 
 def get_std_encoding(stream):
     return getattr(stream, "encoding", None) or sys.getfilesystemencoding()
+
+
+def reg_cleanup(func, *args, **kwargs):
+    atexit.register(func, *args, **kwargs)

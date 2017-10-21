@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-from airtest.core.android.adb import ADB
-from airtest.core.error import AdbShellError, MinicapError
-from airtest.core.android.constant import STFLIB
-from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger
-from airtest.core.utils.compat import PY3
-import threading
-import struct
 import json
-import sys
 import os
+import struct
+import sys
+import threading
+from airtest.core.android.adb import ADB
+from airtest.core.android.constant import STFLIB
+from airtest.core.error import AdbShellError
+from airtest.utils.compat import PY3
+from airtest.utils.safesocket import SafeSocket
+from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.snippet import reg_cleanup
+from airtest.utils.logger import get_logger
 LOGGING = get_logger('minicap')
 
 

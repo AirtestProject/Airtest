@@ -1,0 +1,4 @@
+[run]
+omit =
+	airtest/core/ios/*
+	airtest/core/win/*

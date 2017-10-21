@@ -1,8 +1,7 @@
 # coding=utf-8
 import cv2
 import numpy as np
-from airtest.core.settings import Settings as ST
-from airtest.core.utils import get_logger
+from airtest.utils.logger import get_logger
 from .error import BaseError
 from .utils import generate_result, check_source_larger_than_search
 from .template import find_template, find_all_template, _get_target_rectangle

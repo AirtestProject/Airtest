@@ -2,7 +2,7 @@
 import sys
 import time
 from threading import Thread, Event
-from airtest.core.utils.compat import queue 
+from airtest.utils import queue
 #from queue import Queue, Empty
 
 

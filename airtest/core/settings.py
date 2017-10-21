@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from airtest.core.utils import cocos_min_strategy
+from airtest.utils.resolution import cocos_min_strategy
 
 
 class Settings(object):

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import functools
 import time
-
 from airtest.core.settings import Settings as ST
-from airtest.core.utils import Logwrap, AirtestLogger, get_logger
+from airtest.utils.logwraper import Logwrap, AirtestLogger
+from airtest.utils.logger import get_logger
 
 
 class G(object):

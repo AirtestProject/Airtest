@@ -2,9 +2,6 @@
 
 """本文件用于存放一些计算函数，比如图像适配、搜索区域预测."""
 
-# from airtest.core.helper import G
-from airtest.core.error import AirtestError
-
 
 def no_resize(w_a, h_a, resolution_a, resolution_b):
     """无缩放策略."""
@@ -45,7 +42,6 @@ def predict_area(im_source, op_pos, radius_x, radius_y, src_resolution=None):
 
     # 如果发现预测区域完全在图像外，预测区域将只剩下一条像素，预测失败，直接raise:
     if start_x == end_x or start_y == end_y:
-        # raise AirtestError("Predict area has just one pixel !")
         img_src, left_top_pos = im_source, (0, 0)
         log_info = "Predict area's width or height has just one pixel, abandon prediction."
     else:

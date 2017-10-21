@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from airtest.core.error import AirtestError
-from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger
+from airtest.utils.logger import get_logger
+from airtest.utils.safesocket import SafeSocket
+from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.snippet import reg_cleanup
 from airtest.core.android.adb import ADB
 import struct
 LOGGING = get_logger('javacap')

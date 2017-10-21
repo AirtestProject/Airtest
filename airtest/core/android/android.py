@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 from airtest import aircv
+from airtest.utils.logger import get_logger
 from airtest.core.device import Device
-from airtest.core.utils import get_logger
 from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.core.android.adb import ADB

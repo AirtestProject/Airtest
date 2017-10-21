@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-from airtest.report.images2gif import writeGif
-from PIL import Image, ImageDraw
-import sys
 import os
-import json
+
+from PIL import Image, ImageDraw
 
 
 def draw_circle(img, tup_xy, r=20):

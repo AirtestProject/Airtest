@@ -6,10 +6,13 @@ import time
 import socket
 import threading
 from airtest.core.error import MinitouchError
-from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger, get_std_encoding
 from airtest.core.android.constant import DEFAULT_ADB_SERVER, STFLIB
 from airtest.core.android.adb import ADB
-from airtest.core.utils.compat import queue
+from airtest.utils.compat import queue
+from airtest.utils.safesocket import SafeSocket
+from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.snippet import reg_cleanup, get_std_encoding
+from airtest.utils.logger import get_logger
 LOGGING = get_logger('minitouch')
 
 

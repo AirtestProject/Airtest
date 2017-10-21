@@ -4,15 +4,11 @@ Airtest Main Api
 """
 import os
 import time
-from airtest.core.utils.compat import PY3
+from airtest.utils.compat import urlparse, parse_qsl
 from airtest.core.cv import Template, loop_find, cv_match_all
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
-if PY3:
-    from urllib.parse import urlparse, parse_qsl
-else:
-    from urlparse import urlparse, parse_qsl
 
 
 """

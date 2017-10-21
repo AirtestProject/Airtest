@@ -2,7 +2,8 @@
 import threading
 import traceback
 from airtest.core.error import AirtestError
-from airtest.core.utils import reg_cleanup, get_logger
+from airtest.utils.snippet import reg_cleanup
+from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger('rotation')
 

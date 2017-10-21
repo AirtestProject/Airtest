@@ -9,7 +9,7 @@ from airtest.aircv.match import cv_match, cv_match_all
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, log_in_func
 from airtest.core.settings import Settings as ST
-from airtest.core.utils import TargetPos
+from airtest.utils.transform import TargetPos
 
 
 @logwrap
