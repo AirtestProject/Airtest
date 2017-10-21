@@ -13,13 +13,5 @@ def split_cmd(cmds):
     return cmds
 
 
-def is_str(s):
-    return isinstance(s, str_class)
-
-
-def is_list(v):
-    return isinstance(v, list) or isinstance(v, tuple)
-
-
 def get_std_encoding(stream):
     return getattr(stream, "encoding", None) or sys.getfilesystemencoding()

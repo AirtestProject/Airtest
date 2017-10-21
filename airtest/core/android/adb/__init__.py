@@ -23,8 +23,8 @@ class ADB(object):
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None):
         self.serialno = serialno
-        self.adb_path = adb_path or self.get_adb_path()
-        self.set_cmd_options(server_addr)
+        self.adb_path = adb_path or self.builtin_adb_path()
+        self._set_cmd_options(server_addr)
         self.connect()
         self._sdk_version = None
         self._line_breaker = None
@@ -34,7 +34,8 @@ class ADB(object):
         reg_cleanup(self._cleanup_forwards)
 
     @staticmethod
-    def get_adb_path():
+    def builtin_adb_path():
+        """get airtest built-in adb executable path"""
         system = platform.system()
         base_path = os.path.dirname(os.path.realpath(__file__))
         adb_path = os.path.join(base_path, DEFAULT_ADB_PATH[system])
@@ -44,7 +45,7 @@ class ADB(object):
         os.environ["PATH"] = os.path.dirname(adb_path) + os.pathsep + os.environ["PATH"]
         return adb_path
 
-    def set_cmd_options(self, server_addr=None):
+    def _set_cmd_options(self, server_addr=None):
         """set adb cmd options -H -P"""
         self.host = server_addr[0] if server_addr else "127.0.0.1"
         self.port = server_addr[1] if server_addr else 5037
@@ -56,21 +57,25 @@ class ADB(object):
 
     def start_server(self):
         """adb start-server"""
-        # return subprocess.check_call([self.adb_path, "start-server"])
-        return self.cmd("start-server")
+        return self.cmd("start-server", device=False)
+
+    def version(self):
+        """adb version 1.0.39"""
+        return self.cmd("version", device=False).strip()
 
     def start_cmd(self, cmds, device=True):
         """
         start a subprocess to run adb cmd
         device: specify -s serialno if True
         """
-        cmds = split_cmd(cmds)
-        cmd_options = self.cmd_options
         if device:
             if not self.serialno:
                 raise RuntimeError("please set serialno first")
-            cmd_options = cmd_options + ['-s', self.serialno]
-        cmds = cmd_options + cmds
+            cmd_options = self.cmd_options + ['-s', self.serialno]
+        else:
+            cmd_options = self.cmd_options
+
+        cmds = cmd_options + split_cmd(cmds)
         LOGGING.debug(" ".join(cmds))
 
         cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
@@ -82,7 +87,7 @@ class ADB(object):
         )
         return proc
 
-    def cmd(self, cmds, device=True, not_decode=False):
+    def cmd(self, cmds, device=True, ensure_unicode=True):
         """
         get adb cmd output
         device: specify -s serialno if True
@@ -90,7 +95,7 @@ class ADB(object):
         proc = self.start_cmd(cmds, device)
         stdout, stderr = proc.communicate()
 
-        if not_decode is False:
+        if ensure_unicode:
             stdout = stdout.decode(get_std_encoding(sys.stdout))
             stderr = stderr.decode(get_std_encoding(sys.stderr))
 
@@ -101,10 +106,6 @@ class ADB(object):
             else:
                 raise AdbError(stdout, stderr)
         return stdout
-
-    def version(self):
-        """adb version 1.0.39"""
-        return self.cmd("version", device=False).strip()
 
     def devices(self, state=None):
         """adb devices"""
@@ -162,26 +163,26 @@ class ADB(object):
         else:
             raise DeviceConnectionError("device not ready")
 
-    def raw_shell(self, cmds, not_wait=False):
+    def start_shell(self, cmds):
         cmds = ['shell'] + split_cmd(cmds)
-        if not_wait:
-            return self.start_cmd(cmds)
-        out = self.cmd(cmds, not_decode=True)
+        return self.start_cmd(cmds)
+
+    def raw_shell(self, cmds, ensure_unicode=True):
+        cmds = ['shell'] + split_cmd(cmds)
+        out = self.cmd(cmds, ensure_unicode=False)
+        if not ensure_unicode:
+            return out
+        # use shell encoding to decode output
         try:
             return out.decode(self.SHELL_ENCODING)
         except UnicodeDecodeError:
             warnings.warn("shell output decode {} fail. repr={}".format(self.SHELL_ENCODING, repr(out)))
             return unicode(repr(out))
 
-    def shell(self, cmd, not_wait=False):
+    def shell(self, cmd):
         """
         adb shell
-        not_wait:
-            return subprocess if True
-            return output if False
         """
-        if not_wait is True:
-            return self.raw_shell(cmd, not_wait)
         if self.sdk_version < SDK_VERISON_NEW:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
@@ -220,6 +221,10 @@ class ADB(object):
             keyname = 'ro.build.version.sdk'
             self._sdk_version = int(self.getprop(keyname))
         return self._sdk_version
+
+    def push(self, local, remote):
+        """adb push"""
+        self.cmd(["push", local, remote])
 
     def pull(self, remote, local):
         """adb pull"""
@@ -314,7 +319,7 @@ class ADB(object):
 
     def snapshot(self):
         """take a screenshot"""
-        raw = self.cmd('shell screencap -p', not_decode=True)
+        raw = self.cmd('shell screencap -p', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
@@ -535,22 +540,14 @@ class ADB(object):
         # Guess by height > width
         return 0 if self.display_info["height"] > self.display_info['width'] else 1
 
-    def get_top_activity_name_and_pid(self):
+    def get_top_activity(self):
         dat = self.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
         m = activityRE.search(dat)
         if m:
             return (m.group(1), m.group(2), m.group(3))
         else:
-            warnings.warn("NO MATCH:" + dat)
-            return None
-
-    def get_top_activity_name(self):
-        tanp = self.get_top_activity_name_and_pid()
-        if tanp:
-            return tanp[0] + '/' + tanp[1]
-        else:
-            return None
+            raise AirtestError("Can not get top activity, output:%s" % dat)
 
     def is_keyboard_shown(self):
         dim = self.shell('dumpsys input_method')
@@ -619,7 +616,7 @@ class ADB(object):
         output = self.shell(['dumpsys', 'package', package]).strip()
         if package not in output:
             raise AirtestError('package "{}" not found'.format(package))
-        return 'package:{}'.format(package)
+        return True
 
     def start_app(self, package, activity=None):
         if not activity:

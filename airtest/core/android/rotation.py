@@ -25,7 +25,7 @@ class RotationWatcher(object):
         except AirtestError:
             self.adb.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
             apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
-        p = self.adb.shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path, not_wait=True)
+        p = self.adb.start_shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path)
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         return p

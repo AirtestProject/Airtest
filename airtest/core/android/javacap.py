@@ -33,7 +33,7 @@ class Javacap(object):
         # setup agent proc
         apkpath = self.get_path()
         cmds = ["CLASSPATH=" + apkpath, 'exec', 'app_process', '/system/bin', self.SCREENCAP_SERVICE, "--scale", "100", "--socket", "%s" % deviceport, "-lazy", "2>&1"]
-        proc = self.adb.shell(cmds, not_wait=True)
+        proc = self.adb.start_shell(cmds)
         reg_cleanup(proc.kill)
         # check proc output
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="javacap_sever")

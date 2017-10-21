@@ -35,8 +35,8 @@ class Recorder(object):
             vertical_param = ""
         else:
             vertical_param = "-Dvertical=true" if vertical else "-Dvertical=false"
-        p = self.adb.shell('CLASSPATH=%s exec app_process %s %s %s /system/bin %s.Recorder --start-record' %
-            (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE), not_wait=True)
+        p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s %s /system/bin %s.Recorder --start-record' %
+            (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE))
         nbsp = NonBlockingStreamReader(p.stdout)
         while True:
             line = nbsp.readline(timeout=5)
@@ -53,7 +53,7 @@ class Recorder(object):
 
     def stop_recording(self, output="screen.mp4", is_interrupted=False):
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
-        p = self.adb.shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE), not_wait=True)
+        p = self.adb.start_shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE))
         p.wait()
         self.recording_proc = None
         if is_interrupted:

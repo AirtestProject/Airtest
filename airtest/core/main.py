@@ -22,7 +22,7 @@ Device Setup
 
 def connect_device(uri):
     """
-    Initialize device with uri.
+    Initialize device with uri and set as current dievce.
 
     e.g.
         * ``android:///``   # local adb device using default params
@@ -337,9 +337,10 @@ def exists(v):
     """
     try:
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
-        return pos
     except TargetNotFoundError:
         return False
+    else:
+        return pos
 
 
 @logwrap

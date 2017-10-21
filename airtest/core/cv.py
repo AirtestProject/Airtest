@@ -62,7 +62,7 @@ class Template(object):
 
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), ignore=None, focus=None, rgb=False):
         self.filename = filename
-        self.filepath = os.path.join(G.BASEDIR, filename)
+        self.filepath = os.path.join(G.BASEDIR, filename) if G.BASEDIR else filename
         self.threshold = threshold or ST.THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos

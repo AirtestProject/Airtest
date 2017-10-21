@@ -18,7 +18,7 @@ class Android(Device):
 
     """Android Device"""
 
-    def __init__(self, serialno=None, adbhost=None,
+    def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME):
@@ -28,7 +28,7 @@ class Android(Device):
         self.touch_method = touch_method
         self.ime_method = ime_method
         # init adb
-        self.adb = ADB(self.serialno, server_addr=adbhost)
+        self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         # init components
@@ -143,13 +143,9 @@ class Android(Device):
     def getprop(self, key, strip=True):
         return self.adb.getprop(key, strip)
 
-    def get_top_activity_name_and_pid(self):
-        """not working on all devices"""
-        return self.adb.get_top_activity_name_and_pid()
-
-    def get_top_activity_name(self):
-        """not working on all devices"""
-        return self.adb.get_top_activity_name()
+    def get_top_activity(self):
+        """return (package, activity, pid)"""
+        return self.adb.get_top_activity()
 
     def is_keyboard_shown(self):
         """not working on all devices"""

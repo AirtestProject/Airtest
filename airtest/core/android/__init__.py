@@ -1,7 +1,1 @@
-from airtest.core.android.android import ADB, Minicap, Minitouch, Android
-
-try:
-    from emulator.emulator import Emulator
-except ImportError as e:
-    Emulator = None
-    # print "Emulator module available on Windows only: %s" % e.message
+from airtest.core.android.android import Android

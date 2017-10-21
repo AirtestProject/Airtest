@@ -113,13 +113,12 @@ class Minicap(object):
         self.localport, deviceport = self.adb.setup_forward("localabstract:minicap_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         other_opt = "-l" if lazy else ""
-        proc = self.adb.shell(
+        proc = self.adb.start_shell(
             "LD_LIBRARY_PATH=/data/local/tmp/ /data/local/tmp/minicap -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" % (
                 deviceport,
                 real_width, real_height,
                 proj_width, proj_height,
                 real_orientation, other_opt),
-            not_wait=True
         )
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
         while True:
@@ -162,7 +161,7 @@ class Minicap(object):
         raw_data = self.adb.cmd(
             "shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
             (real_width, real_height, proj_width, proj_height, real_orientation),
-            not_decode=True,
+            ensure_unicode=False,
         )
 
         jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1].replace(self.adb.line_breaker, b"\n")
