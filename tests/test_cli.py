@@ -4,7 +4,7 @@ import os
 import unittest
 from airtest.core.android.android import ADB
 from airtest.core.helper import G
-from airtest.cli.__main__ import main as main_parser
+from airtest.__main__ import main as main_parser
 from testconf import DIR, OWL, try_remove
 
 OUTPUT_LOG = DIR("./log.txt")

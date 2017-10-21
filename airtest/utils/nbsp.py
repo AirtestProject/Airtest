@@ -2,8 +2,7 @@
 import sys
 import time
 from threading import Thread, Event
-from airtest.utils import queue
-#from queue import Queue, Empty
+from .compat import queue
 
 
 class NonBlockingStreamReader:
@@ -47,7 +46,7 @@ class NonBlockingStreamReader:
         self._kill_event = Event()
         self._t = Thread(target=_populateQueue, args=(self._s, self._q, self._kill_event))
         self._t.daemon = True
-        self._t.start() #start collecting lines from the stream
+        self._t.start()  # start collecting lines from the stream
 
     def readline(self, timeout=None):
         try:
