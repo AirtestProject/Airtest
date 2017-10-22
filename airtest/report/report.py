@@ -503,14 +503,8 @@ def main(args):
     # print(author)
     rpt = LogToHtml(path, log_root, static_root, author)
 
-    # gen gif
-    if args.snapshot:
-        snapshots = rpt.analyse_snapshot()
-        if snapshots:
-            print(json.dumps(snapshots))
-        else:
-            print(json.dumps([]))
-    elif args.gif is not None:
+    if args.gif is not None:
+        # gen gif
         steps = rpt.analyse()
         if args.gif_size:
             try:
@@ -522,8 +516,8 @@ def main(args):
         else:
             gif_size = 0.3
         gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
-    # gen html report
     else:
+        # gen html report
         if args.record:
             record = args.record
         else:
@@ -532,19 +526,9 @@ def main(args):
         print(outfile)
         with io.open(outfile, 'w', encoding="utf-8") as f:
             f.write(html)
-    """
-    elif args.new_report:
-        pass
-        tpl = jinja_environment.get_template("new_report_template.html")
-        html = rpt.render(tpl)
-        with io.open(outfile, 'w', encoding="utf-8") as f:
-            f.write(html)
-    """
-
 
 
 if __name__ == "__main__":
-    #single runner
     import argparse
     ap = argparse.ArgumentParser()
     args = get_parger(ap).parse_args()

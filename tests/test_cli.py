@@ -9,8 +9,8 @@ from testconf import DIR, OWL, try_remove
 
 OUTPUT_LOG = DIR("./log.txt")
 OUTPUT_SCREEN = DIR("./img_record")
-OUTPUT_HTML = DIR("./log.html")
-OUTPUT_GIF = DIR("./log.gif")
+OUTPUT_HTML = "./log.html"
+OUTPUT_GIF = "./log.gif"
 
 
 class TestCli(unittest.TestCase):
@@ -23,6 +23,8 @@ class TestCli(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         G.LOGGER.set_logfile(None)
+        try_remove(OUTPUT_HTML)
+        try_remove(OUTPUT_GIF)
 
     def test_info(self):
         argv = ["info", OWL]
@@ -52,6 +54,9 @@ class TestCli(unittest.TestCase):
         argv = ["report", OWL, "--log_root", DIR(".")]
         main_parser(argv)
         self.assertTrue(os.path.exists(OUTPUT_HTML))
+        argv = ["report", OWL, "--gif", "--log_root", DIR(".")]
+        main_parser(argv)
+        self.assertTrue(os.path.exists(OUTPUT_GIF))
 
 
 if __name__ == '__main__':

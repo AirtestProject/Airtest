@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 
-from airtest.core.main import *  # noqa
+from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST
 from airtest.core.helper import log
@@ -25,6 +25,9 @@ class AirtestCase(unittest.TestCase):
             devices = args.device
         elif args.device:
             devices = [args.device]
+        else:
+            # default to use local android device
+            devices = ["Android:///"]
         for device in devices:
             connect_device(device)
 

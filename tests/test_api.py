@@ -1,5 +1,5 @@
 # encoding=utf-8
-from airtest.core.main import *
+from airtest.core.api import *
 from airtest.core.helper import G
 from airtest.core.android import Android
 from airtest.core.error import TargetNotFoundError, AdbShellError
@@ -13,13 +13,16 @@ class TestMainOnAndroid(unittest.TestCase):
     def setUpClass(self):
         if not isinstance(G.DEVICE, Android):
             connect_device("Android:///")
+        ST.CVSTRATEGY = ['tpl']  # 'tpl' is enough for these tests
         self.dev = G.DEVICE
 
     def test_connect(self):
+        old = len(G.DEVICE_LIST)
         d = connect_device("Android://localhost:5037/?cap_method=javacap")
-        self.assertEqual(len(G.DEVICE_LIST), 2)
+        self.assertEqual(len(G.DEVICE_LIST) - old, 1)
         self.assertIs(d, G.DEVICE)
         self.assertEqual(d.cap_method, "javacap")
+        set_current(0)
 
     def test_device(self):
         d = device()
@@ -58,12 +61,12 @@ class TestMainOnAndroid(unittest.TestCase):
             install(APK)
         start_app(PKG)
 
-    def test_amclear(self):
+    def test_clear_app(self):
         if PKG not in self.dev.list_app():
             install(APK)
         clear_app(PKG)
 
-    def test_amstop(self):
+    def test_stop_app(self):
         if PKG not in self.dev.list_app():
             install(APK)
         start_app(PKG)
@@ -88,6 +91,12 @@ class TestMainOnAndroid(unittest.TestCase):
     def test_swipe(self):
         swipe((0, 0), (10, 10))
 
+    def test_pinch(self):
+        pinch()
+
+    def test_keyevent(self):
+        keyevent("HOME")
+
     def test_text(self):
         text("input")
 
@@ -108,16 +117,15 @@ class TestMainOnAndroid(unittest.TestCase):
             wait(TPL2, timeout=5)
 
     def test_exists(self):
+        set_current(0)
         self._start_apk_main_scene()
         pos = exists(TPL)
         self.assertIsInstance(pos, (tuple, list))
-
         self.assertFalse(exists(TPL2))
 
     def test_assert_exists(self):
         self._start_apk_main_scene()
         assert_exists(TPL)
-
         with self.assertRaises(AssertionError):
             assert_exists(TPL2)
 

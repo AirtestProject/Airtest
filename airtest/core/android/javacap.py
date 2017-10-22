@@ -11,7 +11,9 @@ LOGGING = get_logger('javacap')
 
 class Javacap(object):
 
-    """another screencap class, slower than minicap, but better compatibility"""
+    """another screencap class, slower than minicap, but better compatibility
+       bug to be fixed: get_frame will return cached old screen, not always current screen
+    """
 
     APP_PATH = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"

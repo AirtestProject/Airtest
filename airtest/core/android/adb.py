@@ -40,8 +40,7 @@ class ADB(object):
     def builtin_adb_path():
         """get airtest built-in adb executable path"""
         system = platform.system()
-        base_path = os.path.dirname(os.path.realpath(__file__))
-        adb_path = os.path.join(base_path, DEFAULT_ADB_PATH[system])
+        adb_path = DEFAULT_ADB_PATH[system]
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]

@@ -7,8 +7,8 @@ import traceback
 from pprint import pprint
 
 import airtest.cli.runner
-import airtest.core.main
-from airtest.core.main import set_serialno, snapshot, logwrap
+import airtest.core.api
+from airtest.core.api import set_serialno, snapshot, logwrap
 from airtest.core.helper import log_in_func,G
 from uiautomator import AutomatorDevice
 
@@ -116,7 +116,7 @@ def try_getattr(obj, attr, action, *args, **kwargs):
 
 
 def log_error(action, tb, *args, **kwargs):
-    logger = airtest.core.main.LOGGER
+    logger = airtest.core.api.LOGGER
     start = time.time()
     fndata = {'name': action, 'args': args, 'kwargs': kwargs}
     logger.running_stack.append(fndata)
