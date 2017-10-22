@@ -209,6 +209,9 @@ class ADB(object):
             else:
                 return out
 
+    def keyevent(self, keyname):
+        self.shell(["input", "keyevent", keyname.upper()])
+
     def getprop(self, key, strip=True):
         """adb shell getprop"""
         prop = self.raw_shell(['getprop', key])

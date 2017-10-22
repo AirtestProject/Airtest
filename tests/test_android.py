@@ -68,6 +68,7 @@ class TestAndroid(unittest.TestCase):
             if os.path.exists(filename):
                 os.remove(filename)
             self.android.cap_method = i
+            self.android.wake()
             screen = self.android.snapshot(filename=filename)
             self.assertIsInstance(screen, numpy.ndarray)
             self.assertTrue(os.path.exists(filename))

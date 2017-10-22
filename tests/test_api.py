@@ -18,10 +18,10 @@ class TestMainOnAndroid(unittest.TestCase):
 
     def test_connect(self):
         old = len(G.DEVICE_LIST)
-        d = connect_device("Android://localhost:5037/?cap_method=javacap")
+        d = connect_device("Android://localhost:5037/?cap_method=JAVACAP")
         self.assertEqual(len(G.DEVICE_LIST) - old, 1)
         self.assertIs(d, G.DEVICE)
-        self.assertEqual(d.cap_method, "javacap")
+        self.assertEqual(d.cap_method, "adbcap")
         set_current(0)
 
     def test_device(self):
@@ -117,7 +117,6 @@ class TestMainOnAndroid(unittest.TestCase):
             wait(TPL2, timeout=5)
 
     def test_exists(self):
-        set_current(0)
         self._start_apk_main_scene()
         pos = exists(TPL)
         self.assertIsInstance(pos, (tuple, list))

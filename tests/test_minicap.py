@@ -1,83 +1,73 @@
 # encoding=utf-8
-import sys
-sys.path.append("..\\..\\..\\")
-
-from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, AirtestError
-from airtest.core.android.android import Minicap
+from airtest.core.android.android import Android, Minicap
+from airtest.aircv.utils import string_2_img
+from numpy import ndarray
+from testconf import PKG
+import time
 import unittest
-import subprocess
-import mock
-from mock import patch,Mock
-from new_test.adbmock import adbmock
 
 
-class TestMiniCap(unittest.TestCase):
+class TestMinicapBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.adb=ADB()
-        devicelist=cls.adb.devices()
-        if devicelist:
-            no,content=devicelist[0]
-            serialno = no
-            cls.adb.set_serialno(serialno)
-            cls.minicap = Minicap(serialno=serialno,adb=cls.adb,stream=False,size={"physical_width":600,"physical_height":400,"rotation":0})
+        cls.dev = Android()
+        cls.dev.rotation_watcher.get_ready()
+        cls.minicap = cls.dev.minicap
+
+    def _count_server_proc(self):
+        output = self.dev.adb.raw_shell("ps | grep minicap | grep -v do_exit").strip()
+        if output:
+            return len(output.splitlines())
         else:
-            with mock.patch.object(cls.adb,'getprop',return_value="17"):
-                with mock.patch.object(cls.adb,'cmd',return_value="cmd"):
-                    with mock.patch.object(cls.adb,'shell',return_value="cmd"):
-                        cls.minicap = Minicap("",size="112",adb=cls.adb,stream=False)
+            return 0
 
-        cls.adbmock=adbmock()
+    @classmethod
+    def tearDownClass(cls):
+        cls.minicap.teardown_stream()
 
 
-    # need real phone
-    def test_install(self):
-        self.minicap.install()
-        self.minicap.install(reinstall=True)
+class TestMinicap(TestMinicapBase):
 
-    # mock install 
-    def test_install_install(self):
-        # test not wait status
-        with mock.patch.object(self.minicap.adb,'getprop',return_value="17"):
-            with mock.patch.object(self.minicap.adb,'cmd',return_value="cmd"):
-                with mock.patch.object(self.minicap.adb,'shell',return_value="cmd"):
-                    self.minicap.install()
-                    self.assertEqual(self.minicap.adb.getprop.called, True) 
-                    self.assertEqual(self.minicap.adb.cmd.called, True) 
-                    self.assertEqual(self.minicap.adb.shell.called, True)
- 
-    #need real phone 
     def test_get_display_info(self):
-        info=self.minicap.get_display_info() 
-        self.assertIsInstance(info,dict)       
+        info = self.minicap.get_display_info()
+        self.assertIsInstance(info, dict)
 
-
-
-
-    #need real phone 
     def test_get_frame(self):
-        temp = {"physical_width":600,"physical_height":400,"rotation":0}
-        with mock.patch.dict(self.minicap.size,temp,clear=True):
-            frame=self.minicap.get_frame()
-            #print frame
-            try:
-                self.assertIsInstance(frame,str)
-            except AssertionError:
-                self.assertIsInstance(frame,bytes)
+        frame = self.minicap.get_frame()
+        frame = string_2_img(frame)
+        self.assertIsInstance(frame, ndarray)
+
     def test_get_frames(self):
-        pass
-        # Todo
-    # Todo fix this cases
-    def test_resetup(self):
-        with self.assertRaises(KeyError):
-            self.minicap._setup()
+        frame = self.minicap.get_frame_from_stream()
+        frame = string_2_img(frame)
+        self.assertIsInstance(frame, ndarray)
+
+    def test_rotation(self):
+        self.dev.keyevent("HOME")
+        time.sleep(1)
+        frame_vertical = self.minicap.get_frame_from_stream()
+        frame_vertical = string_2_img(frame_vertical)
+        self.dev.start_app(PKG)
+        time.sleep(1)
+        frame_horizontal = self.minicap.get_frame_from_stream()
+        frame_horizontal = string_2_img(frame_horizontal)
+
+        self.assertEqual(frame_vertical.shape[0], frame_horizontal.shape[1])
+        self.assertEqual(frame_vertical.shape[1], frame_horizontal.shape[0])
+        self.assertEqual(self._count_server_proc(), 1)
 
 
+class TestMinicapSetup(TestMinicapBase):
 
+    def test_0_install(self):
+        self.minicap.uninstall()
+        self.minicap.install()
 
-#class kkk():
-
+    def test_teardown(self):
+        self.minicap.get_frame_from_stream()
+        self.minicap.teardown_stream()
+        self.assertEqual(self._count_server_proc(), 0)
 
 
 if __name__ == '__main__':

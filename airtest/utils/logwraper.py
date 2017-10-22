@@ -5,6 +5,8 @@ import json
 import time
 import functools
 import traceback
+from .logger import get_logger
+LOGGING = get_logger(__name__)
 
 
 class AirtestLogger(object):
@@ -37,8 +39,9 @@ class AirtestLogger(object):
 
     def log(self, tag, data, in_stack=True):
         ''' Not thread safe '''
-        if self.debug:
-            print(tag, data)
+        # if self.debug:
+        #     print(tag, data)
+        LOGGING.debug("%s: %s" % (tag, data))
 
         if in_stack:
             depth = len(self.running_stack)
@@ -69,7 +72,7 @@ def Logwrap(f, logger):
         try:
             res = f(*args, **kwargs)
         except Exception as e:
-            data = {"traceback": traceback.format_exc(), "time_used": time.time()-start, "error_str": str(e)}
+            data = {"traceback": traceback.format_exc(), "time_used": time.time() - start, "error_str": str(e)}
             fndata.update(data)
             fndata.update(LOGGER.extra_log)
             LOGGER.log("error", fndata)
@@ -77,8 +80,8 @@ def Logwrap(f, logger):
             raise
         else:
             time_used = time.time() - start
-            print('>'*len(LOGGER.running_stack), f.__name__, 'Time used:', "%.3f" % time_used, "s")
-            sys.stdout.flush()
+            LOGGING.debug("%s%s Time used: %3fs" % ('>' * len(LOGGER.running_stack), f.__name__, time_used))
+            # sys.stdout.flush()
             fndata.update({'time_used': time_used, 'ret': res})
             fndata.update(LOGGER.extra_log)
             LOGGER.log('function', fndata)

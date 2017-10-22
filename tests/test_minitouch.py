@@ -1,73 +1,55 @@
 # encoding=utf-8
-import sys
-sys.path.append("..\\..\\..\\")
-
-from airtest.core.android.android import ADB, AdbError, DEFAULT_ADB_SERVER, AirtestError
-from airtest.core.android.android import Minitouch
+from airtest.core.android.android import ADB, Minitouch
 import unittest
-import subprocess
-import mock
-from mock import patch,Mock
-from new_test.adbmock import adbmock
 
 
-class TestMiniTouch(unittest.TestCase):
+class TestMiniTouchBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.adb=ADB()
-        devicelist=cls.adb.devices()
-        if devicelist:
-            no,content=devicelist[0]
-            serialno = no
-            cls.adb.set_serialno(serialno)
-            cls.minitouch = Minitouch(serialno=serialno,adb=cls.adb,size={"physical_width":600,"physical_height":400,"rotation":0})
+        cls.adb = ADB()
+        devices = cls.adb.devices()
+        if not devices:
+            raise RuntimeError("At lease one adb device required")
+        cls.adb.serialno = devices[0][0]
+        cls.minitouch = Minitouch(cls.adb)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.minitouch.teardown()
+
+    def _count_server_proc(self):
+        output = self.adb.raw_shell("ps | grep minitouch | grep -v do_exit").strip()
+        print(output)
+        if output:
+            return len(output.splitlines())
         else:
-            with mock.patch.object(cls.adb,'getprop',return_value="17"):
-                with mock.patch.object(cls.adb,'cmd',return_value="cmd"):
-                    with mock.patch.object(cls.adb,'shell',return_value="cmd"):
-                        cls.minitouch = Minitouch("",size="112",adb=cls.adb)
-
-        cls.adbmock=adbmock()
+            return 0
 
 
-    # need real phone
-    def test_install(self):
-        self.minitouch.install()
-        self.minitouch.install(reinstall=True)
+class TestMiniTouch(TestMiniTouchBase):
 
+    def test_touch(self):
+        self.minitouch.touch((100, 100))
 
-    def test_setup_server(self):
-        with self.assertRaises(AdbError):
-            proc = self.minitouch.setup_server()
-            proc.kill()
-            self.assertIsInstance(proc, subprocess.Popen)
+    def test_swipe(self):
+        self.minitouch.swipe((100, 100), (200, 200))
 
-
-
-    def setup_client(self):
-        pass
-        # Todo
-
-    def test_setup_client_backend(self):
-        #self.minitouch.setup_client_backend()
-        #stop the process
-        pass
-
-        # Todo "KeyError: 'width'" These two function can't be call derictly now
     def test_pinch(self):
-        with self.assertRaises(KeyError):
-            self.minitouch.pinch()
+        self.minitouch.pinch()
+        self.minitouch.pinch(in_or_out='out')
 
-    def test_pinch_out(self):
-        with self.assertRaises(KeyError):        
-            self.minitouch.pinch(in_or_out='out')
 
-    def tearDown(self):
+class TestMiniTouchSetup(TestMiniTouchBase):
+
+    def test_0_install(self):
+        self.minitouch.uninstall()
+        self.minitouch.install()
+
+    def test_teardown(self):
+        self.minitouch.touch((0, 0))
         self.minitouch.teardown()
-
-#class kkk():
-
+        self.assertEqual(self._count_server_proc(), 0)
 
 
 if __name__ == '__main__':

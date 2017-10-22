@@ -6,7 +6,8 @@ import os
 PWD = args.script
 PKG = "org.cocos2d.blackjack"
 APK = os.path.join(PWD, "blackjack-release-signed.apk")
-install(APK)
+if PKG not in device().list_app():
+    install(APK)
 stop_app(PKG)
 wake()
 start_app(PKG)

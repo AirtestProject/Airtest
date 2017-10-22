@@ -2,7 +2,7 @@
 import threading
 import traceback
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup
+from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger('rotation')
@@ -16,11 +16,11 @@ class RotationWatcher(object):
         self.ow_callback = []
         self._t = None
 
+    @on_method_ready('start')
     def get_ready(self):
-        if not self._t:
-            self.start()
+        pass
 
-    def _setup(self):
+    def _install_and_setup(self):
         try:
             apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
         except AirtestError:
@@ -29,11 +29,11 @@ class RotationWatcher(object):
         p = self.adb.start_shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path)
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
-        return p
+        self.ow_proc = p
+        reg_cleanup(self.ow_proc.kill)
 
     def start(self):
-        self.ow_proc = self._setup()
-        reg_cleanup(self.ow_proc.kill)
+        self._install_and_setup()
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
@@ -50,6 +50,9 @@ class RotationWatcher(object):
                 ori = _refresh_by_ow()
                 if ori is None:
                     break
+                elif ori == self.adb.display_info['orientation']:
+                    continue
+                LOGGING.info('update orientation %s->%s' % (self.adb.display_info['orientation'], ori))
                 for cb in self.ow_callback:
                     try:
                         cb(ori)

@@ -11,26 +11,26 @@ from airtest.core.android.adb import ADB
 from airtest.utils.compat import queue
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup, get_std_encoding
+from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready
 from airtest.utils.logger import get_logger
 LOGGING = get_logger('minitouch')
 
 
 class Minitouch(object):
-    """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER):
-        self.serialno = serialno
+    """super fast operation from minitouch.
+
+    References: https://github.com/openstf/minitouch"""
+
+    def __init__(self, adb, backend=False):
+        self.adb = adb
+        self.backend = backend
         self.server_proc = None
         self.client = None
+        self.display_info = None
         self.max_x, self.max_y = None, None
-        self.adb = adb or ADB(serialno, server_addr=adb_addr)
-        self.localport = localport
-        self.backend = backend
-        self._is_ready = False
+        reg_cleanup(self.teardown)
 
-    def _get_ready(self):
-        if self._is_ready:
-            return
+    def install_and_setup(self):
         self.install()
         self.display_info = self.adb.display_info
         self.setup_server()
@@ -38,10 +38,12 @@ class Minitouch(object):
             self.setup_client_backend()
         else:
             self.setup_client()
-        self._is_ready = True
 
-    def install(self, reinstall=False):
-        if not reinstall and self.adb.exists_file('/data/local/tmp/minitouch'):
+    def uninstall(self):
+        self.adb.raw_shell("rm /data/local/tmp/minitouch*")
+
+    def install(self):
+        if self.adb.exists_file('/data/local/tmp/minitouch'):
             LOGGING.debug("install_minitouch skipped")
             return
 
@@ -74,7 +76,7 @@ class Minitouch(object):
         ny = y * self.max_y / height
         return nx, ny
 
-    def setup_server(self, adb_port=None):
+    def setup_server(self):
         """set up minitouch server and adb forward"""
         if self.server_proc:
             self.server_proc.kill()
@@ -83,11 +85,11 @@ class Minitouch(object):
         self.localport, deviceport = self.adb.setup_forward("localabstract:minitouch_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         p = self.adb.start_shell("/data/local/tmp/minitouch -n '%s' 2>&1" % deviceport)
-        self.nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
+        nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:
-            line = self.nbsp.readline(timeout=5.0)
+            line = nbsp.readline(timeout=5.0)
             if line is None:
-                raise RuntimeError("minitouch setup error")
+                raise RuntimeError("minitouch setup timeout")
 
             line = line.decode(get_std_encoding(sys.stdout))
 
@@ -99,15 +101,16 @@ class Minitouch(object):
             else:
                 self.max_x = 32768
                 self.max_y = 32768
-        # self.nbsp.kill() # 保留，不杀了，后面还会继续读取并pirnt
+        # nbsp.kill() # 保留，不杀了，后面还会继续读取并pirnt
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
-            raise RuntimeError("minitouch setup error")
+            raise RuntimeError("minitouch server quit immediately")
         reg_cleanup(p.kill)
         self.server_proc = p
         return p
 
+    @on_method_ready('install_and_setup')
     def touch(self, tuple_xy, duration=0.01):
         """
         d 0 10 10 50
@@ -116,13 +119,13 @@ class Minitouch(object):
         u 0
         c
         """
-        self._get_ready()
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
         self.handle(b"d 0 %d %d 50\nc\n" % (x, y))
         time.sleep(duration)
         self.handle(b"u 0\nc\n")
 
+    @on_method_ready('install_and_setup')
     def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
         d 0 0 0 50
@@ -140,7 +143,6 @@ class Minitouch(object):
         u 0
         c
         """
-        self._get_ready()
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
 
@@ -161,8 +163,12 @@ class Minitouch(object):
         time.sleep(interval)
         self.handle(b"u 0\nc\n")
 
+    @on_method_ready('install_and_setup')
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
+        perform pinch action,
+
+        minitouch protocol example:
         d 0 0 100 50
         d 1 100 0 50
         c
@@ -188,7 +194,6 @@ class Minitouch(object):
         u 1
         c
         """
-        self._get_ready()
         w, h = self.display_info['width'], self.display_info['height']
         if isinstance(center, (list, tuple)):
             x0, y0 = center
@@ -226,9 +231,8 @@ class Minitouch(object):
             self.handle(c)
             time.sleep(interval)
 
+    @on_method_ready('install_and_setup')
     def operate(self, args):
-        self._get_ready()
-        cmd = ""
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
@@ -248,7 +252,8 @@ class Minitouch(object):
         try:
             self.client.send(data)
         except Exception as err:
-            raise MinitouchError(err)
+            # raise MinitouchError(err)
+            raise err
 
     def _backend_worker(self):
         while not self.backend_stop_event.isSet():
@@ -292,7 +297,7 @@ class Minitouch(object):
     def teardown(self):
         if hasattr(self, "backend_stop_event"):
             self.backend_stop_event.set()
-        self.client.close()
-        # 添加判断，防止报错NoneType
+        if self.client:
+            self.client.close()
         if self.server_proc:
             self.server_proc.kill()

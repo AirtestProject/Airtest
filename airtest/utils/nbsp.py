@@ -1,8 +1,9 @@
 # _*_ coding:UTF-8 _*_
-import sys
 import time
 from threading import Thread, Event
 from .compat import queue
+from .logger import get_logger
+LOGGING = get_logger('nbsp')
 
 
 class NonBlockingStreamReader:
@@ -11,7 +12,7 @@ class NonBlockingStreamReader:
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
-        raise_EOF: if True, raise an UnexpectedEndOfStream 
+        raise_EOF: if True, raise an UnexpectedEndOfStream
                 when stream is EOF before kill
         print_output: if True, print when readline
         '''
@@ -29,18 +30,17 @@ class NonBlockingStreamReader:
                 if line:
                     queue.put(line)
                     if print_output:
-                        # print only new line 
+                        # print only new line
                         if print_new_line and line == self._lastline:
                             continue
                         self._lastline = line
-                        print("[nbsp][%s]%s" % (self.name, repr(line.strip())))
-                        sys.stdout.flush()
+                        LOGGING.debug("[%s]%s" % (self.name, repr(line.strip())))
                 elif kill_event.is_set():
                     break
                 elif raise_EOF:
                     raise UnexpectedEndOfStream
                 else:
-                    print("EndOfStream")
+                    LOGGING.debug("EndOfStream")
                     break
 
         self._kill_event = Event()

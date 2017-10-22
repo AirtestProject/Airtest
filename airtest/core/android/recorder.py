@@ -5,6 +5,7 @@ from airtest.core.error import AirtestError
 from airtest.utils.apkparser import APK
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.snippet import on_method_ready
 LOGGING = get_logger('recorder')
 
 
@@ -15,8 +16,9 @@ class Recorder(object):
     def __init__(self, adb):
         self.adb = adb
         self.recording_proc = None
+        self.recording_file = None
 
-    def get_ready(self):
+    def install_or_upgrade(self):
         self._install_apk_upgrade(YOSEMITE_APK, YOSEMITE_PACKAGE)
 
     def _install_apk_upgrade(self, apk_path, package):
@@ -26,6 +28,7 @@ class Recorder(object):
         if not installed_version or apk_version > installed_version:
             self.adb.install_app(apk_path, replace=True)
 
+    @on_method_ready('install_or_upgrade')
     def start_recording(self, max_time=1800, bit_rate=None, vertical=None):
         if getattr(self, "recording_proc", None):
             raise AirtestError("recording_proc has already started")
@@ -50,8 +53,7 @@ class Recorder(object):
                 self.recording_file = output
                 return True
 
-        raise RuntimeError("recording setup error")
-
+    @on_method_ready('install_or_upgrade')
     def stop_recording(self, output="screen.mp4", is_interrupted=False):
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
         p = self.adb.start_shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE))

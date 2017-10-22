@@ -10,8 +10,10 @@
 
 
 import cv2
+from airtest.utils.logger import get_logger
 from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
+LOGGING = get_logger(__name__)
 
 
 def find_template(im_source, im_search, threshold=0.8, rgb=False):
@@ -28,7 +30,7 @@ def find_template(im_source, im_search, threshold=0.8, rgb=False):
     # 求取识别位置: 目标中心 + 目标区域:
     middle_point, rectangle = _get_target_rectangle(max_loc, w, h)
     best_match = generate_result(middle_point, rectangle, confidence)
-    print("[aircv][template] threshold=%s, result=%s" % (threshold, best_match))
+    LOGGING.debug("threshold=%s, result=%s" % (threshold, best_match))
     return best_match if confidence >= threshold else None
 
 

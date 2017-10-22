@@ -33,9 +33,9 @@ class Android(Device):
         self.sdk_version = self.adb.sdk_version
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(serialno, adb=self.adb)
-        self.javacap = Javacap(serialno, adb=self.adb)
-        self.minitouch = Minitouch(serialno, adb=self.adb)
+        self.minicap = Minicap(self.adb)
+        self.javacap = Javacap(self.adb)
+        self.minitouch = Minitouch(self.adb)
         self.yosemite_ime = YosemiteIme(self)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
@@ -72,7 +72,7 @@ class Android(Device):
         elif self.cap_method == CAP_METHOD.MINICAP:
             screen = self.minicap.get_frame()
         elif self.cap_method == CAP_METHOD.JAVACAP:
-            screen = self.javacap.get_frame()
+            screen = self.javacap.get_frame_from_stream()
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
@@ -96,11 +96,11 @@ class Android(Device):
         return self.adb.shell(*args, **kwargs)
 
     def keyevent(self, keyname, **kwargs):
-        self.adb.shell(["input", "keyevent", keyname.upper()])
+        self.adb.keyevent(keyname)
 
     def wake(self):
         self.home()
-        self.recorder.get_ready()  # 暂时Yosemite只用了ime
+        self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
         self.keyevent("HOME")
 
