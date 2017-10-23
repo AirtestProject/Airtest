@@ -101,30 +101,6 @@ class LogToHtml(object):
 
         return step
 
-    def analyse_snapshot(self):
-        """
-        单独提取所有snapshot标签
-        Returns
-        -------
-        [{"msg": "截图描述", "snapshot": "截图文件所在路径"}]
-        """
-        ret = []
-        step = {}
-        for log in self.log:
-            log.update(log["data"])
-            if log['depth'] in step:
-                step[log['depth']].update(log)
-            else:
-                step[log['depth']] = log
-
-            if log['depth'] == 1:
-                if step[1]['name'] == 'snapshot':
-                    snapshot = step[2]['screen']
-                    msg = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
-                    ret.append({'snapshot': snapshot, 'msg': msg})
-                step = {}
-        return ret
-
     def translate(self, step):
         """
         按照depth = 1 的name来分类
@@ -442,17 +418,7 @@ def safe_percent(a, b):
 
 
 def get_file_author(file_path):
-    if not os.path.exists(file_path):
-        # 中文路径脚本，编码来源比较复杂，从ide启动与从不同终端启动编码各不相同，可以暂不显示作者名称，不影响报告的显示
-        print("get_file_author, file_path %s not existed" % repr(file_path))
-        return
-
-    try:
-        fp = io.open(file_path, encoding="utf-8")
-    except IOError:
-        print("read file %s error" % file_path)
-        return
-
+    fp = io.open(file_path, encoding="utf-8")
     author = ''
     for line in fp:
         if '__author__' in line and '=' in line:

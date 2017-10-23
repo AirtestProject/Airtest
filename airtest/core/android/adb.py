@@ -320,7 +320,7 @@ class ADB(object):
         cmd = ['pm', 'uninstall', package]
         if keepdata:
             cmd.append('-k')
-        self.adb.shell(cmd)
+        self.shell(cmd)
 
     def snapshot(self):
         """take a screenshot"""
@@ -671,23 +671,14 @@ class ADB(object):
         matcher = IP_PATTERN.search(res)
         if matcher:
             return matcher.group(0)
-        else:
-            try:
-                res = self.shell('netcfg | grep wlan0')
-            except AdbShellError:
-                res = ''
-            matcher = re.search(r' ((\d+\.){3}\d+/\d+) ', res)
-            if matcher:
-                ip, mask_len = matcher.group(1).split('/')
-                mask_len = int(mask_len)
-            else:
-                # 获取不到网关就默认按照ip前17位+1
-                ip, mask_len = self.get_ip_address(), 17
+        ip = self.get_ip_address()
+        if not ip:
+            return None
+        mask_len = self._get_subnet_mask_len()
+        gateway = (ip2int(ip) & (((1 << mask_len) - 1) << (32 - mask_len))) + 1
+        return int2ip(gateway)
 
-            gateway = (ip2int(ip) & (((1 << mask_len) - 1) << (32 - mask_len))) + 1
-            return int2ip(gateway)
-
-    def get_subnet_mask_len(self):
+    def _get_subnet_mask_len(self):
         try:
             res = self.shell('netcfg | grep wlan0')
         except AdbShellError:

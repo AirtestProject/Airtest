@@ -5,7 +5,7 @@ import numpy
 import unittest
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
-from testconf import APK, PKG
+from testconf import APK, PKG, try_remove
 
 
 class TestAndroid(unittest.TestCase):
@@ -13,6 +13,10 @@ class TestAndroid(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.android = Android()
+
+    @classmethod
+    def tearDownClass(self):
+        try_remove('screen.mp4')
 
     def _install_test_app(self):
         if PKG not in self.android.list_app():
@@ -34,7 +38,7 @@ class TestAndroid(unittest.TestCase):
     def test_minicap(self):
         minicap = self.android.minicap
         self.assertIsInstance(minicap, Minicap)
-        self.assertIs(minicap.display_info, self.android.display_info)
+        self.assertIs(minicap.adb.display_info, self.android.display_info)
 
     def test_minitouch(self):
         self.assertIsInstance(self.android.minitouch, Minitouch)
@@ -103,6 +107,7 @@ class TestAndroid(unittest.TestCase):
 
     def test_swipe(self):
         for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
+            self.android.touch_method = i
             self.android.swipe((100, 100), (300, 300))
 
     def test_recording(self):
@@ -114,7 +119,6 @@ class TestAndroid(unittest.TestCase):
             time.sleep(3)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
-            os.remove(filepath)
 
     def test_start_recording_error(self):
         if self.android.sdk_version >= 19:

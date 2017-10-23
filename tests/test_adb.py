@@ -1,6 +1,6 @@
 # encoding=utf-8
 from airtest.core.android.adb import ADB, AdbError, AdbShellError, DeviceConnectionError
-from testconf import IMG, try_remove
+from testconf import IMG, APK, PKG, try_remove
 from types import GeneratorType
 import os
 import unittest
@@ -152,6 +152,27 @@ class TestADBWithDevice(unittest.TestCase):
             if line_cnt > 3:
                 break
         self.assertGreater(line_cnt, 0)
+
+    def test_pm_install(self):
+        if PKG in self.adb.list_app():
+            self.adb.pm_uninstall(PKG)
+
+        self.adb.pm_install(APK)
+        self.assertIn(PKG, self.adb.list_app())
+
+        self.adb.pm_uninstall(PKG)
+        self.assertNotIn(PKG, self.adb.list_app())
+
+    def test_ip(self):
+        ip = self.adb.get_ip_address()
+        if ip:
+            self.assertEqual(len(ip.split('.')), 4)
+
+    def test_gateway(self):
+        gateway = self.adb.get_gateway_address()
+        if gateway:
+            self.assertEqual(len(gateway.split('.')), 4)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,32 +1,21 @@
 # -*- coding: utf-8 -*-
 import re
-from airtest.core.android.constant import YOSEMITE_APK, YOSEMITE_PACKAGE
+from airtest.core.android.yosemite import Yosemite
+from airtest.core.android.constant import YOSEMITE_PACKAGE
 from airtest.core.error import AirtestError
-from airtest.utils.apkparser import APK
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import on_method_ready
 LOGGING = get_logger('recorder')
 
 
-class Recorder(object):
-
-    """Screen recorder """
+class Recorder(Yosemite):
+    """Screen recorder."""
 
     def __init__(self, adb):
-        self.adb = adb
+        super(Recorder, self).__init__(adb)
         self.recording_proc = None
         self.recording_file = None
-
-    def install_or_upgrade(self):
-        self._install_apk_upgrade(YOSEMITE_APK, YOSEMITE_PACKAGE)
-
-    def _install_apk_upgrade(self, apk_path, package):
-        apk_version = int(APK(apk_path).androidversion_code)
-        installed_version = int(self.adb.get_package_version(package))
-        LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
-        if not installed_version or apk_version > installed_version:
-            self.adb.install_app(apk_path, replace=True)
 
     @on_method_ready('install_or_upgrade')
     def start_recording(self, max_time=1800, bit_rate=None, vertical=None):
@@ -40,7 +29,7 @@ class Recorder(object):
         else:
             vertical_param = "-Dvertical=true" if vertical else "-Dvertical=false"
         p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s %s /system/bin %s.Recorder --start-record' %
-            (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE))
+                                 (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE))
         nbsp = NonBlockingStreamReader(p.stdout)
         while True:
             line = nbsp.readline(timeout=5)

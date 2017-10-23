@@ -40,6 +40,18 @@ class TestMiniTouch(TestMiniTouchBase):
         self.minitouch.pinch(in_or_out='out')
 
 
+class TestMiniTouchBackend(TestMiniTouch):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.adb = ADB()
+        devices = cls.adb.devices()
+        if not devices:
+            raise RuntimeError("At lease one adb device required")
+        cls.adb.serialno = devices[0][0]
+        cls.minitouch = Minitouch(cls.adb, backend=True)
+
+
 class TestMiniTouchSetup(TestMiniTouchBase):
 
     def test_0_install(self):

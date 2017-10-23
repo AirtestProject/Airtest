@@ -1,7 +1,7 @@
 # encoding=utf-8
 from airtest.core.api import *
 from airtest.core.helper import G
-from airtest.core.android import Android
+from airtest.core.android.android import Android, CAP_METHOD
 from airtest.core.error import TargetNotFoundError, AdbShellError
 from testconf import APK, PKG, TPL, TPL2, DIR
 import unittest
@@ -10,18 +10,18 @@ import unittest
 class TestMainOnAndroid(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         if not isinstance(G.DEVICE, Android):
             connect_device("Android:///")
         ST.CVSTRATEGY = ['tpl']  # 'tpl' is enough for these tests
-        self.dev = G.DEVICE
+        cls.dev = G.DEVICE
 
     def test_connect(self):
         old = len(G.DEVICE_LIST)
         d = connect_device("Android://localhost:5037/?cap_method=JAVACAP")
         self.assertEqual(len(G.DEVICE_LIST) - old, 1)
         self.assertIs(d, G.DEVICE)
-        self.assertEqual(d.cap_method, "adbcap")
+        self.assertEqual(d.cap_method, CAP_METHOD.JAVACAP)
         set_current(0)
 
     def test_device(self):

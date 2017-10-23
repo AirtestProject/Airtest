@@ -36,7 +36,7 @@ class Android(Device):
         self.minicap = Minicap(self.adb)
         self.javacap = Javacap(self.adb)
         self.minitouch = Minitouch(self.adb)
-        self.yosemite_ime = YosemiteIme(self)
+        self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
 
@@ -76,7 +76,10 @@ class Android(Device):
         else:
             screen = self.adb.snapshot()
         # 输出cv2对象
-        screen = aircv.utils.string_2_img(screen)
+        try:
+            screen = aircv.utils.string_2_img(screen)
+        except:
+            print(screen)
 
         # 保证方向是正的
         if ensure_orientation and self.display_info["orientation"]:
@@ -128,7 +131,7 @@ class Android(Device):
     def swipe(self, p1, p2, duration=0.5, steps=5):
         p1 = self._touch_point_by_orientation(p1)
         p2 = self._touch_point_by_orientation(p2)
-        if self.minitouch:
+        if self.touch_method == TOUCH_METHOD.MINITOUCH:
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。

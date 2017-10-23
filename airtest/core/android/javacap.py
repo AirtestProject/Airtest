@@ -2,26 +2,25 @@
 from airtest.utils.logger import get_logger
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup
+from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.core.android.yosemite import Yosemite
 import struct
 LOGGING = get_logger('javacap')
 
 
-class Javacap(object):
-
-    """another screencap class, slower than minicap, but better compatibility
-       bug to be fixed: get_frame will return cached old screen, not always current screen
-    """
+class Javacap(Yosemite):
+    """another screencap class, slower than minicap, but better compatibility."""
 
     APP_PKG = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
     RECVTIMEOUT = None
 
     def __init__(self, adb):
-        self.adb = adb
+        super(Javacap, self).__init__(adb)
         self.frame_gen = None
         reg_cleanup(self.teardown_stream)
 
+    @on_method_ready('install_or_upgrade')
     def _setup_stream_server(self):
         localport, deviceport = self.adb.setup_forward("localabstract:javacap_{}".format)
         deviceport = deviceport[len("localabstract:"):]

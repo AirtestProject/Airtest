@@ -1,25 +1,17 @@
 # coding=utf-8
 import re
-import six
-
-__author__ = 'lxn3032'
-
-YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
+from airtest.utils.compat import text_type
+from airtest.utils.snippet import on_method_ready
+from airtest.core.android.yosemite import Yosemite
+from .constant import YOSEMITE_IME_SERVICE
 
 
 def ensure_unicode(value):
-    if six.PY3:
-        if type(value) is not str:
-            try:
-                value = value.decode('utf-8')
-            except UnicodeDecodeError:
-                value = value.decode('gbk')
-    else:
-        if type(value) is not unicode:
-            try:
-                value = value.decode('utf-8')
-            except UnicodeDecodeError:
-                value = value.decode('gbk')
+    if type(value) is not text_type:
+        try:
+            value = value.decode('utf-8')
+        except UnicodeDecodeError:
+            value = value.decode('gbk')
     return value
 
 
@@ -65,10 +57,12 @@ class CustomIme(object):
 
 
 class YosemiteIme(CustomIme):
-    def __init__(self, android_device):
-        super(YosemiteIme, self).__init__(android_device, None, YOSEMITE_IME_SERVICE)
+    def __init__(self, adb):
+        super(YosemiteIme, self).__init__(adb, None, YOSEMITE_IME_SERVICE)
+        self.yosemite = Yosemite(adb)
 
     def text(self, value):
+        self.yosemite.get_ready()
         if not self.started:
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
