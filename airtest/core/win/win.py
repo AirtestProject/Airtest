@@ -1,35 +1,23 @@
-# _*_ coding:UTF-8 _*_
-
-import sys
-import subprocess
-import win32gui
-import win32process
-import win32com.client
-from PIL import ImageGrab
-
-import aircv
+# -*- coding: utf-8 -*-
+from airtest import aircv
 from airtest.core.device import Device
-
-from airtest.core.win.winsendkey import SendKeys
-from airtest.core.win.keyboard import key_input
-from airtest.core.win.mouse import mouse_click, mouse_drag, mouse_down, mouse_up, mouse_move
-from airtest.core.win.window_mgr import WindowMgr, get_screen_shot, get_resolution
+from pywinauto.application import Application
+from pywinauto import Desktop
+from pywinauto.win32functions import SetForegroundWindow, ShowWindow
+from pywinauto import mouse, keyboard
+import subprocess
 
 
 class Windows(Device):
-    """Windows Client"""
-    def __init__(self, handle=None, window_title=None):
-        self.winmgr = WindowMgr()
-        self.handle = handle
-        self.window_title = window_title
-        self._set_window_by_title()
+    """Windows client."""
 
-    def _set_window_by_title(self):
-        if self.window_title:
-            handles = self.find_window_list(self.window_title)
-            if not handles:
-                raise RuntimeError("no window found with title: '%s'" % self.window_title)
-            self.handle = handles[0]
+    def __init__(self, **kwargs):
+        if not kwargs:
+            self.app = Desktop()
+            self.handle = None
+        else:
+            self.app = Application().connect(handle=handle, **kwargs)
+            self.handle = self.app.handle
 
     def shell(self, cmd):
         return subprocess.check_output(cmd, shell=True)
@@ -45,125 +33,27 @@ class Windows(Device):
             aircv.imwrite(filename, screen)
         return screen
 
-    def snapshot_by_hwnd(self, filename="tmp.png", hwnd_to_snap=None, use_crop_screen=True):
-        """
-            根据窗口句柄进行截图，如果发现窗口句柄已经不在则直接返回None.
-            返回值还包括窗口左上角的位置.
-        """
-        # 如果当前的hwnd不存在，直接返回None
-        hwnd_list = self.find_all_hwnd()
-        if hwnd_to_snap not in hwnd_list:
-            raise Exception("hwnd not exist in system !")
-        else:
-            # print "snapshot_by_hwnd in win.py", hwnd, filename
-            if use_crop_screen:  # 小马电脑上有问题，暂时启用crop_screen_by_hwnd=True：
-                screen = get_screen_shot()
-                img = self.winmgr.crop_screen_by_hwnd(screen, hwnd=hwnd_to_snap, filename=filename)
-            else:
-                img = self.winmgr.snapshot_by_hwnd(hwnd=hwnd_to_snap, filename=filename)
+    def keyevent(self, keyname, **kwargs):
+        pass
 
-            if filename:
-                aircv.imwrite(filename, img)
-            return img
+    def text(self, text, **kwargs):
+        pass
 
-    def get_wnd_pos_by_hwnd(self, hwnd, use_crop_screen=True):
-        """ 根据窗口句柄，返回窗口左上角的位置. """
-        # 如果使用的是use_crop_screen的方法，计算wnd_pos时就不能有负数了：
-        #     否则在窗口左边在屏幕外时，将会有实际操作的左偏移：
-        wnd_pos = self.winmgr.get_wnd_pos_by_hwnd(hwnd, use_crop_screen=use_crop_screen)
-        return wnd_pos
-
-    def get_childhwnd_list_by_hwnd(self, hwnd, child_hwnd_list, w_h):
-        # 传入当前的child_hwnd_list，去除当前已经不在hwnd内的child_hwnd
-        #     如果发现全都不在了，那么就使用w_h进行查找新的child_hwnd_list
-        #     如果发现w_h的也不在了，那么就按照w_h的比例相同的原则进行查找，还没有，就报错...
-        new_child_hwnd_list = self.winmgr.get_childhwnd_list_by_hwnd(hwnd, child_hwnd_list, w_h)
-        return new_child_hwnd_list
-
-    # def keyevent(self, keyname, escape=False, combine=None, shift=False, ctrl=False, alt=False):
-    #     key_input(keyname, escape=escape, combine=combine, shift=shift, ctrl=ctrl, alt=alt)
-
-    def keyevent(self, keyname, escape=False, combine=[]):
-        key_input(keyname, escape=escape, combine=combine)
-
-    def text(self, text, enter=False, with_spaces=True, with_tabs=False, with_newlines=False):
-        SendKeys(text.decode("utf-8"), with_spaces=with_spaces, with_tabs=with_tabs, with_newlines=with_newlines)
-        if enter:
-            self.keyevent("enter", escape=True)
-
-    def touch(self, pos, right_click=False):
-        mouse_click(pos, right_click)
+    def touch(self, pos, **kwargs):
+        pass
 
     def swipe(self, p1, p2, duration=0.8, steps=5):
-        mouse_drag(p1, p2, duration=duration, steps=steps)  # windows拖拽时间固定为0.8s
-
-    def find_window(self, wildcard):
-        """
-        遍历所有window按re.match来查找wildcard，并设置为当前handle
-        """
-        self.window_title = wildcard
-        return self.winmgr.find_window_wildcard(wildcard)
-
-    def find_hwnd_title(self, hwnd):
-        """
-        获取指定hwnd的title.
-        """
-        title = self.winmgr.find_hwnd_title(hwnd)
-        # print "in win.py : find_hwnd_title()", title.encode("utf8")
-        return title
-
-    def find_all_hwnd(self):
-        """
-        获取当前的所有窗口队列.
-        """
-        hwnd_list = self.winmgr.find_all_hwnd()  # 获取所有的窗口句柄
-        # print "in win.py : find_hwnd_title()", title.encode("utf8")
-        return hwnd_list
-
-    def find_window_list(self, wildcard):
-        self.window_title = wildcard
-        return self.winmgr.find_window_list(wildcard)
-
-    def set_handle(self, handle):
-        """设置窗口的handle."""
-        self.handle = handle
-        self.winmgr.handle = handle
+        pass
 
     def set_foreground(self):
         """将对应的窗口置到最前."""
-        self.winmgr.set_foreground()
-
-    def set_hwnd_focus(self):
-        """强制导向输入焦点."""
-        # 这里会向窗口发送UP+ENTER键:
-        if self.handle:
-            _, pid = win32process.GetWindowThreadProcessId(self.handle)
-            shell = win32com.client.Dispatch("WScript.Shell")
-            shell.AppActivate('Console2')
-            shell.SendKeys('{UP}{ENTER}')
-            shell.AppActivate(pid)
+        pass
 
     def get_window_pos(self):
-        return self.winmgr.get_window_pos()
+        pass
 
-    # PEP 3113 -- Removal of Tuple Parameter Unpacking
-    # https://www.python.org/dev/peps/pep-3113/
     def set_window_pos(self, tuple_xy):
-        x, y = tuple_xy
-        self.winmgr.set_window_pos(x, y)
-
-    def getCurrentScreenResolution(self):
-        return get_resolution(self.handle)
-
-    def operate(self, args):
-        if args["type"] == "down":
-            mouse_down(pos=(args['x'], args['y']))
-        elif args["type"] == "move":
-            mouse_move(int(args['x']), int(args['y']))
-        elif args["type"] == "up":
-            mouse_up()
-        else:
-            raise RuntimeError("invalid operate args: %s" % args)
+        pass
 
     def start_app(self, path):
         return subprocess.call('start "" "%s"' % path, shell=True)
@@ -177,24 +67,57 @@ class Windows(Device):
             cmd = 'taskkill /IM %s' % image
         return subprocess.check_output(cmd, shell=True)
 
+    def snapshot(self, filename="tmp.png"):
+        rect = win32gui.GetWindowRect(hwnd)
+        # pos = (rect[0], rect[1])
+        width = abs(rect[2] - rect[0])
+        height = abs(rect[3] - rect[1])
+        # print "in winutils.py WindowMgr():", pos, width, height
+        hwndDC = win32gui.GetWindowDC(hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
 
-#if __name__ == '__main__':
-#    import time
-#    w = Windows()
-#    # w.snapshot()
-#    # w.keyevent("enter", escape=True)
-#    # w.text("nimei")
-#    # w.touch((10, 10))
-#    # w.swipe((10,10), (200,200))
-#    w.set_handle(w.find_window(u"QA平台"))
-#    w.set_foreground()
-#    print w.get_window_pos()
-#    time.sleep(1)
-#    # w.set_window_pos((0, 0))
-#    w2 = Windows()
-#    w.set_handle(w2.find_window("GitHub"))
-#    w2.set_foreground()
-#    time.sleep(1)
-#    w.set_foreground()
-#    time.sleep(1)
-#    w2.set_foreground()
+        saveBitMap = win32ui.CreateBitmap()
+        saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+        saveDC.SelectObject(saveBitMap)
+        saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
+        saveBitMap.SaveBitmapFile(saveDC, filename)
+        img = cv2.imread(filename)
+        return img
+
+
+def get_screen_shot(output="screenshot.png"):
+    hwnd = win32gui.GetDesktopWindow()
+    # print hwnd
+    # you can use this to capture only a specific window
+    #l, t, r, b = win32gui.GetWindowRect(hwnd)
+    #w = r - l
+    #h = b - t
+
+    # get complete virtual screen including all monitors
+    SM_XVIRTUALSCREEN = 76
+    SM_YVIRTUALSCREEN = 77
+    SM_CXVIRTUALSCREEN = 78
+    SM_CYVIRTUALSCREEN = 79
+    w = vscreenwidth = win32api.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+    h = vscreenheigth = win32api.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+    l = vscreenx = win32api.GetSystemMetrics(SM_XVIRTUALSCREEN)
+    t = vscreeny = win32api.GetSystemMetrics(SM_YVIRTUALSCREEN)
+    r = l + w
+    b = t + h
+    # print l, t, r, b, ' -> ', w, h
+
+    hwndDC = win32gui.GetWindowDC(hwnd)
+    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+    saveDC = mfcDC.CreateCompatibleDC()
+
+    saveBitMap = win32ui.CreateBitmap()
+    saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
+    saveDC.SelectObject(saveBitMap)
+    saveDC.BitBlt((0, 0), (w, h),  mfcDC,  (l, t),  win32con.SRCCOPY)
+    saveBitMap.SaveBitmapFile(saveDC,  "screencapture.bmp")
+    # get screencapture in cv2 format
+    img = cv2.imread("screencapture.bmp")
+    # delete temp file:
+    os.remove("screencapture.bmp")
+    return img
