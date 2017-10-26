@@ -497,8 +497,11 @@ class Collector(object):
         def cur_freq(i):
             online = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/online" % str(i))
             if "1" in online:
-                cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i)).strip()
-                ret[i] = cpu if cpu.isdigit() else "0"
+                try:
+                    cpu = self.adb.shell("cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % str(i)).strip()
+                    ret[i] = cpu if cpu.isdigit() else "0"
+                except AdbShellError:
+                    ret[i] = "0"
             else:
                 ret[i] = "0"
 
