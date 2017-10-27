@@ -24,8 +24,9 @@ class Windows(Device):
     """Windows client."""
 
     def __init__(self, **kwargs):
-        self._app = Application()
         self.app = None
+        self._app = Application()
+        self._top_window = None
         self.mouse = mouse
         self.keyboard = keyboard
 
@@ -33,7 +34,8 @@ class Windows(Device):
             self.connect(**kwargs)
 
     def connect(self, **kwargs):
-        self.app = self._app.connect(handle=handle, **kwargs)
+        self.app = self._app.connect(**kwargs)
+        self._top_window = self.app.top_window().wrapper_object()
 
     def shell(self, cmd):
         return subprocess.check_output(cmd, shell=True)
@@ -54,14 +56,14 @@ class Windows(Device):
 
     def touch(self, pos, **kwargs):
         """https://pywinauto.readthedocs.io/en/latest/code/pywinauto.mouse.html"""
-        self.mouse.click(coords=pos, **kwargs)
+        self.mouse.click(coords=self._action_pos(pos), **kwargs)
 
     def swipe(self, p1, p2, duration=0.8, steps=5):
         from_x, from_y = p1
         to_x, to_y = p2
 
         interval = float(duration) / (steps + 1)
-        self.mouse.press(coords=(from_x, from_y))
+        self.mouse.press(coords=self._action_pos((from_x, from_y)))
         time.sleep(interval)
         for i in range(1, steps):
             self.mouse.move(coords=(
@@ -70,9 +72,9 @@ class Windows(Device):
             ))
             time.sleep(interval)
         for i in range(10):
-            self.mouse.move(coords=(to_x, to_y))
+            self.mouse.move(coords=self._action_pos((to_x, to_y)))
         time.sleep(interval)
-        self.mouse.release(coords=(to_x, to_y))
+        self.mouse.release(coords=self._action_pos((to_x, to_y)))
 
     def start_app(self, path):
         self.app = self._app.start(path)
@@ -83,11 +85,15 @@ class Windows(Device):
     @require_app
     def set_foreground(self):
         """将对应的窗口置到最前."""
-        SetForegroundWindow(self.app.wrapper_object())
+        SetForegroundWindow(self._top_window)
 
     @require_app
     def get_rect(self):
-        return self.app.wrapper_object().rectangle()
+        return self._top_window.rectangle()
+
+    @require_app
+    def get_title(self):
+        return self._top_window.texts()
 
     @require_app
     def get_pos(self):
@@ -95,9 +101,22 @@ class Windows(Device):
         return (rect.left, rect.top)
 
     @require_app
-    def move(self, tuple_xy):
-        self.app.MoveWindow(x=tuple_xy[0], y=tuple_xy[1])
+    def move(self, pos):
+        self._top_window.MoveWindow(x=pos[0], y=pos[1])
 
     @require_app
-    def kill(self, pid):
+    def kill(self):
         self.app.kill()
+
+    def _action_pos(self, pos):
+        if self.app:
+            return self._windowpos_to_screenpos(pos)
+        else:
+            return pos
+
+    def _windowpos_to_screenpos(pos)
+        """convert pos relative to window's topleft cornor to screen pos"""
+        rect = self.get_rect()
+        ## 1.5 is the magic number here... get_rect resolution is not the same with actual resolution
+        pos = (int(pos[0] + rect.left * 1.5), int(pos[1] + rect.top * 1.5))
+        return pos
