@@ -9,12 +9,11 @@ Welcome to Airtest documentation!
 
 Airtest: Automated Testing Framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 *   Based on image recognition
 *   Focusing on game's automation, also applicable to apps
 *   Support Windows & Android, iOS support is in progress
-*   Platform transparent Api: simulated input, assertion, report generation
-*   Used with AirtestIDE out of box, complete production workflow: record->replay->report
+*   Cross-Platform APIs: simulated input, assertion and report generation
+*   Using AirtestIDE out of the box, providing complete production workflow: record->replay->report
 
 
 Quickstart 

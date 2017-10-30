@@ -8,8 +8,8 @@ Automated Testing Framework
 *   Based on image recognition
 *   Focusing on game's automation, also applicable to apps
 *   Support Windows & Android, iOS support is in progress
-*   Platform transparent Api: simulated input, assertion, report generation
-*   Used with AirtestIDE out of box, production workflow supported: record->replay->report
+*   Cross-Platform APIs: simulated input, assertion and report generation
+*   Using AirtestIDE out of the box, providing complete production workflow: record->replay->report
 
 
 # Install
@@ -22,7 +22,7 @@ pip install -e airtest
 
 # Use as a python package
 
-[Main Api reference](./docs/_build/html/all_module/airtest.core.main.html)
+[Main API reference](./docs/_build/html/all_module/airtest.core.main.html)
 
 ```python
 from airtest.core.main import *
@@ -44,14 +44,20 @@ uninstall("package_name_of_your_apk")
 ```
 
 
-# Command line usage
+# Use with Airtest IDE
 
-We use `.owl` directory structure to organize code and image resources in test case. With the help of Airtest IDE, you can easily record test cases in `.owl`. This command line tool is provided to run test cases without IDE on different host machine. Device setup is supported by command line arguments, so your test code can be totally platform transparent. 
+We use `.owl` directory structure to organize code and image resources in test cases. With the help of Airtest IDE, you can easily record test cases in `.owl`. Device setup is supported by command line arguments, so you can write cross-platform code in test cases. 
 
-Play cli with the sample: ```/airtest/playground/test_blackjack.owl```
+```python
+# To be continued...
+```
 
+# Use with command line
+
+This command line tool is provided to run test cases without IDE on different host machines. Play CLI with the sample: ```/airtest/playground/test_blackjack.owl```
+
+### run test case
 ```shell
-# run test case
 > python -m airtest run path/to/your/owl --device Android:///
 > python -m airtest run path/to/your/owl --device Android://adbhost:adbport/serialno
 > python -m airtest run path/to/your/owl --device Windows:///
@@ -73,9 +79,10 @@ optional arguments:
   --pre PRE          owl run before script, setup environment
   --post POST        owl run after script, clean up environment, will run
                      whether script success or fail
+```
 
-
-# generate html report
+### generate html report
+```shell
 > python -m airtest report path/to/your/owl
 > python -m airtest report -h
 usage: __main__.py report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
@@ -103,7 +110,11 @@ optional arguments:
   --record RECORD [RECORD ...]
                         add screen record to log.html
   --new_report [NEW_REPORT]
+```
 
-# get test case info, including: author, title, desc
+### get test case info
+```shell
+# print in json, including: author, title and desc
 > python -m airtest info path/to/your/owl
+{"author": ..., "title": ..., "desc": ...}
 ```
