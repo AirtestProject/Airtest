@@ -19,6 +19,7 @@ from airtest.core.win.window_mgr import WindowMgr, get_screen_shot, get_resoluti
 class Windows(Device):
     """Windows Client"""
     def __init__(self, handle=None):
+        super(Windows, self).__init__()
         self.winmgr = WindowMgr()
         self.handle = handle
         self.window_title = None

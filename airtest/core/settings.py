@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from six import with_metaclass
+
 from airtest.core.utils.decouple import config, undefined
 from airtest.core.utils import cocos_min_strategy
 
@@ -18,12 +20,9 @@ class MetaSettings(type):
         cls = type.__new__(meta, name, bases, class_dict)
         return cls
 
+
 # Python 3 change way of using metaclass
-from six import with_metaclass
 class Settings(with_metaclass(MetaSettings,object)):
-
-    __metaclass__ = MetaSettings
-
     DEBUG = SConfig(False, bool)
     ADDRESS = SConfig(('127.0.0.1', 5037))
     BASE_DIR = SConfig(None)
