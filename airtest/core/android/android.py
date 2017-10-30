@@ -79,7 +79,10 @@ class Android(Device):
         try:
             screen = aircv.utils.string_2_img(screen)
         except:
-            print(screen)
+            # may be black/locked screen or other reason, print exc for debugging
+            import traceback
+            traceback.print_exc()
+            return None
 
         # 保证方向是正的
         if ensure_orientation and self.display_info["orientation"]:
