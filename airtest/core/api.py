@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Airtest Main Api
+Airtest Main API
 """
 import os
 import time
@@ -79,10 +79,10 @@ Device Operations
 @on_platform(["Android"])
 def shell(cmd):
     """
-    Execute shell command on device. Android only.
+    Execute shell command on device.
 
     :param cmd: command line, e.g. "ls /data/local/tmp"
-    :return: output of shell cmd
+    :return: output of the shell cmd
     """
     return G.DEVICE.shell(cmd)
 
@@ -94,7 +94,7 @@ def start_app(package, activity=None):
     Start app on device.
 
     :param package: package name of the app, e.g. "com.netease.my"
-    :param activity: activity to start, default as None to start main activity
+    :param activity: activity to start, default to None which is the main activity
     :return: None
     """
     G.DEVICE.start_app(package, activity)
@@ -106,7 +106,7 @@ def stop_app(package):
     """
     Stop app on device.
 
-    :param package: package name of the app, same with `start_app`
+    :param package: package name of the app, same as `start_app`
     :return: None
     """
     G.DEVICE.stop_app(package)
@@ -118,7 +118,7 @@ def clear_app(package):
     """
     Clear data of an app on device.
 
-    :param package: package name of the app, same with `start_app`
+    :param package: package name of the app, same as `start_app`
     :return: None
     """
     G.DEVICE.clear_app(package)
@@ -151,7 +151,7 @@ def uninstall(package):
 @logwrap
 def snapshot(filename, msg=""):
     """
-    Get the screenshot of the device and save to file.
+    Get the screenshot of the device and save it to the file.
 
     :param filename: filename to save the screenshot. Save to ST.LOG_DIR if it's a relative path
     :param msg: message of the screenshot, will be displayed in the report
@@ -214,13 +214,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Swipe on device screen.
 
-    two way of assigning the params
+    Two ways of assigning the parameters
         * ``swipe(v1, v2=Template(...))``   swipe from v1 to v2
-        * ``swipe(v1, vector=(x, y))`` swipe starts at v1 and move along the vector.
+        * ``swipe(v1, vector=(x, y))`` swipe starts at v1 and moves along the vector.
 
     Args:
-        v1: start point of swipe, either a Template instance of absolute coordinates
-        v2: end point of swipe, either a Template instance of absolute coordinates
+        v1: start point of swipe, either a Template instance or absolute coordinates
+        v2: end point of swipe, either a Template instance or absolute coordinates
         vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
         **kwargs: platform specific kwargs, please refer to corresponding docs
 
@@ -253,7 +253,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 @on_platform(["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5):
     """
-    Pinch on device screen. Android Only.
+    Pinch on device screen.
 
     :param in_or_out: pinch in or pinch out, enum in ["in", "out"]
     :param center: center of pinch action, default as None to be center of screen
@@ -284,7 +284,7 @@ def text(text, enter=True):
     """
     Input text on device.
 
-    text input widget must be active first.
+    Text input widget must be active first.
     :param text: text to input, unicode supported
     :param enter: input keyevent Enter after text input
     :return: None
@@ -312,10 +312,10 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
     """
     Wait for Template on device screen.
 
-    :param v: target to wait, instance of Template
-    :param timeout: timeout of wait, default as None to be ST.FIND_TIMEOUT
+    :param v: target to wait, Template instance
+    :param timeout: timeout of wait, default to None which is ST.FIND_TIMEOUT
     :param interval: interval seconds after cv match when waiting
-    :param intervalfunc: interval function to be called after each cv match when target not found
+    :param intervalfunc: interval function to be called after each cv match when the target is not found
     :return: coordinates of the target found. raise TargetNotFoundError after timeout
     """
     timeout = timeout or ST.FIND_TIMEOUT
@@ -329,7 +329,7 @@ def exists(v):
     Return if the target exists on device screen.
 
     :param v: target to find
-    :return: False if not exists else coordinates of target
+    :return: False if not exists, else coordinates of the target
     """
     try:
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
