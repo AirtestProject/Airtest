@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.aircv.utils &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Airtest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html#features">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html#use-as-a-python-package">Use as a python package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html#command-line-usage">Command line usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.aircv.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.aircv.utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># import matplotlib.cm</span>
+<span class="c1"># import matplotlib.pyplot as plt</span>
+<span class="kn">from</span> <span class="nn">.error</span> <span class="k">import</span> <span class="n">TemplateInputError</span><span class="p">,</span> <span class="n">InvalidImageInputError</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+
+
+<div class="viewcode-block" id="generate_result"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.generate_result">[docs]</a><span class="k">def</span> <span class="nf">generate_result</span><span class="p">(</span><span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">confi</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Format the result: 定义图像识别结果格式</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">middle_point</span><span class="p">,</span>
+             <span class="n">rectangle</span><span class="o">=</span><span class="n">pypts</span><span class="p">,</span>
+             <span class="n">confidence</span><span class="o">=</span><span class="n">confi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="check_source_larger_than_search"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.check_source_larger_than_search">[docs]</a><span class="k">def</span> <span class="nf">check_source_larger_than_search</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;检查图像识别的输入.&quot;&quot;&quot;</span>
+    <span class="c1"># 图像格式, 确保输入图像为指定的矩阵格式:</span>
+    <span class="c1"># 图像大小, 检查截图宽、高是否大于了截屏的宽、高:</span>
+    <span class="n">h_search</span><span class="p">,</span> <span class="n">w_search</span> <span class="o">=</span> <span class="n">im_search</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">h_source</span><span class="p">,</span> <span class="n">w_source</span> <span class="o">=</span> <span class="n">im_source</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">h_search</span> <span class="o">&gt;</span> <span class="n">h_source</span> <span class="ow">or</span> <span class="n">w_search</span> <span class="o">&gt;</span> <span class="n">w_source</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TemplateInputError</span><span class="p">(</span><span class="s2">&quot;error: in template match, found im_search bigger than im_source.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="img_mat_rgb_2_gray"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.img_mat_rgb_2_gray">[docs]</a><span class="k">def</span> <span class="nf">img_mat_rgb_2_gray</span><span class="p">(</span><span class="n">img_mat</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        turn img_mat into gray_scale, so that template match can figure the img data.</span>
+<span class="sd">        &quot;print(type(im_search[0][0])&quot;)  can check the pixel type.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="s2">&quot;input must be instance of np.ndarray&quot;</span>
+    <span class="k">return</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img_mat</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="img_2_string"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.img_2_string">[docs]</a><span class="k">def</span> <span class="nf">img_2_string</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">png</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imencode</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">png</span><span class="o">.</span><span class="n">tostring</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="string_2_img"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.string_2_img">[docs]</a><span class="k">def</span> <span class="nf">string_2_img</span><span class="p">(</span><span class="n">pngstr</span><span class="p">):</span>
+    <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">pngstr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imdecode</span><span class="p">(</span><span class="n">nparr</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_COLOR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="pil_2_cv2"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.pil_2_cv2">[docs]</a><span class="k">def</span> <span class="nf">pil_2_cv2</span><span class="p">(</span><span class="n">pil_image</span><span class="p">):</span>
+    <span class="n">open_cv_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pil_image</span><span class="p">)</span>
+    <span class="c1"># Convert RGB to BGR (method-1):</span>
+    <span class="n">open_cv_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">open_cv_image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2BGR</span><span class="p">)</span>
+    <span class="c1"># Convert RGB to BGR (method-2):</span>
+    <span class="c1"># b, g, r = cv2.split(open_cv_image)</span>
+    <span class="c1"># open_cv_image = cv2.merge([r, g, b])</span>
+    <span class="k">return</span> <span class="n">open_cv_image</span></div>
+
+
+<div class="viewcode-block" id="cv2_2_pil"><a class="viewcode-back" href="../../../all_module/airtest.aircv.utils.html#airtest.aircv.utils.cv2_2_pil">[docs]</a><span class="k">def</span> <span class="nf">cv2_2_pil</span><span class="p">(</span><span class="n">cv2_image</span><span class="p">):</span>
+    <span class="n">cv2_im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">cv2_image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
+    <span class="n">pil_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">cv2_im</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pil_im</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

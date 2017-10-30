@@ -114,7 +114,7 @@ class Windows(Device):
         else:
             return pos
 
-    def _windowpos_to_screenpos(pos)
+    def _windowpos_to_screenpos(pos):
         """convert pos relative to window's topleft cornor to screen pos"""
         rect = self.get_rect()
         ## 1.5 is the magic number here... get_rect resolution is not the same with actual resolution

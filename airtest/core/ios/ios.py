@@ -15,7 +15,7 @@ else:
 
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.utils import get_logger
+from airtest.utils.logger import get_logger
 
 
 logger = get_logger("ios")

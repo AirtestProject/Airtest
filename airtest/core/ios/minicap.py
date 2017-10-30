@@ -4,7 +4,11 @@ import os
 import re
 import struct
 import logging
-from airtest.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, get_logger
+from airtest.utils.logger import get_logger
+from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.safesocket import SafeSocket
+from airtest.utils.snippet import reg_cleanup
+
 LOGGING = get_logger('android')
 
 
