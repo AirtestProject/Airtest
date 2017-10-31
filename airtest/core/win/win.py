@@ -25,7 +25,7 @@ class Windows(Device):
 
     def __init__(self, handle=None, dpifactor=1, **kwargs):
         self.app = None
-        self._dpifactor = dpifactor  # windows high dpi scale factor, no exact way to auto get this value for a window, reference: https://msdn.microsoft.com/en-us/library/windows/desktop/mt843498(v=vs.85).aspx
+        self._dpifactor = float(dpifactor)  # windows high dpi scale factor, no exact way to auto get this value for a window, reference: https://msdn.microsoft.com/en-us/library/windows/desktop/mt843498(v=vs.85).aspx
         self._app = Application()
         self._top_window = None
         self.mouse = mouse
@@ -39,7 +39,6 @@ class Windows(Device):
             self.connect(**kwargs)
 
     def connect(self, **kwargs):
-        print(kwargs)
         self.app = self._app.connect(**kwargs)
         self._top_window = self.app.top_window().wrapper_object()
         self.set_foreground()
