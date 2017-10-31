@@ -34,7 +34,7 @@ class Minicap(object):
     def install_or_upgrade(self):
         if self.adb.exists_file("/data/local/tmp/minicap") \
                 and self.adb.exists_file("/data/local/tmp/minicap.so"):
-            output = self.adb.shell("%s -v 2>&1" % self.CMD)
+            output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
             try:
                 version = int(output.split(":")[1])
             except (ValueError, IndexError):
