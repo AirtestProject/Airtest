@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="airtest  documentation" href="index.html"/>
-        <link rel="next" title="airtest.core.android package" href="all_module/airtest.core.android.html"/>
+        <link rel="next" title="airtest.core.api module" href="all_module/airtest.core.api.html"/>
         <link rel="prev" title="Welcome to Airtest documentation!" href="index.html"/> 
 
   
@@ -91,7 +91,16 @@
 <li class="toctree-l1"><a class="reference internal" href="#features">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#install">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#use-as-a-python-package">Use as a python package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#command-line-usage">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#use-with-airtest-ide">Use with Airtest IDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#use-with-command-line">Use with command line</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#run-test-case">run test case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-html-report">generate html report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-test-case-info">get test case info</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="all_module/airtest.core.api.html">airtest.core.api module</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="all_module/airtest.core.android.html">airtest.core.android package</a></li>
@@ -173,8 +182,8 @@
 <li>Based on image recognition</li>
 <li>Focusing on game's automation, also applicable to apps</li>
 <li>Support Windows &amp; Android, iOS support is in progress</li>
-<li>Platform transparent Api: simulated input, assertion, report generation</li>
-<li>Used with AirtestIDE out of box, production workflow supported: record-&gt;replay-&gt;report</li>
+<li>Cross-Platform APIs: simulated input, assertion and report generation</li>
+<li>Using AirtestIDE out of the box, providing complete production workflow: record-&gt;replay-&gt;report</li>
 </ul>
 </div>
 <div class="section" id="install">
@@ -186,15 +195,15 @@ pip install -e airtest
 </div>
 <div class="section" id="use-as-a-python-package">
 <span id="use-as-a-python-package"></span><h1>Use as a python package<a class="headerlink" href="#use-as-a-python-package" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="./docs/_build/html/all_module/airtest.core.main.html">Main Api reference</a></p>
+<p><a class="reference external" href="./docs/_build/html/all_module/airtest.core.api.html">Main API reference</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">airtest.core.main</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1"># connect to local device with adb</span>
 <span class="n">connect_device</span><span class="p">(</span><span class="s2">&quot;Android:///&quot;</span><span class="p">)</span>
 
 <span class="c1"># start your script here</span>
-<span class="n">aminstall</span><span class="p">(</span><span class="s2">&quot;path/to/your/apk&quot;</span><span class="p">)</span>
-<span class="n">amstart</span><span class="p">(</span><span class="s2">&quot;package_name_of_your_apk&quot;</span><span class="p">)</span>
+<span class="n">install</span><span class="p">(</span><span class="s2">&quot;path/to/your/apk&quot;</span><span class="p">)</span>
+<span class="n">start_app</span><span class="p">(</span><span class="s2">&quot;package_name_of_your_apk&quot;</span><span class="p">)</span>
 <span class="n">snapshot</span><span class="p">()</span>
 <span class="n">touch</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="n">touch</span><span class="p">(</span><span class="s2">&quot;image_of_a_button.png&quot;</span><span class="p">)</span>
@@ -206,12 +215,19 @@ pip install -e airtest
 </pre></div>
 </div>
 </div>
-<div class="section" id="command-line-usage">
-<span id="command-line-usage"></span><h1>Command line usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h1>
-<p>We use <code class="docutils literal"><span class="pre">.owl</span></code> structure to organize code and image resources in test case. With the help of Airtest IDE, you can easily record test cases in <code class="docutils literal"><span class="pre">.owl</span></code>. This command line tool is provided to run test cases without IDE on different host machine. Device setup is supported by command line arguments, so your test code can be totally platform transparent.</p>
-<p>Play cli with the sample: <code class="docutils literal"><span class="pre">/airtest/playground/test_blackjack.owl</span></code></p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="c1"># run test case</span>
-&gt; python -m airtest run path/to/your/owl --device Android:///
+<div class="section" id="use-with-airtest-ide">
+<span id="use-with-airtest-ide"></span><h1>Use with Airtest IDE<a class="headerlink" href="#use-with-airtest-ide" title="Permalink to this headline">¶</a></h1>
+<p>We use <code class="docutils literal"><span class="pre">.owl</span></code> directory structure to organize code and image resources in test cases. With the help of Airtest IDE, you can easily record test cases in <code class="docutils literal"><span class="pre">.owl</span></code>. Device setup is supported by command line arguments, so you can write cross-platform code in test cases.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># To be continued...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="use-with-command-line">
+<span id="use-with-command-line"></span><h1>Use with command line<a class="headerlink" href="#use-with-command-line" title="Permalink to this headline">¶</a></h1>
+<p>This command line tool is provided to run test cases without IDE on different host machines. Play CLI with the sample: <code class="docutils literal"><span class="pre">/airtest/playground/test_blackjack.owl</span></code></p>
+<div class="section" id="run-test-case">
+<span id="run-test-case"></span><h2>run test case<a class="headerlink" href="#run-test-case" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>&gt; python -m airtest run path/to/your/owl --device Android:///
 &gt; python -m airtest run path/to/your/owl --device Android://adbhost:adbport/serialno
 &gt; python -m airtest run path/to/your/owl --device Windows:///
 &gt; python -m airtest run path/to/your/owl --device iOS:///
@@ -232,10 +248,12 @@ optional arguments:
   --pre PRE          owl run before script, setup environment
   --post POST        owl run after script, clean up environment, will run
                      whether script success or fail
-
-
-<span class="c1"># generate html report</span>
-&gt; python -m airtest report path/to/your/owl
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-html-report">
+<span id="generate-html-report"></span><h2>generate html report<a class="headerlink" href="#generate-html-report" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>&gt; python -m airtest report path/to/your/owl
 &gt; python -m airtest report -h
 usage: __main__.py report <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--outfile OUTFILE<span class="o">]</span> <span class="o">[</span>--static_root STATIC_ROOT<span class="o">]</span>
                           <span class="o">[</span>--log_root LOG_ROOT<span class="o">]</span> <span class="o">[</span>--gif <span class="o">[</span>GIF<span class="o">]]</span>
@@ -262,10 +280,16 @@ optional arguments:
   --record RECORD <span class="o">[</span>RECORD ...<span class="o">]</span>
                         add screen record to log.html
   --new_report <span class="o">[</span>NEW_REPORT<span class="o">]</span>
-
-<span class="c1"># get test case info, including: author, title, desc</span>
-&gt; python -m airtest info path/to/your/owl
 </pre></div>
+</div>
+</div>
+<div class="section" id="get-test-case-info">
+<span id="get-test-case-info"></span><h2>get test case info<a class="headerlink" href="#get-test-case-info" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="c1"># print in json, including: author, title and desc</span>
+&gt; python -m airtest info path/to/your/owl
+<span class="o">{</span><span class="s2">&quot;author&quot;</span>: ..., <span class="s2">&quot;title&quot;</span>: ..., <span class="s2">&quot;desc&quot;</span>: ...<span class="o">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -279,7 +303,7 @@ optional arguments:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="all_module/airtest.core.android.html" class="btn btn-neutral float-right" title="airtest.core.android package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="all_module/airtest.core.api.html" class="btn btn-neutral float-right" title="airtest.core.api module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="Welcome to Airtest documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

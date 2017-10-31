@@ -22,7 +22,7 @@ pip install -e airtest
 
 # Use as a python package
 
-[Main API reference](./docs/_build/html/all_module/airtest.core.main.html)
+[Main API reference](./docs/_build/html/all_module/airtest.core.api.html)
 
 ```python
 from airtest.core.main import *

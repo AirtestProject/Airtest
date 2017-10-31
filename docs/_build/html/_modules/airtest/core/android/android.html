@@ -90,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-airtest-ide">Use with Airtest IDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-command-line">Use with command line</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
@@ -247,7 +248,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">screen</span> <span class="o">=</span> <span class="n">aircv</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">string_2_img</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+            <span class="c1"># may be black/locked screen or other reason, print exc for debugging</span>
+            <span class="kn">import</span> <span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># 保证方向是正的</span>
         <span class="k">if</span> <span class="n">ensure_orientation</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]:</span>

@@ -90,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-airtest-ide">Use with Airtest IDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-command-line">Use with command line</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
@@ -171,7 +172,7 @@
 <span class="kn">from</span> <span class="nn">airtest.core.device</span> <span class="k">import</span> <span class="n">Device</span>
 <span class="kn">from</span> <span class="nn">pywinauto.application</span> <span class="k">import</span> <span class="n">Application</span>
 <span class="kn">from</span> <span class="nn">pywinauto</span> <span class="k">import</span> <span class="n">Desktop</span>
-<span class="kn">from</span> <span class="nn">pywinauto.win32functions</span> <span class="k">import</span> <span class="n">SetForegroundWindow</span><span class="p">,</span> <span class="n">ShowWindow</span><span class="p">,</span> <span class="n">MoveWindow</span>
+<span class="kn">from</span> <span class="nn">pywinauto.win32functions</span> <span class="k">import</span> <span class="n">SetForegroundWindow</span><span class="p">,</span> <span class="n">ShowWindow</span><span class="p">,</span> <span class="n">MoveWindow</span> <span class="c1">#, SetProcessDPIAware</span>
 <span class="kn">from</span> <span class="nn">pywinauto</span> <span class="k">import</span> <span class="n">mouse</span><span class="p">,</span> <span class="n">keyboard</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
 <span class="kn">from</span> <span class="nn">.screen</span> <span class="k">import</span> <span class="n">screenshot</span>
@@ -191,26 +192,34 @@
 <div class="viewcode-block" id="Windows"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows">[docs]</a><span class="k">class</span> <span class="nc">Windows</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Windows client.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dpifactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dpifactor</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dpifactor</span><span class="p">)</span>  <span class="c1"># windows high dpi scale factor, no exact way to auto get this value for a window, reference: https://msdn.microsoft.com/en-us/library/windows/desktop/mt843498(v=vs.85).aspx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_top_window</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouse</span> <span class="o">=</span> <span class="n">mouse</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keyboard</span> <span class="o">=</span> <span class="n">keyboard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_connect</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_init_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">handle</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Windows.connect"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_top_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">top_window</span><span class="p">()</span><span class="o">.</span><span class="n">wrapper_object</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_top_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">top_window</span><span class="p">()</span><span class="o">.</span><span class="n">wrapper_object</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_foreground</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Windows.shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.shell">[docs]</a>    <span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Windows.snapshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.win.html#airtest.core.win.win.Windows.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;tmp.png&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;tmp.png&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">:</span>
-            <span class="n">screenshot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
+            <span class="n">screenshot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_window</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">screenshot</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">aircv</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
@@ -278,15 +287,13 @@
 
     <span class="k">def</span> <span class="nf">_action_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_windowpos_to_screenpos</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">pos</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_windowpos_to_screenpos</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pos</span>
 
-    <span class="k">def</span> <span class="nf">_windowpos_to_screenpos</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_windowpos_to_screenpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;convert pos relative to window&#39;s topleft cornor to screen pos&quot;&quot;&quot;</span>
         <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rect</span><span class="p">()</span>
-        <span class="c1">## 1.5 is the magic number here... get_rect resolution is not the same with actual resolution</span>
-        <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">left</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">top</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">))</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">left</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dpifactor</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">top</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dpifactor</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">pos</span></div>
 </pre></div>
 

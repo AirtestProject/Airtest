@@ -90,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-airtest-ide">Use with Airtest IDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-command-line">Use with command line</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
@@ -202,7 +203,7 @@
 <div class="viewcode-block" id="Minicap.install_or_upgrade"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.install_or_upgrade">[docs]</a>    <span class="k">def</span> <span class="nf">install_or_upgrade</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">exists_file</span><span class="p">(</span><span class="s2">&quot;/data/local/tmp/minicap&quot;</span><span class="p">)</span> \
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">exists_file</span><span class="p">(</span><span class="s2">&quot;/data/local/tmp/minicap.so&quot;</span><span class="p">):</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -v 2&gt;&amp;1&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -v 2&gt;&amp;1&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>

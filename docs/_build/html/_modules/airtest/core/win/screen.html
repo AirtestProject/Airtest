@@ -90,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#features">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#install">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-as-a-python-package">Use as a python package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#command-line-usage">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-airtest-ide">Use with Airtest IDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html#use-with-command-line">Use with command line</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
@@ -180,6 +181,10 @@
 
 
 <div class="viewcode-block" id="screenshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.win.screen.html#airtest.core.win.screen.screenshot">[docs]</a><span class="k">def</span> <span class="nf">screenshot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">hwnd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># import ctypes</span>
+    <span class="c1"># user32 = ctypes.windll.user32</span>
+    <span class="c1"># user32.SetProcessDPIAware()</span>
+
     <span class="k">if</span> <span class="n">hwnd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;all screens&quot;&quot;&quot;</span>
         <span class="n">hwnd</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetDesktopWindow</span><span class="p">()</span>
@@ -194,14 +199,13 @@
         <span class="n">w</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
-
     <span class="n">hwndDC</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowDC</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
     <span class="n">mfcDC</span> <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateDCFromHandle</span><span class="p">(</span><span class="n">hwndDC</span><span class="p">)</span>
     <span class="n">saveDC</span> <span class="o">=</span> <span class="n">mfcDC</span><span class="o">.</span><span class="n">CreateCompatibleDC</span><span class="p">()</span>
     <span class="n">saveBitMap</span> <span class="o">=</span> <span class="n">win32ui</span><span class="o">.</span><span class="n">CreateBitmap</span><span class="p">()</span>
     <span class="n">saveBitMap</span><span class="o">.</span><span class="n">CreateCompatibleBitmap</span><span class="p">(</span><span class="n">mfcDC</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
     <span class="n">saveDC</span><span class="o">.</span><span class="n">SelectObject</span><span class="p">(</span><span class="n">saveBitMap</span><span class="p">)</span>
-    <span class="n">saveDC</span><span class="o">.</span><span class="n">BitBlt</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">mfcDC</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">win32con</span><span class="o">.</span><span class="n">SRCCOPY</span><span class="p">)</span>
+    <span class="n">saveDC</span><span class="o">.</span><span class="n">BitBlt</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">mfcDC</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">win32con</span><span class="o">.</span><span class="n">SRCCOPY</span><span class="p">)</span>
     <span class="n">saveBitMap</span><span class="o">.</span><span class="n">SaveBitmapFile</span><span class="p">(</span><span class="n">saveDC</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 </pre></div>
 
