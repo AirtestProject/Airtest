@@ -12,6 +12,10 @@ SM_CYVIRTUALSCREEN = 79
 
 
 def screenshot(filename, hwnd=None):
+    # import ctypes
+    # user32 = ctypes.windll.user32
+    # user32.SetProcessDPIAware()
+
     if hwnd is None:
         """all screens"""
         hwnd = win32gui.GetDesktopWindow()
@@ -26,12 +30,11 @@ def screenshot(filename, hwnd=None):
         w = abs(rect[2] - rect[0])
         h = abs(rect[3] - rect[1])
         x, y = 0, 0
-
     hwndDC = win32gui.GetWindowDC(hwnd)
     mfcDC = win32ui.CreateDCFromHandle(hwndDC)
     saveDC = mfcDC.CreateCompatibleDC()
     saveBitMap = win32ui.CreateBitmap()
     saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
     saveDC.SelectObject(saveBitMap)
-    saveDC.BitBlt((0, 0), (w, h), mfcDC, (0, 0), win32con.SRCCOPY)
+    saveDC.BitBlt((0, 0), (w, h), mfcDC, (x, y), win32con.SRCCOPY)
     saveBitMap.SaveBitmapFile(saveDC, filename)

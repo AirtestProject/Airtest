@@ -3,7 +3,7 @@ from airtest import aircv
 from airtest.core.device import Device
 from pywinauto.application import Application
 from pywinauto import Desktop
-from pywinauto.win32functions import SetForegroundWindow, ShowWindow, MoveWindow
+from pywinauto.win32functions import SetForegroundWindow, ShowWindow, MoveWindow #, SetProcessDPIAware
 from pywinauto import mouse, keyboard
 from functools import wraps
 from .screen import screenshot
@@ -23,26 +23,35 @@ def require_app(func):
 class Windows(Device):
     """Windows client."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, handle=None, dpifactor=1, **kwargs):
         self.app = None
+        self._dpifactor = dpifactor  # windows high dpi scale factor, no exact way to auto get this value for a window, reference: https://msdn.microsoft.com/en-us/library/windows/desktop/mt843498(v=vs.85).aspx
         self._app = Application()
         self._top_window = None
         self.mouse = mouse
         self.keyboard = keyboard
+        self._init_connect(handle, kwargs)
 
-        if kwargs:
+    def _init_connect(self, handle, kwargs):
+        if handle:
+            self.connect(handle=handle)
+        elif kwargs:
             self.connect(**kwargs)
 
     def connect(self, **kwargs):
+        print(kwargs)
         self.app = self._app.connect(**kwargs)
         self._top_window = self.app.top_window().wrapper_object()
+        self.set_foreground()
 
     def shell(self, cmd):
         return subprocess.check_output(cmd, shell=True)
 
     def snapshot(self, filename="tmp.png"):
+        if not filename:
+            filename = "tmp.png"
         if self.app:
-            screenshot(filename, self.app.handle)
+            screenshot(filename, self._top_window.handle)
         else:
             screenshot(filename)
         return aircv.imread(filename)
@@ -110,13 +119,11 @@ class Windows(Device):
 
     def _action_pos(self, pos):
         if self.app:
-            return self._windowpos_to_screenpos(pos)
-        else:
-            return pos
+            pos = self._windowpos_to_screenpos(pos)
+        return pos
 
-    def _windowpos_to_screenpos(pos):
+    def _windowpos_to_screenpos(self, pos):
         """convert pos relative to window's topleft cornor to screen pos"""
         rect = self.get_rect()
-        ## 1.5 is the magic number here... get_rect resolution is not the same with actual resolution
-        pos = (int(pos[0] + rect.left * 1.5), int(pos[1] + rect.top * 1.5))
+        pos = (int((pos[0] + rect.left) * self._dpifactor), int((pos[1] + rect.top) * self._dpifactor))
         return pos
