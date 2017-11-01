@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Airtest Main API
+This module contains the Airtest Core APIs.
 """
 import os
 import time
@@ -10,27 +10,25 @@ from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
 
-
 """
-Device Setup
+Device Setup APIs
 """
 
 
 def connect_device(uri):
     """
-    Initialize device with uri and set as current dievce.
+    Initialize device with uri and set the device as the current one.
 
-    e.g.
-        * ``android:///``   # local adb device using default params
-        * ``android://192.168.55.55:5037/1234566?cap_method=javacap&touch_method=adb``
-        * ``windows:///``   # local windows application
-        * ``ios:///``   # ios device
+    :param uri: an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value`
+    :return: device instance
+    :Example:
+        * ``android:///`` #local adb device using default params
+        * ``android://adbhost:adbport/serialno?param=value``
+        * ``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``
+        * ``windows:///`` #local Windows application
+        * ``ios:///`` # iOS device
 
-    Args:
-        uri: android://adbhost:adbport/serialno?param=value
-
-    Returns:
-        device instance
+    :platforms: Android, iOS, Windows
     """
     d = urlparse(uri)
     platform = d.scheme
@@ -49,9 +47,10 @@ def connect_device(uri):
 
 def device():
     """
-    Get current active device.
+    Return the current active device.
 
     :return: current device instance
+    :platforms: Android, iOS, Windows
     """
     return G.DEVICE
 
@@ -62,7 +61,9 @@ def set_current(index):
     Set current active device.
 
     :param index: index of initialized device instance
+    :raise IndexError: raised when device index is out of device list
     :return: None
+    :platforms: Android, iOS, Windows
     """
     try:
         G.DEVICE = G.DEVICE_LIST[index]
@@ -79,10 +80,11 @@ Device Operations
 @on_platform(["Android"])
 def shell(cmd):
     """
-    Execute shell command on device.
+    Start remote shell in the target device and execute the command
 
-    :param cmd: command line, e.g. "ls /data/local/tmp"
-    :return: output of the shell cmd
+    :param cmd: command to be run on device, e.g. "ls /data/local/tmp"
+    :return: the output of the shell cmd
+    :platforms: Android
     """
     return G.DEVICE.shell(cmd)
 
@@ -91,11 +93,12 @@ def shell(cmd):
 @on_platform(["Android", "IOS"])
 def start_app(package, activity=None):
     """
-    Start app on device.
+    Start the target application on device
 
-    :param package: package name of the app, e.g. "com.netease.my"
-    :param activity: activity to start, default to None which is the main activity
+    :param package: name of the package to be started, e.g. "com.netease.my"
+    :param activity: the activity to start, default is None which means the main activity
     :return: None
+    :platforms: Android, iOS
     """
     G.DEVICE.start_app(package, activity)
 
@@ -104,10 +107,11 @@ def start_app(package, activity=None):
 @on_platform(["Android", "IOS"])
 def stop_app(package):
     """
-    Stop app on device.
+    Stop the target application on device
 
-    :param package: package name of the app, same as `start_app`
+    :param package: name of the package to stop, see also `start_app`
     :return: None
+    :platforms: Android, iOS
     """
     G.DEVICE.stop_app(package)
 
@@ -116,10 +120,11 @@ def stop_app(package):
 @on_platform(["Android", "IOS"])
 def clear_app(package):
     """
-    Clear data of an app on device.
+    Clear data of the target application on device
 
-    :param package: package name of the app, same as `start_app`
+    :param package: name of the package,  see also `start_app`
     :return: None
+    :platforms: Android, iOS
     """
     G.DEVICE.clear_app(package)
 
@@ -128,10 +133,11 @@ def clear_app(package):
 @on_platform(["Android", "IOS"])
 def install(filepath):
     """
-    Install app on device.
+    Install application on device
 
-    :param filepath: filepath of the app on host machine
+    :param filepath: the path to file to be installed on target device
     :return: None
+    :platforms: Android, iOS
     """
     return G.DEVICE.install_app(filepath)
 
@@ -140,10 +146,11 @@ def install(filepath):
 @on_platform(["Android", "IOS"])
 def uninstall(package):
     """
-    Uninstall app on device.
+    Uninstall application on device
 
-    :param package: package name of the app, same with `start_app`
+    :param package: name of the package, see also `start_app`
     :return: None
+    :platforms: Android, iOS
     """
     return G.DEVICE.uninstall_app(package)
 
@@ -151,11 +158,13 @@ def uninstall(package):
 @logwrap
 def snapshot(filename, msg=""):
     """
-    Get the screenshot of the device and save it to the file.
+    Take the screenshot of the target device and save it to the file.
 
-    :param filename: filename to save the screenshot. Save to ST.LOG_DIR if it's a relative path
-    :param msg: message of the screenshot, will be displayed in the report
+    :param filename: name of the file where to save the screenshot. If the relative path is provided, the default
+                     location is ``ST.LOG_DIR``
+    :param msg: short description for screenshot, it will be recorded in the report
     :return: None
+    :platforms: Android, iOS, Windows
     """
     if not os.path.isabs(filename):
         filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
@@ -168,9 +177,12 @@ def snapshot(filename, msg=""):
 @on_platform(["Android", "IOS"])
 def wake():
     """
-    Wake up and unlock the device. May not work on some models.
+    Wake up and unlock the target device
 
     :return: None
+    :platforms: Android, iOS
+
+    .. note:: Might not work on some models
     """
     G.DEVICE.wake()
 
@@ -179,9 +191,10 @@ def wake():
 @on_platform(["Android", "IOS"])
 def home():
     """
-    Return to the home screen of the device.
+    Return to the home screen of the target device.
 
     :return: None
+    :platforms: Android, iOS
     """
     G.DEVICE.home()
 
@@ -190,11 +203,12 @@ def home():
 @on_platform(["Android", "Windows", "IOS"])
 def touch(v, **kwargs):
     """
-    Touch on device screen.
+    Perform the touch action on the device screen
 
     :param v: target to touch, either a Template instance or absolute coordinates (x, y)
-    :param kwargs: platform specific kwargs, please refer to corresponding docs
+    :param kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
+    :platforms: Android, Windows, iOS
     """
     if isinstance(v, Template):
         try:
@@ -212,20 +226,23 @@ def touch(v, **kwargs):
 @on_platform(["Android", "Windows", "IOS"])
 def swipe(v1, v2=None, vector=None, **kwargs):
     """
-    Swipe on device screen.
+    Perform the swipe action on the device screen.
 
-    Two ways of assigning the parameters
-        * ``swipe(v1, v2=Template(...))``   swipe from v1 to v2
-        * ``swipe(v1, vector=(x, y))`` swipe starts at v1 and moves along the vector.
+    There are two ways of assigning the parameters
+        * ``swipe(v1, v2=Template(...))``   # swipe from v1 to v2
+        * ``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along the vector.
 
-    Args:
-        v1: start point of swipe, either a Template instance or absolute coordinates
-        v2: end point of swipe, either a Template instance or absolute coordinates
-        vector: vector of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)
-        **kwargs: platform specific kwargs, please refer to corresponding docs
 
-    Returns:
-        None
+    :param v1: the start point of swipe,
+               either a Template instance or absolute coordinates (x, y)
+    :param v2: the end point of swipe,
+               either a Template instance or absolute coordinates (x, y)
+    :param vector: a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of
+                   screen e.g.(0.5, 0.5)
+    :param **kwargs: platform specific `kwargs`, please refer to corresponding docs
+    :raise Exception: general exception when not enough parameters to perform swap action have been provided
+    :return: None
+    :platforms: Android, Windows, iOS
     """
     if isinstance(v1, Template):
         pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
@@ -243,7 +260,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
             vector = (int(vector[0] * w), int(vector[1] * h))
         pos2 = (pos1[0] + vector[0], pos1[1] + vector[1])
     else:
-        raise Exception("no enouph params for swipe")
+        raise Exception("no enough params for swipe")
 
     G.DEVICE.swipe(pos1, pos2, **kwargs)
     delay_after_operation()
@@ -253,12 +270,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 @on_platform(["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5):
     """
-    Pinch on device screen.
+    Perform the pinch action on the device screen
 
     :param in_or_out: pinch in or pinch out, enum in ["in", "out"]
-    :param center: center of pinch action, default as None to be center of screen
-    :param percent: percentage of screen of pinch action, default to be 0.5
+    :param center: center of pinch action, default as None which is the center of the screen
+    :param percent: percentage of the screen of pinch action, default is 0.5
     :return: None
+    :platforms: Android
     """
     G.DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
     delay_after_operation()
@@ -268,11 +286,12 @@ def pinch(in_or_out='in', center=None, percent=0.5):
 @on_platform(["Android", "Windows", "IOS"])
 def keyevent(keyname, **kwargs):
     """
-    Input keyboard event on device.
+    Perform key event on the device
 
-    :param keyname: platform specific keyname
-    :param kwargs: platform specific kwargs
+    :param keyname: platform specific key name
+    :param **kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
+    :platforms: Android, Windows, iOS
     """
     G.DEVICE.keyevent(keyname, **kwargs)
     delay_after_operation()
@@ -282,15 +301,12 @@ def keyevent(keyname, **kwargs):
 @on_platform(["Android", "Windows", "IOS"])
 def text(text, enter=True):
     """
-    Input text on device.
+    Input text on the target device. Text input widget must be active first.
 
-    Text input widget must be active first.
-    :param text: text to input, unicode supported
-    :param enter: input keyevent Enter after text input
+    :param text: text to input, unicode is supported
+    :param enter: input `Enter` keyevent after text input, default is True
     :return: None
-    """
-    """
-        enter: 输入后执行enter操作
+    :platforms: Android, Windows, iOS
     """
     G.DEVICE.text(text, enter=enter)
     delay_after_operation()
@@ -299,10 +315,11 @@ def text(text, enter=True):
 @logwrap
 def sleep(secs=1.0):
     """
-    time.sleep, will be displayed in report.
+    Set the sleep interval. It will be recorded in the report
 
     :param secs: seconds to sleep
     :return: None
+    :platforms: Android, Windows, iOS
     """
     time.sleep(secs)
 
@@ -310,13 +327,15 @@ def sleep(secs=1.0):
 @logwrap
 def wait(v, timeout=None, interval=0.5, intervalfunc=None):
     """
-    Wait for Template on device screen.
+    Wait to match the Template on the device screen
 
-    :param v: target to wait, Template instance
-    :param timeout: timeout of wait, default to None which is ST.FIND_TIMEOUT
-    :param interval: interval seconds after cv match when waiting
-    :param intervalfunc: interval function to be called after each cv match when the target is not found
-    :return: coordinates of the target found. raise TargetNotFoundError after timeout
+    :param v: target object to wait for, Template instance
+    :param timeout: time interval to wait for the match, default is None which is ``ST.FIND_TIMEOUT``
+    :param interval: time interval in seconds to attempt to find a match
+    :param intervalfunc: called after each unsuccessful attempt to find the corresponding match
+    :raise TargetNotFoundError: raised if target is not found after the time limit expired
+    :return: coordinates of the matched target
+    :platforms: Android, Windows, iOS
     """
     timeout = timeout or ST.FIND_TIMEOUT
     pos = loop_find(v, timeout=timeout, interval=interval, intervalfunc=intervalfunc)
@@ -326,10 +345,11 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
 @logwrap
 def exists(v):
     """
-    Return if the target exists on device screen.
+    Check whether given target exists on device screen
 
-    :param v: target to find
-    :return: False if not exists, else coordinates of the target
+    :param v: target to be checked
+    :return: False if target is not found, otherwise returns the coordinates of the target
+    :platforms: Android, Windows, iOS
     """
     try:
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
@@ -342,10 +362,11 @@ def exists(v):
 @logwrap
 def find_all(v):
     """
-    Find all pos of the target on device screen.
+    Find all occurrences of the target on the device screen and return their coordinates
 
     :param v: target to find
     :return: list of coordinates, [(x, y), (x1, y1), ...]
+    :platforms: Android, Windows, iOS
     """
     screen = G.DEVICE.snapshot()
     return cv_match_all(screen, v)
@@ -359,11 +380,13 @@ Assertions
 @logwrap
 def assert_exists(v, msg=""):
     """
-    Assert target exists on device screen.
+    Assert target exists on device screen
 
-    :param v: target to find
-    :param msg: message of assertion, will be displayed in the report
-    :return: coordinates of the target found. raise AssertionError if assertion failed
+    :param v: target to be checked
+    :param msg: short description of assertion, it will be recorded in the report
+    :raise AssertionError: if assertion fails
+    :return: coordinates of the target
+    :platforms: Android, Windows, iOS
     """
     try:
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT)
@@ -375,11 +398,13 @@ def assert_exists(v, msg=""):
 @logwrap
 def assert_not_exists(v, msg=""):
     """
-    Assert target does not exist on device screen.
+    Assert target does not exist on device screen
 
-    :param v: target to find
-    :param msg: message of assertion, will be displayed in the report
-    :return: None. raise AssertionError if assertion failed
+    :param v: target to be checked
+    :param msg: short description of assertion, it will be recorded in the report
+    :raise AssertionError: if assertion fails
+    :return: None.
+    :platforms: Android, Windows, iOS
     """
     try:
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
@@ -391,12 +416,14 @@ def assert_not_exists(v, msg=""):
 @logwrap
 def assert_equal(first, second, msg=""):
     """
-    Assert first and second are equal.
+    Assert two values are equal
 
     :param first: first value
     :param second: second value
-    :param msg: message of assertion, will be displayed in the report
-    :return: None, raise AssertionError if assertion failed
+    :param msg: short description of assertion, it will be recorded in the report
+    :raise AssertionError: if assertion fails
+    :return: None
+    :platforms: Android, Windows, iOS
     """
     if first != second:
         raise AssertionError("%s and %s are not equal, message: %s" % (first, second, msg))
@@ -405,12 +432,14 @@ def assert_equal(first, second, msg=""):
 @logwrap
 def assert_not_equal(first, second, msg=""):
     """
-    Assert first and second are not equal.
+    Assert two values are not equal
 
     :param first: first value
     :param second: second value
-    :param msg: message of assertion, will be displayed in the report
-    :return: None, raise AssertionError if assertion failed
+    :param msg: short description of assertion, it will be recorded in the report
+    :raise AssertionError: if assertion
+    :return: None
+    :platforms: Android, Windows, iOS
     """
     if first == second:
         raise AssertionError("%s and %s are equal, message: %s" % (first, second, msg))
