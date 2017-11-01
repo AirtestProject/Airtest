@@ -60,7 +60,7 @@ img_record
 tests/test_owl.owl/*_sub/
 
 #docs
-#docs/_build
+docs/_build
 
 #pipenv
 Pipfile

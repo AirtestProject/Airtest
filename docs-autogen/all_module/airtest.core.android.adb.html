@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.android.adb module &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../index.html"/>
+        <link rel="up" title="airtest.core.android package" href="airtest.core.android.html"/>
+        <link rel="next" title="airtest.core.android.android module" href="airtest.core.android.android.html"/>
+        <link rel="prev" title="airtest.core.android package" href="airtest.core.android.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.core.android.html">airtest.core.android package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.core.android.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">airtest.core.android.adb module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.android.html">airtest.core.android.android module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.constant.html">airtest.core.android.constant module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.ime.html">airtest.core.android.ime module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.javacap.html">airtest.core.android.javacap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.minicap.html">airtest.core.android.minicap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.minitouch.html">airtest.core.android.minitouch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.recorder.html">airtest.core.android.recorder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.rotation.html">airtest.core.android.rotation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.yosemite.html">airtest.core.android.yosemite module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.html">airtest package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.aircv.html">airtest.aircv package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.cli.html">airtest.cli package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="airtest.core.html">airtest.core package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="airtest.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="airtest.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.report.html">airtest.report package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="airtest.core.android.html">airtest.core.android package</a> &raquo;</li>
+        
+      <li>airtest.core.android.adb module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/all_module/airtest.core.android.adb.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest.core.android.adb">
+<span id="airtest-core-android-adb-module"></span><h1>airtest.core.android.adb module<a class="headerlink" href="#module-airtest.core.android.adb" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="airtest.core.android.adb.ADB">
+<em class="property">class </em><code class="descname">ADB</code><span class="sig-paren">(</span><em>serialno=None</em>, <em>adb_path=None</em>, <em>server_addr=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>adb client</p>
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.status_device">
+<code class="descname">status_device</code><em class="property"> = 'device'</em><a class="headerlink" href="#airtest.core.android.adb.ADB.status_device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.status_offline">
+<code class="descname">status_offline</code><em class="property"> = 'offline'</em><a class="headerlink" href="#airtest.core.android.adb.ADB.status_offline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.SHELL_ENCODING">
+<code class="descname">SHELL_ENCODING</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#airtest.core.android.adb.ADB.SHELL_ENCODING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="airtest.core.android.adb.ADB.builtin_adb_path">
+<em class="property">static </em><code class="descname">builtin_adb_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.builtin_adb_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.builtin_adb_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>get airtest built-in adb executable path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.start_server">
+<code class="descname">start_server</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.start_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.start_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb start-server</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.version">
+<code class="descname">version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb version 1.0.39</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.start_cmd">
+<code class="descname">start_cmd</code><span class="sig-paren">(</span><em>cmds</em>, <em>device=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.start_cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.start_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>start a subprocess to run adb cmd
+device: specify -s serialno if True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.cmd">
+<code class="descname">cmd</code><span class="sig-paren">(</span><em>cmds</em>, <em>device=True</em>, <em>ensure_unicode=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>get adb cmd output
+device: specify -s serialno if True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.devices">
+<code class="descname">devices</code><span class="sig-paren">(</span><em>state=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.devices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb devices</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb connect, if remote devices, connect first</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb disconnect</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_status">
+<code class="descname">get_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>get device’s adb status</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.wait_for_device">
+<code class="descname">wait_for_device</code><span class="sig-paren">(</span><em>timeout=5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.wait_for_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.wait_for_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb wait-for-device
+if timeout, raise AirtestError</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.start_shell">
+<code class="descname">start_shell</code><span class="sig-paren">(</span><em>cmds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.start_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.start_shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.raw_shell">
+<code class="descname">raw_shell</code><span class="sig-paren">(</span><em>cmds</em>, <em>ensure_unicode=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.raw_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.raw_shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.shell">
+<code class="descname">shell</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb shell</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.keyevent">
+<code class="descname">keyevent</code><span class="sig-paren">(</span><em>keyname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.keyevent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.keyevent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.getprop">
+<code class="descname">getprop</code><span class="sig-paren">(</span><em>key</em>, <em>strip=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.getprop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.getprop" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb shell getprop</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.sdk_version">
+<code class="descname">sdk_version</code><a class="headerlink" href="#airtest.core.android.adb.ADB.sdk_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb shell get sdk version</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.push">
+<code class="descname">push</code><span class="sig-paren">(</span><em>local</em>, <em>remote</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.push" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb push</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.pull">
+<code class="descname">pull</code><span class="sig-paren">(</span><em>remote</em>, <em>local</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.pull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.pull" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb pull</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.forward">
+<code class="descname">forward</code><span class="sig-paren">(</span><em>local</em>, <em>remote</em>, <em>no_rebind=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb forward</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_forwards">
+<code class="descname">get_forwards</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_forwards"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_forwards" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb forward –list</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="airtest.core.android.adb.ADB.get_available_forward_local">
+<em class="property">classmethod </em><code class="descname">get_available_forward_local</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_available_forward_local"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_available_forward_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>random a forward local port, use forward –no-rebind to try forward</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.setup_forward">
+<code class="descname">setup_forward</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#airtest.core.android.adb.ADB.setup_forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.remove_forward">
+<code class="descname">remove_forward</code><span class="sig-paren">(</span><em>local=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.remove_forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.remove_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb forward –remove</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.install_app">
+<code class="descname">install_app</code><span class="sig-paren">(</span><em>filepath</em>, <em>replace=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.install_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.install_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.pm_install">
+<code class="descname">pm_install</code><span class="sig-paren">(</span><em>filepath</em>, <em>replace=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.pm_install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.pm_install" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb push &amp; pm install, compatibility is better than adb install</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.uninstall_app">
+<code class="descname">uninstall_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.uninstall_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.uninstall_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>adb uninstall</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.pm_uninstall">
+<code class="descname">pm_uninstall</code><span class="sig-paren">(</span><em>package</em>, <em>keepdata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.pm_uninstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.pm_uninstall" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.snapshot">
+<code class="descname">snapshot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>take a screenshot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.touch">
+<code class="descname">touch</code><span class="sig-paren">(</span><em>tuple_xy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>touch screen</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.swipe">
+<code class="descname">swipe</code><span class="sig-paren">(</span><em>tuple_x0y0</em>, <em>tuple_x1y1</em>, <em>duration=500</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.swipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.swipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>swipe screen</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.logcat">
+<code class="descname">logcat</code><span class="sig-paren">(</span><em>grep_str=''</em>, <em>extra_args=''</em>, <em>read_timeout=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.logcat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.logcat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.exists_file">
+<code class="descname">exists_file</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.exists_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.exists_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.line_breaker">
+<code class="descname">line_breaker</code><a class="headerlink" href="#airtest.core.android.adb.ADB.line_breaker" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.adb.ADB.display_info">
+<code class="descname">display_info</code><a class="headerlink" href="#airtest.core.android.adb.ADB.display_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_display_info">
+<code class="descname">get_display_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_display_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_display_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.getPhysicalDisplayInfo">
+<code class="descname">getPhysicalDisplayInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.getPhysicalDisplayInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.getPhysicalDisplayInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>维护了两套分辨率：
+(physical_width, physical_height)为设备的物理分辨率， (minitouch点击坐标转换要用这个)
+(width, height)为屏幕的有效内容分辨率. (游戏图像适配的分辨率要用这个)
+(max_x, max_y)为点击范围的分辨率。</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.getDisplayOrientation">
+<code class="descname">getDisplayOrientation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.getDisplayOrientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.getDisplayOrientation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_top_activity">
+<code class="descname">get_top_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_top_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_top_activity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.is_keyboard_shown">
+<code class="descname">is_keyboard_shown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.is_keyboard_shown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.is_keyboard_shown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.is_screenon">
+<code class="descname">is_screenon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.is_screenon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.is_screenon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.is_locked">
+<code class="descname">is_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.is_locked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.is_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>not work on xiaomi 2s</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.unlock">
+<code class="descname">unlock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.unlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.unlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>not work on many devices</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_package_version">
+<code class="descname">get_package_version</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_package_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_package_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.list_app">
+<code class="descname">list_app</code><span class="sig-paren">(</span><em>third_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.list_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.list_app" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>pm list packages: prints all packages, optionally only</dt>
+<dd><dl class="first last docutils">
+<dt>those whose package name contains the text in FILTER.  Options:</dt>
+<dd>-f: see their associated file.
+-d: filter to only show disabled packages.
+-e: filter to only show enabled packages.
+-s: filter to only show system packages.
+-3: filter to only show third party packages.
+-i: see the installer for the packages.
+-u: also include uninstalled packages.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.path_app">
+<code class="descname">path_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.path_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.path_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.check_app">
+<code class="descname">check_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.check_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.check_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.start_app">
+<code class="descname">start_app</code><span class="sig-paren">(</span><em>package</em>, <em>activity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.start_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.start_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.stop_app">
+<code class="descname">stop_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.stop_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.stop_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.clear_app">
+<code class="descname">clear_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.clear_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.clear_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_ip_address">
+<code class="descname">get_ip_address</code><span class="sig-paren">(</span><em>adb</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_ip_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_ip_address" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.adb.ADB.get_gateway_address">
+<code class="descname">get_gateway_address</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/adb.html#ADB.get_gateway_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.adb.ADB.get_gateway_address" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="airtest.core.android.android.html" class="btn btn-neutral float-right" title="airtest.core.android.android module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="airtest.core.android.html" class="btn btn-neutral" title="airtest.core.android package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

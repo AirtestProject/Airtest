@@ -1,0 +1,827 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.api module &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../index.html"/>
+        <link rel="next" title="airtest.core.android package" href="airtest.core.android.html"/>
+        <link rel="prev" title="Airtest" href="../README.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">Airtest</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.html">airtest package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.aircv.html">airtest.aircv package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.cli.html">airtest.cli package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="airtest.core.html">airtest.core package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="airtest.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="airtest.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.report.html">airtest.report package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>airtest.core.api module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/all_module/airtest.core.api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest.core.api">
+<span id="airtest-core-api-module"></span><h1>airtest.core.api module<a class="headerlink" href="#module-airtest.core.api" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the Airtest Core APIs.</p>
+<dl class="function">
+<dt id="airtest.core.api.connect_device">
+<code class="descname">connect_device</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#connect_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.connect_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize device with uri and set the device as the current one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>uri</strong> – an URI where to connect to device, e.g. <cite>android://adbhost:adbport/serialno?param=value&amp;param2=value2</cite></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">device instance</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">android:///</span></code> # local adb device using default params</li>
+<li><code class="docutils literal"><span class="pre">android://adbhost:adbport/1234566?cap_method=javacap&amp;touch_method=adb</span></code>  # remote adb device using custom params</li>
+<li><code class="docutils literal"><span class="pre">windows:///</span></code> # local Windows application</li>
+<li><code class="docutils literal"><span class="pre">ios:///</span></code> # iOS device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, iOS, Windows</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.device">
+<code class="descname">device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current active device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">current device instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS, Windows</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.set_current">
+<code class="descname">set_current</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#set_current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.set_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set current active device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> – index of initialized device instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><strong>IndexError</strong> – raised when device index is out of device list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS, Windows</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.shell">
+<code class="descname">shell</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start remote shell in the target device and execute the command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cmd</strong> – command to be run on device, e.g. “ls /data/local/tmp”</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the output of the shell cmd</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.start_app">
+<code class="descname">start_app</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#start_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.start_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the target application on device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>package</strong> – name of the package to be started, e.g. “com.netease.my”</li>
+<li><strong>activity</strong> – the activity to start, default is None which means the main activity</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.stop_app">
+<code class="descname">stop_app</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#stop_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.stop_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the target application on device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> – name of the package to stop, see also <cite>start_app</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.clear_app">
+<code class="descname">clear_app</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#clear_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.clear_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear data of the target application on device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> – name of the package,  see also <cite>start_app</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.install">
+<code class="descname">install</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.install" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install application on device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> – the path to file to be installed on target device</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.uninstall">
+<code class="descname">uninstall</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#uninstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.uninstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uninstall application on device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> – name of the package, see also <cite>start_app</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.snapshot">
+<code class="descname">snapshot</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take the screenshot of the target device and save it to the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> – name of the file where to save the screenshot. If the relative path is provided, the default
+location is <code class="docutils literal"><span class="pre">ST.LOG_DIR</span></code></li>
+<li><strong>msg</strong> – short description for screenshot, it will be recorded in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, iOS, Windows</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.wake">
+<code class="descname">wake</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#wake"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.wake" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wake up and unlock the target device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Might not work on some models</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.home">
+<code class="descname">home</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#home"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return to the home screen of the target device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body">Android, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.touch">
+<code class="descname">touch</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the touch action on the device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to touch, either a Template instance or absolute coordinates (x, y)</li>
+<li><strong>kwargs</strong> – platform specific <cite>kwargs</cite>, please refer to corresponding docs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.swipe">
+<code class="descname">swipe</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#swipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.swipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the swipe action on the device screen.</p>
+<dl class="docutils">
+<dt>There are two ways of assigning the parameters</dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal"><span class="pre">swipe(v1,</span> <span class="pre">v2=Template(...))</span></code>   # swipe from v1 to v2</li>
+<li><code class="docutils literal"><span class="pre">swipe(v1,</span> <span class="pre">vector=(x,</span> <span class="pre">y))</span></code>      # swipe starts at v1 and moves along the vector.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v1</strong> – the start point of swipe,
+either a Template instance or absolute coordinates (x, y)</li>
+<li><strong>v2</strong> – the end point of swipe,
+either a Template instance or absolute coordinates (x, y)</li>
+<li><strong>vector</strong> – a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of
+screen e.g.(0.5, 0.5)</li>
+<li><strong>**kwargs</strong> – <p>platform specific <cite>kwargs</cite>, please refer to corresponding docs</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>Exception</strong> – general exception when not enough parameters to perform swap action have been provided</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.pinch">
+<code class="descname">pinch</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#pinch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.pinch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the pinch action on the device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>in_or_out</strong> – pinch in or pinch out, enum in [“in”, “out”]</li>
+<li><strong>center</strong> – center of pinch action, default as None which is the center of the screen</li>
+<li><strong>percent</strong> – percentage of the screen of pinch action, default is 0.5</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.keyevent">
+<code class="descname">keyevent</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#keyevent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.keyevent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform key event on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>keyname</strong> – platform specific key name</li>
+<li><strong>**kwargs</strong> – <p>platform specific <cite>kwargs</cite>, please refer to corresponding docs</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.text">
+<code class="descname">text</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input text on the target device. Text input widget must be active first.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> – text to input, unicode is supported</li>
+<li><strong>enter</strong> – input <cite>Enter</cite> keyevent after text input, default is True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.sleep">
+<code class="descname">sleep</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#sleep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sleep interval. It will be recorded in the report</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secs</strong> – seconds to sleep</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, Windows, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait to match the Template on the device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target object to wait for, Template instance</li>
+<li><strong>timeout</strong> – time interval to wait for the match, default is None which is <code class="docutils literal"><span class="pre">ST.FIND_TIMEOUT</span></code></li>
+<li><strong>interval</strong> – time interval in seconds to attempt to find a match</li>
+<li><strong>intervalfunc</strong> – called after each unsuccessful attempt to find the corresponding match</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><a class="reference internal" href="airtest.core.error.html#airtest.core.error.TargetNotFoundError" title="airtest.core.error.TargetNotFoundError"><strong>TargetNotFoundError</strong></a> – raised if target is not found after the time limit expired</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">coordinates of the matched target</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.exists">
+<code class="descname">exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether given target exists on device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> – target to be checked</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">False if target is not found, otherwise returns the coordinates of the target</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, Windows, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.find_all">
+<code class="descname">find_all</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#find_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.find_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all occurrences of the target on the device screen and return their coordinates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> – target to find</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of coordinates, [(x, y), (x1, y1), …]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Platforms:</th><td class="field-body">Android, Windows, iOS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.assert_exists">
+<code class="descname">assert_exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#assert_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.assert_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert target exists on device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to be checked</li>
+<li><strong>msg</strong> – short description of assertion, it will be recorded in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>AssertionError</strong> – if assertion fails</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">coordinates of the target</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.assert_not_exists">
+<code class="descname">assert_not_exists</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#assert_not_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.assert_not_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert target does not exist on device screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v</strong> – target to be checked</li>
+<li><strong>msg</strong> – short description of assertion, it will be recorded in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>AssertionError</strong> – if assertion fails</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.assert_equal">
+<code class="descname">assert_equal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#assert_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.assert_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert two values are equal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>first</strong> – first value</li>
+<li><strong>second</strong> – second value</li>
+<li><strong>msg</strong> – short description of assertion, it will be recorded in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>AssertionError</strong> – if assertion fails</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="airtest.core.api.assert_not_equal">
+<code class="descname">assert_not_equal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/api.html#assert_not_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.api.assert_not_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert two values are not equal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>first</strong> – first value</li>
+<li><strong>second</strong> – second value</li>
+<li><strong>msg</strong> – short description of assertion, it will be recorded in the report</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>AssertionError</strong> – if assertion</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Platforms:</th><td class="field-body"><p class="first last">Android, Windows, iOS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="airtest.core.android.html" class="btn btn-neutral float-right" title="airtest.core.android package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../README.html" class="btn btn-neutral" title="Airtest" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -19,13 +19,12 @@ def connect_device(uri):
     """
     Initialize device with uri and set the device as the current one.
 
-    :param uri: an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value`
+    :param uri: an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&param2=value2`
     :return: device instance
     :Example:
-        * ``android:///`` #local adb device using default params
-        * ``android://adbhost:adbport/serialno?param=value``
-        * ``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``
-        * ``windows:///`` #local Windows application
+        * ``android:///`` # local adb device using default params
+        * ``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # remote adb device using custom params
+        * ``windows:///`` # local Windows application
         * ``ios:///`` # iOS device
 
     :platforms: Android, iOS, Windows

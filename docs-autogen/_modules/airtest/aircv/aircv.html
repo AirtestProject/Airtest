@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.aircv.aircv &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.aircv.aircv</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.aircv.aircv</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1.7&quot;</span>
+<span class="n">__project_url__</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/netease/aircv&quot;</span>
+
+
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="imread"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.imread">[docs]</a><span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;根据图片路径，将图片读取为cv2的图片处理格式.&#39;&#39;&#39;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getfilesystemencoding</span><span class="p">())</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="imwrite"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.imwrite">[docs]</a><span class="k">def</span> <span class="nf">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;写出图片到本地路径&#39;&#39;&#39;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getfilesystemencoding</span><span class="p">())</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;show_img&quot;</span><span class="p">,</span> <span class="n">test_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;在可缩放窗口里显示图片.&#39;&#39;&#39;</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">namedWindow</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">WINDOW_NORMAL</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">test_flag</span><span class="p">:</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="show_origin_size"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.show_origin_size">[docs]</a><span class="k">def</span> <span class="nf">show_origin_size</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">test_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;原始尺寸窗口中显示图片.&quot;&quot;&quot;</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">test_flag</span><span class="p">:</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="rotate"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.rotate">[docs]</a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">clockwise</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        函数使图片可顺时针或逆时针旋转90、180、270度.</span>
+<span class="sd">        默认clockwise=True：顺时针旋转</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">count_clock_rotate</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+        <span class="c1"># 逆时针旋转90°</span>
+        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">rotate_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">))</span>
+        <span class="n">rotate_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">rotate_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">rotate_img</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rotate_img</span>
+
+    <span class="c1"># 将角度旋转转化为逆时针旋转90°的次数:</span>
+    <span class="n">counter_rotate_time</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">90</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">clockwise</span> <span class="k">else</span> <span class="p">(</span><span class="n">angle</span> <span class="o">/</span> <span class="mi">90</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">counter_rotate_time</span><span class="p">):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">count_clock_rotate</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="crop_image"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.crop_image">[docs]</a><span class="k">def</span> <span class="nf">crop_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        区域截图，同时返回截取结果 和 截取偏移;</span>
+<span class="sd">        Crop image , rect = [x_min, y_min, x_max ,y_max].</span>
+<span class="sd">        (airtest中有用到)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># 获取在图像中的实际有效区域：</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_min</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_min</span><span class="p">)</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_min</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y_min</span><span class="p">)</span>
+        <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_max</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_max</span><span class="p">)</span>
+        <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_max</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y_max</span><span class="p">)</span>
+
+        <span class="c1"># 返回剪切的有效图像+左上角的偏移坐标：</span>
+        <span class="n">img_crop</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">y_min</span><span class="p">:</span><span class="n">y_max</span><span class="p">,</span> <span class="n">x_min</span><span class="p">:</span><span class="n">x_max</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">img_crop</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;to crop a image, rect should be a list like: [x_min, x_max, y_min, y_max].&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mark_point"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.mark_point">[docs]</a><span class="k">def</span> <span class="nf">mark_point</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; 调试用的: 标记一个点 &#39;&#39;&#39;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">point</span>
+    <span class="c1"># cv2.rectangle(img, (x, y), (x+10, y+10), 255, 1, lineType=cv2.CV_AA)</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">radius</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">radius</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">radius</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># x line</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="n">radius</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="n">radius</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># y line</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="mask_image"><a class="viewcode-back" href="../../../all_module/airtest.aircv.aircv.html#airtest.aircv.aircv.mask_image">[docs]</a><span class="k">def</span> <span class="nf">mask_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        将screen的mask矩形区域刷成白色gbr(255, 255, 255).</span>
+<span class="sd">        其中mask区域为: [x_min, y_min, x_max, y_max].</span>
+<span class="sd">        color: 顺序分别的blue-green-red通道.</span>
+<span class="sd">        linewidth: 为-1时则完全填充填充，为正整数时为线框宽度.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 将划线边界外扩，保证线内区域不被线所遮挡:</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">linewidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">offset</span><span class="p">),</span> <span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">mask</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">linewidth</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

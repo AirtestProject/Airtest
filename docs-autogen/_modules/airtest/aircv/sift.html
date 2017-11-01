@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.aircv.sift &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.aircv.sift</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.aircv.sift</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.error</span> <span class="k">import</span> <span class="o">*</span>  <span class="c1"># noqa</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">generate_result</span><span class="p">,</span> <span class="n">check_source_larger_than_search</span>
+<span class="kn">from</span> <span class="nn">.cal_confidence</span> <span class="k">import</span> <span class="n">cal_ccoeff_confidence</span><span class="p">,</span> <span class="n">cal_rgb_confidence</span>
+
+<span class="c1"># SIFT识别特征点匹配，参数设置:</span>
+<span class="n">FLANN_INDEX_KDTREE</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">FLANN</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">FlannBasedMatcher</span><span class="p">({</span><span class="s1">&#39;algorithm&#39;</span><span class="p">:</span> <span class="n">FLANN_INDEX_KDTREE</span><span class="p">,</span> <span class="s1">&#39;trees&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="nb">dict</span><span class="p">(</span><span class="n">checks</span><span class="o">=</span><span class="mi">50</span><span class="p">))</span>
+<span class="c1"># SIFT参数: FILTER_RATIO为SIFT优秀特征点过滤比例值(0-1范围，建议值0.4-0.6)</span>
+<span class="n">FILTER_RATIO</span> <span class="o">=</span> <span class="mf">0.59</span>
+<span class="c1"># SIFT参数: SIFT识别时只找出一对相似特征点时的置信度(confidence)</span>
+<span class="n">ONE_POINT_CONFI</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+
+<div class="viewcode-block" id="find_sift"><a class="viewcode-back" href="../../../all_module/airtest.aircv.sift.html#airtest.aircv.sift.find_sift">[docs]</a><span class="k">def</span> <span class="nf">find_sift</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">good_ratio</span><span class="o">=</span><span class="n">FILTER_RATIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;基于sift进行图像识别，只筛选出最优区域.&quot;&quot;&quot;</span>
+    <span class="c1"># 第一步：校验图像输入</span>
+    <span class="n">check_source_larger_than_search</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">)</span>
+
+    <span class="c1"># 第二步：获取特征点集并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src</span>
+    <span class="n">kp_sch</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span> <span class="o">=</span> <span class="n">_get_key_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">good_ratio</span><span class="p">)</span>
+
+    <span class="c1"># 第三步：根据匹配点对(good),提取出来识别区域:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">good</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># 匹配点对为0,无法提取识别区域：</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">good</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># 匹配点对为1，可信度赋予设定值，并直接返回:</span>
+        <span class="k">return</span> <span class="n">_handle_one_good_points</span><span class="p">(</span><span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">if</span> <span class="n">ONE_POINT_CONFI</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">good</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># 匹配点对为2，根据点对求出目标区域，据此算出可信度：</span>
+        <span class="n">origin_result</span> <span class="o">=</span> <span class="n">_handle_two_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin_result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">origin_result</span> <span class="k">if</span> <span class="n">ONE_POINT_CONFI</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">w_h_range</span> <span class="o">=</span> <span class="n">_handle_two_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">good</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># 匹配点对为3，取出点对，求出目标区域，据此算出可信度：</span>
+        <span class="n">origin_result</span> <span class="o">=</span> <span class="n">_handle_three_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin_result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">origin_result</span> <span class="k">if</span> <span class="n">ONE_POINT_CONFI</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">w_h_range</span> <span class="o">=</span> <span class="n">_handle_three_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 匹配点对 &gt;= 4个，使用单矩阵映射求出目标区域，据此算出可信度：</span>
+        <span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">w_h_range</span> <span class="o">=</span> <span class="n">_many_good_pts</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+
+    <span class="c1"># 第四步：根据识别区域，求出结果可信度，并将结果进行返回:</span>
+    <span class="c1"># 对识别结果进行合理性校验: 小于5个像素的，或者缩放超过5倍的，一律视为不合法直接raise.</span>
+    <span class="n">_target_error_check</span><span class="p">(</span><span class="n">w_h_range</span><span class="p">)</span>
+    <span class="c1"># 将截图和识别结果缩放到大小一致,准备计算可信度</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">w_h_range</span>
+    <span class="n">target_img</span> <span class="o">=</span> <span class="n">im_source</span><span class="p">[</span><span class="n">y_min</span><span class="p">:</span><span class="n">y_max</span><span class="p">,</span> <span class="n">x_min</span><span class="p">:</span><span class="n">x_max</span><span class="p">]</span>
+    <span class="n">resize_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">target_img</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+    <span class="n">confidence</span> <span class="o">=</span> <span class="n">_cal_sift_confidence</span><span class="p">(</span><span class="n">im_search</span><span class="p">,</span> <span class="n">resize_img</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="n">rgb</span><span class="p">)</span>
+
+    <span class="n">best_match</span> <span class="o">=</span> <span class="n">generate_result</span><span class="p">(</span><span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[aircv][sift] threshold=</span><span class="si">%s</span><span class="s2">, result=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">best_match</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">best_match</span> <span class="k">if</span> <span class="n">confidence</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="mask_sift"><a class="viewcode-back" href="../../../all_module/airtest.aircv.sift.html#airtest.aircv.sift.mask_sift">[docs]</a><span class="k">def</span> <span class="nf">mask_sift</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">good_ratio</span><span class="o">=</span><span class="n">FILTER_RATIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;基于sift查找多个目标区域的方法.&quot;&quot;&quot;</span>
+    <span class="c1"># 求出特征点后，im_source中获得match的那些点进行聚类</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="find_all_sift"><a class="viewcode-back" href="../../../all_module/airtest.aircv.sift.html#airtest.aircv.sift.find_all_sift">[docs]</a><span class="k">def</span> <span class="nf">find_all_sift</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">good_ratio</span><span class="o">=</span><span class="n">FILTER_RATIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;基于sift查找多个目标区域的方法.&quot;&quot;&quot;</span>
+    <span class="c1"># 求出特征点后，im_source中获得match的那些点进行聚类</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<span class="k">def</span> <span class="nf">_init_sift</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Make sure that there is SIFT module in OpenCV.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cv2</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;3.&quot;</span><span class="p">):</span>
+        <span class="c1"># OpenCV3.x, sift is in contrib module, you need to compile it seperately.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sift</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">xfeatures2d</span><span class="o">.</span><span class="n">SIFT_create</span><span class="p">(</span><span class="n">edgeThreshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;to use SIFT, you should build contrib with opencv3.0&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NoSIFTModuleError</span><span class="p">(</span><span class="s2">&quot;There is no SIFT module in your OpenCV environment !&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># OpenCV2.x, just use it.</span>
+        <span class="n">sift</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">SIFT</span><span class="p">(</span><span class="n">edgeThreshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sift</span>
+
+
+<span class="k">def</span> <span class="nf">_get_key_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">good_ratio</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;根据传入图像,计算图像所有的特征点,并得到匹配特征点对.&quot;&quot;&quot;</span>
+    <span class="c1"># 准备工作: 初始化sift算子</span>
+    <span class="n">sift</span> <span class="o">=</span> <span class="n">_init_sift</span><span class="p">()</span>
+    <span class="c1"># 第一步：获取特征点集，并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src</span>
+    <span class="n">kp_sch</span><span class="p">,</span> <span class="n">des_sch</span> <span class="o">=</span> <span class="n">sift</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">im_search</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">kp_src</span><span class="p">,</span> <span class="n">des_src</span> <span class="o">=</span> <span class="n">sift</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># When apply knnmatch , make sure that number of features in both test and</span>
+    <span class="c1">#       query image is greater than or equal to number of nearest neighbors in knn match.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">kp_src</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NoSiftMatchPointError</span><span class="p">(</span><span class="s2">&quot;Not enough feature points in input images !&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">FLANN</span><span class="o">.</span><span class="n">knnMatch</span><span class="p">(</span><span class="n">des_sch</span><span class="p">,</span> <span class="n">des_src</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">good</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># good为特征点初选结果，剔除掉前两名匹配太接近的特征点，不是独特优秀的特征点直接筛除(多目标识别情况直接不适用)</span>
+    <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">distance</span> <span class="o">&lt;</span> <span class="n">good_ratio</span> <span class="o">*</span> <span class="n">n</span><span class="o">.</span><span class="n">distance</span><span class="p">:</span>
+            <span class="n">good</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="c1"># good点需要去除重复的部分，（设定源图像不能有重复点）去重时将src图像中的重复点找出即可</span>
+    <span class="c1"># 去重策略：允许搜索图像对源图像的特征点映射一对多，不允许多对一重复（即不能源图像上一个点对应搜索图像的多个点）</span>
+    <span class="n">good_diff</span><span class="p">,</span> <span class="n">diff_good_point</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[[]]</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">good</span><span class="p">:</span>
+        <span class="n">diff_point</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">if</span> <span class="n">diff_point</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">diff_good_point</span><span class="p">:</span>
+            <span class="n">good_diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">diff_good_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">diff_point</span><span class="p">)</span>
+    <span class="n">good</span> <span class="o">=</span> <span class="n">good_diff</span>
+
+    <span class="k">return</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span>
+
+
+<span class="k">def</span> <span class="nf">_handle_one_good_points</span><span class="p">(</span><span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sift匹配中只有一对匹配的特征点对的情况.&quot;&quot;&quot;</span>
+    <span class="c1"># 识别中心即为该匹配点位置:</span>
+    <span class="n">middle_point</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">confidence</span> <span class="o">=</span> <span class="n">ONE_POINT_CONFI</span>
+    <span class="c1"># 单个特征点对,识别区域无效化:</span>
+    <span class="n">pypts</span> <span class="o">=</span> <span class="p">[</span><span class="n">middle_point</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">generate_result</span><span class="p">(</span><span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="n">threshold</span> <span class="k">else</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_handle_two_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;处理两对特征点的情况.&quot;&quot;&quot;</span>
+    <span class="n">pts_sch1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pts_sch2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pts_src1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pts_src2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">_two_good_points</span><span class="p">(</span><span class="n">pts_sch1</span><span class="p">,</span> <span class="n">pts_sch2</span><span class="p">,</span> <span class="n">pts_src1</span><span class="p">,</span> <span class="n">pts_src2</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">im_source</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_handle_three_good_points</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">good</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;处理三对特征点的情况.&quot;&quot;&quot;</span>
+    <span class="c1"># 拿出sch和src的两个点(点1)和(点2点3的中点)，</span>
+    <span class="c1"># 然后根据两个点原则进行后处理(注意ke_sch和kp_src以及queryIdx和trainIdx):</span>
+    <span class="n">pts_sch1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pts_sch2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">kp_sch</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">pts_src1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pts_src2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">kp_src</span><span class="p">[</span><span class="n">good</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_two_good_points</span><span class="p">(</span><span class="n">pts_sch1</span><span class="p">,</span> <span class="n">pts_sch2</span><span class="p">,</span> <span class="n">pts_src1</span><span class="p">,</span> <span class="n">pts_src2</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">im_source</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_many_good_pts</span><span class="p">(</span><span class="n">im_source</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">kp_sch</span><span class="p">,</span> <span class="n">kp_src</span><span class="p">,</span> <span class="n">good</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;特征点匹配点对数目&gt;=4个，可使用单矩阵映射,求出识别的目标区域.&quot;&quot;&quot;</span>
+    <span class="n">sch_pts</span><span class="p">,</span> <span class="n">img_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">good</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">kp_src</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">good</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># M是转化矩阵</span>
+    <span class="n">M</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">_find_homography</span><span class="p">(</span><span class="n">sch_pts</span><span class="p">,</span> <span class="n">img_pts</span><span class="p">)</span>
+    <span class="n">matches_mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="c1"># 从good中间筛选出更精确的点(假设good中大部分点为正确的，由ratio=0.7保障)</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">good</span><span class="p">)</span> <span class="k">if</span> <span class="n">matches_mask</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+
+    <span class="c1"># 针对所有的selected点再次计算出更精确的转化矩阵M来</span>
+    <span class="n">sch_pts</span><span class="p">,</span> <span class="n">img_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">kp_sch</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">queryIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">kp_src</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">trainIdx</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">M</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">_find_homography</span><span class="p">(</span><span class="n">sch_pts</span><span class="p">,</span> <span class="n">img_pts</span><span class="p">)</span>
+    <span class="c1"># 计算四个角矩阵变换后的坐标，也就是在大图中的目标区域的顶点坐标:</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">im_search</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">h_s</span><span class="p">,</span> <span class="n">w_s</span> <span class="o">=</span> <span class="n">im_source</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">perspectiveTransform</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+
+    <span class="c1"># trans numpy arrary to python list: [(a, b), (a1, b1), ...]</span>
+    <span class="k">def</span> <span class="nf">cal_rect_pts</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">npt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">npt</span> <span class="ow">in</span> <span class="n">dst</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+
+    <span class="n">pypts</span> <span class="o">=</span> <span class="n">cal_rect_pts</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+    <span class="c1"># 注意：虽然4个角点有可能越出source图边界，但是(根据精确化映射单映射矩阵M线性机制)中点不会越出边界</span>
+    <span class="n">lt</span><span class="p">,</span> <span class="n">br</span> <span class="o">=</span> <span class="n">pypts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pypts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">middle_point</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">lt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">br</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">lt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">br</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># 考虑到算出的目标矩阵有可能是翻转的情况，必须进行一次处理，确保映射后的“左上角”在图片中也是左上角点：</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">br</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">br</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">br</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">br</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1"># 挑选出目标矩形区域可能会有越界情况，越界时直接将其置为边界：</span>
+    <span class="c1"># 超出左边界取0，超出右边界取w_s-1，超出下边界取0，超出上边界取h_s-1</span>
+    <span class="c1"># 当x_min小于0时，取0。  x_max小于0时，取0。</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># 当x_min大于w_s时，取值w_s-1。  x_max大于w_s-1时，取w_s-1。</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">w_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">w_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># 当y_min小于0时，取0。  y_max小于0时，取0。</span>
+    <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">y_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># 当y_min大于h_s时，取值h_s-1。  y_max大于h_s-1时，取h_s-1。</span>
+    <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="n">h_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y_max</span><span class="p">,</span> <span class="n">h_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># 目标区域的角点，按左上、左下、右下、右上点序：(x_min,y_min)(x_min,y_max)(x_max,y_max)(x_max,y_min)</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">],</span> <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="p">[</span>
+                     <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">pypts</span> <span class="o">=</span> <span class="n">cal_rect_pts</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_two_good_points</span><span class="p">(</span><span class="n">pts_sch1</span><span class="p">,</span> <span class="n">pts_sch2</span><span class="p">,</span> <span class="n">pts_src1</span><span class="p">,</span> <span class="n">pts_src2</span><span class="p">,</span> <span class="n">im_search</span><span class="p">,</span> <span class="n">im_source</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;返回两对匹配特征点情形下的识别结果.&quot;&quot;&quot;</span>
+    <span class="c1"># 先算出中心点(在im_source中的坐标)：</span>
+    <span class="n">middle_point</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">pts_src1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pts_src2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">pts_src1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pts_src2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+    <span class="n">pypts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># 如果特征点同x轴或同y轴(无论src还是sch中)，均不能计算出目标矩形区域来，此时返回值同good=1情形</span>
+    <span class="k">if</span> <span class="n">pts_sch1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">pts_sch2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">pts_sch1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pts_sch2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">pts_src1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">pts_src2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">pts_src1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pts_src2</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">ONE_POINT_CONFI</span>
+        <span class="n">one_match</span> <span class="o">=</span> <span class="n">generate_result</span><span class="p">(</span><span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">one_match</span>
+    <span class="c1"># 计算x,y轴的缩放比例：x_scale、y_scale，从middle点扩张出目标区域:(注意整数计算要转成浮点数结果!)</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">im_search</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">h_s</span><span class="p">,</span> <span class="n">w_s</span> <span class="o">=</span> <span class="n">im_source</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">x_scale</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">pts_src2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pts_src1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">pts_sch2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pts_sch1</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">y_scale</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">pts_src2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pts_src1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">pts_sch2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pts_sch1</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="c1"># 得到scale后需要对middle_point进行校正，并非特征点中点，而是映射矩阵的中点。</span>
+    <span class="n">sch_middle_point</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">pts_sch1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pts_sch2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">pts_sch1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pts_sch2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nb">int</span><span class="p">((</span><span class="n">sch_middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_scale</span><span class="p">)</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="nb">int</span><span class="p">((</span><span class="n">sch_middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_scale</span><span class="p">)</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># 超出左边界取0  (图像左上角坐标为0,0)</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">w_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 超出右边界取w_s-1</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># 超出上边界取0</span>
+    <span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">h_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 超出下边界取h_s-1</span>
+
+    <span class="c1"># 计算出来rectangle角点的顺序：左上角-&gt;左下角-&gt;右下角-&gt;右上角， 注意：暂不考虑图片转动</span>
+    <span class="c1"># 超出左边界取0, 超出右边界取w_s-1, 超出下边界取0, 超出上边界取h_s-1</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x_scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="nb">min</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x_scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">w_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">y_scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="nb">min</span><span class="p">(</span><span class="n">middle_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">y_scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">h_s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># 目标矩形的角点按左上、左下、右下、右上的点序：(x_min,y_min)(x_min,y_max)(x_max,y_max)(x_max,y_min)</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">],</span> <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">npt</span> <span class="ow">in</span> <span class="n">pts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
+        <span class="n">pypts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">npt</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">middle_point</span><span class="p">,</span> <span class="n">pypts</span><span class="p">,</span> <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_find_homography</span><span class="p">(</span><span class="n">sch_pts</span><span class="p">,</span> <span class="n">src_pts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;多组特征点对时，求取单向性矩阵.&quot;&quot;&quot;</span>
+    <span class="n">M</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findHomography</span><span class="p">(</span><span class="n">sch_pts</span><span class="p">,</span> <span class="n">src_pts</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HomographyError</span><span class="p">(</span><span class="s2">&quot;In findHomography(), find no mask...&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">M</span><span class="p">,</span> <span class="n">mask</span>
+
+
+<span class="k">def</span> <span class="nf">_target_error_check</span><span class="p">(</span><span class="n">w_h_range</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;校验识别结果区域是否符合常理.&quot;&quot;&quot;</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">w_h_range</span>
+    <span class="n">tar_width</span><span class="p">,</span> <span class="n">tar_height</span> <span class="o">=</span> <span class="n">x_max</span> <span class="o">-</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">-</span> <span class="n">y_min</span>
+    <span class="c1"># 如果src_img中的矩形识别区域的宽和高的像素数＜5，则判定识别失效。认为提取区域待不可能小于5个像素。(截图一般不可能小于5像素)</span>
+    <span class="k">if</span> <span class="n">tar_width</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="n">tar_height</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SiftResultCheckError</span><span class="p">(</span><span class="s2">&quot;In src_image, Taget area: width or height &lt; 5 pixel.&quot;</span><span class="p">)</span>
+    <span class="c1"># 如果矩形识别区域的宽和高，与sch_img的宽高差距超过5倍(屏幕像素差不可能有5倍)，认定为识别错误。</span>
+    <span class="k">if</span> <span class="n">tar_width</span> <span class="o">&lt;</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">w</span> <span class="ow">or</span> <span class="n">tar_width</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">w</span> <span class="ow">or</span> <span class="n">tar_height</span> <span class="o">&lt;</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">h</span> <span class="ow">or</span> <span class="n">tar_height</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">h</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SiftResultCheckError</span><span class="p">(</span><span class="s2">&quot;Taget area is 5 times bigger or 0.2 times smaller than sch_img.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_cal_sift_confidence</span><span class="p">(</span><span class="n">im_search</span><span class="p">,</span> <span class="n">resize_img</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rgb</span><span class="p">:</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">cal_rgb_confidence</span><span class="p">(</span><span class="n">im_search</span><span class="p">,</span> <span class="n">resize_img</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">cal_ccoeff_confidence</span><span class="p">(</span><span class="n">im_search</span><span class="p">,</span> <span class="n">resize_img</span><span class="p">)</span>
+    <span class="c1"># sift的confidence要放水</span>
+    <span class="n">confidence</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">confidence</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">confidence</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
