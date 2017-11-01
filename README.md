@@ -1,22 +1,16 @@
-Airtest Library
+Airtest
 ================
 
 Automated Testing Framework
 
 ## Getting Started
 
-Airtest is an automation test framework with main focus on mobile games however
-it can be used for other mobile applications as well. Currently, Windows and Android
-operating systems are supported. Support for iOS comes in near future.
+Airtest is an automated testing framework with main focus on games, however it can be used for other native applications as well. Currently, Windows and Android operating systems are supported. Support for iOS comes in near future.
 
-Airtest framework is based on image recognition technology and provides
-platform transparent APIs that allows to create simulated input,
-assertions, and so forth. It also generates the report when testing is finished.
+Airtest framework is based on image recognition technology and provides cross-platform APIs that allows to install application, perform simulated input, make assertions, and so forth. It also generates the report when testing is finished.
 
-Airtest can be used as CLI but there is also GUI AirtestIDE available that helps to 
-create and record test cases in the user-friendly way.
+**AirtestIDE** is a GUI tool that helps to create and record test cases in the user-friendly way. AirtestIDE provides QA with entire production workflow: ``record -> replay -> report``
 
-Recommended production workflow is: ``record -> replay -> report``
 
 ## Installation
 
@@ -29,26 +23,27 @@ This section describes how to install Airtest test framework.
   * MacOS X
   * Linux
 
-* Python2.7
+* Python2.7 & Python3.3+
 
-**Installing the client library**
+**Installing the python package**
 
-Airtest client library can be installed directly from Git repository. Use ``pip`` to
-to manage installation of all dependencies and library itself.
+Airtest package can be installed directly from Git repository. Use ``pip`` to
+to manage installation of all dependencies and package itself.
 
 ```Shell
 git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
 pip install -e airtest
 ```
+
+Use `-e` to install airtest in develop mode since this repo is in rapid development. Then you can upgrade the repo with `git pull` later.
+
 **Using samples**
 
-Airtest library also contains the samples using this library in several scenarios. 
-All samples can be found in `playground` directory in cloned repository.
+Airtest also contains the samples using this library in several scenarios. All samples can be found in `playground` directory in cloned repository.
 
-## Using Airtest as client library for Python
+## Using as python package
 
-Airtest provides simple APIs that can be called from Python. This section describes how 
-to create simple API-specific test scenario which does following:
+Airtest provides simple APIs that are platform independent. This section describes how to create simple API-specific test scenario on android which does the following:
  
 1. connects to local device with `adb`
 1. installs the `apk` application
@@ -77,20 +72,23 @@ uninstall("package_name_of_your_apk")
 Please refer to full [Airtest Python API reference](./all_module/airtest.core.api.html) for more
 detailed info.
 
-## Running Airtest from command line interface
+## Running from command line interface
 
-Airtest can be run from command line interface as well. All test cases, test code and image templates
-must be placed in one directory with `.owl` suffix. The easiest way how to prepare and 
-record the test cases is to use GUI **Airtest IDE**.
+Airtest can be run from command line interface as well. All test cases, test code and image templates must be placed in one directory with `.owl` suffix. The easiest way to create and record the test cases is to use GUI **Airtest IDE**.
 
-The biggest advantage of using the Airtest CLI is the possibility to 
-execute the test cases and test scenarios on different host devices without using IDE itself.
-Connections to devices are specified by command line arguments, i.e. the test code is
-platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
+The biggest advantage of using the Airtest CLI is the possibility to execute the test cases and test scenarios on different host machine without using IDE itself. Connections to devices are specified by command line arguments, i.e. the test code is platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
 
-Following examples demonstrate the basic usage of airtest framework from CLI. 
-For more detailed info, refer to provided samples of test cases and code: ```airtest/playground/test_blackjack.owl/```
-```Shell
+Following examples demonstrate the basic usage of airtest framework from CLI. For more detailed info, refer to provided samples of test cases and code: ```airtest/playground/test_blackjack.owl/```
+
+
+### run test case
+````Shell
+# run test test cases and scenarios on various devices
+> python -m airtest run <path to your owl dir> --device Android:///
+> python -m airtest run <path to your owl dir> --device Android://adbhost:adbport/serialno
+> python -m airtest run <path to your owl dir> --device Windows:///
+> python -m airtest run <path to your owl dir> --device iOS:///
+...
 # show help
 > python -m airtest run -h
 usage: __main__.py run [-h] [--device [DEVICE]] [--log [LOG]]
@@ -109,22 +107,11 @@ optional arguments:
   --pre PRE          owl run before script, setup environment
   --post POST        owl run after script, clean up environment, will run
                      whether script success or fail
-
-```
-
-````Shell
-# run test test cases and scenarios on various devices
-> python -m airtest run <path to your owl dir> --device Android:///
-> python -m airtest run <path to your owl dir> --device Android://adbhost:adbport/serialno
-> python -m airtest run <path to your owl dir> --device Windows:///
-> python -m airtest run <path to your owl dir> --device iOS:///
-...
-
 ````
 
 
+### generate html report
 ```Shell
-# generate html report
 > python -m airtest report <path to owl directory>
 ...
 > python -m airtest report -h
@@ -155,7 +142,11 @@ optional arguments:
   --new_report [NEW_REPORT]
 
 ```
+
+
+### get test case info
 ```Shell
 # get test case info, including: author, title, desc
 > python -m airtest info <path to your owl directory>
+{"author": ..., "title": ..., "desc": ...}
 ```
