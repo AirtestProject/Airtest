@@ -52,7 +52,7 @@ Airtest provides simple APIs that are platform independent. This section describ
 1. uninstalls application
 
 ```Python
-from airtest.core.main import *
+from airtest.core.api import *
 
 # connect to local device with adb
 connect_device("Android:///")
@@ -60,7 +60,7 @@ connect_device("Android:///")
 # start your script here
 install("path/to/your/apk")
 start_app("package_name_of_your_apk")
-snapshot()
+snapshot("my_screenshot.png")
 touch((100, 100))
 touch("image_of_a_button.png")
 swipe((100, 100), (200, 200))
