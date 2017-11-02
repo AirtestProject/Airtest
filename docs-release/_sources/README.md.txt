@@ -27,12 +27,14 @@ This section describes how to install Airtest test framework.
 
 **Installing the python package**
 
-Airtest package can be installed directly from Git repository. Use ``pip`` to
-to manage installation of all dependencies and package itself.
+Airtest package can be installed directly from Git repository. Use ``pip`` to manage installation of all python dependencies and package itself.
 
 ```Shell
-git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
+git clone https://github.com/Meteorix/airtest.git
 pip install -e airtest
+
+# for netease internal gitlab
+# git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
 ```
 
 Use `-e` here to install airtest in develop mode since this repo is in rapid development. Then you can upgrade the repo with `git pull` later.
@@ -40,6 +42,14 @@ Use `-e` here to install airtest in develop mode since this repo is in rapid dev
 **Using samples**
 
 Airtest also contains the samples using this library in several scenarios. All samples can be found in `playground` directory in cloned repository.
+
+
+## Documentation
+
+For now please clone this repo and open [docs-release/index.html](./docs-release). 
+
+Online docs will be available on readthedocs when this project is released.
+
 
 ## Using as python package
 
@@ -69,7 +79,7 @@ keyevent("BACK")
 home()
 uninstall("package_name_of_your_apk")
 ```
-Please refer to full [Airtest Python API reference](./all_module/airtest.core.api.html) for more detailed info.
+For more detailed info, please refer to full [Airtest Python API reference](./all_module/airtest.core.api.html) or take a look at [API code](./airtest/core/api.py)
 
 ## Running from command line interface
 

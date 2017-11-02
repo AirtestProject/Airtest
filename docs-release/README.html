@@ -90,6 +90,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Airtest</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-as-python-package">Using as python package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-from-command-line-interface">Running from command line interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#run-test-case">run test case</a></li>
@@ -196,15 +197,22 @@
 <li>Python2.7 &amp; Python3.3+</li>
 </ul>
 <p><strong>Installing the python package</strong></p>
-<p>Airtest package can be installed directly from Git repository. Use <code class="docutils literal"><span class="pre">pip</span></code> to
-to manage installation of all dependencies and package itself.</p>
-<div class="highlight-Shell"><div class="highlight"><pre><span></span>git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
+<p>Airtest package can be installed directly from Git repository. Use <code class="docutils literal"><span class="pre">pip</span></code> to manage installation of all python dependencies and package itself.</p>
+<div class="highlight-Shell"><div class="highlight"><pre><span></span>git clone https://github.com/Meteorix/airtest.git
 pip install -e airtest
+
+<span class="c1"># for netease internal gitlab</span>
+<span class="c1"># git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git</span>
 </pre></div>
 </div>
 <p>Use <code class="docutils literal"><span class="pre">-e</span></code> here to install airtest in develop mode since this repo is in rapid development. Then you can upgrade the repo with <code class="docutils literal"><span class="pre">git</span> <span class="pre">pull</span></code> later.</p>
 <p><strong>Using samples</strong></p>
 <p>Airtest also contains the samples using this library in several scenarios. All samples can be found in <code class="docutils literal"><span class="pre">playground</span></code> directory in cloned repository.</p>
+</div>
+<div class="section" id="documentation">
+<span id="documentation"></span><h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>For now please clone this repo and open <a class="reference external" href="./docs-release">docs-release/index.html</a>.</p>
+<p>Online docs will be available on readthedocs when this project is released.</p>
 </div>
 <div class="section" id="using-as-python-package">
 <span id="using-as-python-package"></span><h2>Using as python package<a class="headerlink" href="#using-as-python-package" title="Permalink to this headline">¶</a></h2>
@@ -234,7 +242,7 @@ pip install -e airtest
 <span class="n">uninstall</span><span class="p">(</span><span class="s2">&quot;package_name_of_your_apk&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Please refer to full <a class="reference external" href="./all_module/airtest.core.api.html">Airtest Python API reference</a> for more detailed info.</p>
+<p>For more detailed info, please refer to full <a class="reference external" href="./all_module/airtest.core.api.html">Airtest Python API reference</a> or take a look at <a class="reference external" href="./airtest/core/api.py">API code</a></p>
 </div>
 <div class="section" id="running-from-command-line-interface">
 <span id="running-from-command-line-interface"></span><h2>Running from command line interface<a class="headerlink" href="#running-from-command-line-interface" title="Permalink to this headline">¶</a></h2>
