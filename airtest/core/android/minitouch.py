@@ -31,6 +31,13 @@ class Minitouch(object):
         reg_cleanup(self.teardown)
 
     def install_and_setup(self):
+        """
+        Install and setup minitouch
+
+        Returns:
+            None
+
+        """
         self.install()
         self.display_info = self.adb.display_info
         self.setup_server()
@@ -40,9 +47,23 @@ class Minitouch(object):
             self.setup_client()
 
     def uninstall(self):
+        """
+        Uninstall minitouch
+
+        Returns:
+            None
+
+        """
         self.adb.raw_shell("rm /data/local/tmp/minitouch*")
 
     def install(self):
+        """
+        Install minitouch
+
+        Returns:
+            None
+
+        """
         if self.adb.exists_file('/data/local/tmp/minitouch'):
             LOGGING.debug("install_minitouch skipped")
             return
@@ -62,7 +83,17 @@ class Minitouch(object):
         LOGGING.info("install_minitouch finished")
 
     def __transform_xy(self, x, y):
-        # 根据设备方向、长宽来转换xy值
+        """
+        Transform coordinates (x, y) according to the device display
+
+        Args:
+            x: coordinate x
+            y: coordinate y
+
+        Returns:
+            transformed coordinates (x, y)
+
+        """
         if not (self.display_info and self.display_info['max_x'] and self.display_info['max_y']):
             return x, y
 
@@ -77,7 +108,13 @@ class Minitouch(object):
         return nx, ny
 
     def setup_server(self):
-        """set up minitouch server and adb forward"""
+        """
+        Setip minitouch server and adb forward
+
+        Returns:
+            server process
+
+        """
         if self.server_proc:
             self.server_proc.kill()
             self.server_proc = None
@@ -113,11 +150,22 @@ class Minitouch(object):
     @on_method_ready('install_and_setup')
     def touch(self, tuple_xy, duration=0.01):
         """
-        d 0 10 10 50
-        c
-        <wait in your own code>
-        u 0
-        c
+        Perform touch event
+
+        minitouch protocol example
+            d 0 10 10 50
+            c
+            <wait in your own code>
+            u 0
+            c
+
+        Args:
+            tuple_xy: coordinates (x, y)
+            duration: time interval for touch event, default is 0.01
+
+        Returns:
+            None
+
         """
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
@@ -128,20 +176,34 @@ class Minitouch(object):
     @on_method_ready('install_and_setup')
     def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
-        d 0 0 0 50
-        c
-        m 0 20 0 50
-        c
-        m 0 40 0 50
-        c
-        m 0 60 0 50
-        c
-        m 0 80 0 50
-        c
-        m 0 100 0 50
-        c
-        u 0
-        c
+        Perform swipe event
+
+        Examples:
+            minitouch protocol example:
+            d 0 0 0 50
+            c
+            m 0 20 0 50
+            c
+            m 0 40 0 50
+            c
+            m 0 60 0 50
+            c
+            m 0 80 0 50
+            c
+            m 0 100 0 50
+            c
+            u 0
+            c
+
+        Args:
+            tuple_from_xy: start point
+            tuple_to_xy: end point
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
+
+        Returns:
+            None
+
         """
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
@@ -166,33 +228,34 @@ class Minitouch(object):
     @on_method_ready('install_and_setup')
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
-        perform pinch action,
+        Perform pinch action
 
-        minitouch protocol example:
-        d 0 0 100 50
-        d 1 100 0 50
-        c
-        m 0 10 90 50
-        m 1 90 10 50
-        c
-        m 0 20 80 50
-        m 1 80 20 50
-        c
-        m 0 20 80 50
-        m 1 80 20 50
-        c
-        m 0 30 70 50
-        m 1 70 30 50
-        c
-        m 0 40 60 50
-        m 1 60 40 50
-        c
-        m 0 50 50 50
-        m 1 50 50 50
-        c
-        u 0
-        u 1
-        c
+        Examples:
+            minitouch protocol example:
+            d 0 0 100 50
+            d 1 100 0 50
+            c
+            m 0 10 90 50
+            m 1 90 10 50
+            c
+            m 0 20 80 50
+            m 1 80 20 50
+            c
+            m 0 20 80 50
+            m 1 80 20 50
+            c
+            m 0 30 70 50
+            m 1 70 30 50
+            c
+            m 0 40 60 50
+            m 1 60 40 50
+            c
+            m 0 50 50 50
+            m 1 50 50 50
+            c
+            u 0
+            u 1
+            c
         """
         w, h = self.display_info['width'], self.display_info['height']
         if isinstance(center, (list, tuple)):
@@ -233,6 +296,23 @@ class Minitouch(object):
 
     @on_method_ready('install_and_setup')
     def operate(self, args):
+        """
+        Perform down, up and move actions
+
+        Args:
+            args: action arguments, dictionary containing type and x, y coordinates, e.g.
+                  {
+                      "type" : "down",
+                      "x" : 10,
+                      "y" : 10
+                  }
+
+        Raises:
+            RuntimeError: is invalid arguments are provided
+
+        Returns:
+
+        """
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
@@ -249,6 +329,19 @@ class Minitouch(object):
         self.handle(cmd)
 
     def safe_send(self, data):
+        """
+        Send data to client
+
+        Args:
+            data: data to send
+
+        Raises:
+            Exception: when data cannot be sent
+
+        Returns:
+            None
+
+        """
         try:
             self.client.send(data)
         except Exception as err:
@@ -256,11 +349,25 @@ class Minitouch(object):
             raise err
 
     def _backend_worker(self):
+        """
+        Backend worker queue thread
+
+        Returns:
+            None
+
+        """
         while not self.backend_stop_event.isSet():
             cmd = self.backend_queue.get()
             self.safe_send(cmd)
 
     def setup_client_backend(self):
+        """
+        Setup backend client thread as daemon
+
+        Returns:
+            None
+
+        """
         self.backend_queue = queue.Queue()
         self.backend_stop_event = threading.Event()
         self.setup_client()
@@ -272,12 +379,16 @@ class Minitouch(object):
 
     def setup_client(self):
         """
-        1. connect to server
-        2. recv header
-            v <version>
-            ^ <max-contacts> <max-x> <max-y> <max-pressure>
-            $ <pid>
-        3. prepare to send
+        Setup client:
+            1. connect to server
+            1. recv header
+                * v <version>
+                * ^ <max-contacts> <max-x> <max-y> <max-pressure>
+                * $ <pid>
+            1. prepare to send
+
+        Returns:
+            None
         """
         s = SafeSocket()
         s.connect((self.adb.host, self.localport))
@@ -295,6 +406,13 @@ class Minitouch(object):
         self.handle = self.safe_send
 
     def teardown(self):
+        """
+        Stop the server and client
+
+        Returns:
+            None
+
+        """
         if hasattr(self, "backend_stop_event"):
             self.backend_stop_event.set()
         if self.client:

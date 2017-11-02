@@ -9,6 +9,9 @@ LOGGING = get_logger('rotation')
 
 
 class RotationWatcher(object):
+    """
+    RotationWatcher class
+    """
 
     def __init__(self, adb):
         self.adb = adb
@@ -21,6 +24,16 @@ class RotationWatcher(object):
         pass
 
     def _install_and_setup(self):
+        """
+        Install and setup the RotationWatcher package
+
+        Raises:
+            RuntimeError: if any error occurs while installing the package
+
+        Returns:
+            None
+
+        """
         try:
             apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
         except AirtestError:
@@ -33,6 +46,13 @@ class RotationWatcher(object):
         reg_cleanup(self.ow_proc.kill)
 
     def start(self):
+        """
+        Start the RotationWatcher daemon thread
+
+        Returns:
+            None
+
+        """
         self._install_and_setup()
 
         def _refresh_by_ow():
@@ -65,17 +85,36 @@ class RotationWatcher(object):
         self._t.start()
 
     def reg_callback(self, ow_callback):
+        """
+
+        Args:
+            ow_callback:
+
+        Returns:
+
+        """
         """方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback.append(ow_callback)
 
 
 class XYTransformer(object):
     """
-    transform xy by orientation
-    upright<-->original
+    transform the coordinates (x, y) by orientation (upright <--> original)
     """
     @staticmethod
     def up_2_ori(tuple_xy, tuple_wh, orientation):
+        """
+        Transform the coordinates upright --> original
+
+        Args:
+            tuple_xy: coordinates (x, y)
+            tuple_wh: screen width and height
+            orientation: orientation
+
+        Returns:
+            transformed coordinates (x, y)
+
+        """
         x, y = tuple_xy
         w, h = tuple_wh
 
@@ -89,6 +128,18 @@ class XYTransformer(object):
 
     @staticmethod
     def ori_2_up(tuple_xy, tuple_wh, orientation):
+        """
+        Transform the coordinates original --> upright
+
+        Args:
+            tuple_xy: coordinates (x, y)
+            tuple_wh: screen width and height
+            orientation: orientation
+
+        Returns:
+            transformed coordinates (x, y)
+
+        """
         x, y = tuple_xy
         w, h = tuple_wh
 

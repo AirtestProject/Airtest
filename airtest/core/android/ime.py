@@ -7,6 +7,16 @@ from .constant import YOSEMITE_IME_SERVICE
 
 
 def ensure_unicode(value):
+    """
+    Decode UTF-8 values
+
+    Args:
+        value: value to be decoded
+
+    Returns:
+        decoded valued
+
+    """
     if type(value) is not text_type:
         try:
             value = value.decode('utf-8')
@@ -16,6 +26,9 @@ def ensure_unicode(value):
 
 
 class CustomIme(object):
+    """
+    Input Methods Class Object
+    """
 
     def __init__(self, adb, apk_path, service_name):
         super(CustomIme, self).__init__()
@@ -25,6 +38,13 @@ class CustomIme(object):
         self.started = False
 
     def _get_ime_list(self):
+        """
+        Return all the input methods on the device
+
+        Returns:
+            list of all input methods on the device
+
+        """
         out = self.adb.shell("ime list -a")
         m = re.findall("mId=(.*?/.*?) ", out)
         return m
@@ -36,6 +56,13 @@ class CustomIme(object):
         self.end()
 
     def start(self):
+        """
+        Enable input method
+
+        Returns:
+            None
+
+        """
         self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
         self.ime_list = self._get_ime_list()
         if self.service_name not in self.ime_list:
@@ -47,6 +74,13 @@ class CustomIme(object):
         self.started = True
 
     def end(self):
+        """
+        Disable input method
+
+        Returns:
+            None
+
+        """
         if self.default_ime != self.service_name:
             self.adb.shell("ime disable %s" % self.service_name)
             self.adb.shell("ime set %s" % self.default_ime)
@@ -57,11 +91,25 @@ class CustomIme(object):
 
 
 class YosemiteIme(CustomIme):
+    """
+    Yosemite Input Method Class Object
+    """
+
     def __init__(self, adb):
         super(YosemiteIme, self).__init__(adb, None, YOSEMITE_IME_SERVICE)
         self.yosemite = Yosemite(adb)
 
     def text(self, value):
+        """
+        Input text with Yosemite input method
+
+        Args:
+            value: text to be inputted
+
+        Returns:
+            output form `adb shell` command
+
+        """
         self.yosemite.get_ready()
         if not self.started:
             self.start()

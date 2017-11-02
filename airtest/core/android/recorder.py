@@ -10,7 +10,7 @@ LOGGING = get_logger('recorder')
 
 
 class Recorder(Yosemite):
-    """Screen recorder."""
+    """Screen recorder"""
 
     def __init__(self, adb):
         super(Recorder, self).__init__(adb)
@@ -19,6 +19,21 @@ class Recorder(Yosemite):
 
     @on_method_ready('install_or_upgrade')
     def start_recording(self, max_time=1800, bit_rate=None, vertical=None):
+        """
+        Start screen recording
+
+        Args:
+            max_time: maximum rate value, default is 1800
+            bit_rate: bit rate value, default is None
+            vertical: vertical parameters, default is None
+
+        Raises:
+            RuntimeError: if any error occurs while setup the recording
+
+        Returns:
+            None if recording did not start, otherwise True
+
+        """
         if getattr(self, "recording_proc", None):
             raise AirtestError("recording_proc has already started")
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
@@ -44,6 +59,20 @@ class Recorder(Yosemite):
 
     @on_method_ready('install_or_upgrade')
     def stop_recording(self, output="screen.mp4", is_interrupted=False):
+        """
+        Stop screen recording
+
+        Args:
+            output: default file is `screen.mp4`
+            is_interrupted: True or False
+
+        Raises:
+            AirtestError: if recording was not started before
+
+        Returns:
+            None
+
+        """
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
         p = self.adb.start_shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE))
         p.wait()

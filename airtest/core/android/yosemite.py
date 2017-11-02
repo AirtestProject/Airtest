@@ -12,9 +12,27 @@ class Yosemite(object):
         self.adb = adb
 
     def install_or_upgrade(self):
+        """
+        Install or update the Yosemite.apk file on the device
+
+        Returns:
+            None
+
+        """
         self._install_apk_upgrade(YOSEMITE_APK, YOSEMITE_PACKAGE)
 
     def _install_apk_upgrade(self, apk_path, package):
+        """
+        Install or update the `.apk` file on the device
+
+        Args:
+            apk_path: full path `.apk` file
+            package: package name
+
+        Returns:
+            None
+
+        """
         apk_version = int(APK(apk_path).androidversion_code)
         installed_version = self.adb.get_package_version(package)
         LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
@@ -26,4 +44,11 @@ class Yosemite(object):
         pass
 
     def uninstall(self):
+        """
+        Uninstall `Yosemite.apk` application from the device
+
+        Returns:
+            None
+
+        """
         self.adb.uninstall_app(YOSEMITE_PACKAGE)

@@ -16,7 +16,7 @@ LOGGING = get_logger('android')
 
 class Android(Device):
 
-    """Android Device"""
+    """Android Device object class"""
 
     def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,
@@ -41,30 +41,123 @@ class Android(Device):
         self._register_rotation_watcher()
 
     def list_app(self, third_only=False):
+        """
+        Return list of packages
+
+        Args:
+            third_only: if True, only third party applications are listed
+
+        Returns:
+            array of applications
+
+        """
         return self.adb.list_app(third_only)
 
     def path_app(self, package):
+        """
+        Print the full path to the package
+
+        Args:
+            package: package name
+
+        Returns:
+            the full path to the package
+
+        """
         return self.adb.path_app(package)
 
     def check_app(self, package):
+        """
+        Check is package exists on the device
+
+        Args:
+            package: package name
+
+        Returns:
+            True or False whether the package exists on the device or not
+
+        """
         return self.adb.check_app(package)
 
     def start_app(self, package, activity=None):
+        """
+        Start the application and activity
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            None
+
+        """
         return self.adb.start_app(package, activity)
 
     def stop_app(self, package):
+        """
+        Stop the application
+
+        Args:
+            package: package name
+
+        Returns:
+            None
+
+        """
         return self.adb.stop_app(package)
 
     def clear_app(self, package):
+        """
+        Clear all application data
+
+        Args:
+            package: package name
+
+        Returns:
+            None
+
+        """
         return self.adb.clear_app(package)
 
     def install_app(self, filepath, replace=False):
+        """
+        Install the application on the device
+
+        Args:
+            filepath: full path to the `apk` file to be installed on the device
+            replace: True or False to replace the existing application
+
+        Returns:
+            output from installation process
+
+        """
         self.adb.install_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
+        """
+        Uninstall the application from the device
+
+        Args:
+            package: package name
+
+        Returns:
+            output from the uninstallation process
+
+        """
         return self.adb.uninstall_app(package)
 
     def snapshot(self, filename=None, ensure_orientation=True):
+        """
+        Take the screenshot of the display. The output is send to stdout by default.
+
+        Args:
+            filename: name of the file where to store the screenshot, default is None which si stdout
+            ensure_orientation: True or False whether to keep the orientation same as display
+
+        Returns:
+            screenshot output
+
+        """
         """default not write into file."""
         if self.cap_method == CAP_METHOD.MINICAP_STREAM:
             self.rotation_watcher.get_ready()
@@ -75,7 +168,7 @@ class Android(Device):
             screen = self.javacap.get_frame_from_stream()
         else:
             screen = self.adb.snapshot()
-        # 输出cv2对象
+        # output cv2 object
         try:
             screen = aircv.utils.string_2_img(screen)
         except:
@@ -84,11 +177,11 @@ class Android(Device):
             traceback.print_exc()
             return None
 
-        # 保证方向是正的
+        # ensure the orientation is right
         if ensure_orientation and self.display_info["orientation"]:
-            # minicap截图根据sdk_version不一样
+            # minicap screenshots are different for various sdk_version
             if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
-                h, w = screen.shape[:2]  # cv2的shape是高度在前面!!!!
+                h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
             # adb 截图总是要根据orientation旋转
@@ -99,21 +192,66 @@ class Android(Device):
         return screen
 
     def shell(self, *args, **kwargs):
+        """
+        Return `adb shell` interpreter
+        Args:
+            *args: optional shell commands
+            **kwargs: optional shell commands
+
+        Returns:
+            None
+
+        """
         return self.adb.shell(*args, **kwargs)
 
     def keyevent(self, keyname, **kwargs):
+        """
+        Perform keyevent on the device
+        Args:
+            keyname: keyeven name
+            **kwargs: optional arguments
+
+        Returns:
+            None
+
+        """
         self.adb.keyevent(keyname)
 
     def wake(self):
+        """
+        Perform wake up event
+
+        Returns:
+            None
+
+        """
         self.home()
         self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
         self.keyevent("HOME")
 
     def home(self):
+        """
+        Press HOME button
+
+        Returns:
+            None
+
+        """
         self.keyevent("HOME")
 
     def text(self, text, enter=True):
+        """
+        Input text on the device
+
+        Args:
+            text: text to input
+            enter: True or False whether to press `Enter` key
+
+        Returns:
+            None
+
+        """
         if self.ime_method == IME_METHOD.YOSEMITEIME:
             self.yosemite_ime.text(text)
         else:
@@ -124,6 +262,18 @@ class Android(Device):
             self.adb.shell(["input", "keyevent", "ENTER"])
 
     def touch(self, pos, times=1, duration=0.01):
+        """
+        Perform touch event on the device
+
+        Args:
+            pos: coordinates (x, y)
+            times: how many touches to be performed
+            duration: how long to touch the screen
+
+        Returns:
+            None
+
+        """
         pos = self._touch_point_by_orientation(pos)
         for _ in range(times):
             if self.touch_method == TOUCH_METHOD.MINITOUCH:
@@ -132,6 +282,19 @@ class Android(Device):
                 self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5):
+        """
+        Perform swipe event on the device
+
+        Args:
+            p1: start point
+            p2: end point
+            duration: how long to swipe the screen, default 0.5
+            steps: how big is the swipe step, default 5
+
+        Returns:
+            None
+
+        """
         p1 = self._touch_point_by_orientation(p1)
         p2 = self._touch_point_by_orientation(p2)
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
@@ -141,43 +304,137 @@ class Android(Device):
             self.adb.swipe(p1, p2, duration=duration)
 
     def pinch(self, *args, **kwargs):
+        """
+        Perform pinch event on the device
+
+        Args:
+            *args: optional arguments
+            **kwargs: optional arguments
+
+        Returns:
+            None
+
+        """
         return self.minitouch.pinch(*args, **kwargs)
 
     def logcat(self, *args, **kwargs):
+        """
+        Perform `logcat`operations
+        Args:
+            *args: optional arguments
+            **kwargs: optional arguments
+
+        Returns:
+            `logcat` output
+
+        """
         return self.adb.logcat(*args, **kwargs)
 
     def getprop(self, key, strip=True):
+        """
+        Get properties for given key
+
+        Args:
+            key: key name
+            strip: True or False whether to strip the output or not
+
+        Returns:
+            property value(s)
+
+        """
         return self.adb.getprop(key, strip)
 
     def get_top_activity(self):
-        """return (package, activity, pid)"""
+        """
+        Get the top activity
+
+        Returns:
+            package, activity and pid
+
+        """
         return self.adb.get_top_activity()
 
     def is_keyboard_shown(self):
-        """not working on all devices"""
+        """
+        Return True or False whether soft keyboard is shown or not
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
         return self.adb.is_keyboard_shown()
 
     def is_screenon(self):
-        """not working on all devices"""
+        """
+        Return True or False whether the screen is on or not
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
         return self.adb.is_screenon()
 
     def is_locked(self):
-        """not working on all devices"""
+        """
+        Return True or False whether the device is locked or not
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
         return self.adb.is_locked()
 
     def unlock(self):
-        """not working on many devices"""
+        """
+        Unlock the device
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
         return self.adb.unlock()
 
     @property
     def display_info(self):
+        """
+        Return the display info (orientation, rotation and max values for x and y coordinates)
+
+        Returns:
+            display information
+
+        """
         return self.adb.display_info
 
     def get_display_info(self):
+        """
+        Return the display physical info (orientation, rotation and max values for x and y coordinates)
+
+        Returns:
+            display physical information
+
+        """
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
-        """get current resolution after rotation"""
+        """
+        Return current resolution after rotaion
+
+        Returns:
+            width and height of the display
+
+        """
         # 注意黑边问题，需要用安卓接口获取区分两种分辨率
         w, h = self.display_info["width"], self.display_info["height"]
         if self.display_info["orientation"] in [1, 3]:
@@ -185,13 +442,41 @@ class Android(Device):
         return w, h
 
     def start_recording(self, *args, **kwargs):
+        """
+        Start recording the device display
+
+        Args:
+            *args: optional arguments
+            **kwargs:  optional arguments
+
+        Returns:
+            None
+
+        """
         self.recorder.start_recording(*args, **kwargs)
 
     def stop_recording(self, *args, **kwargs):
+        """
+        Stop recording the device display
+
+        Args:
+            *args: optional arguments
+            **kwargs: optional arguments
+
+        Returns:
+            None
+
+        """
         self.recorder.stop_recording(*args, **kwargs)
 
     def _register_rotation_watcher(self):
-        """auto refresh android.display when rotation changed"""
+        """
+        Auto refresh `android.display` when rotation of screen has changed
+
+        Returns:
+            None
+
+        """
         def refresh_ori(ori):
             self.display_info["orientation"] = ori
             self.display_info["rotation"] = ori * 90
@@ -200,7 +485,16 @@ class Android(Device):
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
 
     def _touch_point_by_orientation(self, tuple_xy):
-        """图片坐标转换为物理坐标，即相对于手机物理左上角的坐标(minitouch点击的是物理坐标)."""
+        """
+        Convert image coordinates to physical display coordinates, the arbitrary point (origin) is upper left corner
+        of the device physical display
+
+        Args:
+            tuple_xy: image coordinates (x, y)
+
+        Returns:
+
+        """
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),

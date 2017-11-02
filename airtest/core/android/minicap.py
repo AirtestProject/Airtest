@@ -32,6 +32,13 @@ class Minicap(object):
         reg_cleanup(self.teardown_stream)
 
     def install_or_upgrade(self):
+        """
+        Install or upgrade minicap
+
+        Returns:
+            None
+
+        """
         if self.adb.exists_file("/data/local/tmp/minicap") \
                 and self.adb.exists_file("/data/local/tmp/minicap.so"):
             output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
@@ -51,10 +58,23 @@ class Minicap(object):
         self.install()
 
     def uninstall(self):
+        """
+        Uninstall minicap
+
+        Returns:
+            None
+
+        """
         self.adb.raw_shell("rm /data/local/tmp/minicap*")
 
     def install(self):
-        """install or upgrade minicap"""
+        """
+        Install minicap
+
+        Returns:
+            None
+
+        """
         abi = self.adb.getprop("ro.product.cpu.abi")
         if self.adb.sdk_version >= 16:
             binfile = "minicap"
@@ -75,8 +95,14 @@ class Minicap(object):
     @on_method_ready('install_or_upgrade')
     def get_display_info(self):
         """
-        get display info by minicap
-        warning: it may segfault, so we prefer to get from adb
+        Get display info by minicap
+
+        Warnings:
+            It might segfault, the preferred way is to get the information from adb commands
+
+        Returns:
+            display information
+
         """
         display_info = self.adb.shell("%s -i" % self.CMD)
         display_info = json.loads(display_info)
@@ -85,10 +111,17 @@ class Minicap(object):
     @on_method_ready('install_or_upgrade')
     def get_frame(self, projection=None):
         """
-        get single frame from minicap -s, slower than get_frames
-        1. shell cmd
-        2. remove log info
-        3. \r\r\n -> \n ... fuck adb
+        Get the single frame from minicap -s, this method slower than `get_frames`
+            1. shell cmd
+            1. remove log info
+            1. \r\r\n -> \n ...
+
+        Args:
+            projection: projection, default is None. If `None`, physical display size is used
+
+        Returns:
+            jpg data
+
         """
         raw_data = self.adb.raw_shell(
             self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
@@ -99,7 +132,16 @@ class Minicap(object):
         return jpg_data
 
     def _get_params(self, projection=None):
-        """get minicap start params, and count projection"""
+        """
+        Get the minicap origin parameters and count the projection
+
+        Args:
+            projection: projection, default is None. If `None`, physical display size is used
+
+        Returns:
+            physical display size (width, height), counted projection (width, height) and real display orientation
+
+        """
         # minicap截屏时，需要截取物理全屏的图片:
         real_width = self.adb.display_info["physical_width"]
         real_height = self.adb.display_info["physical_height"]
@@ -113,10 +155,15 @@ class Minicap(object):
     @on_method_ready('install_or_upgrade')
     def get_stream(self, lazy=True):
         """
-        Use adb forward and socket communicate.
+        Get stream, it uses `adb forward`and socket communication. Use minicap ``lazy``mode (provided by gzmaruijie)
+        for long connections - returns one latest frame from the server
 
-        lazy: use minicap lazy mode (provided by gzmaruijie)
-              long connection, send 1 to server, than server return one lastest frame
+
+        Args:
+            lazy: True or False
+
+        Returns:
+
         """
         proc, nbsp, localport = self._setup_stream_server(lazy=lazy)
         s = SafeSocket()
@@ -150,7 +197,16 @@ class Minicap(object):
         self.adb.remove_forward("tcp:%s" % localport)
 
     def _setup_stream_server(self, lazy=False):
-        """setup minicap process on device"""
+        """
+        Setup minicap process on device
+
+        Args:
+            lazy: parameter `-l` is used when True
+
+        Returns:
+            adb shell process, non-blocking stream reader and local port
+
+        """
         localport, deviceport = self.adb.setup_forward("localabstract:minicap_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         other_opt = "-l" if lazy else ""
@@ -174,7 +230,13 @@ class Minicap(object):
         return proc, nbsp, localport
 
     def get_frame_from_stream(self):
-        """get one frame from minicap stream"""
+        """
+        Get one frame from minicap stream
+
+        Returns:
+            frame
+
+        """
         with self.stream_lock:
             if self.frame_gen is None:
                 self.frame_gen = self.get_stream()
@@ -185,11 +247,27 @@ class Minicap(object):
             return frame
 
     def update_rotation(self, rotation):
-        """update rotation, and reset backend stream generator"""
+        """
+        Update rotation and reset the backend stream generator
+
+        Args:
+            rotation: rotation input
+
+        Returns:
+            None
+
+        """
         LOGGING.debug("update_rotation: %s" % rotation)
         self.teardown_stream()
 
     def teardown_stream(self):
+        """
+        End the stream
+
+        Returns:
+            None
+
+        """
         with self.stream_lock:
             if not self.frame_gen:
                 return

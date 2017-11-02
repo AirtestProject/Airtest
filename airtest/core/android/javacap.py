@@ -9,7 +9,9 @@ LOGGING = get_logger('javacap')
 
 
 class Javacap(Yosemite):
-    """another screencap class, slower than minicap, but better compatibility."""
+    """
+    This is another screencap class, it is slower in performance than minicap, but it provides the better compatibility
+    """
 
     APP_PKG = "com.netease.nie.yosemite"
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
@@ -22,6 +24,13 @@ class Javacap(Yosemite):
 
     @on_method_ready('install_or_upgrade')
     def _setup_stream_server(self):
+        """
+        Setup stream server
+
+        Returns:
+            adb shell process, non-blocking stream reader and local port
+
+        """
         localport, deviceport = self.adb.setup_forward("localabstract:javacap_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         # setup agent proc
@@ -42,6 +51,13 @@ class Javacap(Yosemite):
         return proc, nbsp, localport
 
     def get_frames(self):
+        """
+        Get the screen frames
+
+        Returns:
+            None
+
+        """
         proc, nbsp, localport = self._setup_stream_server()
         s = SafeSocket()
         s.connect((self.adb.host, localport))
@@ -73,11 +89,25 @@ class Javacap(Yosemite):
         self.adb.remove_forward("tcp:%s" % localport)
 
     def get_frame_from_stream(self):
+        """
+        Get frame from the stream
+
+        Returns:
+            frame
+
+        """
         if self.frame_gen is None:
             self.frame_gen = self.get_frames()
         return self.frame_gen.send(None)
 
     def teardown_stream(self):
+        """
+        End stream
+
+        Returns:
+            None
+
+        """
         if not self.frame_gen:
             return
         try:
