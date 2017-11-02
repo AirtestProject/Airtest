@@ -216,7 +216,7 @@ pip install -e airtest
 <li>performs several user operations (touch, swipe, keyevent)</li>
 <li>uninstalls application</li>
 </ol>
-<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">airtest.core.main</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">airtest.core.api</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1"># connect to local device with adb</span>
 <span class="n">connect_device</span><span class="p">(</span><span class="s2">&quot;Android:///&quot;</span><span class="p">)</span>
@@ -224,7 +224,7 @@ pip install -e airtest
 <span class="c1"># start your script here</span>
 <span class="n">install</span><span class="p">(</span><span class="s2">&quot;path/to/your/apk&quot;</span><span class="p">)</span>
 <span class="n">start_app</span><span class="p">(</span><span class="s2">&quot;package_name_of_your_apk&quot;</span><span class="p">)</span>
-<span class="n">snapshot</span><span class="p">()</span>
+<span class="n">snapshot</span><span class="p">(</span><span class="s2">&quot;my_screenshot.png&quot;</span><span class="p">)</span>
 <span class="n">touch</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="n">touch</span><span class="p">(</span><span class="s2">&quot;image_of_a_button.png&quot;</span><span class="p">)</span>
 <span class="n">swipe</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>

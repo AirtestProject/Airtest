@@ -199,16 +199,55 @@
 <dt id="airtest.core.android.recorder.Recorder">
 <em class="property">class </em><code class="descname">Recorder</code><span class="sig-paren">(</span><em>adb</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/recorder.html#Recorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.recorder.Recorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="airtest.core.android.yosemite.html#airtest.core.android.yosemite.Yosemite" title="airtest.core.android.yosemite.Yosemite"><code class="xref py py-class docutils literal"><span class="pre">airtest.core.android.yosemite.Yosemite</span></code></a></p>
-<p>Screen recorder.</p>
+<p>Screen recorder</p>
 <dl class="method">
 <dt id="airtest.core.android.recorder.Recorder.start_recording">
 <code class="descname">start_recording</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/recorder.html#Recorder.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.recorder.Recorder.start_recording" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Start screen recording</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>max_time</strong> – maximum rate value, default is 1800</li>
+<li><strong>bit_rate</strong> – bit rate value, default is None</li>
+<li><strong>vertical</strong> – vertical parameters, default is None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> – if any error occurs while setup the recording</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None if recording did not start, otherwise True</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="airtest.core.android.recorder.Recorder.stop_recording">
 <code class="descname">stop_recording</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/recorder.html#Recorder.stop_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.recorder.Recorder.stop_recording" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Stop screen recording</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output</strong> – default file is <cite>screen.mp4</cite></li>
+<li><strong>is_interrupted</strong> – True or False</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-exc docutils literal"><span class="pre">AirtestError</span></code> – if recording was not started before</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 

@@ -176,9 +176,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span> <span class="o">=</span> <span class="n">adb</span>
 
 <div class="viewcode-block" id="Yosemite.install_or_upgrade"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.yosemite.html#airtest.core.android.yosemite.Yosemite.install_or_upgrade">[docs]</a>    <span class="k">def</span> <span class="nf">install_or_upgrade</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install or update the Yosemite.apk file on the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_install_apk_upgrade</span><span class="p">(</span><span class="n">YOSEMITE_APK</span><span class="p">,</span> <span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_install_apk_upgrade</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apk_path</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install or update the `.apk` file on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            apk_path: full path `.apk` file</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">apk_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">APK</span><span class="p">(</span><span class="n">apk_path</span><span class="p">)</span><span class="o">.</span><span class="n">androidversion_code</span><span class="p">)</span>
         <span class="n">installed_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">get_package_version</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
         <span class="n">LOGGING</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;local version code is </span><span class="si">{}</span><span class="s2">, installed version code is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">apk_version</span><span class="p">,</span> <span class="n">installed_version</span><span class="p">))</span>
@@ -190,6 +208,13 @@
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="Yosemite.uninstall"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.yosemite.html#airtest.core.android.yosemite.Yosemite.uninstall">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uninstall `Yosemite.apk` application from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">uninstall_app</span><span class="p">(</span><span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span></div></div>
 </pre></div>
 

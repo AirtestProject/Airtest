@@ -182,7 +182,7 @@
 
 
 <div class="viewcode-block" id="ADB"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB">[docs]</a><span class="k">class</span> <span class="nc">ADB</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;adb client&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;adb client object class&quot;&quot;&quot;</span>
 
     <span class="n">status_device</span> <span class="o">=</span> <span class="s2">&quot;device&quot;</span>
     <span class="n">status_offline</span> <span class="o">=</span> <span class="s2">&quot;offline&quot;</span>
@@ -202,7 +202,13 @@
 
 <div class="viewcode-block" id="ADB.builtin_adb_path"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.builtin_adb_path">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">builtin_adb_path</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot;get airtest built-in adb executable path&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return built-in adb executable path</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            adb executable path</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
         <span class="n">adb_path</span> <span class="o">=</span> <span class="n">DEFAULT_ADB_PATH</span><span class="p">[</span><span class="n">system</span><span class="p">]</span>
         <span class="c1"># overwrite uiautomator adb</span>
@@ -212,7 +218,16 @@
         <span class="k">return</span> <span class="n">adb_path</span></div>
 
     <span class="k">def</span> <span class="nf">_set_cmd_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_addr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;set adb cmd options -H -P&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set communication parameters (host and port) between adb server and adb client</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            server_addr: adb server address, default is 127.0.0.1:5037</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">server_addr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">server_addr</span> <span class="k">else</span> <span class="s2">&quot;127.0.0.1&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">server_addr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">server_addr</span> <span class="k">else</span> <span class="mi">5037</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cmd_options</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adb_path</span><span class="p">]</span>
@@ -222,17 +237,39 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cmd_options</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;-P&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)]</span>
 
 <div class="viewcode-block" id="ADB.start_server"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.start_server">[docs]</a>    <span class="k">def</span> <span class="nf">start_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb start-server&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb start-server` command to start the adb server</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s2">&quot;start-server&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.version"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.version">[docs]</a>    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb version 1.0.39&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb version` command and return the command output</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ADB.start_cmd"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.start_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">start_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmds</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        start a subprocess to run adb cmd</span>
-<span class="sd">        device: specify -s serialno if True</span>
+<span class="sd">        Start a subprocess with adb command(s)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cmds: command(s) to be run</span>
+<span class="sd">            device: if True, the device serial number must be specified by `-s serialno` argument</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: if `device` is True and serialno is not specified</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            a subprocess</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">device</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span><span class="p">:</span>
@@ -255,8 +292,20 @@
 
 <div class="viewcode-block" id="ADB.cmd"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmds</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ensure_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        get adb cmd output</span>
-<span class="sd">        device: specify -s serialno if True</span>
+<span class="sd">        Run the adb command(s) in subprocess and return the standard output</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cmds: command(s) to be run</span>
+<span class="sd">            device: if True, the device serial number must be specified by -s serialno argument</span>
+<span class="sd">            ensure_unicode: encode/decode unicode of standard outputs (stdout, stderr)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            DeviceConnectionError: if any error occurs when connecting the device</span>
+<span class="sd">            AdbError: if any other adb error occurs</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command(s) standard output (stdout)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_cmd</span><span class="p">(</span><span class="n">cmds</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
@@ -274,7 +323,16 @@
         <span class="k">return</span> <span class="n">stdout</span></div>
 
 <div class="viewcode-block" id="ADB.devices"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.devices">[docs]</a>    <span class="k">def</span> <span class="nf">devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb devices&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb devices` command and return the list of adb devices</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state: optional parameter to filter devices in specific state</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list od adb devices</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">patten</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[\w\d.:-]+\t[\w]+$&#39;</span><span class="p">)</span>
         <span class="n">device_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># self.start_server()</span>
@@ -290,18 +348,42 @@
         <span class="k">return</span> <span class="n">device_list</span></div>
 
 <div class="viewcode-block" id="ADB.connect"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb connect, if remote devices, connect first&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb connect` command, remote devices are preferred to connect first</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            force: force connection, default is False</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span> <span class="ow">and</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span> <span class="ow">and</span> <span class="p">(</span><span class="n">force</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;device&quot;</span><span class="p">):</span>
             <span class="n">connect_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s2">&quot;connect </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span><span class="p">)</span>
             <span class="n">LOGGING</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">connect_result</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.disconnect"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb disconnect&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb disconnect` command</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s2">&quot;disconnect </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.get_status"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;get device&#39;s adb status&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb get-state` and return the device status</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AdbError: if status cannot be obtained from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if status is `not found`, otherwise return the standard output from `adb get-state` command</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_cmd</span><span class="p">(</span><span class="s2">&quot;get-state&quot;</span><span class="p">)</span>
         <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
 
@@ -317,8 +399,17 @@
 
 <div class="viewcode-block" id="ADB.wait_for_device"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.wait_for_device">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        adb wait-for-device</span>
-<span class="sd">        if timeout, raise AirtestError</span>
+<span class="sd">        Perform `adb wait-for-device` command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timeout: time interval in seconds to wait for device</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            DeviceConnectionError: if device is not available after timeout</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_cmd</span><span class="p">(</span><span class="s2">&quot;wait-for-device&quot;</span><span class="p">)</span>
         <span class="n">timer</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">)</span>
@@ -330,10 +421,31 @@
             <span class="k">raise</span> <span class="n">DeviceConnectionError</span><span class="p">(</span><span class="s2">&quot;device not ready&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.start_shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.start_shell">[docs]</a>    <span class="k">def</span> <span class="nf">start_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle `adb shell` command(s)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cmds: adb shell command(s)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;shell&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">split_cmd</span><span class="p">(</span><span class="n">cmds</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_cmd</span><span class="p">(</span><span class="n">cmds</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.raw_shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.raw_shell">[docs]</a>    <span class="k">def</span> <span class="nf">raw_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmds</span><span class="p">,</span> <span class="n">ensure_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle `adb shell` command(s) with unicode support</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cmds: adb shell command(s)</span>
+<span class="sd">            ensure_unicode: decode/encode unicode True or False, default is True</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command(s) output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;shell&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">split_cmd</span><span class="p">(</span><span class="n">cmds</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">cmds</span><span class="p">,</span> <span class="n">ensure_unicode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ensure_unicode</span><span class="p">:</span>
@@ -347,7 +459,17 @@
 
 <div class="viewcode-block" id="ADB.shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.shell">[docs]</a>    <span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        adb shell</span>
+<span class="sd">        Run the `adb shell` command on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cmd: a command to be run</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AdbShellError: if command return value is non-zero or if any other `AdbError` occurred</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdk_version</span> <span class="o">&lt;</span> <span class="n">SDK_VERISON_NEW</span><span class="p">:</span>
             <span class="c1"># for sdk_version &lt; 25, adb shell do not raise error</span>
@@ -374,10 +496,30 @@
                 <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="ADB.keyevent"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.keyevent">[docs]</a>    <span class="k">def</span> <span class="nf">keyevent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell input keyevent` command on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            keyname: key event name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="s2">&quot;keyevent&quot;</span><span class="p">,</span> <span class="n">keyname</span><span class="o">.</span><span class="n">upper</span><span class="p">()])</span></div>
 
 <div class="viewcode-block" id="ADB.getprop"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.getprop">[docs]</a>    <span class="k">def</span> <span class="nf">getprop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb shell getprop&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell getprop` on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: key value for property</span>
+<span class="sd">            strip: True or False to strip the return carriage and line break from returned string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            propery value</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">([</span><span class="s1">&#39;getprop&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
             <span class="n">prop</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -385,22 +527,56 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sdk_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb shell get sdk version&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the SDK version from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            SDK version</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sdk_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">keyname</span> <span class="o">=</span> <span class="s1">&#39;ro.build.version.sdk&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sdk_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getprop</span><span class="p">(</span><span class="n">keyname</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sdk_version</span>
 
 <div class="viewcode-block" id="ADB.push"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.push">[docs]</a>    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local</span><span class="p">,</span> <span class="n">remote</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb push&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb push` command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            local: local file to be copied to the device</span>
+<span class="sd">            remote: destination on the device where the file will be copied</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">([</span><span class="s2">&quot;push&quot;</span><span class="p">,</span> <span class="n">local</span><span class="p">,</span> <span class="n">remote</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.pull"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.pull">[docs]</a>    <span class="k">def</span> <span class="nf">pull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote</span><span class="p">,</span> <span class="n">local</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb pull&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb pull` command</span>
+<span class="sd">        Args:</span>
+<span class="sd">            remote: remote file to be downloaded from the device</span>
+<span class="sd">            local: local destination where the file will be downloaded from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">([</span><span class="s2">&quot;pull&quot;</span><span class="p">,</span> <span class="n">remote</span><span class="p">,</span> <span class="n">local</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.forward"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local</span><span class="p">,</span> <span class="n">remote</span><span class="p">,</span> <span class="n">no_rebind</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb forward&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb forward` command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            local: local tcp port to be forwarded</span>
+<span class="sd">            remote: tcp port of the device where the local tcp port will be forwarded</span>
+<span class="sd">            no_rebind: True or False</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">no_rebind</span><span class="p">:</span>
             <span class="n">cmds</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;--no-rebind&#39;</span><span class="p">]</span>
@@ -410,7 +586,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_forward_local_using</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.get_forwards"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_forwards">[docs]</a>    <span class="k">def</span> <span class="nf">get_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb forward --list&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb forward --list`command</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            serial number, local tcp port, remote tcp port</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">([</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;--list&#39;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -425,16 +610,28 @@
 <div class="viewcode-block" id="ADB.get_available_forward_local"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_available_forward_local">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_available_forward_local</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        random a forward local port, use forward --no-rebind to try forward</span>
+<span class="sd">        Generate a pseudo random number between 11111 and 20000 that will be used as local forward port</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            integer between 11111 and 20000</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            use `forward --no-rebind` to check if port is available</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">11111</span><span class="p">,</span> <span class="mi">20000</span><span class="p">)</span></div>
 
     <span class="nd">@retries</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">setup_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_port</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        setup adb forward with a random local port, try bind at most 3 times</span>
-<span class="sd">        device_port can be a string or a function(localport)</span>
-<span class="sd">        eg: &quot;tcp:5001&quot; or &quot;localabstract:{}&quot;.format</span>
+<span class="sd">        Generate pseudo random local port and check if the port is available.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            device_port: it can be string or the value of the `function(localport)`,</span>
+<span class="sd">                         e.g. `&quot;tcp:5001&quot;` or `&quot;localabstract:{}&quot;.format`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            local port and device port</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">localport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_forward_local</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">device_port</span><span class="p">):</span>
@@ -443,7 +640,16 @@
         <span class="k">return</span> <span class="n">localport</span><span class="p">,</span> <span class="n">device_port</span>
 
 <div class="viewcode-block" id="ADB.remove_forward"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.remove_forward">[docs]</a>    <span class="k">def</span> <span class="nf">remove_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb forward --remove&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb forward --remove` command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            local: local tcp port</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">local</span><span class="p">:</span>
             <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;forward&quot;</span><span class="p">,</span> <span class="s2">&quot;--remove&quot;</span><span class="p">,</span> <span class="n">local</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -454,6 +660,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_forward_local_using</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">local</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.install_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.install_app">[docs]</a>    <span class="k">def</span> <span class="nf">install_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb install` command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: full path to file to be installed on the device</span>
+<span class="sd">            replace: force to replace existing application, default is False</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">replace</span><span class="p">:</span>
             <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;install&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -462,10 +679,23 @@
         <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="ADB.pm_install"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.pm_install">[docs]</a>    <span class="k">def</span> <span class="nf">pm_install</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb push &amp; pm install, compatibility is better than adb install&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb push` and `adb install` commands</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This is more reliable and recommended way of installing `.apk` files</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: full path to file to be installed on the device</span>
+<span class="sd">            replace: force to replace existing application, default is False</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
         <span class="n">device_dir</span> <span class="o">=</span> <span class="s2">&quot;/data/local/tmp&quot;</span>
-        <span class="c1"># 如果apk名称包含空格，需要用引号括起来</span>
+        <span class="c1"># if the apk file path contains spaces, the path must be escaped</span>
         <span class="n">device_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">device_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">([</span><span class="s2">&quot;push&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">device_dir</span><span class="p">])</span>
@@ -477,30 +707,78 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;pm&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">device_path</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.uninstall_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.uninstall_app">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;adb uninstall&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb uninstall` command</span>
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name to be uninstalled from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">([</span><span class="s1">&#39;uninstall&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.pm_uninstall"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.pm_uninstall">[docs]</a>    <span class="k">def</span> <span class="nf">pm_uninstall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">keepdata</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb uninstall` command and delete all related application data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name to be uninstalled from the device</span>
+<span class="sd">            keepdata: True or False, keep application data after removing the app from the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pm&#39;</span><span class="p">,</span> <span class="s1">&#39;uninstall&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">keepdata</span><span class="p">:</span>
             <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-k&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.snapshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;take a screenshot&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take the screenshot of the device display</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            command output (stdout)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s1">&#39;shell screencap -p&#39;</span><span class="p">,</span> <span class="n">ensure_unicode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_breaker</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="c1"># PEP 3113 -- Removal of Tuple Parameter Unpacking</span>
     <span class="c1"># https://www.python.org/dev/peps/pep-3113/</span>
 <div class="viewcode-block" id="ADB.touch"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_xy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;touch screen&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform user input (touchscreen) on given coordinates</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_xy: coordinates (x, y)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;input tap </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.swipe"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.swipe">[docs]</a>    <span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_x0y0</span><span class="p">,</span> <span class="n">tuple_x1y1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;swipe screen&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform user input (swipe screen) from start point (x,y) to end point (x,y)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_x0y0: start point coordinates (x, y)</span>
+<span class="sd">            tuple_x1y1: end point coordinates (x, y)</span>
+<span class="sd">            duration: time interval for action, default 500</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if SDK version is not supported</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># prot python 3</span>
         <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">tuple_x0y0</span>
         <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">tuple_x1y1</span>
@@ -514,6 +792,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;input touchscreen swipe </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">duration</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ADB.logcat"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.logcat">[docs]</a>    <span class="k">def</span> <span class="nf">logcat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grep_str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">extra_args</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">read_timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell logcat` command and search for given patterns</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grep_str: pattern to filter from the logcat output</span>
+<span class="sd">            extra_args: additional logcat arguments</span>
+<span class="sd">            read_timeout: time interval to read the logcat, default is 10</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            logcat lines containing filtered patterns</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmds</span> <span class="o">=</span> <span class="s2">&quot;shell logcat&quot;</span>
         <span class="k">if</span> <span class="n">extra_args</span><span class="p">:</span>
             <span class="n">cmds</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">extra_args</span>
@@ -532,6 +825,16 @@
         <span class="k">return</span></div>
 
 <div class="viewcode-block" id="ADB.exists_file"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.exists_file">[docs]</a>    <span class="k">def</span> <span class="nf">exists_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the file exits on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: path to the file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False if file found or not</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s2">&quot;ls&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">])</span>
         <span class="k">except</span> <span class="n">AdbShellError</span><span class="p">:</span>
@@ -540,11 +843,24 @@
             <span class="k">return</span> <span class="ow">not</span><span class="p">(</span><span class="s2">&quot;No such file or directory&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_cleanup_forwards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the local forward ports</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">local</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_local_using</span><span class="p">[:]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_forward</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">line_breaker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set carriage return and line break property for various platforms and SDK versions</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            carriage return and line break string</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line_breaker</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdk_version</span> <span class="o">&gt;=</span> <span class="n">SDK_VERISON_NEW</span><span class="p">:</span>
@@ -561,6 +877,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set device display properties (orientation, rotation and max values for x and y coordinates)</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">        if there is a lock screen detected, the function tries to unlock the device first</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            device screen properties</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_display_info_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_info</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_display_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_display_info</span><span class="p">()</span>
@@ -568,6 +894,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_info</span>
 
 <div class="viewcode-block" id="ADB.get_display_info"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_display_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get information about device physical display (orientation, rotation and max values for x and y coordinates)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            device screen properties</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">display_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPhysicalDisplayInfo</span><span class="p">()</span>
         <span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDisplayOrientation</span><span class="p">()</span>
         <span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;rotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">90</span>
@@ -575,6 +908,13 @@
         <span class="k">return</span> <span class="n">display_info</span></div>
 
     <span class="k">def</span> <span class="nf">_getMaxXY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get device display maximum values for x and y coordinates</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            max x and max y coordinates</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;getevent -p&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">max_x</span><span class="p">,</span> <span class="n">max_y</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
@@ -592,38 +932,52 @@
         <span class="k">return</span> <span class="n">max_x</span><span class="p">,</span> <span class="n">max_y</span>
 
 <div class="viewcode-block" id="ADB.getPhysicalDisplayInfo"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.getPhysicalDisplayInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getPhysicalDisplayInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;维护了两套分辨率：</span>
-<span class="sd">            (physical_width, physical_height)为设备的物理分辨率， (minitouch点击坐标转换要用这个)</span>
-<span class="sd">            (width, height)为屏幕的有效内容分辨率. (游戏图像适配的分辨率要用这个)</span>
-<span class="sd">            (max_x, max_y)为点击范围的分辨率。</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display size and resolution to be obtained:</span>
+<span class="sd">            1. physical display size (physical_width, physical_height) of the device - this is used by `minitouch` as a</span>
+<span class="sd">               coordinates system</span>
+<span class="sd">            1. screen effective resolution (width, height) - this is used by game image adaptation as a coordinates</span>
+<span class="sd">               system</span>
+<span class="sd">            1. click range resolution (max_x, max_y)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display size and resolution information</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPhysicalDisplayInfo</span><span class="p">()</span>
-        <span class="c1"># 记录物理屏幕的宽高(供屏幕映射使用)：</span>
+        <span class="c1"># record the width of physical display (used for screen mapping)</span>
         <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]:</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
-        <span class="c1"># 获取屏幕有效显示区域分辨率(比如带有软按键的设备需要进行分辨率去除):</span>
+        <span class="c1"># get the screen effective resolution (e.g., the device with soft keys requires resolution removal)</span>
         <span class="n">mRestrictedScreen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRestrictedScreen</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mRestrictedScreen</span><span class="p">:</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mRestrictedScreen</span>
-        <span class="c1"># 因为获取mRestrictedScreen跟设备的横纵向状态有关，所以此处进行高度、宽度的自定义设定:</span>
+        <span class="c1"># as the mRestrictedScreen is related to the horizontal and vertical state of the device, the custom settings</span>
+        <span class="c1"># for height and width are set here</span>
         <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]:</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
-        <span class="c1"># WTF???????????????????????????????????????????</span>
-        <span class="c1"># 如果是特殊的设备，进行特殊处理：</span>
+        <span class="c1"># for a special device, do the special treatment</span>
         <span class="n">special_device_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;5fde825d043782fc&quot;</span><span class="p">,</span> <span class="s2">&quot;320496728874b1a5&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span> <span class="ow">in</span> <span class="n">special_device_list</span><span class="p">:</span>
-            <span class="c1"># 上面已经确保了宽小于高，现在反过来-&gt;宽大于高</span>
+            <span class="c1"># for these devices: width &gt; hight, swap the width and the height</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
             <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">info</span></div>
 
     <span class="k">def</span> <span class="nf">_getRestrictedScreen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get mRestrictedScreen from &#39;adb -s sno shell dumpsys window&#39; &quot;&quot;&quot;</span>
-        <span class="c1"># 获取设备有效内容的分辨率(屏幕内含有软按键、S6 Edge等设备，进行黑边去除.)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get value for mRestrictedScreen from `adb -s sno shell dumpsys window`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            screen resolution mRestrictedScreen value as tuple (x, y)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the effective screen resolution of the device</span>
         <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># 根据设备序列号拿到对应的mRestrictedScreen参数：</span>
+        <span class="c1"># get the corresponding mRestrictedScreen parameters according to the device serial number</span>
         <span class="n">dumpsys_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s2">&quot;dumpsys window&quot;</span><span class="p">)</span>
         <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;mRestrictedScreen=.+&#39;</span><span class="p">,</span> <span class="n">dumpsys_info</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
@@ -635,6 +989,13 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span> <span class="nf">_getPhysicalDisplayInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get value for display dimension and density from `mPhysicalDisplayInfo` value obtained from `dumpsys` command.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            physical display info for dimension and density</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">phyDispRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;.*PhysicalDisplayInfo{(?P&lt;width&gt;\d+) x (?P&lt;height&gt;\d+), .*, density (?P&lt;density&gt;[\d.]+).*&#39;</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys display&#39;</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">phyDispRE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
@@ -647,7 +1008,7 @@
                 <span class="n">displayInfo</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">prop</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">displayInfo</span>
 
-        <span class="sd">&#39;&#39;&#39; Gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density&#39;&#39;&#39;</span>
+        <span class="c1"># gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density</span>
         <span class="n">phyDispRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;Physical size: (?P&lt;width&gt;\d+)x(?P&lt;height&gt;\d+).*Physical density: (?P&lt;density&gt;\d+)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">phyDispRE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;wm size; wm density&#39;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
@@ -680,6 +1041,17 @@
             <span class="k">return</span> <span class="n">displayInfo</span>
 
     <span class="k">def</span> <span class="nf">__getDisplayDensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get display density</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key:</span>
+<span class="sd">            strip: strip the output</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display density</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">BASE_DPI</span> <span class="o">=</span> <span class="mf">160.0</span>
         <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getprop</span><span class="p">(</span><span class="s1">&#39;ro.sf.lcd_density&#39;</span><span class="p">,</span> <span class="n">strip</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">d</span><span class="p">:</span>
@@ -690,6 +1062,13 @@
         <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span>
 
 <div class="viewcode-block" id="ADB.getDisplayOrientation"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.getDisplayOrientation">[docs]</a>    <span class="k">def</span> <span class="nf">getDisplayOrientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Another way to get the display orientation, this works well for older devices (SDK version 15)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display orientation information</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># another way to get orientation, for old sumsung device(sdk version 15) from xiaoma</span>
         <span class="n">SurfaceFlingerRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;orientation=(\d+)&#39;</span><span class="p">)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys SurfaceFlinger&#39;</span><span class="p">)</span>
@@ -710,6 +1089,16 @@
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="ADB.get_top_activity"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_top_activity">[docs]</a>    <span class="k">def</span> <span class="nf">get_top_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys activity top` command search for the top activity</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if top activity cannot be obtained</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            top activity as a tuple</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys activity top&#39;</span><span class="p">)</span>
         <span class="n">activityRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)&#39;</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">activityRE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">dat</span><span class="p">)</span>
@@ -719,12 +1108,29 @@
             <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;Can not get top activity, output:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dat</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.is_keyboard_shown"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.is_keyboard_shown">[docs]</a>    <span class="k">def</span> <span class="nf">is_keyboard_shown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys input_method` command and search for information if keyboard is shown</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False whether the keyboard is shown or not</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys input_method&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dim</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;mInputShown=true&quot;</span> <span class="ow">in</span> <span class="n">dim</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="ADB.is_screenon"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.is_screenon">[docs]</a>    <span class="k">def</span> <span class="nf">is_screenon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys window policy` command and search for information if screen is turned on or off</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if screen state can&#39;t be detected</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False whether the screen is turned on or off</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">screenOnRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;mScreenOnFully=(true|false)&#39;</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">screenOnRE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys window policy&#39;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
@@ -732,7 +1138,19 @@
         <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t determine screen ON state&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.is_locked"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.is_locked">[docs]</a>    <span class="k">def</span> <span class="nf">is_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;not work on xiaomi 2s&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys window policy` command and search for information if screen is locked or not</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if lock screen can&#39;t be detected</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False whether the screen is locked or not</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Does not work on Xiaomi 2S</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lockScreenRE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;mShowingLockscreen=(true|false)&#39;</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">lockScreenRE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;dumpsys window policy&#39;</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
@@ -740,11 +1158,31 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.unlock"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.unlock">[docs]</a>    <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;not work on many devices&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell input keyevent MENU` and `adb shell input keyevent BACK` commands to attempt</span>
+<span class="sd">        to unlock the screen</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Warnings:</span>
+<span class="sd">            Might not work on all devices</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;input keyevent MENU&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;input keyevent BACK&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ADB.get_package_version"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_package_version">[docs]</a>    <span class="k">def</span> <span class="nf">get_package_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys package` and search for information about given package version</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if no info has been found, otherwise package version</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">package_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;dumpsys&#39;</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span>
         <span class="n">matcher</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;versionCode=(\d+)&#39;</span><span class="p">,</span> <span class="n">package_info</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">matcher</span><span class="p">:</span>
@@ -753,15 +1191,25 @@
 
 <div class="viewcode-block" id="ADB.list_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.list_app">[docs]</a>    <span class="k">def</span> <span class="nf">list_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">third_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        pm list packages: prints all packages, optionally only</span>
-<span class="sd">          those whose package name contains the text in FILTER.  Options:</span>
-<span class="sd">            -f: see their associated file.</span>
-<span class="sd">            -d: filter to only show disabled packages.</span>
-<span class="sd">            -e: filter to only show enabled packages.</span>
-<span class="sd">            -s: filter to only show system packages.</span>
-<span class="sd">            -3: filter to only show third party packages.</span>
-<span class="sd">            -i: see the installer for the packages.</span>
-<span class="sd">            -u: also include uninstalled packages.</span>
+<span class="sd">        Perform `adb shell pm list packages` to print all packages, optionally only</span>
+<span class="sd">          those whose package name contains the text in FILTER.</span>
+
+<span class="sd">        Options</span>
+<span class="sd">            -f: see their associated file</span>
+<span class="sd">            -d: filter to only show disabled packages</span>
+<span class="sd">            -e: filter to only show enabled packages</span>
+<span class="sd">            -s: filter to only show system packages</span>
+<span class="sd">            -3: filter to only show third party packages</span>
+<span class="sd">            -i: see the installer for the packages</span>
+<span class="sd">            -u: also include uninstalled packages</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            third_only: print only third party packages</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of packages</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pm&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="s2">&quot;packages&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">third_only</span><span class="p">:</span>
@@ -773,6 +1221,20 @@
         <span class="k">return</span> <span class="n">packages</span></div>
 
 <div class="viewcode-block" id="ADB.path_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.path_app">[docs]</a>    <span class="k">def</span> <span class="nf">path_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell pm path` command to print the path to the package</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AdbShellError: if any adb error occurs</span>
+<span class="sd">            AirtestError: if package is not found on the device</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            path to the package</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;pm&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span>
         <span class="k">except</span> <span class="n">AdbShellError</span><span class="p">:</span>
@@ -782,24 +1244,79 @@
         <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ADB.check_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.check_app">[docs]</a>    <span class="k">def</span> <span class="nf">check_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell dumpsys package` command and check if package exists on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if package is not found</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if package has been found</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;dumpsys&#39;</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">package</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s1">&#39;package &quot;</span><span class="si">{}</span><span class="s1">&quot; not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">))</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="ADB.start_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.start_app">[docs]</a>    <span class="k">def</span> <span class="nf">start_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell monkey` commands to start the application, if `activity` argument is `None`, then</span>
+<span class="sd">        `adb shell am start` command is used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+<span class="sd">            activity: activity name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">activity</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;monkey&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;android.intent.category.LAUNCHER&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;am&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="p">)])</span></div>
 
 <div class="viewcode-block" id="ADB.stop_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.stop_app">[docs]</a>    <span class="k">def</span> <span class="nf">stop_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell am force-stop` command to force stop the application</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;am&#39;</span><span class="p">,</span> <span class="s1">&#39;force-stop&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.clear_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.clear_app">[docs]</a>    <span class="k">def</span> <span class="nf">clear_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell pm clear` command to clear all application data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;pm&#39;</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">,</span> <span class="n">package</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ADB.get_ip_address"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_ip_address">[docs]</a>    <span class="k">def</span> <span class="nf">get_ip_address</span><span class="p">(</span><span class="n">adb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform several set of commands to obtain the IP address</span>
+<span class="sd">            * `adb shell netcfg | grep wlan0`</span>
+<span class="sd">            * `adb shell ifconfig`</span>
+<span class="sd">            * `adb getprop dhcp.wlan0.ipaddress`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if no IP address has been found, otherwise return the IP address</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;netcfg | grep wlan0&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">AdbShellError</span><span class="p">:</span>
@@ -826,6 +1343,15 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="ADB.get_gateway_address"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.adb.html#airtest.core.android.adb.ADB.get_gateway_address">[docs]</a>    <span class="k">def</span> <span class="nf">get_gateway_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform several set of commands to obtain the gateway address</span>
+<span class="sd">            * `adb getprop dhcp.wlan0.gateway`</span>
+<span class="sd">            * `adb shell netcfg | grep wlan0`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if no gateway address has been found, otherwise return the gateway address</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ip2int</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ip</span><span class="p">:</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">int2ip</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
         <span class="k">try</span><span class="p">:</span>
@@ -843,6 +1369,13 @@
         <span class="k">return</span> <span class="n">int2ip</span><span class="p">(</span><span class="n">gateway</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_subnet_mask_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `adb shell netcfg | grep wlan0` command to obtain mask length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            17 if mask length could not be detected, otherwise the mask length</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s1">&#39;netcfg | grep wlan0&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">AdbShellError</span><span class="p">:</span>

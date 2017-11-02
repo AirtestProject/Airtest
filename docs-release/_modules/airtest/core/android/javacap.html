@@ -173,7 +173,9 @@
 
 
 <div class="viewcode-block" id="Javacap"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.javacap.html#airtest.core.android.javacap.Javacap">[docs]</a><span class="k">class</span> <span class="nc">Javacap</span><span class="p">(</span><span class="n">Yosemite</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;another screencap class, slower than minicap, but better compatibility.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is another screencap class, it is slower in performance than minicap, but it provides the better compatibility</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">APP_PKG</span> <span class="o">=</span> <span class="s2">&quot;com.netease.nie.yosemite&quot;</span>
     <span class="n">SCREENCAP_SERVICE</span> <span class="o">=</span> <span class="s2">&quot;com.netease.nie.yosemite.Capture&quot;</span>
@@ -186,6 +188,13 @@
 
     <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_setup_stream_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup stream server</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            adb shell process, non-blocking stream reader and local port</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">localport</span><span class="p">,</span> <span class="n">deviceport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">setup_forward</span><span class="p">(</span><span class="s2">&quot;localabstract:javacap_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
         <span class="n">deviceport</span> <span class="o">=</span> <span class="n">deviceport</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;localabstract:&quot;</span><span class="p">):]</span>
         <span class="c1"># setup agent proc</span>
@@ -206,6 +215,13 @@
         <span class="k">return</span> <span class="n">proc</span><span class="p">,</span> <span class="n">nbsp</span><span class="p">,</span> <span class="n">localport</span>
 
 <div class="viewcode-block" id="Javacap.get_frames"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.javacap.html#airtest.core.android.javacap.Javacap.get_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the screen frames</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc</span><span class="p">,</span> <span class="n">nbsp</span><span class="p">,</span> <span class="n">localport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_stream_server</span><span class="p">()</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">SafeSocket</span><span class="p">()</span>
         <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">localport</span><span class="p">))</span>
@@ -237,11 +253,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">remove_forward</span><span class="p">(</span><span class="s2">&quot;tcp:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">localport</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Javacap.get_frame_from_stream"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.javacap.html#airtest.core.android.javacap.Javacap.get_frame_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame_from_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get frame from the stream</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            frame</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Javacap.teardown_stream"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.javacap.html#airtest.core.android.javacap.Javacap.teardown_stream">[docs]</a>    <span class="k">def</span> <span class="nf">teardown_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        End stream</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">try</span><span class="p">:</span>

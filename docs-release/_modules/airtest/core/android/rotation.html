@@ -173,6 +173,9 @@
 
 
 <div class="viewcode-block" id="RotationWatcher"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.RotationWatcher">[docs]</a><span class="k">class</span> <span class="nc">RotationWatcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    RotationWatcher class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adb</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span> <span class="o">=</span> <span class="n">adb</span>
@@ -185,6 +188,16 @@
         <span class="k">pass</span></div>
 
     <span class="k">def</span> <span class="nf">_install_and_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install and setup the RotationWatcher package</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: if any error occurs while installing the package</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">apk_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">ROTATIONWATCHER_PACKAGE</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">AirtestError</span><span class="p">:</span>
@@ -197,6 +210,13 @@
         <span class="n">reg_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ow_proc</span><span class="o">.</span><span class="n">kill</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RotationWatcher.start"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.RotationWatcher.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the RotationWatcher daemon thread</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_install_and_setup</span><span class="p">()</span>
 
         <span class="k">def</span> <span class="nf">_refresh_by_ow</span><span class="p">():</span>
@@ -229,17 +249,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="RotationWatcher.reg_callback"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.RotationWatcher.reg_callback">[docs]</a>    <span class="k">def</span> <span class="nf">reg_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ow_callback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ow_callback:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot;方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ow_callback</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ow_callback</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="XYTransformer"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.XYTransformer">[docs]</a><span class="k">class</span> <span class="nc">XYTransformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    transform xy by orientation</span>
-<span class="sd">    upright&lt;--&gt;original</span>
+<span class="sd">    transform the coordinates (x, y) by orientation (upright &lt;--&gt; original)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="XYTransformer.up_2_ori"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.XYTransformer.up_2_ori">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">up_2_ori</span><span class="p">(</span><span class="n">tuple_xy</span><span class="p">,</span> <span class="n">tuple_wh</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform the coordinates upright --&gt; original</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_xy: coordinates (x, y)</span>
+<span class="sd">            tuple_wh: screen width and height</span>
+<span class="sd">            orientation: orientation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            transformed coordinates (x, y)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
         <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">tuple_wh</span>
 
@@ -253,6 +292,18 @@
 
 <div class="viewcode-block" id="XYTransformer.ori_2_up"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.rotation.html#airtest.core.android.rotation.XYTransformer.ori_2_up">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">ori_2_up</span><span class="p">(</span><span class="n">tuple_xy</span><span class="p">,</span> <span class="n">tuple_wh</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform the coordinates original --&gt; upright</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_xy: coordinates (x, y)</span>
+<span class="sd">            tuple_wh: screen width and height</span>
+<span class="sd">            orientation: orientation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            transformed coordinates (x, y)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
         <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">tuple_wh</span>
 

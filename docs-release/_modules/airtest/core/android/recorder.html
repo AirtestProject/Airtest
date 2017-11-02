@@ -174,7 +174,7 @@
 
 
 <div class="viewcode-block" id="Recorder"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder">[docs]</a><span class="k">class</span> <span class="nc">Recorder</span><span class="p">(</span><span class="n">Yosemite</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Screen recorder.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Screen recorder&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adb</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Recorder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">adb</span><span class="p">)</span>
@@ -183,6 +183,21 @@
 
 <div class="viewcode-block" id="Recorder.start_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder.start_recording">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">bit_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start screen recording</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_time: maximum rate value, default is 1800</span>
+<span class="sd">            bit_rate: bit rate value, default is None</span>
+<span class="sd">            vertical: vertical parameters, default is None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: if any error occurs while setup the recording</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if recording did not start, otherwise True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;recording_proc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;recording_proc has already started&quot;</span><span class="p">)</span>
         <span class="n">pkg_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span>
@@ -208,6 +223,20 @@
 
 <div class="viewcode-block" id="Recorder.stop_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder.stop_recording">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">stop_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;screen.mp4&quot;</span><span class="p">,</span> <span class="n">is_interrupted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop screen recording</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output: default file is `screen.mp4`</span>
+<span class="sd">            is_interrupted: True or False</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if recording was not started before</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pkg_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">start_shell</span><span class="p">(</span><span class="s1">&#39;CLASSPATH=</span><span class="si">%s</span><span class="s1"> exec app_process /system/bin </span><span class="si">%s</span><span class="s1">.Recorder --stop-record&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pkg_path</span><span class="p">,</span> <span class="n">YOSEMITE_PACKAGE</span><span class="p">))</span>
         <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>

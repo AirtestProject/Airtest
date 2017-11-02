@@ -199,6 +199,7 @@
 <dt id="airtest.core.android.rotation.RotationWatcher">
 <em class="property">class </em><code class="descname">RotationWatcher</code><span class="sig-paren">(</span><em>adb</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#RotationWatcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.RotationWatcher" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>RotationWatcher class</p>
 <dl class="method">
 <dt id="airtest.core.android.rotation.RotationWatcher.get_ready">
 <code class="descname">get_ready</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#RotationWatcher.get_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.RotationWatcher.get_ready" title="Permalink to this definition">¶</a></dt>
@@ -207,12 +208,29 @@
 <dl class="method">
 <dt id="airtest.core.android.rotation.RotationWatcher.start">
 <code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#RotationWatcher.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.RotationWatcher.start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Start the RotationWatcher daemon thread</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="airtest.core.android.rotation.RotationWatcher.reg_callback">
 <code class="descname">reg_callback</code><span class="sig-paren">(</span><em>ow_callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#RotationWatcher.reg_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.RotationWatcher.reg_callback" title="Permalink to this definition">¶</a></dt>
-<dd><p>方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ow_callback</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 </dd></dl>
@@ -221,17 +239,50 @@
 <dt id="airtest.core.android.rotation.XYTransformer">
 <em class="property">class </em><code class="descname">XYTransformer</code><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#XYTransformer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.XYTransformer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>transform xy by orientation
-upright&lt;–&gt;original</p>
+<p>transform the coordinates (x, y) by orientation (upright &lt;–&gt; original)</p>
 <dl class="staticmethod">
 <dt id="airtest.core.android.rotation.XYTransformer.up_2_ori">
 <em class="property">static </em><code class="descname">up_2_ori</code><span class="sig-paren">(</span><em>tuple_xy</em>, <em>tuple_wh</em>, <em>orientation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#XYTransformer.up_2_ori"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.XYTransformer.up_2_ori" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform the coordinates upright –&gt; original</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tuple_xy</strong> – coordinates (x, y)</li>
+<li><strong>tuple_wh</strong> – screen width and height</li>
+<li><strong>orientation</strong> – orientation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">transformed coordinates (x, y)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="airtest.core.android.rotation.XYTransformer.ori_2_up">
 <em class="property">static </em><code class="descname">ori_2_up</code><span class="sig-paren">(</span><em>tuple_xy</em>, <em>tuple_wh</em>, <em>orientation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/rotation.html#XYTransformer.ori_2_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.rotation.XYTransformer.ori_2_up" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform the coordinates original –&gt; upright</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tuple_xy</strong> – coordinates (x, y)</li>
+<li><strong>tuple_wh</strong> – screen width and height</li>
+<li><strong>orientation</strong> – orientation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">transformed coordinates (x, y)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 

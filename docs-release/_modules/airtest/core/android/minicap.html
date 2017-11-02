@@ -196,6 +196,13 @@
         <span class="n">reg_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_stream</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Minicap.install_or_upgrade"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.install_or_upgrade">[docs]</a>    <span class="k">def</span> <span class="nf">install_or_upgrade</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install or upgrade minicap</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">exists_file</span><span class="p">(</span><span class="s2">&quot;/data/local/tmp/minicap&quot;</span><span class="p">)</span> \
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">exists_file</span><span class="p">(</span><span class="s2">&quot;/data/local/tmp/minicap.so&quot;</span><span class="p">):</span>
             <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -v 2&gt;&amp;1&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">)</span>
@@ -215,10 +222,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">install</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Minicap.uninstall"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.uninstall">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uninstall minicap</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">(</span><span class="s2">&quot;rm /data/local/tmp/minicap*&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Minicap.install"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.install">[docs]</a>    <span class="k">def</span> <span class="nf">install</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;install or upgrade minicap&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install minicap</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">abi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">getprop</span><span class="p">(</span><span class="s2">&quot;ro.product.cpu.abi&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">sdk_version</span> <span class="o">&gt;=</span> <span class="mi">16</span><span class="p">:</span>
             <span class="n">binfile</span> <span class="o">=</span> <span class="s2">&quot;minicap&quot;</span>
@@ -239,8 +259,14 @@
 <div class="viewcode-block" id="Minicap.get_display_info"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.get_display_info">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        get display info by minicap</span>
-<span class="sd">        warning: it may segfault, so we prefer to get from adb</span>
+<span class="sd">        Get display info by minicap</span>
+
+<span class="sd">        Warnings:</span>
+<span class="sd">            It might segfault, the preferred way is to get the information from adb commands</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display information</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">display_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -i&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">)</span>
         <span class="n">display_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">display_info</span><span class="p">)</span>
@@ -249,10 +275,17 @@
 <div class="viewcode-block" id="Minicap.get_frame"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.get_frame">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        get single frame from minicap -s, slower than get_frames</span>
-<span class="sd">        1. shell cmd</span>
-<span class="sd">        2. remove log info</span>
-<span class="sd">        3. \r\r\n -&gt; \n ... fuck adb</span>
+<span class="sd">        Get the single frame from minicap -s, this method slower than `get_frames`</span>
+<span class="sd">            1. shell cmd</span>
+<span class="sd">            1. remove log info</span>
+<span class="sd">            1. \r\r\n -&gt; \n ...</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            projection: projection, default is None. If `None`, physical display size is used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            jpg data</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">CMD</span> <span class="o">+</span> <span class="s2">&quot; -n &#39;airtest_minicap&#39; -P </span><span class="si">%d</span><span class="s2">x</span><span class="si">%d</span><span class="s2">@</span><span class="si">%d</span><span class="s2">x</span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> -s&quot;</span> <span class="o">%</span>
@@ -263,7 +296,16 @@
         <span class="k">return</span> <span class="n">jpg_data</span></div>
 
     <span class="k">def</span> <span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;get minicap start params, and count projection&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the minicap origin parameters and count the projection</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            projection: projection, default is None. If `None`, physical display size is used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            physical display size (width, height), counted projection (width, height) and real display orientation</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># minicap截屏时，需要截取物理全屏的图片:</span>
         <span class="n">real_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">]</span>
         <span class="n">real_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">]</span>
@@ -277,10 +319,15 @@
 <div class="viewcode-block" id="Minicap.get_stream"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.get_stream">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Use adb forward and socket communicate.</span>
+<span class="sd">        Get stream, it uses `adb forward`and socket communication. Use minicap ``lazy``mode (provided by gzmaruijie)</span>
+<span class="sd">        for long connections - returns one latest frame from the server</span>
 
-<span class="sd">        lazy: use minicap lazy mode (provided by gzmaruijie)</span>
-<span class="sd">              long connection, send 1 to server, than server return one lastest frame</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lazy: True or False</span>
+
+<span class="sd">        Returns:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc</span><span class="p">,</span> <span class="n">nbsp</span><span class="p">,</span> <span class="n">localport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_stream_server</span><span class="p">(</span><span class="n">lazy</span><span class="o">=</span><span class="n">lazy</span><span class="p">)</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">SafeSocket</span><span class="p">()</span>
@@ -314,7 +361,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">remove_forward</span><span class="p">(</span><span class="s2">&quot;tcp:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">localport</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_setup_stream_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;setup minicap process on device&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup minicap process on device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lazy: parameter `-l` is used when True</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            adb shell process, non-blocking stream reader and local port</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">localport</span><span class="p">,</span> <span class="n">deviceport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">setup_forward</span><span class="p">(</span><span class="s2">&quot;localabstract:minicap_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
         <span class="n">deviceport</span> <span class="o">=</span> <span class="n">deviceport</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;localabstract:&quot;</span><span class="p">):]</span>
         <span class="n">other_opt</span> <span class="o">=</span> <span class="s2">&quot;-l&quot;</span> <span class="k">if</span> <span class="n">lazy</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
@@ -338,7 +394,13 @@
         <span class="k">return</span> <span class="n">proc</span><span class="p">,</span> <span class="n">nbsp</span><span class="p">,</span> <span class="n">localport</span>
 
 <div class="viewcode-block" id="Minicap.get_frame_from_stream"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.get_frame_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame_from_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;get one frame from minicap stream&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get one frame from minicap stream</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            frame</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream_lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stream</span><span class="p">()</span>
@@ -349,11 +411,27 @@
             <span class="k">return</span> <span class="n">frame</span></div>
 
 <div class="viewcode-block" id="Minicap.update_rotation"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.update_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">update_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;update rotation, and reset backend stream generator&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update rotation and reset the backend stream generator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rotation: rotation input</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">LOGGING</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;update_rotation: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">rotation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">teardown_stream</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Minicap.teardown_stream"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minicap.html#airtest.core.android.minicap.Minicap.teardown_stream">[docs]</a>    <span class="k">def</span> <span class="nf">teardown_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        End the stream</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream_lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_gen</span><span class="p">:</span>
                 <span class="k">return</span>

@@ -195,6 +195,13 @@
         <span class="n">reg_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Minitouch.install_and_setup"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.install_and_setup">[docs]</a>    <span class="k">def</span> <span class="nf">install_and_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install and setup minitouch</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">display_info</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_server</span><span class="p">()</span>
@@ -204,9 +211,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_client</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Minitouch.uninstall"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.uninstall">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uninstall minitouch</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">raw_shell</span><span class="p">(</span><span class="s2">&quot;rm /data/local/tmp/minitouch*&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Minitouch.install"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.install">[docs]</a>    <span class="k">def</span> <span class="nf">install</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install minitouch</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">exists_file</span><span class="p">(</span><span class="s1">&#39;/data/local/tmp/minitouch&#39;</span><span class="p">):</span>
             <span class="n">LOGGING</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;install_minitouch skipped&quot;</span><span class="p">)</span>
             <span class="k">return</span>
@@ -226,7 +247,17 @@
         <span class="n">LOGGING</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;install_minitouch finished&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__transform_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># 根据设备方向、长宽来转换xy值</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform coordinates (x, y) according to the device display</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: coordinate x</span>
+<span class="sd">            y: coordinate y</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            transformed coordinates (x, y)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">display_info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s1">&#39;max_x&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s1">&#39;max_y&#39;</span><span class="p">]):</span>
             <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
@@ -241,7 +272,13 @@
         <span class="k">return</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span>
 
 <div class="viewcode-block" id="Minitouch.setup_server"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.setup_server">[docs]</a>    <span class="k">def</span> <span class="nf">setup_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;set up minitouch server and adb forward&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setip minitouch server and adb forward</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            server process</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_proc</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">server_proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">server_proc</span> <span class="o">=</span> <span class="kc">None</span>
@@ -277,11 +314,22 @@
 <div class="viewcode-block" id="Minitouch.touch"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.touch">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_and_setup&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_xy</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        d 0 10 10 50</span>
-<span class="sd">        c</span>
-<span class="sd">        &lt;wait in your own code&gt;</span>
-<span class="sd">        u 0</span>
-<span class="sd">        c</span>
+<span class="sd">        Perform touch event</span>
+
+<span class="sd">        minitouch protocol example</span>
+<span class="sd">            d 0 10 10 50</span>
+<span class="sd">            c</span>
+<span class="sd">            &lt;wait in your own code&gt;</span>
+<span class="sd">            u 0</span>
+<span class="sd">            c</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_xy: coordinates (x, y)</span>
+<span class="sd">            duration: time interval for touch event, default is 0.01</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transform_xy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -292,20 +340,34 @@
 <div class="viewcode-block" id="Minitouch.swipe"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.swipe">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_and_setup&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_from_xy</span><span class="p">,</span> <span class="n">tuple_to_xy</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        d 0 0 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 20 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 40 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 60 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 80 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 100 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        u 0</span>
-<span class="sd">        c</span>
+<span class="sd">        Perform swipe event</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            minitouch protocol example:</span>
+<span class="sd">            d 0 0 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 20 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 40 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 60 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 80 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 100 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            u 0</span>
+<span class="sd">            c</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_from_xy: start point</span>
+<span class="sd">            tuple_to_xy: end point</span>
+<span class="sd">            duration: time interval for swipe duration, default is 0.8</span>
+<span class="sd">            steps: size of swipe step, default is 5</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">from_x</span><span class="p">,</span> <span class="n">from_y</span> <span class="o">=</span> <span class="n">tuple_from_xy</span>
         <span class="n">to_x</span><span class="p">,</span> <span class="n">to_y</span> <span class="o">=</span> <span class="n">tuple_to_xy</span>
@@ -330,33 +392,34 @@
 <div class="viewcode-block" id="Minitouch.pinch"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.pinch">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_and_setup&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">pinch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">in_or_out</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        perform pinch action,</span>
+<span class="sd">        Perform pinch action</span>
 
-<span class="sd">        minitouch protocol example:</span>
-<span class="sd">        d 0 0 100 50</span>
-<span class="sd">        d 1 100 0 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 10 90 50</span>
-<span class="sd">        m 1 90 10 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 20 80 50</span>
-<span class="sd">        m 1 80 20 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 20 80 50</span>
-<span class="sd">        m 1 80 20 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 30 70 50</span>
-<span class="sd">        m 1 70 30 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 40 60 50</span>
-<span class="sd">        m 1 60 40 50</span>
-<span class="sd">        c</span>
-<span class="sd">        m 0 50 50 50</span>
-<span class="sd">        m 1 50 50 50</span>
-<span class="sd">        c</span>
-<span class="sd">        u 0</span>
-<span class="sd">        u 1</span>
-<span class="sd">        c</span>
+<span class="sd">        Examples:</span>
+<span class="sd">            minitouch protocol example:</span>
+<span class="sd">            d 0 0 100 50</span>
+<span class="sd">            d 1 100 0 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 10 90 50</span>
+<span class="sd">            m 1 90 10 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 20 80 50</span>
+<span class="sd">            m 1 80 20 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 20 80 50</span>
+<span class="sd">            m 1 80 20 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 30 70 50</span>
+<span class="sd">            m 1 70 30 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 40 60 50</span>
+<span class="sd">            m 1 60 40 50</span>
+<span class="sd">            c</span>
+<span class="sd">            m 0 50 50 50</span>
+<span class="sd">            m 1 50 50 50</span>
+<span class="sd">            c</span>
+<span class="sd">            u 0</span>
+<span class="sd">            u 1</span>
+<span class="sd">            c</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
@@ -397,6 +460,23 @@
 
 <div class="viewcode-block" id="Minitouch.operate"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.operate">[docs]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_and_setup&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform down, up and move actions</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args: action arguments, dictionary containing type and x, y coordinates, e.g.</span>
+<span class="sd">                  {</span>
+<span class="sd">                      &quot;type&quot; : &quot;down&quot;,</span>
+<span class="sd">                      &quot;x&quot; : 10,</span>
+<span class="sd">                      &quot;y&quot; : 10</span>
+<span class="sd">                  }</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: is invalid arguments are provided</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;down&quot;</span><span class="p">:</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transform_xy</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
             <span class="c1"># support py 3</span>
@@ -413,6 +493,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Minitouch.safe_send"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.safe_send">[docs]</a>    <span class="k">def</span> <span class="nf">safe_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send data to client</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: data to send</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: when data cannot be sent</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -420,11 +513,25 @@
             <span class="k">raise</span> <span class="n">err</span></div>
 
     <span class="k">def</span> <span class="nf">_backend_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Backend worker queue thread</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend_stop_event</span><span class="o">.</span><span class="n">isSet</span><span class="p">():</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">safe_send</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Minitouch.setup_client_backend"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.setup_client_backend">[docs]</a>    <span class="k">def</span> <span class="nf">setup_client_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup backend client thread as daemon</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backend_queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backend_stop_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_client</span><span class="p">()</span>
@@ -436,12 +543,16 @@
 
 <div class="viewcode-block" id="Minitouch.setup_client"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.setup_client">[docs]</a>    <span class="k">def</span> <span class="nf">setup_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        1. connect to server</span>
-<span class="sd">        2. recv header</span>
-<span class="sd">            v &lt;version&gt;</span>
-<span class="sd">            ^ &lt;max-contacts&gt; &lt;max-x&gt; &lt;max-y&gt; &lt;max-pressure&gt;</span>
-<span class="sd">            $ &lt;pid&gt;</span>
-<span class="sd">        3. prepare to send</span>
+<span class="sd">        Setup client:</span>
+<span class="sd">            1. connect to server</span>
+<span class="sd">            1. recv header</span>
+<span class="sd">                * v &lt;version&gt;</span>
+<span class="sd">                * ^ &lt;max-contacts&gt; &lt;max-x&gt; &lt;max-y&gt; &lt;max-pressure&gt;</span>
+<span class="sd">                * $ &lt;pid&gt;</span>
+<span class="sd">            1. prepare to send</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">SafeSocket</span><span class="p">()</span>
         <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">localport</span><span class="p">))</span>
@@ -459,6 +570,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_send</span></div>
 
 <div class="viewcode-block" id="Minitouch.teardown"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.minitouch.html#airtest.core.android.minitouch.Minitouch.teardown">[docs]</a>    <span class="k">def</span> <span class="nf">teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the server and client</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;backend_stop_event&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">backend_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">:</span>

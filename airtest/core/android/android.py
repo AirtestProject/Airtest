@@ -16,7 +16,7 @@ LOGGING = get_logger('android')
 
 class Android(Device):
 
-    """Android Device object class"""
+    """Android Device Class"""
 
     def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,
