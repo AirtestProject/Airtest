@@ -12,6 +12,17 @@ SM_CYVIRTUALSCREEN = 79
 
 
 def screenshot(filename, hwnd=None):
+    """
+    Take the screenshot of Windows app
+
+    Args:
+        filename: file name where to store the screenshot
+        hwnd:
+
+    Returns:
+        bitmap screenshot file
+
+    """
     # import ctypes
     # user32 = ctypes.windll.user32
     # user32.SetProcessDPIAware()

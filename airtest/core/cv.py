@@ -14,7 +14,24 @@ from airtest.utils.transform import TargetPos
 
 @logwrap
 def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None):
-    """Keep looking for pic until timeout, execute intervalfunc if pic not found."""
+    """
+    Search for image template in the screen until timeout
+
+    Args:
+        query: image template to be found in screenshot
+        timeout: time interval how long to look for the image template
+        threshold: default is None
+        interval: sleep interval before next attempt to find the image template
+        intervalfunc: function that is executed after unsuccessful attempt to find the image template
+
+    Raises:
+        TargetNotFoundError: when image template is not found in screenshot
+
+    Returns:
+        TargetNotFoundError if image template not found, otherwise returns the position where the image template has
+        been found in screenshot
+
+    """
     G.LOGGING.info("Try finding:\n%s", query)
     start_time = time.time()
     while True:
@@ -40,6 +57,16 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
 
 
 def _try_save_screen(screen):
+    """
+    Save screenshot to file
+
+    Args:
+        screen: screenshot to be saved
+
+    Returns:
+        None
+
+    """
     if not ST.SCREEN_DIR:
         return
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}

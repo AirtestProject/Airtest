@@ -7,7 +7,7 @@ from airtest.utils.logger import get_logger
 
 
 class G(object):
-    """globals variables"""
+    """Represent the globals variables"""
     BASEDIR = None
     LOGGER = AirtestLogger(None)
     LOGGING = get_logger("main")
@@ -19,8 +19,18 @@ class G(object):
 
     @classmethod
     def add_device(cls, dev):
-        """初始化设备，加入全局环境, eg:
-        init_device(Android())
+        """
+        Initialize the device and adds global variables
+
+        Examples:
+            init_Device(Android())
+
+        Args:
+            dev: device to init
+
+        Returns:
+            None
+
         """
         cls.DEVICE = dev
         cls.DEVICE_LIST.append(dev)
