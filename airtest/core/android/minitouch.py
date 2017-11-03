@@ -17,9 +17,12 @@ LOGGING = get_logger('minitouch')
 
 
 class Minitouch(object):
-    """super fast operation from minitouch.
+    """
+    Super fast operation from minitouch
 
-    References: https://github.com/openstf/minitouch"""
+    References:
+    https://github.com/openstf/minitouch
+    """
 
     def __init__(self, adb, backend=False):
         self.adb = adb
@@ -152,7 +155,9 @@ class Minitouch(object):
         """
         Perform touch event
 
-        minitouch protocol example
+
+        minitouch protocol example::
+
             d 0 10 10 50
             c
             <wait in your own code>
@@ -178,8 +183,8 @@ class Minitouch(object):
         """
         Perform swipe event
 
-        Examples:
-            minitouch protocol example:
+        minitouch protocol example::
+
             d 0 0 0 50
             c
             m 0 20 0 50
@@ -230,8 +235,8 @@ class Minitouch(object):
         """
         Perform pinch action
 
-        Examples:
-            minitouch protocol example:
+        minitouch protocol example::
+
             d 0 0 100 50
             d 1 100 0 50
             c
@@ -300,17 +305,19 @@ class Minitouch(object):
         Perform down, up and move actions
 
         Args:
-            args: action arguments, dictionary containing type and x, y coordinates, e.g.
+            args: action arguments, dictionary containing type and x, y coordinates, e.g.::
+
                   {
-                      "type" : "down",
-                      "x" : 10,
-                      "y" : 10
+                  "type" : "down",
+                  "x" : 10,
+                  "y" : 10
                   }
 
         Raises:
             RuntimeError: is invalid arguments are provided
 
         Returns:
+            None
 
         """
         if args["type"] == "down":
@@ -379,16 +386,18 @@ class Minitouch(object):
 
     def setup_client(self):
         """
-        Setup client:
+        Setup client in following steps::
+
             1. connect to server
-            1. recv header
-                * v <version>
-                * ^ <max-contacts> <max-x> <max-y> <max-pressure>
-                * $ <pid>
-            1. prepare to send
+            2. receive the header
+                v <version>
+                ^ <max-contacts> <max-x> <max-y> <max-pressure>
+                $ <pid>
+            3. prepare to send
 
         Returns:
             None
+
         """
         s = SafeSocket()
         s.connect((self.adb.host, self.localport))
