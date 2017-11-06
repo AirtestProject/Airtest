@@ -182,6 +182,10 @@ def exec_script(scriptname, scope=None, root=False, code=None):
             code = pyfile.read()
             if not PY3:
                 code = code.encode("utf-8")
+    else:
+        pyfilepath = ""
+        if isinstance(code, unicode):
+            code = code.encode("utf-8")
 
     # handle submodule script
     if not root:
