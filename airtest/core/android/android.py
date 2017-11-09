@@ -453,7 +453,7 @@ class Android(Device):
             None
 
         """
-        self.recorder.start_recording(*args, **kwargs)
+        return self.recorder.start_recording(*args, **kwargs)
 
     def stop_recording(self, *args, **kwargs):
         """
@@ -467,7 +467,7 @@ class Android(Device):
             None
 
         """
-        self.recorder.stop_recording(*args, **kwargs)
+        return self.recorder.stop_recording(*args, **kwargs)
 
     def _register_rotation_watcher(self):
         """
