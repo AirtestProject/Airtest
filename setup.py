@@ -7,7 +7,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='airtest',
-    version='0.1.0',
+    version='0.1.3',
     author='Netease Game',
     author_email='gzliuxin@corp.netease.com',
     description='Automated test framework for android/iOS/Windows',
@@ -20,6 +20,7 @@ setup(
         'android_deps': ["*.apk", "airtest/core/android/stf_libs", "airtest/core/android/adb"],
         'html_statics': ["airtest/report"]
     },
+    include_package_data=True,
     install_requires=reqs,
     classifiers=[
         'Programming Language :: Python :: 2.7',
