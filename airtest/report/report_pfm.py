@@ -46,7 +46,7 @@ def gen_pfm_json(log_path):
         with open(os.path.join(log_path, "pfm.json"), "w+") as f:
             f.write(json.dumps(ret))
     except:
-        print traceback.format_exc()
+        print(traceback.format_exc())
         return [], [], ""
     return devices, trace_list, log_path
 
@@ -167,7 +167,6 @@ def cpu_kernel(value):
 
     """
     count = 0
-    print value, type(value)
     if isinstance(value, dict):
         for i in value.values():
             if i != "0" and i != 0:

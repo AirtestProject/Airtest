@@ -46,7 +46,7 @@ def get_script_info(script_path, info_type='param'):
 
 
 def extract_snapshot(pyfilecontent):
-    snapshot_pattern = re.compile(ur"snapshot\((msg=)?([\"\'](?P<msg>.*)[\"\'])?\)")
+    snapshot_pattern = re.compile(r"snapshot\((msg=)?([\"\'](?P<msg>.*)[\"\'])?\)")
     ret = []
     for i in re.finditer(snapshot_pattern, pyfilecontent):
         msg = i.groupdict()

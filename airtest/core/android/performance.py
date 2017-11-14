@@ -235,6 +235,15 @@ class Performance(object):
             raise
         return result
 
+    def read_data(self):
+        try:
+            with open(self.result_file, "r") as f:
+                data = f.read()
+        except:
+            LOGGING.error("Open log file failed!")
+            raise
+        return data
+
 
 class Collector(object):
     """ 收集数据专用 """
