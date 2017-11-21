@@ -109,7 +109,7 @@ def run_script(args):
         if args.performance and isinstance(args.performance, str):
             for dev in G.DEVICE_LIST:
                 log_file = os.path.join(ST.LOG_DIR, "pfm_{serialno}.txt".format(serialno=dev.serialno)) if ST.LOG_DIR else "pfm_{serialno}.txt".format(serialno=dev.serialno)
-                dev.init_performance(args.performance, log_file)
+                dev.init_performance(args.performance, log_file, interval=2)
 
     on_device_ready()
     # set root script as basedir

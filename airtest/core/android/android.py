@@ -77,8 +77,8 @@ class Android(Device):
 
         self.rw.reg_callback(refresh_ori)
 
-    def init_performance(self, pkg_name, pfm_log="pfm.txt"):
-        self.performance = Performance(self.adb, pkg_name, log_file=pfm_log)
+    def init_performance(self, pkg_name, pfm_log="pfm.txt", interval=2):
+        self.performance = Performance(self.adb, pkg_name, log_file=pfm_log, interval=interval)
 
     def list_app(self, third_only=False):
         """
