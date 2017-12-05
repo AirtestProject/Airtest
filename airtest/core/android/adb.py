@@ -13,6 +13,7 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
 from airtest.utils.snippet import reg_cleanup, split_cmd, get_std_encoding
+from airtest.utils.compat import PY3
 from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH, IP_PATTERN
 LOGGING = get_logger('adb')
 
@@ -117,7 +118,9 @@ class ADB(object):
         cmds = cmd_options + split_cmd(cmds)
         LOGGING.debug(" ".join(cmds))
 
-        cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
+        if not PY3:
+            cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
+
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
