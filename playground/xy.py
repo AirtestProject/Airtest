@@ -7,6 +7,11 @@ class G18AirtestCase(AirtestCase):
     def setUp(self):
         self.scope["hunter"] = "i am hunter"
 
+        self.exec_other_script("pre.owl")
+
+    def tearDown(self):
+        self.exec_other_script("post.owl")
+
 
 if __name__ == '__main__':
     ap = runner_parser()

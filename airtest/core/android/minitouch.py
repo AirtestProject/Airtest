@@ -6,12 +6,11 @@ import time
 import socket
 import threading
 from airtest.core.error import MinitouchError
-from airtest.core.android.constant import DEFAULT_ADB_SERVER, STFLIB
-from airtest.core.android.adb import ADB
+from airtest.core.android.constant import STFLIB
 from airtest.utils.compat import queue
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready
+from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready, ready_method
 from airtest.utils.logger import get_logger
 LOGGING = get_logger('minitouch')
 
@@ -33,6 +32,7 @@ class Minitouch(object):
         self.max_x, self.max_y = None, None
         reg_cleanup(self.teardown)
 
+    @ready_method
     def install_and_setup(self):
         """
         Install and setup minitouch

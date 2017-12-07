@@ -76,3 +76,13 @@ def on_method_ready(method_name):
             return func(inst, *args, **kwargs)
         return ready_func
     return wrapper
+
+
+def ready_method(func):
+    @wraps(func)
+    def wrapper(inst, *args, **kwargs):
+        key = "_%s_ready" % func.__name__
+        ret = func(inst, *args, **kwargs)
+        setattr(inst, key, True)
+        return ret
+    return wrapper

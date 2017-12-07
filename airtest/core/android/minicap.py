@@ -10,7 +10,7 @@ from airtest.utils.compat import PY3
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 
 LOGGING = get_logger(__name__)
 
@@ -25,12 +25,18 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb):
+    def __init__(self, adb, projection=None):
+        """
+        :param adb: adb instance of android device
+        :param projection: projection, default is None. If `None`, physical display size is used
+        """
         self.adb = adb
+        self.projection = projection
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         reg_cleanup(self.teardown_stream)
 
+    @ready_method
     def install_or_upgrade(self):
         """
         Install or upgrade minicap
@@ -109,7 +115,7 @@ class Minicap(object):
         return display_info
 
     @on_method_ready('install_or_upgrade')
-    def get_frame(self, projection=None):
+    def get_frame(self):
         """
         Get the single frame from minicap -s, this method slower than `get_frames`
             1. shell cmd
@@ -117,7 +123,6 @@ class Minicap(object):
             1. \r\r\n -> \n ...
 
         Args:
-            projection: projection, default is None. If `None`, physical display size is used
 
         Returns:
             jpg data
@@ -125,18 +130,15 @@ class Minicap(object):
         """
         raw_data = self.adb.raw_shell(
             self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
-            self._get_params(projection),
+            self._get_params(),
             ensure_unicode=False,
         )
         jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1].replace(self.adb.line_breaker, b"\n")
         return jpg_data
 
-    def _get_params(self, projection=None):
+    def _get_params(self):
         """
         Get the minicap origin parameters and count the projection
-
-        Args:
-            projection: projection, default is None. If `None`, physical display size is used
 
         Returns:
             physical display size (width, height), counted projection (width, height) and real display orientation
@@ -146,8 +148,8 @@ class Minicap(object):
         real_width = self.adb.display_info["physical_width"]
         real_height = self.adb.display_info["physical_height"]
         real_orientation = self.adb.display_info["rotation"]
-        if projection:
-            proj_width, proj_height = projection
+        if self.projection:
+            proj_width, proj_height = self.projection
         else:
             proj_width, proj_height = real_width, real_height
         return real_width, real_height, proj_width, proj_height, real_orientation
