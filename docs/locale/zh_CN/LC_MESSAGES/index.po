@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../index.rst:8
+msgid "Welcome to Airtest documentation!"
+msgstr "欢迎来到Airtest官方文档"
+
+#: ../../index.rst:11
+msgid "Airtest: Automated Testing Framework"
+msgstr "Airtest自动化测试框架"
+
+#: ../../index.rst:13
+msgid ""
+"This document provides all the basic information that are needed to start"
+" using the Airtest automation test framework. It covers the main "
+"framework ideas and concepts and shows examples for various use cases as "
+"well."
+msgstr ""
+
+#: ../../index.rst:19
+msgid "Quickstart"
+msgstr "快速开始"
+
+#: ../../index.rst:28
+msgid "Main API"
+msgstr "主要API"
+
+#: ../../index.rst:38
+msgid "Platform Specific API"
+msgstr "平台相关API"
+
+#: ../../index.rst:49
+msgid "Modules Content"
+msgstr ""
+

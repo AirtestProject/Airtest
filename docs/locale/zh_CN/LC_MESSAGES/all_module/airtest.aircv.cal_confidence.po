@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.cal_confidence.rst:2
+msgid "airtest\\.aircv\\.cal\\_confidence module"
+msgstr ""
+
+#: airtest.aircv.cal_confidence:1 of
+msgid "These functions calculate the similarity of two images of the same size."
+msgstr ""
+
+#: airtest.aircv.cal_confidence.cal_ccoeff_confidence:1 of
+msgid "求取两张图片的可信度，使用TM_CCOEFF_NORMED方法."
+msgstr ""
+
+#: airtest.aircv.cal_confidence.cal_rgb_confidence:1 of
+msgid "同大小彩图计算相似度."
+msgstr ""
+

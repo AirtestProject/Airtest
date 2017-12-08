@@ -1,0 +1,55 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../index_cn.rst:8
+msgid "欢迎来到Airtest文档!"
+msgstr ""
+
+#: ../../index_cn.rst:11
+msgid "Airtest自动化测试框架"
+msgstr ""
+
+#: ../../index_cn.rst:13
+msgid "Airtest是一个专注于游戏自动化测试的UI测试框架，也可以用于各种源生App。支持Windows和Android平台，iOS支持正在开发中。"
+msgstr ""
+
+#: ../../index_cn.rst:15
+msgid "Airtest基于图像识别技术，并提供了跨平台的API，包括安装应用、模拟输入、断言等。测试脚本运行后可以自动生成详细的HTML测试报告。"
+msgstr ""
+
+#: ../../index_cn.rst:17
+msgid "**AirtestIDE**是一个开箱即用的GUI工具，可以帮助录制和调试测试脚本。AirtestIDE给QA人员提供了完整的工作流程支持：录制脚本->真机回放->生成报告"
+msgstr ""
+
+#: ../../index_cn.rst:21
+msgid "快速开始"
+msgstr ""
+
+#: ../../index_cn.rst:30
+msgid "主要API"
+msgstr ""
+
+#: ../../index_cn.rst:40
+msgid "平台相关API"
+msgstr ""
+
+#: ../../index_cn.rst:51
+msgid "Modules Content"
+msgstr ""
+

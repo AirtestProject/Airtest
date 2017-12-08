@@ -1,0 +1,79 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.smart_crop.rst:2
+msgid "airtest\\.aircv\\.smart\\_crop module"
+msgstr ""
+
+#: airtest.aircv.smart_crop:1 of
+msgid "本文件用于智能monkey，自动检测画面中可点击的控件： 控件分类："
+msgstr ""
+
+#: airtest.aircv.smart_crop:3 of
+msgid "1、文字按键类型（商城-背包-聊天框） 2、完整轮廓（比如按钮-图标-人物头像） 3、特殊角点（箭头）"
+msgstr ""
+
+#: airtest.aircv.smart_crop:8 of
+msgid "方法1："
+msgstr ""
+
+#: airtest.aircv.smart_crop:8 of
+msgid "integral_preprocess(gray_img):"
+msgstr ""
+
+#: airtest.aircv.smart_crop:8 of
+msgid "Laplacian → 二值化 → 膨胀-膨胀 → 提取轮廓 → 轮廓筛选 适用于UI界面的主要控件提取，细节提取较为不足。"
+msgstr ""
+
+#: airtest.aircv.smart_crop:14 of
+msgid "方法2："
+msgstr ""
+
+#: airtest.aircv.smart_crop:14 of
+msgid "detail_detect(img):"
+msgstr ""
+
+#: airtest.aircv.smart_crop:12 of
+msgid "sobel → 二值化 → 膨胀-腐蚀-膨胀 → 提取轮廓 → 轮廓筛选 默认使用Sobel预处理：适用于各种界面，细节完备，但是提取点太多。"
+msgstr ""
+
+#: airtest.aircv.smart_crop.integral_preprocess:1 of
+msgid "预处理方法1： Laplacian → 二值化 → 膨胀-膨胀 → 提取"
+msgstr ""
+
+#: airtest.aircv.smart_crop.preprocess:1 of
+msgid "预处理方法2： Sobel(默认) → 二值化 → 膨胀-膨胀 → 提取"
+msgstr ""
+
+#: airtest.aircv.smart_crop.smart_target_crop:1 of
+msgid "完整性提取（使用Laplacian预处理），适用于web-app、UI界面等。"
+msgstr ""
+
+#: airtest.aircv.smart_crop.crop_by_xywh:1 of
+msgid "Crop image, rect = [x_min, y_min, w ,h]"
+msgstr ""
+
+#: airtest.aircv.smart_crop.get_proper_contour:1 of
+msgid "轮廓提取："
+msgstr ""
+
+#: airtest.aircv.smart_crop.get_proper_contour:2 of
+msgid "获取轮廓后：1、去除面积过小的轮廓； 2、去除比例过于细长的轮廓."
+msgstr ""
+

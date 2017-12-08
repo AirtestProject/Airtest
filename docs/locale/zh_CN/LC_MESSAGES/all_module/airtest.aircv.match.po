@@ -1,0 +1,55 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.match.rst:2
+msgid "airtest\\.aircv\\.match module"
+msgstr ""
+
+#: airtest.aircv.match.cv_match:1 of
+msgid "选定图像识别方法，并执行图像匹配."
+msgstr ""
+
+#: airtest.aircv.match.template_in_predicted_area:1 of
+msgid "带区域预测的模板匹配."
+msgstr ""
+
+#: airtest.aircv.match.template_after_resize:1 of
+msgid "跨分辨率template图像匹配."
+msgstr ""
+
+#: airtest.aircv.match.find_sift_in_predicted_area:1 of
+msgid "在预测区域内进行sift查找."
+msgstr ""
+
+#: airtest.aircv.match.mask_template_in_predicted_area:1 of
+msgid "带预测区域的mask-template."
+msgstr ""
+
+#: airtest.aircv.match.mask_template_after_resize:1 of
+msgid "带有mask的跨分辨率template图像匹配, 带有ignore-focus区域. find_all未启用."
+msgstr ""
+
+#: airtest.aircv.match.template_with_mask:1 of
+msgid "mask-template方法. img_sch已进行缩放."
+msgstr ""
+
+#: airtest.aircv.match.cal_average_confidence:1 of
+msgid "根据areaList中的面积加权，计算confidenceList的加权平均confidence."
+msgstr ""
+

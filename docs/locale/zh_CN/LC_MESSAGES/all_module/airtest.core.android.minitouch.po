@@ -1,0 +1,178 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.android.minitouch.rst:2
+msgid "airtest\\.core\\.android\\.minitouch module"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch:1 of
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch:1 of
+msgid "Super fast operation from minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch:3 of
+msgid "References: https://github.com/openstf/minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.install_and_setup:1 of
+msgid "Install and setup minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.install
+#: airtest.core.android.minitouch.Minitouch.install_and_setup
+#: airtest.core.android.minitouch.Minitouch.operate
+#: airtest.core.android.minitouch.Minitouch.safe_send
+#: airtest.core.android.minitouch.Minitouch.setup_client
+#: airtest.core.android.minitouch.Minitouch.setup_client_backend
+#: airtest.core.android.minitouch.Minitouch.setup_server
+#: airtest.core.android.minitouch.Minitouch.swipe
+#: airtest.core.android.minitouch.Minitouch.teardown
+#: airtest.core.android.minitouch.Minitouch.touch
+#: airtest.core.android.minitouch.Minitouch.uninstall of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.install:3
+#: airtest.core.android.minitouch.Minitouch.install_and_setup:3
+#: airtest.core.android.minitouch.Minitouch.operate:14
+#: airtest.core.android.minitouch.Minitouch.safe_send:7
+#: airtest.core.android.minitouch.Minitouch.setup_client:10
+#: airtest.core.android.minitouch.Minitouch.setup_client_backend:3
+#: airtest.core.android.minitouch.Minitouch.swipe:25
+#: airtest.core.android.minitouch.Minitouch.teardown:3
+#: airtest.core.android.minitouch.Minitouch.touch:15
+#: airtest.core.android.minitouch.Minitouch.uninstall:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.uninstall:1 of
+msgid "Uninstall minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.install:1 of
+msgid "Install minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.setup_server:1 of
+msgid "Setip minitouch server and adb forward"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.setup_server:3 of
+msgid "server process"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.touch:1 of
+msgid "Perform touch event"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.pinch:3
+#: airtest.core.android.minitouch.Minitouch.swipe:3
+#: airtest.core.android.minitouch.Minitouch.touch:4 of
+msgid "minitouch protocol example::"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate
+#: airtest.core.android.minitouch.Minitouch.safe_send
+#: airtest.core.android.minitouch.Minitouch.swipe
+#: airtest.core.android.minitouch.Minitouch.touch of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.touch:12 of
+msgid "coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.touch:13 of
+msgid "time interval for touch event, default is 0.01"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:1 of
+msgid "Perform swipe event"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:20 of
+msgid "start point"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:21 of
+msgid "end point"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:22 of
+msgid "time interval for swipe duration, default is 0.8"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:23 of
+msgid "size of swipe step, default is 5"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.pinch:1 of
+msgid "Perform pinch action"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate:1 of
+msgid "Perform down, up and move actions"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate:3 of
+msgid ""
+"action arguments, dictionary containing type and x, y coordinates, e.g.::"
+"          {     \"type\" : \"down\",     \"x\" : 10,     \"y\" : 10     }"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate:4 of
+msgid "action arguments, dictionary containing type and x, y coordinates, e.g.::"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate
+#: airtest.core.android.minitouch.Minitouch.safe_send of
+msgid "raises"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.operate:12 of
+msgid ":exc:`RuntimeError` -- is invalid arguments are provided"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.safe_send:1 of
+msgid "Send data to client"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.safe_send:3 of
+msgid "data to send"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.safe_send:5 of
+msgid ":exc:`Exception` -- when data cannot be sent"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.setup_client_backend:1 of
+msgid "Setup backend client thread as daemon"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.setup_client:1 of
+msgid "Setup client in following steps::"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.teardown:1 of
+msgid "Stop the server and client"
+msgstr ""
+

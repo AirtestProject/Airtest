@@ -1,0 +1,202 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.win.win.rst:2
+msgid "airtest\\.core\\.win\\.win module"
+msgstr ""
+
+#: airtest.core.win.win.Windows:1 of
+msgid "Bases: :class:`airtest.core.device.Device`"
+msgstr ""
+
+#: airtest.core.win.win.Windows:1 of
+msgid "Windows client."
+msgstr ""
+
+#: airtest.core.win.win.Windows.connect:1 of
+msgid "Connect to window and set it foreground"
+msgstr ""
+
+#: airtest.core.win.win.Windows.connect airtest.core.win.win.Windows.keyevent
+#: airtest.core.win.win.Windows.move airtest.core.win.win.Windows.shell
+#: airtest.core.win.win.Windows.snapshot airtest.core.win.win.Windows.start_app
+#: airtest.core.win.win.Windows.stop_app airtest.core.win.win.Windows.text
+#: airtest.core.win.win.Windows.touch of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.win.win.Windows.connect:3
+#: airtest.core.win.win.Windows.keyevent:8 airtest.core.win.win.Windows.text:4
+#: airtest.core.win.win.Windows.touch:8 of
+msgid "optional arguments"
+msgstr ""
+
+#: airtest.core.win.win.Windows.connect airtest.core.win.win.Windows.get_pos
+#: airtest.core.win.win.Windows.get_rect airtest.core.win.win.Windows.get_title
+#: airtest.core.win.win.Windows.keyevent airtest.core.win.win.Windows.kill
+#: airtest.core.win.win.Windows.move
+#: airtest.core.win.win.Windows.set_foreground
+#: airtest.core.win.win.Windows.shell airtest.core.win.win.Windows.snapshot
+#: airtest.core.win.win.Windows.start_app airtest.core.win.win.Windows.stop_app
+#: airtest.core.win.win.Windows.swipe airtest.core.win.win.Windows.text
+#: airtest.core.win.win.Windows.touch of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.win.win.Windows.connect:5
+#: airtest.core.win.win.Windows.get_rect:3
+#: airtest.core.win.win.Windows.keyevent:10 airtest.core.win.win.Windows.kill:3
+#: airtest.core.win.win.Windows.move:5
+#: airtest.core.win.win.Windows.set_foreground:3
+#: airtest.core.win.win.Windows.start_app:5
+#: airtest.core.win.win.Windows.stop_app:5 airtest.core.win.win.Windows.swipe:7
+#: airtest.core.win.win.Windows.text:6 airtest.core.win.win.Windows.touch:10 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.win.win.Windows.shell:1 of
+msgid "Run shell command in subprocess"
+msgstr ""
+
+#: airtest.core.win.win.Windows.shell:3 of
+msgid "command to be run"
+msgstr ""
+
+#: airtest.core.win.win.Windows.shell of
+msgid "raises"
+msgstr ""
+
+#: airtest.core.win.win.Windows.shell:5 of
+msgid ""
+":exc:`subprocess.CalledProcessError` -- when command returns non-zero "
+"exit status"
+msgstr ""
+
+#: airtest.core.win.win.Windows.shell:7 of
+msgid "command output as a byte string"
+msgstr ""
+
+#: airtest.core.win.win.Windows.snapshot:1 of
+msgid "Take a screenshot and save it to `tmp.png` filename by default"
+msgstr ""
+
+#: airtest.core.win.win.Windows.snapshot:3 of
+msgid "name of file where to store the screenshot"
+msgstr ""
+
+#: airtest.core.win.win.Windows.snapshot:5 of
+msgid "display the screenshot"
+msgstr ""
+
+#: airtest.core.win.win.Windows.keyevent:1 of
+msgid "Perform a key event"
+msgstr ""
+
+#: airtest.core.win.win.Windows.keyevent:4 airtest.core.win.win.Windows.touch:4
+#: of
+msgid "References"
+msgstr ""
+
+#: airtest.core.win.win.Windows.keyevent:5 of
+msgid "https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html"
+msgstr ""
+
+#: airtest.core.win.win.Windows.keyevent:7 of
+msgid "key event"
+msgstr ""
+
+#: airtest.core.win.win.Windows.text:1 of
+msgid "Input text"
+msgstr ""
+
+#: airtest.core.win.win.Windows.text:3 of
+msgid "text to input"
+msgstr ""
+
+#: airtest.core.win.win.Windows.touch:1 of
+msgid "Perform mouse click action"
+msgstr ""
+
+#: airtest.core.win.win.Windows.touch:5 of
+msgid "https://pywinauto.readthedocs.io/en/latest/code/pywinauto.mouse.html"
+msgstr ""
+
+#: airtest.core.win.win.Windows.touch:7 of
+msgid "coordinates where to click"
+msgstr ""
+
+#: airtest.core.win.win.Windows.swipe:1 of
+msgid ""
+"Perform swipe (mouse press and mouse release) :param p1: start point "
+":param p2: end point :param duration: time interval to perform the swipe "
+"action :param steps: size of the swipe step"
+msgstr ""
+
+#: airtest.core.win.win.Windows.start_app:1 of
+msgid "Start the application"
+msgstr ""
+
+#: airtest.core.win.win.Windows.start_app:3 of
+msgid "full path to the application"
+msgstr ""
+
+#: airtest.core.win.win.Windows.stop_app:1 of
+msgid "Stop the application"
+msgstr ""
+
+#: airtest.core.win.win.Windows.stop_app:3 of
+msgid "proccess ID of the application to be stopped"
+msgstr ""
+
+#: airtest.core.win.win.Windows.set_foreground:1 of
+msgid "Bring the window foreground"
+msgstr ""
+
+#: airtest.core.win.win.Windows.get_rect:1 of
+msgid "Get rectangle"
+msgstr ""
+
+#: airtest.core.win.win.Windows.get_title:1 of
+msgid "Get the window title"
+msgstr ""
+
+#: airtest.core.win.win.Windows.get_title:3 of
+msgid "window title"
+msgstr ""
+
+#: airtest.core.win.win.Windows.get_pos:1 of
+msgid "Get the window position coordinates"
+msgstr ""
+
+#: airtest.core.win.win.Windows.get_pos:3 of
+msgid "coordinates of topleft corner of the window (left, top)"
+msgstr ""
+
+#: airtest.core.win.win.Windows.move:1 of
+msgid "Move window to given coordinates"
+msgstr ""
+
+#: airtest.core.win.win.Windows.move:3 of
+msgid "coordinates (x, y) where to move the window"
+msgstr ""
+
+#: airtest.core.win.win.Windows.kill:1 of
+msgid "Kill the application"
+msgstr ""
+

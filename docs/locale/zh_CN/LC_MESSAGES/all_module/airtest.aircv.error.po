@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.error.rst:2
+msgid "airtest\\.aircv\\.error module"
+msgstr ""
+
+#: airtest.aircv.error:3 of
+msgid "Declaration:"
+msgstr ""
+
+#: airtest.aircv.error:2 of
+msgid "Define all BaseError Classes used in aircv.py."
+msgstr ""
+
+#: airtest.aircv.error.BaseError:1 of
+msgid "Bases: :class:`exceptions.Exception`"
+msgstr ""
+
+#: airtest.aircv.error.BaseError:1 of
+msgid "Base class for exceptions in this module."
+msgstr ""
+
+#: airtest.aircv.error.HomographyError:1
+#: airtest.aircv.error.InvalidCropTargetError:1
+#: airtest.aircv.error.InvalidImageInputError:1
+#: airtest.aircv.error.NoSIFTModuleError:1
+#: airtest.aircv.error.NoSiftFeatureMatched:1
+#: airtest.aircv.error.NoSiftMatchPointError:1
+#: airtest.aircv.error.PredictAreaNoneError:1
+#: airtest.aircv.error.SiftResultCheckError:1
+#: airtest.aircv.error.TemplateInputError:1 of
+msgid "Bases: :class:`airtest.aircv.error.BaseError`"
+msgstr ""
+
+#: airtest.aircv.error.InvalidCropTargetError:1
+#: airtest.aircv.error.InvalidImageInputError:1 of
+msgid "Image file not exist."
+msgstr ""
+
+#: airtest.aircv.error.NoSIFTModuleError:1
+#: airtest.aircv.error.PredictAreaNoneError:1
+#: airtest.aircv.error.TemplateInputError:1 of
+msgid "Resolution input is not right."
+msgstr ""
+
+#: airtest.aircv.error.NoSiftFeatureMatched:1 of
+msgid "After sift, find no good points."
+msgstr ""
+
+#: airtest.aircv.error.NoSiftMatchPointError:1
+#: airtest.aircv.error.SiftResultCheckError:1 of
+msgid "Exception raised for errors 0 sift points found in the input images."
+msgstr ""
+
+#: airtest.aircv.error.HomographyError:1 of
+msgid "In homography, find no mask, should kill points which is duplicate."
+msgstr ""
+
