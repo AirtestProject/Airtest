@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.android.recorder &mdash; airtest  文档</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="搜索" href="../../../../search.html"/>
+    <link rel="top" title="airtest  文档" href="../../../../index.html"/>
+        <link rel="up" title="模块代码" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">模块代码</a> &raquo;</li>
+        
+      <li>airtest.core.android.recorder</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>airtest.core.android.recorder 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.yosemite</span> <span class="k">import</span> <span class="n">Yosemite</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.constant</span> <span class="k">import</span> <span class="n">YOSEMITE_PACKAGE</span>
+<span class="kn">from</span> <span class="nn">airtest.core.error</span> <span class="k">import</span> <span class="n">AirtestError</span>
+<span class="kn">from</span> <span class="nn">airtest.utils.logger</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">airtest.utils.nbsp</span> <span class="k">import</span> <span class="n">NonBlockingStreamReader</span>
+<span class="kn">from</span> <span class="nn">airtest.utils.snippet</span> <span class="k">import</span> <span class="n">on_method_ready</span>
+<span class="n">LOGGING</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;recorder&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Recorder"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder">[文档]</a><span class="k">class</span> <span class="nc">Recorder</span><span class="p">(</span><span class="n">Yosemite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Screen recorder&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adb</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Recorder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_proc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Recorder.start_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder.start_recording">[文档]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">bit_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start screen recording</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_time: maximum rate value, default is 1800</span>
+<span class="sd">            bit_rate: bit rate value, default is None</span>
+<span class="sd">            vertical: vertical parameters, default is None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: if any error occurs while setup the recording</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None if recording did not start, otherwise True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;recording_proc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;recording_proc has already started&quot;</span><span class="p">)</span>
+        <span class="n">pkg_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span>
+        <span class="n">max_time_param</span> <span class="o">=</span> <span class="s2">&quot;-Dduration=</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">max_time</span> <span class="k">if</span> <span class="n">max_time</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">bit_rate_param</span> <span class="o">=</span> <span class="s2">&quot;-Dbitrate=</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bit_rate</span> <span class="k">if</span> <span class="n">bit_rate</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vertical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vertical_param</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vertical_param</span> <span class="o">=</span> <span class="s2">&quot;-Dvertical=true&quot;</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="s2">&quot;-Dvertical=false&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">start_shell</span><span class="p">(</span><span class="s1">&#39;CLASSPATH=</span><span class="si">%s</span><span class="s1"> exec app_process </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> /system/bin </span><span class="si">%s</span><span class="s1">.Recorder --start-record&#39;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">pkg_path</span><span class="p">,</span> <span class="n">max_time_param</span><span class="p">,</span> <span class="n">bit_rate_param</span><span class="p">,</span> <span class="n">vertical_param</span><span class="p">,</span> <span class="n">YOSEMITE_PACKAGE</span><span class="p">))</span>
+        <span class="n">nbsp</span> <span class="o">=</span> <span class="n">NonBlockingStreamReader</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">nbsp</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;recording setup error&quot;</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;start result: Record start success! File path:(.*\.mp4)&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recording_proc</span> <span class="o">=</span> <span class="n">p</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recording_file</span> <span class="o">=</span> <span class="n">output</span>
+                <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Recorder.stop_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.recorder.html#airtest.core.android.recorder.Recorder.stop_recording">[文档]</a>    <span class="nd">@on_method_ready</span><span class="p">(</span><span class="s1">&#39;install_or_upgrade&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stop_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;screen.mp4&quot;</span><span class="p">,</span> <span class="n">is_interrupted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop screen recording</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output: default file is `screen.mp4`</span>
+<span class="sd">            is_interrupted: True or False</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AirtestError: if recording was not started before</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pkg_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">YOSEMITE_PACKAGE</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">start_shell</span><span class="p">(</span><span class="s1">&#39;CLASSPATH=</span><span class="si">%s</span><span class="s1"> exec app_process /system/bin </span><span class="si">%s</span><span class="s1">.Recorder --stop-record&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pkg_path</span><span class="p">,</span> <span class="n">YOSEMITE_PACKAGE</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_proc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">is_interrupted</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;stop result: Stop ok! File path:(.*\.mp4)&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recording_file</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_file</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s2">&quot;rm </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_file</span><span class="p">)</span>
+                <span class="k">return</span>
+        <span class="k">raise</span> <span class="n">AirtestError</span><span class="p">(</span><span class="s2">&quot;start_recording first&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

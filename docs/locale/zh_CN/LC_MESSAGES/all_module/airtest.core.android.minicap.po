@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,7 @@ msgstr ""
 #: airtest.core.android.minicap.Minicap.teardown_stream
 #: airtest.core.android.minicap.Minicap.uninstall
 #: airtest.core.android.minicap.Minicap.update_rotation of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.minicap.Minicap.install:3
@@ -85,16 +85,22 @@ msgstr ""
 msgid "1. shell cmd 1. remove log info 1."
 msgstr ""
 
-#: airtest.core.android.minicap.Minicap.get_frame:9 of
+#: airtest.core.android.minicap.Minicap.get_frame:10 of
 msgid "Args:"
 msgstr ""
 
-#: airtest.core.android.minicap.Minicap.get_frame:11
+#: airtest.core.android.minicap.Minicap.get_frame:10 of
+msgid ""
+"projection: screenshot projection, default is None which means using "
+"self.projection"
+msgstr ""
+
+#: airtest.core.android.minicap.Minicap.get_frame:12
 #: airtest.core.android.minicap.Minicap.get_stream:7 of
 msgid "Returns:"
 msgstr ""
 
-#: airtest.core.android.minicap.Minicap.get_frame:12 of
+#: airtest.core.android.minicap.Minicap.get_frame:13 of
 msgid "jpg data"
 msgstr ""
 
@@ -107,7 +113,7 @@ msgstr ""
 
 #: airtest.core.android.minicap.Minicap.get_stream
 #: airtest.core.android.minicap.Minicap.update_rotation of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.minicap.Minicap.get_stream:5 of
@@ -133,4 +139,10 @@ msgstr ""
 #: airtest.core.android.minicap.Minicap.teardown_stream:1 of
 msgid "End the stream"
 msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
 

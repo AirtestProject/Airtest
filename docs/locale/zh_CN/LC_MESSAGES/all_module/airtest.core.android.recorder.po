@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,7 +35,7 @@ msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording
 #: airtest.core.android.recorder.Recorder.stop_recording of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording:3 of
@@ -61,7 +61,7 @@ msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording
 #: airtest.core.android.recorder.Recorder.stop_recording of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording:9 of
@@ -87,4 +87,10 @@ msgstr ""
 #: airtest.core.android.recorder.Recorder.stop_recording:8 of
 msgid "None"
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 

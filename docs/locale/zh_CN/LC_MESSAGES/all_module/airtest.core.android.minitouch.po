@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr ""
 #: airtest.core.android.minitouch.Minitouch.teardown
 #: airtest.core.android.minitouch.Minitouch.touch
 #: airtest.core.android.minitouch.Minitouch.uninstall of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.install:3
@@ -94,7 +94,7 @@ msgstr ""
 #: airtest.core.android.minitouch.Minitouch.safe_send
 #: airtest.core.android.minitouch.Minitouch.swipe
 #: airtest.core.android.minitouch.Minitouch.touch of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.touch:12 of
@@ -175,4 +175,10 @@ msgstr ""
 #: airtest.core.android.minitouch.Minitouch.teardown:1 of
 msgid "Stop the server and client"
 msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
 

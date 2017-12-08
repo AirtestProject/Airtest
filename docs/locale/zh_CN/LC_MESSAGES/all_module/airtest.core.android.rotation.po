@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,7 +37,7 @@ msgstr ""
 #: airtest.core.android.rotation.RotationWatcher.start
 #: airtest.core.android.rotation.XYTransformer.ori_2_up
 #: airtest.core.android.rotation.XYTransformer.up_2_ori of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.rotation.RotationWatcher.start:3 of
@@ -47,7 +47,7 @@ msgstr ""
 #: airtest.core.android.rotation.RotationWatcher.reg_callback
 #: airtest.core.android.rotation.XYTransformer.ori_2_up
 #: airtest.core.android.rotation.XYTransformer.up_2_ori of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.rotation.RotationWatcher.reg_callback:3 of
@@ -85,4 +85,10 @@ msgstr ""
 #: airtest.core.android.rotation.XYTransformer.ori_2_up:1 of
 msgid "Transform the coordinates original --> upright"
 msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
 

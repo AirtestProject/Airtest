@@ -1,0 +1,733 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.android.android &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>airtest.core.android.android</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for airtest.core.android.android</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">airtest</span> <span class="k">import</span> <span class="n">aircv</span>
+<span class="kn">from</span> <span class="nn">airtest.utils.logger</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">airtest.core.device</span> <span class="k">import</span> <span class="n">Device</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.ime</span> <span class="k">import</span> <span class="n">YosemiteIme</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.constant</span> <span class="k">import</span> <span class="n">CAP_METHOD</span><span class="p">,</span> <span class="n">TOUCH_METHOD</span><span class="p">,</span> <span class="n">IME_METHOD</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.adb</span> <span class="k">import</span> <span class="n">ADB</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.minicap</span> <span class="k">import</span> <span class="n">Minicap</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.minitouch</span> <span class="k">import</span> <span class="n">Minitouch</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.javacap</span> <span class="k">import</span> <span class="n">Javacap</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.rotation</span> <span class="k">import</span> <span class="n">RotationWatcher</span><span class="p">,</span> <span class="n">XYTransformer</span>
+<span class="kn">from</span> <span class="nn">airtest.core.android.recorder</span> <span class="k">import</span> <span class="n">Recorder</span>
+<span class="n">LOGGING</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;android&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Android"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android">[docs]</a><span class="k">class</span> <span class="nc">Android</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Android Device Class&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialno</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cap_method</span><span class="o">=</span><span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">MINICAP_STREAM</span><span class="p">,</span>
+                 <span class="n">touch_method</span><span class="o">=</span><span class="n">TOUCH_METHOD</span><span class="o">.</span><span class="n">MINITOUCH</span><span class="p">,</span>
+                 <span class="n">ime_method</span><span class="o">=</span><span class="n">IME_METHOD</span><span class="o">.</span><span class="n">YOSEMITEIME</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Android</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialno</span> <span class="o">=</span> <span class="n">serialno</span> <span class="ow">or</span> <span class="n">ADB</span><span class="p">()</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="s2">&quot;device&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="o">=</span> <span class="n">cap_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">touch_method</span> <span class="o">=</span> <span class="n">touch_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ime_method</span> <span class="o">=</span> <span class="n">ime_method</span>
+        <span class="c1"># init adb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adb</span> <span class="o">=</span> <span class="n">ADB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialno</span><span class="p">,</span> <span class="n">server_addr</span><span class="o">=</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">wait_for_device</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sdk_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">sdk_version</span>
+        <span class="c1"># init components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation_watcher</span> <span class="o">=</span> <span class="n">RotationWatcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minicap</span> <span class="o">=</span> <span class="n">Minicap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">javacap</span> <span class="o">=</span> <span class="n">Javacap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minitouch</span> <span class="o">=</span> <span class="n">Minitouch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yosemite_ime</span> <span class="o">=</span> <span class="n">YosemiteIme</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span> <span class="o">=</span> <span class="n">Recorder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_rotation_watcher</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Android.list_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.list_app">[docs]</a>    <span class="k">def</span> <span class="nf">list_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">third_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return list of packages</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            third_only: if True, only third party applications are listed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array of applications</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">list_app</span><span class="p">(</span><span class="n">third_only</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.path_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.path_app">[docs]</a>    <span class="k">def</span> <span class="nf">path_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the full path to the package</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the full path to the package</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">path_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.check_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.check_app">[docs]</a>    <span class="k">def</span> <span class="nf">check_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check is package exists on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False whether the package exists on the device or not</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">check_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.start_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.start_app">[docs]</a>    <span class="k">def</span> <span class="nf">start_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the application and activity</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+<span class="sd">            activity: activity name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">start_app</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.stop_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.stop_app">[docs]</a>    <span class="k">def</span> <span class="nf">stop_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the application</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">stop_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.clear_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.clear_app">[docs]</a>    <span class="k">def</span> <span class="nf">clear_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear all application data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">clear_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.install_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.install_app">[docs]</a>    <span class="k">def</span> <span class="nf">install_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Install the application on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: full path to the `apk` file to be installed on the device</span>
+<span class="sd">            replace: True or False to replace the existing application</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            output from installation process</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">install_app</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="n">replace</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.uninstall_app"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.uninstall_app">[docs]</a>    <span class="k">def</span> <span class="nf">uninstall_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uninstall the application from the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package: package name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            output from the uninstallation process</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">uninstall_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.snapshot"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ensure_orientation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take the screenshot of the display. The output is send to stdout by default.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename: name of the file where to store the screenshot, default is None which si stdout</span>
+<span class="sd">            ensure_orientation: True or False whether to keep the orientation same as display</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            screenshot output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;default not write into file.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="o">==</span> <span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">MINICAP_STREAM</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_watcher</span><span class="o">.</span><span class="n">get_ready</span><span class="p">()</span>
+            <span class="n">screen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minicap</span><span class="o">.</span><span class="n">get_frame_from_stream</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="o">==</span> <span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">MINICAP</span><span class="p">:</span>
+            <span class="n">screen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minicap</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="o">==</span> <span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">JAVACAP</span><span class="p">:</span>
+            <span class="n">screen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">javacap</span><span class="o">.</span><span class="n">get_frame_from_stream</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">screen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+        <span class="c1"># output cv2 object</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">screen</span> <span class="o">=</span> <span class="n">aircv</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">string_2_img</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># may be black/locked screen or other reason, print exc for debugging</span>
+            <span class="kn">import</span> <span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># ensure the orientation is right</span>
+        <span class="k">if</span> <span class="n">ensure_orientation</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]:</span>
+            <span class="c1"># minicap screenshots are different for various sdk_version</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="ow">in</span> <span class="p">(</span><span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">MINICAP</span><span class="p">,</span> <span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">MINICAP_STREAM</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdk_version</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">screen</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># cvshape是高度在前面!!!!</span>
+                <span class="k">if</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="n">h</span><span class="p">:</span>  <span class="c1"># 当前是横屏，但是图片是竖的，则旋转，针对sdk&lt;=16的机器</span>
+                    <span class="n">screen</span> <span class="o">=</span> <span class="n">aircv</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">screen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">90</span><span class="p">,</span> <span class="n">clockwise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># adb 截图总是要根据orientation旋转</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap_method</span> <span class="o">==</span> <span class="n">CAP_METHOD</span><span class="o">.</span><span class="n">ADBCAP</span><span class="p">:</span>
+                <span class="n">screen</span> <span class="o">=</span> <span class="n">aircv</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">screen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">90</span><span class="p">,</span> <span class="n">clockwise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">aircv</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">screen</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">screen</span></div>
+
+<div class="viewcode-block" id="Android.shell"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.shell">[docs]</a>    <span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return `adb shell` interpreter</span>
+<span class="sd">        Args:</span>
+<span class="sd">            *args: optional shell commands</span>
+<span class="sd">            **kwargs: optional shell commands</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.keyevent"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.keyevent">[docs]</a>    <span class="k">def</span> <span class="nf">keyevent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform keyevent on the device</span>
+<span class="sd">        Args:</span>
+<span class="sd">            keyname: keyeven name</span>
+<span class="sd">            **kwargs: optional arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="n">keyname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.wake"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.wake">[docs]</a>    <span class="k">def</span> <span class="nf">wake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform wake up event</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">install_or_upgrade</span><span class="p">()</span>  <span class="c1"># 暂时Yosemite只用了ime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s1">&#39;am&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;com.netease.nie.yosemite.ACTION_IDENTIFY&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.home"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.home">[docs]</a>    <span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Press HOME button</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.text"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Input text on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text: text to input</span>
+<span class="sd">            enter: True or False whether to press `Enter` key</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ime_method</span> <span class="o">==</span> <span class="n">IME_METHOD</span><span class="o">.</span><span class="n">YOSEMITEIME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yosemite_ime</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">])</span>
+
+        <span class="c1"># 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。</span>
+        <span class="k">if</span> <span class="n">enter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">shell</span><span class="p">([</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="s2">&quot;keyevent&quot;</span><span class="p">,</span> <span class="s2">&quot;ENTER&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Android.touch"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform touch event on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pos: coordinates (x, y)</span>
+<span class="sd">            times: how many touches to be performed</span>
+<span class="sd">            duration: how long to touch the screen</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_touch_point_by_orientation</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">touch_method</span> <span class="o">==</span> <span class="n">TOUCH_METHOD</span><span class="o">.</span><span class="n">MINITOUCH</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">minitouch</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.swipe"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.swipe">[docs]</a>    <span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform swipe event on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            p1: start point</span>
+<span class="sd">            p2: end point</span>
+<span class="sd">            duration: how long to swipe the screen, default 0.5</span>
+<span class="sd">            steps: how big is the swipe step, default 5</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_touch_point_by_orientation</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_touch_point_by_orientation</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">touch_method</span> <span class="o">==</span> <span class="n">TOUCH_METHOD</span><span class="o">.</span><span class="n">MINITOUCH</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minitouch</span><span class="o">.</span><span class="n">swipe</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">*=</span> <span class="mi">1000</span>  <span class="c1"># adb的swipe操作时间是以毫秒为单位的。</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">swipe</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.pinch"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.pinch">[docs]</a>    <span class="k">def</span> <span class="nf">pinch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform pinch event on the device</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: optional arguments</span>
+<span class="sd">            **kwargs: optional arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">minitouch</span><span class="o">.</span><span class="n">pinch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.logcat"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.logcat">[docs]</a>    <span class="k">def</span> <span class="nf">logcat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform `logcat`operations</span>
+<span class="sd">        Args:</span>
+<span class="sd">            *args: optional arguments</span>
+<span class="sd">            **kwargs: optional arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `logcat` output</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">logcat</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.getprop"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.getprop">[docs]</a>    <span class="k">def</span> <span class="nf">getprop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get properties for given key</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: key name</span>
+<span class="sd">            strip: True or False whether to strip the output or not</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            property value(s)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">getprop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">strip</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.get_top_activity"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.get_top_activity">[docs]</a>    <span class="k">def</span> <span class="nf">get_top_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the top activity</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            package, activity and pid</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">get_top_activity</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Android.is_keyboard_shown"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.is_keyboard_shown">[docs]</a>    <span class="k">def</span> <span class="nf">is_keyboard_shown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True or False whether soft keyboard is shown or not</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Might not work on all devices</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">is_keyboard_shown</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Android.is_screenon"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.is_screenon">[docs]</a>    <span class="k">def</span> <span class="nf">is_screenon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True or False whether the screen is on or not</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Might not work on all devices</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">is_screenon</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Android.is_locked"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.is_locked">[docs]</a>    <span class="k">def</span> <span class="nf">is_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True or False whether the device is locked or not</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Might not work on all devices</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True or False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">is_locked</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Android.unlock"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.unlock">[docs]</a>    <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unlock the device</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Might not work on all devices</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the display info (orientation, rotation and max values for x and y coordinates)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display information</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">display_info</span>
+
+<div class="viewcode-block" id="Android.get_display_info"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.get_display_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_display_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the display physical info (orientation, rotation and max values for x and y coordinates)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            display physical information</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adb</span><span class="o">.</span><span class="n">get_display_info</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Android.get_current_resolution"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.get_current_resolution">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return current resolution after rotaion</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            width and height of the display</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 注意黑边问题，需要用安卓接口获取区分两种分辨率</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span>
+        <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span></div>
+
+<div class="viewcode-block" id="Android.start_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start recording the device display</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: optional arguments</span>
+<span class="sd">            **kwargs:  optional arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">start_recording</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Android.stop_recording"><a class="viewcode-back" href="../../../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.stop_recording">[docs]</a>    <span class="k">def</span> <span class="nf">stop_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop recording the device display</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: optional arguments</span>
+<span class="sd">            **kwargs: optional arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">stop_recording</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_register_rotation_watcher</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Auto refresh `android.display` when rotation of screen has changed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">refresh_ori</span><span class="p">(</span><span class="n">ori</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ori</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;rotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ori</span> <span class="o">*</span> <span class="mi">90</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation_watcher</span><span class="o">.</span><span class="n">reg_callback</span><span class="p">(</span><span class="n">refresh_ori</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation_watcher</span><span class="o">.</span><span class="n">reg_callback</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">minicap</span><span class="o">.</span><span class="n">update_rotation</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">90</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_touch_point_by_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tuple_xy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert image coordinates to physical display coordinates, the arbitrary point (origin) is upper left corner</span>
+<span class="sd">        of the device physical display</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple_xy: image coordinates (x, y)</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">tuple_xy</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">XYTransformer</span><span class="o">.</span><span class="n">up_2_ori</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;physical_width&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;physical_height&quot;</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_info</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

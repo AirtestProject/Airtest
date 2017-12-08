@@ -32,6 +32,10 @@ msgid ""
 "framework ideas and concepts and shows examples for various use cases as "
 "well."
 msgstr ""
+"Airtest是一个专注于游戏自动化测试的UI测试框架，也可以用于各种源生App。支持Windows和Android平台，iOS支持正在开发中。"
+"Airtest基于图像识别技术，并提供了跨平台的API，包括安装应用、模拟输入、断言等。测试脚本运行后可以自动生成详细的HTML测试报告。"
+"**AirtestIDE**是一个开箱即用的GUI工具，可以帮助录制和调试测试脚本。AirtestIDE给QA人员提供了完整的工作流程支持：录制脚本->真机回放->生成报告"
+
 
 #: ../../index.rst:19
 msgid "Quickstart"

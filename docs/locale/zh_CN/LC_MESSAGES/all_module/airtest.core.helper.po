@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "init_Device(Android())"
 msgstr ""
 
 #: airtest.core.helper.G.add_device of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.helper.G.add_device:7 of
@@ -50,7 +50,7 @@ msgid "device to init"
 msgstr ""
 
 #: airtest.core.helper.G.add_device of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.helper.G.add_device:9 of
@@ -60,4 +60,10 @@ msgstr ""
 #: airtest.core.helper.import_device_cls:1 of
 msgid "lazy import device class"
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 

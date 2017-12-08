@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Search for image template in the screen until timeout"
 msgstr ""
 
 #: airtest.core.cv.loop_find of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.cv.loop_find:3 of
@@ -66,7 +66,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.cv.loop_find of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.cv.loop_find:11 of
@@ -92,4 +92,10 @@ msgstr ""
 #: airtest.core.cv.Template.imread:1 of
 msgid "获取搜索图像(cv2格式)."
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 

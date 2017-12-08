@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgstr ""
 #: airtest.core.android.android.Android.text
 #: airtest.core.android.android.Android.touch
 #: airtest.core.android.android.Android.uninstall_app of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.android.Android.list_app:3 of
@@ -85,7 +85,7 @@ msgstr ""
 #: airtest.core.android.android.Android.uninstall_app
 #: airtest.core.android.android.Android.unlock
 #: airtest.core.android.android.Android.wake of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.android.Android.list_app:5 of
@@ -380,4 +380,10 @@ msgstr ""
 #: airtest.core.android.android.Android.stop_recording:1 of
 msgid "Stop recording the device display"
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgid "Take the screenshot of Windows app"
 msgstr ""
 
 #: airtest.core.win.screen.screenshot of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.win.screen.screenshot:3 of
@@ -34,10 +34,16 @@ msgid "file name where to store the screenshot"
 msgstr ""
 
 #: airtest.core.win.screen.screenshot of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.win.screen.screenshot:6 of
 msgid "bitmap screenshot file"
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 

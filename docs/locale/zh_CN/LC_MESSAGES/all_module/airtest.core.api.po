@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgstr ""
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.api.connect_device:3 of
@@ -57,7 +57,7 @@ msgstr ""
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.api.connect_device:4 of
@@ -123,7 +123,7 @@ msgstr ""
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
-msgid "引发"
+msgid "Raises"
 msgstr ""
 
 #: airtest.core.api.set_current:4 of
@@ -446,4 +446,13 @@ msgstr ""
 #: airtest.core.api.assert_not_equal:6 of
 msgid "if assertion"
 msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
 

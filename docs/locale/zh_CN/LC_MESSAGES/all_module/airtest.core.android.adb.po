@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,7 +74,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.uninstall_app
 #: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.builtin_adb_path:3 of
@@ -140,7 +140,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.touch
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
@@ -772,4 +772,10 @@ msgid ""
 "None if no gateway address has been found, otherwise return the gateway "
 "address"
 msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
 

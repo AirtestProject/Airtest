@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgstr ""
 #: airtest.core.android.javacap.Javacap.get_frame_from_stream
 #: airtest.core.android.javacap.Javacap.get_frames
 #: airtest.core.android.javacap.Javacap.teardown_stream of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.javacap.Javacap.get_frames:3
@@ -57,4 +57,7 @@ msgstr ""
 #: airtest.core.android.javacap.Javacap.teardown_stream:1 of
 msgid "End stream"
 msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
 
