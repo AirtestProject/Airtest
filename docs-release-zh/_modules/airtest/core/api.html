@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.api &mdash; airtest  文档</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../../../genindex.html"/>
+        <link rel="search" title="搜索" href="../../../search.html"/>
+    <link rel="top" title="airtest  文档" href="../../../index.html"/>
+        <link rel="up" title="模块代码" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.android.html">airtest.core.android package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../all_module/airtest.html">airtest package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">模块代码</a> &raquo;</li>
+        
+      <li>airtest.core.api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>airtest.core.api 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the Airtest Core APIs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">airtest.utils.compat</span> <span class="k">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">parse_qsl</span>
+<span class="kn">from</span> <span class="nn">airtest.core.cv</span> <span class="k">import</span> <span class="n">Template</span><span class="p">,</span> <span class="n">loop_find</span><span class="p">,</span> <span class="n">cv_match_all</span>
+<span class="kn">from</span> <span class="nn">airtest.core.error</span> <span class="k">import</span> <span class="n">TargetNotFoundError</span>
+<span class="kn">from</span> <span class="nn">airtest.core.helper</span> <span class="k">import</span> <span class="n">G</span><span class="p">,</span> <span class="n">logwrap</span><span class="p">,</span> <span class="n">on_platform</span><span class="p">,</span> <span class="n">import_device_cls</span><span class="p">,</span> <span class="n">delay_after_operation</span>
+<span class="kn">from</span> <span class="nn">airtest.core.settings</span> <span class="k">import</span> <span class="n">Settings</span> <span class="k">as</span> <span class="n">ST</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Device Setup APIs</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="connect_device"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.connect_device">[文档]</a><span class="k">def</span> <span class="nf">connect_device</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize device with uri and set the device as the current one.</span>
+
+<span class="sd">    :param uri: an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&amp;param2=value2`</span>
+<span class="sd">    :return: device instance</span>
+<span class="sd">    :Example:</span>
+<span class="sd">        * ``android:///`` # local adb device using default params</span>
+<span class="sd">        * ``android://adbhost:adbport/1234566?cap_method=javacap&amp;touch_method=adb``  # remote adb device using custom params</span>
+<span class="sd">        * ``windows:///`` # local Windows application</span>
+<span class="sd">        * ``ios:///`` # iOS device</span>
+
+<span class="sd">    :platforms: Android, iOS, Windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+    <span class="n">platform</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">scheme</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">netloc</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parse_qsl</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">query</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">host</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;host&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">import_device_cls</span><span class="p">(</span><span class="n">platform</span><span class="p">)</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_device</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dev</span></div>
+
+
+<div class="viewcode-block" id="device"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.device">[文档]</a><span class="k">def</span> <span class="nf">device</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the current active device.</span>
+
+<span class="sd">    :return: current device instance</span>
+<span class="sd">    :platforms: Android, iOS, Windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span></div>
+
+
+<div class="viewcode-block" id="set_current"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.set_current">[文档]</a><span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">set_current</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set current active device.</span>
+
+<span class="sd">    :param index: index of initialized device instance</span>
+<span class="sd">    :raise IndexError: raised when device index is out of device list</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS, Windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE_LIST</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;device index out of range: </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">DEVICE_LIST</span><span class="p">)))</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Device Operations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="shell"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.shell">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">shell</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start remote shell in the target device and execute the command</span>
+
+<span class="sd">    :param cmd: command to be run on device, e.g. &quot;ls /data/local/tmp&quot;</span>
+<span class="sd">    :return: the output of the shell cmd</span>
+<span class="sd">    :platforms: Android</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="start_app"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.start_app">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">start_app</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start the target application on device</span>
+
+<span class="sd">    :param package: name of the package to be started, e.g. &quot;com.netease.my&quot;</span>
+<span class="sd">    :param activity: the activity to start, default is None which means the main activity</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">start_app</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">activity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="stop_app"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.stop_app">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">stop_app</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stop the target application on device</span>
+
+<span class="sd">    :param package: name of the package to stop, see also `start_app`</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">stop_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clear_app"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.clear_app">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">clear_app</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clear data of the target application on device</span>
+
+<span class="sd">    :param package: name of the package,  see also `start_app`</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">clear_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="install"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.install">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">install</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Install application on device</span>
+
+<span class="sd">    :param filepath: the path to file to be installed on target device</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">install_app</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="uninstall"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.uninstall">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">uninstall</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Uninstall application on device</span>
+
+<span class="sd">    :param package: name of the package, see also `start_app`</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">uninstall_app</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="snapshot"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.snapshot">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take the screenshot of the target device and save it to the file.</span>
+
+<span class="sd">    :param filename: name of the file where to save the screenshot. If the relative path is provided, the default</span>
+<span class="sd">                     location is ``ST.LOG_DIR``</span>
+<span class="sd">    :param msg: short description for screenshot, it will be recorded in the report</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS, Windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ST</span><span class="o">.</span><span class="n">LOG_DIR</span><span class="p">,</span> <span class="n">ST</span><span class="o">.</span><span class="n">SCREEN_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">filename</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wake"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.wake">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">wake</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wake up and unlock the target device</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+
+<span class="sd">    .. note:: Might not work on some models</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">wake</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="home"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.home">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">home</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return to the home screen of the target device.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="touch"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.touch">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform the touch action on the device screen</span>
+
+<span class="sd">    :param v: target to touch, either a Template instance or absolute coordinates (x, y)</span>
+<span class="sd">    :param kwargs: platform specific `kwargs`, please refer to corresponding docs</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TargetNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">delay_after_operation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="swipe"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.swipe">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">swipe</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform the swipe action on the device screen.</span>
+
+<span class="sd">    There are two ways of assigning the parameters</span>
+<span class="sd">        * ``swipe(v1, v2=Template(...))``   # swipe from v1 to v2</span>
+<span class="sd">        * ``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along the vector.</span>
+
+
+<span class="sd">    :param v1: the start point of swipe,</span>
+<span class="sd">               either a Template instance or absolute coordinates (x, y)</span>
+<span class="sd">    :param v2: the end point of swipe,</span>
+<span class="sd">               either a Template instance or absolute coordinates (x, y)</span>
+<span class="sd">    :param vector: a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of</span>
+<span class="sd">                   screen e.g.(0.5, 0.5)</span>
+<span class="sd">    :param **kwargs: platform specific `kwargs`, please refer to corresponding docs</span>
+<span class="sd">    :raise Exception: general exception when not enough parameters to perform swap action have been provided</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
+        <span class="n">pos1</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pos1</span> <span class="o">=</span> <span class="n">v1</span>
+
+    <span class="k">if</span> <span class="n">v2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
+            <span class="n">pos2</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT_TMP</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos2</span> <span class="o">=</span> <span class="n">v2</span>
+    <span class="k">elif</span> <span class="n">vector</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">get_current_resolution</span><span class="p">()</span>
+            <span class="n">vector</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+        <span class="n">pos2</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;no enough params for swipe&quot;</span><span class="p">)</span>
+
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">swipe</span><span class="p">(</span><span class="n">pos1</span><span class="p">,</span> <span class="n">pos2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">delay_after_operation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="pinch"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.pinch">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">pinch</span><span class="p">(</span><span class="n">in_or_out</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform the pinch action on the device screen</span>
+
+<span class="sd">    :param in_or_out: pinch in or pinch out, enum in [&quot;in&quot;, &quot;out&quot;]</span>
+<span class="sd">    :param center: center of pinch action, default as None which is the center of the screen</span>
+<span class="sd">    :param percent: percentage of the screen of pinch action, default is 0.5</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">pinch</span><span class="p">(</span><span class="n">in_or_out</span><span class="o">=</span><span class="n">in_or_out</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="n">percent</span><span class="p">)</span>
+    <span class="n">delay_after_operation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="keyevent"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.keyevent">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">keyevent</span><span class="p">(</span><span class="n">keyname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform key event on the device</span>
+
+<span class="sd">    :param keyname: platform specific key name</span>
+<span class="sd">    :param **kwargs: platform specific `kwargs`, please refer to corresponding docs</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="n">keyname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">delay_after_operation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="text"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.text">[文档]</a><span class="nd">@logwrap</span>
+<span class="nd">@on_platform</span><span class="p">([</span><span class="s2">&quot;Android&quot;</span><span class="p">,</span> <span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="s2">&quot;IOS&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Input text on the target device. Text input widget must be active first.</span>
+
+<span class="sd">    :param text: text to input, unicode is supported</span>
+<span class="sd">    :param enter: input `Enter` keyevent after text input, default is True</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="n">enter</span><span class="p">)</span>
+    <span class="n">delay_after_operation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="sleep"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.sleep">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="n">secs</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the sleep interval. It will be recorded in the report</span>
+
+<span class="sd">    :param secs: seconds to sleep</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">secs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wait"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.wait">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">intervalfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wait to match the Template on the device screen</span>
+
+<span class="sd">    :param v: target object to wait for, Template instance</span>
+<span class="sd">    :param timeout: time interval to wait for the match, default is None which is ``ST.FIND_TIMEOUT``</span>
+<span class="sd">    :param interval: time interval in seconds to attempt to find a match</span>
+<span class="sd">    :param intervalfunc: called after each unsuccessful attempt to find the corresponding match</span>
+<span class="sd">    :raise TargetNotFoundError: raised if target is not found after the time limit expired</span>
+<span class="sd">    :return: coordinates of the matched target</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">intervalfunc</span><span class="o">=</span><span class="n">intervalfunc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span></div>
+
+
+<div class="viewcode-block" id="exists"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.exists">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check whether given target exists on device screen</span>
+
+<span class="sd">    :param v: target to be checked</span>
+<span class="sd">    :return: False if target is not found, otherwise returns the coordinates of the target</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT_TMP</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">TargetNotFoundError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pos</span></div>
+
+
+<div class="viewcode-block" id="find_all"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.find_all">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">find_all</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find all occurrences of the target on the device screen and return their coordinates</span>
+
+<span class="sd">    :param v: target to find</span>
+<span class="sd">    :return: list of coordinates, [(x, y), (x1, y1), ...]</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">screen</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">cv_match_all</span><span class="p">(</span><span class="n">screen</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Assertions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="assert_exists"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.assert_exists">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">assert_exists</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert target exists on device screen</span>
+
+<span class="sd">    :param v: target to be checked</span>
+<span class="sd">    :param msg: short description of assertion, it will be recorded in the report</span>
+<span class="sd">    :raise AssertionError: if assertion fails</span>
+<span class="sd">    :return: coordinates of the target</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">THRESHOLD_STRICT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pos</span>
+    <span class="k">except</span> <span class="n">TargetNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not exist in screen, message: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="assert_not_exists"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.assert_not_exists">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">assert_not_exists</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert target does not exist on device screen</span>
+
+<span class="sd">    :param v: target to be checked</span>
+<span class="sd">    :param msg: short description of assertion, it will be recorded in the report</span>
+<span class="sd">    :raise AssertionError: if assertion fails</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">loop_find</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">ST</span><span class="o">.</span><span class="n">FIND_TIMEOUT_TMP</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> exists unexpectedly at pos: </span><span class="si">%s</span><span class="s2">, message: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">TargetNotFoundError</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="assert_equal"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.assert_equal">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">assert_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert two values are equal</span>
+
+<span class="sd">    :param first: first value</span>
+<span class="sd">    :param second: second value</span>
+<span class="sd">    :param msg: short description of assertion, it will be recorded in the report</span>
+<span class="sd">    :raise AssertionError: if assertion fails</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">first</span> <span class="o">!=</span> <span class="n">second</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> are not equal, message: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="assert_not_equal"><a class="viewcode-back" href="../../../all_module/airtest.core.api.html#airtest.core.api.assert_not_equal">[文档]</a><span class="nd">@logwrap</span>
+<span class="k">def</span> <span class="nf">assert_not_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert two values are not equal</span>
+
+<span class="sd">    :param first: first value</span>
+<span class="sd">    :param second: second value</span>
+<span class="sd">    :param msg: short description of assertion, it will be recorded in the report</span>
+<span class="sd">    :raise AssertionError: if assertion</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :platforms: Android, Windows, iOS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">first</span> <span class="o">==</span> <span class="n">second</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> are equal, message: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

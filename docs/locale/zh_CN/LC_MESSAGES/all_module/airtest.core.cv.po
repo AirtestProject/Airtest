@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.cv.rst:2
+msgid "airtest\\.core\\.cv module"
+msgstr ""
+
+#: airtest.core.cv:1 of
+msgid "\"Airtest图像识别专用."
+msgstr ""
+
+#: airtest.core.cv.loop_find:1 of
+msgid "Search for image template in the screen until timeout"
+msgstr ""
+
+#: airtest.core.cv.loop_find of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.cv.loop_find:3 of
+msgid "image template to be found in screenshot"
+msgstr ""
+
+#: airtest.core.cv.loop_find:4 of
+msgid "time interval how long to look for the image template"
+msgstr ""
+
+#: airtest.core.cv.loop_find:5 of
+msgid "default is None"
+msgstr ""
+
+#: airtest.core.cv.loop_find:6 of
+msgid "sleep interval before next attempt to find the image template"
+msgstr ""
+
+#: airtest.core.cv.loop_find:7 of
+msgid ""
+"function that is executed after unsuccessful attempt to find the image "
+"template"
+msgstr ""
+
+#: airtest.core.cv.loop_find of
+msgid "raises"
+msgstr ""
+
+#: airtest.core.cv.loop_find:9 of
+msgid ""
+":exc:`TargetNotFoundError` -- when image template is not found in "
+"screenshot"
+msgstr ""
+
+#: airtest.core.cv.loop_find of
+msgid "Returns"
+msgstr ""
+
+#: airtest.core.cv.loop_find:11 of
+msgid ""
+"TargetNotFoundError if image template not found, otherwise returns the "
+"position where the image template has been found in screenshot"
+msgstr ""
+
+#: airtest.core.cv.Template:1 of
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: airtest.core.cv.Template:1 of
+msgid ""
+"picture as touch/swipe/wait/exists target and extra info for cv match "
+"filename: pic filename target_pos: ret which pos in the pic record_pos: "
+"pos in screen when recording resolution: screen resolution when recording"
+" ignore: [ [x_min, y_min, x_max, y_max], ... ]  识别时，忽略掉ignore包含的矩形区域 "
+"(mask_tpl) focus: [ [x_min, y_min, x_max, y_max], ... ]  "
+"识别时，只识别focus包含的矩形区域 (可信度为面积加权平均) rgb: 识别结果是否使用rgb三通道进行校验."
+msgstr ""
+
+#: airtest.core.cv.Template.imread:1 of
+msgid "获取搜索图像(cv2格式)."
+msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+

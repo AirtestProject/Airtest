@@ -1,0 +1,785 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.android.android module &mdash; airtest  文档</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../genindex.html"/>
+        <link rel="search" title="搜索" href="../search.html"/>
+    <link rel="top" title="airtest  文档" href="../index.html"/>
+        <link rel="up" title="airtest.core.android package" href="airtest.core.android.html"/>
+        <link rel="next" title="airtest.core.android.constant module" href="airtest.core.android.constant.html"/>
+        <link rel="prev" title="airtest.core.android.adb module" href="airtest.core.android.adb.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.core.android.html">airtest.core.android package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.core.android.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.adb.html">airtest.core.android.adb module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">airtest.core.android.android module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.constant.html">airtest.core.android.constant module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.ime.html">airtest.core.android.ime module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.javacap.html">airtest.core.android.javacap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.minicap.html">airtest.core.android.minicap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.minitouch.html">airtest.core.android.minitouch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.recorder.html">airtest.core.android.recorder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.rotation.html">airtest.core.android.rotation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.yosemite.html">airtest.core.android.yosemite module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.html">airtest package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.aircv.html">airtest.aircv package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.cli.html">airtest.cli package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="airtest.core.html">airtest.core package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="airtest.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="airtest.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.report.html">airtest.report package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="airtest.core.android.html">airtest.core.android package</a> &raquo;</li>
+        
+      <li>airtest.core.android.android module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/all_module/airtest.core.android.android.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest.core.android.android">
+<span id="airtest-core-android-android-module"></span><h1>airtest.core.android.android module<a class="headerlink" href="#module-airtest.core.android.android" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="airtest.core.android.android.Android">
+<em class="property">class </em><code class="descname">Android</code><span class="sig-paren">(</span><em>serialno=None</em>, <em>host=None</em>, <em>cap_method='MINICAP_STREAM'</em>, <em>touch_method='MINITOUCH'</em>, <em>ime_method='YOSEMITEIME'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android" title="永久链接至目标">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="airtest.core.device.html#airtest.core.device.Device" title="airtest.core.device.Device"><code class="xref py py-class docutils literal"><span class="pre">airtest.core.device.Device</span></code></a></p>
+<p>Android Device Class</p>
+<dl class="method">
+<dt id="airtest.core.android.android.Android.list_app">
+<code class="descname">list_app</code><span class="sig-paren">(</span><em>third_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.list_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.list_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Return list of packages</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>third_only</strong> – if True, only third party applications are listed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">array of applications</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.path_app">
+<code class="descname">path_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.path_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.path_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Print the full path to the package</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>package</strong> – package name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">the full path to the package</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.check_app">
+<code class="descname">check_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.check_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.check_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Check is package exists on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>package</strong> – package name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">True or False whether the package exists on the device or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.start_app">
+<code class="descname">start_app</code><span class="sig-paren">(</span><em>package</em>, <em>activity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.start_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.start_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Start the application and activity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>package</strong> – package name</li>
+<li><strong>activity</strong> – activity name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.stop_app">
+<code class="descname">stop_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.stop_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.stop_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Stop the application</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>package</strong> – package name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.clear_app">
+<code class="descname">clear_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.clear_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.clear_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Clear all application data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>package</strong> – package name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.install_app">
+<code class="descname">install_app</code><span class="sig-paren">(</span><em>filepath</em>, <em>replace=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.install_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.install_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Install the application on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>filepath</strong> – full path to the <cite>apk</cite> file to be installed on the device</li>
+<li><strong>replace</strong> – True or False to replace the existing application</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">output from installation process</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.uninstall_app">
+<code class="descname">uninstall_app</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.uninstall_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.uninstall_app" title="永久链接至目标">¶</a></dt>
+<dd><p>Uninstall the application from the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>package</strong> – package name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">output from the uninstallation process</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.snapshot">
+<code class="descname">snapshot</code><span class="sig-paren">(</span><em>filename=None</em>, <em>ensure_orientation=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.snapshot"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.snapshot" title="永久链接至目标">¶</a></dt>
+<dd><p>Take the screenshot of the display. The output is send to stdout by default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> – name of the file where to store the screenshot, default is None which si stdout</li>
+<li><strong>ensure_orientation</strong> – True or False whether to keep the orientation same as display</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">screenshot output</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.shell">
+<code class="descname">shell</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.shell"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.shell" title="永久链接至目标">¶</a></dt>
+<dd><p>Return <cite>adb shell</cite> interpreter
+:param *args: optional shell commands
+:param **kwargs: optional shell commands</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.keyevent">
+<code class="descname">keyevent</code><span class="sig-paren">(</span><em>keyname</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.keyevent"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.keyevent" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform keyevent on the device
+:param keyname: keyeven name
+:param **kwargs: optional arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.wake">
+<code class="descname">wake</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.wake"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.wake" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform wake up event</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.home">
+<code class="descname">home</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.home"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.home" title="永久链接至目标">¶</a></dt>
+<dd><p>Press HOME button</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.text">
+<code class="descname">text</code><span class="sig-paren">(</span><em>text</em>, <em>enter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.text"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.text" title="永久链接至目标">¶</a></dt>
+<dd><p>Input text on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> – text to input</li>
+<li><strong>enter</strong> – True or False whether to press <cite>Enter</cite> key</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.touch">
+<code class="descname">touch</code><span class="sig-paren">(</span><em>pos</em>, <em>times=1</em>, <em>duration=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.touch"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.touch" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform touch event on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos</strong> – coordinates (x, y)</li>
+<li><strong>times</strong> – how many touches to be performed</li>
+<li><strong>duration</strong> – how long to touch the screen</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.swipe">
+<code class="descname">swipe</code><span class="sig-paren">(</span><em>p1</em>, <em>p2</em>, <em>duration=0.5</em>, <em>steps=5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.swipe"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.swipe" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform swipe event on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>p1</strong> – start point</li>
+<li><strong>p2</strong> – end point</li>
+<li><strong>duration</strong> – how long to swipe the screen, default 0.5</li>
+<li><strong>steps</strong> – how big is the swipe step, default 5</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.pinch">
+<code class="descname">pinch</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.pinch"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.pinch" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform pinch event on the device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>*args</strong> – optional arguments</li>
+<li><strong>**kwargs</strong> – optional arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.logcat">
+<code class="descname">logcat</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.logcat"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.logcat" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform <a href="#id1"><span class="problematic" id="id2">`</span></a>logcat`operations
+:param *args: optional arguments
+:param **kwargs: optional arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body"><cite>logcat</cite> output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.getprop">
+<code class="descname">getprop</code><span class="sig-paren">(</span><em>key</em>, <em>strip=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.getprop"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.getprop" title="永久链接至目标">¶</a></dt>
+<dd><p>Get properties for given key</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> – key name</li>
+<li><strong>strip</strong> – True or False whether to strip the output or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">property value(s)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.get_top_activity">
+<code class="descname">get_top_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.get_top_activity"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.get_top_activity" title="永久链接至目标">¶</a></dt>
+<dd><p>Get the top activity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">package, activity and pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.is_keyboard_shown">
+<code class="descname">is_keyboard_shown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.is_keyboard_shown"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.is_keyboard_shown" title="永久链接至目标">¶</a></dt>
+<dd><p>Return True or False whether soft keyboard is shown or not</p>
+<p class="rubric">Notes</p>
+<p>Might not work on all devices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">True or False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.is_screenon">
+<code class="descname">is_screenon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.is_screenon"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.is_screenon" title="永久链接至目标">¶</a></dt>
+<dd><p>Return True or False whether the screen is on or not</p>
+<p class="rubric">Notes</p>
+<p>Might not work on all devices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">True or False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.is_locked">
+<code class="descname">is_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.is_locked"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.is_locked" title="永久链接至目标">¶</a></dt>
+<dd><p>Return True or False whether the device is locked or not</p>
+<p class="rubric">Notes</p>
+<p>Might not work on all devices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">True or False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.unlock">
+<code class="descname">unlock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.unlock"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.unlock" title="永久链接至目标">¶</a></dt>
+<dd><p>Unlock the device</p>
+<p class="rubric">Notes</p>
+<p>Might not work on all devices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="airtest.core.android.android.Android.display_info">
+<code class="descname">display_info</code><a class="headerlink" href="#airtest.core.android.android.Android.display_info" title="永久链接至目标">¶</a></dt>
+<dd><p>Return the display info (orientation, rotation and max values for x and y coordinates)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">display information</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.get_display_info">
+<code class="descname">get_display_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.get_display_info"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.get_display_info" title="永久链接至目标">¶</a></dt>
+<dd><p>Return the display physical info (orientation, rotation and max values for x and y coordinates)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">display physical information</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.get_current_resolution">
+<code class="descname">get_current_resolution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.get_current_resolution"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.get_current_resolution" title="永久链接至目标">¶</a></dt>
+<dd><p>Return current resolution after rotaion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">width and height of the display</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.start_recording">
+<code class="descname">start_recording</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.start_recording"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.start_recording" title="永久链接至目标">¶</a></dt>
+<dd><p>Start recording the device display</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>*args</strong> – optional arguments</li>
+<li><strong>**kwargs</strong> – optional arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.android.Android.stop_recording">
+<code class="descname">stop_recording</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/android.html#Android.stop_recording"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#airtest.core.android.android.Android.stop_recording" title="永久链接至目标">¶</a></dt>
+<dd><p>Stop recording the device display</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>*args</strong> – optional arguments</li>
+<li><strong>**kwargs</strong> – optional arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="airtest.core.android.constant.html" class="btn btn-neutral float-right" title="airtest.core.android.constant module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="airtest.core.android.adb.html" class="btn btn-neutral" title="airtest.core.android.adb module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

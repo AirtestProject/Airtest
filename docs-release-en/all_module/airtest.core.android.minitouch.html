@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>airtest.core.android.minitouch module &mdash; airtest  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="airtest  documentation" href="../index.html"/>
+        <link rel="up" title="airtest.core.android package" href="airtest.core.android.html"/>
+        <link rel="next" title="airtest.core.android.recorder module" href="airtest.core.android.recorder.html"/>
+        <link rel="prev" title="airtest.core.android.minicap module" href="airtest.core.android.minicap.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> airtest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">Airtest</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.api.html">airtest.core.api module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.core.android.html">airtest.core.android package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.core.android.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.adb.html">airtest.core.android.adb module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.android.html">airtest.core.android.android module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.constant.html">airtest.core.android.constant module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.ime.html">airtest.core.android.ime module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.javacap.html">airtest.core.android.javacap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.minicap.html">airtest.core.android.minicap module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">airtest.core.android.minitouch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.recorder.html">airtest.core.android.recorder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.rotation.html">airtest.core.android.rotation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.core.android.yosemite.html">airtest.core.android.yosemite module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.ios.html">airtest.core.ios package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airtest.core.win.html">airtest.core.win package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="airtest.html">airtest package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="airtest.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airtest.aircv.html">airtest.aircv package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.cli.html">airtest.cli package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="airtest.core.html">airtest.core package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="airtest.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="airtest.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="airtest.report.html">airtest.report package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">airtest</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="airtest.core.android.html">airtest.core.android package</a> &raquo;</li>
+        
+      <li>airtest.core.android.minitouch module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/all_module/airtest.core.android.minitouch.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-airtest.core.android.minitouch">
+<span id="airtest-core-android-minitouch-module"></span><h1>airtest.core.android.minitouch module<a class="headerlink" href="#module-airtest.core.android.minitouch" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="airtest.core.android.minitouch.Minitouch">
+<em class="property">class </em><code class="descname">Minitouch</code><span class="sig-paren">(</span><em>adb</em>, <em>backend=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Super fast operation from minitouch</p>
+<p>References:
+<a class="reference external" href="https://github.com/openstf/minitouch">https://github.com/openstf/minitouch</a></p>
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.install_and_setup">
+<code class="descname">install_and_setup</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.install_and_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.install_and_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install and setup minitouch</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.uninstall">
+<code class="descname">uninstall</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.uninstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.uninstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uninstall minitouch</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.install">
+<code class="descname">install</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.install" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install minitouch</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.setup_server">
+<code class="descname">setup_server</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.setup_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.setup_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setip minitouch server and adb forward</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">server process</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.touch">
+<code class="descname">touch</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform touch event</p>
+<p>minitouch protocol example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="mi">0</span> <span class="mi">10</span> <span class="mi">10</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="o">&lt;</span><span class="n">wait</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">own</span> <span class="n">code</span><span class="o">&gt;</span>
+<span class="n">u</span> <span class="mi">0</span>
+<span class="n">c</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tuple_xy</strong> – coordinates (x, y)</li>
+<li><strong>duration</strong> – time interval for touch event, default is 0.01</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.swipe">
+<code class="descname">swipe</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.swipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.swipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform swipe event</p>
+<p>minitouch protocol example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">20</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">40</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">60</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">80</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">100</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">u</span> <span class="mi">0</span>
+<span class="n">c</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tuple_from_xy</strong> – start point</li>
+<li><strong>tuple_to_xy</strong> – end point</li>
+<li><strong>duration</strong> – time interval for swipe duration, default is 0.8</li>
+<li><strong>steps</strong> – size of swipe step, default is 5</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.pinch">
+<code class="descname">pinch</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.pinch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.pinch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform pinch action</p>
+<p>minitouch protocol example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">100</span> <span class="mi">50</span>
+<span class="n">d</span> <span class="mi">1</span> <span class="mi">100</span> <span class="mi">0</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">10</span> <span class="mi">90</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">90</span> <span class="mi">10</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">20</span> <span class="mi">80</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">80</span> <span class="mi">20</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">20</span> <span class="mi">80</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">80</span> <span class="mi">20</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">30</span> <span class="mi">70</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">70</span> <span class="mi">30</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">40</span> <span class="mi">60</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">60</span> <span class="mi">40</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">m</span> <span class="mi">0</span> <span class="mi">50</span> <span class="mi">50</span> <span class="mi">50</span>
+<span class="n">m</span> <span class="mi">1</span> <span class="mi">50</span> <span class="mi">50</span> <span class="mi">50</span>
+<span class="n">c</span>
+<span class="n">u</span> <span class="mi">0</span>
+<span class="n">u</span> <span class="mi">1</span>
+<span class="n">c</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.operate">
+<code class="descname">operate</code><span class="sig-paren">(</span><em>inst</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.operate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform down, up and move actions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> – <p>action arguments, dictionary containing type and x, y coordinates, e.g.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="s2">&quot;type&quot;</span> <span class="p">:</span> <span class="s2">&quot;down&quot;</span><span class="p">,</span>
+<span class="s2">&quot;x&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+<span class="s2">&quot;y&quot;</span> <span class="p">:</span> <span class="mi">10</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> – is invalid arguments are provided</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.safe_send">
+<code class="descname">safe_send</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.safe_send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.safe_send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send data to client</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – data to send</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> – when data cannot be sent</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.setup_client_backend">
+<code class="descname">setup_client_backend</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.setup_client_backend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.setup_client_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup backend client thread as daemon</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.setup_client">
+<code class="descname">setup_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.setup_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.setup_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup client in following steps:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>1. connect to server
+2. receive the header
+    v &lt;version&gt;
+    ^ &lt;max-contacts&gt; &lt;max-x&gt; &lt;max-y&gt; &lt;max-pressure&gt;
+    $ &lt;pid&gt;
+3. prepare to send
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="airtest.core.android.minitouch.Minitouch.teardown">
+<code class="descname">teardown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/airtest/core/android/minitouch.html#Minitouch.teardown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#airtest.core.android.minitouch.Minitouch.teardown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the server and client</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="airtest.core.android.recorder.html" class="btn btn-neutral float-right" title="airtest.core.android.recorder module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="airtest.core.android.minicap.html" class="btn btn-neutral" title="airtest.core.android.minicap module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Game-Netease.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

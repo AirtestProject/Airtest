@@ -1,0 +1,83 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.error.rst:2
+msgid "airtest\\.core\\.error module"
+msgstr ""
+
+#: airtest.core.error:1 of
+msgid "error classes"
+msgstr ""
+
+#: airtest.core.error.AdbError:1 airtest.core.error.BaseError:1
+#: airtest.core.error.ICmdError:1 of
+msgid "Bases: :class:`exceptions.Exception`"
+msgstr ""
+
+#: airtest.core.error.AirtestError:1 airtest.core.error.DeviceConnectionError:1
+#: airtest.core.error.MinicapError:1 airtest.core.error.MinitouchError:1
+#: airtest.core.error.PerformanceError:1 of
+msgid "Bases: :class:`airtest.core.error.BaseError`"
+msgstr ""
+
+#: airtest.core.error.AirtestError:1 of
+msgid "This is Airtest BaseError"
+msgstr ""
+
+#: airtest.core.error.ScriptParamError:1
+#: airtest.core.error.TargetNotFoundError:1 of
+msgid "Bases: :class:`airtest.core.error.AirtestError`"
+msgstr ""
+
+#: airtest.core.error.TargetNotFoundError:1 of
+msgid "This is TargetNotFoundError BaseError When something is not found"
+msgstr ""
+
+#: airtest.core.error.ScriptParamError:1 of
+msgid "This is ScriptParamError BaseError When something goes wrong"
+msgstr ""
+
+#: airtest.core.error.AdbError:1 of
+msgid "This is AdbError BaseError When ADB have something wrong"
+msgstr ""
+
+#: airtest.core.error.AdbShellError:1 of
+msgid "Bases: :class:`airtest.core.error.AdbError`"
+msgstr ""
+
+#: airtest.core.error.AdbShellError:1 of
+msgid "adb shell error"
+msgstr ""
+
+#: airtest.core.error.DeviceConnectionError:1 of
+msgid "device connection error"
+msgstr ""
+
+#: airtest.core.error.ICmdError:1 of
+msgid "This is ICmdError BaseError When ICmd have something wrong"
+msgstr ""
+
+#: airtest.core.error.MinicapError:1 of
+msgid "This is MinicapError BaseError When Minicap have something wrong"
+msgstr ""
+
+#: airtest.core.error.MinitouchError:1 of
+msgid "This is MinitouchError BaseError When Minicap have something wrong"
+msgstr ""
+

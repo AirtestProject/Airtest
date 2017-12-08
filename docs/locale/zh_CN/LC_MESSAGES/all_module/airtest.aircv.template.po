@@ -1,0 +1,47 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.template.rst:2
+msgid "airtest\\.aircv\\.template module"
+msgstr ""
+
+#: airtest.aircv.template:1 of
+msgid "[summary] 模板匹配对用户提供的调节参数:"
+msgstr ""
+
+#: airtest.aircv.template:6 of
+msgid "[description]"
+msgstr ""
+
+#: airtest.aircv.template:4 of
+msgid "threshod: 筛选阈值，默认为0.8"
+msgstr ""
+
+#: airtest.aircv.template:5 of
+msgid "rgb: 彩色三通道,进行彩色权识别."
+msgstr ""
+
+#: airtest.aircv.template.find_template:1 of
+msgid "函数功能：找到最优结果."
+msgstr ""
+
+#: airtest.aircv.template.find_all_template:1 of
+msgid "根据输入图片和参数设置,返回所有的图像识别结果."
+msgstr ""
+

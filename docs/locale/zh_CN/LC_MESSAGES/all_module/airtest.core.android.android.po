@@ -1,0 +1,389 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.android.android.rst:2
+msgid "airtest\\.core\\.android\\.android module"
+msgstr ""
+
+#: airtest.core.android.android.Android:1 of
+msgid "Bases: :class:`airtest.core.device.Device`"
+msgstr ""
+
+#: airtest.core.android.android.Android:1 of
+msgid "Android Device Class"
+msgstr ""
+
+#: airtest.core.android.android.Android.list_app:1 of
+msgid "Return list of packages"
+msgstr ""
+
+#: airtest.core.android.android.Android.check_app
+#: airtest.core.android.android.Android.clear_app
+#: airtest.core.android.android.Android.getprop
+#: airtest.core.android.android.Android.install_app
+#: airtest.core.android.android.Android.list_app
+#: airtest.core.android.android.Android.path_app
+#: airtest.core.android.android.Android.pinch
+#: airtest.core.android.android.Android.snapshot
+#: airtest.core.android.android.Android.start_app
+#: airtest.core.android.android.Android.start_recording
+#: airtest.core.android.android.Android.stop_app
+#: airtest.core.android.android.Android.stop_recording
+#: airtest.core.android.android.Android.swipe
+#: airtest.core.android.android.Android.text
+#: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.uninstall_app of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.android.android.Android.list_app:3 of
+msgid "if True, only third party applications are listed"
+msgstr ""
+
+#: airtest.core.android.android.Android.check_app
+#: airtest.core.android.android.Android.clear_app
+#: airtest.core.android.android.Android.display_info
+#: airtest.core.android.android.Android.get_current_resolution
+#: airtest.core.android.android.Android.get_display_info
+#: airtest.core.android.android.Android.get_top_activity
+#: airtest.core.android.android.Android.getprop
+#: airtest.core.android.android.Android.home
+#: airtest.core.android.android.Android.install_app
+#: airtest.core.android.android.Android.is_keyboard_shown
+#: airtest.core.android.android.Android.is_locked
+#: airtest.core.android.android.Android.is_screenon
+#: airtest.core.android.android.Android.keyevent
+#: airtest.core.android.android.Android.list_app
+#: airtest.core.android.android.Android.logcat
+#: airtest.core.android.android.Android.path_app
+#: airtest.core.android.android.Android.pinch
+#: airtest.core.android.android.Android.shell
+#: airtest.core.android.android.Android.snapshot
+#: airtest.core.android.android.Android.start_app
+#: airtest.core.android.android.Android.start_recording
+#: airtest.core.android.android.Android.stop_app
+#: airtest.core.android.android.Android.stop_recording
+#: airtest.core.android.android.Android.swipe
+#: airtest.core.android.android.Android.text
+#: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.uninstall_app
+#: airtest.core.android.android.Android.unlock
+#: airtest.core.android.android.Android.wake of
+msgid "Returns"
+msgstr ""
+
+#: airtest.core.android.android.Android.list_app:5 of
+msgid "array of applications"
+msgstr ""
+
+#: airtest.core.android.android.Android.path_app:1 of
+msgid "Print the full path to the package"
+msgstr ""
+
+#: airtest.core.android.android.Android.check_app:3
+#: airtest.core.android.android.Android.clear_app:3
+#: airtest.core.android.android.Android.path_app:3
+#: airtest.core.android.android.Android.start_app:3
+#: airtest.core.android.android.Android.stop_app:3
+#: airtest.core.android.android.Android.uninstall_app:3 of
+msgid "package name"
+msgstr ""
+
+#: airtest.core.android.android.Android.path_app:5 of
+msgid "the full path to the package"
+msgstr ""
+
+#: airtest.core.android.android.Android.check_app:1 of
+msgid "Check is package exists on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.check_app:5 of
+msgid "True or False whether the package exists on the device or not"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_app:1 of
+msgid "Start the application and activity"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_app:4 of
+msgid "activity name"
+msgstr ""
+
+#: airtest.core.android.android.Android.clear_app:5
+#: airtest.core.android.android.Android.home:3
+#: airtest.core.android.android.Android.keyevent:5
+#: airtest.core.android.android.Android.pinch:6
+#: airtest.core.android.android.Android.shell:5
+#: airtest.core.android.android.Android.start_app:6
+#: airtest.core.android.android.Android.start_recording:6
+#: airtest.core.android.android.Android.stop_app:5
+#: airtest.core.android.android.Android.stop_recording:6
+#: airtest.core.android.android.Android.swipe:8
+#: airtest.core.android.android.Android.text:6
+#: airtest.core.android.android.Android.touch:7
+#: airtest.core.android.android.Android.unlock:7
+#: airtest.core.android.android.Android.wake:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.android.Android.stop_app:1 of
+msgid "Stop the application"
+msgstr ""
+
+#: airtest.core.android.android.Android.clear_app:1 of
+msgid "Clear all application data"
+msgstr ""
+
+#: airtest.core.android.android.Android.install_app:1 of
+msgid "Install the application on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.install_app:3 of
+msgid "full path to the `apk` file to be installed on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.install_app:4 of
+msgid "True or False to replace the existing application"
+msgstr ""
+
+#: airtest.core.android.android.Android.install_app:6 of
+msgid "output from installation process"
+msgstr ""
+
+#: airtest.core.android.android.Android.uninstall_app:1 of
+msgid "Uninstall the application from the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.uninstall_app:5 of
+msgid "output from the uninstallation process"
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:1 of
+msgid ""
+"Take the screenshot of the display. The output is send to stdout by "
+"default."
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:3 of
+msgid ""
+"name of the file where to store the screenshot, default is None which si "
+"stdout"
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:4 of
+msgid "True or False whether to keep the orientation same as display"
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:6 of
+msgid "screenshot output"
+msgstr ""
+
+#: airtest.core.android.android.Android.shell:1 of
+msgid ""
+"Return `adb shell` interpreter :param \\*args: optional shell commands "
+":param \\*\\*kwargs: optional shell commands"
+msgstr ""
+
+#: airtest.core.android.android.Android.keyevent:1 of
+msgid ""
+"Perform keyevent on the device :param keyname: keyeven name :param "
+"\\*\\*kwargs: optional arguments"
+msgstr ""
+
+#: airtest.core.android.android.Android.wake:1 of
+msgid "Perform wake up event"
+msgstr ""
+
+#: airtest.core.android.android.Android.home:1 of
+msgid "Press HOME button"
+msgstr ""
+
+#: airtest.core.android.android.Android.text:1 of
+msgid "Input text on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.text:3 of
+msgid "text to input"
+msgstr ""
+
+#: airtest.core.android.android.Android.text:4 of
+msgid "True or False whether to press `Enter` key"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch:1 of
+msgid "Perform touch event on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch:3 of
+msgid "coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch:4 of
+msgid "how many touches to be performed"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch:5 of
+msgid "how long to touch the screen"
+msgstr ""
+
+#: airtest.core.android.android.Android.swipe:1 of
+msgid "Perform swipe event on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.swipe:3 of
+msgid "start point"
+msgstr ""
+
+#: airtest.core.android.android.Android.swipe:4 of
+msgid "end point"
+msgstr ""
+
+#: airtest.core.android.android.Android.swipe:5 of
+msgid "how long to swipe the screen, default 0.5"
+msgstr ""
+
+#: airtest.core.android.android.Android.swipe:6 of
+msgid "how big is the swipe step, default 5"
+msgstr ""
+
+#: airtest.core.android.android.Android.pinch:1 of
+msgid "Perform pinch event on the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.pinch:3
+#: airtest.core.android.android.Android.pinch:4
+#: airtest.core.android.android.Android.start_recording:3
+#: airtest.core.android.android.Android.start_recording:4
+#: airtest.core.android.android.Android.stop_recording:3
+#: airtest.core.android.android.Android.stop_recording:4 of
+msgid "optional arguments"
+msgstr ""
+
+#: airtest.core.android.android.Android.logcat:1 of
+msgid ""
+"Perform `logcat`operations :param \\*args: optional arguments :param "
+"\\*\\*kwargs: optional arguments"
+msgstr ""
+
+#: airtest.core.android.android.Android.logcat:5 of
+msgid "`logcat` output"
+msgstr ""
+
+#: airtest.core.android.android.Android.getprop:1 of
+msgid "Get properties for given key"
+msgstr ""
+
+#: airtest.core.android.android.Android.getprop:3 of
+msgid "key name"
+msgstr ""
+
+#: airtest.core.android.android.Android.getprop:4 of
+msgid "True or False whether to strip the output or not"
+msgstr ""
+
+#: airtest.core.android.android.Android.getprop:6 of
+msgid "property value(s)"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_top_activity:1 of
+msgid "Get the top activity"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_top_activity:3 of
+msgid "package, activity and pid"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_keyboard_shown:1 of
+msgid "Return True or False whether soft keyboard is shown or not"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_keyboard_shown:4
+#: airtest.core.android.android.Android.is_locked:4
+#: airtest.core.android.android.Android.is_screenon:4
+#: airtest.core.android.android.Android.unlock:4 of
+msgid "Notes"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_keyboard_shown:5
+#: airtest.core.android.android.Android.is_locked:5
+#: airtest.core.android.android.Android.is_screenon:5
+#: airtest.core.android.android.Android.unlock:5 of
+msgid "Might not work on all devices"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_keyboard_shown:7
+#: airtest.core.android.android.Android.is_locked:7
+#: airtest.core.android.android.Android.is_screenon:7 of
+msgid "True or False"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_screenon:1 of
+msgid "Return True or False whether the screen is on or not"
+msgstr ""
+
+#: airtest.core.android.android.Android.is_locked:1 of
+msgid "Return True or False whether the device is locked or not"
+msgstr ""
+
+#: airtest.core.android.android.Android.unlock:1 of
+msgid "Unlock the device"
+msgstr ""
+
+#: airtest.core.android.android.Android.display_info:1 of
+msgid ""
+"Return the display info (orientation, rotation and max values for x and y"
+" coordinates)"
+msgstr ""
+
+#: airtest.core.android.android.Android.display_info:3 of
+msgid "display information"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_display_info:1 of
+msgid ""
+"Return the display physical info (orientation, rotation and max values "
+"for x and y coordinates)"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_display_info:3 of
+msgid "display physical information"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_current_resolution:1 of
+msgid "Return current resolution after rotaion"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_current_resolution:3 of
+msgid "width and height of the display"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:1 of
+msgid "Start recording the device display"
+msgstr ""
+
+#: airtest.core.android.android.Android.stop_recording:1 of
+msgid "Stop recording the device display"
+msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+

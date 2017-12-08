@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.aircv.rst:2
+msgid "airtest\\.aircv\\.aircv module"
+msgstr ""
+
+#: airtest.aircv.aircv.imread:1 of
+msgid "根据图片路径，将图片读取为cv2的图片处理格式."
+msgstr ""
+
+#: airtest.aircv.aircv.imwrite:1 of
+msgid "写出图片到本地路径"
+msgstr ""
+
+#: airtest.aircv.aircv.show:1 of
+msgid "在可缩放窗口里显示图片."
+msgstr ""
+
+#: airtest.aircv.aircv.show_origin_size:1 of
+msgid "原始尺寸窗口中显示图片."
+msgstr ""
+
+#: airtest.aircv.aircv.rotate:1 of
+msgid "函数使图片可顺时针或逆时针旋转90、180、270度. 默认clockwise=True：顺时针旋转"
+msgstr ""
+
+#: airtest.aircv.aircv.crop_image:1 of
+msgid ""
+"区域截图，同时返回截取结果 和 截取偏移; Crop image , rect = [x_min, y_min, x_max ,y_max]. "
+"(airtest中有用到)"
+msgstr ""
+
+#: airtest.aircv.aircv.mark_point:1 of
+msgid "调试用的: 标记一个点"
+msgstr ""
+
+#: airtest.aircv.aircv.mask_image:1 of
+msgid ""
+"将screen的mask矩形区域刷成白色gbr(255, 255, 255). 其中mask区域为: [x_min, y_min, x_max, "
+"y_max]. color: 顺序分别的blue-green-red通道. linewidth: 为-1时则完全填充填充，为正整数时为线框宽度."
+msgstr ""
+
