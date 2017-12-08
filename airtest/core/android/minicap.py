@@ -115,7 +115,7 @@ class Minicap(object):
         return display_info
 
     @on_method_ready('install_or_upgrade')
-    def get_frame(self):
+    def get_frame(self, projection=None):
         """
         Get the single frame from minicap -s, this method slower than `get_frames`
             1. shell cmd
@@ -123,6 +123,7 @@ class Minicap(object):
             1. \r\r\n -> \n ...
 
         Args:
+            projection: screenshot projection, default is None which means using self.projection
 
         Returns:
             jpg data
@@ -130,13 +131,13 @@ class Minicap(object):
         """
         raw_data = self.adb.raw_shell(
             self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
-            self._get_params(),
+            self._get_params(projection),
             ensure_unicode=False,
         )
         jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1].replace(self.adb.line_breaker, b"\n")
         return jpg_data
 
-    def _get_params(self):
+    def _get_params(self, projection=None):
         """
         Get the minicap origin parameters and count the projection
 
@@ -148,8 +149,10 @@ class Minicap(object):
         real_width = self.adb.display_info["physical_width"]
         real_height = self.adb.display_info["physical_height"]
         real_orientation = self.adb.display_info["rotation"]
-        if self.projection:
-            proj_width, proj_height = self.projection
+        # 优先去传入的projection
+        projection = projection or self.projection
+        if projection:
+            proj_width, proj_height = projection
         else:
             proj_width, proj_height = real_width, real_height
         return real_width, real_height, proj_width, proj_height, real_orientation
