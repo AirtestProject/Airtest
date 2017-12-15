@@ -599,6 +599,7 @@ def save_extra_data(data, filename="fps.txt"):
 
     """
     log_file = os.path.join(ST.LOG_DIR, "fps.txt" if ST.LOG_DIR else filename)
+    print("write data", log_file)
     with open(log_file, "a") as f:
         data = json.dumps(data)
         f.write(data)
