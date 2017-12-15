@@ -11,10 +11,12 @@ import functools
 import sys
 import subprocess
 import copy
+import os
 import logging
 from collections import defaultdict
 from airtest.core.error import PerformanceError, AdbShellError
 from airtest.core.utils import split_cmd, get_std_encoding, get_logger
+from airtest.core.settings import Settings as ST
 
 LOGGING = get_logger('performance')
 
@@ -596,7 +598,8 @@ def save_extra_data(data, filename="fps.txt"):
     -------
 
     """
-    with open(filename, "a") as f:
+    log_file = os.path.join(ST.LOG_DIR, "fps.txt" if ST.LOG_DIR else filename)
+    with open(log_file, "a") as f:
         data = json.dumps(data)
         f.write(data)
         f.write("\r\n")
