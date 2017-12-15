@@ -254,9 +254,13 @@
         <!-- 性能图 -->
         {% for pfm in pfm_devices %}
             <br/>
+            <div id="fps" style="width: 100%;height:500px;"></div>
+            <br/>
             <div class="pfm_chart" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}"></div>
             <br/>
             <div class="pfm_chart_cpu" style="width: 100%;height:500px;" id="pfm{% if pfm %}_{{ pfm }}{% endif %}_cpu"></div>
+            <br/>
+
         {% endfor %}
 
           {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
@@ -554,7 +558,8 @@
                 if (chart_load === false) {
                     chart_load = true;
                     // v2是测试版本js，版本稳定后可以修改回正常的pfm_charts.js
-                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js")
+                    jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js");
+                    jsLoader.load("{{ static_root }}js\/echarts\/extra_data_charts.js")
                 }
             };
             jsLoader.onfailure=function () {
@@ -563,6 +568,7 @@
                     $.getJSON("{{ pfm_path }}pfm.json", function (data) {
                         json_data = data;
                         jsLoader.load("{{ static_root }}js\/echarts\/pfm_charts_v2.js");
+                        jsLoader.load("{{ static_root }}js\/echarts\/extra_data_charts.js");
                     });
                 }
             };

@@ -36,6 +36,11 @@ def gen_pfm_json(log_path):
         ret.append(data)
         if trace:
             trace_list.extend(trace)
+    # 如果存在额外文件，读取数据放入json中
+    if os.path.exists(os.path.join(log_path, "fps.txt")):
+        extra_data = read_extra_data(os.path.join(log_path, "fps.txt"))
+        if extra_data and ret:
+            ret[0]["extra_data"] = extra_data
     if not ret:
         return [], [], ""
     content = "json_data=" + json.dumps(ret)
@@ -107,6 +112,41 @@ def trans_log_json(log="pfm.txt"):
                         ret["cpu_freq"][kernel].append(freq)
     ret["times"] = times
     return ret, transback_content
+
+
+def read_extra_data(filename="fps.txt"):
+    """
+    临时增加的新接口，用于读取引擎自己写的数据内容，格式比较固定
+    第一行为 生成的task id，从第二行开始是写入的数据
+    Parameters
+    ----------
+    filename
+
+    Returns {"times": [], "fps": [], "tag": []}
+    -------
+
+    """
+    if not os.path.exists(filename):
+        return []
+
+    task_id = 0
+    fps_data = None
+    ret = defaultdict(list)
+    with open(filename, "r") as f:
+        for line in f.readlines():
+            data = json.loads(line)
+            if isinstance(data, int) or isinstance(data, str):
+                task_id = data
+            else:
+                fps_data = data
+    if fps_data:
+        for item in fps_data:
+            ret["times"].append(item["time"])
+            for k, v in item["data"].items():
+                ret[k].append(v)
+        return ret
+    else:
+        return None
 
 
 def cpu(value):
