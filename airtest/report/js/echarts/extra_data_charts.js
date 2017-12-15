@@ -69,6 +69,23 @@ extra_data_option = {
         }
     ]
 };
+var markAreaItem = {
+  name: "tag",
+  xAxis: "",
+  itemStyle: {
+    normal: {
+      color: 'rgba(255, 0, 0, 0.3)',
+    }
+  },
+  label: {
+    normal: {
+      position: 'inside',
+      rotate: 90,
+      color: 'black',
+    }
+  }
+};
+
 function load_extra_data() {
     if (json_data === null) {
         console.log("test");
@@ -80,6 +97,26 @@ function load_extra_data() {
                 var myChart = echarts.init(document.getElementById('fps'), 'shine');
                 extra_data_option.xAxis.data = n.extra_data.times;
                 extra_data_option.series[0].data = n.extra_data.fps;
+                var markAreaData = [];
+                if (n.extra_data.tag_list) {
+                    $.each(n.extra_data.tag_list, function(i, index){
+                            var item = jQuery.extend({}, markAreaItem);
+                            item.xAxis = n.extra_data.times[index].toString();
+                            item.name = n.extra_data.tag[index];
+                            var end = 0;
+                            if (i + 1 < n.extra_data.tag_list.length) {
+                                end = n.extra_data.tag_list[i + 1];
+                                if (end > 1) {
+                                    end = end - 1;
+                                }
+                            } else {
+                                end = n.extra_data.times.length - 1;
+                            }
+                            markAreaData.push([item, {xAxis: n.extra_data.times[end].toString()}])
+
+                    })
+                }
+                extra_data_option.series[0].markArea = { data: markAreaData};
                 myChart.setOption(extra_data_option);
 
             }

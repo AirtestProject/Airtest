@@ -144,6 +144,14 @@ def read_extra_data(filename="fps.txt"):
             ret["times"].append(item["time"])
             for k, v in item["data"].items():
                 ret[k].append(v)
+        if ret["tag"]:
+            tag = ret["tag"][0]
+            tag_index_list = [0]
+            for i, t in enumerate(ret["tag"]):
+                if t != tag:
+                    tag_index_list.append(i)
+                    tag = t
+            ret["tag_list"] = tag_index_list
         return ret
     else:
         return None
