@@ -585,6 +585,23 @@ def performance_main(args):
     pfm.start_forever()
 
 
+def save_extra_data(data, filename="fps.txt"):
+    """
+    临时增加的新接口，用于写一些引擎专用的数据到文件中
+    Parameters
+    ----------
+    data: [{data..}]
+
+    Returns
+    -------
+
+    """
+    with open(filename, "a") as f:
+        data = json.dumps(data)
+        f.write(data)
+        f.write("\r\n")
+
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
