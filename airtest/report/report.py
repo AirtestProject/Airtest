@@ -410,7 +410,12 @@ class MoaLogDisplay(object):
                 records.append(os.path.join(self.log_root, f))
 
         # 生成性能数据log的json文件
-        pfm_devices, pfm_trace, pfm_path = gen_pfm_json(self.log_root)
+        try:
+            pfm_devices, pfm_trace, pfm_path = gen_pfm_json(self.log_root)
+        except:
+            import traceback
+            print(traceback.format_exc())
+            pfm_devices, pfm_trace, pfm_path = [], [], ""
 
         data = {}
         data['steps'] = self.analyse()

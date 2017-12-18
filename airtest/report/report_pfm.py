@@ -104,7 +104,7 @@ def trans_log_json(log="pfm.txt"):
         for k in func_dict.keys():
             if k != 'cpu_freq':
                 ret[k].append(data[t][k])
-            else:
+            elif data[t]["cpu_freq"]:
                 for kernel, freq in data[t]["cpu_freq"].items():
                     if kernel not in ret["cpu_freq"]:
                         ret["cpu_freq"][kernel] = [freq]
