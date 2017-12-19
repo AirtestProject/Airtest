@@ -132,7 +132,8 @@ class LogToHtml(object):
             if step['type'] == 'snapshot':
                 # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
                 #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
-                step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
+                #step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
+                step['screenshot'] = step[1]['ret'] or ""
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
                 if step['type'] in self.img_type:

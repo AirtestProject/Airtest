@@ -155,21 +155,24 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename, msg=""):
+def snapshot(filename=None, msg=""):
     """
     Take the screenshot of the target device and save it to the file.
 
     :param filename: name of the file where to save the screenshot. If the relative path is provided, the default
                      location is ``ST.LOG_DIR``
     :param msg: short description for screenshot, it will be recorded in the report
-    :return: None
+    :return: absolute path of the screenshot
     :platforms: Android, iOS, Windows
     """
+    if not filename:
+        filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     if not os.path.isabs(filename):
         filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
     else:
         filepath = filename
     G.DEVICE.snapshot(filepath)
+    return filepath
 
 
 @logwrap
