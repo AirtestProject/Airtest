@@ -121,7 +121,7 @@ class AirtestCase(unittest.TestCase):
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):
-    global args  # make it global delibrately to be used in AirtestCase & test scripts
+    global args  # make it global deliberately to be used in AirtestCase & test scripts
     args = parsed_args
     suite = unittest.TestSuite()
     suite.addTest(testcase_cls())
