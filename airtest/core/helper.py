@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import functools
+import shutil
 import time
 import os
 from airtest.core.settings import Settings as ST
@@ -53,9 +54,11 @@ def set_logdir(dirpath):
     Returns:
 
     """
-    ST.LOG_DIR = dirpath
+    shutil.rmtree(dirpath, ignore_errors=True)
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
+    ST.LOG_DIR = dirpath
+    G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
 def log(tag, data, in_stack=True):

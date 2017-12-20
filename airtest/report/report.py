@@ -8,7 +8,6 @@ from collections import defaultdict
 from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
-SCREENDIR = "img_record"
 
 
 class LogToHtml(object):
@@ -430,7 +429,7 @@ def get_file_author(file_path):
     return author
 
 
-def simple_report(logpath, tplpath, logfile=LOGFILE, output="log.html"):
+def simple_report(logpath, tplpath=".", logfile=LOGFILE, output="log.html"):
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     htmltpl = jinja_environment.get_template("log_template.html")
     rpt = LogToHtml(tplpath, logpath, logfile=logfile)
@@ -469,9 +468,7 @@ def main(args):
         static_root = os.path.dirname(__file__)
 
     # log data root
-    log_root = args.log_root or path
-    if not log_root.endswith(os.path.sep):
-        log_root += "/"
+    log_root = args.log_root or os.path.join(path, "log")
 
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
@@ -493,7 +490,7 @@ def main(args):
                 gif_size = 0.3
         else:
             gif_size = 0.3
-        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
+        gen_gif(log_root, steps, output=args.gif, size=gif_size)
     else:
         # gen html report
         if args.record:

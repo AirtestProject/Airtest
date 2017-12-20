@@ -7,7 +7,7 @@ import shutil
 
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
-from airtest.core.settings import Settings as ST
+from airtest.core.settings import Settings as ST  # noqa
 from airtest.core.helper import log
 from copy import copy
 
@@ -28,34 +28,26 @@ class AirtestCase(unittest.TestCase):
         else:
             # default to use local android device
             devices = ["Android:///"]
-        for device in devices:
-            connect_device(device)
+
+        for dev in devices:
+            connect_device(dev)
 
         cls.script = args.script
         cls.pre = args.pre
         cls.post = args.post
 
-        # set basedir to find tpl
+        # set base dir to find tpl
         G.BASEDIR = cls.script
 
-        # set logfile and screendir
+        # set log dir
         if args.log is True:
-            print("save log & screen in script dir")
-            ST.LOG_DIR = cls.script
+            print("save log in <`script`.owl path>/log")
+            set_logdir(os.path.join(cls.script, "log"))
         elif args.log:
-            print("save log & screen in '%s'" % args.log)
-            ST.LOG_DIR = args.log
+            print("save log in '%s'" % args.log)
+            set_logdir(args.log)
         else:
-            print("save log in cwd as default")
-        # set log file
-        logfile = os.path.join(ST.LOG_DIR, ST.LOG_FILE)
-        print("set_logfile %s", repr(os.path.realpath(logfile)))
-        G.LOGGER.set_logfile(logfile)
-        # make screen dir
-        dirpath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR)
-        shutil.rmtree(dirpath, ignore_errors=True)
-        if not os.path.isdir(dirpath):
-            os.mkdir(dirpath)
+            print("do not save log")
 
         # setup script exec scope
         cls.scope = copy(globals())

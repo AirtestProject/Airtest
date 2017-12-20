@@ -67,12 +67,12 @@ def _try_save_screen(screen):
         None
 
     """
-    if not ST.SCREEN_DIR:
+    if not ST.LOG_DIR:
         return
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
+    filepath = os.path.join(ST.LOG_DIR, filename)
     aircv.imwrite(filepath, screen)
-    log_in_func({"screen": os.path.join(ST.SCREEN_DIR, filename)})
+    log_in_func({"screen": filename})
 
 
 class Template(object):
