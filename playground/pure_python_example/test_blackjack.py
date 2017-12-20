@@ -11,7 +11,7 @@ APK = "blackjack-release-signed.apk"
 
 
 # set log file if you want a html report
-# set_logdir("logs")
+set_logdir("logs")
 
 # connect android device with adb
 connect_device("Android:///")
@@ -40,4 +40,4 @@ snapshot(msg="app stopped")
 print("test finished")
 
 # generate html report
-# simple_report("logs")
+simple_report("logs")
