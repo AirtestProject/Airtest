@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import functools
+import shutil
 import time
+import os
 from airtest.core.settings import Settings as ST
 from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.utils.logger import get_logger
@@ -39,6 +41,24 @@ class G(object):
 """
 helper functions
 """
+
+
+def set_logdir(dirpath):
+    """set log dir for logfile and screenshots.
+
+    And create dir at `dirpath/ST.SCREEN_DIR` for screenshots
+
+    Args:
+        dirpath: directory to save logfile and screenshots
+
+    Returns:
+
+    """
+    shutil.rmtree(dirpath, ignore_errors=True)
+    if not os.path.exists(dirpath):
+        os.mkdir(dirpath)
+    ST.LOG_DIR = dirpath
+    G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
 def log(tag, data, in_stack=True):

@@ -7,7 +7,7 @@ import time
 from airtest.utils.compat import urlparse, parse_qsl
 from airtest.core.cv import Template, loop_find, cv_match_all
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, logwrap, on_platform, import_device_cls, delay_after_operation
+from airtest.core.helper import G, set_logdir, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
 
 """
@@ -168,7 +168,8 @@ def snapshot(filename=None, msg=""):
     if not filename:
         filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     if not os.path.isabs(filename):
-        filepath = os.path.join(ST.LOG_DIR, ST.SCREEN_DIR, filename)
+        logdir = ST.LOG_DIR or "."
+        filepath = os.path.join(logdir, filename)
     else:
         filepath = filename
     G.DEVICE.snapshot(filepath)

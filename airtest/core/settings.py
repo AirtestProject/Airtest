@@ -5,9 +5,8 @@ from airtest.utils.resolution import cocos_min_strategy
 class Settings(object):
 
     DEBUG = False
-    LOG_DIR = "."
+    LOG_DIR = None
     LOG_FILE = "log.txt"
-    SCREEN_DIR = "img_record"
     RESIZE_METHOD = staticmethod(cocos_min_strategy)
     CVSTRATEGY = ["tpl", "sift"]
     THRESHOLD = 0.6  # [0, 1]

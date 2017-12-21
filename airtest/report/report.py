@@ -8,19 +8,17 @@ from collections import defaultdict
 from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
-SCREENDIR = "img_record"
 
 
 class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root="", log_root="", static_root="", author=""):
-        """ logpath """
+    def __init__(self, script_root="", log_root="", static_root="", author="", logfile=LOGFILE):
         self.log = []
         self.script_root = script_root
         self.log_root = log_root
-        self.static_root = static_root
+        self.static_root = static_root or os.path.dirname(__file__)
         self.test_result = None
         self.run_start = None
         self.run_end = None
@@ -28,7 +26,7 @@ class LogToHtml(object):
         self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.uiautomator_img_type = ('click', 'long_click', 'ui.swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'end', 'assert')
         self.uiautomator_ignore_type = ('select', )
-        self.logfile = os.path.join(log_root, LOGFILE)
+        self.logfile = os.path.join(log_root, logfile)
         self._load()
         self.error_str = ""
 
@@ -384,6 +382,9 @@ class LogToHtml(object):
             elif os.path.isfile(os.path.join(self.log_root, f)):
                 records.append(os.path.join(self.log_root, f))
 
+        if not self.static_root.endswith(os.path.sep):
+            self.static_root += "/"
+
         data = {}
         data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
@@ -428,6 +429,17 @@ def get_file_author(file_path):
     return author
 
 
+def simple_report(logpath, tplpath=".", logfile=LOGFILE, output="log.html"):
+    jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+    htmltpl = jinja_environment.get_template("log_template.html")
+    rpt = LogToHtml(tplpath, logpath, logfile=logfile)
+    rpt.analyse()
+    html = rpt.render(htmltpl)
+    with io.open(output, 'w', encoding="utf-8") as f:
+        f.write(html)
+    print(output)
+
+
 def get_parger(ap):
     ap.add_argument("script", help="script filepath")
     ap.add_argument("--outfile", help="output html filepath, default to be log.html", default="log.html")
@@ -454,13 +466,9 @@ def main(args):
         static_root = args.static_root
     else:
         static_root = os.path.dirname(__file__)
-    if not static_root.endswith(os.path.sep):
-        static_root += "/"
 
     # log data root
-    log_root = args.log_root or path
-    if not log_root.endswith(os.path.sep):
-        log_root += "/"
+    log_root = args.log_root or os.path.join(path, "log")
 
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
@@ -482,7 +490,7 @@ def main(args):
                 gif_size = 0.3
         else:
             gif_size = 0.3
-        gen_gif(os.path.join(log_root, SCREENDIR), steps, output=args.gif, size=gif_size)
+        gen_gif(log_root, steps, output=args.gif, size=gif_size)
     else:
         # gen html report
         if args.record:
