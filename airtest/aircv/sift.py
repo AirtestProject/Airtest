@@ -263,7 +263,7 @@ def _target_error_check(w_h_range):
         raise SiftResultCheckError("In src_image, Taget area: width or height < 5 pixel.")
     # 如果矩形识别区域的宽和高，与sch_img的宽高差距超过5倍(屏幕像素差不可能有5倍)，认定为识别错误。
     if tar_width < 0.2 * w or tar_width > 5 * w or tar_height < 0.2 * h or tar_height > 5 * h:
-        raise SiftResultCheckError("Taget area is 5 times bigger or 0.2 times smaller than sch_img.")
+        raise SiftResultCheckError("Target area is 5 times bigger or 0.2 times smaller than sch_img.")
 
 
 def _cal_sift_confidence(im_search, resize_img, threshold, rgb=False):

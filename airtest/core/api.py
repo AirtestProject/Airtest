@@ -5,7 +5,7 @@ This module contains the Airtest Core APIs.
 import os
 import time
 from airtest.utils.compat import urlparse, parse_qsl
-from airtest.core.cv import Template, loop_find, cv_match_all
+from airtest.core.cv import Template, loop_find
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, set_logdir, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
@@ -372,7 +372,7 @@ def find_all(v):
     :platforms: Android, Windows, iOS
     """
     screen = G.DEVICE.snapshot()
-    return cv_match_all(screen, v)
+    return v.match_all_in(screen)
 
 
 """

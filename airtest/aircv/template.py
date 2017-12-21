@@ -12,7 +12,7 @@
 import cv2
 from airtest.utils.logger import get_logger
 from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
-from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
+from .cal_confidence import cal_rgb_confidence
 LOGGING = get_logger(__name__)
 
 

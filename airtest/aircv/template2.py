@@ -1,164 +1,18 @@
 # coding=utf-8
+"""
+Template matching with higher level parameters like: focus/ignore.
+"""
 import cv2
 import numpy as np
 from airtest.utils.logger import get_logger
-from .error import BaseError
 from .utils import generate_result, check_source_larger_than_search
-from .template import find_template, find_all_template, _get_target_rectangle
-from .sift import find_sift
+from .template import find_template, _get_target_rectangle
 
 LOGGING = get_logger("aircv")
 
 
-def cv_match(source, query, strategies=("tpl", "sift")):
-    """选定图像识别方法，并执行图像匹配."""
-    ret = None
-    if query.ignore or query.focus:
-        # 带有mask的模板匹配方法:
-        LOGGING.debug("method: template match (with ignore & focus rects)")
-        ret = mask_template_in_predicted_area(source, query)
-        # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
-        if not ret:
-            ret = mask_template_after_resize(source, query, find_in_screen=True)
-    else:
-        # 根据cv_strategy配置进行匹配:
-        for method in strategies:
-            if method == "tpl":
-                # 普通的模板匹配: (默认pre，其次全屏)
-                LOGGING.debug("[method] template match")
-
-                # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
-                if not ret:
-                    try:
-                        ret = template_after_resize(source, query, find_in_screen=True)
-                    except BaseError:
-                        pass
-
-                LOGGING.debug(" ->tpl result: %s" % ret)
-            elif method == "sift":
-                # sift匹配，默认pre，其次全屏
-                LOGGING.debug("[method] sift match")
-                # sift默认提供预测区域内查找:
-                try:
-                    ret = find_sift_in_predicted_area(source, query)
-                except BaseError:
-                    pass
-
-                # 如果在预测区域没有找到，并且没有指定find_inside区域，才在全局寻找
-                if not ret:
-                    screen, img_sch = source, query.imread()
-                    try:
-                        ret = find_sift(screen, img_sch, threshold=query.threshold, rgb=query.rgb)
-                    except BaseError:
-                        pass
-
-                LOGGING.debug(" ->sift result: %s" % ret)
-            else:
-                LOGGING.warning("skip method in CV_STRATEGY: %s", method)
-
-            # 使用ST.CVSTRATEGY中某个识别方法找到后，就直接返回，不再继续循环下去:
-            if ret:
-                return ret
-
-    return ret
-
-
-def cv_match_all(source, query):
-    pass
-
-
-def template_in_predicted_area(source, query):
-    '''带区域预测的模板匹配.'''
-    # 第一步：在预测区域内，进行跨分辨率识别，调用find_template_after_resize:
-    pre_result = template_after_resize(source, query)
-
-    # 第二步：对结果进行offset位置校正:
-    # return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
-    return pre_result
-
-
-def template_after_resize(source, query, find_in_screen=False):
-    '''跨分辨率template图像匹配.'''
-    # 默认在预测区域(或find_inside区域)进行搜索,指定全局时才在screen内搜索:
-    im_source = source if find_in_screen else source
-
-    # 第一步：先对im_search进行跨分辨率适配resize
-    img_sch = _resize_im_search(query, _get_resolution(source))
-
-    # 第二步：图像识别得到结果(可选择寻找结果集合)
-    # if query.find_all:
-    #     return find_all_template(im_source, img_sch, threshold=query.threshold, rgb=query.rgb)
-    # else:
-    return find_template(im_source, img_sch, threshold=query.threshold, rgb=query.rgb)
-
-
-def find_sift_in_predicted_area(source, query):
-    '''在预测区域内进行sift查找.'''
-    # 提取截图
-    im_search = query.imread()
-
-    # 第一步：在预测区域内进行基于sift的识别，调用find_sift:
-    if not source.any():
-        pre_result = None
-    else:
-        pre_result = find_sift(source, im_search, threshold=query.threshold, rgb=query.rgb)
-
-    # 第二步：对结果进行位置校正:
-    # return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
-    return pre_result
-
-
-def _resize_im_search(query, src_resolution, target_img=None):
-    """模板匹配中，将输入的截图适配成 等待模板匹配的截图."""
-    # 提取参数:
-    if target_img is not None:
-        im_search = target_img
-    else:
-        im_search = query.imread()
-    sch_resolution = query.resolution
-    # src_resolution = _get_resolution(source)
-    resize_strategy = query._resize_method
-
-    # 如果分辨率一致，则不需要进行im_search的适配:
-    if tuple(sch_resolution) == tuple(src_resolution) or resize_strategy is None:
-        return im_search
-    else:
-        # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
-        h, w = im_search.shape[:2]
-        w_re, h_re = resize_strategy(w, h, sch_resolution, src_resolution)
-        # 确保w_re和h_re > 0, 至少有1个像素:
-        w_re, h_re = max(1, w_re), max(1, h_re)
-
-        # 调试代码: 输出调试信息.
-        LOGGING.debug("resize: (%s, %s)->(%s, %s), resolution: %s=>%s" % (w, h, w_re, h_re, sch_resolution, src_resolution))
-
-        # 进行图片缩放:
-        resized_im_search = cv2.resize(im_search, (w_re, h_re))
-        return resized_im_search
-
-
-def mask_template_in_predicted_area(source, query):
-    """带预测区域的mask-template."""
-    # 第一步：在预测区域内，进行跨分辨率识别，调用mask_template_after_resize
-    pre_result = mask_template_after_resize(source, query)
-
-    # 第二步：对结果进行位置校正:
-    # return CvPosFix.fix_cv_pos(pre_result, source.offset) if pre_result else None
-    return pre_result
-
-
-def mask_template_after_resize(source, query, find_in_screen=False):
+def find_template2(im_search, im_source, ignore=None, focus=None, threshold=0.8, rgb=False):
     """带有mask的跨分辨率template图像匹配, 带有ignore-focus区域. find_all未启用."""
-    im_search = query.imread()
-    # 默认在预测区域(或者find_inside区域)进行搜索,只有指定全局时才在screen内搜索:
-    im_source = source if find_in_screen else source
-    ignore, focus = query.ignore, query.focus
-    resize_strategy = query._resize_method
-
-    # 第一步：对im_search进行跨分辨率适配resize
-    img_sch = _resize_im_search(query, _get_resolution(source))
-
-    # 第二步：ignore-focus参数的处理
     if ignore:
         # 在截图中含有ignore区域时,在得到初步结果后需要进行可信度的更新:
         # 需要根据ignore区域生成匹配时的mask图像,注意需要进行跨分辨率的resize:
@@ -180,7 +34,7 @@ def mask_template_after_resize(source, query, find_in_screen=False):
             confidence = _cal_confi_outside_ignore(target_img, query, _get_resolution(source), resize_strategy)
     else:
         # 没有ignore区域，但是有focus区域，先找到img_sch的最优匹配，然后计算focus区域可信度
-        result = find_template(im_source, img_sch, threshold=0, rgb=query.rgb)
+        result = find_template(im_source, im_search, threshold=0, rgb=rgb)
         if not result:
             return None
         if focus:
@@ -191,7 +45,7 @@ def mask_template_after_resize(source, query, find_in_screen=False):
             confidence = result.get("confidence", 0)
 
     # 校验可信度:
-    if confidence < query.threshold:
+    if confidence < threshold:
         return None
     else:
         # 本方法中一直求取的是最佳解，因此此处result一定有效
@@ -217,11 +71,6 @@ def template_with_mask(im_source, img_sch, ignore_mask):
     best_result = generate_result(middle_point, rectangle, confidence)
 
     return best_result
-
-
-def _get_resolution(img):
-    h, w = img.shape[:2]
-    return w, h
 
 
 def _generate_mask_img(img_search, rect_list):

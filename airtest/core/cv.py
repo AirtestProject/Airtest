@@ -5,11 +5,13 @@
 import os
 import time
 from airtest import aircv
-from airtest.aircv.match import cv_match, cv_match_all
+from airtest.aircv import cv2
+from airtest.aircv.template2 import find_template2
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, log_in_func
 from airtest.core.settings import Settings as ST
 from airtest.utils.transform import TargetPos
+from copy import deepcopy
 
 
 @logwrap
@@ -97,17 +99,12 @@ class Template(object):
         self.ignore = ignore
         self.focus = focus
         self.rgb = rgb
-        self._resize_method = ST.RESIZE_METHOD
 
     def __repr__(self):
         return "Template(%s)" % self.filepath
 
-    def imread(self):
-        """获取搜索图像(cv2格式)."""
-        return aircv.imread(self.filepath)
-
-    def match_in(self, source):
-        match_result = cv_match(source, self, strategies=ST.CVSTRATEGY)
+    def match_in(self, screen):
+        match_result = self._cv_match(screen)
         G.LOGGING.debug("match result: %s", match_result)
         log_in_func({"cv": match_result})
         if not match_result:
@@ -115,26 +112,124 @@ class Template(object):
         focus_pos = TargetPos().getXY(match_result, self.target_pos)
         return focus_pos
 
-    def _cv_match(self, source):
-        pass
+    def match_all_in(self, screen):
+        image = self._imread()
+        image = self._resize_image(image, screen, ST.RESIZE_METHOD)
+        return self._find_all_template(image, screen)
 
-    def _find_all_with_template(self, screen):
-        pass
+    def _cv_match(self, screen):
+        image = self._imread()
+        image = self._resize_image(image, screen, ST.RESIZE_METHOD)
+        ret = None
+        if self.ignore or self.focus:
+            ret = self._find_template_with_focus_and_ignore()
+        else:
+            for method in ST.CVSTRATEGY:
+                if method == "tpl":
+                    ret = self._try_match(self._find_template, image, screen)
+                elif method == "sift":
+                    ret = self._try_match(self._find_sift_in_predict_area, image, screen)
+                    if not ret:
+                        ret = self._try_match(self._find_sift, image, screen)
+                else:
+                    G.LOGGING.warning("Undefined method in CV_STRATEGY: %s", method)
+                if ret:
+                    break
+        return ret
 
-    def _find_with_template(self, screen):
-        pass
+    @staticmethod
+    def _try_match(method, *args, **kwargs):
+        G.LOGGING.debug("try match with %s" % method.__name__)
+        try:
+            ret = method(*args, **kwargs)
+        except aircv.BaseError as err:
+            G.LOGGING.debug(repr(err))
+            return None
+        else:
+            return ret
 
-    def _find_with_sift(self, screen):
-        pass
+    def _imread(self):
+        return aircv.imread(self.filepath)
 
-    def _img_after_predict(self):
-        pass
+    def _find_all_template(self, image, screen):
+        return aircv.find_all_template(screen, image, threshold=self.threshold, rgb=self.rgb)
 
-    def _img_after_resize(self):
-        pass
+    def _find_template(self, image, screen):
+        return aircv.find_template(screen, image, threshold=self.threshold, rgb=self.rgb)
 
-    def _img_after_focus(self):
-        pass
+    def _find_sift(self, image, screen):
+        return aircv.find_sift(screen, image, threshold=self.threshold, rgb=self.rgb)
 
-    def _img_after_ignore(self):
-        pass
+    def _find_sift_in_predict_area(self, image, screen):
+        if not self.record_pos:
+            return None
+        # calc predict area in screen
+        screen_resolution = aircv.get_resolution(screen)
+        xmin, ymin, xmax, ymax = Predictor.get_predict_area(self.record_pos, screen_resolution)
+        # crop predict image from screen
+        predict_area = aircv.crop_image(screen, (xmin, ymin, xmax, ymax))
+        aircv.show(predict_area)
+        # find sift in that image
+        ret_in_area = aircv.find_sift(predict_area, image, threshold=self.threshold, rgb=self.rgb)
+        # calc cv ret if found
+        if not ret_in_area:
+            return None
+        ret = deepcopy(ret_in_area)
+        ret["result"] = (ret_in_area["result"][0] + xmin, ret_in_area["result"][1] + ymin)
+        return ret
+
+    def _resize_image(self, image, screen, resize_method):
+        """模板匹配中，将输入的截图适配成 等待模板匹配的截图."""
+        screen_resolution = aircv.get_resolution(screen)
+        # 如果分辨率一致，则不需要进行im_search的适配:
+        if tuple(self.resolution) == tuple(screen_resolution) or resize_method is None:
+            return image
+        # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
+        h, w = image.shape[:2]
+        w_re, h_re = resize_method(w, h, self.resolution, screen_resolution)
+        # 确保w_re和h_re > 0, 至少有1个像素:
+        w_re, h_re = max(1, w_re), max(1, h_re)
+        # 调试代码: 输出调试信息.
+        G.LOGGING.debug("resize: (%s, %s)->(%s, %s), resolution: %s=>%s" % (
+                        w, h, w_re, h_re, self.resolution, screen_resolution))
+        # 进行图片缩放:
+        image = cv2.resize(image, (w_re, h_re))
+        return image
+
+    def _find_template_with_focus_and_ignore(self, image, screen):
+        return aircv.find_template2(image, screen, ignore=self.ignore, focus=self.focus, threshold=self.threshold, rgb=self.rgb)
+
+
+class Predictor(object):
+    """
+    this class predicts the press_point and the area to search im_search.
+    """
+
+    RADIUS_X = 250
+    RADIUS_Y = 250
+
+    @staticmethod
+    def count_record_pos(pos, resolution):
+        """计算坐标对应的中点偏移值相对于分辨率的百分比"""
+        _w, _h = resolution
+        # 都按宽度缩放，针对G18的实验结论
+        delta_x = (pos[0] - _w * 0.5) / _w
+        delta_y = (pos[1] - _h * 0.5) / _w
+        delta_x = round(delta_x, 3)
+        delta_y = round(delta_y, 3)
+        return delta_x, delta_y
+
+    @classmethod
+    def get_predict_point(cls, record_pos, screen_resolution):
+        """预测缩放后的点击位置点"""
+        delta_x, delta_y = record_pos
+        _w, _h = screen_resolution
+        target_x = delta_x * _w + _w * 0.5
+        target_y = delta_y * _w + _h * 0.5
+        return target_x, target_y
+
+    @classmethod
+    def get_predict_area(cls, record_pos, screen_resolution):
+        x, y = cls.get_predict_point(record_pos, screen_resolution)
+        area = (x - cls.RADIUS_X, y - cls.RADIUS_Y, x + cls.RADIUS_X, y + cls.RADIUS_Y)
+        return area

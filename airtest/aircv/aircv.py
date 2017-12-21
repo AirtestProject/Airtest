@@ -6,28 +6,21 @@ import cv2
 import numpy as np
 
 
-__version__ = "0.1.7"
-__project_url__ = "https://github.com/netease/aircv"
-
-
-DEBUG = False
-
-
 def imread(filename):
-    '''根据图片路径，将图片读取为cv2的图片处理格式.'''
+    """根据图片路径，将图片读取为cv2的图片处理格式."""
     filename = filename.encode(sys.getfilesystemencoding())
     img = cv2.imread(filename, 1)
     return img
 
 
 def imwrite(filename, img):
-    '''写出图片到本地路径'''
+    """写出图片到本地路径"""
     filename = filename.encode(sys.getfilesystemencoding())
     cv2.imwrite(filename, img)
 
 
 def show(img, title="show_img", test_flag=False):
-    '''在可缩放窗口里显示图片.'''
+    """在可缩放窗口里显示图片."""
     cv2.namedWindow(title, cv2.WINDOW_NORMAL)
     cv2.imshow(title, img)
     if not test_flag:
@@ -44,10 +37,10 @@ def show_origin_size(img, title="image", test_flag=False):
 
 
 def rotate(img, angle=90, clockwise=True):
-    '''
+    """
         函数使图片可顺时针或逆时针旋转90、180、270度.
         默认clockwise=True：顺时针旋转
-    '''
+    """
 
     def count_clock_rotate(img):
         # 逆时针旋转90°
@@ -66,16 +59,16 @@ def rotate(img, angle=90, clockwise=True):
 
 
 def crop_image(img, rect):
-    '''
+    """
         区域截图，同时返回截取结果 和 截取偏移;
         Crop image , rect = [x_min, y_min, x_max ,y_max].
         (airtest中有用到)
-    '''
+    """
 
     if isinstance(rect, (list, tuple)):
         height, width = img.shape[:2]
         # 获取在图像中的实际有效区域：
-        x_min, y_min, x_max, y_max = rect[0], rect[1], rect[2], rect[3]
+        x_min, y_min, x_max, y_max = [int(i) for i in rect]
         x_min, y_min = max(0, x_min), max(0, y_min)
         x_min, y_min = min(width - 1, x_min), min(height - 1, y_min)
         x_max, y_max = max(0, x_max), max(0, y_max)
@@ -89,7 +82,7 @@ def crop_image(img, rect):
 
 
 def mark_point(img, point):
-    ''' 调试用的: 标记一个点 '''
+    """ 调试用的: 标记一个点 """
     x, y = point
     # cv2.rectangle(img, (x, y), (x+10, y+10), 255, 1, lineType=cv2.CV_AA)
     radius = 20
@@ -109,3 +102,8 @@ def mask_image(img, mask, color=(255, 255, 255), linewidth=-1):
     # 将划线边界外扩，保证线内区域不被线所遮挡:
     offset = int(linewidth / 2)
     return cv2.rectangle(img, (mask[0] - offset, mask[1] - offset), (mask[2] + linewidth, mask[3] + linewidth), color, linewidth)
+
+
+def get_resolution(img):
+    h, w = img.shape[:2]
+    return w, h

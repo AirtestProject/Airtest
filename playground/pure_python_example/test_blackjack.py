@@ -23,7 +23,7 @@ home()
 if PKG not in device().list_app():
     install(APK)
 
-clear_app(PKG)
+stop_app(PKG)
 start_app(PKG)
 sleep(2)
 
