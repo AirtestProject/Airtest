@@ -23,10 +23,10 @@ class G(object):
     @classmethod
     def add_device(cls, dev):
         """
-        Initialize the device and adds global variables
+        Add device instance in G and set as current device.
 
         Examples:
-            init_Device(Android())
+            G.add_device(Android())
 
         Args:
             dev: device to init
