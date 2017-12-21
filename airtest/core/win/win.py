@@ -36,6 +36,8 @@ class Windows(Device):
 
     def _init_connect(self, handle, kwargs):
         if handle:
+            if isinstance(handle, str) and handle.isdigit():
+                handle = int(handle)
             self.connect(handle=handle)
         elif kwargs:
             self.connect(**kwargs)
@@ -84,6 +86,7 @@ class Windows(Device):
         """
         if not filename:
             filename = "tmp.png"
+        print("snapshot", self._top_window.handle, self.app)
         if self.app:
             screenshot(filename, self._top_window.handle)
         else:
