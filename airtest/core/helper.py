@@ -18,6 +18,7 @@ class G(object):
     DEVICE_LIST = []
     RECENT_CAPTURE = None
     RECENT_CAPTURE_PATH = None
+    CUSTOM_DEVICES = {}
 
     @classmethod
     def add_device(cls, dev):
@@ -36,6 +37,10 @@ class G(object):
         """
         cls.DEVICE = dev
         cls.DEVICE_LIST.append(dev)
+
+    @classmethod
+    def register_custom_device(cls, device_cls):
+        cls.CUSTOM_DEVICES[device_cls.__name__.lower()] = device_cls
 
 
 """
@@ -79,10 +84,15 @@ def device_platform():
     return G.DEVICE.__class__.__name__
 
 
+NATIVE_PFS = ["Android", "Windows", "IOS"]
+
+
 def import_device_cls(platform):
     """lazy import device class"""
     platform = platform.lower()
-    if platform == "android":
+    if platform in G.CUSTOM_DEVICES:
+        cls = G.CUSTOM_DEVICES[platform]
+    elif platform == "android":
         from .android import Android as cls
     elif platform == "windows":
         from .win import Windows as cls
@@ -97,10 +107,10 @@ def on_platform(platforms):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            pf = device_platform()
-            if pf is None:
+            if G.DEVICE is None:
                 raise RuntimeError("Device not initialized yet.")
-            if pf not in platforms:
+            pf = device_platform()
+            if pf in NATIVE_PFS and pf not in platforms:
                 raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, platforms))
             r = f(*args, **kwargs)
             return r
