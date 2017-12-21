@@ -86,8 +86,6 @@ def import_device_cls(platform):
         from .android import Android as cls
     elif platform == "windows":
         from .win import Windows as cls
-    elif platform == "windows-inide":
-        from .win import WindowsInIDE as cls
     elif platform == "ios":
         from .ios import IOS as cls
     else:

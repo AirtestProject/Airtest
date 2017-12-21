@@ -203,7 +203,7 @@ def home():
 
 
 @logwrap
-@on_platform(["Android", "Windows", "WindowsInIDE", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def touch(v, **kwargs):
     """
     Perform the touch action on the device screen
@@ -226,7 +226,7 @@ def touch(v, **kwargs):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "WindowsInIDE", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Perform the swipe action on the device screen.
@@ -286,7 +286,7 @@ def pinch(in_or_out='in', center=None, percent=0.5):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "WindowsInIDE", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def keyevent(keyname, **kwargs):
     """
     Perform key event on the device
@@ -301,7 +301,7 @@ def keyevent(keyname, **kwargs):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "WindowsInIDE", "IOS"])
+@on_platform(["Android", "Windows", "IOS"])
 def text(text, enter=True):
     """
     Input text on the target device. Text input widget must be active first.

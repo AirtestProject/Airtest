@@ -36,8 +36,6 @@ class Windows(Device):
 
     def _init_connect(self, handle, kwargs):
         if handle:
-            if isinstance(handle, str) and handle.isdigit():
-                handle = int(handle)
             self.connect(handle=handle)
         elif kwargs:
             self.connect(**kwargs)
