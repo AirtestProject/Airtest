@@ -86,7 +86,6 @@ class Windows(Device):
         """
         if not filename:
             filename = "tmp.png"
-        print("snapshot", self._top_window.handle, self.app)
         if self.app:
             screenshot(filename, self._top_window.handle)
         else:
