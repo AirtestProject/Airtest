@@ -97,8 +97,82 @@ following:
     home()
     uninstall("package_name_of_your_apk")
 
+
 For more detailed info, please refer to full `Airtest Python API
 reference`_ or take a look at `API code`_
+
+
+Connect Device
+..................
+
+Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+Using ``connect_device`` API you can connect to any android device or windows application.
+
+.. code:: python
+
+    connect_device("platform://host:port/uuid?param=value&param2=value2")
+
+
+Connect android device
+**************************
+
+Local device
+
+1. Connect your android phone to your PC with usb
+2. Use ``adb devices`` to make sure the state is ``device``
+3. Connect device in Airtest
+4. If you have multiple devices or even remote devices, use more params to specify the device
+
+.. code:: python
+
+    # connect a local adb device using default params
+    connect_device("android:///")
+
+    # connect a remote device using custom params
+    connect_device("android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb")
+
+
+Connect windows application
+****************************
+
+.. code:: python
+
+    # connect local windows desktop
+    connect_device("Windows:///")
+
+    # connect local windows application
+    connect_device("Windows:///title_re=unity.*")
+
+
+For more windows params, please see **pywinauto** documentation.
+
+
+Simulate Input
+...............
+
+Following APIs are fully supported:
+1. touch
+2. swipe
+3. text
+4. keyevent
+5. snapshot
+6. wait
+
+More APIs are available, some of which may be platform specific, please see `API docs`_ for more information.
+
+
+Make Assertion
+...............
+
+Airtest provide some assert functions, including:
+1. assert_exists
+2. assert_not_exists
+3. assert_equal
+4. assert_not_equal
+
+When assertion fails, it will raise ``AssertsionError``. And you will see all assertions in the html report.
+
+
 
 
 Trying Samples
