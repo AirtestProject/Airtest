@@ -119,4 +119,4 @@ def run_script(parsed_args, testcase_cls=AirtestCase):
     suite.addTest(testcase_cls())
     result = unittest.TextTestRunner(verbosity=0).run(suite)
     if not result.wasSuccessful():
-        exit(-1)
+        sys.exit(-1)
