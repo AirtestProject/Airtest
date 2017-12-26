@@ -1145,7 +1145,7 @@ class ADB(object):
         """
         self.shell(['pm', 'clear', package])
 
-    def get_ip_address(adb):
+    def get_ip_address(self):
         """
         Perform several set of commands to obtain the IP address
             * `adb shell netcfg | grep wlan0`
@@ -1157,7 +1157,7 @@ class ADB(object):
 
         """
         try:
-            res = adb.shell('netcfg | grep wlan0')
+            res = self.shell('netcfg | grep wlan0')
         except AdbShellError:
             res = ''
         matcher = re.search(r' ((\d+\.){3}\d+)/\d+', res)
@@ -1165,7 +1165,7 @@ class ADB(object):
             return matcher.group(1)
         else:
             try:
-                res = adb.shell('ifconfig')
+                res = self.shell('ifconfig')
             except AdbShellError:
                 res = ''
             matcher = re.search(r'wlan0.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
@@ -1173,7 +1173,7 @@ class ADB(object):
                 return matcher.group(1)
             else:
                 try:
-                    res = adb.shell('getprop dhcp.wlan0.ipaddress')
+                    res = self.shell('getprop dhcp.wlan0.ipaddress')
                 except AdbShellError:
                     res = ''
                 matcher = IP_PATTERN.search(res)

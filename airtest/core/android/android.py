@@ -344,6 +344,19 @@ class Android(Device):
         """
         return self.adb.getprop(key, strip)
 
+    def get_ip_address(self):
+        """
+        Perform several set of commands to obtain the IP address
+            * `adb shell netcfg | grep wlan0`
+            * `adb shell ifconfig`
+            * `adb getprop dhcp.wlan0.ipaddress`
+
+        Returns:
+            None if no IP address has been found, otherwise return the IP address
+
+        """
+        return self.adb.get_ip_address()
+
     def get_top_activity(self):
         """
         Get the top activity
@@ -353,6 +366,31 @@ class Android(Device):
 
         """
         return self.adb.get_top_activity()
+
+    def get_top_activity_name_and_pid(self):
+        import re
+        dat = self.adb.shell('dumpsys activity top')
+        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        m = activityRE.search(dat)
+        if m:
+            return (m.group(1), m.group(2), m.group(3))
+        else:
+            warnings.warn("NO MATCH:" + dat)
+            return None
+
+    def get_top_activity_name(self):
+        """
+        Get the top activity name
+
+        Returns:
+            package, activity and pid
+
+        """
+        tanp = self.get_top_activity_name_and_pid()
+        if tanp:
+            return tanp[0] + '/' + tanp[1]
+        else:
+            return None
 
     def is_keyboard_shown(self):
         """
