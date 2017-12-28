@@ -26,6 +26,7 @@ class LogToHtml(object):
         self.logfile = os.path.join(log_root, logfile)
         self._load()
         self.error_str = ""
+        self._steps = None
         self.all_step = None
 
     def _load(self):
@@ -80,6 +81,7 @@ class LogToHtml(object):
 
                 temp = {}
 
+        self._steps = steps
         self.all_step = all_step
         if steps:
             self.run_start = steps[0].get('start_time')
@@ -94,7 +96,6 @@ class LogToHtml(object):
                             3=screenshot 2= _loop_find  1=本身操作
         keyevent,text,sleep 和图片无关，直接显示一条说明就可以
                             1= 本身
-        server_call没有log
         assert 类似于exist
         """
         scale = LogToHtml.scale
@@ -113,9 +114,6 @@ class LogToHtml(object):
                 step['target_pos'] = step[1].get('args')
 
             if step['type'] == 'snapshot':
-                # 对于截图的展示，把截图内容本身作为运行时屏幕，截图文件的文件名作为错误描述
-                #step['screenshot'] = os.path.join(self.log_root, os.path.dirname(step[2]['screen']), step[1]['args'][0])
-                #step['screenshot'] = os.path.join(self.log_root, step[2]['screen'])
                 step['screenshot'] = step[1]['ret'] or ""
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
             elif step.get(2):
@@ -191,66 +189,19 @@ class LogToHtml(object):
             step['title'] = self.func_title(step)
             return step
 
-        elif step['type'] in ['server_call']:
-            args = step[1]["args"]
-            # 单独对server_call进行步骤说明。
-            step['desc'] = u'server_call [ "%s" ] ' %(args[0])
-            step['title'] = self.func_title(step)
-            return step
-
         step['desc'] = self.func_desc(step)
         step['title'] = self.func_title(step)
         return step
 
-    def translate_poco_step(self, step, prev_step=None):
-        """
-        处理poco的相关操作，参数与airtest的不同，由一个截图和一个操作构成，需要合成一个步骤
-        Parameters
-        ----------
-        step 一个完整的操作，如click
-        prev_step 前一个步骤，应该是截图
-
-        Returns
-        -------
-
-        """
-        ret = {}
-        if prev_step:
-            ret.update(prev_step)
-        ret['type'] = step[1].get("name", "")
-        if step.get('trace'):
-            ret['trace'] = step['trace']
-            ret['traceback'] = step.get('traceback')
-        if ret['type'] == 'touch':
-            # 取出点击位置
-            if step[1]['args'] and len(step[1]['args'][0]) == 2:
-                pos = step[1]['args'][0]
-                ret['target_pos'] = [int(pos[0]), int(pos[1])]
-                ret['top'] = ret['target_pos'][1]
-                ret['left'] = ret['target_pos'][0]
-        elif ret['type'] == 'swipe':
-            if step[1]['args'] and len(step[1]['args'][0]) == 2:
-                pos = step[1]['args'][0]
-                ret['target_pos'] = [int(pos[0]), int(pos[1])]
-                ret['top'] = ret['target_pos'][1]
-                ret['left'] = ret['target_pos'][0]
-            # swipe 需要显示一个方向
-            vector = step[1]["kwargs"].get("vector")
-            if vector:
-                ret['swipe'] = self.dis_vector(vector)
-                ret['vector'] = vector
-
-        ret['desc'] = self.func_desc_poco(ret)
-        ret['title'] = self.func_title(ret)
-        return ret
-
-    def to_percent(self, p):
+    @staticmethod
+    def to_percent(p):
         if not p:
             return ''
         
         return round(p * 100, 1)
 
-    def div_rect(self, r, offset=None):
+    @staticmethod
+    def div_rect(r, offset=None):
         if not r:
             return {}
         
@@ -269,7 +220,8 @@ class LogToHtml(object):
         
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
-    def func_desc(self, step):
+    @staticmethod
+    def func_desc(step):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
@@ -287,12 +239,12 @@ class LogToHtml(object):
             "assert_exists": u"目标图片应当存在",
             "assert_not_exists": u"目标图片应当不存在",
             "traceback": u"异常信息",
-
             # "snapshot": step[1]['args'][0],
         }
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
 
-    def func_title(self, step):
+    @staticmethod
+    def func_title(step):
         title = {
             "touch": u"点击",
             "swipe": u"滑动",
@@ -311,8 +263,8 @@ class LogToHtml(object):
         name = step['type']
         return title.get(name, name)
 
-    def dis_vector(self, v):
-
+    @staticmethod
+    def dis_vector(v):
         x = v[0]
         y = v[1]
         a = ''
@@ -327,15 +279,15 @@ class LogToHtml(object):
             b = u'下'
         return a+b
 
-    def _render(self, template_name, **template_vars):
+    @staticmethod
+    def _render(template_name, **template_vars):
         """ 用jinja2输出html 
         """
         TEMPLATE_DIR = '.'
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
-            extensions=(
-            ),
-            autoescape = True
+            extensions=(),
+            autoescape=True
         )
         template = env.get_template(template_name)
         return template.render(**template_vars)
