@@ -5,7 +5,7 @@ This module contains the Airtest Core APIs.
 import os
 import time
 from airtest.utils.compat import urlparse, parse_qsl
-from airtest.core.cv import Template, loop_find
+from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, set_logdir, logwrap, on_platform, import_device_cls, delay_after_operation
 from airtest.core.settings import Settings as ST
@@ -219,6 +219,7 @@ def touch(v, **kwargs):
         except TargetNotFoundError:
             raise
     else:
+        try_log_screen()
         pos = v
 
     G.DEVICE.touch(pos, **kwargs)
@@ -250,6 +251,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     if isinstance(v1, Template):
         pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
     else:
+        try_log_screen()
         pos1 = v1
 
     if v2:

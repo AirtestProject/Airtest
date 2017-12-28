@@ -104,18 +104,17 @@ class LogToHtml(object):
 
         if step['type'] in self.img_type:
             # 一般来说会有截图 没有这层就无法找到截图了
-            st = 2
+            st = 1
             while st in step:
                 if 'screen' in step[st]:
                     step['screenshot'] = os.path.join(self.log_root, step[st]['screen'])
                     break
                 st += 1
-            if 'screenshot' not in step:
-                step['target_pos'] = step[1].get('args')
 
             if step['type'] == 'snapshot':
                 step['screenshot'] = step[1]['ret'] or ""
                 step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
+
             elif step.get(2):
                 if step['type'] in self.img_type:
                     # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
@@ -135,8 +134,8 @@ class LogToHtml(object):
                         step['record_pos'] = step[2]['args'][0].get("record_pos", None)
             
                 if not step['trace']:
-                    step['target_pos'] = step[2].get('ret')
-                    if step['target_pos']:
+                    if step[2]["name"] == "loop_find":
+                        step['target_pos'] = step[2]['ret']
                         cv = step[2].get('cv', {})
                         step['confidence'] = self.to_percent(cv.get('confidence'))
 
@@ -144,21 +143,22 @@ class LogToHtml(object):
                         #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
                         if 'wnd_pos' in step[2]:
                             wnd_pos = step[2]['wnd_pos']
-                            # mark_pos = (step['target_pos'][0] - step["wnd_pos"][0], step[2]['target_pos'][1] - step[2]["wnd_pos"][1])
                             mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
                         else:
                             mark_pos = step['target_pos']
-                        
-                        # 如果点击坐标target_pos和识别坐标result不同，绘制识别区域rectangle时，需要进行相应的偏移：
-                        # if mark_pos != cv.get('result'):
-                        #     operate_pos = mark_pos
-                        #     match_pos = cv.get('result')
-                        #     offset = (operate_pos[0] - match_pos[0], operate_pos[1] - match_pos[1])
-                        #     step['rect'] = self.div_rect(cv.get('rectangle', []), offset)
-                        # else:
+
                         step['rect'] = self.div_rect(cv.get('rectangle', []))
                         step['top'] = round(mark_pos[1])
                         step['left'] = round(mark_pos[0])
+
+            if step['type'] == 'touch':
+                try:
+                    target = step[1]['args'][0]
+                except (IndexError, KeyError):
+                    target = None
+                if isinstance(target, (tuple, list)):
+                    step['target_pos'] = target
+                    step['left'], step['top'] = target
 
             # swipe 需要显示一个方向
             if step['type'] == 'swipe':
@@ -185,7 +185,7 @@ class LogToHtml(object):
             if len(args) >= 2:
                 step['assert'] = args[2]
             # 单独对assert_equal和assert_not_equal进行步骤说明。
-            step['desc'] = u'assert_equal [ "%s", "%s", "%s" ]' %(args[0], args[1], args[2])
+            step['desc'] = u'assert_equal [ "%s", "%s", "%s" ]' % (args[0], args[1], args[2])
             step['title'] = self.func_title(step)
             return step
 
