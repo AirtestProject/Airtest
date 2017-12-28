@@ -5,7 +5,6 @@ import os
 import io
 import jinja2
 from collections import defaultdict
-from airtest.report.report_gif import gen_gif
 
 LOGFILE = "log.txt"
 
@@ -439,8 +438,6 @@ def get_parger(ap):
     ap.add_argument("--outfile", help="output html filepath, default to be log.html", default="log.html")
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
-    ap.add_argument("--gif", help="generate gif, default to be log.gif", nargs="?", const="log.gif")
-    ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
     ap.add_argument("--record", help="add screen record to log.html", nargs="+")
     return ap
@@ -471,29 +468,15 @@ def main(args):
     # print(author)
     rpt = LogToHtml(path, log_root, static_root, author)
 
-    if args.gif is not None:
-        # gen gif
-        steps = rpt.analyse()
-        if args.gif_size:
-            try:
-                gif_size = float(args.gif_size)
-                if 0.0 > gif_size or gif_size > 1.0:
-                    gif_size = 0.3
-            except ValueError:
-                gif_size = 0.3
-        else:
-            gif_size = 0.3
-        gen_gif(log_root, steps, output=args.gif, size=gif_size)
+    # gen html report
+    if args.record:
+        record = args.record
     else:
-        # gen html report
-        if args.record:
-            record = args.record
-        else:
-            record = []
-        html = rpt.render(tpl, record_name=record)
-        print(outfile)
-        with io.open(outfile, 'w', encoding="utf-8") as f:
-            f.write(html)
+        record = []
+    html = rpt.render(tpl, record_name=record)
+    print(outfile)
+    with io.open(outfile, 'w', encoding="utf-8") as f:
+        f.write(html)
 
 
 if __name__ == "__main__":
