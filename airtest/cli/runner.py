@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import sys
 import re
 import shutil
 
@@ -52,13 +53,6 @@ class AirtestCase(unittest.TestCase):
         # setup script exec scope
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
-
-        # add user defined global varibles
-        if args.kwargs:
-            print("load kwargs", repr(args.kwargs))
-            for kv in args.kwargs.split(","):
-                k, v = kv.split("=")
-                cls.scope[k] = v
 
     def setUp(self):
         if self.pre:
