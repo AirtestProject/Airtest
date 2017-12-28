@@ -221,12 +221,8 @@
             </div>
           </div>
 
-        <!-- gif和录屏 -->
+        <!-- 录屏 -->
          <div class="row gif-wrap">
-          <div class="col-md-6">
-            <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
-          </div>
-
           <div class="col-md-6">
             {% if records %}
               {% for r in records %}
@@ -240,7 +236,7 @@
               <p>暂无设备录屏信息</p>
             {% endif %}
           </div>
-         </div><!-- /.gif -->
+         </div>
 
         <!--单步-->
         {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
@@ -499,6 +495,3 @@
   </script>
   </body>
 </html>
-
-
-

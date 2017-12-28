@@ -5,7 +5,7 @@ import os
 import sys
 import re
 import shutil
-
+import  traceback
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST  # noqa
@@ -33,7 +33,9 @@ class AirtestCase(unittest.TestCase):
         for dev in devices:
             connect_device(dev)
 
+        cls.args = args
         cls.script = args.script
+        cls.recording = args.recording
         cls.pre = args.pre
         cls.post = args.post
 
@@ -43,7 +45,8 @@ class AirtestCase(unittest.TestCase):
         # set log dir
         if args.log is True:
             print("save log in <`script`.owl path>/log")
-            set_logdir(os.path.join(cls.script, "log"))
+            args.log = os.path.join(cls.script, "log")
+            set_logdir(args.log)
         elif args.log:
             print("save log in '%s'" % args.log)
             set_logdir(args.log)
@@ -55,11 +58,26 @@ class AirtestCase(unittest.TestCase):
         cls.scope["exec_script"] = cls.exec_other_script
 
     def setUp(self):
+        if self.args.log and self.recording:
+            for dev in G.DEVICE_LIST:
+                try:
+                    dev.start_recording()
+                except:
+                    traceback.print_exc()
+
         if self.pre:
             log("pre_script", {"script": self.pre})
             self.exec_other_script(self.pre)
 
     def tearDown(self):
+        if self.args.log and self.recording:
+            for k, dev in enumerate(G.DEVICE_LIST):
+                try:
+                    output = os.path.join(self.args.log, "recording_%d.mp4" % k)
+                    dev.stop_recording(output)
+                except:
+                    traceback.print_exc()
+
         if self.post:
             log("post_script", {"script": self.pre})
             self.exec_other_script(self.post)

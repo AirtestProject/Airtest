@@ -18,13 +18,11 @@ class LogToHtml(object):
         self.script_root = script_root
         self.log_root = log_root
         self.static_root = static_root or os.path.dirname(__file__)
-        self.test_result = None
+        self.test_result = True
         self.run_start = None
         self.run_end = None
         self.author = author
         self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
-        self.uiautomator_img_type = ('click', 'long_click', 'ui.swipe', 'drag', 'fling', 'scroll', 'press', 'clear_text', 'set_text', 'end', 'assert')
-        self.uiautomator_ignore_type = ('select', )
         self.logfile = os.path.join(log_root, logfile)
         self._load()
         self.error_str = ""
@@ -40,10 +38,9 @@ class LogToHtml(object):
         """ 进一步解析成模板可显示的内容 """
         steps = []
         temp = {}
-        self.test_result = True
         current_step = 'main_script'
-        prev_type = ''
         all_step = defaultdict(list)
+
         for log in self.log:
             if log["depth"] == 0 and log.get("tag") in ["main_script", "pre_script", "post_script"]:
                 # 根据脚本执行的pre,main,post，将log区分开
@@ -76,18 +73,11 @@ class LogToHtml(object):
                 else:
                     temp['trace'] = False
 
-                # poco语句的判定标准是，depth只有1，且上一个步骤是截图步骤
-                if prev_type == 'snapshot' and 2 not in temp and log.get("name") in self.img_type:
-                    temp = self.translate_poco_step(temp, steps[-1])
-                    if len(all_step[current_step]) > 0:
-                        all_step[current_step][-1] = temp
-                else:
-                    temp = self.translate(temp)
-                    if temp is not None:
-                        steps.append(temp)
-                        all_step[current_step].append(temp)
+                temp = self.translate(temp)
+                if temp is not None:
+                    steps.append(temp)
+                    all_step[current_step].append(temp)
 
-                prev_type = temp['type']
                 temp = {}
 
         self.all_step = all_step
@@ -111,10 +101,7 @@ class LogToHtml(object):
         self.scale = scale
         step['type'] = step[1]['name']
 
-        if step['type'] in self.uiautomator_ignore_type:
-            return None
-
-        if step['type'] in self.img_type or step['type'] in self.uiautomator_img_type:
+        if step['type'] in self.img_type:
             # 一般来说会有截图 没有这层就无法找到截图了
             st = 2
             while st in step:
@@ -287,7 +274,6 @@ class LogToHtml(object):
         name = step['type']
         desc = {
             "snapshot": u"截图描述：%s" % step.get('text', ''),
-            # "_loop_find":"寻找目标位置",
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
 
@@ -304,18 +290,7 @@ class LogToHtml(object):
 
             # "snapshot": step[1]['args'][0],
         }
-
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
-
-    def func_desc_poco(self, step):
-        """ 把对应的poco操作显示成中文"""
-        desc = {
-            "touch": u"点击UI组件 {name}".format(name=step.get("text", "")),
-        }
-        if step['type'] in desc:
-            return desc.get(step['type'])
-        else:
-            return self.func_desc(step)
 
     def func_title(self, step):
         title = {
@@ -362,23 +337,13 @@ class LogToHtml(object):
             ),
             autoescape = True
         )
-        #env.globals['static'] = STATIC
         template = env.get_template(template_name)
         return template.render(**template_vars)
 
-    def render(self, template_name, record_name=[]):
-        records = []
-        # 录屏文件如果存在，就放进html里
-        for f in record_name:
-            ext = os.path.splitext(f)[1]
-            if not ext:
-                f = f + ".mp4"
-            if os.path.splitext(f)[1] not in [".mp4", ".MP4"]:
-                continue
-            if os.path.isfile(f):
-                records.append(f)
-            elif os.path.isfile(os.path.join(self.log_root, f)):
-                records.append(os.path.join(self.log_root, f))
+    def render(self, template_name, record_list=None):
+        if not record_list:
+            record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
+        records = [os.path.join(self.log_root, f) for f in record_list]
 
         if not self.static_root.endswith(os.path.sep):
             self.static_root += "/"
@@ -394,7 +359,7 @@ class LogToHtml(object):
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
         data['run_start'] = self.run_start
-        data['static_root'] = self.static_root  # .encode('string-escape') if isinstance(self.static_root, str) else self.static_root
+        data['static_root'] = self.static_root
         data['author'] = self.author
         data['records'] = records
 
@@ -408,7 +373,6 @@ def get_script_name(path):
     for p in pp:
         if p.endswith('.owl'):
             return p
-
     return ''
 
 
@@ -439,7 +403,7 @@ def get_parger(ap):
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
-    ap.add_argument("--record", help="add screen record to log.html", nargs="+")
+    ap.add_argument("--record", help="custom screen record file path", nargs="+")
     return ap
 
 
@@ -449,6 +413,7 @@ def main(args):
     basename = os.path.basename(path).split(".")[0]
     py_file = os.path.join(path, basename + ".py")
     author = get_file_author(py_file)
+
     # output html filepath
     outfile = args.outfile
     # static file root
@@ -459,13 +424,8 @@ def main(args):
 
     # log data root
     log_root = args.log_root or os.path.join(path, "log")
-
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
-    # TODO:  File "c:\python27\lib\site-packages\nose\plugins\xunit.py", line 129, in write
-    # UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
-
-    # print(author)
     rpt = LogToHtml(path, log_root, static_root, author)
 
     # gen html report
@@ -473,7 +433,7 @@ def main(args):
         record = args.record
     else:
         record = []
-    html = rpt.render(tpl, record_name=record)
+    html = rpt.render(tpl, record_list=record)
     print(outfile)
     with io.open(outfile, 'w', encoding="utf-8") as f:
         f.write(html)
