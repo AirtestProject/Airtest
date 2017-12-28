@@ -29,6 +29,7 @@ class LogToHtml(object):
         self.logfile = os.path.join(log_root, logfile)
         self._load()
         self.error_str = ""
+        self.all_step = None
 
     def _load(self):
         # 假如log.txt不存在，以前是直接抛出异常，现在改为读不到文件就设置log为空，看看会不会有什么问题
@@ -38,7 +39,7 @@ class LogToHtml(object):
 
     def analyse(self):
         """ 进一步解析成模板可显示的内容 """
-        step = []
+        steps = []
         temp = {}
         self.test_result = True
         current_step = 'main_script'
@@ -78,26 +79,24 @@ class LogToHtml(object):
 
                 # poco语句的判定标准是，depth只有1，且上一个步骤是截图步骤
                 if prev_type == 'snapshot' and 2 not in temp and log.get("name") in self.img_type:
-                    temp = self.translate_poco_step(temp, step[-1])
+                    temp = self.translate_poco_step(temp, steps[-1])
                     if len(all_step[current_step]) > 0:
                         all_step[current_step][-1] = temp
-                        step[-1] = temp
                 else:
                     temp = self.translate(temp)
                     if temp is not None:
+                        steps.append(temp)
                         all_step[current_step].append(temp)
-                        step.append(temp)
 
                 prev_type = temp['type']
                 temp = {}
 
-        self.step = step
         self.all_step = all_step
-        if step:
-            self.run_start = step[0].get('start_time')
-            self.run_end = step[-1].get('end_time')
+        if steps:
+            self.run_start = steps[0].get('start_time')
+            self.run_end = steps[-1].get('end_time')
 
-        return step
+        return steps
 
     def translate(self, step):
         """
@@ -385,13 +384,13 @@ class LogToHtml(object):
         if not self.static_root.endswith(os.path.sep):
             self.static_root += "/"
 
+        if self.all_step is None:
+            self.analyse()
+
         data = {}
-        data['steps'] = self.analyse()
         data['all_steps'] = self.all_step
         data['host'] = self.script_root
-        data['img_type'] = self.img_type
-        data['uiautomator_img_type'] = self.uiautomator_img_type
-        data['script_name'] = get_script_name(self.script_root)     
+        data['script_name'] = get_script_name(self.script_root)
         data['scale'] = self.scale
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
@@ -399,24 +398,19 @@ class LogToHtml(object):
         data['static_root'] = self.static_root  # .encode('string-escape') if isinstance(self.static_root, str) else self.static_root
         data['author'] = self.author
         data['records'] = records
+
+        from pprint import pprint
+        pprint(data["all_steps"]["main_script"])
         return self._render(template_name, **data)
 
 
 def get_script_name(path):
-
     pp = path.replace('\\', '/').split('/')
     for p in pp:
         if p.endswith('.owl'):
             return p
 
     return ''
-
-
-def safe_percent(a, b):
-    if b:
-        return round(a * 100.0 / b, 1)
-    else:
-        return 0
 
 
 def get_file_author(file_path):
@@ -449,7 +443,6 @@ def get_parger(ap):
     ap.add_argument("--gif_size", help="gif thumbnails size (0.1-1), default 0.3", nargs="?", const="0.3", default="0.3")
     ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
     ap.add_argument("--record", help="add screen record to log.html", nargs="+")
-    ap.add_argument("--new_report", nargs='?', const=True, default=False)
     return ap
 
 
@@ -507,5 +500,4 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
     args = get_parger(ap).parse_args()
-
     main(args)
