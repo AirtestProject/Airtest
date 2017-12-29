@@ -315,8 +315,6 @@ class LogToHtml(object):
         data['author'] = self.author
         data['records'] = records
 
-        from pprint import pprint
-        pprint(data["all_steps"]["main_script"])
         return self._render(template_name, **data)
 
 
