@@ -372,7 +372,8 @@ class Collector(object):
         # 如果获取不到pid相关的数据，说明已经没有在运行，返回0或者抛出异常
         try:
             output = self.adb.shell("cat /proc/{pid}/stat".format(pid=self.pid))
-        except AdbShellError:
+            assert len(output) != 0
+        except (AdbShellError, AssertionError):
             LOGGING.error("No such file: /proc/{pid}/stat".format(pid=self.pid))
             self._init_data()
             return None
