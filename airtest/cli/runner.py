@@ -16,7 +16,7 @@ from copy import copy
 class AirtestCase(unittest.TestCase):
 
     SCRIPTHOME = "."
-    SCRIPTEXT = ".owl"
+    SCRIPTEXT = ".air"
     TPLEXT = ".png"
 
     @classmethod
@@ -44,8 +44,8 @@ class AirtestCase(unittest.TestCase):
 
         # set log dir
         if args.log is True:
-            print("save log in <`script`.owl path>/log")
-            args.log = os.path.join(cls.script, "log")
+            print("save log in %s/log" % args.script)
+            args.log = os.path.join(args.script, "log")
             set_logdir(args.log)
         elif args.log:
             print("save log in '%s'" % args.log)
