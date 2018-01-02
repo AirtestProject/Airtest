@@ -5,7 +5,7 @@ import os
 import sys
 import re
 import shutil
-import  traceback
+import traceback
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST  # noqa
