@@ -12,7 +12,7 @@ class G(object):
     """Represent the globals variables"""
     BASEDIR = None
     LOGGER = AirtestLogger(None)
-    LOGGING = get_logger("main")
+    LOGGING = get_logger("airtest.core.api")
     SCREEN = None
     DEVICE = None
     DEVICE_LIST = []

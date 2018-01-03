@@ -12,7 +12,7 @@ from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready, ready_method
 from airtest.utils.logger import get_logger
-LOGGING = get_logger('minitouch')
+LOGGING = get_logger(__name__)
 
 
 class Minitouch(object):

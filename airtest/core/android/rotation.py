@@ -5,7 +5,7 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
-LOGGING = get_logger('rotation')
+LOGGING = get_logger(__name__)
 
 
 class RotationWatcher(object):

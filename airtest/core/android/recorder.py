@@ -6,7 +6,7 @@ from airtest.core.error import AirtestError
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import on_method_ready
-LOGGING = get_logger('recorder')
+LOGGING = get_logger(__name__)
 
 
 class Recorder(Yosemite):

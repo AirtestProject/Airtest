@@ -18,7 +18,7 @@ from airtest.core.device import Device
 from airtest.utils.logger import get_logger
 
 
-logger = get_logger("ios")
+logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
 

@@ -11,7 +11,7 @@ from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
-LOGGING = get_logger('android')
+LOGGING = get_logger(__name__)
 
 
 class Android(Device):
