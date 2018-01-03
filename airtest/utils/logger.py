@@ -1,13 +1,21 @@
 import logging
-import sys
 
 
-logging.basicConfig(
-    # level=logging.DEBUG,  # do not set level in global, to avoid other modules output
-    format='[%(asctime)s][%(levelname)s]<%(name)s> %(message)s', 
-    datefmt='%I:%M:%S',
-    stream=sys.stdout
-)
+def init_logging():
+    # logger = logging.root
+    # use 'airtest' as root logger name to prevent changing other modules' logger
+    logger = logging.getLogger("airtest")
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        fmt='[%(asctime)s][%(levelname)s]<%(name)s> %(message)s',
+        datefmt='%I:%M:%S'
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
+init_logging()
 
 
 def get_logger(name):
