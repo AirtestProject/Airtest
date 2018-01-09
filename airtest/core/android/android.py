@@ -131,7 +131,7 @@ class Android(Device):
             output from installation process
 
         """
-        self.adb.install_app(filepath, replace=replace)
+        return self.adb.install_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
         """
