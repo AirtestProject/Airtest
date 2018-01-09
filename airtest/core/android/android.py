@@ -17,6 +17,10 @@ from airtest.core.android.performance import Performance
 from airtest.core.utils.compat import apkparser
 LOGGING = get_logger('android')
 
+Minitouch_blacklist = [
+    "SM-G9500"
+]
+
 
 class Android(Device):
 
@@ -33,7 +37,13 @@ class Android(Device):
         self._size = None
         self._init_rw()
         self._init_cap(cap_method)
-        self._init_touch(True)
+        self.device_model = self.getprop("ro.product.model")
+        if self.device_model in Minitouch_blacklist:
+            self._init_touch(False)
+            self.blacklist_device = True
+        else:
+            self._init_touch(True)
+            self.blacklist_device = False
         self.shell_ime = shell_ime
         self.performance = None
 
@@ -266,7 +276,8 @@ class Android(Device):
             self.ime.end()
 
     def touch(self, pos, times=1, duration=0.01):
-        pos = self._transformPointByOrientation(pos)
+        if not self.blacklist_device:
+            pos = self._transformPointByOrientation(pos)
         for _ in range(times):
             if self.minitouch:
                 self.minitouch.touch(pos, duration=duration)
