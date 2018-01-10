@@ -7,7 +7,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='airtest',
-    version='0.1.3',
+    version='0.1.4',
     author='Netease Game',
     author_email='gzliuxin@corp.netease.com',
     description='Automated test framework for android/iOS/Windows',
