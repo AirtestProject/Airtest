@@ -53,3 +53,6 @@ class Device(with_metaclass(MetaDevice, object)):
 
     def uninstall_app(self, package):
         raise NotImplementedError
+
+    def get_current_resolution(self):
+        raise NotImplementedError

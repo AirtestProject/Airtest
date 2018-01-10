@@ -8,7 +8,7 @@ from airtest.utils.logger import get_logger
 from .utils import generate_result, check_source_larger_than_search
 from .template import find_template, _get_target_rectangle
 
-LOGGING = get_logger("aircv")
+LOGGING = get_logger(__name__)
 
 
 def find_template2(im_search, im_source, ignore=None, focus=None, threshold=0.8, rgb=False):

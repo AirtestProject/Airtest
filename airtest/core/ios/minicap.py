@@ -9,7 +9,7 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup
 
-LOGGING = get_logger('android')
+LOGGING = get_logger(__name__)
 
 
 class MinicapIOS(object):

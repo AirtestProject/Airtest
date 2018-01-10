@@ -5,7 +5,7 @@ import os
 import sys
 import re
 import shutil
-import  traceback
+import traceback
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST  # noqa
@@ -21,6 +21,7 @@ class AirtestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.args = args
         # init devices
         if isinstance(args.device, list):
             devices = args.device
@@ -33,14 +34,8 @@ class AirtestCase(unittest.TestCase):
         for dev in devices:
             connect_device(dev)
 
-        cls.args = args
-        cls.script = args.script
-        cls.recording = args.recording
-        cls.pre = args.pre
-        cls.post = args.post
-
         # set base dir to find tpl
-        G.BASEDIR = cls.script
+        G.BASEDIR = args.script
 
         # set log dir
         if args.log is True:
@@ -58,19 +53,19 @@ class AirtestCase(unittest.TestCase):
         cls.scope["exec_script"] = cls.exec_other_script
 
     def setUp(self):
-        if self.args.log and self.recording:
+        if self.args.log and self.args.recording:
             for dev in G.DEVICE_LIST:
                 try:
                     dev.start_recording()
                 except:
                     traceback.print_exc()
 
-        if self.pre:
-            log("pre_script", {"script": self.pre})
-            self.exec_other_script(self.pre)
+        if self.args.pre:
+            log("pre_script", {"script": self.args.pre})
+            self.exec_other_script(self.args.pre)
 
     def tearDown(self):
-        if self.args.log and self.recording:
+        if self.args.log and self.args.recording:
             for k, dev in enumerate(G.DEVICE_LIST):
                 try:
                     output = os.path.join(self.args.log, "recording_%d.mp4" % k)
@@ -78,12 +73,13 @@ class AirtestCase(unittest.TestCase):
                 except:
                     traceback.print_exc()
 
-        if self.post:
-            log("post_script", {"script": self.pre})
-            self.exec_other_script(self.post)
+        if self.args.post:
+            log("post_script", {"script": self.args.post})
+            self.exec_other_script(self.args.post)
 
     def runTest(self):
-        scriptpath = self.script
+        log("main_script", {"script": self.args.script})
+        scriptpath = self.args.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         code = open(pyfilepath).read()
@@ -113,7 +109,7 @@ class AirtestCase(unittest.TestCase):
         scriptpath = os.path.join(cls.SCRIPTHOME, scriptpath)
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
-        sub_dirpath = os.path.join(cls.script, sub_dir)
+        sub_dirpath = os.path.join(cls.args.script, sub_dir)
         _copy_script(scriptpath, sub_dirpath)
         # read code
         pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
