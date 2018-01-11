@@ -10,6 +10,8 @@ from .screen import screenshot
 import time
 import subprocess
 
+from airtest.core.settings import Settings as ST  # noqa
+
 
 def require_app(func):
     @wraps(func)
@@ -278,6 +280,9 @@ class Windows(Device):
     def _action_pos(self, pos):
         if self.app:
             pos = self._windowpos_to_screenpos(pos)
+        # op_offset: caused by windows border
+        pos = (pos[0] + ST.OP_OFFSET[0], pos[1] + ST.OP_OFFSET[1])
+
         return pos
 
     def _windowpos_to_screenpos(self, pos):
