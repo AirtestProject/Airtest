@@ -285,8 +285,9 @@ class Android(Device):
                 self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5):
-        p1 = self._transformPointByOrientation(p1)
-        p2 = self._transformPointByOrientation(p2)
+        if not self.blacklist_device:
+            p1 = self._transformPointByOrientation(p1)
+            p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
