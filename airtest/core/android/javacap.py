@@ -5,7 +5,7 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.core.android.yosemite import Yosemite
 import struct
-LOGGING = get_logger('javacap')
+LOGGING = get_logger(__name__)
 
 
 class Javacap(Yosemite):

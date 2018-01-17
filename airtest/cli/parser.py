@@ -24,7 +24,7 @@ def runner_parser(ap=None):
     ap.add_argument("script", help="owl path")
     ap.add_argument("--device", help="connect dev by uri string, e.g. Android:///", nargs="?", action="append")
     ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
-    ap.add_argument("--kwargs", help="extra kwargs used in script as global variables, e.g. a=1,b=2")
+    ap.add_argument("--recording", help="record screen when running", nargs="?", const=True)
     ap.add_argument("--pre", help="owl run before script, setup environment")
     ap.add_argument("--post", help="owl run after script, clean up environment, will run whether script success or fail")
     return ap

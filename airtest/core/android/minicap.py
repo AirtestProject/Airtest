@@ -58,9 +58,9 @@ class Minicap(object):
             else:
                 LOGGING.debug(output)
                 LOGGING.debug('upgrade minicap to lastest version:%s', self.VERSION)
+                self.uninstall()
         else:
             LOGGING.debug('install minicap')
-        self.uninstall()
         self.install()
 
     def uninstall(self):

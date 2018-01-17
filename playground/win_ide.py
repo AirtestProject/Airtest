@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+import os
 import win32gui
 from pywinauto.win32structures import RECT
 from airtest import aircv
@@ -69,8 +71,11 @@ class WindowsInIDE(Windows):
                 screenshot(filename)
         else:
             screenshot(filename)
-        return aircv.imread(filename)
 
+        img = aircv.imread(filename)
+        os.remove(filename)
+
+        return img
 
 if __name__ == '__main__':
     from airtest.core.api import G

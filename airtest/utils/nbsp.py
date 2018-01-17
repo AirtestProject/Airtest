@@ -3,7 +3,7 @@ import time
 from threading import Thread, Event
 from .compat import queue
 from .logger import get_logger
-LOGGING = get_logger('nbsp')
+LOGGING = get_logger(__name__)
 
 
 class NonBlockingStreamReader:

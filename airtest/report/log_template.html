@@ -183,7 +183,7 @@
       <div class="row">
         <div id="main" class="main col-md-12">
 
-          {% if not steps %}
+          {% if not all_steps %}
           <h2>你没有眼花，这个Log文件就是一片空白</h2>
           {% endif %}
 
@@ -221,12 +221,8 @@
             </div>
           </div>
 
-        <!-- gif和录屏 -->
+        <!-- 录屏 -->
          <div class="row gif-wrap">
-          <div class="col-md-6">
-            <img id="gif" src="report.gif" alt="gif合成中，稍后将会加载">
-          </div>
-
           <div class="col-md-6">
             {% if records %}
               {% for r in records %}
@@ -240,18 +236,22 @@
               <p>暂无设备录屏信息</p>
             {% endif %}
           </div>
-         </div><!-- /.gif -->
+         </div>
 
-          {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
-          {% for t in step_type %}
-            {% for step in all_steps[t] %}
+        <!--单步-->
+        {% set step_type = ['pre_script', 'main_script', 'post_script'] %}
+        {% for t in step_type %}
+          {% for step in all_steps[t] %}
           <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
             <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
             <hr>
             <div class="step_content">
-                {% if step.type in img_type or step.type in uiautomator_img_type %}
-                {% if step.type in img_type and step.image_to_find %}
+              <!--单步操作-->
+              <!--带图片的操作-->
+              {% if step.screenshot %}
+
+                {% if step.image_to_find %}
                 <div class="row">
                   <div class="col-xs-3">
                     <div class="point">
@@ -281,7 +281,7 @@
                       <img class="fancybox scale" src="{{step.screenshot}}" title="{{step.screenshot}}">
                       {% if not step.trace and step.target_pos %}
                       <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{step.top}}" data-left="{{step.left}}" style="top:{{step.top}}px;left:{{step.left}}px;">
-                      <!-- rect area -->
+                        <!-- rect area -->
                         {% if step.rect %}
                         <div class="rect" {% for k,v in step.rect.items() %}data-{{k}}="{{v}}"{% endfor %}></div>
                         {% endif %}
@@ -291,31 +291,34 @@
                     <div class="screen_place"></div>
                   </div>
                 </div>
-                  {% if step.confidence %}
-                  <p class="desc"><span class="point glyphicon glyphicon-play"></span>匹配度: {{step.confidence}}%</p>
-                  {% endif %}
-                <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
-                {% else %}
-                <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
+
+                {% if step.confidence %}
+                <p class="desc"><span class="point glyphicon glyphicon-play"></span>匹配度: {{step.confidence}}%</p>
                 {% endif %}
 
-                {% if not step.trace %}
-                <div class="alert alert-success">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  执行成功
-                </div>
-                {% else %}
-                <div class="alert alert-danger">
-                  <span class="glyphicon glyphicon-alert"></span>
-                  执行失败
-                </div>
+              <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
+              {% else %}
+              <!--不带图片的操作-->
+              <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
+              {% endif %}
 
-                <div>
-                  <pre><code class="python">{{step.traceback}}
-                  </code></pre>
-                </div>
-                {% endif %}
-            </div><!-- step content -->
+              <!--单步结果-->
+              {% if not step.trace %}
+              <div class="alert alert-success">
+                <span class="glyphicon glyphicon-ok"></span>
+                执行成功
+              </div>
+              {% else %}
+              <div class="alert alert-danger">
+                <span class="glyphicon glyphicon-alert"></span>
+                执行失败
+              </div>
+              <div>
+                <pre><code class="python">{{step.traceback}}</code></pre>
+              </div>
+              {% endif %}
+
+            </div>
           </div>
           {% endfor %}
         {% endfor %}
@@ -492,6 +495,3 @@
   </script>
   </body>
 </html>
-
-
-

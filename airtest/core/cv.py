@@ -44,7 +44,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         else:
             match_pos = query.match_in(screen)
             if match_pos:
-                _try_save_screen(screen)
+                try_log_screen(screen)
                 return match_pos
 
         if intervalfunc is not None:
@@ -52,13 +52,13 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
 
         # 超时则raise，未超时则进行下次循环:
         if (time.time() - start_time) > timeout:
-            _try_save_screen(screen)
+            try_log_screen(screen)
             raise TargetNotFoundError('Picture %s not found in screen' % query)
         else:
             time.sleep(interval)
 
 
-def _try_save_screen(screen):
+def try_log_screen(screen=None):
     """
     Save screenshot to file
 
@@ -71,6 +71,8 @@ def _try_save_screen(screen):
     """
     if not ST.LOG_DIR:
         return
+    if screen is None:
+        screen = G.DEVICE.snapshot()
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
     aircv.imwrite(filepath, screen)

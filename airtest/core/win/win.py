@@ -10,6 +10,8 @@ from .screen import screenshot
 import time
 import subprocess
 
+from airtest.core.settings import Settings as ST  # noqa
+
 
 def require_app(func):
     @wraps(func)
@@ -122,6 +124,7 @@ class Windows(Device):
         self.keyevent(text)
 
     def touch(self, pos, **kwargs):
+    # def touch(self, pos, times=1, duration=0.01):
         """
         Perform mouse click action
 
@@ -136,7 +139,17 @@ class Windows(Device):
             None
 
         """
-        self.mouse.click(coords=self._action_pos(pos), **kwargs)
+        # self.mouse.click(coords=self._action_pos(pos), **kwargs)
+        duration = kwargs.get("duration", 0.01)
+        times = kwargs.get("times", 1)
+        right_click = kwargs.get("right_click", False)
+        button = "right" if right_click else "left"
+        coords = self._action_pos(pos)
+
+        for _ in range(times):
+            self.mouse.press(button=button, coords=coords)
+            time.sleep(duration)
+            self.mouse.release(button=button, coords=coords)
 
     def swipe(self, p1, p2, duration=0.8, steps=5):
         """
@@ -267,6 +280,9 @@ class Windows(Device):
     def _action_pos(self, pos):
         if self.app:
             pos = self._windowpos_to_screenpos(pos)
+        # op_offset: caused by windows border
+        pos = (pos[0] + ST.OP_OFFSET[0], pos[1] + ST.OP_OFFSET[1])
+
         return pos
 
     def _windowpos_to_screenpos(self, pos):

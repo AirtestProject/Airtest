@@ -5,18 +5,20 @@ from airtest.cli.parser import runner_parser
 class CustomAirtestCase(AirtestCase):
 
     def setUp(self):
+        print("custom setup")
         # add var/function/class/.. to globals
         # self.scope["hunter"] = "i am hunter"
         # self.scope["add"] = lambda x: x+1
 
         # exec setup script
         # self.exec_other_script("setup.owl")
-        print("custom setup")
+        super(CustomAirtestCase, self).setUp()
 
     def tearDown(self):
+        print("custom tearDown")
         # exec teardown script
         # self.exec_other_script("teardown.owl")
-        print("custom tearDown")
+        super(CustomAirtestCase, self).setUp()
 
 
 if __name__ == '__main__':
