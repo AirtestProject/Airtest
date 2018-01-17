@@ -5,6 +5,7 @@ import re
 import time
 import socket
 import threading
+import warnings
 from airtest.core.error import MinitouchError
 from airtest.core.android.constant import STFLIB
 from airtest.utils.compat import queue
@@ -407,7 +408,9 @@ class Minitouch(object):
             try:
                 header += s.sock.recv(4096)  # size is not strict, so use raw socket.recv
             except socket.timeout:
-                raise RuntimeError("minitouch setup client error")
+                # raise RuntimeError("minitouch setup client error")
+                warnings.warn("minitouch header not recved")
+                break
             if header.count(b'\n') >= 3:
                 break
         LOGGING.debug("minitouch header:%s", repr(header))

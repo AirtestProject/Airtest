@@ -34,6 +34,7 @@ class Minicap(object):
         self.projection = projection
         self.frame_gen = None
         self.stream_lock = threading.Lock()
+        self.quirk_flag = 0
         reg_cleanup(self.teardown_stream)
 
     @ready_method
@@ -155,6 +156,10 @@ class Minicap(object):
             proj_width, proj_height = projection
         else:
             proj_width, proj_height = real_width, real_height
+
+        if self.quirk_flag & 2 and real_orientation != 0:
+            return real_height, real_width, proj_height, proj_width, 0
+
         return real_width, real_height, proj_width, proj_height, real_orientation
 
     @on_method_ready('install_or_upgrade')
@@ -170,12 +175,37 @@ class Minicap(object):
         Returns:
 
         """
+        gen = self._get_stream(lazy)
+
+        # if quirk error, restart server and client once
+        if not PY3:
+            stopped = gen.next()
+        else:
+            stopped = gen.__next__()
+
+        if stopped:
+            gen = self._get_stream(lazy)
+
+        return gen
+
+    @on_method_ready('install_or_upgrade')
+    def _get_stream(self, lazy=True):
         proc, nbsp, localport = self._setup_stream_server(lazy=lazy)
         s = SafeSocket()
         s.connect((self.adb.host, localport))
         t = s.recv(24)
         # minicap header
-        LOGGING.debug(struct.unpack("<2B5I2B", t))
+        global_headers = struct.unpack("<2B5I2B", t)
+        LOGGING.debug(global_headers)
+        # check quirk-bitflags, reference: https://github.com/openstf/minicap#quirk-bitflags
+        ori, self.quirk_flag = global_headers[-2:]
+
+        if self.quirk_flag & 2 and ori != 0:
+            # resetup
+            stopping = True
+        else:
+            stopping = False
+        yield stopping
 
         stopping = False
         while not stopping:
@@ -284,4 +314,3 @@ class Minicap(object):
             else:
                 LOGGING.warn("%s tear down failed" % self.frame_gen)
             self.frame_gen = None
-
