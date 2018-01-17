@@ -102,8 +102,6 @@ class Minitouch(object):
             return x, y
 
         width, height = self.display_info['physical_width'], self.display_info['physical_height']
-        # print '__transform', x, y
-        # print self.display_info
         if width > height and self.display_info['orientation'] in [1, 3]:
             width, height = height, width
 
