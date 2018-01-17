@@ -335,13 +335,20 @@ int
 minicap_try_get_display_info(int32_t displayId, Minicap::DisplayInfo* info) {
   android::sp<android::IBinder> dpy = android::SurfaceComposerClient::getBuiltInDisplay(displayId);
 
-  android::DisplayInfo dinfo;
-  android::status_t err = android::SurfaceComposerClient::getDisplayInfo(dpy, &dinfo);
+  android::Vector<android::DisplayInfo> configs;
+  android::status_t err = android::SurfaceComposerClient::getDisplayConfigs(dpy, &configs);
 
   if (err != android::NO_ERROR) {
     MCERROR("SurfaceComposerClient::getDisplayInfo() failed: %s (%d)\n", error_name(err), err);
     return err;
   }
+
+  int activeConfig = android::SurfaceComposerClient::getActiveConfig(dpy);
+  if(static_cast<size_t>(activeConfig) >= configs.size()) {
+      MCERROR("Active config %d not inside configs (size %zu)\n", activeConfig, configs.size());
+      return android::BAD_VALUE;
+  }
+  android::DisplayInfo dinfo = configs[activeConfig];
 
   info->width = dinfo.w;
   info->height = dinfo.h;
