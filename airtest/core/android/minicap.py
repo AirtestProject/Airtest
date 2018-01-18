@@ -178,13 +178,11 @@ class Minicap(object):
         gen = self._get_stream(lazy)
 
         # if quirk error, restart server and client once
-        if not PY3:
-            stopped = gen.next()
-        else:
-            stopped = gen.__next__()
+        stopped = next(gen)
 
         if stopped:
             gen = self._get_stream(lazy)
+            next(gen)
 
         return gen
 
