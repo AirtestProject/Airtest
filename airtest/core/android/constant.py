@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import sys
+from airtest.utils.compat import PY3
 
 THISPATH = os.path.dirname(os.path.realpath(__file__))
+if not PY3:
+    THISPATH = THISPATH.decode(sys.getfilesystemencoding())
 STATICPATH = os.path.join(THISPATH, "static")
 DEFAULT_ADB_PATH = {
     "Windows": os.path.join(STATICPATH, "adb", "windows", "adb.exe"),

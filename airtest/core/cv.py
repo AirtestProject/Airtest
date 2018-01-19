@@ -3,6 +3,7 @@
 
 """"Airtest图像识别专用."""
 import os
+import sys
 import time
 from airtest import aircv
 from airtest.aircv import cv2
@@ -103,7 +104,7 @@ class Template(object):
         self.rgb = rgb
 
     def __repr__(self):
-        return "Template(%s)" % self.filepath
+        return "Template(%s)" % self.filepath.encode(sys.getfilesystemencoding())
 
     def match_in(self, screen):
         match_result = self._cv_match(screen)

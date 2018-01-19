@@ -52,7 +52,6 @@ class ADB(object):
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
-        os.environ["PATH"] = os.path.dirname(adb_path) + os.pathsep + os.environ["PATH"]
         return adb_path
 
     def _set_cmd_options(self, server_addr=None):
