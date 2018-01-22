@@ -52,7 +52,6 @@ class ADB(object):
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
-        os.environ["PATH"] = os.path.dirname(adb_path) + os.pathsep + os.environ["PATH"]
         return adb_path
 
     def _set_cmd_options(self, server_addr=None):
@@ -837,11 +836,11 @@ class ADB(object):
 
         """
         phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
-        out = self.shell('dumpsys display')
+        out = self.raw_shell('dumpsys display')
         m = phyDispRE.search(out)
         if m:
             displayInfo = {}
-            for prop in ['width','height']:
+            for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
             for prop in ['density']:
                 # In mPhysicalDisplayInfo density is already a factor, no need to calculate
@@ -850,12 +849,12 @@ class ADB(object):
 
         # gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density
         phyDispRE = re.compile('Physical size: (?P<width>\d+)x(?P<height>\d+).*Physical density: (?P<density>\d+)', re.S)
-        m = phyDispRE.search(self.shell('wm size; wm density'))
+        m = phyDispRE.search(self.raw_shell('wm size; wm density'))
         if m:
             displayInfo = {}
-            for prop in [ 'width', 'height' ]:
+            for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
-            for prop in [ 'density' ]:
+            for prop in ['density']:
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
@@ -863,13 +862,13 @@ class ADB(object):
         phyDispRE = re.compile('\s*mUnrestrictedScreen=\((?P<x>\d+),(?P<y>\d+)\) (?P<width>\d+)x(?P<height>\d+)')
         # This is known to work on older versions (i.e. API 10) where mrestrictedScreen is not available
         dispWHRE = re.compile('\s*DisplayWidth=(?P<width>\d+) *DisplayHeight=(?P<height>\d+)')
-        out = self.shell('dumpsys window')
+        out = self.raw_shell('dumpsys window')
         m = phyDispRE.search(out, 0)
         if not m:
             m = dispWHRE.search(out, 0)
         if m:
             displayInfo = {}
-            for prop in ['width' , 'height']:
+            for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
             for prop in ['density']:
                 d = self.__getDisplayDensity(None, strip=True)

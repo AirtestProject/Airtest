@@ -37,13 +37,13 @@ public:
   struct DisplayInfo {
     uint32_t width;
     uint32_t height;
-    uint8_t orientation;
     float fps;
     float density;
     float xdpi;
     float ydpi;
-    bool secure;
     float size;
+    uint8_t orientation;
+    bool secure;
   };
 
   struct Frame {

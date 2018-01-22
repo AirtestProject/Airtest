@@ -35,6 +35,7 @@ class AirtestCase(unittest.TestCase):
             connect_device(dev)
 
         # set base dir to find tpl
+        args.script = args.script.decode(sys.getfilesystemencoding())
         G.BASEDIR = args.script
 
         # set log dir
@@ -44,7 +45,7 @@ class AirtestCase(unittest.TestCase):
             set_logdir(args.log)
         elif args.log:
             print("save log in '%s'" % args.log)
-            set_logdir(args.log)
+            set_logdir(args.log.decode(sys.getfilesystemencoding()))
         else:
             print("do not save log")
 
@@ -83,7 +84,7 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         code = open(pyfilepath).read()
-        exec(compile(code, pyfilepath, 'exec')) in self.scope
+        exec(compile(code, pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
 
     @classmethod
     def exec_other_script(cls, scriptpath):
