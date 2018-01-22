@@ -129,6 +129,25 @@ class ADB(object):
         )
         return proc
 
+    def shell_prompt(self, device=True):
+       """
+       Return ADB shell interpreteur used in ADBConsole widget
+
+       Args:
+           device: true or false if return value is device related
+
+       Returns:
+           adb shell command string
+
+       """
+        if device:
+            if not self.serialno:
+                raise RuntimeError("please set serialno first")
+            return self.adb_path + " -s %s shell" % self.serialno
+        else:
+            return self.adb_path + " shell"
+
+
     def cmd(self, cmds, device=True, ensure_unicode=True):
         """
         Run the adb command(s) in subprocess and return the standard output
