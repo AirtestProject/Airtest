@@ -204,20 +204,6 @@ class Android(Device):
         """
         return self.adb.shell(*args, **kwargs)
 
-    def shell_prompt(self, *args, **kwargs):
-        """
-        Return ADB shell interpreteur used in ADBConsole widget
-
-        Args:
-            *args:
-            **kwargs:
-
-        Returns:
-            adb shell for given device
-
-        """
-        return self.adb.shell_prompt(*args, **kwargs)
-
     def keyevent(self, keyname, **kwargs):
         """
         Perform keyevent on the device
