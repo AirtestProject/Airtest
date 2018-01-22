@@ -130,16 +130,16 @@ class ADB(object):
         return proc
 
     def shell_prompt(self, device=True):
-       """
-       Return ADB shell interpreteur used in ADBConsole widget
+        """
+        Return ADB shell interpreteur used in ADBConsole widget
 
-       Args:
-           device: true or false if return value is device related
+        Args:
+        device: true or false if return value is device related
 
-       Returns:
+        Returns:
            adb shell command string
 
-       """
+        """
         if device:
             if not self.serialno:
                 raise RuntimeError("please set serialno first")
