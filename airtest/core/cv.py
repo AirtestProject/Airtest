@@ -12,6 +12,7 @@ from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, log_in_func
 from airtest.core.settings import Settings as ST
 from airtest.utils.transform import TargetPos
+from airtest.utils.compat import PY3
 from copy import deepcopy
 
 
@@ -104,7 +105,7 @@ class Template(object):
         self.rgb = rgb
 
     def __repr__(self):
-        return "Template(%s)" % self.filepath.encode(sys.getfilesystemencoding())
+        return "Template(%s)" % self.filepath if PY3 else self.filepath.encode(sys.getfilesystemencoding())
 
     def match_in(self, screen):
         match_result = self._cv_match(screen)

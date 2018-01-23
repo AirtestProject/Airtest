@@ -15,6 +15,9 @@ if PY3:
 
     def enforce_unicode(text):
         return text
+
+    def decode_path(path):
+        return path
 else:
     from ConfigParser import SafeConfigParser as ConfigParser
     import Queue as queue
@@ -26,3 +29,6 @@ else:
 
     def enforce_unicode(text):
         return unicode(text)
+
+    def decode_path(path):
+        return path.decode(sys.getfilesystemencoding()) if path else path

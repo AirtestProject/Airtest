@@ -10,6 +10,7 @@ from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST  # noqa
 from airtest.core.helper import log
+from airtest.utils.compat import decode_path
 from copy import copy
 
 
@@ -35,7 +36,7 @@ class AirtestCase(unittest.TestCase):
             connect_device(dev)
 
         # set base dir to find tpl
-        args.script = args.script.decode(sys.getfilesystemencoding())
+        args.script = decode_path(args.script)
         G.BASEDIR = args.script
 
         # set log dir
@@ -45,7 +46,7 @@ class AirtestCase(unittest.TestCase):
             set_logdir(args.log)
         elif args.log:
             print("save log in '%s'" % args.log)
-            set_logdir(args.log.decode(sys.getfilesystemencoding()))
+            set_logdir(decode_path(args.log))
         else:
             print("do not save log")
 
