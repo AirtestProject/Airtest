@@ -14,6 +14,11 @@ class BaseError(Exception):
         self.message = message
 
 
+class FileNotExistError(BaseError):
+    """Image does not exist."""
+    pass
+
+
 class TemplateInputError(BaseError):
     """Resolution input is not right."""
     pass
