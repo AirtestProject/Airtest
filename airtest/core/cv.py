@@ -105,7 +105,8 @@ class Template(object):
         self.rgb = rgb
 
     def __repr__(self):
-        return "Template(%s)" % self.filepath if PY3 else self.filepath.encode(sys.getfilesystemencoding())
+        filepath = self.filepath if PY3 else self.filepath.encode(sys.getfilesystemencoding())
+        return "Template(%s)" % filepath
 
     def match_in(self, screen):
         match_result = self._cv_match(screen)
