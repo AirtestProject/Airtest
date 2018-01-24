@@ -12,6 +12,7 @@ from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, log_in_func
 from airtest.core.settings import Settings as ST
 from airtest.utils.transform import TargetPos
+from airtest.utils.compat import PY3
 from copy import deepcopy
 
 
@@ -104,7 +105,8 @@ class Template(object):
         self.rgb = rgb
 
     def __repr__(self):
-        return "Template(%s)" % self.filepath.encode(sys.getfilesystemencoding())
+        filepath = self.filepath if PY3 else self.filepath.encode(sys.getfilesystemencoding())
+        return "Template(%s)" % filepath
 
     def match_in(self, screen):
         match_result = self._cv_match(screen)
@@ -121,7 +123,13 @@ class Template(object):
         return self._find_all_template(image, screen)
 
     def _cv_match(self, screen):
-        image = self._imread()
+        # in case image file not exist in current directory:
+        try:
+            image = self._imread()
+        except aircv.FileNotExistError as err:
+            G.LOGGING.debug(repr(err))
+            return None
+
         image = self._resize_image(image, screen, ST.RESIZE_METHOD)
         ret = None
         if self.ignore or self.focus:
@@ -152,6 +160,8 @@ class Template(object):
             return ret
 
     def _imread(self):
+        if not os.path.isfile(self.filepath):
+            raise aircv.FileNotExistError("File not exist in current directory!")
         return aircv.imread(self.filepath)
 
     def _find_all_template(self, image, screen):

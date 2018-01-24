@@ -3,8 +3,10 @@
 import json
 import os
 import io
+import sys
 import jinja2
 from collections import defaultdict
+from airtest.utils.compat import decode_path, PY3
 
 LOGFILE = "log.txt"
 
@@ -31,7 +33,7 @@ class LogToHtml(object):
 
     def _load(self):
         # 假如log.txt不存在，以前是直接抛出异常，现在改为读不到文件就设置log为空，看看会不会有什么问题
-        with io.open(self.logfile, encoding="utf-8")as f:
+        with io.open(self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile) as f:
             for line in f.readlines():
                 self.log.append(json.loads(line))
 
@@ -119,7 +121,7 @@ class LogToHtml(object):
                 if step['type'] in self.img_type:
                     # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
                     if len(step[2]['args']) > 0 and 'filename' in step[2]['args'][0]:
-                        image_path = os.path.join(self.script_root, step[2]['args'][0]['filename'])
+                        image_path = os.path.join(self.script_root, str(step[2]['args'][0]['filename']))
                     else:
                         image_path = ""
                     if not os.path.isfile(image_path) and step[2]['args'] and len(step[2]['args']) > 0 and 'filepath' in step[2]['args'][0]:
@@ -132,24 +134,24 @@ class LogToHtml(object):
                     if step[2]['args'] and len(step[2]['args']) > 0:
                         step['resolution'] = step[2]['args'][0].get("resolution", None)
                         step['record_pos'] = step[2]['args'][0].get("record_pos", None)
-            
                 if not step['trace']:
                     if step[2]["name"] == "loop_find":
-                        step['target_pos'] = step[2]['ret']
+                        step['target_pos'] = step[2].get('ret')
                         cv = step[2].get('cv', {})
-                        step['confidence'] = self.to_percent(cv.get('confidence'))
+                        if cv:
+                            step['confidence'] = self.to_percent(cv.get('confidence'))
+                            # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
+                            #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
+                            if 'wnd_pos' in step[2]:
+                                wnd_pos = step[2]['wnd_pos']
+                                mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
+                            else:
+                                mark_pos = step['target_pos']
 
-                        # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
-                        #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
-                        if 'wnd_pos' in step[2]:
-                            wnd_pos = step[2]['wnd_pos']
-                            mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
-                        else:
-                            mark_pos = step['target_pos']
-
-                        step['rect'] = self.div_rect(cv.get('rectangle', []))
-                        step['top'] = round(mark_pos[1])
-                        step['left'] = round(mark_pos[0])
+                            step['rect'] = self.div_rect(cv.get('rectangle', []))
+                            if isinstance(mark_pos, (tuple, list)):
+                                step['top'] = round(mark_pos[1])
+                                step['left'] = round(mark_pos[0])
 
             if step['type'] == 'touch':
                 try:
@@ -327,12 +329,15 @@ def get_script_name(path):
 
 
 def get_file_author(file_path):
-    fp = io.open(file_path, encoding="utf-8")
     author = ''
-    for line in fp:
-        if '__author__' in line and '=' in line:
-            author = line.split('=')[-1].strip()[1:-1]
-            break
+    if not os.path.exists(file_path) and not PY3:
+        file_path = file_path.encode(sys.getfilesystemencoding())
+    if os.path.exists(file_path):
+        fp = io.open(file_path)
+        for line in fp:
+            if '__author__' in line and '=' in line:
+                author = line.split('=')[-1].strip()[1:-1]
+                break
     return author
 
 
@@ -359,7 +364,7 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
-    path = args.script
+    path = decode_path(args.script)
     basename = os.path.basename(path).split(".")[0]
     py_file = os.path.join(path, basename + ".py")
     author = get_file_author(py_file)
@@ -368,12 +373,12 @@ def main(args):
     outfile = args.outfile
     # static file root
     if args.static_root is not None:
-        static_root = args.static_root
+        static_root = decode_path(args.static_root)
     else:
-        static_root = os.path.dirname(__file__)
+        static_root = decode_path(os.path.dirname(__file__))
 
     # log data root
-    log_root = args.log_root or os.path.join(path, "log")
+    log_root = decode_path(args.log_root) or os.path.join(path, "log")
     jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
     tpl = jinja_environment.get_template("log_template.html")
     rpt = LogToHtml(path, log_root, static_root, author)
@@ -384,7 +389,6 @@ def main(args):
     else:
         record = []
     html = rpt.render(tpl, record_list=record)
-    print(outfile)
     with io.open(outfile, 'w', encoding="utf-8") as f:
         f.write(html)
 

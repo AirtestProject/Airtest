@@ -4,18 +4,26 @@
 import sys
 import cv2
 import numpy as np
+from airtest.utils.compat import PY3
 
 
 def imread(filename):
     """根据图片路径，将图片读取为cv2的图片处理格式."""
-    filename = filename.encode(sys.getfilesystemencoding())
-    img = cv2.imread(filename, 1)
+    if PY3:
+        stream = open(filename, "rb")
+        bytes = bytearray(stream.read())
+        numpyarray = np.asarray(bytes, dtype=np.uint8)
+        img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+    else:
+        filename = filename.encode(sys.getfilesystemencoding())
+        img = cv2.imread(filename, 1)
     return img
 
 
 def imwrite(filename, img):
     """写出图片到本地路径"""
-    filename = filename.encode(sys.getfilesystemencoding())
+    if not PY3:
+        filename = filename.encode(sys.getfilesystemencoding())
     cv2.imwrite(filename, img)
 
 
