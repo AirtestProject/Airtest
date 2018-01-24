@@ -1,0 +1,70 @@
+*.py[cod]
+
+# C extensions
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+tmp/
+log/
+*.log
+_site
+apps
+screen.jpg
+*.spec
+log.txt
+localrunner/test1.owl/img_record
+localrunner/other/test2.owl/img_record
+core/ios/certificate_config.py
+htmlcov/
+cover/
+moa/plugins/testlab/user_config.py
+
+.idea/
+.DS_Store
+env/
+screencapture.bmp
+log.html
+log.gif
+screen.png
+log.txt
+img_record
+tests/test_owl.owl/*_sub/
+
+#docs
+docs/_build
+
+#pipenv
+Pipfile
+Pipfile.lock
+
+*.sublime-project
+*.sublime-workspace

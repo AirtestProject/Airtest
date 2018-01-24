@@ -1,0 +1,210 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../README.rst:2
+msgid "Airtest"
+msgstr ""
+
+#: ../../README.rst:4
+msgid "Automated Testing Framework"
+msgstr "自动化测试框架"
+
+#: ../../README.rst:7
+msgid "Getting Started"
+msgstr "快速开始"
+
+#: ../../README.rst:9
+msgid ""
+"Airtest is an automated testing framework with main focus on games, "
+"however it can be used for other native applications as well. Currently, "
+"Windows and Android operating systems are supported. Support for iOS "
+"comes in near future."
+msgstr "Airtest是一个专注于游戏自动化测试的UI测试框架，也可以用于各种源生App。目前支持Windows和Android平台，iOS支持正在开发中。"
+
+#: ../../README.rst:14
+msgid ""
+"Airtest framework is based on image recognition technology and provides "
+"cross-platform APIs that allows to install application, perform simulated"
+" input, make assertions, and so forth. It also generates the report when "
+"testing is finished."
+msgstr "Airtest基于图像识别技术，并提供了跨平台的API，包括安装应用、模拟输入、断言等。测试脚本运行后可以自动生成详细的HTML测试报告。"
+
+#: ../../README.rst:19
+msgid ""
+"**AirtestIDE** is an out of the box GUI tool that helps to create and "
+"record test cases in the user-friendly way. AirtestIDE provides QA with "
+"entire production workflow: ``record -> replay -> report``"
+msgstr "**AirtestIDE**是一个开箱即用的GUI工具，可以帮助录制和调试测试脚本。AirtestIDE给QA人员提供了完整的工作流程支持：录制脚本->真机回放->生成报告"
+
+#: ../../README.rst:24
+msgid "Installation"
+msgstr "安装"
+
+#: ../../README.rst:26
+msgid "This section describes how to install Airtest test framework."
+msgstr ""
+
+#: ../../README.rst:29
+msgid "System Requirements"
+msgstr "环境要求"
+
+#: ../../README.rst:31
+msgid "Operating System:"
+msgstr "操作系统"
+
+#: ../../README.rst:33
+msgid "Windows"
+msgstr ""
+
+#: ../../README.rst:34
+msgid "MacOS X"
+msgstr ""
+
+#: ../../README.rst:35
+msgid "Linux"
+msgstr ""
+
+#: ../../README.rst:37
+msgid "Python2.7 & Python3.3+"
+msgstr ""
+
+#: ../../README.rst:40
+msgid "Installing the python package"
+msgstr "安装Airtest"
+
+#: ../../README.rst:42
+msgid ""
+"Airtest package can be installed directly from Git repository. Use "
+"``pip`` to manage installation of all python dependencies and package "
+"itself."
+msgstr "Airtest可以直接从Git仓库安装。推荐使用``pip``来管理安装包和自动安装所有依赖。"
+
+#: ../../README.rst:54
+msgid ""
+"Use ``-e`` here to install airtest in develop mode since this repo is in "
+"rapid development. Then you can upgrade the repo with ``git pull`` later."
+msgstr "因为Airtest还在快速开发中，这里使用`-e`来安装源码。以后你就可以直接使用`git pull`更新代码目录来升级Airtest了。"
+
+#: ../../README.rst:60
+msgid "Documentation"
+msgstr "文档"
+
+#: ../../README.rst:62
+msgid "For now please clone this repo and open ``docs-release/index.html``."
+msgstr "浏览器打开[docs-release/index.html](./docs-release). "
+
+#: ../../README.rst:64
+msgid ""
+"Online docs will be available on readthedocs when this project is "
+"released."
+msgstr "项目发布后，文档会放在readthedocs上。"
+
+#: ../../README.rst:69
+msgid "Basic Usage"
+msgstr "使用方法"
+
+#: ../../README.rst:71
+msgid ""
+"Airtest provides simple APIs that are platform independent. This section "
+"describes how to create simple API-specific test scenario which does the "
+"following:"
+msgstr "Airtest提供了简洁而且平台无关的API。这部分介绍了如何使用这些API来编写一个测试脚本，测试步骤如下："
+
+#: ../../README.rst:75
+msgid "connects to local android device with ``adb``"
+msgstr "通过ADB连接一台安卓手机"
+
+#: ../../README.rst:76
+msgid "installs the ``apk`` application"
+msgstr "安装应用APK"
+
+#: ../../README.rst:77
+msgid "runs application and takes the screenshot"
+msgstr "运行应用并截图"
+
+#: ../../README.rst:78
+msgid "performs several user operations (touch, swipe, keyevent)"
+msgstr "模拟用户输入（点击、滑动、按键）"
+
+#: ../../README.rst:79
+msgid "uninstalls application"
+msgstr "卸载应用"
+
+#: ../../README.rst:100
+msgid ""
+"For more detailed info, please refer to full `Airtest Python API "
+"reference`_ or take a look at `API code`_"
+msgstr "更多API和使用方法，请参考完整的`Airtest Python API "
+"reference`_，或者直接看看`API code`_"
+
+#: ../../README.rst:105
+msgid "Trying Samples"
+msgstr "试试样例"
+
+#: ../../README.rst:107
+msgid ""
+"Airtest also contains the samples using this library in several "
+"scenarios. All samples can be found in ``playground`` directory in cloned"
+" repository."
+msgstr "代码仓库内`playground`目录下提供了一些例子，现在你可以试试。"
+
+#: ../../README.rst:113
+msgid "Running from CLI"
+msgstr "命令行使用"
+
+#: ../../README.rst:114
+msgid ""
+"Airtest can be run from command line interface as well. All test cases, "
+"test code and image templates must be placed in one directory with `.owl`"
+" suffix. The easiest way to create and record the test cases is to use "
+"GUI **Airtest IDE**."
+msgstr "Airtest也提供了丰富的命令行功能，包括在不同设备上运行测试脚本，生成测试报告，获取脚本信息。 通过GUI工具**Airtest IDE**，你可以很快录制一个测试脚本。一个测试脚本通常是一个`.owl`结尾的文件目录，包含测试代码和模版图片。"
+
+#: ../../README.rst:116
+msgid ""
+"The biggest advantage of using the Airtest CLI is the possibility to "
+"execute the test cases and test scenarios on different host machine "
+"without using IDE itself. Connections to devices are specified by command"
+" line arguments, i.e. the test code is platform independent and one code,"
+" test cases, scenarios can be used for Android, Windows or iOS devices as"
+" well."
+msgstr "使用AirtestIDE录制的测试脚本，可以直接通过Airtest的命令行来运行。你可以在命令行参数中指定连接的被测设备，这样就可以运行在不同的手机平台和宿主机器上。只要你的测试代码本身是平台无关的，你就可以在一个平台上录制脚本，然后在不同平台上运行。"
+
+#: ../../README.rst:118
+msgid ""
+"Following examples demonstrate the basic usage of airtest framework from "
+"CLI. For more detailed info, refer to provided samples of test cases and "
+"code: ```airtest/playground/test_blackjack.owl/```"
+msgstr "下面的例子介绍了命令行的基本用法。可以配合我们提供的示例```airtest/playground/test_blackjack.owl/```来学习使用："
+
+#: ../../README.rst:122
+msgid "run test case"
+msgstr "运行测试"
+
+#: ../../README.rst:152
+msgid "generate html report"
+msgstr "生成报告"
+
+#: ../../README.rst:186
+msgid "get test case info"
+msgstr "获取脚本信息"
+
+#~ msgid "Trying samples"
+#~ msgstr "试试样例"
+

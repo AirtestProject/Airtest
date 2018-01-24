@@ -1,0 +1,458 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.api.rst:2
+msgid "airtest\\.core\\.api module"
+msgstr ""
+
+#: airtest.core.api:1 of
+msgid "This module contains the Airtest Core APIs."
+msgstr ""
+
+#: airtest.core.api.connect_device:1 of
+msgid "Initialize device with uri and set the device as the current one."
+msgstr ""
+
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.clear_app airtest.core.api.connect_device
+#: airtest.core.api.exists airtest.core.api.find_all airtest.core.api.install
+#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
+#: airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.api.connect_device:3 of
+msgid ""
+"an URI where to connect to device, e.g. "
+"`android://adbhost:adbport/serialno?param=value&param2=value2`"
+msgstr ""
+
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.clear_app airtest.core.api.connect_device
+#: airtest.core.api.device airtest.core.api.exists airtest.core.api.find_all
+#: airtest.core.api.home airtest.core.api.install airtest.core.api.keyevent
+#: airtest.core.api.pinch airtest.core.api.set_current airtest.core.api.shell
+#: airtest.core.api.sleep airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
+#: airtest.core.api.wake of
+msgid "Returns"
+msgstr ""
+
+#: airtest.core.api.connect_device:4 of
+msgid "device instance"
+msgstr ""
+
+#: airtest.core.api.connect_device of
+msgid "Example"
+msgstr ""
+
+#: airtest.core.api.connect_device:6 of
+msgid "``android:///`` # local adb device using default params"
+msgstr ""
+
+#: airtest.core.api.connect_device:7 of
+msgid ""
+"``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``"
+"  # remote adb device using custom params"
+msgstr ""
+
+#: airtest.core.api.connect_device:8 of
+msgid "``windows:///`` # local Windows application"
+msgstr ""
+
+#: airtest.core.api.connect_device:9 of
+msgid "``ios:///`` # iOS device"
+msgstr ""
+
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.clear_app airtest.core.api.connect_device
+#: airtest.core.api.device airtest.core.api.exists airtest.core.api.find_all
+#: airtest.core.api.home airtest.core.api.install airtest.core.api.keyevent
+#: airtest.core.api.pinch airtest.core.api.set_current airtest.core.api.shell
+#: airtest.core.api.sleep airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
+#: airtest.core.api.wake of
+msgid "platforms"
+msgstr ""
+
+#: airtest.core.api.connect_device:11 airtest.core.api.device:4
+#: airtest.core.api.set_current:6 airtest.core.api.snapshot:7 of
+msgid "Android, iOS, Windows"
+msgstr ""
+
+#: airtest.core.api.device:1 of
+msgid "Return the current active device."
+msgstr ""
+
+#: airtest.core.api.device:3 of
+msgid "current device instance"
+msgstr ""
+
+#: airtest.core.api.set_current:1 of
+msgid "Set current active device."
+msgstr ""
+
+#: airtest.core.api.set_current:3 of
+msgid "index of initialized device instance"
+msgstr ""
+
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
+msgid "Raises"
+msgstr ""
+
+#: airtest.core.api.set_current:4 of
+msgid "raised when device index is out of device list"
+msgstr ""
+
+#: airtest.core.api.assert_equal:7 airtest.core.api.assert_not_equal:7
+#: airtest.core.api.clear_app:4 airtest.core.api.home:3
+#: airtest.core.api.install:4 airtest.core.api.keyevent:5
+#: airtest.core.api.pinch:6 airtest.core.api.set_current:5
+#: airtest.core.api.sleep:4 airtest.core.api.snapshot:6
+#: airtest.core.api.start_app:5 airtest.core.api.stop_app:4
+#: airtest.core.api.swipe:16 airtest.core.api.text:5 airtest.core.api.touch:5
+#: airtest.core.api.uninstall:4 airtest.core.api.wake:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.api.shell:1 of
+msgid "Start remote shell in the target device and execute the command"
+msgstr ""
+
+#: airtest.core.api.shell:3 of
+msgid "command to be run on device, e.g. \"ls /data/local/tmp\""
+msgstr ""
+
+#: airtest.core.api.shell:4 of
+msgid "the output of the shell cmd"
+msgstr ""
+
+#: airtest.core.api.pinch:7 airtest.core.api.shell:5 of
+msgid "Android"
+msgstr ""
+
+#: airtest.core.api.start_app:1 of
+msgid "Start the target application on device"
+msgstr ""
+
+#: airtest.core.api.start_app:3 of
+msgid "name of the package to be started, e.g. \"com.netease.my\""
+msgstr ""
+
+#: airtest.core.api.start_app:4 of
+msgid "the activity to start, default is None which means the main activity"
+msgstr ""
+
+#: airtest.core.api.clear_app:5 airtest.core.api.home:4
+#: airtest.core.api.install:5 airtest.core.api.start_app:6
+#: airtest.core.api.stop_app:5 airtest.core.api.uninstall:5
+#: airtest.core.api.wake:4 of
+msgid "Android, iOS"
+msgstr ""
+
+#: airtest.core.api.stop_app:1 of
+msgid "Stop the target application on device"
+msgstr ""
+
+#: airtest.core.api.stop_app:3 of
+msgid "name of the package to stop, see also `start_app`"
+msgstr ""
+
+#: airtest.core.api.clear_app:1 of
+msgid "Clear data of the target application on device"
+msgstr ""
+
+#: airtest.core.api.clear_app:3 of
+msgid "name of the package,  see also `start_app`"
+msgstr ""
+
+#: airtest.core.api.install:1 of
+msgid "Install application on device"
+msgstr ""
+
+#: airtest.core.api.install:3 of
+msgid "the path to file to be installed on target device"
+msgstr ""
+
+#: airtest.core.api.uninstall:1 of
+msgid "Uninstall application on device"
+msgstr ""
+
+#: airtest.core.api.uninstall:3 of
+msgid "name of the package, see also `start_app`"
+msgstr ""
+
+#: airtest.core.api.snapshot:1 of
+msgid "Take the screenshot of the target device and save it to the file."
+msgstr ""
+
+#: airtest.core.api.snapshot:3 of
+msgid ""
+"name of the file where to save the screenshot. If the relative path is "
+"provided, the default location is ``ST.LOG_DIR``"
+msgstr ""
+
+#: airtest.core.api.snapshot:5 of
+msgid "short description for screenshot, it will be recorded in the report"
+msgstr ""
+
+#: airtest.core.api.wake:1 of
+msgid "Wake up and unlock the target device"
+msgstr ""
+
+#: airtest.core.api.wake:6 of
+msgid "Might not work on some models"
+msgstr ""
+
+#: airtest.core.api.home:1 of
+msgid "Return to the home screen of the target device."
+msgstr ""
+
+#: airtest.core.api.touch:1 of
+msgid "Perform the touch action on the device screen"
+msgstr ""
+
+#: airtest.core.api.touch:3 of
+msgid "target to touch, either a Template instance or absolute coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.api.keyevent:4 airtest.core.api.swipe:14
+#: airtest.core.api.touch:4 of
+msgid "platform specific `kwargs`, please refer to corresponding docs"
+msgstr ""
+
+#: airtest.core.api.assert_equal:8 airtest.core.api.assert_exists:7
+#: airtest.core.api.assert_not_equal:8 airtest.core.api.assert_not_exists:7
+#: airtest.core.api.exists:5 airtest.core.api.find_all:5
+#: airtest.core.api.keyevent:6 airtest.core.api.sleep:5
+#: airtest.core.api.swipe:17 airtest.core.api.text:6 airtest.core.api.touch:6
+#: airtest.core.api.wait:9 of
+msgid "Android, Windows, iOS"
+msgstr ""
+
+#: airtest.core.api.swipe:1 of
+msgid "Perform the swipe action on the device screen."
+msgstr ""
+
+#: airtest.core.api.swipe:6 of
+msgid "There are two ways of assigning the parameters"
+msgstr ""
+
+#: airtest.core.api.swipe:4 of
+msgid "``swipe(v1, v2=Template(...))``   # swipe from v1 to v2"
+msgstr ""
+
+#: airtest.core.api.swipe:5 of
+msgid ""
+"``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along "
+"the vector."
+msgstr ""
+
+#: airtest.core.api.swipe:8 of
+msgid ""
+"the start point of swipe, either a Template instance or absolute "
+"coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.api.swipe:10 of
+msgid ""
+"the end point of swipe, either a Template instance or absolute "
+"coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.api.swipe:12 of
+msgid ""
+"a vector coordinates of swipe action, either absolute coordinates (x, y) "
+"or percentage of screen e.g.(0.5, 0.5)"
+msgstr ""
+
+#: airtest.core.api.swipe:15 of
+msgid ""
+"general exception when not enough parameters to perform swap action have "
+"been provided"
+msgstr ""
+
+#: airtest.core.api.pinch:1 of
+msgid "Perform the pinch action on the device screen"
+msgstr ""
+
+#: airtest.core.api.pinch:3 of
+msgid "pinch in or pinch out, enum in [\"in\", \"out\"]"
+msgstr ""
+
+#: airtest.core.api.pinch:4 of
+msgid "center of pinch action, default as None which is the center of the screen"
+msgstr ""
+
+#: airtest.core.api.pinch:5 of
+msgid "percentage of the screen of pinch action, default is 0.5"
+msgstr ""
+
+#: airtest.core.api.keyevent:1 of
+msgid "Perform key event on the device"
+msgstr ""
+
+#: airtest.core.api.keyevent:3 of
+msgid "platform specific key name"
+msgstr ""
+
+#: airtest.core.api.text:1 of
+msgid "Input text on the target device. Text input widget must be active first."
+msgstr ""
+
+#: airtest.core.api.text:3 of
+msgid "text to input, unicode is supported"
+msgstr ""
+
+#: airtest.core.api.text:4 of
+msgid "input `Enter` keyevent after text input, default is True"
+msgstr ""
+
+#: airtest.core.api.sleep:1 of
+msgid "Set the sleep interval. It will be recorded in the report"
+msgstr ""
+
+#: airtest.core.api.sleep:3 of
+msgid "seconds to sleep"
+msgstr ""
+
+#: airtest.core.api.wait:1 of
+msgid "Wait to match the Template on the device screen"
+msgstr ""
+
+#: airtest.core.api.wait:3 of
+msgid "target object to wait for, Template instance"
+msgstr ""
+
+#: airtest.core.api.wait:4 of
+msgid ""
+"time interval to wait for the match, default is None which is "
+"``ST.FIND_TIMEOUT``"
+msgstr ""
+
+#: airtest.core.api.wait:5 of
+msgid "time interval in seconds to attempt to find a match"
+msgstr ""
+
+#: airtest.core.api.wait:6 of
+msgid "called after each unsuccessful attempt to find the corresponding match"
+msgstr ""
+
+#: airtest.core.api.wait:7 of
+msgid "raised if target is not found after the time limit expired"
+msgstr ""
+
+#: airtest.core.api.wait:8 of
+msgid "coordinates of the matched target"
+msgstr ""
+
+#: airtest.core.api.exists:1 of
+msgid "Check whether given target exists on device screen"
+msgstr ""
+
+#: airtest.core.api.assert_exists:3 airtest.core.api.assert_not_exists:3
+#: airtest.core.api.exists:3 of
+msgid "target to be checked"
+msgstr ""
+
+#: airtest.core.api.exists:4 of
+msgid ""
+"False if target is not found, otherwise returns the coordinates of the "
+"target"
+msgstr ""
+
+#: airtest.core.api.find_all:1 of
+msgid ""
+"Find all occurrences of the target on the device screen and return their "
+"coordinates"
+msgstr ""
+
+#: airtest.core.api.find_all:3 of
+msgid "target to find"
+msgstr ""
+
+#: airtest.core.api.find_all:4 of
+msgid "list of coordinates, [(x, y), (x1, y1), ...]"
+msgstr ""
+
+#: airtest.core.api.assert_exists:1 of
+msgid "Assert target exists on device screen"
+msgstr ""
+
+#: airtest.core.api.assert_equal:5 airtest.core.api.assert_exists:4
+#: airtest.core.api.assert_not_equal:5 airtest.core.api.assert_not_exists:4 of
+msgid "short description of assertion, it will be recorded in the report"
+msgstr ""
+
+#: airtest.core.api.assert_equal:6 airtest.core.api.assert_exists:5
+#: airtest.core.api.assert_not_exists:5 of
+msgid "if assertion fails"
+msgstr ""
+
+#: airtest.core.api.assert_exists:6 of
+msgid "coordinates of the target"
+msgstr ""
+
+#: airtest.core.api.assert_not_exists:1 of
+msgid "Assert target does not exist on device screen"
+msgstr ""
+
+#: airtest.core.api.assert_not_exists:6 of
+msgid "None."
+msgstr ""
+
+#: airtest.core.api.assert_equal:1 of
+msgid "Assert two values are equal"
+msgstr ""
+
+#: airtest.core.api.assert_equal:3 airtest.core.api.assert_not_equal:3 of
+msgid "first value"
+msgstr ""
+
+#: airtest.core.api.assert_equal:4 airtest.core.api.assert_not_equal:4 of
+msgid "second value"
+msgstr ""
+
+#: airtest.core.api.assert_not_equal:1 of
+msgid "Assert two values are not equal"
+msgstr ""
+
+#: airtest.core.api.assert_not_equal:6 of
+msgid "if assertion"
+msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
+

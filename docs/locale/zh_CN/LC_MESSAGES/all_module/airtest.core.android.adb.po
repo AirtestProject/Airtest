@@ -1,0 +1,781 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.android.adb.rst:2
+msgid "airtest\\.core\\.android\\.adb module"
+msgstr ""
+
+#: airtest.core.android.adb.ADB:1 of
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB:1 of
+msgid "adb client object class"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.builtin_adb_path:1 of
+msgid "Return built-in adb executable path"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.builtin_adb_path
+#: airtest.core.android.adb.ADB.check_app
+#: airtest.core.android.adb.ADB.clear_app airtest.core.android.adb.ADB.cmd
+#: airtest.core.android.adb.ADB.connect airtest.core.android.adb.ADB.devices
+#: airtest.core.android.adb.ADB.disconnect
+#: airtest.core.android.adb.ADB.display_info
+#: airtest.core.android.adb.ADB.exists_file
+#: airtest.core.android.adb.ADB.forward
+#: airtest.core.android.adb.ADB.getDisplayOrientation
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo
+#: airtest.core.android.adb.ADB.get_available_forward_local
+#: airtest.core.android.adb.ADB.get_display_info
+#: airtest.core.android.adb.ADB.get_forwards
+#: airtest.core.android.adb.ADB.get_gateway_address
+#: airtest.core.android.adb.ADB.get_ip_address
+#: airtest.core.android.adb.ADB.get_package_version
+#: airtest.core.android.adb.ADB.get_status
+#: airtest.core.android.adb.ADB.get_top_activity
+#: airtest.core.android.adb.ADB.getprop
+#: airtest.core.android.adb.ADB.install_app
+#: airtest.core.android.adb.ADB.is_keyboard_shown
+#: airtest.core.android.adb.ADB.is_locked
+#: airtest.core.android.adb.ADB.is_screenon
+#: airtest.core.android.adb.ADB.keyevent
+#: airtest.core.android.adb.ADB.line_breaker
+#: airtest.core.android.adb.ADB.list_app airtest.core.android.adb.ADB.logcat
+#: airtest.core.android.adb.ADB.path_app
+#: airtest.core.android.adb.ADB.pm_install
+#: airtest.core.android.adb.ADB.pm_uninstall airtest.core.android.adb.ADB.pull
+#: airtest.core.android.adb.ADB.push airtest.core.android.adb.ADB.raw_shell
+#: airtest.core.android.adb.ADB.remove_forward
+#: airtest.core.android.adb.ADB.sdk_version airtest.core.android.adb.ADB.shell
+#: airtest.core.android.adb.ADB.snapshot airtest.core.android.adb.ADB.start_app
+#: airtest.core.android.adb.ADB.start_cmd
+#: airtest.core.android.adb.ADB.start_server
+#: airtest.core.android.adb.ADB.start_shell
+#: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
+#: airtest.core.android.adb.ADB.touch
+#: airtest.core.android.adb.ADB.uninstall_app
+#: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
+#: airtest.core.android.adb.ADB.wait_for_device of
+msgid "Returns"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.builtin_adb_path:3 of
+msgid "adb executable path"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_server:1 of
+msgid "Perform `adb start-server` command to start the adb server"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.clear_app:5
+#: airtest.core.android.adb.ADB.connect:5
+#: airtest.core.android.adb.ADB.disconnect:3
+#: airtest.core.android.adb.ADB.forward:7
+#: airtest.core.android.adb.ADB.get_forwards:5
+#: airtest.core.android.adb.ADB.keyevent:5
+#: airtest.core.android.adb.ADB.logcat:9
+#: airtest.core.android.adb.ADB.pm_install:8
+#: airtest.core.android.adb.ADB.pull:5 airtest.core.android.adb.ADB.push:6
+#: airtest.core.android.adb.ADB.remove_forward:5
+#: airtest.core.android.adb.ADB.start_app:7
+#: airtest.core.android.adb.ADB.start_server:3
+#: airtest.core.android.adb.ADB.start_shell:5
+#: airtest.core.android.adb.ADB.stop_app:5 airtest.core.android.adb.ADB.swipe:9
+#: airtest.core.android.adb.ADB.touch:5 airtest.core.android.adb.ADB.unlock:4
+#: airtest.core.android.adb.ADB.wait_for_device:7 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.version:1 of
+msgid "Perform `adb version` command and return the command output"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:6
+#: airtest.core.android.adb.ADB.pm_uninstall:6
+#: airtest.core.android.adb.ADB.shell:7
+#: airtest.core.android.adb.ADB.uninstall_app:4
+#: airtest.core.android.adb.ADB.version:3 of
+msgid "command output"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_cmd:1 of
+msgid "Start a subprocess with adb command(s)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app
+#: airtest.core.android.adb.ADB.clear_app airtest.core.android.adb.ADB.cmd
+#: airtest.core.android.adb.ADB.connect airtest.core.android.adb.ADB.devices
+#: airtest.core.android.adb.ADB.exists_file
+#: airtest.core.android.adb.ADB.forward
+#: airtest.core.android.adb.ADB.get_package_version
+#: airtest.core.android.adb.ADB.getprop
+#: airtest.core.android.adb.ADB.install_app
+#: airtest.core.android.adb.ADB.keyevent airtest.core.android.adb.ADB.list_app
+#: airtest.core.android.adb.ADB.logcat airtest.core.android.adb.ADB.path_app
+#: airtest.core.android.adb.ADB.pm_install
+#: airtest.core.android.adb.ADB.pm_uninstall airtest.core.android.adb.ADB.push
+#: airtest.core.android.adb.ADB.raw_shell
+#: airtest.core.android.adb.ADB.remove_forward
+#: airtest.core.android.adb.ADB.shell airtest.core.android.adb.ADB.start_app
+#: airtest.core.android.adb.ADB.start_cmd
+#: airtest.core.android.adb.ADB.start_shell
+#: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
+#: airtest.core.android.adb.ADB.touch
+#: airtest.core.android.adb.ADB.wait_for_device of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
+#: of
+msgid "command(s) to be run"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_cmd:4 of
+msgid ""
+"if True, the device serial number must be specified by `-s serialno` "
+"argument"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app airtest.core.android.adb.ADB.cmd
+#: airtest.core.android.adb.ADB.get_status
+#: airtest.core.android.adb.ADB.get_top_activity
+#: airtest.core.android.adb.ADB.is_locked
+#: airtest.core.android.adb.ADB.is_screenon
+#: airtest.core.android.adb.ADB.path_app airtest.core.android.adb.ADB.shell
+#: airtest.core.android.adb.ADB.start_cmd airtest.core.android.adb.ADB.swipe
+#: airtest.core.android.adb.ADB.wait_for_device of
+msgid "raises"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_cmd:6 of
+msgid ":exc:`RuntimeError` -- if `device` is True and serialno is not specified"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_cmd:8 of
+msgid "a subprocess"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:1 of
+msgid "Run the adb command(s) in subprocess and return the standard output"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:4 of
+msgid ""
+"if True, the device serial number must be specified by -s serialno "
+"argument"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:5 of
+msgid "encode/decode unicode of standard outputs (stdout, stderr)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:7 of
+msgid ""
+":exc:`DeviceConnectionError` -- if any error occurs when connecting the "
+"device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:8 of
+msgid ":exc:`AdbError` -- if any other adb error occurs"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:10 of
+msgid "command(s) standard output (stdout)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.devices:1 of
+msgid "Perform `adb devices` command and return the list of adb devices"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.devices:3 of
+msgid "optional parameter to filter devices in specific state"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.devices:5 of
+msgid "list od adb devices"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.connect:1 of
+msgid ""
+"Perform `adb connect` command, remote devices are preferred to connect "
+"first"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.connect:3 of
+msgid "force connection, default is False"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.disconnect:1 of
+msgid "Perform `adb disconnect` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_status:1 of
+msgid "Perform `adb get-state` and return the device status"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_status:3 of
+msgid ":exc:`AdbError` -- if status cannot be obtained from the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_status:5 of
+msgid ""
+"None if status is `not found`, otherwise return the standard output from "
+"`adb get-state` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.wait_for_device:1 of
+msgid "Perform `adb wait-for-device` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.wait_for_device:3 of
+msgid "time interval in seconds to wait for device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.wait_for_device:5 of
+msgid ":exc:`DeviceConnectionError` -- if device is not available after timeout"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_shell:1 of
+msgid "Handle `adb shell` command(s)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.raw_shell:3
+#: airtest.core.android.adb.ADB.start_shell:3 of
+msgid "adb shell command(s)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.raw_shell:1 of
+msgid "Handle `adb shell` command(s) with unicode support"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.raw_shell:4 of
+msgid "decode/encode unicode True or False, default is True"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.raw_shell:6 of
+msgid "command(s) output"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.shell:1 of
+msgid "Run the `adb shell` command on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.shell:3 of
+msgid "a command to be run"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.shell:5 of
+msgid ""
+":exc:`AdbShellError` -- if command return value is non-zero or if any "
+"other `AdbError` occurred"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.keyevent:1 of
+msgid "Perform `adb shell input keyevent` command on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.keyevent:3 of
+msgid "key event name"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getprop:1 of
+msgid "Perform `adb shell getprop` on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getprop:3 of
+msgid "key value for property"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getprop:4 of
+msgid ""
+"True or False to strip the return carriage and line break from returned "
+"string"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getprop:6 of
+msgid "propery value"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.sdk_version:1 of
+msgid "Get the SDK version from the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.sdk_version:3 of
+msgid "SDK version"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.push:1 of
+msgid "Perform `adb push` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.push:3 of
+msgid "local file to be copied to the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.push:4 of
+msgid "destination on the device where the file will be copied"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pull:1 of
+msgid ""
+"Perform `adb pull` command :param remote: remote file to be downloaded "
+"from the device :param local: local destination where the file will be "
+"downloaded from the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.forward:1 of
+msgid "Perform `adb forward` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.forward:3 of
+msgid "local tcp port to be forwarded"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.forward:4 of
+msgid "tcp port of the device where the local tcp port will be forwarded"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.forward:5 of
+msgid "True or False"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_forwards:1 of
+msgid "Perform `adb forward --list`command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_forwards
+#: airtest.core.android.adb.ADB.logcat of
+msgid "Yields"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_forwards:3 of
+msgid "serial number, local tcp port, remote tcp port"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_available_forward_local:1 of
+msgid ""
+"Generate a pseudo random number between 11111 and 20000 that will be used"
+" as local forward port"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_available_forward_local:3 of
+msgid "integer between 11111 and 20000"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_available_forward_local:5 of
+msgid "use `forward --no-rebind` to check if port is available"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.remove_forward:1 of
+msgid "Perform `adb forward --remove` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.remove_forward:3 of
+msgid "local tcp port"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:1 of
+msgid "Perform `adb install` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:3
+#: airtest.core.android.adb.ADB.pm_install:5 of
+msgid "full path to file to be installed on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:4
+#: airtest.core.android.adb.ADB.pm_install:6 of
+msgid "force to replace existing application, default is False"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pm_install:1 of
+msgid "Perform `adb push` and `adb install` commands"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pm_install:3 of
+msgid "This is more reliable and recommended way of installing `.apk` files"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.uninstall_app:1 of
+msgid ""
+"Perform `adb uninstall` command :param package: package name to be "
+"uninstalled from the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pm_uninstall:1 of
+msgid "Perform `adb uninstall` command and delete all related application data"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pm_uninstall:3 of
+msgid "package name to be uninstalled from the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.pm_uninstall:4 of
+msgid ""
+"True or False, keep application data after removing the app from the "
+"device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.snapshot:1 of
+msgid "Take the screenshot of the device display"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.snapshot:3 of
+msgid "command output (stdout)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.touch:1 of
+msgid "Perform user input (touchscreen) on given coordinates"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.touch:3 of
+msgid "coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.swipe:1 of
+msgid ""
+"Perform user input (swipe screen) from start point (x,y) to end point "
+"(x,y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.swipe:3 of
+msgid "start point coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.swipe:4 of
+msgid "end point coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.swipe:5 of
+msgid "time interval for action, default 500"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.swipe:7 of
+msgid ":exc:`AirtestError` -- if SDK version is not supported"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.logcat:1 of
+msgid "Perform `adb shell logcat` command and search for given patterns"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.logcat:3 of
+msgid "pattern to filter from the logcat output"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.logcat:4 of
+msgid "additional logcat arguments"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.logcat:5 of
+msgid "time interval to read the logcat, default is 10"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.logcat:7 of
+msgid "logcat lines containing filtered patterns"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.exists_file:1 of
+msgid "Check if the file exits on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.exists_file:3 of
+msgid "path to the file"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.exists_file:5 of
+msgid "True or False if file found or not"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.line_breaker:1 of
+msgid ""
+"Set carriage return and line break property for various platforms and SDK"
+" versions"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.line_breaker:3 of
+msgid "carriage return and line break string"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.display_info:1 of
+msgid ""
+"Set device display properties (orientation, rotation and max values for x"
+" and y coordinates)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.display_info:3 of
+msgid ""
+"Notes: if there is a lock screen detected, the function tries to unlock "
+"the device first"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.display_info:6
+#: airtest.core.android.adb.ADB.get_display_info:3 of
+msgid "device screen properties"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_info:1 of
+msgid ""
+"Get information about device physical display (orientation, rotation and "
+"max values for x and y coordinates)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:6 of
+msgid "Display size and resolution to be obtained:"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:2 of
+msgid ""
+"physical display size (physical_width, physical_height) of the device - "
+"this is used by `minitouch` as a coordinates system"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:4 of
+msgid ""
+"screen effective resolution (width, height) - this is used by game image "
+"adaptation as a coordinates system"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:6 of
+msgid "click range resolution (max_x, max_y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:8 of
+msgid "display size and resolution information"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getDisplayOrientation:1 of
+msgid ""
+"Another way to get the display orientation, this works well for older "
+"devices (SDK version 15)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getDisplayOrientation:3 of
+msgid "display orientation information"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_top_activity:1 of
+msgid ""
+"Perform `adb shell dumpsys activity top` command search for the top "
+"activity"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_top_activity:3 of
+msgid ":exc:`AirtestError` -- if top activity cannot be obtained"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_top_activity:5 of
+msgid "top activity as a tuple"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_keyboard_shown:1 of
+msgid ""
+"Perform `adb shell dumpsys input_method` command and search for "
+"information if keyboard is shown"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_keyboard_shown:3 of
+msgid "True or False whether the keyboard is shown or not"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_screenon:1 of
+msgid ""
+"Perform `adb shell dumpsys window policy` command and search for "
+"information if screen is turned on or off"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_screenon:3 of
+msgid ":exc:`AirtestError` -- if screen state can't be detected"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_screenon:5 of
+msgid "True or False whether the screen is turned on or off"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_locked:1 of
+msgid ""
+"Perform `adb shell dumpsys window policy` command and search for "
+"information if screen is locked or not"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_locked:3 of
+msgid ":exc:`AirtestError` -- if lock screen can't be detected"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_locked:5 of
+msgid "True or False whether the screen is locked or not"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_locked:8 of
+msgid "Notes"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.is_locked:9 of
+msgid "Does not work on Xiaomi 2S"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.unlock:1 of
+msgid ""
+"Perform `adb shell input keyevent MENU` and `adb shell input keyevent "
+"BACK` commands to attempt to unlock the screen"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.unlock:6 of
+msgid "Might not work on all devices"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_package_version:1 of
+msgid ""
+"Perform `adb shell dumpsys package` and search for information about "
+"given package version"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app:3
+#: airtest.core.android.adb.ADB.clear_app:3
+#: airtest.core.android.adb.ADB.get_package_version:3
+#: airtest.core.android.adb.ADB.path_app:3
+#: airtest.core.android.adb.ADB.start_app:4
+#: airtest.core.android.adb.ADB.stop_app:3 of
+msgid "package name"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_package_version:5 of
+msgid "None if no info has been found, otherwise package version"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:2 of
+msgid ""
+"Perform `adb shell pm list packages` to print all packages, optionally "
+"only"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:2 of
+msgid "those whose package name contains the text in FILTER."
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:12 of
+msgid "Options"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:5 of
+msgid ""
+"-f: see their associated file -d: filter to only show disabled packages "
+"-e: filter to only show enabled packages -s: filter to only show system "
+"packages -3: filter to only show third party packages -i: see the "
+"installer for the packages -u: also include uninstalled packages"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:14 of
+msgid "print only third party packages"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.list_app:16 of
+msgid "list of packages"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.path_app:1 of
+msgid "Perform `adb shell pm path` command to print the path to the package"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.path_app:5 of
+msgid ":exc:`AdbShellError` -- if any adb error occurs"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.path_app:6 of
+msgid ":exc:`AirtestError` -- if package is not found on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.path_app:8 of
+msgid "path to the package"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app:1 of
+msgid ""
+"Perform `adb shell dumpsys package` command and check if package exists "
+"on the device"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app:5 of
+msgid ":exc:`AirtestError` -- if package is not found"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.check_app:7 of
+msgid "True if package has been found"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_app:1 of
+msgid ""
+"Perform `adb shell monkey` commands to start the application, if "
+"`activity` argument is `None`, then `adb shell am start` command is used."
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_app:5 of
+msgid "activity name"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.stop_app:1 of
+msgid "Perform `adb shell am force-stop` command to force stop the application"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.clear_app:1 of
+msgid "Perform `adb shell pm clear` command to clear all application data"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_ip_address:4 of
+msgid "Perform several set of commands to obtain the IP address"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_gateway_address:3
+#: airtest.core.android.adb.ADB.get_ip_address:2 of
+msgid "`adb shell netcfg | grep wlan0`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_ip_address:3 of
+msgid "`adb shell ifconfig`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_ip_address:4 of
+msgid "`adb getprop dhcp.wlan0.ipaddress`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_ip_address:6 of
+msgid "None if no IP address has been found, otherwise return the IP address"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_gateway_address:3 of
+msgid "Perform several set of commands to obtain the gateway address"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_gateway_address:2 of
+msgid "`adb getprop dhcp.wlan0.gateway`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_gateway_address:5 of
+msgid ""
+"None if no gateway address has been found, otherwise return the gateway "
+"address"
+msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
