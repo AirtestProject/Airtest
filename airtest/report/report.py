@@ -32,8 +32,8 @@ class LogToHtml(object):
         self.all_step = None
 
     def _load(self):
-        # 假如log.txt不存在，以前是直接抛出异常，现在改为读不到文件就设置log为空，看看会不会有什么问题
-        with io.open(self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile) as f:
+        logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
+        with io.open(logfile, encoding="utf-8") as f:
             for line in f.readlines():
                 self.log.append(json.loads(line))
 
@@ -333,7 +333,7 @@ def get_file_author(file_path):
     if not os.path.exists(file_path) and not PY3:
         file_path = file_path.encode(sys.getfilesystemencoding())
     if os.path.exists(file_path):
-        fp = io.open(file_path)
+        fp = io.open(file_path, encoding="utf-8")
         for line in fp:
             if '__author__' in line and '=' in line:
                 author = line.split('=')[-1].strip()[1:-1]
