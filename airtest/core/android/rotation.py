@@ -80,7 +80,7 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self._t = threading.Thread(target=_run)
+        self._t = threading.Thread(target=_run, name="rotationwatcher")
         self._t.daemon = True
         self._t.start()
 

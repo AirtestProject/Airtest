@@ -86,7 +86,7 @@ def crop_image(img, rect):
         img_crop = img[y_min:y_max, x_min:x_max]
         return img_crop
     else:
-        raise Exception("to crop a image, rect should be a list like: [x_min, x_max, y_min, y_max].")
+        raise Exception("to crop a image, rect should be a list like: [x_min, y_min, x_max, y_max].")
 
 
 def mark_point(img, point):
