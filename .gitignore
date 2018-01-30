@@ -61,6 +61,8 @@ tests/test_owl.owl/*_sub/
 
 #docs
 docs/_build
+docs/README.rst
+docs/demo.gif
 
 #pipenv
 Pipfile
