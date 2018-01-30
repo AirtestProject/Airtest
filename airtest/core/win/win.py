@@ -27,22 +27,24 @@ class Windows(Device):
 
     def __init__(self, handle=None, dpifactor=1, **kwargs):
         self.app = None
-        # windows high dpi scale factor, no exact way to auto get this value for a window
+        self.handle = int(handle) if handle else None
+        # windows high dpi scale factor, no exact way to auto detect this value for a window
         # reference: https://msdn.microsoft.com/en-us/library/windows/desktop/mt843498(v=vs.85).aspx
         self._dpifactor = float(dpifactor)
         self._app = Application()
         self._top_window = None
+        self._focus_rect = (0, 0, 0, 0)
         self.mouse = mouse
         self.keyboard = keyboard
         self._init_connect(handle, kwargs)
 
     def _init_connect(self, handle, kwargs):
         if handle:
-            self.connect(handle=int(handle))
+            self.connect(handle=handle)
         elif kwargs:
             self.connect(**kwargs)
 
-    def connect(self, **kwargs):
+    def connect(self, handle=None, **kwargs):
         """
         Connect to window and set it foreground
 
@@ -53,8 +55,13 @@ class Windows(Device):
             None
 
         """
-        self.app = self._app.connect(**kwargs)
-        self._top_window = self.app.top_window().wrapper_object()
+        if handle:
+            handle = int(handle)
+            self.app = self._app.connect(handle=handle)
+            self._top_window = self.app.window(handle=handle).wrapper_object()
+        else:
+            self.app = self._app.connect(**kwargs)
+            self._top_window = self.app.top_window().wrapper_object()
         self.set_foreground()
 
     def shell(self, cmd):
@@ -86,11 +93,18 @@ class Windows(Device):
         """
         if not filename:
             filename = "tmp.png"
-        if self.app:
-            screenshot(filename, self._top_window.handle)
+        if self.handle:
+            screen = screenshot(filename, self.handle)
         else:
-            screenshot(filename)
-        return aircv.imread(filename)
+            screen = screenshot(filename)
+        # screen = aircv.imread(filename)
+        if self._focus_rect != (0, 0, 0, 0):
+            height, width = screen.shape[:2]
+            rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
+            screen = aircv.crop_image(screen, rect)
+        if filename:
+            aircv.imwrite(filename, screen)
+        return screen
 
     def keyevent(self, keyname, **kwargs):
         """
@@ -145,6 +159,7 @@ class Windows(Device):
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
         coords = self._action_pos(pos)
+        print(coords)
 
         for _ in range(times):
             self.mouse.press(button=button, coords=coords)
@@ -164,22 +179,22 @@ class Windows(Device):
             None
 
         """
-        from_x, from_y = p1
-        to_x, to_y = p2
+        from_x, from_y = self._action_pos(p1)
+        to_x, to_y = self._action_pos(p2)
 
         interval = float(duration) / (steps + 1)
-        self.mouse.press(coords=self._action_pos((from_x, from_y)))
+        self.mouse.press(coords=(from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
             self.mouse.move(coords=(
-                from_x + (to_x - from_x) * i / steps,
-                from_y + (to_y - from_y) * i / steps,
+                int(from_x + (to_x - from_x) * i / steps),
+                int(from_y + (to_y - from_y) * i / steps),
             ))
             time.sleep(interval)
         for i in range(10):
-            self.mouse.move(coords=self._action_pos((to_x, to_y)))
+            self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
-        self.mouse.release(coords=self._action_pos((to_x, to_y)))
+        self.mouse.release(coords=(to_x, to_y))
 
     def start_app(self, path):
         """
@@ -280,10 +295,28 @@ class Windows(Device):
     def _action_pos(self, pos):
         if self.app:
             pos = self._windowpos_to_screenpos(pos)
-        # op_offset: caused by windows border
-        pos = (pos[0] + ST.OP_OFFSET[0], pos[1] + ST.OP_OFFSET[1])
-
+        pos = (int(pos[0]), int(pos[1]))
         return pos
+
+    # @property
+    # def handle(self):
+    #     return self._top_window.handle
+
+    @property
+    def focus_rect(self):
+        return self._focus_rect
+
+    @focus_rect.setter
+    def focus_rect(self, value):
+        # set focus rect to get rid of window border
+        assert len(value) == 4, "focus rect must be in [left, top, right, bottom]"
+        self._focus_rect = value
+
+    def get_current_resolution(self):
+        rect = self.get_rect()
+        w = (rect.right + self._focus_rect[2]) - (rect.left + self._focus_rect[0])
+        h = (rect.bottom + self._focus_rect[3]) - (rect.top + self._focus_rect[1])
+        return w, h
 
     def _windowpos_to_screenpos(self, pos):
         """
@@ -297,5 +330,6 @@ class Windows(Device):
 
         """
         rect = self.get_rect()
-        pos = (int((pos[0] + rect.left) * self._dpifactor), int((pos[1] + rect.top) * self._dpifactor))
+        pos = (int((pos[0] + rect.left + self._focus_rect[0]) * self._dpifactor), 
+            int((pos[1] + rect.top + self._focus_rect[1]) * self._dpifactor))
         return pos

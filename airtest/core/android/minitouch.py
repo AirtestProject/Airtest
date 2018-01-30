@@ -377,7 +377,7 @@ class Minitouch(object):
         self.backend_queue = queue.Queue()
         self.backend_stop_event = threading.Event()
         self.setup_client()
-        t = threading.Thread(target=self._backend_worker)
+        t = threading.Thread(target=self._backend_worker, name="minitouch")
         t.daemon = True
         t.start()
         self.backend_thread = t

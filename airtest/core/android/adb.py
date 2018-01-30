@@ -22,6 +22,7 @@ LOGGING = get_logger(__name__)
 class ADB(object):
     """adb client object class"""
 
+    _instances = []
     status_device = "device"
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
@@ -36,7 +37,8 @@ class ADB(object):
         self._display_info = None
         self._display_info_lock = threading.Lock()
         self._forward_local_using = []
-        reg_cleanup(self._cleanup_forwards)
+        self.__class__._instances.append(self)
+        # reg_cleanup(self._cleanup_forwards)
 
     @staticmethod
     def builtin_adb_path():
@@ -1226,3 +1228,11 @@ class ADB(object):
         # 获取不到网段长度就默认取17
         print('[iputils WARNING] fail to get subnet mask len. use 17 as default.')
         return 17
+
+
+def cleanup_adb_forward():
+    for adb in ADB._instances:
+        adb._cleanup_forwards()
+
+
+reg_cleanup(cleanup_adb_forward)
