@@ -1,10 +1,10 @@
 Airtest
 =======
 
-Automated Testing Framework
+UI Test Automation Framework for Games and Apps
 
 
-demo.gif
+.. image:: demo.gif
 
 
 Getting Started

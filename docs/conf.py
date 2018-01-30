@@ -63,6 +63,9 @@ source_parsers = {'.md': CommonMarkParser}
 source_suffix = ['.rst', '.md']
 
 # The master toctree document.
+import shutil
+shutil.copyfile('../README.rst', './README.rst')
+shutil.copyfile('../demo.gif', './demo.gif')
 master_doc = 'index'
 
 # General information about the project.
