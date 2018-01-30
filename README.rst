@@ -17,14 +17,14 @@ comes in near future.
 
 Airtest framework is based on image recognition technology and provides
 cross-platform APIs that allows to install application, perform
-simulated input, make assertions, and so forth. It also generates the
+simulated input, make assertions, and so forth. It also generates the html 
 report when testing is finished.
 
-[AirtestIDE] is an out of the box GUI tool that helps to create and
+**AirtestIDE** is an out of the box GUI tool that helps to create and
 record test cases in the user-friendly way. AirtestIDE provides QA with
 entire production workflow: ``record -> replay -> report``
 
-[Get Started from Airtest Project Homepage]()
+`Get Started from Airtest Project Homepage`_
 
 
 Installation
@@ -201,7 +201,7 @@ Airtest can be run from command line interface as well. All test cases, test cod
 
 The biggest advantage of using the Airtest CLI is the possibility to execute the test cases and test scenarios on different host machine without using IDE itself. Connections to devices are specified by command line arguments, i.e. the test code is platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
 
-Following examples demonstrate the basic usage of airtest framework from CLI. For more deeper understanding, try running provided samples of test cases: ```airtest/playground/test_blackjack.owl/```
+Following examples demonstrate the basic usage of airtest framework from CLI. For deeper understanding, try running provided samples of test cases: ```airtest/playground/test_blackjack.air```
 
 
 run test case
@@ -278,6 +278,7 @@ get test case info
 
 
 
+.. _Get Started from Airtest Project Homepage: 
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
