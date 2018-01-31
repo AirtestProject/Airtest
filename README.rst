@@ -1,20 +1,7 @@
 Airtest
 =======
 
-**UI Test Automation Framework for Games and Apps**
-
-
-.. raw:: html
-
-    <div style=" overflow: hidden; max-width: 100%; height: auto;">
-        <div align="center" class="embed-responsive embed-responsive-16by9">
-            <video class="embed-responsive-item device-record" controls="none" style="top: 0;bottom: 0;left: 0;width: 100%;height: 100%;border: 0;">
-                <source src="demo.mp4" type="video/mp4">
-            </video>
-        </div>
-        <br/>
-    </div>
-
+** UI Test Automation Framework for Games and Apps **
 
 .. image:: demo.gif
 
