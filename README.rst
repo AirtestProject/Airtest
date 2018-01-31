@@ -169,7 +169,7 @@ Following APIs are fully supported:
 - snapshot
 - wait
 
-More APIs are available, some of which may be platform specific, please see `API docs`_ for more information.
+More APIs are available, some of which may be platform specific, please see `Airtest Python API reference`_ for more information.
 
 
 Make Assertion
