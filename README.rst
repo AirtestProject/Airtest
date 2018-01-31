@@ -60,7 +60,7 @@ You can also install it from Git repository.
 
 .. code:: shell
 
-    git clone https://github.com/Meteorix/airtest.git
+    git clone https://github.com/AirtestProject/Airtest.git
     pip install -e airtest
 
 
@@ -108,7 +108,7 @@ following:
     uninstall("package_name_of_your_apk")
 
 
-For more detailed info, please refer to full `Airtest Python API
+For more detailed info, please refer to `Airtest Python API
 reference`_ or take a look at `API code`_
 
 
@@ -154,7 +154,7 @@ Connect windows application
     connect_device("Windows:///title_re=unity.*")
 
 
-Airtest uses `pywinauto` as Windows backend. For more windows params, please see `pywinauto documentation`_.
+Airtest uses `pywinauto` as Windows backend. For more window searching params, please see `pywinauto documentation`_.
 
 
 Simulate Input
@@ -209,10 +209,10 @@ run test case
 .. code:: shell
 
     # run test test cases and scenarios on various devices
-    > python -m airtest run <path to your owl dir> --device Android:///
-    > python -m airtest run <path to your owl dir> --device Android://adbhost:adbport/serialno
-    > python -m airtest run <path to your owl dir> --device Windows:///
-    > python -m airtest run <path to your owl dir> --device iOS:///
+    > python -m airtest run <path to your air dir> --device Android:///
+    > python -m airtest run <path to your air dir> --device Android://adbhost:adbport/serialno
+    > python -m airtest run <path to your air dir> --device Windows:///
+    > python -m airtest run <path to your air dir> --device iOS:///
     ...
     # show help
     > python -m airtest run -h
@@ -221,7 +221,7 @@ run test case
                            script
 
     positional arguments:
-      script             owl path
+      script             air path
 
     optional arguments:
       -h, --help         show this help message and exit
@@ -229,8 +229,8 @@ run test case
       --log [LOG]        set log dir, default to be script dir
       --kwargs KWARGS    extra kwargs used in script as global variables, e.g.
                          a=1,b=2
-      --pre PRE          owl run before script, setup environment
-      --post POST        owl run after script, clean up environment, will run
+      --pre PRE          air run before script, setup environment
+      --post POST        air run after script, clean up environment, will run
                          whether script success or fail
 
 
@@ -238,7 +238,7 @@ generate html report
 .....................
 .. code:: shell
 
-    > python -m airtest report <path to your owl directory>
+    > python -m airtest report <path to your air directory>
     log.html
     > python -m airtest report -h
     usage: __main__.py report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
@@ -273,12 +273,12 @@ get test case info
 .. code:: shell
 
     # get test case info in json, including: author, title, desc
-    > python -m airtest info <path to your owl directory>
+    > python -m airtest info <path to your air directory>
     {"author": ..., "title": ..., "desc": ...}
 
 
 
-.. _Get Started from Airtest Project Homepage: 
+.. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html

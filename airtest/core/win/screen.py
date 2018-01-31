@@ -39,7 +39,6 @@ def screenshot(filename, hwnd=None):
     else:
         """window"""
         rect = win32gui.GetWindowRect(hwnd)
-        print(rect)
         w = abs(rect[2] - rect[0])
         h = abs(rect[3] - rect[1])
         x, y = 0, 0

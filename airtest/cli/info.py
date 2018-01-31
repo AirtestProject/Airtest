@@ -9,7 +9,7 @@ import traceback
 
 def get_script_info(script_path):
     """extract info from script, like __author__, __title__ and __desc__."""
-    script_path, pyfilename = script_path, os.path.basename(script_path).replace(".owl", ".py")
+    script_path, pyfilename = script_path, os.path.basename(script_path).replace(".air", ".py")
     pyfilepath = os.path.join(script_path, pyfilename)
 
     with open(pyfilepath) as pyfile:
