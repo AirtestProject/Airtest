@@ -55,6 +55,7 @@ def reg_cleanup(func, *args, **kwargs):
         None
 
     """
+    print("register----------------", func, args)
     CLEANUP_CALLS.put((func, args, kwargs))
     # atexit.register(func, *args, **kwargs)
 
@@ -63,6 +64,7 @@ def _cleanup():
     # cleanup together to prevent atexit thread issue
     while not CLEANUP_CALLS.empty():
         (func, args, kwargs) = CLEANUP_CALLS.get()
+        print("cleanup======================", func, args)
         func(*args, **kwargs)
 
 

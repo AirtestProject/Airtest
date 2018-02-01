@@ -35,7 +35,7 @@ class Minicap(object):
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
-        reg_cleanup(self.teardown_stream)
+        # reg_cleanup(self.teardown_stream)
 
     @ready_method
     def install_or_upgrade(self):

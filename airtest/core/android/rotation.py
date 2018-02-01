@@ -43,7 +43,7 @@ class RotationWatcher(object):
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         self.ow_proc = p
-        reg_cleanup(self.ow_proc.kill)
+        # reg_cleanup(self.ow_proc.kill)
 
     def start(self):
         """

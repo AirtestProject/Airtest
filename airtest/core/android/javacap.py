@@ -20,7 +20,7 @@ class Javacap(Yosemite):
     def __init__(self, adb):
         super(Javacap, self).__init__(adb)
         self.frame_gen = None
-        reg_cleanup(self.teardown_stream)
+        # reg_cleanup(self.teardown_stream)
 
     @on_method_ready('install_or_upgrade')
     def _setup_stream_server(self):
