@@ -85,6 +85,16 @@ class ADB(object):
         """
         return self.cmd("start-server", device=False)
 
+    def kill_server(self):
+        """
+        Perform `adb kill-server` command to kill the adb server
+
+        Returns:
+            None
+
+        """
+        return self.cmd("kill-server", device=False)
+
     def version(self):
         """
         Perform `adb version` command and return the command output
