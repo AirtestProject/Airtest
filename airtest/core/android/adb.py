@@ -713,16 +713,10 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if platform.system() == "Windows":
-                if self.sdk_version >= SDK_VERISON_NEW:
-                    line_breaker = b"\r\n"
-                else:
-                    line_breaker = b"\r\r\n"
+            if self.sdk_version >= SDK_VERISON_NEW:
+                line_breaker = os.linesep
             else:
-                if self.sdk_version >= SDK_VERISON_NEW:
-                    line_breaker = b"\n"
-                else:
-                    line_breaker = b"\r\n"
+                line_breaker = b'\r' + os.linesep
             self._line_breaker = line_breaker
         return self._line_breaker
 
