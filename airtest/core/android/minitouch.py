@@ -11,7 +11,7 @@ from airtest.core.android.constant import STFLIB
 from airtest.utils.compat import queue
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready, ready_method
+from airtest.utils.snippet import get_std_encoding, on_method_ready, ready_method
 from airtest.utils.logger import get_logger
 LOGGING = get_logger(__name__)
 
@@ -31,7 +31,6 @@ class Minitouch(object):
         self.client = None
         self.display_info = None
         self.max_x, self.max_y = None, None
-        # reg_cleanup(self.teardown)
 
     @ready_method
     def install_and_setup(self):
@@ -145,7 +144,6 @@ class Minitouch(object):
             # server setup error, may be already setup by others
             # subprocess exit immediately
             raise RuntimeError("minitouch server quit immediately")
-        # reg_cleanup(p.kill)
         self.server_proc = p
         return p
 

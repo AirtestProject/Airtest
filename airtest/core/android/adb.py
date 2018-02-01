@@ -38,7 +38,6 @@ class ADB(object):
         self._display_info_lock = threading.Lock()
         self._forward_local_using = []
         self.__class__._instances.append(self)
-        # reg_cleanup(self._cleanup_forwards)
 
     @staticmethod
     def builtin_adb_path():

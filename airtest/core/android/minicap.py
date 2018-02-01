@@ -10,7 +10,7 @@ from airtest.utils.compat import PY3
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+from airtest.utils.snippet import on_method_ready, ready_method
 
 LOGGING = get_logger(__name__)
 
@@ -35,7 +35,6 @@ class Minicap(object):
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
-        # reg_cleanup(self.teardown_stream)
 
     @ready_method
     def install_or_upgrade(self):

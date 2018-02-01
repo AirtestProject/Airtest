@@ -2,7 +2,7 @@
 import threading
 import traceback
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.utils.snippet import on_method_ready
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger(__name__)
@@ -43,7 +43,6 @@ class RotationWatcher(object):
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         self.ow_proc = p
-        # reg_cleanup(self.ow_proc.kill)
 
     def start(self):
         """
