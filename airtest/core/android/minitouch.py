@@ -31,6 +31,7 @@ class Minitouch(object):
         self.client = None
         self.display_info = None
         self.max_x, self.max_y = None, None
+        reg_cleanup(self.teardown)
 
     @ready_method
     def install_and_setup(self):
@@ -145,7 +146,7 @@ class Minitouch(object):
             # subprocess exit immediately
             raise RuntimeError("minitouch server quit immediately")
         self.server_proc = p
-        reg_cleanup(self.server_proc.kill)
+        # reg_cleanup(self.server_proc.kill)
         return p
 
     @on_method_ready('install_and_setup')
@@ -377,7 +378,7 @@ class Minitouch(object):
         self.backend_stop_event = threading.Event()
         self.setup_client()
         t = threading.Thread(target=self._backend_worker, name="minitouch")
-        t.daemon = True
+        # t.daemon = True
         t.start()
         self.backend_thread = t
         self.handle = self.backend_queue.put

@@ -66,7 +66,23 @@ def _cleanup():
         func(*args, **kwargs)
 
 
-atexit.register(_cleanup)
+# atexit.register(_cleanup)
+
+import threading
+
+
+_shutdown = threading._shutdown
+
+
+def exitfunc():
+    print("exiting.......")
+    _cleanup()
+    _shutdown()
+
+
+threading._shutdown = exitfunc
+
+
 
 
 def on_method_ready(method_name):
