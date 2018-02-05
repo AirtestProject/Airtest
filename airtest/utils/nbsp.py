@@ -40,7 +40,8 @@ class NonBlockingStreamReader:
                 elif raise_EOF:
                     raise UnexpectedEndOfStream
                 else:
-                    LOGGING.debug("EndOfStream")
+                    if LOGGING:  # is None when atexit
+                        LOGGING.debug("EndOfStream")
                     break
 
         self._kill_event = Event()

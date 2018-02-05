@@ -10,7 +10,7 @@ from airtest.utils.compat import PY3
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import on_method_ready, ready_method
+from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 
 LOGGING = get_logger(__name__)
 
@@ -259,6 +259,7 @@ class Minicap(object):
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
             raise RuntimeError("minicap server quit immediately")
+        reg_cleanup(proc.kill)
         return proc, nbsp, localport
 
     def get_frame_from_stream(self):
