@@ -80,6 +80,9 @@ def exitfunc():
     _shutdown()
 
 
+# use threading._shutdown to exec cleanup when main thread exit
+# atexit exec after all thread exit, which needs to cooperate with daemon thread.
+# daemon thread is evil, which abruptly exit causing unexpected error
 threading._shutdown = exitfunc
 
 
