@@ -699,8 +699,10 @@ class ADB(object):
         Returns:
             None
         """
-        for local in self._forward_local_using[:]:
-            self.remove_forward(local)
+        for local in self._forward_local_using:
+            self.start_cmd(["forward", "--remove", local])
+
+        self._forward_local_using = []
 
     @property
     def line_breaker(self):
