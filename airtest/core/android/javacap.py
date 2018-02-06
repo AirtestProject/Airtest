@@ -2,7 +2,7 @@
 from airtest.utils.logger import get_logger
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.utils.snippet import on_method_ready
 from airtest.core.android.yosemite import Yosemite
 import struct
 LOGGING = get_logger(__name__)
@@ -20,7 +20,6 @@ class Javacap(Yosemite):
     def __init__(self, adb):
         super(Javacap, self).__init__(adb)
         self.frame_gen = None
-        reg_cleanup(self.teardown_stream)
 
     @on_method_ready('install_or_upgrade')
     def _setup_stream_server(self):

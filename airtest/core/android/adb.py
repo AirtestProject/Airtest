@@ -38,7 +38,6 @@ class ADB(object):
         self._display_info_lock = threading.Lock()
         self._forward_local_using = []
         self.__class__._instances.append(self)
-        # reg_cleanup(self._cleanup_forwards)
 
     @staticmethod
     def builtin_adb_path():
@@ -84,6 +83,16 @@ class ADB(object):
 
         """
         return self.cmd("start-server", device=False)
+
+    def kill_server(self):
+        """
+        Perform `adb kill-server` command to kill the adb server
+
+        Returns:
+            None
+
+        """
+        return self.cmd("kill-server", device=False)
 
     def version(self):
         """
@@ -690,8 +699,10 @@ class ADB(object):
         Returns:
             None
         """
-        for local in self._forward_local_using[:]:
-            self.remove_forward(local)
+        for local in self._forward_local_using:
+            self.start_cmd(["forward", "--remove", local])
+
+        self._forward_local_using = []
 
     @property
     def line_breaker(self):
@@ -703,16 +714,10 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if platform.system() == "Windows":
-                if self.sdk_version >= SDK_VERISON_NEW:
-                    line_breaker = b"\r\n"
-                else:
-                    line_breaker = b"\r\r\n"
+            if self.sdk_version >= SDK_VERISON_NEW:
+                line_breaker = os.linesep
             else:
-                if self.sdk_version >= SDK_VERISON_NEW:
-                    line_breaker = b"\n"
-                else:
-                    line_breaker = b"\r\n"
+                line_breaker = b'\r' + os.linesep
             self._line_breaker = line_breaker
         return self._line_breaker
 

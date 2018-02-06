@@ -18,6 +18,7 @@ class RotationWatcher(object):
         self.ow_proc = None
         self.ow_callback = []
         self._t = None
+        reg_cleanup(self.teardown)
 
     @on_method_ready('start')
     def get_ready(self):
@@ -43,7 +44,11 @@ class RotationWatcher(object):
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         self.ow_proc = p
-        reg_cleanup(self.ow_proc.kill)
+        # reg_cleanup(self.ow_proc.kill)
+
+    def teardown(self):
+        if self.ow_proc:
+            self.ow_proc.kill()
 
     def start(self):
         """
@@ -60,6 +65,8 @@ class RotationWatcher(object):
             if line == b"":
                 if LOGGING is not None:  # may be None atexit
                     LOGGING.error("orientationWatcher has ended")
+                else:
+                    print("orientationWatcher has ended")
                 return None
 
             ori = int(line) / 90
@@ -81,7 +88,7 @@ class RotationWatcher(object):
                         traceback.print_exc()
 
         self._t = threading.Thread(target=_run, name="rotationwatcher")
-        self._t.daemon = True
+        # self._t.daemon = True
         self._t.start()
 
     def reg_callback(self, ow_callback):

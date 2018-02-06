@@ -145,8 +145,8 @@ class Minitouch(object):
             # server setup error, may be already setup by others
             # subprocess exit immediately
             raise RuntimeError("minitouch server quit immediately")
-        reg_cleanup(p.kill)
         self.server_proc = p
+        # reg_cleanup(self.server_proc.kill)
         return p
 
     @on_method_ready('install_and_setup')
@@ -378,7 +378,7 @@ class Minitouch(object):
         self.backend_stop_event = threading.Event()
         self.setup_client()
         t = threading.Thread(target=self._backend_worker, name="minitouch")
-        t.daemon = True
+        # t.daemon = True
         t.start()
         self.backend_thread = t
         self.handle = self.backend_queue.put

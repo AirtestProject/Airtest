@@ -2,7 +2,7 @@
 import atexit
 import sys
 from functools import wraps
-from .compat import str_class
+from .compat import str_class, queue
 
 
 def split_cmd(cmds):
@@ -38,6 +38,10 @@ def get_std_encoding(stream):
     return getattr(stream, "encoding", None) or sys.getfilesystemencoding()
 
 
+
+CLEANUP_CALLS = queue.Queue()
+
+
 def reg_cleanup(func, *args, **kwargs):
     """
     Clean the register for given function
@@ -51,7 +55,37 @@ def reg_cleanup(func, *args, **kwargs):
         None
 
     """
-    atexit.register(func, *args, **kwargs)
+    CLEANUP_CALLS.put((func, args, kwargs))
+    # atexit.register(func, *args, **kwargs)
+
+
+def _cleanup():
+    # cleanup together to prevent atexit thread issue
+    while not CLEANUP_CALLS.empty():
+        (func, args, kwargs) = CLEANUP_CALLS.get()
+        func(*args, **kwargs)
+
+
+# atexit.register(_cleanup)
+
+import threading
+
+
+_shutdown = threading._shutdown
+
+
+def exitfunc():
+    print("exiting.......")
+    _cleanup()
+    _shutdown()
+
+
+# use threading._shutdown to exec cleanup when main thread exit
+# atexit exec after all thread exit, which needs to cooperate with daemon thread.
+# daemon thread is evil, which abruptly exit causing unexpected error
+threading._shutdown = exitfunc
+
+
 
 
 def on_method_ready(method_name):

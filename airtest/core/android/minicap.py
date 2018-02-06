@@ -35,7 +35,6 @@ class Minicap(object):
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
-        reg_cleanup(self.teardown_stream)
 
     @ready_method
     def install_or_upgrade(self):
@@ -260,6 +259,7 @@ class Minicap(object):
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
             raise RuntimeError("minicap server quit immediately")
+        reg_cleanup(proc.kill)
         return proc, nbsp, localport
 
     def get_frame_from_stream(self):
