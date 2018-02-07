@@ -59,7 +59,6 @@ def set_logdir(dirpath):
     Returns:
 
     """
-    shutil.rmtree(dirpath, ignore_errors=True)
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
     ST.LOG_DIR = dirpath
