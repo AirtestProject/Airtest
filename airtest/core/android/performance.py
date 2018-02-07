@@ -418,6 +418,9 @@ class Collector(object):
                 return None
             total_cpu_time2 = self.total_cpu_time()
             dt_process_time = process_cpu_time2 - process_cpu_time1
+            if not total_cpu_time2 or not total_cpu_time1:
+                LOGGING.error("cpu data-total_cpu_time error: %s, %s" % (str(total_cpu_time1), str(total_cpu_time2)))
+                continue
             dt_total_time = total_cpu_time2 - total_cpu_time1
 
             cpu = round(100 * ((dt_process_time * 1.0) / dt_total_time), 2)
