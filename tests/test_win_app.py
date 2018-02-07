@@ -1,7 +1,8 @@
 # encoding=utf-8
-from airtest.core.win import Windows, WindowsInIDE
+from airtest.core.win import Windows
 import unittest
 import numpy
+import time
 
 
 class TestWin(unittest.TestCase):
@@ -10,8 +11,8 @@ class TestWin(unittest.TestCase):
     def setUpClass(cls):
         w = Windows()
         w.start_app("calc")
-        top_window = w.app.top_window().wrapper_object()
-        cls.windows = WindowsInIDE(top_window.handle)
+        time.sleep(1)
+        cls.windows = Windows(title_re=".*计算器.*".decode("utf-8"))
 
     def test_snapshot(self):
         result = self.windows.snapshot(filename="win_snapshot.png")
