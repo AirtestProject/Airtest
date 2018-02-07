@@ -7,7 +7,6 @@ import logging
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup
 
 LOGGING = get_logger(__name__)
 
@@ -28,9 +27,7 @@ class MinicapIOS(object):
 
     def setup(self):
         cmd = [self.executable, "--udid", self.udid, "--port", str(self.port), "--resolution", self.resolution]
-        print(cmd)
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        reg_cleanup(proc.kill)
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
         while True:
             line = nbsp.readline(timeout=10.0)

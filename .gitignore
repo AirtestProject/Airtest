@@ -41,12 +41,9 @@ apps
 screen.jpg
 *.spec
 log.txt
-localrunner/test1.owl/img_record
-localrunner/other/test2.owl/img_record
 core/ios/certificate_config.py
 htmlcov/
 cover/
-moa/plugins/testlab/user_config.py
 
 .idea/
 .DS_Store
@@ -57,10 +54,11 @@ log.gif
 screen.png
 log.txt
 img_record
-tests/test_owl.owl/*_sub/
 
 #docs
 docs/_build
+docs/README.rst
+docs/demo.gif
 
 #pipenv
 Pipfile

@@ -40,11 +40,11 @@ class NonBlockingStreamReader:
                 elif raise_EOF:
                     raise UnexpectedEndOfStream
                 else:
-                    LOGGING.debug("EndOfStream")
+                    print("EndOfStream: %s" % self.name)
                     break
 
         self._kill_event = Event()
-        self._t = Thread(target=_populateQueue, args=(self._s, self._q, self._kill_event))
+        self._t = Thread(target=_populateQueue, args=(self._s, self._q, self._kill_event), name="nbsp%s"%self.name)
         self._t.daemon = True
         self._t.start()  # start collecting lines from the stream
 

@@ -7,12 +7,24 @@
 Welcome to Airtest documentation!
 ==================================
 
-Airtest: Automated Testing Framework
+Airtest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This document provides all the basic information that are needed to start using the Airtest automation test framework.
-It covers the main framework ideas and concepts and shows examples for various use cases as well.
 
+**UI Test Automation Framework for Games and Apps**
+
+
+.. image:: demo.gif
+
+
+Airtest is a cross-platform automated testing framework with main focus on games,
+which can also be used for native apps. Currently, Windows and Android are well supported.
+Support for iOS comes in near future.
+
+If you are new to Airtest, `Airtest Project Homepage`_ is a good place to get started.
+
+The following documentation will guide you through main ideas of Airtest,
+as well as providing a API reference documentation.
 
 
 Quickstart 
@@ -24,11 +36,12 @@ Quickstart
    ../README
 
 
-Main API
+Cross Platform API
 =================
 
 .. toctree::
    :maxdepth: 1
+   :caption: API Reference
 
    all_module/airtest.core.api
 
@@ -52,3 +65,9 @@ Modules Content
    :maxdepth: 1
 
    all_module/airtest
+
+
+
+
+.. _Airtest Project Homepage: http://airtest.netease.com/
+

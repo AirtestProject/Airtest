@@ -1,7 +1,11 @@
 Airtest
 =======
 
-Automated Testing Framework
+**UI Test Automation Framework for Games and Apps**
+
+
+.. image:: demo.gif
+
 
 Getting Started
 ---------------
@@ -13,12 +17,15 @@ comes in near future.
 
 Airtest framework is based on image recognition technology and provides
 cross-platform APIs that allows to install application, perform
-simulated input, make assertions, and so forth. It also generates the
+simulated input, make assertions, and so forth. It also generates the html 
 report when testing is finished.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
 record test cases in the user-friendly way. AirtestIDE provides QA with
 entire production workflow: ``record -> replay -> report``
+
+`Get Started from Airtest Project Homepage`_
+
 
 Installation
 ------------
@@ -36,20 +43,26 @@ System Requirements
 
 -  Python2.7 & Python3.3+
 
+
 Installing the python package
 ..............................
 
-Airtest package can be installed directly from Git repository. Use
+Airtest package can be installed directly from Pypi. Use
 ``pip`` to manage installation of all python dependencies and package
 itself.
 
 .. code:: shell
 
-    git clone https://github.com/Meteorix/airtest.git
+    pip install airtest
+
+
+You can also install it from Git repository.
+
+.. code:: shell
+
+    git clone https://github.com/AirtestProject/Airtest.git
     pip install -e airtest
 
-    # for netease internal gitlab
-    # git clone ssh://git@git-qa.gz.netease.com:32200/gzliuxin/airtest.git
 
 Use ``-e`` here to install airtest in develop mode since this repo is in
 rapid development. Then you can upgrade the repo with ``git pull``
@@ -59,10 +72,7 @@ later.
 Documentation
 -------------
 
-For now please clone this repo and open ``docs-release/index.html``.
-
-Online docs will be available on readthedocs when this project is
-released.
+You can find the airtest documentation on `readthedocs`_
 
 
 Basic Usage
@@ -98,7 +108,7 @@ following:
     uninstall("package_name_of_your_apk")
 
 
-For more detailed info, please refer to full `Airtest Python API
+For more detailed info, please refer to `Airtest Python API
 reference`_ or take a look at `API code`_
 
 
@@ -144,19 +154,20 @@ Connect windows application
     connect_device("Windows:///title_re=unity.*")
 
 
-For more windows params, please see **pywinauto** documentation.
+Airtest uses `pywinauto` as Windows backend. For more window searching params, please see `pywinauto documentation`_.
 
 
 Simulate Input
 ...............
 
 Following APIs are fully supported:
-1. touch
-2. swipe
-3. text
-4. keyevent
-5. snapshot
-6. wait
+
+- touch
+- swipe
+- text
+- keyevent
+- snapshot
+- wait
 
 More APIs are available, some of which may be platform specific, please see `API docs`_ for more information.
 
@@ -165,10 +176,11 @@ Make Assertion
 ...............
 
 Airtest provide some assert functions, including:
-1. assert_exists
-2. assert_not_exists
-3. assert_equal
-4. assert_not_equal
+
+- assert_exists
+- assert_not_exists
+- assert_equal
+- assert_not_equal
 
 When assertion fails, it will raise ``AssertsionError``. And you will see all assertions in the html report.
 
@@ -185,11 +197,11 @@ cloned repository.
 
 Running from CLI
 -----------------------------------
-Airtest can be run from command line interface as well. All test cases, test code and image templates must be placed in one directory with `.owl` suffix. The easiest way to create and record the test cases is to use GUI **Airtest IDE**.
+Airtest can be run from command line interface as well. All test cases, test code and image templates must be placed in one directory with `.air` suffix. The easiest way to create and record the test cases is to use GUI tool **Airtest IDE**.
 
 The biggest advantage of using the Airtest CLI is the possibility to execute the test cases and test scenarios on different host machine without using IDE itself. Connections to devices are specified by command line arguments, i.e. the test code is platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
 
-Following examples demonstrate the basic usage of airtest framework from CLI. For more detailed info, refer to provided samples of test cases and code: ```airtest/playground/test_blackjack.owl/```
+Following examples demonstrate the basic usage of airtest framework from CLI. For deeper understanding, try running provided samples of test cases: ```airtest/playground/test_blackjack.air```
 
 
 run test case
@@ -197,10 +209,10 @@ run test case
 .. code:: shell
 
     # run test test cases and scenarios on various devices
-    > python -m airtest run <path to your owl dir> --device Android:///
-    > python -m airtest run <path to your owl dir> --device Android://adbhost:adbport/serialno
-    > python -m airtest run <path to your owl dir> --device Windows:///
-    > python -m airtest run <path to your owl dir> --device iOS:///
+    > python -m airtest run <path to your air dir> --device Android:///
+    > python -m airtest run <path to your air dir> --device Android://adbhost:adbport/serialno
+    > python -m airtest run <path to your air dir> --device Windows:///
+    > python -m airtest run <path to your air dir> --device iOS:///
     ...
     # show help
     > python -m airtest run -h
@@ -209,7 +221,7 @@ run test case
                            script
 
     positional arguments:
-      script             owl path
+      script             air path
 
     optional arguments:
       -h, --help         show this help message and exit
@@ -217,8 +229,8 @@ run test case
       --log [LOG]        set log dir, default to be script dir
       --kwargs KWARGS    extra kwargs used in script as global variables, e.g.
                          a=1,b=2
-      --pre PRE          owl run before script, setup environment
-      --post POST        owl run after script, clean up environment, will run
+      --pre PRE          air run before script, setup environment
+      --post POST        air run after script, clean up environment, will run
                          whether script success or fail
 
 
@@ -226,7 +238,7 @@ generate html report
 .....................
 .. code:: shell
 
-    > python -m airtest report <path to your owl directory>
+    > python -m airtest report <path to your air directory>
     log.html
     > python -m airtest report -h
     usage: __main__.py report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
@@ -261,11 +273,13 @@ get test case info
 .. code:: shell
 
     # get test case info in json, including: author, title, desc
-    > python -m airtest info <path to your owl directory>
+    > python -m airtest info <path to your air directory>
     {"author": ..., "title": ..., "desc": ...}
 
 
 
-
-.. _Airtest Python API reference: ./all_module/airtest.core.api.html
+.. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
+.. _readthedocs: http://airtest.readthedocs.io/
+.. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
+.. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API code: ./airtest/core/api.py

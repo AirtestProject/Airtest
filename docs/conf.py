@@ -39,6 +39,21 @@ import airtest
 from recommonmark.parser import CommonMarkParser
 
 
+import mock
+
+
+if not sys.platform.startswith('win'):
+    for mod_name in [
+            'win32api',
+            'win32con',
+            'win32gui',
+            'win32ui',
+            'pywinauto',
+            'pywinauto.application',
+            'pywinauto.win32functions'
+            ]:
+
+        sys.modules[mod_name] = mock.MagicMock()
 
 
 extensions = ['sphinx.ext.autodoc',
@@ -63,6 +78,9 @@ source_parsers = {'.md': CommonMarkParser}
 source_suffix = ['.rst', '.md']
 
 # The master toctree document.
+import shutil
+shutil.copyfile('../README.rst', './README.rst')
+shutil.copyfile('../demo.gif', './demo.gif')
 master_doc = 'index'
 
 # General information about the project.

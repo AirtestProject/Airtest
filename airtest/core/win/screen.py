@@ -3,6 +3,7 @@ import win32gui
 import win32api
 import win32ui
 import win32con
+from aircv.utils import Image, pil_2_cv2
 
 
 SM_XVIRTUALSCREEN = 76
@@ -48,4 +49,12 @@ def screenshot(filename, hwnd=None):
     saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
     saveDC.SelectObject(saveBitMap)
     saveDC.BitBlt((0, 0), (w, h), mfcDC, (x, y), win32con.SRCCOPY)
-    saveBitMap.SaveBitmapFile(saveDC, filename)
+    # saveBitMap.SaveBitmapFile(saveDC, filename)
+    bmpinfo = saveBitMap.GetInfo()
+    bmpstr = saveBitMap.GetBitmapBits(True)
+    pil_image = Image.frombuffer(
+        'RGB',
+        (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+        bmpstr, 'raw', 'BGRX', 0, 1)
+    cv2_image = pil_2_cv2(pil_image)
+    return cv2_image

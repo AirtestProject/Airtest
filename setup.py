@@ -8,20 +8,30 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
     name='airtest',
     version='1.0.0',
-    author='Netease Game',
+    author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
-    description='Automated test framework for android/iOS/Windows',
-    long_description='Automated test framework for android/iOS/Windows, present by NetEase Games',
-    url='http://git-qa.gz.netease.com/gzliuxin/airtest',
+    description='UI Test Automation Framework for Games and Apps',
+    long_description='UI Test Automation Framework for Games and Apps, present by NetEase Games',
+    url='https://github.com/AirtestProject/Airtest',
     license='Apache License 2.0',
-    keywords=['automation', 'test', 'android', 'opencv'],
-    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist', 'new_test']),
+    keywords=['game', 'automation', 'test', 'android', 'windows', 'opencv'],
+    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist']),
     package_data={
-        'android_deps': ["*.apk", "airtest/core/android/stf_libs", "airtest/core/android/adb"],
+        'android_deps': ["*.apk", "airtest/core/android/static"],
         'html_statics': ["airtest/report"]
     },
     include_package_data=True,
     install_requires=reqs,
+    extras_require={
+        'tests': [
+            'nose',
+        ],
+        'docs': [
+            'sphinx',
+            'recommonmark',
+            'sphinx_rtd_theme',
+            'mock',
+        ]},
     classifiers=[
         'Programming Language :: Python :: 2.7',
     ],
