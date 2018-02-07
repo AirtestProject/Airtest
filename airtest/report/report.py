@@ -4,26 +4,32 @@ import json
 import os
 import io
 import sys
+import shutil
 import jinja2
 from collections import defaultdict
 from airtest.utils.compat import decode_path, PY3
 
+LOGDIR = "log"
 LOGFILE = "log.txt"
+HTML_TPL = "log_template.html"
+HTML_FILE = "log.html"
+STATIC_DIR = os.path.dirname(__file__)
 
 
 class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root="", log_root="", static_root="", author="", logfile=LOGFILE):
+    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE):
         self.log = []
         self.script_root = script_root
         self.log_root = log_root
-        self.static_root = static_root or os.path.dirname(__file__)
+        self.static_root = static_root or STATIC_DIR
         self.test_result = True
         self.run_start = None
         self.run_end = None
         self.author = author
+        self.export_dir = export_dir
         self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.logfile = os.path.join(log_root, logfile)
         self._load()
@@ -109,7 +115,12 @@ class LogToHtml(object):
             st = 1
             while st in step:
                 if 'screen' in step[st]:
-                    step['screenshot'] = os.path.join(self.log_root, step[st]['screen'])
+                    screenshot = step[st]['screen']
+                    if self.export_dir:
+                        screenshot = os.path.join(LOGDIR, screenshot)
+                    else:
+                        screenshot = os.path.join(self.log_root, screenshot)
+                    step['screenshot'] = screenshot
                     break
                 st += 1
 
@@ -121,11 +132,11 @@ class LogToHtml(object):
                 if step['type'] in self.img_type:
                     # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
                     if len(step[2]['args']) > 0 and 'filename' in step[2]['args'][0]:
-                        image_path = os.path.join(self.script_root, str(step[2]['args'][0]['filename']))
+                        image_path = str(step[2]['args'][0]['filename'])
+                        if not self.export_dir:
+                            image_path = os.path.join(self.script_root, image_path)
                     else:
                         image_path = ""
-                    if not os.path.isfile(image_path) and step[2]['args'] and len(step[2]['args']) > 0 and 'filepath' in step[2]['args'][0]:
-                        image_path = step[2]['args'][0]['filepath']
                     if not os.path.isfile(image_path) and step.get("trace"):
                         step['desc'] = self.func_desc(step)
                         step['title'] = self.func_title(step)
@@ -199,17 +210,16 @@ class LogToHtml(object):
     def to_percent(p):
         if not p:
             return ''
-        
+
         return round(p * 100, 1)
 
     @staticmethod
     def div_rect(r, offset=None):
         if not r:
             return {}
-        
+
         xs = [p[0] for p in r]
         ys = [p[1] for p in r]
-        
         left = min(xs)
         top = min(ys)
         w = max(xs) - left
@@ -219,7 +229,7 @@ class LogToHtml(object):
         if offset:
             left = left + offset[0]
             top = top + offset[1]
-        
+
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
     @staticmethod
@@ -282,28 +292,60 @@ class LogToHtml(object):
         return a+b
 
     @staticmethod
-    def _render(template_name, **template_vars):
-        """ 用jinja2输出html 
+    def _render(template_name, output_file=None, **template_vars):
+        """ 用jinja2输出html
         """
-        TEMPLATE_DIR = '.'
         env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
+            loader=jinja2.FileSystemLoader(STATIC_DIR),
             extensions=(),
             autoescape=True
         )
         template = env.get_template(template_name)
-        return template.render(**template_vars)
+        html = template.render(**template_vars)
 
-    def render(self, template_name, record_list=None):
+        if output_file:
+            with io.open(output_file, 'w', encoding="utf-8") as f:
+                f.write(html)
+            print(output_file)
+
+        return html
+
+    def _make_export_dir(self):
+        """mkdir & copy /staticfiles/screenshots"""
+        dirname = os.path.basename(self.script_root).replace(".air", ".log")
+        # mkdir
+        dirpath = os.path.join(self.export_dir, dirname)
+        if os.path.isdir(dirpath):
+            shutil.rmtree(dirpath, ignore_errors=True)
+        # copy script
+        shutil.copytree(self.script_root, dirpath)
+        # copy log
+        logpath = os.path.join(dirpath, LOGDIR)
+        if os.path.normpath(logpath) != os.path.normpath(self.log_root):
+            if os.path.isdir(logpath):
+                shutil.rmtree(logpath, ignore_errors=True)
+            shutil.copytree(self.log_root, logpath)
+        # copy static files
+        for subdir in ["css", "fonts", "image", "js"]:
+            shutil.copytree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
+
+        return dirpath, logpath
+
+    def render(self, template_name, output_file=None, record_list=None):
+        if self.export_dir:
+            self.script_root, self.log_root = self._make_export_dir()
+            output_file = os.path.join(self.script_root, HTML_FILE)
+            self.static_root = "static/"
+
+        if self.all_step is None:
+            self.analyse()
+
         if not record_list:
             record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
         records = [os.path.join(self.log_root, f) for f in record_list]
 
         if not self.static_root.endswith(os.path.sep):
             self.static_root += "/"
-
-        if self.all_step is None:
-            self.analyse()
 
         data = {}
         data['all_steps'] = self.all_step
@@ -317,7 +359,7 @@ class LogToHtml(object):
         data['author'] = self.author
         data['records'] = records
 
-        return self._render(template_name, **data)
+        return self._render(template_name, output_file, **data)
 
 
 def get_script_name(path):
@@ -341,24 +383,18 @@ def get_file_author(file_path):
     return author
 
 
-def simple_report(logpath, tplpath=".", logfile=LOGFILE, output="log.html"):
-    jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
-    htmltpl = jinja_environment.get_template("log_template.html")
+def simple_report(logpath, tplpath=".", logfile=LOGFILE, output=HTML_FILE):
     rpt = LogToHtml(tplpath, logpath, logfile=logfile)
-    rpt.analyse()
-    html = rpt.render(htmltpl)
-    with io.open(output, 'w', encoding="utf-8") as f:
-        f.write(html)
-    print(output)
+    rpt.render(HTML_TPL, output_file=output)
 
 
 def get_parger(ap):
     ap.add_argument("script", help="script filepath")
-    ap.add_argument("--outfile", help="output html filepath, default to be log.html", default="log.html")
+    ap.add_argument("--outfile", help="output html filepath, default to be log.html", default=HTML_FILE)
     ap.add_argument("--static_root", help="static files root dir")
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
-    ap.add_argument("--snapshot", help="get all snapshot", nargs='?', const=True, default=False)
     ap.add_argument("--record", help="custom screen record file path", nargs="+")
+    ap.add_argument("--export", help="export a portable report dir containing all resources")
     return ap
 
 
@@ -368,29 +404,14 @@ def main(args):
     basename = os.path.basename(path).split(".")[0]
     py_file = os.path.join(path, basename + ".py")
     author = get_file_author(py_file)
-
-    # output html filepath
-    outfile = args.outfile
-    # static file root
-    if args.static_root is not None:
-        static_root = decode_path(args.static_root)
-    else:
-        static_root = decode_path(os.path.dirname(__file__))
-
-    # log data root
-    log_root = decode_path(args.log_root) or os.path.join(path, "log")
-    jinja_environment = jinja2.Environment(autoescape=True, loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
-    tpl = jinja_environment.get_template("log_template.html")
-    rpt = LogToHtml(path, log_root, static_root, author)
+    record_list = args.record or []
+    log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
+    static_root = args.static_root or STATIC_DIR
+    static_root = decode_path(static_root)
 
     # gen html report
-    if args.record:
-        record = args.record
-    else:
-        record = []
-    html = rpt.render(tpl, record_list=record)
-    with io.open(outfile, 'w', encoding="utf-8") as f:
-        f.write(html)
+    rpt = LogToHtml(path, log_root, static_root, author, export_dir=args.export)
+    rpt.render(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
 if __name__ == "__main__":
