@@ -180,6 +180,10 @@ class Minicap(object):
         stopped = next(gen)
 
         if stopped:
+            try:
+                next(gen)
+            except StopIteration:
+                pass
             gen = self._get_stream(lazy)
             next(gen)
 
@@ -199,12 +203,12 @@ class Minicap(object):
 
         if self.quirk_flag & 2 and ori != 0:
             # resetup
+            LOGGING.debug("quirk_flag found, going to resetup")
             stopping = True
         else:
             stopping = False
         yield stopping
 
-        stopping = False
         while not stopping:
             if lazy:
                 s.send(b"1")
@@ -247,7 +251,7 @@ class Minicap(object):
             "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
             tuple([self.CMD, deviceport] + list(params) + [other_opt]),
         )
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server")
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
