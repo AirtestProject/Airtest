@@ -1164,10 +1164,10 @@ class ADB(object):
 
         """
         try:
-            res = self.shell('netcfg | grep wlan0')
+            res = self.shell('netcfg')
         except AdbShellError:
             res = ''
-        matcher = re.search(r' ((\d+\.){3}\d+)/\d+', res)
+        matcher = re.search(r'wlan0.* ((\d+\.){3}\d+)/\d+', res)
         if matcher:
             return matcher.group(1)
         else:
@@ -1223,11 +1223,11 @@ class ADB(object):
 
         """
         try:
-            res = self.shell('netcfg | grep wlan0')
+            res = self.shell('netcfg')
         except AdbShellError:
             pass
         else:
-            matcher = re.search(r' (\d+\.){3}\d+/(\d+) ', res)
+            matcher = re.search(r'wlan0.* (\d+\.){3}\d+/(\d+) ', res)
             if matcher:
                 return int(matcher.group(2))
         # 获取不到网段长度就默认取17
