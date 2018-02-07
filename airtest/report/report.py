@@ -310,6 +310,12 @@ class LogToHtml(object):
 
         return html
 
+    def copy_tree(self, src, dst):
+        try:
+            shutil.copytree(src, dst)
+        except Exception as e:
+            print(e)
+
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
         dirname = os.path.basename(self.script_root).replace(".air", ".log")
@@ -318,16 +324,16 @@ class LogToHtml(object):
         if os.path.isdir(dirpath):
             shutil.rmtree(dirpath, ignore_errors=True)
         # copy script
-        shutil.copytree(self.script_root, dirpath)
+        self.copy_tree(self.script_root, dirpath)
         # copy log
         logpath = os.path.join(dirpath, LOGDIR)
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
-            shutil.copytree(self.log_root, logpath)
+            self.copy_tree(self.log_root, logpath)
         # copy static files
         for subdir in ["css", "fonts", "image", "js"]:
-            shutil.copytree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
+            self.copy_tree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
 
         return dirpath, logpath
 
