@@ -3,6 +3,10 @@ from airtest.core.win import Windows
 import subprocess
 import unittest
 import numpy
+from testconf import try_remove
+
+
+SNAPSHOT = "win_snapshot.png"
 
 
 class TestWin(unittest.TestCase):   
@@ -17,8 +21,10 @@ class TestWin(unittest.TestCase):
         self.assertIn("..", result)
 
     def test_snapshot(self):
-        result = self.windows.snapshot(filename="win_snapshot.png") 
+        try_remove(SNAPSHOT)
+        result = self.windows.snapshot(filename=SNAPSHOT) 
         self.assertIsInstance(result, numpy.ndarray)
+        try_remove(SNAPSHOT)
 
     def test_keyevent(self):
         self.windows.keyevent("abc{ENTER}")
@@ -35,3 +41,4 @@ class TestWin(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+bc
