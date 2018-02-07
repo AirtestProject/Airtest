@@ -19,12 +19,12 @@ class TestMiniTouchBase(unittest.TestCase):
         cls.minitouch.teardown()
 
     def _count_server_proc(self):
-        output = self.adb.raw_shell("ps | grep minitouch | grep -v do_exit").strip()
-        print(output)
-        if output:
-            return len(output.splitlines())
-        else:
-            return 0
+        output = self.adb.raw_shell("ps").strip()
+        cnt = 0
+        for line in output.splitlines():
+            if "minitouch" in line and "do_exit" not in line:
+                cnt += 1
+        return cnt
 
 
 class TestMiniTouch(TestMiniTouchBase):
