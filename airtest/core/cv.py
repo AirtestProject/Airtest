@@ -124,12 +124,7 @@ class Template(object):
 
     def _cv_match(self, screen):
         # in case image file not exist in current directory:
-        try:
-            image = self._imread()
-        except aircv.FileNotExistError as err:
-            G.LOGGING.debug(repr(err))
-            return None
-
+        image = self._imread()
         image = self._resize_image(image, screen, ST.RESIZE_METHOD)
         ret = None
         if self.ignore or self.focus:
@@ -160,8 +155,6 @@ class Template(object):
             return ret
 
     def _imread(self):
-        if not os.path.isfile(self.filepath):
-            raise aircv.FileNotExistError("File not exist in current directory!")
         return aircv.imread(self.filepath)
 
     def _find_all_template(self, image, screen):
