@@ -13,6 +13,9 @@ class BaseError(Exception):
     def __init__(self, message=""):
         self.message = message
 
+    def __repr__(self):
+        return repr(self.message)
+
 
 class FileNotExistError(BaseError):
     """Image does not exist."""
