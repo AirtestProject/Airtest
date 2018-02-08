@@ -7,7 +7,6 @@ import sys
 import time
 from airtest import aircv
 from airtest.aircv import cv2
-from airtest.aircv.template2 import find_template2
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap, log_in_func
 from airtest.core.settings import Settings as ST
