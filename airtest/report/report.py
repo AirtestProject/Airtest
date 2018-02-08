@@ -408,9 +408,10 @@ def main(args):
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
+    export = decode_path(args.export) if args.export else None
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, author, export_dir=args.export)
+    rpt = LogToHtml(path, log_root, static_root, author, export_dir=export)
     rpt.render(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
