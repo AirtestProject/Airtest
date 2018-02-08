@@ -88,20 +88,16 @@ class Template(object):
     target_pos: ret which pos in the pic
     record_pos: pos in screen when recording
     resolution: screen resolution when recording
-    ignore: [ [x_min, y_min, x_max, y_max], ... ]  识别时，忽略掉ignore包含的矩形区域 (mask_tpl)
-    focus: [ [x_min, y_min, x_max, y_max], ... ]  识别时，只识别focus包含的矩形区域 (可信度为面积加权平均)
     rgb: 识别结果是否使用rgb三通道进行校验.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), ignore=None, focus=None, rgb=False):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False):
         self.filename = filename
         self.filepath = os.path.join(G.BASEDIR, filename) if G.BASEDIR else filename
         self.threshold = threshold or ST.THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
-        self.ignore = ignore
-        self.focus = focus
         self.rgb = rgb
 
     def __repr__(self):
@@ -127,20 +123,17 @@ class Template(object):
         image = self._imread()
         image = self._resize_image(image, screen, ST.RESIZE_METHOD)
         ret = None
-        if self.ignore or self.focus:
-            ret = self._find_template_with_focus_and_ignore()
-        else:
-            for method in ST.CVSTRATEGY:
-                if method == "tpl":
-                    ret = self._try_match(self._find_template, image, screen)
-                elif method == "sift":
-                    ret = self._try_match(self._find_sift_in_predict_area, image, screen)
-                    if not ret:
-                        ret = self._try_match(self._find_sift, image, screen)
-                else:
-                    G.LOGGING.warning("Undefined method in CV_STRATEGY: %s", method)
-                if ret:
-                    break
+        for method in ST.CVSTRATEGY:
+            if method == "tpl":
+                ret = self._try_match(self._find_template, image, screen)
+            elif method == "sift":
+                ret = self._try_match(self._find_sift_in_predict_area, image, screen)
+                if not ret:
+                    ret = self._try_match(self._find_sift, image, screen)
+            else:
+                G.LOGGING.warning("Undefined method in CV_STRATEGY: %s", method)
+            if ret:
+                break
         return ret
 
     @staticmethod
@@ -201,9 +194,6 @@ class Template(object):
         # 进行图片缩放:
         image = cv2.resize(image, (w_re, h_re))
         return image
-
-    def _find_template_with_focus_and_ignore(self, image, screen):
-        return aircv.find_template2(image, screen, ignore=self.ignore, focus=self.focus, threshold=self.threshold, rgb=self.rgb)
 
 
 class Predictor(object):
