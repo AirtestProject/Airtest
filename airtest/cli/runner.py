@@ -87,6 +87,7 @@ class AirtestCase(unittest.TestCase):
         scriptpath = self.args.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(pyfilepath)
         code = open(pyfilepath).read()
         exec(compile(code, pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
 
@@ -119,6 +120,7 @@ class AirtestCase(unittest.TestCase):
         # read code
         pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(pyfilepath)
         code = open(pyfilepath).read()
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
