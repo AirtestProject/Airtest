@@ -16,7 +16,7 @@ from copy import copy
 
 class AirtestCase(unittest.TestCase):
 
-    SCRIPTHOME = "."
+    PROJECT_ROOT = "."
     SCRIPTEXT = ".air"
     TPLEXT = ".png"
 
@@ -53,6 +53,9 @@ class AirtestCase(unittest.TestCase):
         # setup script exec scope
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
+
+        # set PROJECT_ROOT for exec other script
+        cls.PROJECT_ROOT = os.environ.get("PROJECT_ROOT", ".")
 
     def setUp(self):
         if self.args.log and self.args.recording:
@@ -107,8 +110,8 @@ class AirtestCase(unittest.TestCase):
                 dstfile = os.path.join(dst, f)
                 shutil.copy(srcfile, dstfile)
 
-        # find script in SCRIPTHOME
-        scriptpath = os.path.join(cls.SCRIPTHOME, scriptpath)
+        # find script in PROJECT_ROOT
+        scriptpath = os.path.join(cls.PROJECT_ROOT, scriptpath)
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
         sub_dirpath = os.path.join(cls.args.script, sub_dir)
