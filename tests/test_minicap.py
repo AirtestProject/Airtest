@@ -16,11 +16,12 @@ class TestMinicapBase(unittest.TestCase):
         cls.minicap = cls.dev.minicap
 
     def _count_server_proc(self):
-        output = self.dev.adb.raw_shell("ps | grep minicap | grep -v do_exit").strip()
-        if output:
-            return len(output.splitlines())
-        else:
-            return 0
+        output = self.dev.adb.raw_shell("ps").strip()
+        cnt = 0
+        for line in output.splitlines():
+            if "minicap" in line and "do_exit" not in line:
+                cnt += 1
+        return cnt
 
     @classmethod
     def tearDownClass(cls):

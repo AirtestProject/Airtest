@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import os
 import sys
 import cv2
 import numpy as np
+from .error import FileNotExistError
 from airtest.utils.compat import PY3
 
 
 def imread(filename):
     """根据图片路径，将图片读取为cv2的图片处理格式."""
+    if not os.path.isfile(filename):
+        raise FileNotExistError("File not exist: %s" % filename)
     if PY3:
         stream = open(filename, "rb")
         bytes = bytearray(stream.read())
