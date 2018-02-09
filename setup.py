@@ -23,6 +23,9 @@ setup(
     include_package_data=True,
     install_requires=reqs,
     extras_require={
+        'win': [
+            'pywinauto'
+        ],
         'tests': [
             'nose',
         ],
