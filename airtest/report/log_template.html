@@ -4,8 +4,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
-    <title>
-    {{script_name}}脚本运行报告
+    <title lang="en">
+    {{script_name}}script running report
     </title>
     
     <!--[if lt IE 9]>
@@ -24,7 +24,15 @@
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
     <script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>
     <script src="{{ static_root }}js/echarts/shine.js"></script>
-
+    <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
+    <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
+    <script type="text/javascript">
+        var lang = new Lang();
+        lang.init({
+            defaultLang: 'en',
+            currentLang: '{{ lang }}'
+        });
+    </script>
     <style>
     .pre_script h2.header, .post_script h2.header{
         background-color: rgba(52, 152, 219, 0.5);
@@ -184,37 +192,37 @@
         <div id="main" class="main col-md-12">
 
           {% if not all_steps %}
-          <h2>你没有眼花，这个Log文件就是一片空白</h2>
+          <h2 lang="en">I am sorry, this log file is empty! </h2>
           {% endif %}
 
           <div class="material moa" >
-            <h2>测试用例 {{script_name}}            
+              <h2><span lang="en">Test Case</span> {{script_name}}
               {% if test_result %}
-              <label class="green">[测试成功]</label>
+              <label class="green" lang="en">[Passed]</label>
               {% else %}
-              <label class="red">[测试失败]</label>
+              <label class="red" lang="en">[Failed]</label>
               {% endif %}
             </h2>
             {% if author %}
-            <h4>作者：{{author}}</h4>
+                <h4><span lang="en">Author:</span> {{author}}</h4>
             {% else %}
-            <h4>作者：佚名</h4>
+            <h4 lang="en">Author: Anonymous</h4>
             {% endif %}
             <h4>{{run_start}} -- {{run_end}}</h4>
 
-            <h2 class="header">Assert 测试点汇总</h2>
+            <h2 class="header" lang="en">Assert: Test Steps Summary</h2>
             <hr>
             <div class="row">
             {% for step in all_steps['main_script'] %}
               {% if step.assert %}
                 <div class="col-xs-4 assert">
-                  测试点 
+                    <span lang="en">Test step</span>
                   {% if step.trace %}
                   <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                   {% else %}
                   <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                   {% endif %}
-                  预期结果:{{step.assert}}
+                    <span lang="en">Expected result:</span>{{step.assert}}
                 </div>
               {% endif %}
             {% endfor %}
@@ -233,7 +241,7 @@
                 </div>
               {% endfor %}
             {% else %}
-              <p>暂无设备录屏信息</p>
+              <p lang="en">No record information found.</p>
             {% endif %}
           </div>
          </div>
@@ -244,7 +252,7 @@
           {% for step in all_steps[t] %}
           <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
-            <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
+            <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
             <hr>
             <div class="step_content">
               <!--单步操作-->
@@ -257,7 +265,7 @@
                     <div class="point">
                       <span class="glyphicon glyphicon-play"></span>
                     </div>
-                    <label>目标图片</label>
+                      <label><span lang="en">Target object</span></label>
                   </div>
                   <div class="col-xs-9">
                     <img class="crop_image" src="{{step.image_to_find}}" title="{{step.image_to_find}}">
@@ -273,7 +281,7 @@
                     <div class="point">
                       <span class="glyphicon glyphicon-play"></span>
                     </div>
-                    <label>运行时屏幕截图</label>
+                      <label><span lang="en">Runtime screenshot</span></label>
                   </div>
                   <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
                   <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
@@ -293,7 +301,7 @@
                 </div>
 
                 {% if step.confidence %}
-                <p class="desc"><span class="point glyphicon glyphicon-play"></span>匹配度: {{step.confidence}}%</p>
+                    <p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Matching confidence:</span> {{step.confidence}}%</p>
                 {% endif %}
 
               <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
@@ -306,12 +314,12 @@
               {% if not step.trace %}
               <div class="alert alert-success">
                 <span class="glyphicon glyphicon-ok"></span>
-                执行成功
+                  <span lang="en">Execution finished successfully</span>
               </div>
               {% else %}
               <div class="alert alert-danger">
                 <span class="glyphicon glyphicon-alert"></span>
-                执行失败
+                  <span lang="en">Execution failed</span>
               </div>
               <div>
                 <pre><code class="python">{{step.traceback}}</code></pre>
@@ -325,7 +333,7 @@
 
           <!-- 导航栏 -->
           <div class="fast-nav-step">
-            <label>步骤导航
+              <label><span lang="en">Steps navigation</span>
               <button class="btn btn-info btn-sm" id="collapse_nav_step"><i class="glyphicon glyphicon-chevron-down"></i></button>
               <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
             </label>
@@ -350,7 +358,7 @@
   
     {% block footer %}
     <div class="footer">
-      相关信息
+        <span lang="en">Related information</span>
     </div> 
     {% endblock %}
   
