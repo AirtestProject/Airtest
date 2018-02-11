@@ -3,7 +3,7 @@ import win32gui
 import win32api
 import win32ui
 import win32con
-from aircv.utils import Image, pil_2_cv2
+from airtest.aircv.utils import Image, pil_2_cv2
 
 
 SM_XVIRTUALSCREEN = 76

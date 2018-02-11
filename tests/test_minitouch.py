@@ -60,8 +60,9 @@ class TestMiniTouchSetup(TestMiniTouchBase):
 
     def test_teardown(self):
         self.minitouch.touch((0, 0))
+        cnt = self._count_server_proc()
         self.minitouch.teardown()
-        self.assertEqual(self._count_server_proc(), 0)
+        self.assertEqual(self._count_server_proc(), cnt - 1)
 
 
 if __name__ == '__main__':
