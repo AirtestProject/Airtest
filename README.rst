@@ -10,19 +10,16 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is an automated testing framework with main focus on games,
-however it can be used for other native applications as well. Currently,
-Windows and Android operating systems are supported. Support for iOS
-comes in near future.
+Airtest is a cross-platform automated testing framework with main focus on games,
+which can also be used for native apps. Currently, Windows and Android are well supported.
+Support for iOS comes in near future.
 
-Airtest framework is based on image recognition technology and provides
-cross-platform APIs that allows to install application, perform
-simulated input, make assertions, and so forth. It also generates the html 
-report when testing is finished.
+Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. After running the test, an HTML report will be generated automatically, that allows you to quickly locate failed test points.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
 record test cases in the user-friendly way. AirtestIDE provides QA with
-entire production workflow: ``record -> replay -> report``
+a complate production workflow: ``record -> replay -> report``
+
 
 `Get Started from Airtest Project Homepage`_
 
@@ -151,7 +148,7 @@ Connect windows application
     connect_device("Windows:///")
 
     # connect local windows application
-    connect_device("Windows:///title_re=unity.*")
+    connect_device("Windows:///?title_re=unity.*")
 
 
 Airtest uses `pywinauto` as Windows backend. For more window searching params, please see `pywinauto documentation`_.
@@ -197,11 +194,13 @@ cloned repository.
 
 Running from CLI
 -----------------------------------
-Airtest can be run from command line interface as well. All test cases, test code and image templates must be placed in one directory with `.air` suffix. The easiest way to create and record the test cases is to use GUI tool **Airtest IDE**.
 
-The biggest advantage of using the Airtest CLI is the possibility to execute the test cases and test scenarios on different host machine without using IDE itself. Connections to devices are specified by command line arguments, i.e. the test code is platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
+Using AirtestIDE, you can easily create and author automated tests as ``.air`` directories.
+Airtest CLI provides the possibility to execute tests on different host machine and target device platforms without using AirtestIDE itself.
 
-Following examples demonstrate the basic usage of airtest framework from CLI. For deeper understanding, try running provided samples of test cases: ```airtest/playground/test_blackjack.air```
+Connections to devices are specified by command line arguments, i.e. the test code is platform independent and one code, test cases, scenarios can be used for Android, Windows or iOS devices as well. 
+
+Following examples demonstrate the basic usage of airtest framework running from CLI. For a deeper understanding, try running provided test cases: ``airtest/playground/test_blackjack.air``
 
 
 run test case
@@ -211,7 +210,7 @@ run test case
     # run test test cases and scenarios on various devices
     > python -m airtest run <path to your air dir> --device Android:///
     > python -m airtest run <path to your air dir> --device Android://adbhost:adbport/serialno
-    > python -m airtest run <path to your air dir> --device Windows:///
+    > python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
     > python -m airtest run <path to your air dir> --device iOS:///
     ...
     # show help
@@ -240,12 +239,10 @@ generate html report
 
     > python -m airtest report <path to your air directory>
     log.html
-    > python -m airtest report -h
+    > $ python -m airtest report -h
     usage: __main__.py report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
-                              [--log_root LOG_ROOT] [--gif [GIF]]
-                              [--gif_size [GIF_SIZE]] [--snapshot [SNAPSHOT]]
-                              [--record RECORD [RECORD ...]]
-                              [--new_report [NEW_REPORT]]
+                              [--log_root LOG_ROOT] [--record RECORD [RECORD ...]]
+                              [--export EXPORT] [--lang LANG]
                               script
 
     positional arguments:
@@ -258,14 +255,10 @@ generate html report
                             static files root dir
       --log_root LOG_ROOT   log & screen data root dir, logfile should be
                             log_root/log.txt
-      --gif [GIF]           generate gif, default to be log.gif
-      --gif_size [GIF_SIZE]
-                            gif thumbnails size (0.1-1), default 0.3
-      --snapshot [SNAPSHOT]
-                            get all snapshot
       --record RECORD [RECORD ...]
-                            add screen record to log.html
-      --new_report [NEW_REPORT]
+                            custom screen record file path
+      --export EXPORT       export a portable report dir containing all resources
+      --lang LANG           report language
 
 
 get test case info
