@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
 import os
+import re
+import json
 import struct
 import threading
-
+import traceback
 from airtest.core.android.constant import STFLIB
 from airtest.core.error import AdbShellError
 from airtest.utils.compat import PY3
@@ -11,6 +12,7 @@ from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+
 
 LOGGING = get_logger(__name__)
 
@@ -47,17 +49,23 @@ class Minicap(object):
         """
         if self.adb.exists_file("/data/local/tmp/minicap") \
                 and self.adb.exists_file("/data/local/tmp/minicap.so"):
-            output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
             try:
-                version = int(output.split(":")[1])
-            except (ValueError, IndexError):
+                output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
+            except Exception as err:
+                LOGGING.error(str(err))
                 version = -1
+            else:
+                LOGGING.debug(output.strip())
+                m = re.match("version:(\d)", output)
+                if m:
+                    version = int(m.group(1))
+                else:
+                    version = -1
             if version >= self.VERSION:
                 LOGGING.debug('skip install minicap')
                 return
             else:
-                LOGGING.debug(output)
-                LOGGING.debug('upgrade minicap to lastest version:%s', self.VERSION)
+                LOGGING.debug('upgrade minicap to lastest version: %s->%s' % (version, self.VERSION))
                 self.uninstall()
         else:
             LOGGING.debug('install minicap')
