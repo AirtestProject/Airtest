@@ -166,7 +166,7 @@ Following APIs are fully supported:
 - snapshot
 - wait
 
-More APIs are available, some of which may be platform specific, please see `API docs`_ for more information.
+More APIs are available, some of which may be platform specific, please see `API reference`_ for more information.
 
 
 Make Assertion
@@ -275,4 +275,5 @@ get test case info
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
+.. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
 .. _API code: ./airtest/core/api.py
