@@ -32,10 +32,5 @@ Lang.prototype.pack.zh = {
 		"Snapshot": "截图",
 		"Assert equal": "断言相等",
 		"Assert not equal": "断言不相等"
-
-	},
-	"regex": [
-		[/^Something at start of text/, ""],
-		[/This will be case insensitive/i, ""]
-	]
+	}
 };
