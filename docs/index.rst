@@ -37,7 +37,7 @@ Quickstart
 
 
 Cross Platform API
-=================
+====================
 
 .. toctree::
    :maxdepth: 1

@@ -2,7 +2,4 @@
 branch = True
 omit =
 	airtest/core/ios/*
-	airtest/core/win/*
     airtest/utils/*
-    airtest/aircv/*
-

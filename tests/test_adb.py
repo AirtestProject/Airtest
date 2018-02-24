@@ -106,14 +106,14 @@ class TestADBWithDevice(unittest.TestCase):
     def test_push(self):
         tmpdir = "/data/local/tmp"
         imgname = os.path.basename(IMG)
-        tmpimgpath = os.path.join(tmpdir, imgname)
+        tmpimgpath = tmpdir + "/" + imgname
         self.adb.push(IMG, tmpdir)
         self.assertTrue(self.adb.exists_file(tmpimgpath))
 
     def test_pull(self):
         tmpdir = "/data/local/tmp"
         imgname = os.path.basename(IMG)
-        tmpimgpath = os.path.join(tmpdir, imgname)
+        tmpimgpath = tmpdir + "/" + imgname
         self.adb.push(IMG, tmpdir)
 
         try_remove(imgname)

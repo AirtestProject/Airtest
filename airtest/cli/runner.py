@@ -16,7 +16,7 @@ from copy import copy
 
 class AirtestCase(unittest.TestCase):
 
-    SCRIPTHOME = "."
+    PROJECT_ROOT = "."
     SCRIPTEXT = ".air"
     TPLEXT = ".png"
 
@@ -54,6 +54,9 @@ class AirtestCase(unittest.TestCase):
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
 
+        # set PROJECT_ROOT for exec other script
+        cls.PROJECT_ROOT = os.environ.get("PROJECT_ROOT", ".")
+
     def setUp(self):
         if self.args.log and self.args.recording:
             for dev in G.DEVICE_LIST:
@@ -84,6 +87,7 @@ class AirtestCase(unittest.TestCase):
         scriptpath = self.args.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(pyfilepath)
         code = open(pyfilepath).read()
         exec(compile(code, pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
 
@@ -107,8 +111,8 @@ class AirtestCase(unittest.TestCase):
                 dstfile = os.path.join(dst, f)
                 shutil.copy(srcfile, dstfile)
 
-        # find script in SCRIPTHOME
-        scriptpath = os.path.join(cls.SCRIPTHOME, scriptpath)
+        # find script in PROJECT_ROOT
+        scriptpath = os.path.join(cls.PROJECT_ROOT, scriptpath)
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
         sub_dirpath = os.path.join(cls.args.script, sub_dir)
@@ -116,6 +120,7 @@ class AirtestCase(unittest.TestCase):
         # read code
         pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(pyfilepath)
         code = open(pyfilepath).read()
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)

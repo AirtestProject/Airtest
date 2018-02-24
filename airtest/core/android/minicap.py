@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
 import os
+import re
+import json
 import struct
 import threading
-
+import traceback
 from airtest.core.android.constant import STFLIB
 from airtest.core.error import AdbShellError
 from airtest.utils.compat import PY3
@@ -11,6 +12,7 @@ from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+
 
 LOGGING = get_logger(__name__)
 
@@ -47,17 +49,23 @@ class Minicap(object):
         """
         if self.adb.exists_file("/data/local/tmp/minicap") \
                 and self.adb.exists_file("/data/local/tmp/minicap.so"):
-            output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
             try:
-                version = int(output.split(":")[1])
-            except (ValueError, IndexError):
+                output = self.adb.raw_shell("%s -v 2>&1" % self.CMD)
+            except Exception as err:
+                LOGGING.error(str(err))
                 version = -1
+            else:
+                LOGGING.debug(output.strip())
+                m = re.match("version:(\d)", output)
+                if m:
+                    version = int(m.group(1))
+                else:
+                    version = -1
             if version >= self.VERSION:
                 LOGGING.debug('skip install minicap')
                 return
             else:
-                LOGGING.debug(output)
-                LOGGING.debug('upgrade minicap to lastest version:%s', self.VERSION)
+                LOGGING.debug('upgrade minicap to lastest version: %s->%s' % (version, self.VERSION))
                 self.uninstall()
         else:
             LOGGING.debug('install minicap')
@@ -180,6 +188,10 @@ class Minicap(object):
         stopped = next(gen)
 
         if stopped:
+            try:
+                next(gen)
+            except StopIteration:
+                pass
             gen = self._get_stream(lazy)
             next(gen)
 
@@ -199,12 +211,12 @@ class Minicap(object):
 
         if self.quirk_flag & 2 and ori != 0:
             # resetup
+            LOGGING.debug("quirk_flag found, going to resetup")
             stopping = True
         else:
             stopping = False
         yield stopping
 
-        stopping = False
         while not stopping:
             if lazy:
                 s.send(b"1")
@@ -247,7 +259,7 @@ class Minicap(object):
             "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
             tuple([self.CMD, deviceport] + list(params) + [other_opt]),
         )
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server")
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:

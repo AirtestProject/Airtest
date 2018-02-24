@@ -364,6 +364,8 @@ class Minitouch(object):
         """
         while not self.backend_stop_event.isSet():
             cmd = self.backend_queue.get()
+            if cmd is None:
+                break
             self.safe_send(cmd)
 
     def setup_client_backend(self):
@@ -425,6 +427,7 @@ class Minitouch(object):
         """
         if hasattr(self, "backend_stop_event"):
             self.backend_stop_event.set()
+            self.backend_queue.put(None)
         if self.client:
             self.client.close()
         if self.server_proc:

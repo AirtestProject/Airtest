@@ -20,7 +20,7 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE):
+    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE, lang="en"):
         self.log = []
         self.script_root = script_root
         self.log_root = log_root
@@ -36,6 +36,7 @@ class LogToHtml(object):
         self.error_str = ""
         self._steps = None
         self.all_step = None
+        self.lang = lang
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -138,7 +139,10 @@ class LogToHtml(object):
                     else:
                         image_path = ""
                     if not os.path.isfile(image_path) and step.get("trace"):
-                        step['desc'] = self.func_desc(step)
+                        if self.lang != "en":
+                            step['desc'] = self.func_desc_zh(step)
+                        else:
+                            step['desc'] = self.func_desc(step)
                         step['title'] = self.func_title(step)
                         return step
                     step['image_to_find'] = image_path
@@ -177,7 +181,7 @@ class LogToHtml(object):
             if step['type'] == 'swipe':
                 vector = step[1]["kwargs"].get("vector")
                 if vector:
-                    step['swipe'] = self.dis_vector(vector)
+                    step['swipe'] = self.dis_vector_zh(vector) if self.lang != 'en' else self.dis_vector(vector)
                     step['vector'] = vector
 
             # print step['type']
@@ -202,7 +206,10 @@ class LogToHtml(object):
             step['title'] = self.func_title(step)
             return step
 
-        step['desc'] = self.func_desc(step)
+        if self.lang != "en":
+            step['desc'] = self.func_desc_zh(step)
+        else:
+            step['desc'] = self.func_desc(step)
         step['title'] = self.func_title(step)
         return step
 
@@ -233,14 +240,13 @@ class LogToHtml(object):
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
     @staticmethod
-    def func_desc(step):
+    def func_desc_zh(step):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
             "snapshot": u"截图描述：%s" % step.get('text', ''),
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
-
             "wait": u"等待目标图片出现",
             "exists": u"图片%s存在" % step.get('exists_ret', ''),
 
@@ -248,9 +254,30 @@ class LogToHtml(object):
             "keyevent": u"点击[%s]按键" % step.get('keyevent', ''),
             "sleep": u"等待%s秒" % step.get('sleep', ''),
 
-            "assert_exists": u"目标图片应当存在",
-            "assert_not_exists": u"目标图片应当不存在",
+            "assert_exists": u"断言目标图片存在",
+            "assert_not_exists": u"断言目标图片不存在",
             "traceback": u"异常信息",
+            # "snapshot": step[1]['args'][0],
+        }
+        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
+
+    @staticmethod
+    def func_desc(step):
+        """ 把对应函数(depth=1)的name显示成中文 """
+        name = step['type']
+        desc = {
+            "snapshot": u"Screenshot description: %s" % step.get('text', ''),
+            "touch": u"Search for target object, touch the screen coordinates %s" % repr(step.get('target_pos', '')),
+            "swipe": u"Swipe from {target_pos} to {direction} {vector}".format(target_pos=repr(step.get('target_pos', '')), direction=step.get('swipe', ''), vector=repr(step.get('vector', ''))),
+            "wait": u"Wait for target object to appear",
+            "exists": u"Picture %s exists" % step.get('exists_ret', ''),
+
+            "text": u"Input text:%s" % step.get('text', ''),
+            "keyevent": u"Click [%s] button" % step.get('keyevent', ''),
+            "sleep": u"Wait for %s seconds" % step.get('sleep', ''),
+            "assert_exists": u"Assert target object exists",
+            "assert_not_exists": u"Assert target object does not exists",
+            "traceback": u"Traceback",
             # "snapshot": step[1]['args'][0],
         }
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
@@ -258,25 +285,41 @@ class LogToHtml(object):
     @staticmethod
     def func_title(step):
         title = {
-            "touch": u"点击",
-            "swipe": u"滑动",
-            "wait": u"等待",
-            "exists": u"根据图片是否存在选择分支",
-            "text": u"输入",
-            "keyevent": u"按键",
-            "sleep": u"sleep",
-            "server_call": u"调用服务器方法",
-            "assert_exists": u"验证图片存在",
-            "assert_not_exists": u"验证图片不存在",
-            "snapshot": u"截图",
-            "assert_equal": u"验证相等",
-            "assert_not_equal": u"验证不相等",
+            "touch": u"Touch",
+            "swipe": u"Swipe",
+            "wait": u"Wait",
+            "exists": u"Exists",
+            "text": u"Text",
+            "keyevent": u"Keyevent",
+            "sleep": u"Sleep",
+            "server_call": u"Server call",
+            "assert_exists": u"Assert exists",
+            "assert_not_exists": u"Assert not exists",
+            "snapshot": u"Snapshot",
+            "assert_equal": u"Assert equal",
+            "assert_not_equal": u"Assert not equal",
         }
         name = step['type']
         return title.get(name, name)
 
     @staticmethod
     def dis_vector(v):
+        x = v[0]
+        y = v[1]
+        a = ''
+        b = ''
+        if x > 0:
+            a = u'right'
+        if x < 0:
+            a = u'left'
+        if y < 0:
+            b = u'upper '
+        if y > 0:
+            b = u'lower '
+        return b + a
+
+    @staticmethod
+    def dis_vector_zh(v):
         x = v[0]
         y = v[1]
         a = ''
@@ -364,6 +407,7 @@ class LogToHtml(object):
         data['static_root'] = self.static_root
         data['author'] = self.author
         data['records'] = records
+        data['lang'] = self.lang
 
         return self._render(template_name, output_file, **data)
 
@@ -401,6 +445,7 @@ def get_parger(ap):
     ap.add_argument("--log_root", help="log & screen data root dir, logfile should be log_root/log.txt")
     ap.add_argument("--record", help="custom screen record file path", nargs="+")
     ap.add_argument("--export", help="export a portable report dir containing all resources")
+    ap.add_argument("--lang", help="report language", default="en")
     return ap
 
 
@@ -414,9 +459,11 @@ def main(args):
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
+    export = decode_path(args.export) if args.export else None
+    lang = args.lang if args.lang in ['zh', 'en'] else 'en'
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, author, export_dir=args.export)
+    rpt = LogToHtml(path, log_root, static_root, author, export_dir=export, lang=lang)
     rpt.render(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
