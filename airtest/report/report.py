@@ -125,11 +125,7 @@ class LogToHtml(object):
                     break
                 st += 1
 
-            if step['type'] == 'snapshot':
-                step['screenshot'] = step[1]['ret'] or ""
-                step['text'] = step[1]['kwargs'].get('msg', '') if step[1]['kwargs'] else ''
-
-            elif step.get(2):
+            if step.get(2):
                 if step['type'] in self.img_type:
                     # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
                     if len(step[2]['args']) > 0 and 'filename' in step[2]['args'][0]:

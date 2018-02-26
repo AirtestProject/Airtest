@@ -172,7 +172,8 @@ def snapshot(filename=None, msg=""):
         filepath = os.path.join(logdir, filename)
     else:
         filepath = filename
-    G.DEVICE.snapshot(filepath)
+    screen = G.DEVICE.snapshot(filepath)
+    try_log_screen(screen)
     return filepath
 
 
