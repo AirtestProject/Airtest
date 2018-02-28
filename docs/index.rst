@@ -14,7 +14,16 @@ Airtest
 **UI Test Automation Framework for Games and Apps**
 
 
-.. image:: demo.gif
+.. raw:: html
+
+    <div style=" overflow: hidden; max-width: 100%; height: auto;">
+        <div align="center" class="embed-responsive embed-responsive-16by9">
+            <video class="embed-responsive-item device-record" autoplay loop controls="none" style="top: 0;bottom: 0;left: 0;width: 100%;height: 100%;border: 0;">
+                <source src="./demo.mp4" type="video/mp4">
+            </video>
+        </div>
+        <br/>
+    </div>
 
 
 Airtest is a cross-platform automated testing framework with main focus on games,
@@ -27,45 +36,38 @@ The following documentation will guide you through main ideas of Airtest,
 as well as providing a API reference documentation.
 
 
-Quickstart 
-==================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
+   :caption: Quickstart 
 
    ../README_MORE.md
 
 
-Cross Platform API
-====================
 
 .. toctree::
    :maxdepth: 1
-   :caption: API Reference
+   :caption: Cross Platform API
 
    all_module/airtest.core.api
 
 
 
-Platform Specific API
-========================
-
 .. toctree::
    :maxdepth: 1
+   :caption: Platform Specific API
 
    all_module/airtest.core.android
    all_module/airtest.core.ios
    all_module/airtest.core.win
 
 
-Modules Content 
-==================
 
 .. toctree::
    :maxdepth: 1
+   :caption: Modules Content 
 
-   all_module/airtest
-
+   all_module/modules
 
 
 
