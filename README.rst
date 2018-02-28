@@ -3,7 +3,7 @@ Airtest
 
 **UI Test Automation Framework for Games and Apps**
 
-**跨平台的UI自动化测试编辑器，适用于游戏和App**，`中文版点这里`_
+**跨平台的UI自动化测试框架，适用于游戏和App**（`中文版点这里`_）
 
 
 .. image:: demo.gif
@@ -33,8 +33,7 @@ Use `pip` to install Airtest python library.
 
 .. code:: shell
 
-    git clone https://github.com/AirtestProject/Airtest.git
-    pip install -e airtest
+    pip install airtest
 
 
 Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
@@ -43,13 +42,20 @@ Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
 Documentation
 -------------
 
-You can find the complete airtest documentation on `readthedocs`_
+You can find the complete airtest documentation on `readthedocs`_.
 
 
 Example
 -------
 
-Airtest provides simple APIs that are platform independent. 
+Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+
+1. Using `connect_device`_ API you can connect to any android device or windows application. 
+
+2. Then perform `simulated input`_ to test your game or app. 
+
+3. And **do not** forget to `make assertions`_ of the expected test result. 
+
 
 .. code:: python
 
@@ -67,23 +73,21 @@ Airtest provides simple APIs that are platform independent.
     uninstall("package_name_of_your_apk")
 
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
-
-1. Using `connect_device`_ API you can connect to any android device or windows application. 
-
-2. Then perform `simulated input`_ to test your game or app. 
-
-3. And **do not** forget to `make assertions`_ of the expected test result. 
-
 For more detailed info, please refer to `Airtest Python API reference`_ or take a look at `API code`_
 
 
-Running from CLI
-----------------
+Running ``.air`` from CLI
+-------------------------
 
 Using AirtestIDE, you can easily create and author automated tests as ``.air`` directories.
 Airtest CLI provides the possibility to execute tests on different host machine and target device platforms without using AirtestIDE itself.
-Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `more details here`_.
+
+.. code:: shell
+
+    # run test test cases and scenarios on various devices
+    > python -m airtest run <path to your air dir> --device Android:///
+
+Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
 
 
 Contribution
