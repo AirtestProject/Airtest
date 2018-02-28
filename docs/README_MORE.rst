@@ -4,7 +4,16 @@ Airtest
 **UI Test Automation Framework for Games and Apps**
 
 
-.. image:: demo.gif
+.. raw:: html
+
+    <div style=" overflow: hidden; max-width: 100%; height: auto;">
+        <div align="center" class="embed-responsive embed-responsive-16by9">
+            <video class="embed-responsive-item device-record" autoplay loop controls="none" style="top: 0;bottom: 0;left: 0;width: 100%;height: 100%;border: 0;">
+                <source src="./demo.mp4" type="video/mp4">
+            </video>
+        </div>
+        <br/>
+    </div>
 
 
 Getting Started
@@ -69,11 +78,11 @@ later.
 Documentation
 -------------
 
-You can find the airtest documentation on `readthedocs`_
+You can find the complete airtest documentation on `readthedocs`_.
 
 
-Basic Usage
------------------------
+Example
+------------
 
 Airtest provides simple APIs that are platform independent. This section
 describes how to create simple API-specific test scenario which does the
@@ -89,17 +98,13 @@ following:
 
     from airtest.core.api import *
 
-    # connect to local device with adb
+    # connect an android phone with adb
     connect_device("Android:///")
-
-    # start your script here
     install("path/to/your/apk")
     start_app("package_name_of_your_apk")
-    snapshot("my_screenshot.png")
-    touch((100, 100))
     touch("image_of_a_button.png")
-    swipe((100, 100), (200, 200))
-    swipe("button1.png", "button2.png")
+    swipe("slide_start.png", "slide_end.png")
+    assert_exists("success.png")
     keyevent("BACK")
     home()
     uninstall("package_name_of_your_apk")
@@ -107,6 +112,18 @@ following:
 
 For more detailed info, please refer to `Airtest Python API
 reference`_ or take a look at `API code`_
+
+
+Basic Usage
+------------
+
+Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+
+1. Using `connect_device`_ API you can connect to any android device or windows application. 
+
+2. Then perform `simulated input`_ to test your game or app. 
+
+3. And **do not** forget to `make assertions`_ of the expected test result. 
 
 
 Connect Device
@@ -182,17 +199,7 @@ Airtest provide some assert functions, including:
 When assertion fails, it will raise ``AssertsionError``. And you will see all assertions in the html report.
 
 
-
-
-Trying Samples
---------------
-
-Airtest also contains the samples using this library in several
-scenarios. All samples can be found in ``playground`` directory in
-cloned repository.
-
-
-Running from CLI
+Running ``.air`` from CLI
 -----------------------------------
 
 Using AirtestIDE, you can easily create and author automated tests as ``.air`` directories.
