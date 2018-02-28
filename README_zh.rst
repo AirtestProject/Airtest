@@ -10,7 +10,7 @@ Airtest
 快速开始
 --------
 
-Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。支持Windows和Android平台，iOS支持正在开发中。
+Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。
 
 Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化测试。 测试脚本运行后可以自动生成详细的HTML测试报告，让你迅速定位失败的测试点。
 
@@ -35,7 +35,7 @@ Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等�
 文档
 -------------
 
-完整的Airtest框架文档在`readthedocs`_。
+完整的Airtest框架文档请看 `readthedocs`_。
 
 
 例子
@@ -77,8 +77,8 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 
 .. code:: shell
 
-    # run test test cases and scenarios on various devices
-    > python -m airtest run <path to your air dir> --device Android:///
+    python -m airtest run <path to your air dir> --device Android:///
+    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
 
 试试样例 ``airtest/playground/test_blackjack.air`` ，更多用法看 `命令行用法`_。
 
