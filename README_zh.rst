@@ -83,16 +83,16 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 试试样例 ``airtest/playground/test_blackjack.air`` ，更多用法看 `命令行用法`_。
 
 
-Contribution
+贡献代码
 ------------
 
-Pull requests are very welcome.
+欢迎大家fork和提pull requrests。
 
 
-Thanks
+致谢
 ------
 
-Thanks for all these great works that make this project better.
+感谢以下仓库让Airtest变得更好：
 
 - `stf`_
 - `atx`_
@@ -101,6 +101,7 @@ Thanks for all these great works that make this project better.
 
 .. _从官网开始上手吧: http://airtest.netease.com/
 .. _官网: http://airtest.netease.com/
+.. _readthedocs: http://airtest.readthedocs.io/
 .. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
 .. _模拟操作: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
 .. _声明断言: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
@@ -111,4 +112,3 @@ Thanks for all these great works that make this project better.
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
-
