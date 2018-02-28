@@ -129,7 +129,6 @@ Airtest aims at providing platform independent api, so that you can write test o
 Connect Device
 ..................
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
 Using ``connect_device`` API you can connect to any android device or windows application.
 
 .. code:: python

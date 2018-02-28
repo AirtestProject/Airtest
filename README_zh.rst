@@ -99,13 +99,16 @@ Thanks for all these great works that make this project better.
 - `pywinauto`_
 
 
-.. _中文版点这里: ./README_zh.rst
-.. _homepage: http://airtest.netease.com/
-.. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
-.. _readthedocs: http://airtest.readthedocs.io/
-.. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
+.. _从官网开始上手吧: http://airtest.netease.com/
+.. _官网: http://airtest.netease.com/
+.. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
+.. _模拟操作: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
+.. _声明断言: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
+.. _Airtest Python API 文档: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
-.. _API code: ./airtest/core/api.py
+.. _API代码: ./airtest/core/api.py
+.. _命令行用法: http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
+

@@ -110,9 +110,13 @@ Thanks for all these great works that make this project better.
 .. _homepage: http://airtest.netease.com/
 .. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
 .. _readthedocs: http://airtest.readthedocs.io/
+.. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
+.. _simulated input: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
+.. _make assertions: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
 .. _API code: ./airtest/core/api.py
+.. _Usage of CLI: http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
