@@ -3,7 +3,7 @@ Airtest
 
 **UI Test Automation Framework for Games and Apps**
 
-**跨平台的UI自动化测试框架，适用于游戏和App**（`中文版点这里`_）
+**跨平台的UI自动化测试框架，适用于游戏和App** （`中文版点这里`_）
 
 
 .. image:: demo.gif
