@@ -84,8 +84,8 @@ Airtest CLI provides the possibility to execute tests on different host machine 
 
 .. code:: shell
 
-    # run test test cases and scenarios on various devices
-    > python -m airtest run <path to your air dir> --device Android:///
+    python -m airtest run <path to your air dir> --device Android:///
+    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
 
 Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
 
