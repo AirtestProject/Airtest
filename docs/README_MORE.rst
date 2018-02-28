@@ -37,6 +37,8 @@ Installation
 ------------
 
 This section describes how to install Airtest test framework.
+Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
+
 
 System Requirements
 ...................
@@ -129,7 +131,6 @@ Airtest aims at providing platform independent api, so that you can write test o
 Connect Device
 ..................
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
 Using ``connect_device`` API you can connect to any android device or windows application.
 
 .. code:: python
@@ -279,8 +280,12 @@ get test case info
 
 
 .. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
+.. _homepage: http://airtest.netease.com/
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
+.. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
+.. _simulated input: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
+.. _make assertions: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
 .. _API code: ./airtest/core/api.py
