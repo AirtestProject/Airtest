@@ -33,7 +33,7 @@ Quickstart
 .. toctree::
    :maxdepth: 2
 
-   ../README
+   ../README_MORE.md
 
 
 Cross Platform API
