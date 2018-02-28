@@ -37,6 +37,8 @@ Installation
 ------------
 
 This section describes how to install Airtest test framework.
+Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
+
 
 System Requirements
 ...................
