@@ -280,6 +280,7 @@ get test case info
 
 
 .. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
+.. _homepage: http://airtest.netease.com/
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
 .. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
