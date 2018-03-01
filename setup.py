@@ -10,7 +10,7 @@ if sys.platform != "win32":
 
 setup(
     name='airtest',
-    version='1.0.1',
+    version='1.0.2',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
