@@ -16,6 +16,5 @@ Submodules
    airtest.aircv.error
    airtest.aircv.sift
    airtest.aircv.template
-   airtest.aircv.template2
    airtest.aircv.utils
 

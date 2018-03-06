@@ -1,0 +1,344 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: ../../README_MORE.rst:2
+msgid "Airtest"
+msgstr ""
+
+#: ../../README_MORE.rst:4
+msgid "**UI Test Automation Framework for Games and Apps**"
+msgstr "**跨平台的UI自动化测试框架，适用于游戏和App**"
+
+#: ../../README_MORE.rst:20
+msgid "Getting Started"
+msgstr "快速开始"
+
+#: ../../README_MORE.rst:22
+msgid ""
+"Airtest is a cross-platform automated testing framework with main focus "
+"on games, which can also be used for native apps. Currently, Windows and "
+"Android are well supported. Support for iOS comes in near future."
+msgstr "Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。"
+
+#: ../../README_MORE.rst:26
+msgid ""
+"Airtest provides cross-platform APIs, including app installation, "
+"simulated input, assertion and so forth. Airtest uses image recognition "
+"technology to locate UI elements, so that you can automate test on games "
+"without injecting any code. After running the test, an HTML report will "
+"be generated automatically, that allows you to quickly locate failed test"
+" points."
+msgstr ""
+"Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化测试。 "
+"测试脚本运行后可以自动生成详细的HTML测试报告，让你迅速定位失败的测试点。"
+
+#: ../../README_MORE.rst:28
+msgid ""
+"**AirtestIDE** is an out of the box GUI tool that helps to create and "
+"record test cases in the user-friendly way. AirtestIDE provides QA with a"
+" complate production workflow: ``record -> replay -> report``"
+msgstr ""
+"**AirtestIDE** 是一个强大的GUI工具，可以帮助你录制和调试测试脚本。 "
+"AirtestIDE给QA人员提供了完整的工作流程支持：``录制脚本->真机回放->生成报告``"
+
+#: ../../README_MORE.rst:33
+msgid "`Get Started from Airtest Project Homepage`_"
+msgstr "`从官网开始上手吧`_"
+
+#: ../../README_MORE.rst:37
+msgid "Installation"
+msgstr "安装"
+
+#: ../../README_MORE.rst:39
+msgid ""
+"This section describes how to install Airtest test framework. Download "
+"AirtestIDE from our `homepage`_ if you need to use the GUI tool."
+msgstr "这部分说明了如何安装Airtest测试框架。如果你需要使用GUI工具，请从 `官网`_ 下载AirtestIDE。"
+
+#: ../../README_MORE.rst:44
+msgid "System Requirements"
+msgstr "系统要求"
+
+#: ../../README_MORE.rst:46
+msgid "Operating System:"
+msgstr "操作系统"
+
+#: ../../README_MORE.rst:48
+msgid "Windows"
+msgstr ""
+
+#: ../../README_MORE.rst:49
+msgid "MacOS X"
+msgstr ""
+
+#: ../../README_MORE.rst:50
+msgid "Linux"
+msgstr ""
+
+#: ../../README_MORE.rst:52
+msgid "Python2.7 & Python3.3+"
+msgstr ""
+
+#: ../../README_MORE.rst:56
+msgid "Installing the python package"
+msgstr "安装Python Package"
+
+#: ../../README_MORE.rst:58
+msgid ""
+"Airtest package can be installed directly from Pypi. Use ``pip`` to "
+"manage installation of all python dependencies and package itself."
+msgstr "使用 ``pip`` 来管理安装包和自动安装所有依赖。"
+
+#: ../../README_MORE.rst:67
+msgid "You can also install it from Git repository."
+msgstr "你也可以直接从Git仓库安装。"
+
+#: ../../README_MORE.rst:75
+msgid ""
+"Use ``-e`` here to install airtest in develop mode since this repo is in "
+"rapid development. Then you can upgrade the repo with ``git pull`` later."
+msgstr "因为Airtest还在快速开发中，这里使用 `-e` 来安装源码。以后你就可以直接使用 `git pull` 更新代码目录来升级Airtest了。"
+
+#: ../../README_MORE.rst:81
+msgid "Documentation"
+msgstr "文档"
+
+#: ../../README_MORE.rst:83
+msgid "You can find the complete airtest documentation on `readthedocs`_."
+msgstr "完整的Airtest框架文档请看 `readthedocs`_。"
+
+#: ../../README_MORE.rst:87
+msgid "Example"
+msgstr "例子"
+
+#: ../../README_MORE.rst:89
+msgid ""
+"Airtest provides simple APIs that are platform independent. This section "
+"describes how to create simple API-specific test scenario which does the "
+"following:"
+msgstr "Airtest提供了简洁而且平台无关的API。这部分介绍了如何使用这些API来编写一个测试脚本，测试步骤如下："
+
+#: ../../README_MORE.rst:93
+msgid "connects to local android device with ``adb``"
+msgstr "通过ADB连接一台安卓手机"
+
+#: ../../README_MORE.rst:94
+msgid "installs the ``apk`` application"
+msgstr "安装应用APK"
+
+#: ../../README_MORE.rst:95
+msgid "runs application and takes the screenshot"
+msgstr "运行应用并截图"
+
+#: ../../README_MORE.rst:96
+msgid "performs several user operations (touch, swipe, keyevent)"
+msgstr "模拟用户输入（点击、滑动、按键）"
+
+#: ../../README_MORE.rst:97
+msgid "uninstalls application"
+msgstr "卸载应用"
+
+#: ../../README_MORE.rst:115
+msgid ""
+"For more detailed info, please refer to `Airtest Python API reference`_ "
+"or take a look at `API code`_"
+msgstr "更多API和使用方法，请参考完整的`Airtest Python API reference`_，或者直接看看`API code`_"
+
+#: ../../README_MORE.rst:120
+msgid "Basic Usage"
+msgstr "基本使用方法"
+
+#: ../../README_MORE.rst:122
+msgid ""
+"Airtest aims at providing platform independent api, so that you can write"
+" test once and run test on different devices."
+msgstr "Airtest希望提供平台无关的API，让你的测试代码可以运行在不同平台的应用上。"
+
+#: ../../README_MORE.rst:124
+msgid ""
+"Using `connect_device`_ API you can connect to any android device or "
+"windows application."
+msgstr "使用 `connect_device`_ 来连接任意Android设备或者Windows窗口。"
+
+#: ../../README_MORE.rst:126
+msgid "Then perform `simulated input`_ to test your game or app."
+msgstr "使用 `模拟操作`_ 的API来测试你的游戏或者App。"
+
+#: ../../README_MORE.rst:128
+msgid "And **do not** forget to `make assertions`_ of the expected test result."
+msgstr "千万 **不要** 忘记 `声明断言`_ 来验证测试结果。 "
+
+#: ../../README_MORE.rst:132
+msgid "Connect Device"
+msgstr "连接设备"
+
+#: ../../README_MORE.rst:134
+msgid ""
+"Using ``connect_device`` API you can connect to any android device or "
+"windows application."
+msgstr "使用 `connect_device`_ 来连接任意Android设备或者Windows窗口。"
+
+#: ../../README_MORE.rst:142
+msgid "Connect android device"
+msgstr "连接安卓设备"
+
+#: ../../README_MORE.rst:144
+msgid "Local device"
+msgstr "本地设备"
+
+#: ../../README_MORE.rst:146
+msgid "Connect your android phone to your PC with usb"
+msgstr "通过usb将手机与电脑相连"
+
+#: ../../README_MORE.rst:147
+msgid "Use ``adb devices`` to make sure the state is ``device``"
+msgstr "命令行输入 ``adb devices`` 命令，确保手机连接状态是 ``device``"
+
+#: ../../README_MORE.rst:148
+msgid "Connect device in Airtest"
+msgstr "在Airtest中连接设备"
+
+#: ../../README_MORE.rst:149
+msgid ""
+"If you have multiple devices or even remote devices, use more params to "
+"specify the device"
+msgstr "如果你连接了多个设备，或者有远程设备，那么使用参数来指定要连接的设备"
+
+#: ../../README_MORE.rst:161
+msgid "Connect windows application"
+msgstr "连接windows应用"
+
+#: ../../README_MORE.rst:172
+msgid ""
+"Airtest uses `pywinauto` as Windows backend. For more window searching "
+"params, please see `pywinauto documentation`_."
+msgstr ""
+"Airtest使用了 `pywinauto` 作为操作Windows应用的底层库，更多窗口搜索的参数请看 `pywinauto "
+"documentation`_ 。"
+
+#: ../../README_MORE.rst:176
+msgid "Simulate Input"
+msgstr "模拟输入"
+
+#: ../../README_MORE.rst:178
+msgid "Following APIs are fully supported:"
+msgstr "支持以下常用API："
+
+#: ../../README_MORE.rst:180
+msgid "touch"
+msgstr ""
+
+#: ../../README_MORE.rst:181
+msgid "swipe"
+msgstr ""
+
+#: ../../README_MORE.rst:182
+msgid "text"
+msgstr ""
+
+#: ../../README_MORE.rst:183
+msgid "keyevent"
+msgstr ""
+
+#: ../../README_MORE.rst:184
+msgid "snapshot"
+msgstr ""
+
+#: ../../README_MORE.rst:185
+msgid "wait"
+msgstr ""
+
+#: ../../README_MORE.rst:187
+msgid ""
+"More APIs are available, some of which may be platform specific, please "
+"see `API reference`_ for more information."
+msgstr "支持更多API，其中部分是平台相关的API，请查看 `API reference`_ 。"
+
+#: ../../README_MORE.rst:191
+msgid "Make Assertion"
+msgstr "声明断言"
+
+#: ../../README_MORE.rst:193
+msgid "Airtest provide some assert functions, including:"
+msgstr "Airtest提供了以下断言方法："
+
+#: ../../README_MORE.rst:195
+msgid "assert_exists"
+msgstr ""
+
+#: ../../README_MORE.rst:196
+msgid "assert_not_exists"
+msgstr ""
+
+#: ../../README_MORE.rst:197
+msgid "assert_equal"
+msgstr ""
+
+#: ../../README_MORE.rst:198
+msgid "assert_not_equal"
+msgstr ""
+
+#: ../../README_MORE.rst:200
+msgid ""
+"When assertion fails, it will raise ``AssertsionError``. And you will see"
+" all assertions in the html report."
+msgstr "当断言失败，会抛出 ``AssertsionError``。所有断言都会在html报告中显示。"
+
+#: ../../README_MORE.rst:204
+msgid "Running ``.air`` from CLI"
+msgstr "用命令行运行 ``.air`` 脚本"
+
+#: ../../README_MORE.rst:206
+msgid ""
+"Using AirtestIDE, you can easily create and author automated tests as "
+"``.air`` directories. Airtest CLI provides the possibility to execute "
+"tests on different host machine and target device platforms without using"
+" AirtestIDE itself."
+msgstr ""
+"使用AirtestIDE你可以非常轻松地录制一个测试脚本并保存为 ``.air`` "
+"目录结构。Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备上运行测试脚本。"
+
+#: ../../README_MORE.rst:209
+msgid ""
+"Connections to devices are specified by command line arguments, i.e. the "
+"test code is platform independent and one code, test cases, scenarios can"
+" be used for Android, Windows or iOS devices as well."
+msgstr "你可以在命令行参数中指定连接的被测设备，这样就可以运行在不同的手机平台和宿主机器上。只要你的测试代码本身是平台无关的，你就可以在一个平台上录制脚本，然后在不同平台上运行"
+
+#: ../../README_MORE.rst:211
+msgid ""
+"Following examples demonstrate the basic usage of airtest framework "
+"running from CLI. For a deeper understanding, try running provided test "
+"cases: ``airtest/playground/test_blackjack.air``"
+msgstr ""
+"下面的例子介绍了命令行的基本用法。可以配合我们提供的示例 ```airtest/playground/test_blackjack.owl/```"
+" 来学习使用："
+
+#: ../../README_MORE.rst:215
+msgid "run test case"
+msgstr "运行测试"
+
+#: ../../README_MORE.rst:245
+msgid "generate html report"
+msgstr "生成报告"
+
+#: ../../README_MORE.rst:273
+msgid "get test case info"
+msgstr "获取脚本信息"
+

@@ -12,5 +12,4 @@ Submodules
 .. toctree::
 
    airtest.report.report
-   airtest.report.report_gif
 

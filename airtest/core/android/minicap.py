@@ -23,7 +23,7 @@ class Minicap(object):
     reference https://github.com/openstf/minicap
     """
 
-    VERSION = 4
+    VERSION = 5
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
@@ -85,24 +85,37 @@ class Minicap(object):
         """
         Install minicap
 
+        Reference: https://github.com/openstf/minicap/blob/master/run.sh
+
         Returns:
             None
 
         """
         abi = self.adb.getprop("ro.product.cpu.abi")
-        if self.adb.sdk_version >= 16:
+        pre = self.adb.getprop("ro.build.version.preview_sdk")
+        rel = self.adb.getprop("ro.build.version.release")
+        sdk = self.adb.sdk_version
+
+        if pre.isdigit() and int(pre) > 0:
+            sdk += 1
+
+        if sdk >= 16:
             binfile = "minicap"
         else:
             binfile = "minicap-nopie"
 
         device_dir = "/data/local/tmp"
-        path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
-        self.adb.cmd("push %s %s/minicap" % (path, device_dir))
+
+        path = os.path.join(STFLIB, abi, binfile)
+        self.adb.push(path, "%s/minicap" % device_dir)
         self.adb.shell("chmod 755 %s/minicap" % device_dir)
 
-        path = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%d/%s/minicap.so' %
-                            (self.adb.sdk_version, abi)).replace("\\", r"\\")
-        self.adb.cmd("push %s %s" % (path, device_dir))
+        pattern = os.path.join(STFLIB, 'minicap-shared/aosp/libs/android-%s/%s/minicap.so')
+        path = pattern % (sdk, abi)
+        if not os.path.isfile(path):
+            path = pattern % (rel, abi)
+
+        self.adb.push(path, "%s/minicap.so" % device_dir)
         self.adb.shell("chmod 755 %s/minicap.so" % device_dir)
         LOGGING.info("minicap installation finished")
 
