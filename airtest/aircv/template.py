@@ -26,7 +26,7 @@ def find_template(im_source, im_search, threshold=0.8, rgb=False):
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     h, w = im_search.shape[:2]
     # 求取可信度:
-    confidence = _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, threshold, rgb)
+    confidence = _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, rgb)
     # 求取识别位置: 目标中心 + 目标区域:
     middle_point, rectangle = _get_target_rectangle(max_loc, w, h)
     best_match = generate_result(middle_point, rectangle, confidence)
@@ -50,7 +50,7 @@ def find_all_template(im_source, im_search, threshold=0.8, rgb=False, max_count=
         # 本次循环中,取出当前结果矩阵中的最优值
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         # 求取可信度:
-        confidence = _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, threshold, rgb)
+        confidence = _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, rgb)
 
         if confidence < threshold or len(result) > max_count:
             break
@@ -67,13 +67,13 @@ def find_all_template(im_source, im_search, threshold=0.8, rgb=False, max_count=
     return result if result else None
 
 
-def _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, threshold, rgb):
+def _get_confidence_from_matrix(im_source, im_search, max_loc, max_val, w, h, rgb):
     """根据结果矩阵求出confidence."""
     # 求取可信度:
     if rgb:
         # 如果有颜色校验,对目标区域进行BGR三通道校验:
         img_crop = im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
-        confidence = cal_rgb_confidence(img_crop, im_search, threshold)
+        confidence = cal_rgb_confidence(img_crop, im_search)
     else:
         confidence = max_val
 
