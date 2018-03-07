@@ -5,6 +5,7 @@
 import os
 import sys
 import time
+import types
 from airtest import aircv
 from airtest.aircv import cv2
 from airtest.core.error import TargetNotFoundError
@@ -182,6 +183,8 @@ class Template(object):
         # 如果分辨率一致，则不需要进行im_search的适配:
         if tuple(self.resolution) == tuple(screen_resolution) or resize_method is None:
             return image
+        if isinstance(resize_method, types.MethodType):
+            resize_method = resize_method.__func__
         # 分辨率不一致则进行适配，默认使用cocos_min_strategy:
         h, w = image.shape[:2]
         w_re, h_re = resize_method(w, h, self.resolution, screen_resolution)
