@@ -52,8 +52,9 @@ class LogToHtml(object):
         all_step = defaultdict(list)
 
         for log in self.log:
-            if log["depth"] == 0 and log.get("tag") in ["main_script", "pre_script", "post_script"]:
+            if log["depth"] == 0 and log.get("tag") in ["main_script"]:
                 # 根据脚本执行的pre,main,post，将log区分开
+                # to be fixed: 不区分pre/post了，以后用来区分子脚本
                 current_step = log.get("tag", "main_script")
 
             #拆分成每一个步骤，并且加上traceback的标志
