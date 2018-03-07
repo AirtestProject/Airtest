@@ -80,8 +80,8 @@ class StringBlock:
 
         while length > 0:
             offset += 2
-            # Unicode character
-            data += chr(self.getShort(self.m_strings, offset))
+            # get the unicode character as the apk might contain non-ASCII label
+            data += unichr(self.getShort(self.m_strings, offset))
 
             # FIXME
             if data[-1] == "&":
