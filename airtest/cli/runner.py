@@ -29,8 +29,7 @@ class AirtestCase(unittest.TestCase):
         elif args.device:
             devices = [args.device]
         else:
-            # default to use local android device
-            devices = ["Android:///"]
+            print("do not connect device")
 
         for dev in devices:
             connect_device(dev)
