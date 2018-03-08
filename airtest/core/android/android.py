@@ -395,6 +395,20 @@ class Android(Device):
     def get_display_info(self):
         return self.adb.get_display_info()
 
+    def get_current_resolution(self):
+        """
+        Return current resolution after rotaion
+
+        Returns:
+            width and height of the display
+
+        """
+        # 注意黑边问题，需要用安卓接口获取区分两种分辨率
+        w, h = self.display_info["width"], self.display_info["height"]
+        if self.display_info["orientation"] in [1, 3]:
+            w, h = h, w
+        return w, h
+
     def getCurrentScreenResolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
         if self.display_info["orientation"] in [1, 3]:
