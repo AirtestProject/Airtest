@@ -77,15 +77,14 @@ templates_path = ['_templates']
 source_parsers = {'.md': CommonMarkParser}
 source_suffix = ['.rst', '.md']
 
+html_extra_path = ["./demo.mp4"]
+
 # The master toctree document.
-import shutil
-shutil.copyfile('../README.rst', './README.rst')
-shutil.copyfile('../demo.gif', './demo.gif')
 master_doc = 'index'
 
 # General information about the project.
 project = u'airtest'
-copyright = u'2017, Game-Netease'
+copyright = u'2018, Game-Netease'
 author = u'Game-Netease'
 
 # The version info for the project you're documenting, acts as replacement for

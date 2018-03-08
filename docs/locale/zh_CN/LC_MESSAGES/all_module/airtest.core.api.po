@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"POT-Creation-Date: 2018-02-28 20:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../all_module/airtest.core.api.rst:2
 msgid "airtest\\.core\\.api module"
@@ -38,7 +38,7 @@ msgstr ""
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.api.connect_device:3 of
@@ -57,7 +57,7 @@ msgstr ""
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.api.connect_device:4 of
@@ -123,7 +123,7 @@ msgstr ""
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
-msgid "Raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.api.set_current:4 of
@@ -134,9 +134,9 @@ msgstr ""
 #: airtest.core.api.clear_app:4 airtest.core.api.home:3
 #: airtest.core.api.install:4 airtest.core.api.keyevent:5
 #: airtest.core.api.pinch:6 airtest.core.api.set_current:5
-#: airtest.core.api.sleep:4 airtest.core.api.snapshot:6
-#: airtest.core.api.start_app:5 airtest.core.api.stop_app:4
-#: airtest.core.api.swipe:16 airtest.core.api.text:5 airtest.core.api.touch:5
+#: airtest.core.api.sleep:4 airtest.core.api.start_app:5
+#: airtest.core.api.stop_app:4 airtest.core.api.swipe:16
+#: airtest.core.api.text:5 airtest.core.api.touch:5
 #: airtest.core.api.uninstall:4 airtest.core.api.wake:3 of
 msgid "None"
 msgstr ""
@@ -220,6 +220,10 @@ msgstr ""
 
 #: airtest.core.api.snapshot:5 of
 msgid "short description for screenshot, it will be recorded in the report"
+msgstr ""
+
+#: airtest.core.api.snapshot:6 of
+msgid "absolute path of the screenshot"
 msgstr ""
 
 #: airtest.core.api.wake:1 of
@@ -454,5 +458,14 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "引发"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Raises"
 #~ msgstr ""
 

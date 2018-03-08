@@ -29,8 +29,8 @@ class AirtestCase(unittest.TestCase):
         elif args.device:
             devices = [args.device]
         else:
-            # default to use local android device
-            devices = ["Android:///"]
+            devices = []
+            print("do not connect device")
 
         for dev in devices:
             connect_device(dev)
@@ -65,10 +65,6 @@ class AirtestCase(unittest.TestCase):
                 except:
                     traceback.print_exc()
 
-        if self.args.pre:
-            log("pre_script", {"script": self.args.pre})
-            self.exec_other_script(self.args.pre)
-
     def tearDown(self):
         if self.args.log and self.args.recording:
             for k, dev in enumerate(G.DEVICE_LIST):
@@ -77,10 +73,6 @@ class AirtestCase(unittest.TestCase):
                     dev.stop_recording(output)
                 except:
                     traceback.print_exc()
-
-        if self.args.post:
-            log("post_script", {"script": self.args.post})
-            self.exec_other_script(self.args.post)
 
     def runTest(self):
         log("main_script", {"script": self.args.script})

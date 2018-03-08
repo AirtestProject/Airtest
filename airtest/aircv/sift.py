@@ -57,7 +57,7 @@ def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_R
     x_min, x_max, y_min, y_max, w, h = w_h_range
     target_img = im_source[y_min:y_max, x_min:x_max]
     resize_img = cv2.resize(target_img, (w, h))
-    confidence = _cal_sift_confidence(im_search, resize_img, threshold, rgb=rgb)
+    confidence = _cal_sift_confidence(im_search, resize_img, rgb=rgb)
 
     best_match = generate_result(middle_point, pypts, confidence)
     print("[aircv][sift] threshold=%s, result=%s" % (threshold, best_match))
@@ -266,9 +266,9 @@ def _target_error_check(w_h_range):
         raise SiftResultCheckError("Target area is 5 times bigger or 0.2 times smaller than sch_img.")
 
 
-def _cal_sift_confidence(im_search, resize_img, threshold, rgb=False):
+def _cal_sift_confidence(im_search, resize_img, rgb=False):
     if rgb:
-        confidence = cal_rgb_confidence(im_search, resize_img, threshold)
+        confidence = cal_rgb_confidence(im_search, resize_img)
     else:
         confidence = cal_ccoeff_confidence(im_search, resize_img)
     # sift的confidence要放水

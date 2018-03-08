@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 15:42+0800\n"
+"POT-Creation-Date: 2018-02-28 20:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../all_module/airtest.core.android.adb.rst:2
 msgid "airtest\\.core\\.android\\.adb module"
@@ -57,6 +57,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.is_locked
 #: airtest.core.android.adb.ADB.is_screenon
 #: airtest.core.android.adb.ADB.keyevent
+#: airtest.core.android.adb.ADB.kill_server
 #: airtest.core.android.adb.ADB.line_breaker
 #: airtest.core.android.adb.ADB.list_app airtest.core.android.adb.ADB.logcat
 #: airtest.core.android.adb.ADB.path_app
@@ -74,7 +75,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.uninstall_app
 #: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.builtin_adb_path:3 of
@@ -91,6 +92,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.forward:7
 #: airtest.core.android.adb.ADB.get_forwards:5
 #: airtest.core.android.adb.ADB.keyevent:5
+#: airtest.core.android.adb.ADB.kill_server:3
 #: airtest.core.android.adb.ADB.logcat:9
 #: airtest.core.android.adb.ADB.pm_install:8
 #: airtest.core.android.adb.ADB.pull:5 airtest.core.android.adb.ADB.push:6
@@ -102,6 +104,10 @@ msgstr ""
 #: airtest.core.android.adb.ADB.touch:5 airtest.core.android.adb.ADB.unlock:4
 #: airtest.core.android.adb.ADB.wait_for_device:7 of
 msgid "None"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.kill_server:1 of
+msgid "Perform `adb kill-server` command to kill the adb server"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.version:1 of
@@ -140,7 +146,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.touch
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
@@ -777,5 +783,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Parameters"
 #~ msgstr ""
 
