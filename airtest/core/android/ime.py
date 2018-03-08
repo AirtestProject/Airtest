@@ -3,6 +3,7 @@ import re
 from airtest.utils.compat import text_type
 from airtest.utils.snippet import on_method_ready
 from airtest.core.android.yosemite import Yosemite
+from airtest.core.error import AdbError
 from .constant import YOSEMITE_IME_SERVICE
 
 
@@ -63,7 +64,12 @@ class CustomIme(object):
             None
 
         """
-        self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
+        try:
+            self.default_ime = self.adb.shell("settings get secure default_input_method").strip()
+        except AdbError:
+            # settings cmd not found for older phones, e.g. Xiaomi 2A
+            # /system/bin/sh: settings: not found
+            self.default_ime = None
         self.ime_list = self._get_ime_list()
         if self.service_name not in self.ime_list:
             if self.apk_path:
@@ -81,7 +87,7 @@ class CustomIme(object):
             None
 
         """
-        if self.default_ime != self.service_name:
+        if self.default_ime and self.default_ime != self.service_name:
             self.adb.shell("ime disable %s" % self.service_name)
             self.adb.shell("ime set %s" % self.default_ime)
         self.started = False
