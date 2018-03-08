@@ -155,6 +155,7 @@ def uninstall(package):
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def snapshot(filename=None, msg=""):
     """
     Take the screenshot of the target device and save it to the file.
@@ -331,6 +332,7 @@ def sleep(secs=1.0):
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def wait(v, timeout=None, interval=0.5, intervalfunc=None):
     """
     Wait to match the Template on the device screen
@@ -349,6 +351,7 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def exists(v):
     """
     Check whether given target exists on device screen
@@ -366,6 +369,7 @@ def exists(v):
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def find_all(v):
     """
     Find all occurrences of the target on the device screen and return their coordinates
@@ -384,6 +388,7 @@ Assertions
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def assert_exists(v, msg=""):
     """
     Assert target exists on device screen
@@ -402,6 +407,7 @@ def assert_exists(v, msg=""):
 
 
 @logwrap
+@on_platform(["Android", "Windows", "IOS"])
 def assert_not_exists(v, msg=""):
     """
     Assert target does not exist on device screen
