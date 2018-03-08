@@ -29,6 +29,7 @@ class AirtestCase(unittest.TestCase):
         elif args.device:
             devices = [args.device]
         else:
+            devices = []
             print("do not connect device")
 
         for dev in devices:

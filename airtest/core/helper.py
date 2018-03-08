@@ -107,7 +107,7 @@ def on_platform(platforms):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             if G.DEVICE is None:
-                raise RuntimeError("Device not initialized yet.")
+                raise RuntimeError("Device not connected yet.")
             pf = device_platform()
             if pf in NATIVE_PFS and pf not in platforms:
                 raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, platforms))
