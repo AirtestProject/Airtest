@@ -15,7 +15,7 @@ LOGGING = get_logger('minitouch')
 
 class Minitouch(object):
     """quick operation from minitouch  https://github.com/openstf/minitouch"""
-    def __init__(self, serialno, localport=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER):
+    def __init__(self, serialno, localport=None, backend=False, adb=None, adb_addr=DEFAULT_ADB_SERVER, reinstall=False):
         self.serialno = serialno
         self.server_proc = None
         self.client = None
@@ -23,7 +23,7 @@ class Minitouch(object):
         self.adb = adb or ADB(serialno, server_addr=adb_addr)
         self.localport = localport
         self.backend = backend
-        self.install()
+        self.install(reinstall)
         self._is_ready = False
 
     def _get_ready(self):

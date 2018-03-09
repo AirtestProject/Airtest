@@ -39,11 +39,9 @@ class Android(Device):
         self._init_cap(cap_method)
         self.device_model = self.getprop("ro.product.model")
         if self.device_model in Minitouch_blacklist:
-            self._init_touch(False)
-            self.blacklist_device = True
+            self._init_touch(True, reinstall=True)
         else:
             self._init_touch(True)
-            self.blacklist_device = False
         self.shell_ime = shell_ime
         self.performance = None
 
@@ -59,8 +57,8 @@ class Android(Device):
             print("cap_method %s not found, use adb screencap" % cap_method)
             self.cap_method = None
 
-    def _init_touch(self, minitouch=True):
-        self.minitouch = Minitouch(self.serialno, adb=self.adb) if minitouch else None
+    def _init_touch(self, minitouch=True, reinstall=False):
+        self.minitouch = Minitouch(self.serialno, adb=self.adb, reinstall=reinstall) if minitouch else None
 
     def _init_requirement_apk(self, apk_path, package):
         apk_version = apkparser.version(apk_path)
@@ -276,8 +274,8 @@ class Android(Device):
             self.ime.end()
 
     def touch(self, pos, times=1, duration=0.01):
-        if not self.blacklist_device:
-            pos = self._transformPointByOrientation(pos)
+        # if not self.blacklist_device:
+        #     pos = self._transformPointByOrientation(pos)
         for _ in range(times):
             if self.minitouch:
                 self.minitouch.touch(pos, duration=duration)
@@ -285,9 +283,9 @@ class Android(Device):
                 self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5):
-        if not self.blacklist_device:
-            p1 = self._transformPointByOrientation(p1)
-            p2 = self._transformPointByOrientation(p2)
+        # if not self.blacklist_device:
+        #     p1 = self._transformPointByOrientation(p1)
+        #     p2 = self._transformPointByOrientation(p2)
         if self.minitouch:
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
