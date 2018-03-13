@@ -256,7 +256,7 @@ class AutomatorWrapper(object):
         return len(self.obj)
 
     def __nonzero__(self):
-        """ python 2 only, for python 3, please overide __bool__
+        """ python 2 only, for python 3, please override __bool__
         """
         return bool(self.obj)
 
