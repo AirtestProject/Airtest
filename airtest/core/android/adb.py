@@ -13,7 +13,7 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
 from airtest.utils.snippet import reg_cleanup, split_cmd, get_std_encoding
-from airtest.utils.compat import PY3
+from airtest.utils.compat import PY3, decode_path
 from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH, IP_PATTERN
 # LOGGING = get_logger('adb')
 LOGGING = get_logger(__name__)
@@ -521,6 +521,9 @@ class ADB(object):
             command output
 
         """
+        if isinstance(filepath, str):
+            filepath = decode_path(filepath)
+
         if not replace:
             cmds = ["install", filepath]
         else:
