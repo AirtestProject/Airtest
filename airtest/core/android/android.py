@@ -495,7 +495,7 @@ class Android(Device):
 
     def stop_recording(self, *args, **kwargs):
         """
-        Stop recording the device display
+        Stop recording the device display. Recoding file will be kept in the device.
 
         Args:
             *args: optional arguments
@@ -506,6 +506,16 @@ class Android(Device):
 
         """
         return self.recorder.stop_recording(*args, **kwargs)
+
+    def pull_last_recording_file(self, *args, **kwargs):
+        """
+        Pull the latest recording file from device.
+
+        Args:
+            *args: optional arguments
+            **kwargs: optional arguments
+        """
+        return self.recorder.pull_last_recording_file(*args, **kwargs)
 
     def _register_rotation_watcher(self):
         """
