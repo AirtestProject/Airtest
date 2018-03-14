@@ -5,7 +5,7 @@ import re
 import time
 import socket
 import threading
-from airtest.core.error import MinitouchError
+from airtest.core.error import MinitouchError, AdbShellError
 from airtest.core.utils import SafeSocket, NonBlockingStreamReader, reg_cleanup, retries, get_logger, get_std_encoding
 from airtest.core.android.constant import DEFAULT_ADB_SERVER, STFLIB
 from airtest.core.android.adb import ADB
@@ -38,9 +38,15 @@ class Minitouch(object):
         self._is_ready = True
 
     def install(self, reinstall=False):
+        # reinstall = True
         if not reinstall and self.adb.exists_file('/data/local/tmp/minitouch'):
             LOGGING.debug("install_minitouch skipped")
             return
+
+        # try:
+        #     self.adb.shell("rm /data/local/tmp/minitouch*")
+        # except AdbShellError:
+        #     pass
 
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
