@@ -495,7 +495,7 @@ class Android(Device):
 
     def stop_recording(self, *args, **kwargs):
         """
-        Stop recording the device display
+        Stop recording the device display. Recoding file will be kept in the device.
 
         Args:
             *args: optional arguments

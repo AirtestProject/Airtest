@@ -64,7 +64,7 @@ class Recorder(Yosemite):
 
         Args:
             output: default file is `screen.mp4`
-            is_interrupted: True or False
+            is_interrupted: True or False. Stop only, no pulling recorded file from device.
 
         Raises:
             AirtestError: if recording was not started before
@@ -84,6 +84,17 @@ class Recorder(Yosemite):
             if m:
                 self.recording_file = m.group(1)
                 self.adb.pull(self.recording_file, output)
-                self.adb.shell("rm %s" % self.recording_file)
                 return
         raise AirtestError("start_recording first")
+
+    @on_method_ready('install_or_upgrade')
+    def pull_last_recording_file(self, output='screen.mp4'):
+        """
+        Pull the latest recording file from device. Error raises if no recording files on device.
+
+        Args:
+            output: default file is `screen.mp4`
+
+        """
+        recording_file = 'mnt/sdcard/test.mp4'
+        self.adb.pull(recording_file, output)
