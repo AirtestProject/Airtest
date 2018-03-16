@@ -82,7 +82,7 @@ class Minitouch(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
-        self.adb.cmd(r"push %s %s/minitouch" % (path, device_dir))
+        self.adb.push(path, "%s/minitouch" % device_dir)
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
         LOGGING.info("install_minitouch finished")
 
