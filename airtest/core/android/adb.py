@@ -400,7 +400,7 @@ class ADB(object):
             None
 
         """
-        self.cmd(["push", local, remote])
+        self.cmd(["push", local, remote], ensure_unicode=False)
 
     def pull(self, remote, local):
         """
@@ -412,7 +412,7 @@ class ADB(object):
         Returns:
             None
         """
-        self.cmd(["pull", remote, local])
+        self.cmd(["pull", remote, local], ensure_unicode=False)
 
     def forward(self, local, remote, no_rebind=True):
         """
