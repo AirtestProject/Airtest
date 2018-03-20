@@ -86,7 +86,7 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 贡献代码
 ------------
 
-欢迎大家fork和提pull requrests。
+欢迎大家fork和提pull requests。
 
 
 致谢
