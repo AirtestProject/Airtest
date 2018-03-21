@@ -17,6 +17,7 @@
 # along with Androguard.  If not, see <http://www.gnu.org/licenses/>.
 
 from .bytecode import SV
+from airtest.utils.compat import PY3
 
 
 class StringBlock:
@@ -80,8 +81,11 @@ class StringBlock:
 
         while length > 0:
             offset += 2
-            # get the unicode character as the apk might contain non-ASCII label
-            data += unichr(self.getShort(self.m_strings, offset))
+            if PY3:
+                data += chr(self.getShort(self.m_strings, offset))
+            else:
+                # get the unicode character as the apk might contain non-ASCII label
+                data += unichr(self.getShort(self.m_strings, offset))
 
             # FIXME
             if data[-1] == "&":
