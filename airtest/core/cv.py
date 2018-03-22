@@ -179,6 +179,9 @@ class Template(object):
 
     def _resize_image(self, image, screen, resize_method):
         """模板匹配中，将输入的截图适配成 等待模板匹配的截图."""
+        # 未记录录制分辨率，跳过
+        if not self.resolution:
+            return image
         screen_resolution = aircv.get_resolution(screen)
         # 如果分辨率一致，则不需要进行im_search的适配:
         if tuple(self.resolution) == tuple(screen_resolution) or resize_method is None:
