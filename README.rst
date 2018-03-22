@@ -12,11 +12,9 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework with main focus on games,
-which can also be used for native apps. Currently, Windows and Android are well supported.
-Support for iOS comes in near future.
+Airtest is a cross-platform automated testing framework focused mainly on games, but can also be used for native apps. Windows and Android are currently supported. iOS support will be coming in the near future.
 
-Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. After running the test, an HTML report will be generated automatically, that allows you to quickly locate failed test points.
+Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate a HTML report, which allows you to quickly locate failed test points.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
 record test cases in the user-friendly way. AirtestIDE provides QA with
@@ -48,7 +46,7 @@ You can find the complete airtest documentation on `readthedocs`_.
 Example
 -------
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+Airtest aims at providing platform independent API, so that you can write test once and run test on different devices.
 
 1. Using `connect_device`_ API you can connect to any android device or windows application. 
 
