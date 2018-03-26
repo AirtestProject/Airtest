@@ -1,2 +1,3 @@
 docs/* linguist-documentation
+playground/* linguist-vendored
 airtest/report/* linguist-vendored
