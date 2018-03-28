@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import re
+import warnings
+
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
@@ -368,7 +372,6 @@ class Android(Device):
         return self.adb.get_top_activity()
 
     def get_top_activity_name_and_pid(self):
-        import re
         dat = self.adb.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
         m = activityRE.search(dat)
