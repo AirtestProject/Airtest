@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
-import subprocess
-import threading
-import platform
-import warnings
-import random
-import time
-import sys
 import os
+import platform
+import random
 import re
-from airtest.core.error import AirtestError, AdbError, AdbShellError, DeviceConnectionError
-from airtest.utils.nbsp import NonBlockingStreamReader
+import subprocess
+import sys
+import threading
+import time
+import warnings
+
+from six import PY3, text_type
+from six.moves import reduce
+
+from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
+                                           SDK_VERISON_NEW)
+from airtest.core.error import (AdbError, AdbShellError, AirtestError,
+                                DeviceConnectionError)
+from airtest.utils.compat import decode_path
 from airtest.utils.logger import get_logger
+from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
-from airtest.utils.snippet import reg_cleanup, split_cmd, get_std_encoding
-from airtest.utils.compat import PY3, decode_path
-from airtest.core.android.constant import SDK_VERISON_NEW, DEFAULT_ADB_PATH, IP_PATTERN
+from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
+
 # LOGGING = get_logger('adb')
 LOGGING = get_logger(__name__)
 
@@ -305,7 +312,7 @@ class ADB(object):
             return out.decode(self.SHELL_ENCODING)
         except UnicodeDecodeError:
             warnings.warn("shell output decode {} fail. repr={}".format(self.SHELL_ENCODING, repr(out)))
-            return unicode(repr(out))
+            return text_type(repr(out))
 
     def shell(self, cmd):
         """

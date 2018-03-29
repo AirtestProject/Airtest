@@ -1,8 +1,9 @@
 # _*_ coding:UTF-8 _*_
-import atexit
 import sys
+import threading
 from functools import wraps
-from .compat import str_class, queue
+from six import string_types
+from six.moves import queue
 
 
 def split_cmd(cmds):
@@ -16,12 +17,8 @@ def split_cmd(cmds):
         array commands
 
     """
-    if isinstance(cmds, str_class):
-        # cmds = shlex.split(cmds)  # disable auto removing \ on windows
-        cmds = cmds.split()
-    else:
-        cmds = list(cmds)
-    return cmds
+    # cmds = shlex.split(cmds)  # disable auto removing \ on windows
+    return cmds.split() if isinstance(cmds, string_types) else list(cmds)
 
 
 def get_std_encoding(stream):
@@ -36,7 +33,6 @@ def get_std_encoding(stream):
 
     """
     return getattr(stream, "encoding", None) or sys.getfilesystemencoding()
-
 
 
 CLEANUP_CALLS = queue.Queue()
@@ -68,9 +64,6 @@ def _cleanup():
 
 # atexit.register(_cleanup)
 
-import threading
-
-
 _shutdown = threading._shutdown
 
 
@@ -84,8 +77,6 @@ def exitfunc():
 # atexit exec after all thread exit, which needs to cooperate with daemon thread.
 # daemon thread is evil, which abruptly exit causing unexpected error
 threading._shutdown = exitfunc
-
-
 
 
 def on_method_ready(method_name):
