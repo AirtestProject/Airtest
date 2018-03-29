@@ -5,6 +5,7 @@ from types import GeneratorType
 import os
 import unittest
 import subprocess
+from six import text_type
 
 
 class TestADBWithoutDevice(unittest.TestCase):
@@ -38,7 +39,7 @@ class TestADBWithoutDevice(unittest.TestCase):
 
     def test_cmd(self):
         output = self.adb.cmd("devices", device=False)
-        self.assertIsInstance(output, unicode)
+        self.assertIsInstance(output, text_type)
 
         with self.assertRaises(AdbError):
             self.adb.cmd("wtf", device=False)
@@ -81,20 +82,20 @@ class TestADBWithDevice(unittest.TestCase):
     def test_raw_shell(self):
         output = self.adb.raw_shell("pwd")
         self.assertEqual(output.strip(), "/")
-        self.assertIsInstance(output, unicode)
+        self.assertIsInstance(output, text_type)
 
         self.assertIsInstance(self.adb.raw_shell("pwd", ensure_unicode=False), str)
 
     def test_shell(self):
         output = self.adb.shell("time")
-        self.assertIsInstance(output, unicode)
+        self.assertIsInstance(output, text_type)
 
         with self.assertRaises(AdbShellError):
             self.adb.shell("ls some_imposible_path")
 
     def test_getprop(self):
         output = self.adb.getprop("wifi.interface")
-        self.assertIsInstance(output, unicode)
+        self.assertIsInstance(output, text_type)
 
     def test_sdk_version(self):
         output = self.adb.sdk_version
