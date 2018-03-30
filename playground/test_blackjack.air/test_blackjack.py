@@ -4,6 +4,8 @@ __author__ = "刘欣"
 
 import os
 from time import sleep
+from airtest.core.api import (Template, args, assert_exists, device, install,
+                              start_app, stop_app, touch, wait, wake)
 
 PWD = args.script
 PKG = "org.cocos2d.blackjack"
