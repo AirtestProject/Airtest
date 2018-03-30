@@ -3,7 +3,6 @@
 __author__ = "刘欣"
 
 import os
-from time import sleep
 
 PWD = args.script
 PKG = "org.cocos2d.blackjack"
