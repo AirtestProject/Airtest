@@ -1,6 +1,9 @@
 Airtest
 =======
 
+.. image:: https://travis-ci.org/AirtestProject/Airtest.svg?branch=master
+    :target: https://travis-ci.org/AirtestProject/Airtest
+
 **UI Test Automation Framework for Games and Apps**
 
 **跨平台的UI自动化测试框架，适用于游戏和App** （`中文版点这里`_）
