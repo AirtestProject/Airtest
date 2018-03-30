@@ -261,7 +261,7 @@ class LogToHtml(object):
     def func_desc(step):
         name = step['type']
         desc = {
-            "snapshot": u"Screenshot description: %s" % step[1].get("data")["kwargs"]["msg"] if step[1].get("data", {}).get("kwargs", {}) else '',
+            "snapshot": u"Screenshot description: %s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
             "touch": u"Search for target object, touch the screen coordinates %s" % repr(step.get('target_pos', '')),
             "swipe": u"Swipe from {target_pos} to {direction} {vector}".format(target_pos=repr(step.get('target_pos', '')), direction=step.get('swipe', ''), vector=repr(step.get('vector', ''))),
             "wait": u"Wait for target object to appear",
