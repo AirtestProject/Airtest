@@ -214,7 +214,10 @@ class LogToHtml(object):
     def to_percent(p):
         if not p:
             return ''
-
+        try:
+            p = float(p)
+        except ValueError:
+            return ''
         return round(p * 100, 1)
 
     @staticmethod
@@ -241,7 +244,7 @@ class LogToHtml(object):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            "snapshot": u"截图描述：%s" % step[1].get("data")["kwargs"]["msg"] if step[1].get("data", {}).get("kwargs", {}) else '',
+            "snapshot": u"截图描述：%s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
             "wait": u"等待目标图片出现",
