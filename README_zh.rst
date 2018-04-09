@@ -77,8 +77,14 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 
 .. code:: shell
 
+    airtest run <path to your air dir> --device Android:///
+    airtest report <path to your air dir>
+
+    # 在Windows应用上运行测试
+    airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
+
+    # 也可以用python -m的方式使用命令行
     python -m airtest run <path to your air dir> --device Android:///
-    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
 
 试试样例 ``airtest/playground/test_blackjack.air`` ，更多用法看 `命令行用法`_。
 

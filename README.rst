@@ -34,7 +34,7 @@ Use `pip` to install Airtest python library.
 
 .. code:: shell
 
-    pip install airtest
+    pip install -U airtest
 
 
 Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
@@ -85,8 +85,14 @@ Airtest CLI provides the possibility to execute tests on different host machine 
 
 .. code:: shell
 
+    airtest run <path to your air dir> --device Android:///
+    airtest report <path to your air dir>
+
+    # run test targeting on Windows application whose title matches Unity.*
+    airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
+
+    # or use as python module
     python -m airtest run <path to your air dir> --device Android:///
-    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
 
 Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
 
