@@ -74,6 +74,17 @@ def set_current(index):
         raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
 
 
+def auto_connect():
+    """
+    Auto try connect android device if not connected to any device.
+    """
+    if not device():
+        try:
+            connect_device("Android:///")
+        except IndexError:
+            pass
+
+
 """
 Device Operations
 """
