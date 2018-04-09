@@ -15,6 +15,7 @@ from airtest.utils.transform import TargetPos
 from copy import deepcopy
 from six import PY3
 
+
 @logwrap
 def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None):
     """
@@ -92,12 +93,23 @@ class Template(object):
 
     def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False):
         self.filename = filename
-        self.filepath = os.path.join(G.BASEDIR, filename) if G.BASEDIR else filename
+        self._filepath = None
         self.threshold = threshold or ST.THRESHOLD
         self.target_pos = target_pos
         self.record_pos = record_pos
         self.resolution = resolution
         self.rgb = rgb
+
+    @property
+    def filepath(self):
+        if self._filepath:
+            return self._filepath
+        for dirname in G.BASEDIR:
+            filepath =os.path.join(dirname, self.filename)
+            if os.path.isfile(filepath):
+                self._filepath = filepath
+                return self._filepath
+        return self.filename
 
     def __repr__(self):
         filepath = self.filepath if PY3 else self.filepath.encode(sys.getfilesystemencoding())

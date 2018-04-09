@@ -10,7 +10,7 @@ from six.moves.urllib.parse import parse_qsl, urlparse
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
-                                 logwrap, on_platform, set_logdir)
+                                 logwrap, on_platform, set_logdir, using)
 from airtest.core.settings import Settings as ST
 
 
@@ -74,10 +74,14 @@ def set_current(index):
         raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
 
 
-def auto_connect():
+def auto_setup(filepath):
     """
-    Auto try connect android device if not connected to any device.
+    Auto setup G.BASEDIR and try connect android device if not connected to any device.
     """
+    if filepath:
+        dirname = os.path.dirname(filepath)
+        if dirname not in G.BASEDIR:
+            G.BASEDIR.append(dirname)
     if not device():
         try:
             connect_device("Android:///")
