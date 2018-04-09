@@ -531,6 +531,9 @@ class ADB(object):
         if isinstance(filepath, str):
             filepath = decode_path(filepath)
 
+        if not os.path.isfile(filepath):
+            raise RuntimeError("file: %s does not exists" % (repr(filepath)))
+
         if not replace:
             cmds = ["install", filepath]
         else:
