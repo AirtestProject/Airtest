@@ -37,7 +37,7 @@ class AirtestCase(unittest.TestCase):
 
         # set base dir to find tpl
         args.script = decode_path(args.script)
-        G.BASEDIR = args.script
+        G.BASEDIR = [args.script]
 
         # set log dir
         if args.log is True:
