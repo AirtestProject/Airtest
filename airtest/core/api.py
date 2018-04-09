@@ -4,11 +4,15 @@ This module contains the Airtest Core APIs.
 """
 import os
 import time
-from airtest.utils.compat import urlparse, parse_qsl
+
+from six.moves.urllib.parse import parse_qsl, urlparse
+
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, set_logdir, logwrap, on_platform, import_device_cls, delay_after_operation
+from airtest.core.helper import (G, delay_after_operation, import_device_cls,
+                                 logwrap, on_platform, set_logdir)
 from airtest.core.settings import Settings as ST
+
 
 """
 Device Setup APIs

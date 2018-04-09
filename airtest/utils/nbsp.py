@@ -1,7 +1,7 @@
 # _*_ coding:UTF-8 _*_
 import time
 from threading import Thread, Event
-from .compat import queue
+from six.moves import queue
 from .logger import get_logger
 LOGGING = get_logger(__name__)
 

@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import re
-import time
 import socket
+import sys
 import threading
+import time
 import warnings
-from airtest.core.error import MinitouchError
+
+from six.moves import queue
+
 from airtest.core.android.constant import STFLIB
-from airtest.utils.compat import queue
-from airtest.utils.safesocket import SafeSocket
-from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import reg_cleanup, get_std_encoding, on_method_ready, ready_method
 from airtest.utils.logger import get_logger
+from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.safesocket import SafeSocket
+from airtest.utils.snippet import (get_std_encoding, on_method_ready,
+                                   ready_method, reg_cleanup)
+
 LOGGING = get_logger(__name__)
 
 

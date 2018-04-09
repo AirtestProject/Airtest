@@ -1,6 +1,9 @@
 Airtest
 =======
 
+.. image:: https://travis-ci.org/AirtestProject/Airtest.svg?branch=master
+    :target: https://travis-ci.org/AirtestProject/Airtest
+
 **UI Test Automation Framework for Games and Apps**
 
 **跨平台的UI自动化测试框架，适用于游戏和App** （`中文版点这里`_）
@@ -12,13 +15,13 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework focused mainly on games, but can also be used for native apps. Windows and Android are currently supported. iOS support will be coming in the near future.
+Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future.
 
-Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test points.
+Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
-record test cases in the user-friendly way. AirtestIDE provides QA with
-a complate production workflow: ``record -> replay -> report``
+record test cases in a user-friendly way. AirtestIDE provides QA with
+a complete production workflow: ``record -> replay -> report``
 
 
 `Get Started from Airtest Project Homepage`_
@@ -40,13 +43,13 @@ Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
 Documentation
 -------------
 
-You can find the complete airtest documentation on `readthedocs`_.
+You can find the complete Airtest documentation on `readthedocs`_.
 
 
 Example
 -------
 
-Airtest aims at providing platform independent API, so that you can write test once and run test on different devices.
+Airtest aims at providing platform independent API, so that you can write tests once and be able to run it on multiple devices. 
 
 1. Using `connect_device`_ API you can connect to any android device or windows application. 
 

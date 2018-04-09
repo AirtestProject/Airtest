@@ -3,6 +3,7 @@
 __author__ = "刘欣"
 
 import os
+
 PWD = args.script
 PKG = "org.cocos2d.blackjack"
 APK = os.path.join(PWD, "blackjack-release-signed.apk")
