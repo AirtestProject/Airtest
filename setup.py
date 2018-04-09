@@ -10,7 +10,7 @@ if sys.platform != "win32":
 
 setup(
     name='airtest',
-    version='1.0.4',
+    version='1.0.5',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
@@ -35,7 +35,12 @@ setup(
             'sphinx_rtd_theme',
             'mock',
         ]},
+    entry_points="""
+    [console_scripts]
+    airtest = airtest.cli.__main__:main
+    """,
     classifiers=[
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
     ],
 )
