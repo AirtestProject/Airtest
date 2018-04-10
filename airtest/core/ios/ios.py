@@ -102,20 +102,37 @@ class IOS(Device):
     def stop_app(self, package):
         self.driver.session().close()
 
-    def external_ip(self):
+    def get_ip_address(self):
+        """
+        get ip address from webDriverAgent
+
+        Returns:
+            raise if no IP address has been found, otherwise return the IP address
+
+        """
         return self.driver.status()['ios']['ip']
+
+    def device_status(self):
+        """
+        show status return by webDriverAgent
+        Return dicts of infos
+        """
+        return self.driver.status()
 
 
 if __name__ == "__main__":
     start = time.time()
     ios = IOS()
-    # ios.snapshot("aaa2.png")
+
+    ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))
-    ios.stop_app(111)
+    
     # ios.start_app("com.tencent.xin")
+    ios.home()
+    ios.start_app('com.apple.mobilesafari')
     ios.touch((88, 88))
-    # ios.stop_app(111)
-    # ios.text("abc")
-    # ios.home()
-    # ios.stop_app()
-    # ios.swipe((100, 100), (800, 100))
+    ios.stop_app('com.apple.mobilesafari')
+    ios.swipe((100, 100), (800, 100))
+
+    print(ios.device_status())
+    print(ios.get_ip_address())
