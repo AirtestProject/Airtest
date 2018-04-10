@@ -2,7 +2,7 @@
 from airtest import aircv
 from airtest.core.device import Device
 from pywinauto.application import Application
-from pywinauto.win32functions import SetForegroundWindow   # ,SetProcessDPIAware
+from pywinauto.win32functions import SetForegroundWindow  # ,SetProcessDPIAware
 from pywinauto import mouse, keyboard
 from functools import wraps
 from .screen import screenshot
