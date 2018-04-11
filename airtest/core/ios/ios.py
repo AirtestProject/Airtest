@@ -15,6 +15,7 @@ else:
 
 from airtest import aircv
 from airtest.core.device import Device
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.utils.logger import get_logger
 
 
@@ -29,9 +30,15 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, addr=DEFAULT_ADDR):
+    def __init__(self, addr=DEFAULT_ADDR,
+                 cap_method=CAP_METHOD.WDACAP,
+                 touch_method=TOUCH_METHOD.WDATOUCH,
+                 ime_method=IME_METHOD.WDAIME):
         super(IOS, self).__init__()
         self.addr = addr
+        self.cap_method = cap_method
+        self.touch_method = touch_method
+        self.ime_method = ime_method
 
         # wda driver, use to home, start app
         # init wda session, updata when start app
@@ -53,9 +60,24 @@ class IOS(Device):
         take snapshot
         filename: save screenshot to filename
         """
-        data = self.driver.screenshot(filename)  # wda 截图不用考虑朝向
-        # 输出cv2对象
-        screen = aircv.utils.string_2_img(data)
+        data = None
+
+        if self.cap_method == CAP_METHOD.MINICAP:
+            raise NotImplementedError
+        elif self.cap_method == CAP_METHOD.MINICAP_STREAM:
+            raise NotImplementedError
+        elif self.cap_method == CAP_METHOD.WDACAP:
+            data = self.driver.screenshot(filename)  # wda 截图不用考虑朝向
+        
+        # output cv2 object 
+        try:
+            screen = aircv.utils.string_2_img(data)
+        except:
+            # may be black/locked screen or other reason, print exc for debugging
+            import traceback
+            traceback.print_exc()
+            return None
+
         return screen
 
     def touch(self, pos, times=1, duration=0.01):
