@@ -276,14 +276,14 @@ Import from other ``.air``
 --------------------------
 You can write some common used function in one ``.air`` script and import it from other scripts. Airtest provide ``using`` API to manage the context change including ``sys.path`` and ``Template`` search path. 
 
-```
-from airtest.core.api import using
-using("common.air")
+.. code:: python
 
-from common import common_function
+    from airtest.core.api import using
+    using("common.air")
 
-common_function()
-```
+    from common import common_function
+
+    common_function()
 
 
 .. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
