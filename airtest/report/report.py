@@ -7,7 +7,8 @@ import sys
 import shutil
 import jinja2
 from collections import defaultdict
-from airtest.utils.compat import decode_path, PY3
+from airtest.utils.compat import decode_path
+from six import PY3
 
 LOGDIR = "log"
 LOGFILE = "log.txt"

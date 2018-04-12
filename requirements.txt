@@ -3,4 +3,4 @@ Pillow>=3.4.0
 requests>=2.11.1
 six
 opencv-contrib-python
-pywinauto
+pywinauto==0.6.3

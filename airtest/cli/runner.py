@@ -38,7 +38,7 @@ class AirtestCase(unittest.TestCase):
 
         # set base dir to find tpl
         args.script = decode_path(args.script)
-        G.BASEDIR = args.script
+        G.BASEDIR = [args.script]
 
         # set log dir
         if args.log is True:
@@ -81,6 +81,7 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
+        self.scope["__file__"] = pyfilepath
         with open(pyfilepath, 'r', encoding="utf8") as f:
             code = f.read()
         exec(compile(code.encode("utf-8"), pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope

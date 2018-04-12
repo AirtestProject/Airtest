@@ -4,10 +4,8 @@ import re
 import json
 import struct
 import threading
-import traceback
+import six
 from airtest.core.android.constant import STFLIB
-from airtest.core.error import AdbShellError
-from airtest.utils.compat import PY3
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
@@ -298,11 +296,7 @@ class Minicap(object):
         with self.stream_lock:
             if self.frame_gen is None:
                 self.frame_gen = self.get_stream()
-            if not PY3:
-                frame = self.frame_gen.next()
-            else:
-                frame = self.frame_gen.__next__()
-            return frame
+            return six.next(self.frame_gen)
 
     def update_rotation(self, rotation):
         """

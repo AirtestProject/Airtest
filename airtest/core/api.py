@@ -4,11 +4,15 @@ This module contains the Airtest Core APIs.
 """
 import os
 import time
-from airtest.utils.compat import urlparse, parse_qsl
+
+from six.moves.urllib.parse import parse_qsl, urlparse
+
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, set_logdir, logwrap, on_platform, import_device_cls, delay_after_operation
+from airtest.core.helper import (G, delay_after_operation, import_device_cls,
+                                 logwrap, on_platform, set_logdir, using)
 from airtest.core.settings import Settings as ST
+
 
 """
 Device Setup APIs
@@ -68,6 +72,21 @@ def set_current(index):
         G.DEVICE = G.DEVICE_LIST[index]
     except IndexError:
         raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
+
+
+def auto_setup(filepath):
+    """
+    Auto setup G.BASEDIR and try connect android device if not connected to any device.
+    """
+    if filepath:
+        dirname = os.path.dirname(filepath)
+        if dirname not in G.BASEDIR:
+            G.BASEDIR.append(dirname)
+    if not device():
+        try:
+            connect_device("Android:///")
+        except IndexError:
+            pass
 
 
 """
