@@ -1,14 +1,18 @@
-#encoding=utf8
-
+# -*- encoding=utf8 -*-
 __author__ = "刘欣"
 
+from airtest.core.api import *
 import os
 
-PWD = args.script
+auto_setup(__file__)
+
+PWD = os.path.dirname(__file__)
 PKG = "org.cocos2d.blackjack"
 APK = os.path.join(PWD, "blackjack-release-signed.apk")
+
 if PKG not in device().list_app():
     install(APK)
+
 stop_app(PKG)
 wake()
 start_app(PKG)
