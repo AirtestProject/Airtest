@@ -337,6 +337,22 @@ class Minitouch(object):
             raise RuntimeError("invalid operate args: %s" % args)
         self.handle(cmd)
 
+    @on_method_ready('install_and_setup')
+    def perform(self, motion_events, interval=0.01):
+        """
+        Perform a sequence of motion events including: UpEvent, DownEvent, MoveEvent, SleepEvent
+        :param motion_events: a list of MotionEvent instances
+        :param interval: minimum interval between events
+        :return: None
+        """
+        for event in motion_events:
+            if isinstance(event, SleepEvent):
+                time.sleep(event.seconds)
+            else:
+                cmd = event.getcmd(transform=self.__transform_xy)
+                self.handle(cmd)
+                time.sleep(interval)
+
     def safe_send(self, data):
         """
         Send data to client
@@ -435,3 +451,76 @@ class Minitouch(object):
             self.client.close()
         if self.server_proc:
             self.server_proc.kill()
+
+
+class MotionEvent(object):
+    """
+    Motion Event to be performed by Minitouch
+    """
+    def getcmd(self, transform=None):
+        raise NotImplementedError
+
+class DownEvent(MotionEvent):
+    def __init__(self, coordinates, contact=0, pressure=50):
+        """
+        Finger Down Event
+        :param coordinates: finger down coordinates in (x, y)
+        :param contact: multi-touch action, starts from 0
+        :param pressure: touch pressure
+        """
+        super(DownEvent, self).__init__()
+        self.coordinates = coordinates
+        self.contact = contact
+        self.pressure = pressure
+
+    def getcmd(self, transform=None):
+        if transform:
+            x, y = transform(*self.coordinates)
+        else:
+            x, y = self.coordinates
+        cmd = b"d %d %d %d %d\nc\n" % (self.contact, x, y, self.pressure)
+        return cmd
+
+
+class UpEvent(MotionEvent):
+    def __init__(self, contact=0):
+        """
+        Finger Up Event
+        :param contact: multi-touch action, starts from 0
+        """
+        super(UpEvent, self).__init__()
+        self.contact = contact
+
+    def getcmd(self, transform=None):
+        cmd = b"u %d\nc\n" % self.contact
+        return cmd
+
+
+class MoveEvent(MotionEvent):
+    def __init__(self, coordinates, contact=0, pressure=50):
+        """
+        Finger Move Event
+        :param coordinates: finger move to coordinates in (x, y)
+        :param contact: multi-touch action, starts from 0
+        :param pressure: touch pressure
+        """
+        super(MoveEvent, self).__init__()
+        self.coordinates = coordinates
+        self.contact = contact
+        self.pressure = pressure
+
+    def getcmd(self, transform=None):
+        if transform:
+            x, y = transform(*self.coordinates)
+        else:
+            x, y = self.coordinates
+        cmd = b"m %d %d %d %d\nc\n" % (self.contact, x, y, self.pressure)
+        return cmd
+
+
+class SleepEvent(MotionEvent):
+    def __init__(self, seconds):
+        self.seconds = seconds
+
+    def getcmd(self, transform=None):
+        return None
