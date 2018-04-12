@@ -4,13 +4,14 @@ from pip.req import parse_requirements
 
 install_reqs = parse_requirements('requirements.txt', session=False)
 reqs = [str(ir.req) for ir in install_reqs]
-if sys.platform != "win32":
-    reqs.remove('pywinauto==0.6.3')
+if sys.platform == "win32":
+    reqs.append('pywinauto==0.6.3')
+    reqs.append('pywin32')
 
 
 setup(
     name='airtest',
-    version='1.0.5',
+    version='1.0.6',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
