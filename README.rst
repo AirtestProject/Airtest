@@ -85,14 +85,17 @@ Airtest CLI provides the possibility to execute tests on different host machine 
 
 .. code:: shell
 
-    airtest run <path to your air dir> --device Android:///
-    airtest report <path to your air dir>
+    # run test targeting on Android phone connected to your host machine via ADB
+    airtest run "path to your .air dir" --device Android:///
 
     # run test targeting on Windows application whose title matches Unity.*
-    airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
+    airtest run "path to your .air dir" --device Windows:///?title_re=Unity.*
+
+    # generate HTML report after running test
+    airtest report "path to your .air dir"
 
     # or use as python module
-    python -m airtest run <path to your air dir> --device Android:///
+    python -m airtest run "path to your .air dir" --device Android:///
 
 Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
 

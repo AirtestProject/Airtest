@@ -80,6 +80,7 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
+        self.scope["__file__"] = pyfilepath
         code = open(pyfilepath).read()
         exec(compile(code, pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
 
