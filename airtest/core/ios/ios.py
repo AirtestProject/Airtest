@@ -47,7 +47,7 @@ class IOS(Device):
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        wda.DEBUG = True
+        wda.DEBUG = False
         self.driver = wda.Client(addr)
 
         # record device's width
@@ -61,7 +61,7 @@ class IOS(Device):
         return self.driver.session()
 
     def window_size(self):
-        """ 
+        """
             return window size
             namedtuple:
                 Size(wide , hight)
@@ -76,10 +76,16 @@ class IOS(Device):
         """
         return self.driver.session().orientation
 
+    def display_info(self):
+        if not self._size['width'] or self._size['height']:
+            self.snapshot()
+
+        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation}
+
     def home(self):
         return self.driver.home()
 
-    def snapshot(self, filename=None, ensure_orientation=True):
+    def snapshot(self, strType = False , filename=None, ensure_orientation=True):
         """
         take snapshot
         filename: save screenshot to filename
@@ -92,8 +98,11 @@ class IOS(Device):
             raise NotImplementedError
         elif self.cap_method == CAP_METHOD.WDACAP:
             data = self.driver.screenshot()  # wda 截图不用考虑朝向
-        
-        # output cv2 object 
+
+        if strType:
+            return data
+
+        # output cv2 object
         try:
             screen = aircv.utils.string_2_img(data)
         except:
@@ -115,8 +124,8 @@ class IOS(Device):
 
             # wda 截图是要根据orientation旋转
             elif self.cap_method == CAP_METHOD.WDACAP:
-                screen = aircv.rotate(screen, 90, clockwise= (now_orientation== LANDSCAPE_RIGHT) ) 
-      
+                screen = aircv.rotate(screen, 90, clockwise= (now_orientation== LANDSCAPE_RIGHT) )
+
 
         # readed screen size
         h, w = screen.shape[:2]
@@ -144,9 +153,9 @@ class IOS(Device):
         # trans pos of click
         pos = self._touch_point_by_orientation(pos)
 
-        # scale touch postion 
+        # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-        
+
         if times == 2:
             self.session.double_tap(x, y)
         else:
@@ -249,7 +258,7 @@ if __name__ == "__main__":
 
     ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))
-    
+
     # ios.start_app("com.tencent.xin")
     ios.home()
     ios.start_app('com.apple.mobilesafari')
