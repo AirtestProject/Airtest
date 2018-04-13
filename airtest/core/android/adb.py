@@ -139,6 +139,7 @@ class ADB(object):
         if not PY3:
             cmds = [c.encode(get_std_encoding(sys.stdin)) for c in cmds]
 
+        print(cmds)
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -173,6 +174,8 @@ class ADB(object):
 
         if proc.returncode > 0:
             # adb connection error
+            if PY3:#ycw,Python3
+                stderr=stderr.decode('utf-8')
             if re.search(DeviceConnectionError.DEVICE_CONNECTION_ERROR, stderr):
                 raise DeviceConnectionError(stderr)
             else:

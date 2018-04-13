@@ -4,6 +4,7 @@ __author__ = "刘欣"
 from airtest.core.api import *
 import os
 
+
 auto_setup(__file__)
 
 PWD = os.path.dirname(__file__)
