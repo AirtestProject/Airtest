@@ -39,7 +39,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
     G.LOGGING.info("Try finding:\n%s", query)
     start_time = time.time()
     while True:
-        screen = G.DEVICE.snapshot(filename=None)
+        screen = G.DEVICE.snapshot(filename=None)      
 
         if screen is None:
             G.LOGGING.warning("Screen is None, may be locked")

@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Apr 13 17:26:30 2018
+
+@author: Administrator
+"""
+
+一，adb.py
+1，cmd
+    python会出现编码错误，需添加
+    if PY3:#ycw,Python3
+        stderr=stderr.decode('utf-8')
+
+二、android.py
+1，touch
+    采用adb触摸屏幕，不需要坐标转换，只有用MINITOUCH才需要；
+
