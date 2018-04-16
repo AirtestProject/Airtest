@@ -34,6 +34,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
+        self._display_info = {}
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
         self.minicap = Minicap(self.adb)
@@ -425,7 +426,7 @@ class Android(Device):
         Return True or False whether the device is locked or not
 
         Notes:
-            Might not work on all devices
+            Might not work on some devices
 
         Returns:
             True or False
@@ -449,23 +450,29 @@ class Android(Device):
     @property
     def display_info(self):
         """
-        Return the display info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
             display information
 
         """
-        return self.adb.display_info
+        if not self._display_info:
+            self._display_info = self.get_display_info()
+        return self._display_info
 
     def get_display_info(self):
         """
-        Return the display physical info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
-            display physical information
+            display information
 
         """
-        return self.adb.get_display_info()
+        try:
+            display_info = self.minicap.get_display_info()
+        except:
+            display_info = self.adb.display_info
+        return display_info
 
     def get_current_resolution(self):
         """
@@ -520,6 +527,8 @@ class Android(Device):
         def refresh_ori(ori):
             self.display_info["orientation"] = ori
             self.display_info["rotation"] = ori * 90
+            self.adb.display_info["orientation"] = ori
+            self.adb.display_info["rotation"] = ori * 90
 
         self.rotation_watcher.reg_callback(refresh_ori)
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
@@ -538,7 +547,7 @@ class Android(Device):
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self.display_info["physical_width"], self.display_info["physical_height"]),
+            (self.display_info["width"], self.display_info["height"]),
             self.display_info["orientation"]
         )
         return x, y
