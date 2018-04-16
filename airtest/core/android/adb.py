@@ -539,6 +539,11 @@ class ADB(object):
         else:
             cmds = ["install", "-r", filepath]
         out = self.cmd(cmds)
+
+        if re.search(r"Failure \[.*?\]", out):
+            print(out)
+            raise AirtestError("Installation Failure")
+
         return out
 
     def pm_install(self, filepath, replace=False):
