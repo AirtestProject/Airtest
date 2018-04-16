@@ -277,9 +277,10 @@ class Android(Device):
             None
 
         """
-        pos = self._touch_point_by_orientation(pos)
+        
         for _ in range(times):
             if self.touch_method == TOUCH_METHOD.MINITOUCH:
+				pos = self._touch_point_by_orientation(pos)
                 self.minitouch.touch(pos, duration=duration)
             else:
                 self.adb.touch(pos)
