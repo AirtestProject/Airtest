@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
-from pip.req import parse_requirements
 
-install_reqs = parse_requirements('requirements.txt', session=False)
-reqs = [str(ir.req) for ir in install_reqs]
 
+def parse_requirements(filename='requirements.txt'):
+    """ load requirements from a pip requirements file. (replacing from pip.req import parse_requirements)"""
+    lineiter = (line.strip() for line in open(filename))
+    return [line for line in lineiter if line and not line.startswith("#")]
+
+install_reqs = parse_requirements()
 
 setup(
     name='airtest',
@@ -20,7 +23,7 @@ setup(
         'android_deps': ["*.apk", "airtest/core/android/stf_libs", "airtest/core/android/adb"],
         'html_statics': ["airtest/report"]
     },
-    install_requires=reqs,
+    install_requires=install_reqs,
     classifiers=[
         'Programming Language :: Python :: 2.7',
     ],
