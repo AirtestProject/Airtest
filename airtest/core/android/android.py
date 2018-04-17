@@ -299,9 +299,9 @@ class Android(Device):
             None
 
         """
-        p1 = self._touch_point_by_orientation(p1)
-        p2 = self._touch_point_by_orientation(p2)
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
