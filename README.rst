@@ -1,6 +1,9 @@
 Airtest
 =======
 
+.. image:: https://travis-ci.org/AirtestProject/Airtest.svg?branch=master
+    :target: https://travis-ci.org/AirtestProject/Airtest
+
 **UI Test Automation Framework for Games and Apps**
 
 **跨平台的UI自动化测试框架，适用于游戏和App** （`中文版点这里`_）
@@ -12,15 +15,13 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework with main focus on games,
-which can also be used for native apps. Currently, Windows and Android are well supported.
-Support for iOS comes in near future.
+Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future. [`Roadmap`_]
 
-Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. After running the test, an HTML report will be generated automatically, that allows you to quickly locate failed test points.
+Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
-record test cases in the user-friendly way. AirtestIDE provides QA with
-a complate production workflow: ``record -> replay -> report``
+record test cases in a user-friendly way. AirtestIDE provides QA with
+a complete production workflow: ``record -> replay -> report``
 
 
 `Get Started from Airtest Project Homepage`_
@@ -33,7 +34,7 @@ Use `pip` to install Airtest python library.
 
 .. code:: shell
 
-    pip install airtest
+    pip install -U airtest
 
 
 Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
@@ -42,13 +43,13 @@ Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
 Documentation
 -------------
 
-You can find the complete airtest documentation on `readthedocs`_.
+You can find the complete Airtest documentation on `readthedocs`_.
 
 
 Example
 -------
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+Airtest aims at providing platform independent API, so that you can write tests once and be able to run it on multiple devices. 
 
 1. Using `connect_device`_ API you can connect to any android device or windows application. 
 
@@ -65,9 +66,9 @@ Airtest aims at providing platform independent api, so that you can write test o
     connect_device("Android:///")
     install("path/to/your/apk")
     start_app("package_name_of_your_apk")
-    touch("image_of_a_button.png")
-    swipe("slide_start.png", "slide_end.png")
-    assert_exists("success.png")
+    touch(Template("image_of_a_button.png"))
+    swipe(Template("slide_start.png"), Template("slide_end.png"))
+    assert_exists(Template("success.png"))
     keyevent("BACK")
     home()
     uninstall("package_name_of_your_apk")
@@ -84,8 +85,17 @@ Airtest CLI provides the possibility to execute tests on different host machine 
 
 .. code:: shell
 
-    python -m airtest run <path to your air dir> --device Android:///
-    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
+    # run test targeting on Android phone connected to your host machine via ADB
+    airtest run "path to your .air dir" --device Android:///
+
+    # run test targeting on Windows application whose title matches Unity.*
+    airtest run "path to your .air dir" --device "Windows:///?title_re=Unity.*"
+
+    # generate HTML report after running test
+    airtest report "path to your .air dir"
+
+    # or use as python module
+    python -m airtest run "path to your .air dir" --device Android:///
 
 Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
 
@@ -120,3 +130,4 @@ Thanks for all these great works that make this project better.
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
+.. _Roadmap: https://github.com/AirtestProject/Airtest/issues/33

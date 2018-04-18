@@ -7,7 +7,8 @@ import sys
 import shutil
 import jinja2
 from collections import defaultdict
-from airtest.utils.compat import decode_path, PY3
+from airtest.utils.compat import decode_path
+from six import PY3
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -189,7 +190,7 @@ class LogToHtml(object):
 
             if step['type'] == 'exists':
                 # ret 为false表示图片没有找到
-                step['exists_ret'] = u"不" if step[1].get('ret', False) == False else ""
+                step['exists_ret'] = False if step[1].get('ret', False) is False else True
 
         elif step['type'] in ['text', 'sleep', 'keyevent']:
             step[step['type']] = step[1]['args'][0]
@@ -214,7 +215,10 @@ class LogToHtml(object):
     def to_percent(p):
         if not p:
             return ''
-
+        try:
+            p = float(p)
+        except ValueError:
+            return ''
         return round(p * 100, 1)
 
     @staticmethod
@@ -241,11 +245,11 @@ class LogToHtml(object):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            "snapshot": u"截图描述：%s" % step.get('text', ''),
+            "snapshot": u"截图描述：%s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
             "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
             "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
             "wait": u"等待目标图片出现",
-            "exists": u"图片%s存在" % step.get('exists_ret', ''),
+            "exists": u"图片%s存在" % ("" if step.get('exists_ret') else u"不"),
 
             "text": u"输入文字:%s" % step.get('text', ''),
             "keyevent": u"点击[%s]按键" % step.get('keyevent', ''),
@@ -254,28 +258,24 @@ class LogToHtml(object):
             "assert_exists": u"断言目标图片存在",
             "assert_not_exists": u"断言目标图片不存在",
             "traceback": u"异常信息",
-            # "snapshot": step[1]['args'][0],
         }
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
 
     @staticmethod
     def func_desc(step):
-        """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
-            "snapshot": u"Screenshot description: %s" % step.get('text', ''),
+            "snapshot": u"Screenshot description: %s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
             "touch": u"Search for target object, touch the screen coordinates %s" % repr(step.get('target_pos', '')),
             "swipe": u"Swipe from {target_pos} to {direction} {vector}".format(target_pos=repr(step.get('target_pos', '')), direction=step.get('swipe', ''), vector=repr(step.get('vector', ''))),
             "wait": u"Wait for target object to appear",
-            "exists": u"Picture %s exists" % step.get('exists_ret', ''),
-
+            "exists": u"Picture %s exists" % ("" if step.get('exists_ret') else "not"),
             "text": u"Input text:%s" % step.get('text', ''),
             "keyevent": u"Click [%s] button" % step.get('keyevent', ''),
             "sleep": u"Wait for %s seconds" % step.get('sleep', ''),
             "assert_exists": u"Assert target object exists",
             "assert_not_exists": u"Assert target object does not exists",
             "traceback": u"Traceback",
-            # "snapshot": step[1]['args'][0],
         }
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
 

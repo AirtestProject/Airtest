@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+import re
+import warnings
+
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
@@ -31,6 +34,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
+        self._display_info = {}
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
         self.minicap = Minicap(self.adb)
@@ -171,7 +175,7 @@ class Android(Device):
         # output cv2 object
         try:
             screen = aircv.utils.string_2_img(screen)
-        except:
+        except Exception:
             # may be black/locked screen or other reason, print exc for debugging
             import traceback
             traceback.print_exc()
@@ -274,9 +278,9 @@ class Android(Device):
             None
 
         """
-        pos = self._touch_point_by_orientation(pos)
         for _ in range(times):
             if self.touch_method == TOUCH_METHOD.MINITOUCH:
+                pos = self._touch_point_by_orientation(pos)
                 self.minitouch.touch(pos, duration=duration)
             else:
                 self.adb.touch(pos)
@@ -295,9 +299,9 @@ class Android(Device):
             None
 
         """
-        p1 = self._touch_point_by_orientation(p1)
-        p2 = self._touch_point_by_orientation(p2)
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
@@ -368,7 +372,6 @@ class Android(Device):
         return self.adb.get_top_activity()
 
     def get_top_activity_name_and_pid(self):
-        import re
         dat = self.adb.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
         m = activityRE.search(dat)
@@ -423,7 +426,7 @@ class Android(Device):
         Return True or False whether the device is locked or not
 
         Notes:
-            Might not work on all devices
+            Might not work on some devices
 
         Returns:
             True or False
@@ -447,23 +450,29 @@ class Android(Device):
     @property
     def display_info(self):
         """
-        Return the display info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
             display information
 
         """
-        return self.adb.display_info
+        if not self._display_info:
+            self._display_info = self.get_display_info()
+        return self._display_info
 
     def get_display_info(self):
         """
-        Return the display physical info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
-            display physical information
+            display information
 
         """
-        return self.adb.get_display_info()
+        try:
+            display_info = self.minicap.get_display_info()
+        except:
+            display_info = self.adb.display_info
+        return display_info
 
     def get_current_resolution(self):
         """
@@ -495,7 +504,7 @@ class Android(Device):
 
     def stop_recording(self, *args, **kwargs):
         """
-        Stop recording the device display
+        Stop recording the device display. Recoding file will be kept in the device.
 
         Args:
             *args: optional arguments
@@ -518,6 +527,8 @@ class Android(Device):
         def refresh_ori(ori):
             self.display_info["orientation"] = ori
             self.display_info["rotation"] = ori * 90
+            self.adb.display_info["orientation"] = ori
+            self.adb.display_info["rotation"] = ori * 90
 
         self.rotation_watcher.reg_callback(refresh_ori)
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
@@ -536,7 +547,7 @@ class Android(Device):
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self.display_info["physical_width"], self.display_info["physical_height"]),
+            (self.display_info["width"], self.display_info["height"]),
             self.display_info["orientation"]
         )
         return x, y

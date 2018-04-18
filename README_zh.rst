@@ -10,7 +10,7 @@ Airtest
 快速开始
 --------
 
-Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。
+Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。 [`路线图`_]
 
 Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化测试。 测试脚本运行后可以自动生成详细的HTML测试报告，让你迅速定位失败的测试点。
 
@@ -58,9 +58,9 @@ Airtest希望提供平台无关的API，让你的测试代码可以运行在不�
     connect_device("Android:///")
     install("path/to/your/apk")
     start_app("package_name_of_your_apk")
-    touch("image_of_a_button.png")
-    swipe("slide_start.png", "slide_end.png")
-    assert_exists("success.png")
+    touch(Template("image_of_a_button.png"))
+    swipe(Template("slide_start.png"), Template("slide_end.png"))
+    assert_exists(Template("success.png"))
     keyevent("BACK")
     home()
     uninstall("package_name_of_your_apk")
@@ -77,8 +77,17 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 
 .. code:: shell
 
-    python -m airtest run <path to your air dir> --device Android:///
-    python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
+    # 在本地ADB连接的安卓手机上运行测试
+    airtest run "path to your air dir" --device Android:///
+
+    # 在Windows应用上运行测试
+    airtest run "path to your air dir" --device "Windows:///?title_re=Unity.*"
+
+    # 生成HTML测试报告
+    airtest report "path to your air dir"
+
+    # 也可以用python -m的方式使用命令行
+    python -m airtest run "path to your air dir" --device Android:///
 
 试试样例 ``airtest/playground/test_blackjack.air`` ，更多用法看 `命令行用法`_。
 
@@ -86,7 +95,7 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 贡献代码
 ------------
 
-欢迎大家fork和提pull requrests。
+欢迎大家fork和提pull requests。
 
 
 致谢
@@ -112,3 +121,4 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
+.. _路线图: https://github.com/AirtestProject/Airtest/issues/33

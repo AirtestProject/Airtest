@@ -19,15 +19,13 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework with main focus on games,
-which can also be used for native apps. Currently, Windows and Android are well supported.
-Support for iOS comes in near future.
+Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future.
 
-Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. After running the test, an HTML report will be generated automatically, that allows you to quickly locate failed test points.
+Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
 **AirtestIDE** is an out of the box GUI tool that helps to create and
-record test cases in the user-friendly way. AirtestIDE provides QA with
-a complate production workflow: ``record -> replay -> report``
+record test cases in a user-friendly way. AirtestIDE provides QA with
+a complete production workflow: ``record -> replay -> report``
 
 
 `Get Started from Airtest Project Homepage`_
@@ -61,7 +59,7 @@ itself.
 
 .. code:: shell
 
-    pip install airtest
+    pip install -U airtest
 
 
 You can also install it from Git repository.
@@ -80,7 +78,7 @@ later.
 Documentation
 -------------
 
-You can find the complete airtest documentation on `readthedocs`_.
+You can find the complete Airtest documentation on `readthedocs`_.
 
 
 Example
@@ -112,14 +110,13 @@ following:
     uninstall("package_name_of_your_apk")
 
 
-For more detailed info, please refer to `Airtest Python API
-reference`_ or take a look at `API code`_
+For more detailed info, please refer to `Airtest Python API reference`_ or take a look at `API code`_
 
 
 Basic Usage
 ------------
 
-Airtest aims at providing platform independent api, so that you can write test once and run test on different devices.
+Airtest aims at providing platform independent APIs, so that you can write test once and run test on different devices.
 
 1. Using `connect_device`_ API you can connect to any android device or windows application. 
 
@@ -216,42 +213,39 @@ run test case
 .. code:: shell
 
     # run test test cases and scenarios on various devices
-    > python -m airtest run <path to your air dir> --device Android:///
-    > python -m airtest run <path to your air dir> --device Android://adbhost:adbport/serialno
-    > python -m airtest run <path to your air dir> --device Windows:///?title_re=Unity.*
-    > python -m airtest run <path to your air dir> --device iOS:///
+    > airtest run "path to your .air dir" --device Android:///
+    > airtest run "path to your .air dir" --device Android://adbhost:adbport/serialno
+    > airtest run "path to your .air dir" --device Windows:///?title_re=Unity.*
+    > airtest run "path to your .air dir" --device iOS:///
     ...
     # show help
-    > python -m airtest run -h
-    usage: __main__.py run [-h] [--device [DEVICE]] [--log [LOG]]
-                           [--kwargs KWARGS] [--pre PRE] [--post POST]
-                           script
+    > airtest run -h
+    usage: airtest run [-h] [--device [DEVICE]] [--log [LOG]]
+                       [--recording [RECORDING]]
+                       script
 
     positional arguments:
-      script             air path
+      script                air path
 
     optional arguments:
-      -h, --help         show this help message and exit
-      --device [DEVICE]  connect dev by uri string, e.g. Android:///
-      --log [LOG]        set log dir, default to be script dir
-      --kwargs KWARGS    extra kwargs used in script as global variables, e.g.
-                         a=1,b=2
-      --pre PRE          air run before script, setup environment
-      --post POST        air run after script, clean up environment, will run
-                         whether script success or fail
+      -h, --help            show this help message and exit
+      --device [DEVICE]     connect dev by uri string, e.g. Android:///
+      --log [LOG]           set log dir, default to be script dir
+      --recording [RECORDING]
+                          record screen when running
 
 
 generate html report
 .....................
 .. code:: shell
 
-    > python -m airtest report <path to your air directory>
+    > airtest report "path to your .air dir"
     log.html
-    > $ python -m airtest report -h
-    usage: __main__.py report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
-                              [--log_root LOG_ROOT] [--record RECORD [RECORD ...]]
-                              [--export EXPORT] [--lang LANG]
-                              script
+    > airtest report -h
+    usage: airtest report [-h] [--outfile OUTFILE] [--static_root STATIC_ROOT]
+                          [--log_root LOG_ROOT] [--record RECORD [RECORD ...]]
+                          [--export EXPORT] [--lang LANG]
+                          script
 
     positional arguments:
       script                script filepath
@@ -273,10 +267,23 @@ get test case info
 ...................
 .. code:: shell
 
-    # get test case info in json, including: author, title, desc
-    > python -m airtest info <path to your air directory>
+    # print case info in json if defined, including: author, title, desc
+    > python -m airtest info "path to your .air dir"
     {"author": ..., "title": ..., "desc": ...}
 
+
+Import from other ``.air``
+--------------------------
+You can write some common used function in one ``.air`` script and import it from other scripts. Airtest provide ``using`` API to manage the context change including ``sys.path`` and ``Template`` search path. 
+
+.. code:: python
+
+    from airtest.core.api import using
+    using("common.air")
+
+    from common import common_function
+
+    common_function()
 
 
 .. _Get Started from Airtest Project Homepage: http://airtest.netease.com/

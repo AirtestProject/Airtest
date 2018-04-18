@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Androguard.  If not, see <http://www.gnu.org/licenses/>.
 
+import six
 from .bytecode import SV
 
 
@@ -81,7 +82,7 @@ class StringBlock:
         while length > 0:
             offset += 2
             # get the unicode character as the apk might contain non-ASCII label
-            data += unichr(self.getShort(self.m_strings, offset))
+            data += six.unichr(self.getShort(self.m_strings, offset))
 
             # FIXME
             if data[-1] == "&":
@@ -97,4 +98,3 @@ class StringBlock:
             return value & 0xFFFF
         else:
             return value >> 16
-

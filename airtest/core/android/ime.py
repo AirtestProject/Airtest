@@ -1,10 +1,9 @@
 # coding=utf-8
 import re
-from airtest.utils.compat import text_type
-from airtest.utils.snippet import on_method_ready
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.error import AdbError
 from .constant import YOSEMITE_IME_SERVICE
+from six import text_type
 
 
 def ensure_unicode(value):

@@ -1,16 +1,22 @@
 import sys
 from setuptools import setup, find_packages
-from pip.req import parse_requirements
 
-install_reqs = parse_requirements('requirements.txt', session=False)
-reqs = [str(ir.req) for ir in install_reqs]
-if sys.platform != "win32":
-    reqs.remove('pywinauto')
+
+def parse_requirements(filename):
+    """ load requirements from a pip requirements file. (replacing from pip.req import parse_requirements)"""
+    lineiter = (line.strip() for line in open(filename))
+    return [line for line in lineiter if line and not line.startswith("#")]
+
+
+reqs = parse_requirements('requirements.txt')
+if sys.platform == "win32":
+    reqs.append('pywinauto==0.6.3')
+    reqs.append('pywin32')
 
 
 setup(
     name='airtest',
-    version='1.0.2',
+    version='1.0.7',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
@@ -35,7 +41,12 @@ setup(
             'sphinx_rtd_theme',
             'mock',
         ]},
+    entry_points="""
+    [console_scripts]
+    airtest = airtest.cli.__main__:main
+    """,
     classifiers=[
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
     ],
 )
