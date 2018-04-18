@@ -1222,6 +1222,119 @@ class ADB(object):
         print('[iputils WARNING] fail to get subnet mask len. use 17 as default.')
         return 17
 
+    def get_memory(self):
+        res = self.shell("dumpsys meminfo")
+        pat = re.compile(r".*Total RAM:\s+(\S+)\s+", re.DOTALL)
+        _str = pat.match(res).group(1)
+        if ',' in _str:
+            _list = _str.split(',')
+            _num = int(_list[0])
+            _num = round(_num + (float(_list[1]) / 1000.0))
+        else:
+            _num = round(float(_str) / 1000.0 / 1000.0)
+        res = str(_num) + 'G'
+        return res
+
+    def get_storage(self):
+        res = self.shell("df /data")
+        pat = re.compile(r".*\/data\s+(\S+)",re.DOTALL)
+        if pat.match(res):
+            _str = pat.match(res).group(1)
+        else:
+            pat = re.compile(r".*\s+(\S+)\s+\S+\s+\S+\s+\S+\s+\/data",re.DOTALL)
+            _str = pat.match(res).group(1)
+        if 'G' in _str:
+            _num = round(float(_str[:-1]))
+        elif 'M' in _str:
+            _num = round(float(_str[:-1])/1000.0)
+        else:
+            _num = round(float(_str) / 1000.0 / 1000.0)
+        if _num > 64:
+            res = '128G'
+        elif _num > 32:
+            res = '64G'
+        elif _num > 16:
+            res = '32G'
+        elif _num > 8:
+            res = '16G'
+        else:
+            res = '8G'
+        return res
+
+    def get_cpuinfo(self):
+        res = self.shell("cat /proc/cpuinfo").strip()
+        cpuNum = res.count("processor")
+        pat = re.compile(r'Hardware\s+:\s+(\w+.*)')
+        m = pat.match(res)
+        if not m:
+            pat = re.compile(r'Processor\s+:\s+(\w+.*)')
+            m = pat.match(res)
+        cpuName = m.group(1).replace('\r','')
+        return dict(cpuNum=cpuNum, cpuName=cpuName)
+
+    def get_cpufreq(self):
+        res = self.shell("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq")
+        num = round(float(res) / 1000 / 1000, 1)
+        res = str(num) + 'GHz'
+        return res.strip()
+
+    def get_gpu(self):
+        res = self.shell("dumpsys SurfaceFlinger")
+        pat = re.compile(r'GLES:\s+(.*)')
+        m = pat.search(res)
+        if not m:
+            return None
+        _list = m.group(1).split(',')
+        gpuModel = ""
+        opengl = ""
+        if len(_list) > 0:
+            gpuModel = _list[1].strip()
+        if len(_list) > 1:
+            m2 = re.search(r'(\S+\s+\S+\s+\S+).*', _list[2])
+            if m2:
+               opengl = m2.group(1)
+        return dict(gpuModel=gpuModel, opengl=opengl)
+
+    def get_model(self):
+        return self.getprop("ro.product.model")
+
+    def get_manufacturer(self):
+        return self.getprop("ro.product.manufacturer")
+
+    def get_device_info(self):
+        """
+        Get android device information, including: memory/storage/display/cpu/gpu/model/manufacturer...
+
+        Returns:
+            Dict of info
+
+        """
+        handlers = {
+            "platform": "Android",
+            "serialno": self.serialno,
+            "memory": self.get_memory,
+            "storage": self.get_storage,
+            "display": self.getPhysicalDisplayInfo,
+            "cpuinfo": self.get_cpuinfo,
+            "cpufreq": self.get_cpufreq,
+            "sdkversion": self.sdk_version,
+            "gpu": self.get_gpu,
+            "model": self.get_model,
+            "manufacturer": self.get_manufacturer,
+            # "battery": getBatteryCapacity
+        }
+        ret = {}
+        for k, v in handlers.items():
+            if callable(v):
+                try:
+                    value = v()
+                except Exception:
+                    value = None
+                ret[k] = value
+            else:
+                ret[k] = v
+        return ret
+
 
 def cleanup_adb_forward():
     for adb in ADB._instances:
