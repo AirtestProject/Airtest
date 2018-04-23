@@ -78,7 +78,6 @@ class RotationWatcher(object):
                 ori = _refresh_by_ow()
                 if ori is None:
                     break
-                    se
                 LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
                 self.current_orientation = ori
                 for cb in self.ow_callback:
