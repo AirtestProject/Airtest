@@ -215,7 +215,7 @@ class Windows(Device):
         Stop the application
 
         Args:
-            pid: proccess ID of the application to be stopped
+            pid: process ID of the application to be stopped
 
         Returns:
             None
