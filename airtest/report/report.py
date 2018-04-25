@@ -201,10 +201,12 @@ class LogToHtml(object):
 
         elif step['type'] in ['assert_equal', 'assert_not_equal']:
             args = step[1]["args"]
-            if len(args) >= 2:
-                step['assert'] = args[2]
+            msg = ""
+            if len(args) > 2:
+                msg = args[2]
+            step['assert'] = msg
             # 单独对assert_equal和assert_not_equal进行步骤说明。
-            step['desc'] = u'assert_equal [ "%s", "%s", "%s" ]' % (args[0], args[1], args[2])
+            step['desc'] = u'%s [ "%s", "%s", "%s" ]' % (step['type'], args[0], args[1], msg)
             step['title'] = self.func_title(step)
             return step
 
