@@ -38,3 +38,9 @@ class TOUCH_METHOD(object):
 class IME_METHOD(object):
     ADBIME = "ADBIME"
     YOSEMITEIME = "YOSEMITEIME"
+
+
+class ORI_METHOD(object):
+    ADB = "ADBORI"
+    MINICAP = "MINICAPORI"
+
