@@ -152,7 +152,11 @@ class LogToHtml(object):
                         step['target_pos'] = step[2].get('ret')
                         cv = step[2].get('cv', {})
                         if cv:
-                            step['confidence'] = self.to_percent(cv.get('confidence'))
+                            confidence = cv.get('confidence')
+                            # 图片rgb=True时记录的confidence格式:[confi_rgb, [conf_r, conf_g, conf_b]]
+                            if isinstance(confidence, list):
+                                confidence = confidence[0]
+                            step['confidence'] = self.to_percent(confidence)
                             # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
                             #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
                             if 'wnd_pos' in step[2]:
