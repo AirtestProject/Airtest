@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import threading
 import traceback
+import time
 from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
@@ -15,11 +16,11 @@ class RotationWatcher(object):
     RotationWatcher class
     """
 
-    def __init__(self, adb):
-        self.adb = adb
-        self.ow_proc = None
+    def __init__(self, session):
+        self.session = session
         self.ow_callback = []
         self._t = None
+        self.last_result = None
         reg_cleanup(self.teardown)
 
     @on_method_ready('start')
@@ -37,15 +38,8 @@ class RotationWatcher(object):
             None
 
         """
-        try:
-            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
-        except AirtestError:
-            self.adb.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
-            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
-        p = self.adb.start_shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path)
-        if p.poll() is not None:
-            raise RuntimeError("orientationWatcher setup error")
-        self.ow_proc = p
+        # fetch orientation result
+        self.last_result = self.session.orientation
         # reg_cleanup(self.ow_proc.kill)
 
     def teardown(self):
@@ -63,25 +57,20 @@ class RotationWatcher(object):
         self._install_and_setup()
 
         def _refresh_by_ow():
-            line = self.ow_proc.stdout.readline()
-            if line == b"":
-                if LOGGING is not None:  # may be None atexit
-                    LOGGING.error("orientationWatcher has ended")
-                else:
-                    print("orientationWatcher has ended")
-                return None
-
-            ori = int(line) / 90
-            return ori
+            return self.session.orientation
 
         def _run():
             while True:
+                time.sleep(1)
                 ori = _refresh_by_ow()
                 if ori is None:
                     break
-                elif ori == self.adb.display_info['orientation']:
+                elif self.last_result == ori:
                     continue
-                LOGGING.info('update orientation %s->%s' % (self.adb.display_info['orientation'], ori))
+                LOGGING.info('update orientation %s->%s' % (self.last_result, ori))
+                self.last_result = ori
+
+                # exec cb functions
                 for cb in self.ow_callback:
                     try:
                         cb(ori)
@@ -127,7 +116,7 @@ class XYTransformer(object):
         x, y = tuple_xy
         w, h = tuple_wh
 
-        # no need to do changing 
+        # no need to do changing
         # ios touch point same way of image
 
         return x, y
