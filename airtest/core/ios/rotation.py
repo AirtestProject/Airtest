@@ -19,7 +19,8 @@ class RotationWatcher(object):
     def __init__(self, session):
         self.session = session
         self.ow_callback = []
-        self._t = None
+        self.roundProcess = None
+        self._stopEvent = threading.Event()
         self.last_result = None
         reg_cleanup(self.teardown)
 
@@ -43,8 +44,9 @@ class RotationWatcher(object):
         # reg_cleanup(self.ow_proc.kill)
 
     def teardown(self):
-        if self.ow_proc:
-            self.ow_proc.kill()
+        # if has roataion watcher stop it
+        if self.roundProcess:
+            self._stopEvent.set()
 
     def start(self):
         """
@@ -60,7 +62,7 @@ class RotationWatcher(object):
             return self.session.orientation
 
         def _run():
-            while True:
+            while not self._stopEvent.isSet():
                 time.sleep(1)
                 ori = _refresh_by_ow()
                 if ori is None:
@@ -78,9 +80,9 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self._t = threading.Thread(target=_run, name="rotationwatcher")
+        self.roundProcess = threading.Thread(target=_run, name="rotationwatcher")
         # self._t.daemon = True
-        self._t.start()
+        self.roundProcess.start()
 
     def reg_callback(self, ow_callback):
         """
@@ -148,10 +150,7 @@ class XYTransformer(object):
         x, y = tuple_xy
         w, h = tuple_wh
 
-        if orientation == 1:
-            x, y = y, w - x
-        elif orientation == 2:
-            x, y = w - x, h - y
-        elif orientation == 3:
-            x, y = h - y, x
+        # no need to do changing
+        # ios touch point same way of image
+
         return x, y

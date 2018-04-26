@@ -190,13 +190,6 @@ class IOS(Device):
         else:
             for _ in range(times):
                 self.session.tap(x, y)
-        #r = requests.get(urljoin(self.addr, "status"))
-        #sid = r.json()["sessionId"]
-        #url = urljoin(self.addr, "session/%s/wda/tap/0" % sid)
-        #print(url, x, y)
-        #r = requests.post(url, json={"x": x, "y": y})
-        #print(r.json())
-        #return r
 
     def swipe(self, fpos, tpos, duration=0.5):
         # trans pos of swipe
