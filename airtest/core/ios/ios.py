@@ -36,15 +36,14 @@ class IOS(Device):
         # iproxy $port 8100 $udid
     """
 
-    def __init__(self, addr=DEFAULT_ADDR,
-                 cap_method=CAP_METHOD.WDACAP,
-                 touch_method=TOUCH_METHOD.WDATOUCH,
-                 ime_method=IME_METHOD.WDAIME):
+    def __init__(self, addr=DEFAULT_ADDR):
         super(IOS, self).__init__()
         self.addr = addr
-        self.cap_method = cap_method
-        self.touch_method = touch_method
-        self.ime_method = ime_method
+
+        """here now use these supported cap touch and ime method"""
+        self.cap_method = CAP_METHOD.WDACAP
+        self.touch_method = TOUCH_METHOD.WDATOUCH
+        self.ime_method = IME_METHOD.WDAIME
 
         # wda driver, use to home, start app
         # init wda session, updata when start app
@@ -169,7 +168,7 @@ class IOS(Device):
             self._size['height'] = h
             self._size['width'] = w
 
-        winw,winh = self.window_size()
+        winw, winh = self.window_size()
 
         self._touch_factor = float(winh) / float(h)
 
@@ -178,7 +177,6 @@ class IOS(Device):
             aircv.imwrite(filename, screen)
 
         return screen
-
 
     def touch(self, pos, times=1, duration=0.01):
         # trans pos of click

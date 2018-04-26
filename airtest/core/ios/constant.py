@@ -18,12 +18,11 @@ class CAP_METHOD(object):
     MINICAP_STREAM = "MINICAP_STREAM"
     WDACAP = "WDACAP"
 
-# now touch and ime only support wda  
+
+# now touch and ime only support wda
 class TOUCH_METHOD(object):
     WDATOUCH = "WDATOUCH"
-#    MINITOUCH = "MINITOUCH"
 
 
 class IME_METHOD(object):
     WDAIME = "WDAIME"
-#    YOSEMITEIME = "YOSEMITEIME"

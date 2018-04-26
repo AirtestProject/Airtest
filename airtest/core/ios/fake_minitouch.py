@@ -57,6 +57,5 @@ class fakeMiniTouch(object):
             self.recentPoint['y'] = operate_arg['y']
 
 
-
 if __name__ == '__main__':
     pass
