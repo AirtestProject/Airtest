@@ -4,13 +4,14 @@ from pip.req import parse_requirements
 
 install_reqs = parse_requirements('requirements.txt', session=False)
 reqs = [str(ir.req) for ir in install_reqs]
-if sys.platform != "win32":
-    reqs.remove('pywinauto')
+if sys.platform == "win32":
+    reqs.append('pywinauto==0.6.3')
+    reqs.append('pywin32')
 
 
 setup(
     name='airtest',
-    version='1.0.4',
+    version='1.0.6',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
@@ -35,7 +36,12 @@ setup(
             'sphinx_rtd_theme',
             'mock',
         ]},
+    entry_points="""
+    [console_scripts]
+    airtest = airtest.cli.__main__:main
+    """,
     classifiers=[
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
     ],
 )

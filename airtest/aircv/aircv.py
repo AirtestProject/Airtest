@@ -5,7 +5,7 @@ import sys
 import cv2
 import numpy as np
 from .error import FileNotExistError
-from airtest.utils.compat import PY3
+from six import PY3
 
 
 def imread(filename):

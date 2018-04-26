@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import re
 import warnings
 
@@ -175,7 +174,7 @@ class Android(Device):
         # output cv2 object
         try:
             screen = aircv.utils.string_2_img(screen)
-        except:
+        except Exception:
             # may be black/locked screen or other reason, print exc for debugging
             import traceback
             traceback.print_exc()

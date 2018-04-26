@@ -2,6 +2,7 @@
 import functools
 import shutil
 import time
+import sys
 import os
 from airtest.core.settings import Settings as ST
 from airtest.utils.logwraper import Logwrap, AirtestLogger
@@ -10,7 +11,7 @@ from airtest.utils.logger import get_logger
 
 class G(object):
     """Represent the globals variables"""
-    BASEDIR = None
+    BASEDIR = []
     LOGGER = AirtestLogger(None)
     LOGGING = get_logger("airtest.core.api")
     SCREEN = None
@@ -81,6 +82,11 @@ def logwrap(f):
 
 def device_platform():
     return G.DEVICE.__class__.__name__
+
+
+def using(path):
+    sys.path.append(path)
+    G.BASEDIR.append(path)
 
 
 NATIVE_PFS = ["Android", "Windows", "IOS"]

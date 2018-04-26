@@ -47,7 +47,7 @@ class MinicapIOS(object):
         s.connect(("localhost", self.port))
         t = s.recv(24)
         # minicap info
-        print struct.unpack("<2B5I2B", t)
+        print(struct.unpack("<2B5I2B", t))
 
         while True:
             # recv header, count frame_size

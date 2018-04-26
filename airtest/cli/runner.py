@@ -6,6 +6,7 @@ import sys
 import re
 import shutil
 import traceback
+from io import open
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
 from airtest.core.settings import Settings as ST  # noqa
@@ -37,7 +38,7 @@ class AirtestCase(unittest.TestCase):
 
         # set base dir to find tpl
         args.script = decode_path(args.script)
-        G.BASEDIR = args.script
+        G.BASEDIR = [args.script]
 
         # set log dir
         if args.log is True:
@@ -80,8 +81,10 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
-        code = open(pyfilepath).read()
-        exec(compile(code, pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
+        self.scope["__file__"] = pyfilepath
+        with open(pyfilepath, 'r', encoding="utf8") as f:
+            code = f.read()
+        exec(compile(code.encode("utf-8"), pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
 
     @classmethod
     def exec_other_script(cls, scriptpath):
@@ -113,10 +116,11 @@ class AirtestCase(unittest.TestCase):
         pyfilename = os.path.basename(scriptpath).replace(cls.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
-        code = open(pyfilepath).read()
+        with open(pyfilepath, 'r', encoding='utf8') as f:
+            code = f.read()
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
-        exec(compile(code, pyfilepath, 'exec')) in cls.scope
+        exec(compile(code.encode("utf8"), pyfilepath, 'exec')) in cls.scope
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):
