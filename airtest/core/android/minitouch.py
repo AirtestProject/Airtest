@@ -101,15 +101,15 @@ class Minitouch(object):
             transformed coordinates (x, y)
 
         """
-        if not (self.display_info and self.display_info['max_x'] and self.display_info['max_y']):
-            return x, y
-
-        width, height = self.display_info['physical_width'], self.display_info['physical_height']
-        if width > height and self.display_info['orientation'] in [1, 3]:
-            width, height = height, width
+        width, height = self.display_info['width'], self.display_info['height']
+        # if self.display_info['orientation'] in [1, 3]:
+        #     width, height = height, width
 
         nx = x * self.max_x / width
         ny = y * self.max_y / height
+
+        # print(nx, ny, self.max_x, self.max_y, width, height)
+
         return nx, ny
 
     def setup_server(self):

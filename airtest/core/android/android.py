@@ -7,7 +7,7 @@ from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -24,19 +24,23 @@ class Android(Device):
     def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,
                  touch_method=TOUCH_METHOD.MINITOUCH,
-                 ime_method=IME_METHOD.YOSEMITEIME):
+                 ime_method=IME_METHOD.YOSEMITEIME,
+                 ori_method=ORI_METHOD.MINICAP,
+                 ):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.cap_method = cap_method
         self.touch_method = touch_method
         self.ime_method = ime_method
+        self.ori_method = ori_method
         # init adb
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
+        self._display_info = {}
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb)
+        self.minicap = Minicap(self.adb, ori_method=self.ori_method)
         self.javacap = Javacap(self.adb)
         self.minitouch = Minitouch(self.adb)
         self.yosemite_ime = YosemiteIme(self.adb)
@@ -277,9 +281,9 @@ class Android(Device):
             None
 
         """
-        pos = self._touch_point_by_orientation(pos)
         for _ in range(times):
             if self.touch_method == TOUCH_METHOD.MINITOUCH:
+                pos = self._touch_point_by_orientation(pos)
                 self.minitouch.touch(pos, duration=duration)
             else:
                 self.adb.touch(pos)
@@ -298,9 +302,9 @@ class Android(Device):
             None
 
         """
-        p1 = self._touch_point_by_orientation(p1)
-        p2 = self._touch_point_by_orientation(p2)
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
             self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
@@ -425,7 +429,7 @@ class Android(Device):
         Return True or False whether the device is locked or not
 
         Notes:
-            Might not work on all devices
+            Might not work on some devices
 
         Returns:
             True or False
@@ -449,23 +453,29 @@ class Android(Device):
     @property
     def display_info(self):
         """
-        Return the display info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
             display information
 
         """
-        return self.adb.display_info
+        if not self._display_info:
+            self._display_info = self.get_display_info()
+        return self._display_info
 
     def get_display_info(self):
         """
-        Return the display physical info (orientation, rotation and max values for x and y coordinates)
+        Return the display info (width, height, orientation and max_x, max_y)
 
         Returns:
-            display physical information
+            display information
 
         """
-        return self.adb.get_display_info()
+        if self.ori_method == ORI_METHOD.MINICAP:
+            display_info = self.minicap.get_display_info()
+        else:
+            display_info = self.adb.display_info
+        return display_info
 
     def get_current_resolution(self):
         """
@@ -520,6 +530,8 @@ class Android(Device):
         def refresh_ori(ori):
             self.display_info["orientation"] = ori
             self.display_info["rotation"] = ori * 90
+            self.adb.display_info["orientation"] = ori
+            self.adb.display_info["rotation"] = ori * 90
 
         self.rotation_watcher.reg_callback(refresh_ori)
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
@@ -538,7 +550,7 @@ class Android(Device):
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self.display_info["physical_width"], self.display_info["physical_height"]),
+            (self.display_info["width"], self.display_info["height"]),
             self.display_info["orientation"]
         )
         return x, y

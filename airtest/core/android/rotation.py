@@ -18,6 +18,7 @@ class RotationWatcher(object):
         self.ow_proc = None
         self.ow_callback = []
         self._t = None
+        self.current_orientation = None
         reg_cleanup(self.teardown)
 
     @on_method_ready('start')
@@ -77,9 +78,8 @@ class RotationWatcher(object):
                 ori = _refresh_by_ow()
                 if ori is None:
                     break
-                elif ori == self.adb.display_info['orientation']:
-                    continue
-                LOGGING.info('update orientation %s->%s' % (self.adb.display_info['orientation'], ori))
+                LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
+                self.current_orientation = ori
                 for cb in self.ow_callback:
                     try:
                         cb(ori)

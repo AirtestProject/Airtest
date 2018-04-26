@@ -56,7 +56,8 @@ class AirtestCase(unittest.TestCase):
         cls.scope["exec_script"] = cls.exec_other_script
 
         # set PROJECT_ROOT for exec other script
-        cls.PROJECT_ROOT = os.environ.get("PROJECT_ROOT", ".")
+        if os.environ.get("PROJECT_ROOT"):
+            cls.PROJECT_ROOT = os.environ["PROJECT_ROOT"]
 
     def setUp(self):
         if self.args.log and self.args.recording:

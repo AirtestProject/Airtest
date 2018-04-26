@@ -15,7 +15,7 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future.
+Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future. [`Roadmap`_]
 
 Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
@@ -89,7 +89,7 @@ Airtest CLI provides the possibility to execute tests on different host machine 
     airtest run "path to your .air dir" --device Android:///
 
     # run test targeting on Windows application whose title matches Unity.*
-    airtest run "path to your .air dir" --device Windows:///?title_re=Unity.*
+    airtest run "path to your .air dir" --device "Windows:///?title_re=Unity.*"
 
     # generate HTML report after running test
     airtest report "path to your .air dir"
@@ -130,3 +130,4 @@ Thanks for all these great works that make this project better.
 .. _stf: https://github.com/openstf
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
+.. _Roadmap: https://github.com/AirtestProject/Airtest/issues/33

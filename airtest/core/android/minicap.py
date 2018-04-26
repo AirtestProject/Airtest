@@ -5,7 +5,7 @@ import json
 import struct
 import threading
 import six
-from airtest.core.android.constant import STFLIB
+from airtest.core.android.constant import STFLIB, ORI_METHOD
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
@@ -25,16 +25,18 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None):
+    def __init__(self, adb, projection=None, ori_method=ORI_METHOD.MINICAP):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
         self.adb = adb
         self.projection = projection
+        self.ori_method = ori_method
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
+        self._stream_rotation = None
 
     @ready_method
     def install_or_upgrade(self):
@@ -131,6 +133,7 @@ class Minicap(object):
         """
         display_info = self.adb.shell("%s -i" % self.CMD)
         display_info = json.loads(display_info)
+        display_info["orientation"] = display_info["rotation"] / 90
         return display_info
 
     @on_method_ready('install_or_upgrade')
@@ -148,12 +151,13 @@ class Minicap(object):
             jpg data
 
         """
+        params, display_info = self._get_params(projection)
         raw_data = self.adb.raw_shell(
-            self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" %
-            self._get_params(projection),
+            self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
             ensure_unicode=False,
         )
-        jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1].replace(self.adb.line_breaker, b"\n")
+        jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1]
+        jpg_data = jpg_data.replace(self.adb.line_breaker, b"\n")
         return jpg_data
 
     def _get_params(self, projection=None):
@@ -164,10 +168,13 @@ class Minicap(object):
             physical display size (width, height), counted projection (width, height) and real display orientation
 
         """
-        # minicap截屏时，需要截取物理全屏的图片:
-        real_width = self.adb.display_info["physical_width"]
-        real_height = self.adb.display_info["physical_height"]
-        real_orientation = self.adb.display_info["rotation"]
+        if self.ori_method == ORI_METHOD.MINICAP:
+            display_info = self.get_display_info()
+        else:
+            display_info = self.adb.display_info
+        real_width = display_info["width"]
+        real_height = display_info["height"]
+        real_rotation = display_info["rotation"]
         # 优先去传入的projection
         projection = projection or self.projection
         if projection:
@@ -175,10 +182,12 @@ class Minicap(object):
         else:
             proj_width, proj_height = real_width, real_height
 
-        if self.quirk_flag & 2 and real_orientation != 0:
-            return real_height, real_width, proj_height, proj_width, 0
+        if self.quirk_flag & 2 and real_rotation in (90, 270):
+            params = real_height, real_width, proj_height, proj_width, 0
+        else:
+            params = real_width, real_height, proj_width, proj_height, real_rotation
 
-        return real_width, real_height, proj_width, proj_height, real_orientation
+        return (params, display_info)
 
     @on_method_ready('install_or_upgrade')
     def get_stream(self, lazy=True):
@@ -220,7 +229,7 @@ class Minicap(object):
         # check quirk-bitflags, reference: https://github.com/openstf/minicap#quirk-bitflags
         ori, self.quirk_flag = global_headers[-2:]
 
-        if self.quirk_flag & 2 and ori != 0:
+        if self.quirk_flag & 2 and ori in (1, 3):
             # resetup
             LOGGING.debug("quirk_flag found, going to resetup")
             stopping = True
@@ -265,7 +274,7 @@ class Minicap(object):
         localport, deviceport = self.adb.setup_forward("localabstract:minicap_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         other_opt = "-l" if lazy else ""
-        params = self._get_params()
+        params, display_info = self._get_params()
         proc = self.adb.start_shell(
             "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
             tuple([self.CMD, deviceport] + list(params) + [other_opt]),
@@ -282,7 +291,9 @@ class Minicap(object):
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
             raise RuntimeError("minicap server quit immediately")
+
         reg_cleanup(proc.kill)
+        self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
     def get_frame_from_stream(self):
@@ -310,6 +321,9 @@ class Minicap(object):
 
         """
         LOGGING.debug("update_rotation: %s" % rotation)
+        with self.stream_lock:
+            if self._stream_rotation == rotation:
+                return
         self.teardown_stream()
 
     def teardown_stream(self):
