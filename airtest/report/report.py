@@ -204,6 +204,8 @@ class LogToHtml(object):
             msg = ""
             if len(args) > 2:
                 msg = args[2]
+            elif step[1]["kwargs"] and "msg" in step[1]["kwargs"]:
+                msg = step[1]["kwargs"]["msg"]
             step['assert'] = msg
             # 单独对assert_equal和assert_not_equal进行步骤说明。
             step['desc'] = u'%s [ "%s", "%s", "%s" ]' % (step['type'], args[0], args[1], msg)
