@@ -152,7 +152,11 @@ class LogToHtml(object):
                         step['target_pos'] = step[2].get('ret')
                         cv = step[2].get('cv', {})
                         if cv:
-                            step['confidence'] = self.to_percent(cv.get('confidence'))
+                            confidence = cv.get('confidence')
+                            # 图片rgb=True时记录的confidence格式:[confi_rgb, [conf_r, conf_g, conf_b]]
+                            if isinstance(confidence, list):
+                                confidence = confidence[0]
+                            step['confidence'] = self.to_percent(confidence)
                             # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
                             #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
                             if 'wnd_pos' in step[2]:
@@ -197,10 +201,14 @@ class LogToHtml(object):
 
         elif step['type'] in ['assert_equal', 'assert_not_equal']:
             args = step[1]["args"]
-            if len(args) >= 2:
-                step['assert'] = args[2]
+            msg = ""
+            if len(args) > 2:
+                msg = args[2]
+            elif step[1]["kwargs"] and "msg" in step[1]["kwargs"]:
+                msg = step[1]["kwargs"]["msg"]
+            step['assert'] = msg
             # 单独对assert_equal和assert_not_equal进行步骤说明。
-            step['desc'] = u'assert_equal [ "%s", "%s", "%s" ]' % (args[0], args[1], args[2])
+            step['desc'] = u'%s [ "%s", "%s", "%s" ]' % (step['type'], args[0], args[1], msg)
             step['title'] = self.func_title(step)
             return step
 

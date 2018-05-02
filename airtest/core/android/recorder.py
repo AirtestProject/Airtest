@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import six
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.android.constant import YOSEMITE_PACKAGE
 from airtest.core.error import AirtestError
@@ -49,7 +50,9 @@ class Recorder(Yosemite):
         while True:
             line = nbsp.readline(timeout=5)
             if line is None:
-                raise RuntimeError("recording setup error")
+                raise RuntimeError("start recording error")
+            if six.PY3:
+                line = line.decode("utf-8")
             m = re.match("start result: Record start success! File path:(.*\.mp4)", line.strip())
             if m:
                 output = m.group(1)
@@ -80,11 +83,15 @@ class Recorder(Yosemite):
         if is_interrupted:
             return
         for line in p.stdout.readlines():
+            if line is None:
+                break
+            if six.PY3:
+                line = line.decode("utf-8")
             m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
             if m:
                 self.recording_file = m.group(1)
                 self.adb.pull(self.recording_file, output)
-                return
+                return True
         raise AirtestError("start_recording first")
 
     @on_method_ready('install_or_upgrade')

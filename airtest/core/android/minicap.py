@@ -5,7 +5,7 @@ import json
 import struct
 import threading
 import six
-from airtest.core.android.constant import STFLIB
+from airtest.core.android.constant import STFLIB, ORI_METHOD
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
@@ -25,13 +25,14 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None):
+    def __init__(self, adb, projection=None, ori_method=ORI_METHOD.MINICAP):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
         self.adb = adb
         self.projection = projection
+        self.ori_method = ori_method
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
@@ -167,10 +168,9 @@ class Minicap(object):
             physical display size (width, height), counted projection (width, height) and real display orientation
 
         """
-        # minicap截屏时，需要截取物理全屏的图片:
-        try:
+        if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.get_display_info()
-        except:
+        else:
             display_info = self.adb.display_info
         real_width = display_info["width"]
         real_height = display_info["height"]

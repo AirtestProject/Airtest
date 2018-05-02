@@ -16,7 +16,7 @@ if sys.platform == "win32":
 
 setup(
     name='airtest',
-    version='1.0.7',
+    version='1.0.8',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps',
@@ -48,5 +48,8 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 )

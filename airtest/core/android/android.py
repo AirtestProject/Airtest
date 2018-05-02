@@ -7,7 +7,7 @@ from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -24,12 +24,15 @@ class Android(Device):
     def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP_STREAM,
                  touch_method=TOUCH_METHOD.MINITOUCH,
-                 ime_method=IME_METHOD.YOSEMITEIME):
+                 ime_method=IME_METHOD.YOSEMITEIME,
+                 ori_method=ORI_METHOD.MINICAP,
+                 ):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.cap_method = cap_method
         self.touch_method = touch_method
         self.ime_method = ime_method
+        self.ori_method = ori_method
         # init adb
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
@@ -37,7 +40,7 @@ class Android(Device):
         self._display_info = {}
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb)
+        self.minicap = Minicap(self.adb, ori_method=self.ori_method)
         self.javacap = Javacap(self.adb)
         self.minitouch = Minitouch(self.adb)
         self.yosemite_ime = YosemiteIme(self.adb)
@@ -468,9 +471,9 @@ class Android(Device):
             display information
 
         """
-        try:
+        if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.minicap.get_display_info()
-        except:
+        else:
             display_info = self.adb.display_info
         return display_info
 
