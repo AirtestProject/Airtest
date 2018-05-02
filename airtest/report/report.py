@@ -21,7 +21,7 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE, lang="en"):
+    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE, lang="en", plugins=[]):
         self.log = []
         self.script_root = script_root
         self.log_root = log_root
@@ -38,6 +38,15 @@ class LogToHtml(object):
         self._steps = None
         self.all_step = None
         self.lang = lang
+        self.plugins_module = []
+        self.init_plugin_modules(plugins)
+
+    def init_plugin_modules(self, plugins):
+        for p in plugins:
+            sys.path.append(os.path.dirname(p))
+            # print "--------------", os.path.dirname(p), os.path.basename(p)
+            module = __import__(os.path.basename(p)).Report(export_dir=self.export_dir, log_root=self.log_root)
+            self.plugins_module.append(module)
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -204,11 +213,18 @@ class LogToHtml(object):
             msg = ""
             if len(args) > 2:
                 msg = args[2]
+            elif step[1]["kwargs"] and "msg" in step[1]["kwargs"]:
+                msg = step[1]["kwargs"]["msg"]
             step['assert'] = msg
             # 单独对assert_equal和assert_not_equal进行步骤说明。
             step['desc'] = u'%s [ "%s", "%s", "%s" ]' % (step['type'], args[0], args[1], msg)
             step['title'] = self.func_title(step)
             return step
+
+        else:
+            # 判断类型是否属于plugin扩展模块
+            for module in self.plugins_module:
+                step = module.report_parse(step)
 
         if self.lang != "en":
             step['desc'] = self.func_desc_zh(step)
@@ -246,8 +262,8 @@ class LogToHtml(object):
 
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
-    @staticmethod
-    def func_desc_zh(step):
+    # @staticmethod
+    def func_desc_zh(self, step):
         """ 把对应函数(depth=1)的name显示成中文 """
         name = step['type']
         desc = {
@@ -265,10 +281,14 @@ class LogToHtml(object):
             "assert_not_exists": u"断言目标图片不存在",
             "traceback": u"异常信息",
         }
+
+        for module in self.plugins_module:
+            desc.update(module.report_desc_zh(step))
+
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
 
-    @staticmethod
-    def func_desc(step):
+    # @staticmethod
+    def func_desc(self, step):
         name = step['type']
         desc = {
             "snapshot": u"Screenshot description: %s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
@@ -283,10 +303,14 @@ class LogToHtml(object):
             "assert_not_exists": u"Assert target object does not exists",
             "traceback": u"Traceback",
         }
+
+        for module in self.plugins_module:
+            desc.update(module.report_desc(step))
+
         return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
 
-    @staticmethod
-    def func_title(step):
+    # @staticmethod
+    def func_title(self, step):
         title = {
             "touch": u"Touch",
             "swipe": u"Swipe",
@@ -302,6 +326,10 @@ class LogToHtml(object):
             "assert_equal": u"Assert equal",
             "assert_not_equal": u"Assert not equal",
         }
+
+        for module in self.plugins_module:
+            title.update(module.report_title())
+
         name = step['type']
         return title.get(name, name)
 
@@ -356,6 +384,12 @@ class LogToHtml(object):
 
         return html
 
+    def copy_tree(self, src, dst):
+        try:
+            shutil.copytree(src, dst)
+        except Exception as e:
+            print(e)
+
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
         dirname = os.path.basename(self.script_root).replace(".air", ".log")
@@ -364,16 +398,16 @@ class LogToHtml(object):
         if os.path.isdir(dirpath):
             shutil.rmtree(dirpath, ignore_errors=True)
         # copy script
-        shutil.copytree(self.script_root, dirpath)
+        self.copy_tree(self.script_root, dirpath)
         # copy log
         logpath = os.path.join(dirpath, LOGDIR)
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
-            shutil.copytree(self.log_root, logpath)
+            self.copy_tree(self.log_root, logpath)
         # copy static files
         for subdir in ["css", "fonts", "image", "js"]:
-            shutil.copytree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
+            self.copy_tree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
 
         return dirpath, logpath
 
@@ -443,6 +477,7 @@ def get_parger(ap):
     ap.add_argument("--record", help="custom screen record file path", nargs="+")
     ap.add_argument("--export", help="export a portable report dir containing all resources")
     ap.add_argument("--lang", help="report language", default="en")
+    ap.add_argument("--plugins", help="plugin report", nargs="+")
     return ap
 
 
@@ -458,9 +493,10 @@ def main(args):
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
+    plugins = args.plugins or []
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, author, export_dir=export, lang=lang)
+    rpt = LogToHtml(path, log_root, static_root, author, export_dir=export, lang=lang, plugins=plugins)
     rpt.render(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
