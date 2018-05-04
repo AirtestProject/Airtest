@@ -26,6 +26,7 @@
     <script src="{{ static_root }}js/echarts/shine.js"></script>
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
+    <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>"
     <script type="text/javascript">
         var lang = new Lang();
         lang.init({
@@ -279,7 +280,7 @@
                   <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
                   <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
                     <div class="screen_holder">
-                      <img class="fancybox scale" src="{{step.screenshot}}" title="{{step.screenshot}}">
+                      <img class="fancybox scale lazyload" data-src="{{step.screenshot}}" url="" title="{{step.screenshot}}">
                       {% if not step.trace and step.target_pos %}
                       <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{step.top}}" data-left="{{step.left}}" style="top:{{step.top}}px;left:{{step.left}}px;">
                         <!-- rect area -->
@@ -369,18 +370,19 @@
       if (iframe) {
           window.frameElement.setAttribute("allowfullscreen", "allowfullscreen")
       }
-    $("#expand_nav_step").hide(); // init
     $("#collapse_nav_step").click(function() {
       $("#nav_steps").addClass('collapsed');
       $(this).hide();
       $("#expand_nav_step").show();
-    })
+    });
 
     $("#expand_nav_step").click(function() {
       $("#nav_steps").removeClass('collapsed');
       $(this).hide();
       $("#collapse_nav_step").show();
-    })
+    });
+    $("#collapse_nav_step").click();
+    $("#collapse_nav_step").hide(); // init
   });
 
   $(function(){
@@ -481,7 +483,8 @@
       scale_img(scale)
     });
     $(window).resize();
-
+    // 延迟加载图片
+    lazyload();
   });
   </script>
 
