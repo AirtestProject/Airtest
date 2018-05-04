@@ -166,7 +166,9 @@ class Windows(Device):
         coords = self._action_pos(pos)
         print(coords)
 
-        for _ in range(times):
+        if times > 1:
+            self.mouse.double_click(coords=coords)
+        else:
             self.mouse.press(button=button, coords=coords)
             time.sleep(duration)
             self.mouse.release(button=button, coords=coords)
