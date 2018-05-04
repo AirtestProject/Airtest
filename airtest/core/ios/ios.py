@@ -220,7 +220,7 @@ class IOS(Device):
         """
         raise NotImplementedError
 
-    def start_app(self, package):
+    def start_app(self, package, activity=None):
         self.driver.session(package)
 
     def stop_app(self, package):
