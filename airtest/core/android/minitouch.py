@@ -7,6 +7,7 @@ import threading
 import time
 import warnings
 
+import six
 from six.moves import queue
 
 from airtest.core.android.constant import STFLIB
@@ -176,9 +177,9 @@ class Minitouch(object):
         """
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
-        self.handle(b"d 0 %d %d 50\nc\n" % (x, y))
+        self.handle("d 0 {} {} 50\nc\n".format(x, y))
         time.sleep(duration)
-        self.handle(b"u 0\nc\n")
+        self.handle("u 0\nc\n")
 
     @on_method_ready('install_and_setup')
     def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
@@ -219,18 +220,18 @@ class Minitouch(object):
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration) / (steps + 1)
-        self.handle(b"d 0 %d %d 50\nc\n" % (from_x, from_y))
+        self.handle("d 0 {} {} 50\nc\n".format(from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            self.handle(b"m 0 %d %d 50\nc\n" % (
+            self.handle("m 0 {} {} 50\nc\n".format(
                 from_x + (to_x - from_x) * i / steps,
                 from_y + (to_y - from_y) * i / steps,
             ))
             time.sleep(interval)
         for i in range(10):
-            self.handle(b"m 0 %d %d 50\nc\n" % (to_x, to_y))
+            self.handle("m 0 {} {} 50\nc\n".format(to_x, to_y))
         time.sleep(interval)
-        self.handle(b"u 0\nc\n")
+        self.handle("u 0\nc\n")
 
     @on_method_ready('install_and_setup')
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
@@ -276,27 +277,27 @@ class Minitouch(object):
         x2, y2 = x0 + w * percent / 2, y0 + h * percent / 2
         cmds = []
         if in_or_out == 'in':
-            cmds.append(b"d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
+            cmds.append("d 0 {} {} 50\nd 1 {} {} 50\nc\n".format(x1, y1, x2, y2))
             for i in range(1, steps):
-                cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(
                     x1+(x0-x1)*i/steps, y1+(y0-y1)*i/steps,
                     x2+(x0-x2)*i/steps, y2+(y0-y2)*i/steps
                 ))
-            cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
-            cmds.append(b"u 0\nu 1\nc\n")
+            cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(x0, y0, x0, y0))
+            cmds.append("u 0\nu 1\nc\n")
         elif in_or_out == 'out':
-            cmds.append(b"d 0 %d %d 50\nd 1 %d %d 50\nc\n" % (x0, y0, x0, y0))
+            cmds.append("d 0 {} {} 50\nd 1 {} {} 50\nc\n".format(x0, y0, x0, y0))
             for i in range(1, steps):
-                cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (
+                cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(
                     x0+(x1-x0)*i/steps, y0+(y1-y0)*i/steps,
                     x0+(x2-x0)*i/steps, y0+(y2-y0)*i/steps
                 ))
-            cmds.append(b"m 0 %d %d 50\nm 1 %d %d 50\nc\n" % (x1, y1, x2, y2))
-            cmds.append(b"u 0\nu 1\nc\n")
+            cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(x1, y1, x2, y2))
+            cmds.append("u 0\nu 1\nc\n")
         else:
-            raise RuntimeError("center should be 'in' or 'out', not %s" % repr(in_or_out))
+            raise RuntimeError("center should be 'in' or 'out', not {}".format(repr(in_or_out)))
 
-        interval = float(duration)/(steps+1)
+        interval = float(duration) / (steps + 1)
         for i, c in enumerate(cmds):
             self.handle(c)
             time.sleep(interval)
@@ -325,16 +326,16 @@ class Minitouch(object):
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
-            cmd = b"d 0 %d %d 50\nc\n" % (x, y)
+            cmd = "d 0 {} {} 50\nc\n".format(x, y)
         elif args["type"] == "move":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
-            cmd = b"m 0 %d %d 50\nc\n" % (x, y)
+            cmd = "m 0 {} {} 50\nc\n".format(x, y)
         elif args["type"] == "up":
             # support py 3
-            cmd = b"u 0\nc\n"
+            cmd = "u 0\nc\n"
         else:
-            raise RuntimeError("invalid operate args: %s" % args)
+            raise RuntimeError("invalid operate args: {}".format(args))
         self.handle(cmd)
 
     @on_method_ready('install_and_setup')
@@ -367,6 +368,8 @@ class Minitouch(object):
             None
 
         """
+        if isinstance(data, six.text_type):
+            data = data.encode('utf-8')
         try:
             self.client.send(data)
         except Exception as err:
@@ -478,7 +481,7 @@ class DownEvent(MotionEvent):
             x, y = transform(*self.coordinates)
         else:
             x, y = self.coordinates
-        cmd = b"d %d %d %d %d\nc\n" % (self.contact, x, y, self.pressure)
+        cmd = "d {} {} {} {}\nc\n".format(self.contact, x, y, self.pressure)
         return cmd
 
 
@@ -492,7 +495,7 @@ class UpEvent(MotionEvent):
         self.contact = contact
 
     def getcmd(self, transform=None):
-        cmd = b"u %d\nc\n" % self.contact
+        cmd = "u {}\nc\n".format(self.contact)
         return cmd
 
 
@@ -514,7 +517,7 @@ class MoveEvent(MotionEvent):
             x, y = transform(*self.coordinates)
         else:
             x, y = self.coordinates
-        cmd = b"m %d %d %d %d\nc\n" % (self.contact, x, y, self.pressure)
+        cmd = "m {} {} {} {}\nc\n".format(self.contact, x, y, self.pressure)
         return cmd
 
 
