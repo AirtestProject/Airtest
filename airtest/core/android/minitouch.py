@@ -177,7 +177,7 @@ class Minitouch(object):
         """
         x, y = tuple_xy
         x, y = self.__transform_xy(x, y)
-        self.handle("d 0 {} {} 50\nc\n".format(x, y))
+        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(x, y))
         time.sleep(duration)
         self.handle("u 0\nc\n")
 
@@ -220,16 +220,16 @@ class Minitouch(object):
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration) / (steps + 1)
-        self.handle("d 0 {} {} 50\nc\n".format(from_x, from_y))
+        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
-            self.handle("m 0 {} {} 50\nc\n".format(
+            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(
                 from_x + (to_x - from_x) * i / steps,
                 from_y + (to_y - from_y) * i / steps,
             ))
             time.sleep(interval)
         for i in range(10):
-            self.handle("m 0 {} {} 50\nc\n".format(to_x, to_y))
+            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(to_x, to_y))
         time.sleep(interval)
         self.handle("u 0\nc\n")
 
@@ -277,22 +277,22 @@ class Minitouch(object):
         x2, y2 = x0 + w * percent / 2, y0 + h * percent / 2
         cmds = []
         if in_or_out == 'in':
-            cmds.append("d 0 {} {} 50\nd 1 {} {} 50\nc\n".format(x1, y1, x2, y2))
+            cmds.append("d 0 {:.0f} {:.0f} 50\nd 1 {:.0f} {:.0f} 50\nc\n".format(x1, y1, x2, y2))
             for i in range(1, steps):
-                cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(
+                cmds.append("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(
                     x1+(x0-x1)*i/steps, y1+(y0-y1)*i/steps,
                     x2+(x0-x2)*i/steps, y2+(y0-y2)*i/steps
                 ))
-            cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(x0, y0, x0, y0))
+            cmds.append("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(x0, y0, x0, y0))
             cmds.append("u 0\nu 1\nc\n")
         elif in_or_out == 'out':
-            cmds.append("d 0 {} {} 50\nd 1 {} {} 50\nc\n".format(x0, y0, x0, y0))
+            cmds.append("d 0 {:.0f} {:.0f} 50\nd 1 {:.0f} {:.0f} 50\nc\n".format(x0, y0, x0, y0))
             for i in range(1, steps):
-                cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(
+                cmds.append("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(
                     x0+(x1-x0)*i/steps, y0+(y1-y0)*i/steps,
                     x0+(x2-x0)*i/steps, y0+(y2-y0)*i/steps
                 ))
-            cmds.append("m 0 {} {} 50\nm 1 {} {} 50\nc\n".format(x1, y1, x2, y2))
+            cmds.append("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(x1, y1, x2, y2))
             cmds.append("u 0\nu 1\nc\n")
         else:
             raise RuntimeError("center should be 'in' or 'out', not {}".format(repr(in_or_out)))
@@ -326,11 +326,11 @@ class Minitouch(object):
         if args["type"] == "down":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
-            cmd = "d 0 {} {} 50\nc\n".format(x, y)
+            cmd = "d 0 {:.0f} {:.0f} 50\nc\n".format(x, y)
         elif args["type"] == "move":
             x, y = self.__transform_xy(args["x"], args["y"])
             # support py 3
-            cmd = "m 0 {} {} 50\nc\n".format(x, y)
+            cmd = "m 0 {:.0f} {:.0f} 50\nc\n".format(x, y)
         elif args["type"] == "up":
             # support py 3
             cmd = "u 0\nc\n"
@@ -481,7 +481,7 @@ class DownEvent(MotionEvent):
             x, y = transform(*self.coordinates)
         else:
             x, y = self.coordinates
-        cmd = "d {} {} {} {}\nc\n".format(self.contact, x, y, self.pressure)
+        cmd = "d {:.0f} {:.0f} {:.0f} {:.0f}\nc\n".format(self.contact, x, y, self.pressure)
         return cmd
 
 
@@ -495,7 +495,7 @@ class UpEvent(MotionEvent):
         self.contact = contact
 
     def getcmd(self, transform=None):
-        cmd = "u {}\nc\n".format(self.contact)
+        cmd = "u {:.0f}\nc\n".format(self.contact)
         return cmd
 
 
@@ -517,7 +517,7 @@ class MoveEvent(MotionEvent):
             x, y = transform(*self.coordinates)
         else:
             x, y = self.coordinates
-        cmd = "m {} {} {} {}\nc\n".format(self.contact, x, y, self.pressure)
+        cmd = "m {:.0f} {:.0f} {:.0f} {:.0f}\nc\n".format(self.contact, x, y, self.pressure)
         return cmd
 
 
