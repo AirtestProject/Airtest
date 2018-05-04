@@ -6,6 +6,7 @@ import requests
 import six
 import time
 import json
+import base64
 import wda
 
 if six.PY3:
@@ -15,7 +16,13 @@ else:
 
 from airtest import aircv
 from airtest.core.device import Device
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+from airtest.core.ios.fake_minitouch import fakeMiniTouch
 from airtest.utils.logger import get_logger
+
+# roatations of ios
+from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
 
 
 logger = get_logger(__name__)
@@ -33,59 +40,176 @@ class IOS(Device):
         super(IOS, self).__init__()
         self.addr = addr
 
+        """here now use these supported cap touch and ime method"""
+        self.cap_method = CAP_METHOD.WDACAP
+        self.touch_method = TOUCH_METHOD.WDATOUCH
+        self.ime_method = IME_METHOD.WDAIME
+
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        wda.DEBUG = True
+        wda.DEBUG = False
         self.driver = wda.Client(addr)
-        self._size = {'width': 0, 'height': 0}
+
+        # record device's width
+        self._size = {'width': None, 'height': None}
         self._touch_factor = 0.5
+        self._last_orientation = None
+        self.defaultSession = None
+
+        # start up RotationWatcher with default session
+        self.rotation_watcher = RotationWatcher(self.session)
+
+        # fake minitouch to simulate swipe
+        self.minitouch = fakeMiniTouch(self)
 
     @property
     def session(self):
-        return self.driver.session()
+        if not self.defaultSession:
+            self.defaultSession = self.driver.session()
+        return self.defaultSession
+
+    def window_size(self):
+        """
+            return window size
+            namedtuple:
+                Size(wide , hight)
+        """
+        return self.session.window_size()
+
+    @property
+    def orientation(self):
+        """
+            return device oritantation status
+            in  LANDSACPE POR
+        """
+        return self.session.orientation
+
+    @property
+    def display_info(self):
+        if not self._size['width'] or not self._size['height']:
+            self.snapshot()
+
+        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,\
+        'physical_width': self._size['width'], 'physical_height': self._size['height']}
+
+    def get_current_resolution(self):
+        w, h = self.display_info["width"], self.display_info["height"]
+        if self.display_info["orientation"] in [LANDSCAPE, LANDSCAPE_RIGHT]:
+            w, h = h, w
+        return w, h
 
     def home(self):
         return self.driver.home()
 
-    def snapshot(self, filename=None):
+    def _neo_wda_screenshot(self):
+        """
+            this is almost same as wda implementation, but without png header check,
+            as response data is now jpg format in mid quality
+        """
+        value = self.driver.http.get('screenshot').value
+        raw_value = base64.b64decode(value)
+        return raw_value
+
+    def snapshot(self, strType=False, filename=None, ensure_orientation=True):
         """
         take snapshot
         filename: save screenshot to filename
         """
-        data = self.driver.screenshot(filename)  # wda 截图不用考虑朝向
-        # 输出cv2对象
-        screen = aircv.utils.string_2_img(data)
+        data = None
+
+        if self.cap_method == CAP_METHOD.MINICAP:
+            raise NotImplementedError
+        elif self.cap_method == CAP_METHOD.MINICAP_STREAM:
+            raise NotImplementedError
+        elif self.cap_method == CAP_METHOD.WDACAP:
+            data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
+
+        if strType:
+            if filename:
+                with open(filename, 'wb') as f:
+                    f.write(data)
+            return data
+
+        # output cv2 object
+        try:
+            screen = aircv.utils.string_2_img(data)
+        except:
+            # may be black/locked screen or other reason, print exc for debugging
+            import traceback
+            traceback.print_exc()
+            return None
+
+        now_orientation = self.orientation
+
+        # ensure the orientation is right
+        if ensure_orientation and now_orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
+
+            # minicap screenshots are different for various sdk_version
+            if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
+                h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
+                if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
+                    screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
+
+            # wda 截图是要根据orientation旋转
+            elif self.cap_method == CAP_METHOD.WDACAP:
+                # seems no need to rotate now
+                pass
+                #screen = aircv.rotate(screen, 90, clockwise= (now_orientation == LANDSCAPE_RIGHT) )
+
+        # readed screen size
+        h, w = screen.shape[:2]
+
+        # save last res for portrait
+        if now_orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
+            self._size['height'] = w
+            self._size['width'] = h
+        else:
+            self._size['height'] = h
+            self._size['width'] = w
+
+        winw, winh = self.window_size()
+
+        self._touch_factor = float(winh) / float(h)
+
+        # save as file if needed
+        if filename:
+            aircv.imwrite(filename, screen)
+
         return screen
 
     def touch(self, pos, times=1, duration=0.01):
+        # trans pos of click
+        pos = self._touch_point_by_orientation(pos)
+
+        # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-        # if times == 2:
-        #     self.session.double_tap(x, y)
-        # else:
-        #     for _ in range(times):
-        #         self.session.tap(x, y)
-        r = requests.get(urljoin(self.addr, "status"))
-        sid = r.json()["sessionId"]
-        url = urljoin(self.addr, "session/%s/wda/tap/0" % sid)
-        print(url, x, y)
-        r = requests.post(url, json={"x": x, "y": y})
-        print(r.json())
-        return r
+
+        if times == 2:
+            self.session.double_tap(x, y)
+        else:
+            for _ in range(times):
+                self.session.tap(x, y)
 
     def swipe(self, fpos, tpos, duration=0.5):
-        self.session.swipe(fpos[0] * self._touch_factor, fpos[1] * self._touch_factor,
-                           tpos[0] * self._touch_factor, tpos[1] * self._touch_factor, duration)
+        # trans pos of swipe
+        fx, fy = self._touch_point_by_orientation(fpos)
+        tx, ty = self._touch_point_by_orientation(tpos)
+
+        self.session.swipe(fx * self._touch_factor, fy * self._touch_factor,
+                           tx * self._touch_factor, ty * self._touch_factor, duration)
 
     def keyevent(self, keys):
-        """bug in wda for now"""
-        self.session.send_keys(keys)
+        """just use as home event"""
+        if keys not in ['HOME', 'home', 'Home']:
+            raise NotImplementedError
+        self.home()
 
     def text(self, text, enter=True):
         """bug in wda for now"""
         if enter:
             text += '\n'
-        self.keyevent(text)
+        self.session.send_keys(text)
 
     def install_app(self, uri, package):
         """
@@ -96,26 +220,79 @@ class IOS(Device):
         """
         raise NotImplementedError
 
-    def start_app(self, package):
+    def start_app(self, package, activity=None):
         self.driver.session(package)
 
     def stop_app(self, package):
         self.driver.session().close()
 
-    def external_ip(self):
+    def get_ip_address(self):
+        """
+        get ip address from webDriverAgent
+
+        Returns:
+            raise if no IP address has been found, otherwise return the IP address
+
+        """
         return self.driver.status()['ios']['ip']
 
+    def device_status(self):
+        """
+        show status return by webDriverAgent
+        Return dicts of infos
+        """
+        return self.driver.status()
+
+    def _touch_point_by_orientation(self, tuple_xy):
+        """
+        Convert image coordinates to physical display coordinates, the arbitrary point (origin) is upper left corner
+        of the device physical display
+
+        Args:
+            tuple_xy: image coordinates (x, y)
+
+        Returns:
+
+        """
+        x, y = tuple_xy
+
+        # use correct w and h due to now orientation
+        # _size 只对应竖直时候长宽
+        now_orientation = self.orientation
+
+        if now_orientation in [PORTRAIT, PORTRAIT_UPSIDEDOWN]:
+            width, height = self._size['width'], self._size["height"]
+        else:
+            height, width = self._size['width'], self._size["height"]
+
+        # check if not get screensize when touching
+        if not width or not height:
+            # use snapshot to get current resuluton
+            self.snapshot()
+
+        x, y = XYTransformer.up_2_ori(
+            (x, y),
+            (width, height),
+            now_orientation
+        )
+        return x, y
+
+    def _check_orientation_change(self):
+        pass
 
 if __name__ == "__main__":
     start = time.time()
     ios = IOS()
-    # ios.snapshot("aaa2.png")
+
+    ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))
-    ios.stop_app(111)
+
     # ios.start_app("com.tencent.xin")
+    ios.home()
+    ios.start_app('com.apple.mobilesafari')
     ios.touch((88, 88))
-    # ios.stop_app(111)
-    # ios.text("abc")
-    # ios.home()
-    # ios.stop_app()
-    # ios.swipe((100, 100), (800, 100))
+    ios.stop_app('com.apple.mobilesafari')
+    ios.swipe((100, 100), (800, 100))
+
+    print(ios.device_status())
+    print(ios.get_ip_address())

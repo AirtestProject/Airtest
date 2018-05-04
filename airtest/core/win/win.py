@@ -99,6 +99,10 @@ class Windows(Device):
             if self.app:
                 rect = self.get_rect()
                 screen = aircv.crop_image(screen, [rect.left, rect.top, rect.right, rect.bottom])
+        if not screen.any():
+            if self.app:
+                rect = self.get_rect()
+                screen = aircv.crop_image(screenshot(filename), [rect.left, rect.top, rect.right, rect.bottom])
         if self._focus_rect != (0, 0, 0, 0):
             height, width = screen.shape[:2]
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
@@ -162,7 +166,9 @@ class Windows(Device):
         coords = self._action_pos(pos)
         print(coords)
 
-        for _ in range(times):
+        if times > 1:
+            self.mouse.double_click(coords=coords)
+        else:
             self.mouse.press(button=button, coords=coords)
             time.sleep(duration)
             self.mouse.release(button=button, coords=coords)

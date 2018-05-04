@@ -48,11 +48,11 @@ class Recorder(Yosemite):
                                  (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE))
         nbsp = NonBlockingStreamReader(p.stdout)
         while True:
-            line = nbsp.readline(timeout=5).strip()
+            line = nbsp.readline(timeout=5)
+            if line is None:
+                raise RuntimeError("start recording error")
             if six.PY3:
                 line = line.decode("utf-8")
-            if line is None:
-                raise RuntimeError("recording setup error")
             m = re.match("start result: Record start success! File path:(.*\.mp4)", line.strip())
             if m:
                 output = m.group(1)
@@ -83,14 +83,15 @@ class Recorder(Yosemite):
         if is_interrupted:
             return
         for line in p.stdout.readlines():
-            line = line.strip()
+            if line is None:
+                break
             if six.PY3:
                 line = line.decode("utf-8")
-            m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line)
+            m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
             if m:
                 self.recording_file = m.group(1)
                 self.adb.pull(self.recording_file, output)
-                return
+                return True
         raise AirtestError("start_recording first")
 
     @on_method_ready('install_or_upgrade')
