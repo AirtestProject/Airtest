@@ -15,7 +15,7 @@ Airtest
 Getting Started
 ---------------
 
-Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support will be available in the near future. [`Roadmap`_]
+Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps. Windows and Android are currently supported; iOS support is in `open beta`_ now! [`Roadmap`_]
 
 Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
@@ -131,3 +131,5 @@ Thanks for all these great works that make this project better.
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
 .. _Roadmap: https://github.com/AirtestProject/Airtest/issues/33
+.. _open beta: https://github.com/AirtestProject/iOS-Tagent
+
