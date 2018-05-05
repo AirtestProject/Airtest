@@ -58,7 +58,6 @@ class WebChrome(Chrome):
         y = size['height'] / 2 + location['y']
         jpg_file_name = str(int(time.time())) + '.jpg'
         jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
-        print "this is jpg: ", jpg_path
         self.save_screenshot(jpg_path)
         extra_data ={"args": [[x, y]], "screen": jpg_file_name}
         log_in_func(extra_data)
@@ -68,7 +67,6 @@ class Element(WebElement):
 
     def __init__(self, _obj):
         super(Element, self).__init__(parent=_obj._parent, id_=_obj._id, w3c=_obj._w3c)
-        # print "Element here:", super(Element, self).rect
 
     @logwrap
     def click(self):
