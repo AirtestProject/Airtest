@@ -7,11 +7,14 @@ from airtest.core.settings import Settings as ST
 from airtest.core.helper import logwrap, log_in_func
 import os
 import time
+import sys
 
 
 class WebChrome(Chrome):
 
     def __init__(self, chrome_options=None):
+        if "darwin" in sys.platform:
+            os.environ['path'] += "/Applications/AirtestIDE.app/Contents"
         super(WebChrome, self).__init__(chrome_options=chrome_options)
 
     def find_element_by_xpath(self, xpath):
