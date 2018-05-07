@@ -248,10 +248,17 @@ def _two_good_points(pts_sch1, pts_sch2, pts_src1, pts_src2, im_search, im_sourc
 
 def _find_homography(sch_pts, src_pts):
     """多组特征点对时，求取单向性矩阵."""
-    M, mask = cv2.findHomography(sch_pts, src_pts, cv2.RANSAC, 5.0)
-    if mask is None:
-        raise HomographyError("In findHomography(), find no mask...")
-    return M, mask
+    try:
+        M, mask = cv2.findHomography(sch_pts, src_pts, cv2.RANSAC, 5.0)
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise HomographyError("OpenCV error in _find_homography()...")
+    else:
+        if mask is None:
+            raise HomographyError("In _find_homography(), find no mask...")
+        else:
+            return M, mask
 
 
 def _target_error_check(w_h_range):
