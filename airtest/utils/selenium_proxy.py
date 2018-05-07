@@ -14,7 +14,7 @@ class WebChrome(Chrome):
 
     def __init__(self, chrome_options=None):
         if "darwin" in sys.platform:
-            os.environ['path'] += "/Applications/AirtestIDE.app/Contents"
+            os.environ['PATH'] += "/Applications/AirtestIDE.app/Contents"
         super(WebChrome, self).__init__(chrome_options=chrome_options)
 
     def find_element_by_xpath(self, xpath):
