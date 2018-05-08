@@ -7,6 +7,7 @@ from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
 from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from wda import WDAError
 
 LOGGING = get_logger(__name__)
 
@@ -18,6 +19,7 @@ class RotationWatcher(object):
 
     def __init__(self, iosHandle):
         self.iosHandle = iosHandle
+        self.session = iosHandle.session
         self.ow_callback = []
         self.roundProcess = None
         self._stopEvent = threading.Event()
@@ -59,7 +61,15 @@ class RotationWatcher(object):
         self._install_and_setup()
 
         def _refresh_by_ow():
-            return self.iosHandle.orientation
+            try:
+                return self.session.orientation
+            except WDAError as err:
+                if err.status == 6:
+                    self.iosHandle._fetchNewSession()
+                    self.session = self.iosHandle.session
+                    return self.session.orientation
+                else:
+                    return self.last_result
 
         def _run():
             while not self._stopEvent.isSet():
