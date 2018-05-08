@@ -31,7 +31,7 @@ DEFAULT_ADDR = "http://localhost:8100/"
 
 # retry when saved session failed
 def retry_session(func):
-    def wrapper(self,*args, **kwargs):
+    def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
         except WDAError as err:
