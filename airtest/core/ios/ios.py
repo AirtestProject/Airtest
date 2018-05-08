@@ -23,11 +23,25 @@ from airtest.utils.logger import get_logger
 
 # roatations of ios
 from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from wda import WDAError
 
 
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
+# retry when saved session failed
+def retry_session(func):
+    def wrapper(self,*args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except WDAError as err:
+            # 6 : Session does not exist
+            if err.status == 6:
+                self._fetchNewSession()
+                return func(self, *args, **kwargs)
+            else:
+                raise err
+    return wrapper
 
 class IOS(Device):
     """ios client
@@ -58,7 +72,7 @@ class IOS(Device):
         self.defaultSession = None
 
         # start up RotationWatcher with default session
-        self.rotation_watcher = RotationWatcher(self.session)
+        self.rotation_watcher = RotationWatcher(self)
 
         # fake minitouch to simulate swipe
         self.minitouch = fakeMiniTouch(self)
@@ -69,6 +83,10 @@ class IOS(Device):
             self.defaultSession = self.driver.session()
         return self.defaultSession
 
+    def _fetchNewSession(self):
+        self.defaultSession = self.driver.session()
+
+    @retry_session
     def window_size(self):
         """
             return window size
@@ -78,6 +96,7 @@ class IOS(Device):
         return self.session.window_size()
 
     @property
+    @retry_session
     def orientation(self):
         """
             return device oritantation status
@@ -178,6 +197,7 @@ class IOS(Device):
 
         return screen
 
+    @retry_session
     def touch(self, pos, times=1, duration=0.01):
         # trans pos of click
         pos = self._touch_point_by_orientation(pos)
@@ -205,6 +225,7 @@ class IOS(Device):
             raise NotImplementedError
         self.home()
 
+    @retry_session
     def text(self, text, enter=True):
         """bug in wda for now"""
         if enter:
@@ -221,6 +242,7 @@ class IOS(Device):
         raise NotImplementedError
 
     def start_app(self, package, activity=None):
+        self.defaultSession = None
         self.driver.session(package)
 
     def stop_app(self, package):
