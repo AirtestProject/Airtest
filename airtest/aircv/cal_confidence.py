@@ -32,5 +32,5 @@ def cal_rgb_confidence(img_src_rgb, img_sch_rgb):
 
     # 加权可信度
     weighted_confidence = bgr_confidence[0] * weight[0] + bgr_confidence[1] * weight[1] + bgr_confidence[2] * weight[2]
-    # 只要任何一通道的可信度低于阈值,均视为识别失败, 所以也返回每个通道的
-    return weighted_confidence, bgr_confidence
+
+    return weighted_confidence
