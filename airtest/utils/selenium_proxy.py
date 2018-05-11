@@ -53,7 +53,6 @@ class WebChrome(Chrome):
     def gen_screen_log(self, element):
         size = element.size
         location = element.location
-        print "selenium size:", size, location
         x = size['width'] / 2 + location['x']
         y = size['height'] / 2 + location['y']
         jpg_file_name = str(int(time.time())) + '.jpg'
