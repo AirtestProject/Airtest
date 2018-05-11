@@ -53,13 +53,15 @@ class WebChrome(Chrome):
     def gen_screen_log(self, element):
         size = element.size
         location = element.location
-
+        print "selenium size:", size, location
         x = size['width'] / 2 + location['x']
         y = size['height'] / 2 + location['y']
         jpg_file_name = str(int(time.time())) + '.jpg'
         jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
         print "this is jpg: ", jpg_path
         self.save_screenshot(jpg_path)
+        if "darwin" in sys.platform:
+            x, y = x*2, y*2
         extra_data ={"args": [[x, y]], "screen": jpg_file_name}
         log_in_func(extra_data)
 
