@@ -10,7 +10,7 @@ Airtest
 快速开始
 --------
 
-Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。 [`路线图`_]
+Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持已经发布 `Beta版`_ [`路线图`_]
 
 Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化测试。 测试脚本运行后可以自动生成详细的HTML测试报告，让你迅速定位失败的测试点。
 
@@ -122,3 +122,4 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 .. _atx: https://github.com/NetEaseGame/ATX
 .. _pywinauto: https://github.com/pywinauto/pywinauto
 .. _路线图: https://github.com/AirtestProject/Airtest/issues/33
+.. _Beta版: https://github.com/AirtestProject/iOS-Tagent
