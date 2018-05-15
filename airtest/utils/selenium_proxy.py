@@ -56,13 +56,16 @@ class WebChrome(Chrome):
         x = size['width'] / 2 + location['x']
         y = size['height'] / 2 + location['y']
         jpg_file_name = str(int(time.time())) + '.jpg'
-        jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
-        self.save_screenshot(jpg_path)
-        if "darwin" in sys.platform:
-            x, y = x*2, y*2
-        extra_data ={"args": [[x, y]], "screen": jpg_file_name}
-        log_in_func(extra_data)
-
+        try:
+            jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
+            self.save_screenshot(jpg_path)
+            if "darwin" in sys.platform:
+                x, y = x * 2, y * 2
+            extra_data ={"args": [[x, y]], "screen": jpg_file_name}
+            log_in_func(extra_data)
+        except Exception:
+            import traceback
+            traceback.print_exc()
 
 class Element(WebElement):
 
@@ -75,9 +78,12 @@ class Element(WebElement):
         time.sleep(0.5)
 
     @logwrap
-    def send_keys(self, text):
+    def send_keys(self, text, keyborad=None):
         log_in_func({"func_args": text})
-        super(Element, self).send_keys(text)
+        if keyborad:
+            super(Element, self).send_keys(text, keyborad)
+        else:
+            super(Element, self).send_keys(text)
         time.sleep(0.5)
 
     @logwrap
