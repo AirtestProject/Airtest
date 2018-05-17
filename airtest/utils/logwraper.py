@@ -49,7 +49,11 @@ class AirtestLogger(object):
             depth = 1
 
         if self.logfd:
-            self.logfd.write(json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper) + '\n')
+            try:
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper)
+            except UnicodeDecodeError:
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': repr(data).decode(sys.getfilesystemencoding())}, default=self._dumper)
+            self.logfd.write(log_data + '\n')
             self.logfd.flush()
 
     def handle_stacked_log(self):
