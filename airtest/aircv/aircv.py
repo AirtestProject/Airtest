@@ -25,9 +25,11 @@ def imread(filename):
 
 def imwrite(filename, img):
     """写出图片到本地路径"""
-    if not PY3:
+    if PY3:
+        cv2.imencode('.jpg', img)[1].tofile(filename)
+    else:
         filename = filename.encode(sys.getfilesystemencoding())
-    cv2.imwrite(filename, img)
+        cv2.imwrite(filename, img)
 
 
 def show(img, title="show_img", test_flag=False):
