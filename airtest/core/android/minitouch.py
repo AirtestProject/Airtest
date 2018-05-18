@@ -454,6 +454,7 @@ class Minitouch(object):
             self.client.close()
         if self.server_proc:
             self.server_proc.kill()
+            self.adb.close_proc_pipe(self.server_proc)
 
 
 class MotionEvent(object):
@@ -462,6 +463,7 @@ class MotionEvent(object):
     """
     def getcmd(self, transform=None):
         raise NotImplementedError
+
 
 class DownEvent(MotionEvent):
     def __init__(self, coordinates, contact=0, pressure=50):

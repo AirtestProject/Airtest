@@ -50,6 +50,7 @@ class RotationWatcher(object):
     def teardown(self):
         if self.ow_proc:
             self.ow_proc.kill()
+            self.adb.close_proc_pipe(self.ow_proc)
 
     def start(self):
         """

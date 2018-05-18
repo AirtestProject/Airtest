@@ -86,6 +86,7 @@ class Javacap(Yosemite):
         nbsp.kill()
         proc.kill()
         self.adb.remove_forward("tcp:%s" % localport)
+        self.adb.close_proc_pipe(proc)
 
     def get_frame_from_stream(self):
         """

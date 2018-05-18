@@ -60,6 +60,8 @@ class Recorder(Yosemite):
                 self.recording_file = output
                 return True
 
+        self.adb.close_proc_pipe(self.recording_proc)
+
     @on_method_ready('install_or_upgrade')
     def stop_recording(self, output="screen.mp4", is_interrupted=False):
         """
@@ -92,6 +94,9 @@ class Recorder(Yosemite):
                 self.recording_file = m.group(1)
                 self.adb.pull(self.recording_file, output)
                 return True
+
+        self.adb.close_proc_pipe(p)
+
         raise AirtestError("start_recording first")
 
     @on_method_ready('install_or_upgrade')
