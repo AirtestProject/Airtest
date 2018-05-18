@@ -177,21 +177,7 @@ class ADB(object):
                 raise DeviceConnectionError(stderr)
             else:
                 raise AdbError(stdout, stderr)
-
-        self.close_proc_pipe(proc)
-
         return stdout
-
-    def close_proc_pipe(self, proc):
-        """close stdin/stdout/stderr of subprocess.Popen."""
-
-        def close_pipe(pipe):
-            if pipe:
-                pipe.close()
-
-        close_pipe(proc.stdin)
-        close_pipe(proc.stdout)
-        close_pipe(proc.stderr)
 
     def devices(self, state=None):
         """
@@ -268,8 +254,6 @@ class ADB(object):
         else:
             raise AdbError(stdout, stderr)
 
-        self.close_proc_pipe(proc)
-
     def wait_for_device(self, timeout=5):
         """
         Perform `adb wait-for-device` command
@@ -292,8 +276,6 @@ class ADB(object):
             timer.cancel()
         else:
             raise DeviceConnectionError("device not ready")
-
-        self.close_proc_pipe(proc)
 
     def start_shell(self, cmds):
         """
@@ -708,9 +690,6 @@ class ADB(object):
                 yield line
         nbsp.kill()
         logcat_proc.kill()
-
-        self.close_proc_pipe(logcat_proc)
-
         return
 
     def exists_file(self, filepath):
@@ -739,8 +718,7 @@ class ADB(object):
             None
         """
         for local in self._forward_local_using:
-            proc = self.start_cmd(["forward", "--remove", local])
-            self.close_proc_pipe(proc)
+            self.start_cmd(["forward", "--remove", local])
 
         self._forward_local_using = []
 

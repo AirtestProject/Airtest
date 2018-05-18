@@ -259,7 +259,6 @@ class Minicap(object):
         nbsp.kill()
         proc.kill()
         self.adb.remove_forward("tcp:%s" % localport)
-        self.adb.close_proc_pipe(proc)
 
     def _setup_stream_server(self, lazy=False):
         """
