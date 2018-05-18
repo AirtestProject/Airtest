@@ -205,8 +205,11 @@ class LogToHtml(object):
                 # ret 为false表示图片没有找到
                 step['exists_ret'] = False if step[1].get('ret', False) is False else True
 
-        elif step['type'] in ['text', 'sleep', 'keyevent']:
+        elif step['type'] in ['text', 'keyevent']:
             step[step['type']] = step[1]['args'][0]
+
+        elif step['type'] == 'sleep':
+            step[step['type']] = step[1]['args'][0] if len(step[1]['args']) > 0 else 1
 
         elif step['type'] in ['assert_equal', 'assert_not_equal']:
             args = step[1]["args"]

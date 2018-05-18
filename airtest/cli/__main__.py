@@ -14,6 +14,8 @@ def main(argv=None):
     elif args.action == "run":
         from airtest.cli.runner import run_script
         run_script(args)
+    else:
+        ap.print_help()
 
 
 if __name__ == '__main__':
