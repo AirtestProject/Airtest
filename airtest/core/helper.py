@@ -85,7 +85,17 @@ def device_platform():
 
 
 def using(path):
-    sys.path.append(path)
+    if not os.path.isabs(path):
+        if os.environ.get("PROJECT_ROOT") and os.path.exists(os.path.join(os.environ.get("PROJECT_ROOT"), path)):
+            path = os.path.join(os.environ.get("PROJECT_ROOT"), path)
+        else:
+            for basedir in G.BASEDIR:
+                if os.path.exists(os.path.join(os.path.dirname(basedir), path)):
+                    path = os.path.join(os.path.dirname(basedir), path)
+                    break
+    print("using path: ", path)
+    if path not in sys.path:
+        sys.path.append(path)
     G.BASEDIR.append(path)
 
 
