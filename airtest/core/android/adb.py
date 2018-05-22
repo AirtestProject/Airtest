@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 import os
 import platform
@@ -178,6 +179,17 @@ class ADB(object):
             else:
                 raise AdbError(stdout, stderr)
         return stdout
+
+    def close_proc_pipe(self, proc):
+        """close stdin/stdout/stderr of subprocess.Popen."""
+
+        def close_pipe(pipe):
+            if pipe:
+                pipe.close()
+
+        close_pipe(proc.stdin)
+        close_pipe(proc.stdout)
+        close_pipe(proc.stderr)
 
     def devices(self, state=None):
         """
