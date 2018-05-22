@@ -85,7 +85,7 @@ class AirtestCase(unittest.TestCase):
         self.scope["__file__"] = pyfilepath
         with open(pyfilepath, 'r', encoding="utf8") as f:
             code = f.read()
-        exec(compile(code.encode("utf-8"), pyfilepath.encode(sys.getfilesystemencoding()), 'exec')) in self.scope
+        exec(compile(code.encode("utf-8"), pyfilepath.encode(sys.getfilesystemencoding()), 'exec'), self.scope)
 
     @classmethod
     def exec_other_script(cls, scriptpath):
@@ -121,7 +121,7 @@ class AirtestCase(unittest.TestCase):
             code = f.read()
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
-        exec(compile(code.encode("utf8"), pyfilepath, 'exec')) in cls.scope
+        exec(compile(code.encode("utf8"), pyfilepath, 'exec'), cls.scope)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):

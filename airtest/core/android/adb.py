@@ -722,6 +722,21 @@ class ADB(object):
         else:
             return not("No such file or directory" in out)
 
+    def file_size(self, filepath):
+        """
+        Get the file size
+        
+        Args:
+            filepath: path to the file
+
+        Returns:
+            The file size
+        """
+        out = self.shell(["ls", "-l", filepath])
+        file_size = int(out.split()[3])
+        return file_size
+
+
     def _cleanup_forwards(self):
         """
         Remove the local forward ports
