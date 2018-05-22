@@ -52,7 +52,13 @@ class IOS(Device):
 
     def __init__(self, addr=DEFAULT_ADDR):
         super(IOS, self).__init__()
-        self.addr = addr
+
+        # if none or empty, use default addr
+        self.addr = addr or DEFAULT_ADDR
+
+        # fit wda format, make url start with http://
+        if not self.addr.startswith("http://"):
+            self.addr = "http://" + addr
 
         """here now use these supported cap touch and ime method"""
         self.cap_method = CAP_METHOD.WDACAP
@@ -63,7 +69,7 @@ class IOS(Device):
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
         wda.DEBUG = False
-        self.driver = wda.Client(addr)
+        self.driver = wda.Client(self.addr)
 
         # record device's width
         self._size = {'width': None, 'height': None}
