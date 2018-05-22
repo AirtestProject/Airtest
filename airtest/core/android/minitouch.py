@@ -72,9 +72,6 @@ class Minitouch(object):
             None
 
         """
-        if self.adb.exists_file('/data/local/tmp/minitouch'):
-            LOGGING.debug("install_minitouch skipped")
-            return
 
         abi = self.adb.getprop("ro.product.cpu.abi")
         sdk = int(self.adb.getprop("ro.build.version.sdk"))
@@ -86,6 +83,19 @@ class Minitouch(object):
 
         device_dir = "/data/local/tmp"
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
+
+        if self.adb.exists_file('/data/local/tmp/minitouch'):
+            local_minitouch_size = int(os.path.getsize(path))
+            try:
+                file_size = self.adb.file_size('/data/local/tmp/minitouch')
+            except Exception:
+                self.uninstall()
+            else:
+                if local_minitouch_size == file_size:
+                    LOGGING.debug("install_minitouch skipped")
+                    return
+                self.uninstall()
+
         self.adb.push(path, "%s/minitouch" % device_dir)
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
         LOGGING.info("install_minitouch finished")
