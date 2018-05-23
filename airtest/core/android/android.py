@@ -29,10 +29,10 @@ class Android(Device):
                  ):
         super(Android, self).__init__()
         self.serialno = serialno or ADB().devices(state="device")[0][0]
-        self.cap_method = cap_method
-        self.touch_method = touch_method
-        self.ime_method = ime_method
-        self.ori_method = ori_method
+        self.cap_method = cap_method.upper()
+        self.touch_method = touch_method.upper()
+        self.ime_method = ime_method.upper()
+        self.ori_method = ori_method.upper()
         # init adb
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
