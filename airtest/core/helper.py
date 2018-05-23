@@ -80,8 +80,10 @@ def logwrap(f):
     return Logwrap(f, G.LOGGER)
 
 
-def device_platform():
-    return G.DEVICE.__class__.__name__
+def device_platform(device=None):
+    if not device:
+        device = G.DEVICE
+    return device.__class__.__name__
 
 
 def using(path):
