@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 import os
 import platform
@@ -178,6 +179,17 @@ class ADB(object):
             else:
                 raise AdbError(stdout, stderr)
         return stdout
+
+    def close_proc_pipe(self, proc):
+        """close stdin/stdout/stderr of subprocess.Popen."""
+
+        def close_pipe(pipe):
+            if pipe:
+                pipe.close()
+
+        close_pipe(proc.stdin)
+        close_pipe(proc.stdout)
+        close_pipe(proc.stderr)
 
     def devices(self, state=None):
         """
@@ -709,6 +721,21 @@ class ADB(object):
             return False
         else:
             return not("No such file or directory" in out)
+
+    def file_size(self, filepath):
+        """
+        Get the file size
+        
+        Args:
+            filepath: path to the file
+
+        Returns:
+            The file size
+        """
+        out = self.shell(["ls", "-l", filepath])
+        file_size = int(out.split()[3])
+        return file_size
+
 
     def _cleanup_forwards(self):
         """
