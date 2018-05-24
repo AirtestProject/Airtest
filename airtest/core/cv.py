@@ -105,7 +105,7 @@ class Template(object):
         if self._filepath:
             return self._filepath
         for dirname in G.BASEDIR:
-            filepath =os.path.join(dirname, self.filename)
+            filepath = os.path.join(dirname, self.filename)
             if os.path.isfile(filepath):
                 self._filepath = filepath
                 return self._filepath
@@ -174,8 +174,8 @@ class Template(object):
         if not self.record_pos:
             return None
         # calc predict area in screen
-        screen_resolution = aircv.get_resolution(screen)
-        xmin, ymin, xmax, ymax = Predictor.get_predict_area(self.record_pos, screen_resolution)
+        image_wh, screen_resolution = aircv.get_resolution(image), aircv.get_resolution(screen)
+        xmin, ymin, xmax, ymax = Predictor.get_predict_area(self.record_pos, image_wh, self.resolution, screen_resolution)
         # crop predict image from screen
         predict_area = aircv.crop_image(screen, (xmin, ymin, xmax, ymax))
         # aircv.show(predict_area)
@@ -217,12 +217,11 @@ class Predictor(object):
     this class predicts the press_point and the area to search im_search.
     """
 
-    RADIUS_X = 250
-    RADIUS_Y = 250
+    DEVIATION = 100
 
     @staticmethod
     def count_record_pos(pos, resolution):
-        """计算坐标对应的中点偏移值相对于分辨率的百分比"""
+        """计算坐标对应的中点偏移值相对于分辨率的百分比."""
         _w, _h = resolution
         # 都按宽度缩放，针对G18的实验结论
         delta_x = (pos[0] - _w * 0.5) / _w
@@ -233,7 +232,7 @@ class Predictor(object):
 
     @classmethod
     def get_predict_point(cls, record_pos, screen_resolution):
-        """预测缩放后的点击位置点"""
+        """预测缩放后的点击位置点."""
         delta_x, delta_y = record_pos
         _w, _h = screen_resolution
         target_x = delta_x * _w + _w * 0.5
@@ -241,7 +240,14 @@ class Predictor(object):
         return target_x, target_y
 
     @classmethod
-    def get_predict_area(cls, record_pos, screen_resolution):
+    def get_predict_area(cls, record_pos, image_wh, image_resolution=(), screen_resolution=()):
+        """Get predicted area in screen."""
         x, y = cls.get_predict_point(record_pos, screen_resolution)
-        area = (x - cls.RADIUS_X, y - cls.RADIUS_Y, x + cls.RADIUS_X, y + cls.RADIUS_Y)
+        # The prediction area should depend on the image size:
+        if image_resolution:
+            predict_x_radius = int(image_wh[0] * screen_resolution[0] / (2 * image_resolution[0])) + cls.DEVIATION
+            predict_y_radius = int(image_wh[1] * screen_resolution[1] / (2 * image_resolution[1])) + cls.DEVIATION
+        else:
+            predict_x_radius, predict_y_radius = int(image_wh[0] / 2) + cls.DEVIATION, int(image_wh[1] / 2) + cls.DEVIATION
+        area = (x - predict_x_radius, y - predict_y_radius, x + predict_x_radius, y + predict_y_radius)
         return area
