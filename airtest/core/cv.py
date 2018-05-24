@@ -185,6 +185,9 @@ class Template(object):
         if not ret_in_area:
             return None
         ret = deepcopy(ret_in_area)
+        if "rectangle" in ret:
+            for idx, item in enumerate(ret["rectangle"]):
+                ret["rectangle"][idx] = (item[0] + xmin, item[1] + ymin)
         ret["result"] = (ret_in_area["result"][0] + xmin, ret_in_area["result"][1] + ymin)
         return ret
 

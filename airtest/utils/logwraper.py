@@ -1,4 +1,5 @@
 # _*_ coding:UTF-8 _*_
+
 import os
 import sys
 import json
@@ -76,7 +77,7 @@ def Logwrap(f, logger):
         try:
             res = f(*args, **kwargs)
         except Exception as e:
-            data = {"traceback": traceback.format_exc(), "time_used": time.time() - start, "error_str": str(e)}
+            data = {"traceback": traceback.format_exc(), "time_used": time.time() - start, "error_str": repr(e).encode(sys.getfilesystemencoding())}
             fndata.update(data)
             fndata.update(LOGGER.extra_log)
             LOGGER.log("error", fndata)
