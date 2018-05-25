@@ -70,6 +70,10 @@ class RotationWatcher(object):
                     return self.session.orientation
                 else:
                     return self.last_result
+            except ValueError as err:
+                import traceback
+                print(traceback.format_exc())
+                return self.last_result
 
         def _run():
             while not self._stopEvent.isSet():
