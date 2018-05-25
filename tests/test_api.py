@@ -91,6 +91,9 @@ class TestMainOnAndroid(unittest.TestCase):
     def test_swipe(self):
         swipe((0, 0), (10, 10))
 
+    def test_swipe_two_fingers(self):
+        swipe((0, 0), (10, 10), fingers=2)
+
     def test_pinch(self):
         pinch()
 
