@@ -46,7 +46,7 @@ class TestMainOnAndroid(unittest.TestCase):
 
     def test_install(self):
         if PKG in self.dev.list_app():
-            uninstall(APK)
+            uninstall(PKG)
         install(APK)
         self.assertIn(PKG, self.dev.list_app())
 
