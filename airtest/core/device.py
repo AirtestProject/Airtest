@@ -30,7 +30,7 @@ class Device(with_metaclass(MetaDevice, object)):
     def swipe(self, t1, t2, **kwargs):
         raise NotImplementedError
 
-    def swipe_two_fingers(self, t1, t2, **kwargs):
+    def two_finger_swipe(self, t1, t2, **kwargs):
         raise NotImplementedError
 
     def keyevent(self, key, **kwargs):

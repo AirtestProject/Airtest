@@ -292,7 +292,7 @@ def swipe(v1, v2=None, vector=None, fingers=1, **kwargs):
     if fingers == 1:
         G.DEVICE.swipe(pos1, pos2, **kwargs)
     elif fingers == 2:
-        G.DEVICE.swipe_two_fingers(pos1, pos2, **kwargs)
+        G.DEVICE.two_finger_swipe(pos1, pos2, **kwargs)
     else:
         raise Exception("param fingers should be 1 or 2")
     delay_after_operation()

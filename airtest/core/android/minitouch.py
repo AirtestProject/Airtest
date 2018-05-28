@@ -234,9 +234,9 @@ class Minitouch(object):
         self.handle("u 0\nc\n")
 
     @on_method_ready('install_and_setup')
-    def swipe_two_fingers(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
+    def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
-        Perform two-fingers swipe action
+        Perform two finger swipe action
 
         minitouch protocol example::
 

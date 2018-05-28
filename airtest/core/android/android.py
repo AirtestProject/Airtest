@@ -310,9 +310,9 @@ class Android(Device):
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
 
-    def swipe_two_fingers(self, p1, p2, duration=0.5, steps=5):
+    def two_finger_swipe(self, p1, p2, duration=0.5, steps=5):
         """
-        Perform two-fingers swipe event on the device
+        Perform two finger swipe event on the device
 
         Args:
             p1: start point
@@ -327,7 +327,7 @@ class Android(Device):
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
             p1 = self._touch_point_by_orientation(p1)
             p2 = self._touch_point_by_orientation(p2)
-            self.minitouch.swipe_two_fingers(p1, p2, duration=duration, steps=steps)
+            self.minitouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
         else:
             raise NotImplementedError
     

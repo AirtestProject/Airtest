@@ -35,8 +35,8 @@ class TestMiniTouch(TestMiniTouchBase):
     def test_swipe(self):
         self.minitouch.swipe((100, 100), (200, 200))
 
-    def test_swipe_two_fingers(self):
-        self.minitouch.swipe_two_fingers((100, 100), (200, 200))
+    def test_two_finger_swipe(self):
+        self.minitouch.two_finger_swipe((100, 100), (200, 200))
 
     def test_pinch(self):
         self.minitouch.pinch()
