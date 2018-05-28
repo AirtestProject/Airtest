@@ -156,8 +156,9 @@ class Minicap(object):
             self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
             ensure_unicode=False,
         )
-        jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1]
-        jpg_data = jpg_data.replace(self.adb.line_breaker, b"\n")
+        line_breaker_bytes = self.adb.line_breaker.encode("ascii")
+        jpg_data = raw_data.split(b"for JPG encoder" + line_breaker_bytes)[-1]
+        jpg_data = jpg_data.replace(line_breaker_bytes, b"\n")
         return jpg_data
 
     def _get_params(self, projection=None):

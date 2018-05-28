@@ -762,7 +762,7 @@ class ADB(object):
             if self.sdk_version >= SDK_VERISON_NEW:
                 line_breaker = os.linesep
             else:
-                line_breaker = b'\r' + os.linesep
+                line_breaker = '\r' + os.linesep
             self._line_breaker = line_breaker
         return self._line_breaker
 

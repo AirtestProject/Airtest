@@ -68,7 +68,6 @@ _shutdown = threading._shutdown
 
 
 def exitfunc():
-    print("exiting.......")
     _cleanup()
     _shutdown()
 
