@@ -249,7 +249,7 @@ def touch(v, **kwargs):
 
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
-def swipe(v1, v2=None, vector=None, fingers=1, **kwargs):
+def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Perform the swipe action on the device screen.
 
@@ -264,7 +264,6 @@ def swipe(v1, v2=None, vector=None, fingers=1, **kwargs):
                either a Template instance or absolute coordinates (x, y)
     :param vector: a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of
                    screen e.g.(0.5, 0.5)
-    :param fingers: the number of fingers. 1 or 2.
     :param **kwargs: platform specific `kwargs`, please refer to corresponding docs
     :raise Exception: general exception when not enough parameters to perform swap action have been provided
     :return: None
@@ -289,12 +288,7 @@ def swipe(v1, v2=None, vector=None, fingers=1, **kwargs):
     else:
         raise Exception("no enough params for swipe")
 
-    if fingers == 1:
-        G.DEVICE.swipe(pos1, pos2, **kwargs)
-    elif fingers == 2:
-        G.DEVICE.two_finger_swipe(pos1, pos2, **kwargs)
-    else:
-        raise Exception("param fingers should be 1 or 2")
+    G.DEVICE.swipe(pos1, pos2, **kwargs)
     delay_after_operation()
 
 

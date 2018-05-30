@@ -109,13 +109,14 @@ class TestAndroid(unittest.TestCase):
         for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
             self.android.touch_method = i
             self.android.swipe((100, 100), (300, 300))
-
-    def test_two_finger_swipe(self):
+            self.android.swipe((100, 100), (300, 300), fingers=1)
+            self.android.swipe((100, 100), (300, 300), fingers=2)        
         self.android.touch_method = TOUCH_METHOD.ADBTOUCH
-        self.assertRaises(NotImplementedError, lambda: self.android.two_finger_swipe((100, 100), (300, 300)))
+        self.android.swipe((100, 100), (300, 300), fingers=3)
         self.android.touch_method = TOUCH_METHOD.MINITOUCH
-        self.android.two_finger_swipe((100, 100), (300, 300))
-    
+        with self.assertRaises(Exception):
+            self.android.swipe((100, 100), (300, 300), fingers=3)
+
     def test_recording(self):
         if self.android.sdk_version >= 19:
             filepath = "screen.mp4"

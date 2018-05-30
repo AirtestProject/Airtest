@@ -90,9 +90,10 @@ class TestMainOnAndroid(unittest.TestCase):
 
     def test_swipe(self):
         swipe((0, 0), (10, 10))
-
-    def test_two_finger_swipe(self):
+        swipe((0, 0), (10, 10), fingers=1)
         swipe((0, 0), (10, 10), fingers=2)
+        with self.assertRaises(Exception):
+            swipe((0, 0), (10, 10), fingers=3)
 
     def test_pinch(self):
         pinch()

@@ -288,7 +288,7 @@ class Android(Device):
             else:
                 self.adb.touch(pos)
 
-    def swipe(self, p1, p2, duration=0.5, steps=5):
+    def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
         Perform swipe event on the device
 
@@ -297,6 +297,7 @@ class Android(Device):
             p2: end point
             duration: how long to swipe the screen, default 0.5
             steps: how big is the swipe step, default 5
+            fingers: the number of fingers. 1 or 2.
 
         Returns:
             None
@@ -305,32 +306,16 @@ class Android(Device):
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
             p1 = self._touch_point_by_orientation(p1)
             p2 = self._touch_point_by_orientation(p2)
-            self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
+            if fingers == 1:
+                self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
+            elif fingers == 2:
+                self.minitouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
+            else:
+                raise Exception("param fingers should be 1 or 2")
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
 
-    def two_finger_swipe(self, p1, p2, duration=0.5, steps=5):
-        """
-        Perform two finger swipe event on the device
-
-        Args:
-            p1: start point
-            p2: end point
-            duration: how long to swipe the screen, default 0.5
-            steps: how big is the swipe step, default 5
-
-        Returns:
-            None
-
-        """
-        if self.touch_method == TOUCH_METHOD.MINITOUCH:
-            p1 = self._touch_point_by_orientation(p1)
-            p2 = self._touch_point_by_orientation(p2)
-            self.minitouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
-        else:
-            raise NotImplementedError
-    
     def pinch(self, *args, **kwargs):
         """
         Perform pinch event on the device
