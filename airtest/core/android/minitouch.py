@@ -234,6 +234,69 @@ class Minitouch(object):
         self.handle("u 0\nc\n")
 
     @on_method_ready('install_and_setup')
+    def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
+        """
+        Perform two finger swipe action
+
+        minitouch protocol example::
+
+            d 0 0 0 50
+            d 1 1 0 50
+            c
+            m 0 20 0 50
+            m 1 21 0 50
+            c
+            m 0 40 0 50
+            m 1 41 0 50
+            c
+            m 0 60 0 50
+            m 1 61 0 50
+            c
+            m 0 80 0 50
+            m 1 81 0 50
+            c
+            m 0 100 0 50
+            m 1 101 0 50
+            c
+            u 0
+            u 1
+            c
+        
+        Args:
+            tuple_from_xy: start point
+            tuple_to_xy: end point
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
+
+        Returns:
+            None
+        """
+        from_x, from_y = tuple_from_xy
+        to_x, to_y = tuple_to_xy
+
+        from_x, from_y = self.__transform_xy(from_x, from_y)
+        to_x, to_y = self.__transform_xy(to_x, to_y)
+
+        w = self.display_info['width']
+        shift_x = 1 if from_x + 1 >= w else -1
+        
+        interval = float(duration) / (steps + 1)
+        self.handle("d 0 {:.0f} {:.0f} 50\nd 1 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y, from_x + shift_x, from_y))
+        time.sleep(interval)
+        for i in range(1, steps):
+            self.handle("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(
+                from_x + (to_x - from_x) * i / steps,
+                from_y + (to_y - from_y) * i / steps,
+                from_x + (to_x - from_x) * i / steps + shift_x,
+                from_y + (to_y - from_y) * i / steps,
+            ))
+            time.sleep(interval)
+        for i in range(10):
+            self.handle("m 0 {:.0f} {:.0f} 50\nm 1 {:.0f} {:.0f} 50\nc\n".format(to_x, to_y, to_x + shift_x, to_y))
+        time.sleep(interval)
+        self.handle("u 0\nu 1\nc\n")
+
+    @on_method_ready('install_and_setup')
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
         Perform pinch action
