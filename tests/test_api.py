@@ -46,7 +46,7 @@ class TestMainOnAndroid(unittest.TestCase):
 
     def test_install(self):
         if PKG in self.dev.list_app():
-            uninstall(APK)
+            uninstall(PKG)
         install(APK)
         self.assertIn(PKG, self.dev.list_app())
 
@@ -90,6 +90,10 @@ class TestMainOnAndroid(unittest.TestCase):
 
     def test_swipe(self):
         swipe((0, 0), (10, 10))
+        swipe((0, 0), (10, 10), fingers=1)
+        swipe((0, 0), (10, 10), fingers=2)
+        with self.assertRaises(Exception):
+            swipe((0, 0), (10, 10), fingers=3)
 
     def test_pinch(self):
         pinch()
