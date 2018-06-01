@@ -91,7 +91,7 @@ def using(path):
         abspath = os.path.join(ST.PROJECT_ROOT, path)
         if os.path.exists(abspath):
             path = abspath
-    print("using path: ", path)
+    G.LOGGING.debug("using path: ", path)
     if path not in sys.path:
         sys.path.append(path)
     G.BASEDIR.append(path)

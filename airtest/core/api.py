@@ -19,32 +19,47 @@ Device Setup APIs
 """
 
 
+def init_device(uuid, platform="Android", **kwargs):
+    """
+    Initialize device if not yet, and set as current device.
+
+    :param uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
+    :param platform: Android, IOS or Windows
+    :param kwargs: Optional platform specific keyword args, e.g. `cap_method=JAVACAP` for Android
+    :return: device instance
+    """
+    cls = import_device_cls(platform)
+    dev = cls(uuid, **kwargs)
+    for index, instance in enumerate(G.DEVICE_LIST):
+        if dev.uuid == instance.uuid:
+            G.LOGGING.warn("Device:%s updated %s -> %s" % (dev.uuid, instance, dev))
+            G.DEVICE_LIST[index] = dev
+            break
+    else:
+        G.add_device(dev)
+    return dev
+
+
 def connect_device(uri):
     """
-    Initialize device with uri and set the device as the current one.
+    Initialize device with uri, and set as current device.
 
     :param uri: an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&param2=value2`
     :return: device instance
     :Example:
         * ``android:///`` # local adb device using default params
-        * ``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # remote adb device using custom params
+        * ``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # remote device using custom params
         * ``windows:///`` # local Windows application
         * ``ios:///`` # iOS device
-
-    :platforms: Android, iOS, Windows
     """
     d = urlparse(uri)
     platform = d.scheme
     host = d.netloc
     uuid = d.path.lstrip("/")
     params = dict(parse_qsl(d.query))
-
     if host:
         params["host"] = host.split(":")
-
-    cls = import_device_cls(platform)
-    dev = cls(uuid, **params)
-    G.add_device(dev)
+    dev = init_device(uuid, platform, **params)
     return dev
 
 
@@ -53,7 +68,6 @@ def device():
     Return the current active device.
 
     :return: current device instance
-    :platforms: Android, iOS, Windows
     """
     return G.DEVICE
 
@@ -71,7 +85,7 @@ def set_current(idx):
     dev_dict = {dev.uuid: dev for dev in G.DEVICE_LIST}
     if idx in dev_dict:
         current_dev = dev_dict[idx]
-    elif idx < len(G.DEVICE_LIST):
+    elif isinstance(idx, int) and idx < len(G.DEVICE_LIST):
         current_dev = G.DEVICE_LIST[idx]
     else:
         raise IndexError("device idx not found in: %s or %s" % (
