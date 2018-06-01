@@ -74,7 +74,8 @@ def set_current(idx):
     elif idx < len(G.DEVICE_LIST):
         current_dev = G.DEVICE_LIST[idx]
     else:
-        raise IndexError("device idx not found in: %s or %s" % (idx, len(G.DEVICE_LIST)))
+        raise IndexError("device idx not found in: %s or %s" % (
+            list(dev_dict.keys()), list(range(len(G.DEVICE_LIST)))))
     G.DEVICE = current_dev
 
 
