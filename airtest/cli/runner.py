@@ -26,30 +26,11 @@ class AirtestCase(unittest.TestCase):
     def setUpClass(cls):
         cls.args = args
 
-        # set base dir to find tpl
-        args.script = decode_path(args.script)
-        G.BASEDIR = [args.script]
-
         setup_by_args(args)
-
-        # set log dir
-        if args.log is True:
-            print("save log in %s/log" % args.script)
-            args.log = os.path.join(args.script, "log")
-            set_logdir(args.log)
-        elif args.log:
-            print("save log in '%s'" % args.log)
-            set_logdir(decode_path(args.log))
-        else:
-            print("do not save log")
-
-        # set PROJECT_ROOT for using other script, default to be basedir of current script
-        ST.PROJECT_ROOT = os.environ.get("PROJECT_ROOT") or os.path.dirname(args.script)
 
         # setup script exec scope
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
-
 
     def setUp(self):
         if self.args.log and self.args.recording:
@@ -130,8 +111,22 @@ def setup_by_args(args):
         devices = []
         print("do not connect device")
 
-    for dev in devices:
-        connect_device(dev)
+    # set base dir to find tpl
+    args.script = decode_path(args.script)
+
+    # set log dir
+    if args.log is True:
+        print("save log in %s/log" % args.script)
+        args.log = os.path.join(args.script, "log")
+    elif args.log:
+        print("save log in '%s'" % args.log)
+        args.log = decode_path(args.log)
+    else:
+        print("do not save log")
+
+    # guess project_root to be basedir of current .air path
+    project_root = os.path.dirname(args.script)
+    auto_setup(args.script, devices, args.log, project_root)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):
