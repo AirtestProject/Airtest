@@ -93,19 +93,27 @@ def set_current(idx):
     G.DEVICE = current_dev
 
 
-def auto_setup(filepath):
+def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     """
-    Auto setup G.BASEDIR and try connect android device if not connected to any device.
+    Auto setup running env and try connect android device if not device connected.
     """
-    if filepath:
-        dirname = os.path.dirname(filepath)
-        if dirname not in G.BASEDIR:
-            G.BASEDIR.append(dirname)
-    if not device():
+    if devices:
+        for dev in devices:
+            connect_device(dev)
+    else:
         try:
             connect_device("Android:///")
         except IndexError:
             pass
+    if basedir:
+        if os.path.isfile(basedir):
+            basedir = os.path.dirname(basedir)
+        if basedir not in G.BASEDIR:
+            G.BASEDIR.append(basedir)
+    if logdir:
+        set_logdir(logdir)
+    if project_root:
+        ST.PROJECT_ROOT = project_root
 
 
 """

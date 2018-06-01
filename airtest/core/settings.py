@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from airtest.utils.resolution import cocos_min_strategy
+import os
 
 
 class Settings(object):
@@ -14,4 +15,4 @@ class Settings(object):
     OPDELAY = 0.1
     FIND_TIMEOUT = 20
     FIND_TIMEOUT_TMP = 3
-    PROJECT_ROOT = ""
+    PROJECT_ROOT = os.environ.get("PROJECT_ROOT")  # for ``using`` other script
