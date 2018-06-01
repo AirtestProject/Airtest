@@ -8,9 +8,9 @@ import shutil
 import traceback
 import warnings
 from io import open
-from airtest.core.api import *  # noqa
-from airtest.core.error import *  # noqa
-from airtest.core.settings import Settings as ST  # noqa
+from airtest.core.api import *
+from airtest.core.error import *
+from airtest.core.settings import Settings as ST
 from airtest.core.helper import log
 from airtest.utils.compat import decode_path
 from copy import copy
@@ -25,21 +25,12 @@ class AirtestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.args = args
-        # init devices
-        if isinstance(args.device, list):
-            devices = args.device
-        elif args.device:
-            devices = [args.device]
-        else:
-            devices = []
-            print("do not connect device")
-
-        for dev in devices:
-            connect_device(dev)
 
         # set base dir to find tpl
         args.script = decode_path(args.script)
         G.BASEDIR = [args.script]
+
+        setup_by_args(args)
 
         # set log dir
         if args.log is True:
@@ -52,13 +43,14 @@ class AirtestCase(unittest.TestCase):
         else:
             print("do not save log")
 
+        # set PROJECT_ROOT for exec other script
+        if os.environ.get("PROJECT_ROOT"):
+            ST.PROJECT_ROOT = os.environ["PROJECT_ROOT"] or args.script
+
         # setup script exec scope
         cls.scope = copy(globals())
         cls.scope["exec_script"] = cls.exec_other_script
 
-        # set PROJECT_ROOT for exec other script
-        if os.environ.get("PROJECT_ROOT"):
-            cls.PROJECT_ROOT = os.environ["PROJECT_ROOT"]
 
     def setUp(self):
         if self.args.log and self.args.recording:
@@ -86,7 +78,8 @@ class AirtestCase(unittest.TestCase):
         self.scope["__file__"] = pyfilepath
         with open(pyfilepath, 'r', encoding="utf8") as f:
             code = f.read()
-        exec(compile(code.encode("utf-8"), pyfilepath.encode(sys.getfilesystemencoding()), 'exec'), self.scope)
+        pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
+        exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
 
     @classmethod
     def exec_other_script(cls, scriptpath):
@@ -112,7 +105,7 @@ class AirtestCase(unittest.TestCase):
                 shutil.copy(srcfile, dstfile)
 
         # find script in PROJECT_ROOT
-        scriptpath = os.path.join(cls.PROJECT_ROOT, scriptpath)
+        scriptpath = os.path.join(ST.PROJECT_ROOT, scriptpath)
         # copy submodule's images into sub_dir
         sub_dir = _sub_dir_name(scriptpath)
         sub_dirpath = os.path.join(cls.args.script, sub_dir)
@@ -126,6 +119,20 @@ class AirtestCase(unittest.TestCase):
         # replace tpl filepath with filepath in sub_dir
         code = re.sub("[\'\"](\w+.png)[\'\"]", "\"%s/\g<1>\"" % sub_dir, code)
         exec(compile(code.encode("utf8"), pyfilepath, 'exec'), cls.scope)
+
+
+def setup_by_args(args):
+    # init devices
+    if isinstance(args.device, list):
+        devices = args.device
+    elif args.device:
+        devices = [args.device]
+    else:
+        devices = []
+        print("do not connect device")
+
+    for dev in devices:
+        connect_device(dev)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):
