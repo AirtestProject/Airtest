@@ -125,7 +125,7 @@ def setup_by_args(args):
         print("do not save log")
 
     # guess project_root to be basedir of current .air path
-    project_root = os.path.dirname(args.script)
+    project_root = os.path.dirname(args.script) if not ST.PROJECT_ROOT else None
     auto_setup(args.script, devices, args.log, project_root)
 
 
