@@ -16,6 +16,7 @@ class WebChrome(Chrome):
         if "darwin" in sys.platform:
             os.environ['PATH'] += ":/Applications/AirtestIDE.app/Contents/Resources/selenium_plugin"
         super(WebChrome, self).__init__(chrome_options=chrome_options)
+        self.number = 0
 
     def find_element_by_xpath(self, xpath):
         web_element = super(WebChrome, self).find_element_by_xpath(xpath)
@@ -31,6 +32,16 @@ class WebChrome(Chrome):
         web_element = super(WebChrome, self).find_element_by_name(name)
         self.gen_screen_log(web_element)
         return Element(web_element)
+
+    def switch_to_latest_window(self):
+        self.number += 1
+        self.switch_to_window(self.window_handles[self.number])
+        time.sleep(0.5)
+
+    def switch_to_last_window(self):
+        self.number -= 1
+        self.switch_to_window(self.window_handles[self.number])
+        time.sleep(0.5)
 
     @logwrap
     def get(self, address):
