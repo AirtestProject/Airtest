@@ -31,11 +31,9 @@ class Minicap(object):
         self.stream_mode = stream
         self.frame_gen = None
         self.stream_lock = threading.Lock()
-        self.quirk_flag = 0
 
     def install(self, reinstall=False):
         """install or upgrade minicap"""
-        # reinstall = True
         if not reinstall and self.adb.exists_file("/data/local/tmp/minicap") \
                 and self.adb.exists_file("/data/local/tmp/minicap.so"):
             output = self.adb.shell("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -v 2>&1")
@@ -94,9 +92,7 @@ class Minicap(object):
             proj_height = self.projection * real_height
         else:
             raise RuntimeError("invalid projection type: %s" % repr(self.projection))
-        if self.quirk_flag & 2 and real_orientation != 0:
-            return real_height, real_width, proj_height, proj_width, 0, real_orientation
-        return real_width, real_height, proj_width, proj_height, real_orientation, real_orientation
+        return real_width, real_height, proj_width, proj_height, real_orientation
 
     def _setup(self, adb_port=None, lazy=False):
         """setup minicap process on device"""
@@ -109,7 +105,7 @@ class Minicap(object):
             self.server_proc = None
             self.adb.remove_forward("tcp:%s" % self.localport)
 
-        real_width, real_height, proj_width, proj_height, minicap_orientation, real_orientation = self._get_params()
+        real_width, real_height, proj_width, proj_height, real_orientation = self._get_params()
 
         self.localport, deviceport = self.adb.setup_forward("localabstract:minicap_{}".format)
         deviceport = deviceport[len("localabstract:"):]
@@ -119,7 +115,7 @@ class Minicap(object):
                 deviceport,
                 real_width, real_height,
                 proj_width, proj_height,
-                minicap_orientation, other_opt),
+                real_orientation, other_opt),
             not_wait=True
         )
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_sever")
@@ -158,7 +154,7 @@ class Minicap(object):
         2. remove log info
         3. \r\r\n -> \n ... fuck adb
         """
-        real_width, real_height, proj_width, proj_height, real_orientation, _ = self._get_params(use_ori_size)
+        real_width, real_height, proj_width, proj_height, real_orientation = self._get_params(use_ori_size)
 
         raw_data = self.adb.cmd(
             "shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -n 'moa_minicap' -P %dx%d@%dx%d/%d -s" %
@@ -177,26 +173,11 @@ class Minicap(object):
         """
         self._setup(adb_port, lazy=lazy)
         s = SafeSocket()
-        port = adb_port or self.localport
-        s.connect((self.adb.host, port))
+        adb_port = adb_port or self.localport
+        s.connect((self.adb.host, adb_port))
         t = s.recv(24)
         # minicap info
-        global_headers = struct.unpack("<2B5I2B", t)
-        LOGGING.debug(global_headers)
-        ori, self.quirk_flag = global_headers[-2:]
-        if self.quirk_flag & 2 and ori != 0:
-            self._setup(adb_port, lazy=lazy)
-            s.close()
-            s = SafeSocket()
-            _port = adb_port or self.localport
-            s.connect((self.adb.host, _port))
-            t = s.recv(24)
-            # minicap info
-            global_headers = struct.unpack("<2B5I2B", t)
-            ori, self.quirk_flag = global_headers[-2:]
-            LOGGING.debug(global_headers)
-
-        yield global_headers
+        yield struct.unpack("<2B5I2B", t)
 
         cnt = 0
         while cnt <= max_cnt:
@@ -246,10 +227,9 @@ class Minicap(object):
 
     def update_rotation(self, rotation):
         """update rotation, and reset backend stream generator"""
-        print("%s -> %s" % (self.current_rotation, rotation))
         with self.stream_lock:
-            self.display_info["rotation"] = rotation
             if str(rotation) == str(self.current_rotation):
                 LOGGING.debug("update_rotation is the same with current_rotation %s" % rotation)
-            else:
-                self.frame_gen = None
+                return
+            self.display_info["rotation"] = rotation
+            self.frame_gen = None
