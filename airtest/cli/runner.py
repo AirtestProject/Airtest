@@ -6,6 +6,7 @@ import sys
 import re
 import shutil
 import traceback
+import warnings
 from io import open
 from airtest.core.api import *  # noqa
 from airtest.core.error import *  # noqa
@@ -90,6 +91,9 @@ class AirtestCase(unittest.TestCase):
     @classmethod
     def exec_other_script(cls, scriptpath):
         """run other script in test script"""
+
+        warnings.simplefilter("always")
+        warnings.warn("please use using() api instead.", PendingDeprecationWarning)
 
         def _sub_dir_name(scriptname):
             dirname = os.path.splitdrive(os.path.normpath(scriptname))[-1]
