@@ -15,4 +15,4 @@ class Settings(object):
     OPDELAY = 0.1
     FIND_TIMEOUT = 20
     FIND_TIMEOUT_TMP = 3
-    PROJECT_ROOT = os.environ.get("PROJECT_ROOT")  # for ``using`` other script
+    PROJECT_ROOT = os.environ.get("PROJECT_ROOT", "")  # for ``using`` other script
