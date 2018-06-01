@@ -55,6 +55,9 @@ Airtest希望提供平台无关的API，让你的测试代码可以运行在不�
     from airtest.core.api import *
 
     # 通过ADB连接本地Android设备
+    init_device("Android")
+    # 或者使用connect_device函数
+    # connect_device("Android:///")
     connect_device("Android:///")
     install("path/to/your/apk")
     start_app("package_name_of_your_apk")

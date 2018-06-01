@@ -51,7 +51,7 @@ Example
 
 Airtest aims at providing platform independent API, so that you can write tests once and be able to run it on multiple devices. 
 
-1. Using `connect_device`_ API you can connect to any android device or windows application. 
+1. Using `connect_device`_ API you can connect to any android/iOS device or windows application.
 
 2. Then perform `simulated input`_ to test your game or app. 
 
@@ -63,7 +63,10 @@ Airtest aims at providing platform independent API, so that you can write tests 
     from airtest.core.api import *
 
     # connect an android phone with adb
-    connect_device("Android:///")
+    init_device("Android")
+    # or use connect_device api
+    # connect_device("Android:///")
+
     install("path/to/your/apk")
     start_app("package_name_of_your_apk")
     touch(Template("image_of_a_button.png"))

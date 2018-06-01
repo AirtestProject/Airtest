@@ -19,12 +19,12 @@ Device Setup APIs
 """
 
 
-def init_device(uuid, platform="Android", **kwargs):
+def init_device(platform="Android", uuid=None, **kwargs):
     """
     Initialize device if not yet, and set as current device.
 
-    :param uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
     :param platform: Android, IOS or Windows
+    :param uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
     :param kwargs: Optional platform specific keyword args, e.g. `cap_method=JAVACAP` for Android
     :return: device instance
     """
@@ -59,7 +59,7 @@ def connect_device(uri):
     params = dict(parse_qsl(d.query))
     if host:
         params["host"] = host.split(":")
-    dev = init_device(uuid, platform, **params)
+    dev = init_device(platform, uuid, **params)
     return dev
 
 
