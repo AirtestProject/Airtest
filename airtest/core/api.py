@@ -58,20 +58,24 @@ def device():
     return G.DEVICE
 
 
-@on_platform(["Android", "Windows", "IOS"])
-def set_current(index):
+def set_current(idx):
     """
     Set current active device.
 
-    :param index: index of initialized device instance
-    :raise IndexError: raised when device index is out of device list
+    :param idx: uuid or index of initialized device instance
+    :raise IndexError: raised when device idx is not found
     :return: None
     :platforms: Android, iOS, Windows
     """
-    try:
-        G.DEVICE = G.DEVICE_LIST[index]
-    except IndexError:
-        raise IndexError("device index out of range: %s/%s" % (index, len(G.DEVICE_LIST)))
+
+    dev_dict = {dev.uuid: dev for dev in G.DEVICE_LIST}
+    if idx in dev_dict:
+        current_dev = dev_dict[idx]
+    elif idx < len(G.DEVICE_LIST):
+        current_dev = G.DEVICE_LIST[idx]
+    else:
+        raise IndexError("device idx not found in: %s or %s" % (idx, len(G.DEVICE_LIST)))
+    G.DEVICE = current_dev
 
 
 def auto_setup(filepath):

@@ -18,6 +18,10 @@ class Device(with_metaclass(MetaDevice, object)):
     def __init__(self):
         super(Device, self).__init__()
 
+    @property
+    def uuid(self):
+        raise NotImplementedError
+
     def shell(self, *args, **kwargs):
         raise NotImplementedError
 
