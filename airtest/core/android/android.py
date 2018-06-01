@@ -47,6 +47,10 @@ class Android(Device):
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
 
+    @property
+    def uuid(self):
+        return self.serialno
+
     def list_app(self, third_only=False):
         """
         Return list of packages

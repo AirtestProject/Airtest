@@ -84,6 +84,10 @@ class IOS(Device):
         self.minitouch = fakeMiniTouch(self)
 
     @property
+    def uuid(self):
+        return self.addr
+
+    @property
     def session(self):
         if not self.defaultSession:
             self.defaultSession = self.driver.session()

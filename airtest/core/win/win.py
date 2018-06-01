@@ -37,6 +37,10 @@ class Windows(Device):
         self.keyboard = keyboard
         self._init_connect(handle, kwargs)
 
+    @property
+    def uuid(self):
+        return self.handle
+
     def _init_connect(self, handle, kwargs):
         if handle:
             self.connect(handle=handle)
