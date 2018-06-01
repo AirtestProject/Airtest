@@ -43,9 +43,8 @@ class AirtestCase(unittest.TestCase):
         else:
             print("do not save log")
 
-        # set PROJECT_ROOT for exec other script
-        if os.environ.get("PROJECT_ROOT"):
-            ST.PROJECT_ROOT = os.environ["PROJECT_ROOT"] or args.script
+        # set PROJECT_ROOT for using other script, default to be basedir of current script
+        ST.PROJECT_ROOT = os.environ.get("PROJECT_ROOT") or os.path.dirname(args.script)
 
         # setup script exec scope
         cls.scope = copy(globals())
