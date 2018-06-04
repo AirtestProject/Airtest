@@ -4,3 +4,4 @@ requests>=2.11.1
 six
 opencv-contrib-python
 facebook-wda
+pywinauto==0.6.3
