@@ -111,6 +111,8 @@ def import_device_cls(platform):
         from .win import Windows as cls
     elif platform == "ios":
         from .ios import IOS as cls
+    elif platform == "linux":
+        from .linux import Linux as cls
     else:
         raise RuntimeError("Unknown platform: %s" % platform)
     return cls
