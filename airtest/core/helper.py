@@ -92,9 +92,6 @@ def using(path):
     G.BASEDIR.append(path)
 
 
-NATIVE_PFS = ["Android", "Windows", "IOS"]
-
-
 def import_device_cls(platform):
     """lazy import device class"""
     platform = platform.lower()
@@ -111,21 +108,6 @@ def import_device_cls(platform):
     else:
         raise RuntimeError("Unknown platform: %s" % platform)
     return cls
-
-
-def on_platform(platforms):
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(*args, **kwargs):
-            if G.DEVICE is None:
-                raise RuntimeError("Device not connected yet.")
-            pf = device_platform()
-            if pf in NATIVE_PFS and pf not in platforms:
-                raise NotImplementedError("Method not implememted on {}. required {}.".format(pf, platforms))
-            r = f(*args, **kwargs)
-            return r
-        return wrapper
-    return decorator
 
 
 def delay_after_operation():

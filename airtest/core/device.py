@@ -20,43 +20,47 @@ class Device(with_metaclass(MetaDevice, object)):
 
     @property
     def uuid(self):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def shell(self, *args, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def snapshot(self, *args, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def touch(self, target, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def swipe(self, t1, t2, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def keyevent(self, key, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def text(self, text, enter=True):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def start_app(self, package):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def stop_app(self, package):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def clear_app(self, package):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def list_app(self, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def install_app(self, uri, **kwargs):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def uninstall_app(self, package):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
 
     def get_current_resolution(self):
-        raise NotImplementedError
+        self._raise_not_implemented_error()
+
+    def _raise_not_implemented_error(self):
+        platform = self.__class__.__name__
+        raise NotImplementedError("Method not implemented on %s" % platform)
