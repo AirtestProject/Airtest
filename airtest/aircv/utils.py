@@ -17,7 +17,7 @@ def generate_result(middle_point, pypts, confi):
 
 def check_image_valid(im_source, im_search):
     """Check if the input images valid or not."""
-    if im_source and im_source.any() and im_search and im_search.any():
+    if im_source is not None and im_source.any() and im_search is not None and im_search.any():
         return True
     else:
         return False
