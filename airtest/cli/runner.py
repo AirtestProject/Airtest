@@ -49,7 +49,6 @@ class AirtestCase(unittest.TestCase):
                     traceback.print_exc()
 
     def runTest(self):
-        log("main_script", {"script": self.args.script})
         scriptpath = self.args.script
         pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
         pyfilepath = os.path.join(scriptpath, pyfilename)

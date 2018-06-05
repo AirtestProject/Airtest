@@ -3,20 +3,25 @@ __author__ = 'wjjn3033'
 
 import os
 import re
+import sys
+import six
 import json
 
 
 def get_script_info(script_path):
-    """extract info from script, like __author__, __title__ and __desc__."""
-    pyfilename = os.path.basename(script_path).replace(".air", ".py")
+    """extract info from script, like basename, __author__, __title__ and __desc__."""
+    script_name = os.path.basename(script_path)
+    pyfilename = script_name.replace(".air", ".py")
     pyfilepath = os.path.join(script_path, pyfilename)
 
+    if not os.path.exists(pyfilepath) and six.PY2:
+        pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
     with open(pyfilepath) as pyfile:
         pyfilecontent = pyfile.read()
 
     author, title, desc = get_author_title_desc(pyfilecontent)
 
-    result_json = {"author": author, "title": title, "desc": desc}
+    result_json = {"name": script_name, "author": author, "title": title, "desc": desc}
     return json.dumps(result_json)
 
 

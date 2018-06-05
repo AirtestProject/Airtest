@@ -52,7 +52,6 @@ def reg_cleanup(func, *args, **kwargs):
 
     """
     CLEANUP_CALLS.put((func, args, kwargs))
-    # atexit.register(func, *args, **kwargs)
 
 
 def _cleanup():

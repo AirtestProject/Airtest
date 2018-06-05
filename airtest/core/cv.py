@@ -9,7 +9,7 @@ import types
 from airtest import aircv
 from airtest.aircv import cv2
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import G, logwrap, log_in_func
+from airtest.core.helper import G, logwrap
 from airtest.core.settings import Settings as ST
 from airtest.utils.transform import TargetPos
 from copy import deepcopy
@@ -44,6 +44,8 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         if screen is None:
             G.LOGGING.warning("Screen is None, may be locked")
         else:
+            if threshold:
+                query.threshold = threshold
             match_pos = query.match_in(screen)
             if match_pos:
                 try_log_screen(screen)
@@ -60,6 +62,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
             time.sleep(interval)
 
 
+@logwrap
 def try_log_screen(screen=None):
     """
     Save screenshot to file
@@ -78,7 +81,8 @@ def try_log_screen(screen=None):
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
     aircv.imwrite(filepath, screen)
-    log_in_func({"screen": filename})
+    # log_in_func({"screen": filename})
+    return filename
 
 
 class Template(object):
@@ -118,7 +122,6 @@ class Template(object):
     def match_in(self, screen):
         match_result = self._cv_match(screen)
         G.LOGGING.debug("match result: %s", match_result)
-        log_in_func({"cv": match_result})
         if not match_result:
             return None
         focus_pos = TargetPos().getXY(match_result, self.target_pos)
@@ -129,6 +132,7 @@ class Template(object):
         image = self._resize_image(image, screen, ST.RESIZE_METHOD)
         return self._find_all_template(image, screen)
 
+    @logwrap
     def _cv_match(self, screen):
         # in case image file not exist in current directory:
         image = self._imread()
