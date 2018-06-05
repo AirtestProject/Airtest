@@ -19,6 +19,8 @@ class AirtestLogger(object):
         super(AirtestLogger, self).__init__()
         self.running_stack = []
         self.extra_log = {}
+        self.logfile = None
+        self.logfd = None
         self.set_logfile(logfile)
         reg_cleanup(self.handle_stacked_log)
 
