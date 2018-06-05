@@ -1,7 +1,6 @@
 # _*_ coding:UTF-8 _*_
 
 import os
-import sys
 import json
 import time
 import inspect
@@ -18,7 +17,6 @@ class AirtestLogger(object):
     def __init__(self, logfile):
         super(AirtestLogger, self).__init__()
         self.running_stack = []
-        self.extra_log = {}
         self.logfile = None
         self.logfd = None
         self.set_logfile(logfile)
@@ -62,7 +60,6 @@ class AirtestLogger(object):
 
 
 def Logwrap(f, logger):
-
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -74,15 +71,12 @@ def Logwrap(f, logger):
         except Exception as e:
             data = {"traceback": traceback.format_exc(), "end_time": time.time()}
             fndata.update(data)
-            fndata.update(logger.extra_log)
             logger.log("error", fndata)
             raise
         else:
             fndata.update({'end_time': time.time(), 'ret': res})
-            fndata.update(logger.extra_log)
             logger.log('function', fndata)
         finally:
             logger.running_stack.pop()
-            logger.extra_log = {}
         return res
     return wrapper

@@ -123,6 +123,7 @@ class LogToHtml(object):
             if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
                 cv_result = item["data"]["ret"]
                 pos = cv_result['result']
+                # todo: count pos after target_pos
                 if isinstance(pos, (list, tuple)):
                     screen['pos'].append((round(pos[0]), round(pos[1])))
                 rect = self.div_rect(cv_result['rectangle'])
