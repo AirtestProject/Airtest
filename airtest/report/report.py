@@ -23,7 +23,7 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", export_dir=None, logfile=LOGFILE, lang="en", plugins=[]):
+    def __init__(self, script_root, log_root="", static_root="", export_dir=None, logfile=LOGFILE, lang="en", plugins=None):
         self.log = []
         self.script_root = script_root
         self.log_root = log_root
@@ -34,14 +34,14 @@ class LogToHtml(object):
         self.export_dir = export_dir
         self.logfile = os.path.join(log_root, logfile)
         self.lang = lang
-        self.plugins_module = []
         self.init_plugin_modules(plugins)
 
-    def init_plugin_modules(self, plugins):
-        for p in plugins:
-            sys.path.append(os.path.dirname(p))
-            module = __import__(os.path.basename(p)).Report(export_dir=self.export_dir, log_root=self.log_root)
-            self.plugins_module.append(module)
+    @staticmethod
+    def init_plugin_modules(plugins):
+        if not plugins:
+            return
+        for plugin_name in plugins:
+            __import__(plugin_name)
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -211,9 +211,6 @@ class LogToHtml(object):
         if self.lang == "zh":
             desc = desc_zh
 
-        for module in self.plugins_module:
-            desc.update(module.report_desc(step))
-
         ret = desc.get(name)
         if callable(ret):
             ret = ret()
@@ -234,9 +231,6 @@ class LogToHtml(object):
             "assert_equal": u"Assert equal",
             "assert_not_equal": u"Assert not equal",
         }
-
-        for module in self.plugins_module:
-            title.update(module.report_title())
 
         return title.get(name, name)
 
@@ -331,7 +325,7 @@ def get_parger(ap):
     ap.add_argument("--record", help="custom screen record file path", nargs="+")
     ap.add_argument("--export", help="export a portable report dir containing all resources")
     ap.add_argument("--lang", help="report language", default="en")
-    ap.add_argument("--plugins", help="plugin report", nargs="+")
+    ap.add_argument("--plugins", help="load reporter plugins", nargs="+")
     return ap
 
 
@@ -344,7 +338,7 @@ def main(args):
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
-    plugins = args.plugins or []
+    plugins = args.plugins
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, lang=lang, plugins=plugins)
