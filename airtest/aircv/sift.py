@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from .error import *  # noqa
-from .utils import generate_result
+from .utils import generate_result, check_image_valid
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 # SIFT识别特征点匹配，参数设置:
@@ -19,10 +19,14 @@ ONE_POINT_CONFI = 0.5
 
 def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_RATIO):
     """基于sift进行图像识别，只筛选出最优区域."""
-    # 第一步：获取特征点集并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src
+    # 第一步：检验图像是否正常：
+    if not check_image_valid(im_source, im_search):
+        return None
+
+    # 第二步：获取特征点集并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src
     kp_sch, kp_src, good = _get_key_points(im_source, im_search, good_ratio)
 
-    # 第二步：根据匹配点对(good),提取出来识别区域:
+    # 第三步：根据匹配点对(good),提取出来识别区域:
     if len(good) == 0:
         # 匹配点对为0,无法提取识别区域：
         return None
@@ -47,7 +51,7 @@ def find_sift(im_source, im_search, threshold=0.8, rgb=True, good_ratio=FILTER_R
         # 匹配点对 >= 4个，使用单矩阵映射求出目标区域，据此算出可信度：
         middle_point, pypts, w_h_range = _many_good_pts(im_source, im_search, kp_sch, kp_src, good)
 
-    # 第三步：根据识别区域，求出结果可信度，并将结果进行返回:
+    # 第四步：根据识别区域，求出结果可信度，并将结果进行返回:
     # 对识别结果进行合理性校验: 小于5个像素的，或者缩放超过5倍的，一律视为不合法直接raise.
     _target_error_check(w_h_range)
     # 将截图和识别结果缩放到大小一致,准备计算可信度
