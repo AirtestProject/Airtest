@@ -221,7 +221,7 @@ class IOS(Device):
             for _ in range(times):
                 self.session.tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0.5):
+    def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
         # trans pos of swipe
         fx, fy = self._touch_point_by_orientation(fpos)
         tx, ty = self._touch_point_by_orientation(tpos)
