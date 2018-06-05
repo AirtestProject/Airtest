@@ -122,7 +122,6 @@ Device Operations
 
 
 @logwrap
-@on_platform(["Android"])
 def shell(cmd):
     """
     Start remote shell in the target device and execute the command
@@ -135,7 +134,6 @@ def shell(cmd):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def start_app(package, activity=None):
     """
     Start the target application on device
@@ -149,7 +147,6 @@ def start_app(package, activity=None):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def stop_app(package):
     """
     Stop the target application on device
@@ -162,7 +159,6 @@ def stop_app(package):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def clear_app(package):
     """
     Clear data of the target application on device
@@ -175,7 +171,6 @@ def clear_app(package):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def install(filepath):
     """
     Install application on device
@@ -188,7 +183,6 @@ def install(filepath):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def uninstall(package):
     """
     Uninstall application on device
@@ -201,7 +195,6 @@ def uninstall(package):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def snapshot(filename=None, msg=""):
     """
     Take the screenshot of the target device and save it to the file.
@@ -225,7 +218,6 @@ def snapshot(filename=None, msg=""):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def wake():
     """
     Wake up and unlock the target device
@@ -239,7 +231,6 @@ def wake():
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def home():
     """
     Return to the home screen of the target device.
@@ -251,7 +242,6 @@ def home():
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def touch(v, times=1, **kwargs):
     """
     Perform the touch action on the device screen
@@ -289,7 +279,6 @@ def double_click(v):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Perform the swipe action on the device screen.
@@ -335,7 +324,6 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 
 
 @logwrap
-@on_platform(["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5):
     """
     Perform the pinch action on the device screen
@@ -352,7 +340,6 @@ def pinch(in_or_out='in', center=None, percent=0.5):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def keyevent(keyname, **kwargs):
     """
     Perform key event on the device
@@ -367,7 +354,6 @@ def keyevent(keyname, **kwargs):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def text(text, enter=True):
     """
     Input text on the target device. Text input widget must be active first.
@@ -394,7 +380,6 @@ def sleep(secs=1.0):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def wait(v, timeout=None, interval=0.5, intervalfunc=None):
     """
     Wait to match the Template on the device screen
@@ -413,7 +398,6 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def exists(v):
     """
     Check whether given target exists on device screen
@@ -431,7 +415,6 @@ def exists(v):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def find_all(v):
     """
     Find all occurrences of the target on the device screen and return their coordinates
@@ -450,7 +433,6 @@ Assertions
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def assert_exists(v, msg=""):
     """
     Assert target exists on device screen
@@ -469,7 +451,6 @@ def assert_exists(v, msg=""):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def assert_not_exists(v, msg=""):
     """
     Assert target does not exist on device screen
