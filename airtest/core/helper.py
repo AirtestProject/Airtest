@@ -68,7 +68,7 @@ def set_logdir(dirpath):
 
 def log(message, tag="info"):
     if G.LOGGER:
-        G.LOGGER.log(tag, {"message": message}, 0)
+        G.LOGGER.log(tag, {"name": message}, 0)
 
 
 def logwrap(f):

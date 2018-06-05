@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
     <title lang="en">
-    {{script_name}}script running report
+    {{name}} test report
     </title>
     
     <!--[if lt IE 9]>
@@ -244,7 +244,7 @@
           {% for step in steps %}
           <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
-            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
+            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
             <hr>
             <div class="step_content">
               <!--单步操作-->
@@ -275,14 +275,12 @@
 
               <!--运行时的截图-->
               {% if step.screen.src %}
-
-
                 <div class="row">
                   <div class="col-xs-3">
                     <div class="point">
                       <span class="glyphicon glyphicon-play"></span>
                     </div>
-                      <label><span lang="en">Runtime screenshot</span></label>
+                      <label><span lang="en">screenshot</span></label>
                   </div>
                   <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
                   <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
@@ -306,13 +304,13 @@
                   </div>
                 </div>
 
-                {% if step.confidence %}
-                    <p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Matching confidence:</span> {{step.confidence}}%</p>
+                {% if step.screen.confidence %}
+                    <p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Matching confidence:</span> {{step.screen.confidence}}%</p>
                 {% endif %}
+              {% endif %}
 
-              <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
-              {% else %}
-              <!--不带图片的操作-->
+              <!--描述信息-->
+              {% if step.desc %}
               <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
               {% endif %}
 
@@ -320,7 +318,7 @@
               {% if not step.trace %}
               <div class="alert alert-success">
                 <span class="glyphicon glyphicon-ok"></span>
-                  <span lang="en">Execution finished successfully</span>
+                  <span lang="en">Execution succeeded</span>
               </div>
               {% else %}
               <div class="alert alert-danger">

@@ -10,6 +10,7 @@ from copy import deepcopy
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
 from six import PY3
+from pprint import pprint
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -31,7 +32,6 @@ class LogToHtml(object):
         self.run_start = None
         self.run_end = None
         self.export_dir = export_dir
-        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.logfile = os.path.join(log_root, logfile)
         self.error_str = ""
         self.lang = lang
@@ -92,13 +92,14 @@ class LogToHtml(object):
         """
         name = step["data"]["name"]
         title = self._translate_title(name)
-        desc = self._translate_desc(step)
         code = self._translate_code(step)
+        desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
         traceback = self._translate_traceback(step)
 
         translated = {
             "title": title,
+            "time": step["time"],
             "code": code,
             "screen": screen,
             "desc": desc,
@@ -106,12 +107,15 @@ class LogToHtml(object):
         }
         return translated
 
-    def _translate_screen(self, step, code=None):
+    def _translate_screen(self, step, code):
+        if step['tag'] != "function":
+            return None
         screen = {
             "src": None,
             "rect": [],
             "pos": [],
             "vector": [],
+            "confidence": None,
         }
 
         for item in step["__children__"]:
@@ -132,6 +136,8 @@ class LogToHtml(object):
                     screen['pos'].append((round(pos[0]), round(pos[1])))
                 rect = self.div_rect(cv_result['rectangle'])
                 screen['rect'].append(rect)
+                screen['confidence'] = cv_result['confidence']
+                break
         # print(screen)
         return screen
 
@@ -149,23 +155,10 @@ class LogToHtml(object):
             "args": args,
         }
         for key, value in step_data["call_args"].items():
-            if key == "args":
-                for v in value:
-                    args.append({
-                        "key": None,
-                        "value": v,
-                    })
-            elif key == "kwargs":
-                for k, v in value.items():
-                    args.append({
-                        "key": k,
-                        "value": v
-                    })
-            else:
-                args.append({
-                    "key": key,
-                    "value": value,
-                })
+            args.append({
+                "key": key,
+                "value": value,
+            })
         for k, arg in enumerate(args):
             value = arg["value"]
             if isinstance(value, dict) and value.get("__class__") == "Template":
@@ -173,82 +166,65 @@ class LogToHtml(object):
                 if not self.export_dir:
                     image_path = os.path.join(self.script_root, image_path)
                 arg["image"] = image_path
-        # from pprint import pprint
+        # pprint(step_data["name"])
         # pprint(code)
         return code
 
     @staticmethod
-    def to_percent(p):
-        if not p:
-            return ''
-        try:
-            p = float(p)
-        except ValueError:
-            return ''
-        return round(p * 100, 1)
-
-    @staticmethod
-    def div_rect(r, offset=None):
-        if not r:
-            return {}
-
+    def div_rect(r):
         xs = [p[0] for p in r]
         ys = [p[1] for p in r]
         left = min(xs)
         top = min(ys)
         w = max(xs) - left
         h = max(ys) - top
-
-        # offset参数，是在log中点击坐标和识别坐标不同时(人为点击偏移)，绘制识别区域也需要同样的偏移：
-        if offset:
-            left = left + offset[0]
-            top = top + offset[1]
-
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
-    def _translate_desc_zh(self, step):
-        """ 把对应函数(depth=1)的name显示成中文 """
-        name = step['type']
+    def _translate_desc(self, step, code):
+        """ 函数描述 """
+        if step['tag'] != "function":
+            return None
+        name = step['data']['name']
+        ret = step['data']['ret']
+        args = {i["key"]: i["value"] for i in code["args"]}
+
         desc = {
-            "snapshot": u"截图描述：%s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
-            "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
-            "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
+            "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
+            "touch": lambda: u"Touch %s" % ("target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
+            "swipe": u"Swipe on screen",
+            "wait": u"Wait for target image to appear",
+            "exists": lambda: u"Image %s exists" % ("" if ret else "not"),
+            "text": lambda: u"Input text:%s" % args.get('text'),
+            "keyevent": lambda: u"Click [%s] button" % args.get('keyname'),
+            "sleep": lambda: u"Wait for %s seconds" % args.get('secs'),
+            "assert_exists": u"Assert target image exists",
+            "assert_not_exists": u"Assert target image does not exists",
+        }
+
+        # todo: 最好用js里的多语言实现
+        desc_zh = {
+            "snapshot": lambda: u"截图描述: %s" % args.get("msg"),
+            "touch": lambda: u"点击 %s" % ("目标图片" if isinstance(args['v'], dict) else "屏幕坐标 %s" % args['v']),
+            "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
-            "exists": u"图片%s存在" % ("" if step.get('exists_ret') else u"不"),
-            "text": u"输入文字:%s" % step.get('text', ''),
-            "keyevent": u"点击[%s]按键" % step.get('keyevent', ''),
-            "sleep": u"等待%s秒" % step.get('sleep', ''),
+            "exists": lambda: u"图片%s存在" % ("" if ret else "not"),
+            "text": lambda: u"输入文字:%s" % args.get('text'),
+            "keyevent": lambda: u"点击[%s]按键" % args.get('keyname'),
+            "sleep": lambda: u"等待%s秒" % args.get('secs'),
             "assert_exists": u"断言目标图片存在",
             "assert_not_exists": u"断言目标图片不存在",
-            "traceback": u"异常信息",
         }
 
-        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
-
-    def _translate_desc(self, step):
         if self.lang == "zh":
-            return self._translate_desc_zh(step)
-        name = step['data']['name']
-        call_args = step['data']['call_args']
-        ret = step['data']['ret']
-        desc = {
-            "snapshot": u"Screenshot description: %s" % step["data"].get("msg", ""),
-            "touch": u"Search for target object, touch the screen coordinates %s" % repr(step.get('target_pos', '')),
-            "swipe": u"Swipe from {target_pos} to {direction} {vector}".format(target_pos=repr(step.get('target_pos', '')), direction=step.get('swipe', ''), vector=repr(step.get('vector', ''))),
-            "wait": u"Wait for target object to appear",
-            "exists": u"Picture %s exists" % ("" if step.get('exists_ret') else "not"),
-            "text": u"Input text:%s" % step.get('text', ''),
-            "keyevent": u"Click [%s] button" % step.get('keyevent', ''),
-            "sleep": u"Wait for %s seconds" % call_args.get('secs', ''),
-            "assert_exists": u"Assert target object exists",
-            "assert_not_exists": u"Assert target object does not exists",
-            "traceback": u"Traceback",
-        }
+            desc = desc_zh
 
         for module in self.plugins_module:
             desc.update(module.report_desc(step))
 
-        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
+        ret = desc.get(name)
+        if callable(ret):
+            ret = ret()
+        return ret
 
     def _translate_title(self, name):
         title = {
@@ -272,41 +248,8 @@ class LogToHtml(object):
         return title.get(name, name)
 
     @staticmethod
-    def dis_vector(v):
-        x = v[0]
-        y = v[1]
-        a = ''
-        b = ''
-        if x > 0:
-            a = u'right'
-        if x < 0:
-            a = u'left'
-        if y < 0:
-            b = u'upper '
-        if y > 0:
-            b = u'lower '
-        return b + a
-
-    @staticmethod
-    def dis_vector_zh(v):
-        x = v[0]
-        y = v[1]
-        a = ''
-        b = ''
-        if x > 0:
-            a = u'右'
-        if x < 0:
-            a = u'左'
-        if y < 0:
-            b = u'上'
-        if y > 0:
-            b = u'下'
-        return a+b
-
-    @staticmethod
     def _render(template_name, output_file=None, **template_vars):
-        """ 用jinja2输出html
-        """
+        """ 用jinja2渲染html"""
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(STATIC_DIR),
             extensions=(),
@@ -369,7 +312,7 @@ class LogToHtml(object):
 
         data = {}
         data['steps'] = steps
-        data['host'] = self.script_root
+        data['name'] = self.script_root
         data['scale'] = self.scale
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
@@ -402,7 +345,6 @@ def get_parger(ap):
 def main(args):
     # script filepath
     path = decode_path(args.script)
-    basename = os.path.basename(path).split(".")[0]
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
     static_root = args.static_root or STATIC_DIR

@@ -10,7 +10,6 @@ import warnings
 from io import open
 from airtest.core.api import G, auto_setup
 from airtest.core.settings import Settings as ST
-from airtest.core.helper import log
 from airtest.utils.compat import decode_path
 from copy import copy
 

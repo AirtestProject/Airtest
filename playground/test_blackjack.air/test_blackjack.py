@@ -29,7 +29,7 @@ touch(p)
 swipe(Template(r"tpl1523932626575.png", record_pos=(-0.266, 0.105), resolution=(1920, 1080)), vector=[0.0005, -0.4023])
 assert_exists(Template(r"tpl1523933150565.png", record_pos=(-0.213, 0.103), resolution=(1920, 1080)), "Swipe succeed")
 
+log("Test OK")
 
 sleep(2)
 stop_app(PKG)
-
