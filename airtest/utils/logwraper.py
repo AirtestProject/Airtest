@@ -72,7 +72,7 @@ def Logwrap(f, logger):
         try:
             res = f(*args, **kwargs)
         except Exception as e:
-            data = {"traceback": traceback.format_exc(), "end_time": time.time(), "error_str": repr(e).encode(sys.getfilesystemencoding())}
+            data = {"traceback": traceback.format_exc(), "end_time": time.time()}
             fndata.update(data)
             fndata.update(logger.extra_log)
             logger.log("error", fndata)
