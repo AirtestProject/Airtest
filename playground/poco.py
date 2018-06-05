@@ -49,7 +49,7 @@ class PocoReport(report.LogToHtml):
                 ret['vector'] = vector
 
         ret['desc'] = self.func_desc_poco(ret)
-        ret['title'] = self.func_title(ret)
+        ret['title'] = self._translate_title(ret)
         return ret
 
     def func_desc_poco(self, step):
@@ -60,7 +60,7 @@ class PocoReport(report.LogToHtml):
         if step['type'] in desc:
             return desc.get(step['type'])
         else:
-            return self.func_desc(step)
+            return self._translate_desc(step)
 
 
 if __name__ == "__main__":

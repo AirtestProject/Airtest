@@ -185,20 +185,20 @@
       <div class="row">
         <div id="main" class="main col-md-12">
 
-          {% if not all_steps %}
+          {% if not steps %}
           <h2 lang="en">I am sorry, this log file is empty! </h2>
           {% endif %}
 
           <div class="material moa" >
-              <h2><span lang="en">Test Case</span> {{script_name}}
+              <h2><span lang="en">Test Case</span> {{info.name}}
               {% if test_result %}
               <label class="green" lang="en">[Passed]</label>
               {% else %}
               <label class="red" lang="en">[Failed]</label>
               {% endif %}
             </h2>
-            {% if author %}
-                <h4><span lang="en">Author:</span> {{author}}</h4>
+            {% if info.author %}
+                <h4><span lang="en">Author:</span> {{info.author}}</h4>
             {% else %}
             <h4 lang="en">Author: Anonymous</h4>
             {% endif %}
@@ -207,7 +207,7 @@
             <h2 class="header" lang="en">Assert: Test Steps Summary</h2>
             <hr>
             <div class="row">
-            {% for step in all_steps['main_script'] %}
+            {% for step in steps %}
               {% if step.assert %}
                 <div class="col-xs-4 assert">
                     <span lang="en">Test step</span>
@@ -223,8 +223,8 @@
             </div>
           </div>
 
-        <!-- 录屏 -->
-         <div class="row gif-wrap">
+          <!-- 录屏 -->
+          <div class="row gif-wrap">
           <div class="col-md-6">
             {% if records %}
               {% for r in records %}
@@ -238,37 +238,44 @@
               <p lang="en">No record information found.</p>
             {% endif %}
           </div>
-         </div>
+          </div>
 
-        <!--单步-->
-        {% set step_type = ['main_script'] %}
-        {% for t in step_type %}
-          {% for step in all_steps[t] %}
+          <!--单步-->
+          {% for step in steps %}
           <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
 
-            <h2 class="header">[{{ t[:-7] }}]Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
+            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.start_time}}]</span></h2>
             <hr>
             <div class="step_content">
               <!--单步操作-->
-              <!--带图片的操作-->
-              {% if step.screenshot %}
 
-                {% if step.image_to_find %}
+              <!--代码和参数显示-->
+                {% if step.code.name %}
                 <div class="row">
                   <div class="col-xs-3">
                     <div class="point">
                       <span class="glyphicon glyphicon-play"></span>
                     </div>
-                      <label><span lang="en">Target object</span></label>
+                      <label><span lang="en">{{step.code.name}}</span></label>
                   </div>
                   <div class="col-xs-9">
-                    <img class="crop_image" src="{{step.image_to_find}}" title="{{step.image_to_find}}">
-                    <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
-                    <p class="desc">record_pos: {{step.record_pos}}, resolution: {{step.resolution}}</p>
+                    {% for arg in step.code.args %}
+                      {% if arg.image %}
+                        <img class="crop_image" src="{{arg.image}}" title="{{arg.image}}">
+                        <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
+                        <p class="desc">resolution: {{arg.value.resolution}}</p>
+                      {% else %}
+                        <!-- 其他参数 -->
+                        <p class="desc">{{arg.key}}: {{arg.value}}</p>
+                      {% endif %}
+                    {% endfor %}
                   </div>
-
                 </div>
                 {% endif %}
+
+              <!--运行时的截图-->
+              {% if step.screen.src %}
+
 
                 <div class="row">
                   <div class="col-xs-3">
@@ -280,13 +287,18 @@
                   <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
                   <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
                     <div class="screen_holder">
-                      <img class="fancybox scale lazyload" data-src="{{step.screenshot}}" url="" title="{{step.screenshot}}">
-                      {% if not step.trace and step.target_pos %}
-                      <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{step.top}}" data-left="{{step.left}}" style="top:{{step.top}}px;left:{{step.left}}px;">
-                        <!-- rect area -->
-                        {% if step.rect %}
-                        <div class="rect" {% for k,v in step.rect.items() %}data-{{k}}="{{v}}"{% endfor %}></div>
-                        {% endif %}
+                      <img class="fancybox scale lazyload" data-src="{{step.screen.src}}" url="{{step.screen.src}}" title="{{step.screen.src}}">
+                      {% if step.screen.pos %}
+                        {% for pos in step.screen.pos %}
+                          <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{pos[1]}}" data-left="{{pos[0]}}" style="top:{{pos[1]}}px;left:{{pos[0]}}px;">
+                        {% endfor %}
+                      {% endif %}
+
+                      <!-- rect area -->
+                      {% if step.screen.rect %}
+                        {% for rect in step.screen.rect %}
+                          <div class="rect" {% for k,v in rect.items() %} data-{{k}}="{{v}}"{% endfor %}></div>
+                        {% endfor %}
                       {% endif %}
                     </div>
                     <br />
@@ -323,7 +335,6 @@
             </div>
           </div>
           {% endfor %}
-        {% endfor %}
 
           <!-- 导航栏 -->
           <div class="fast-nav-step">
@@ -332,15 +343,13 @@
               <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
             </label>
             <div id="nav_steps">
-            {% for t in step_type %}
-              {% for step in all_steps[t] %}
+              {% for step in steps %}
                 {% if step.trace %}
                 <a class="a-circle bg-red" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
                 {% else %}
                 <a class="a-circle bg-green nav_{{ t }}" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
                 {% endif %}
               {% endfor %}
-            {% endfor %}
               <a class="a-circle bg-green" href="#">Top</a>
             </div>
           </div>

@@ -66,14 +66,9 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(tag, data, in_stack=True):
+def log(message, tag="info"):
     if G.LOGGER:
-        G.LOGGER.log(tag, data, in_stack)
-
-
-def log_in_func(data):
-    if G.LOGGER:
-        G.LOGGER.extra_log.update(data)
+        G.LOGGER.log(tag, {"message": message}, 0)
 
 
 def logwrap(f):
