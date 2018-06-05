@@ -211,7 +211,7 @@
               {% if step.assert %}
                 <div class="col-xs-4 assert">
                     <span lang="en">Test step</span>
-                  {% if step.trace %}
+                  {% if step.traceback %}
                   <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                   {% else %}
                   <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
@@ -242,7 +242,7 @@
 
           <!--单步-->
           {% for step in steps %}
-          <div class="material moa {{ t }}" data-trace="{{step.trace}}" id="{{ t }}_{{loop.index}}">
+          <div class="material moa {{ t }}" data-trace="{{step.traceback}}" id="{{ t }}_{{loop.index}}">
 
             <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
             <hr>
@@ -315,7 +315,7 @@
               {% endif %}
 
               <!--单步结果-->
-              {% if not step.trace %}
+              {% if not step.traceback %}
               <div class="alert alert-success">
                 <span class="glyphicon glyphicon-ok"></span>
                   <span lang="en">Execution succeeded</span>
@@ -342,7 +342,7 @@
             </label>
             <div id="nav_steps">
               {% for step in steps %}
-                {% if step.trace %}
+                {% if step.traceback %}
                 <a class="a-circle bg-red" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
                 {% else %}
                 <a class="a-circle bg-green nav_{{ t }}" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>

@@ -10,7 +10,7 @@ from six.moves.urllib.parse import parse_qsl, urlparse
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
-                                 logwrap, on_platform, set_logdir, using)
+                                 logwrap, set_logdir, using, log)
 from airtest.core.settings import Settings as ST
 
 

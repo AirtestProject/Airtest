@@ -33,7 +33,6 @@ class LogToHtml(object):
         self.run_end = None
         self.export_dir = export_dir
         self.logfile = os.path.join(log_root, logfile)
-        self.error_str = ""
         self.lang = lang
         self.plugins_module = []
         self.init_plugin_modules(plugins)
@@ -72,7 +71,6 @@ class LogToHtml(object):
                 children_steps = []
                 # error message if exists
                 if log["tag"] == "error":
-                    self.error_str = log['data']['error_str']
                     self.test_result = False
             else:
                 children_steps.insert(0, log)
@@ -82,14 +80,7 @@ class LogToHtml(object):
         return translated_steps
 
     def _translate_step(self, step):
-        """
-        按照depth = 1 的name来分类
-        touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
-                            3=screenshot 2= _loop_find  1=本身操作
-        keyevent,text,sleep 和图片无关，直接显示一条说明就可以
-                            1= 本身
-        assert 类似于exist
-        """
+        """translate single step"""
         name = step["data"]["name"]
         title = self._translate_title(name)
         code = self._translate_code(step)
@@ -172,6 +163,7 @@ class LogToHtml(object):
 
     @staticmethod
     def div_rect(r):
+        """count rect for js use"""
         xs = [p[0] for p in r]
         ys = [p[1] for p in r]
         left = min(xs)
