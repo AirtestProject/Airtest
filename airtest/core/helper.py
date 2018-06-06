@@ -66,9 +66,9 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(message, tag="info"):
+def log(message, traceback=""):
     if G.LOGGER:
-        G.LOGGER.log(tag, {"name": message}, 0)
+        G.LOGGER.log("info", {"name": message, "traceback": traceback}, 0)
 
 
 def logwrap(f):
