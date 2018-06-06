@@ -179,7 +179,7 @@ class LogToHtml(object):
         if step['tag'] != "function":
             return None
         name = step['data']['name']
-        ret = step['data']['ret']
+        ret = step['data'].get('ret')
         args = {i["key"]: i["value"] for i in code["args"]}
 
         desc = {

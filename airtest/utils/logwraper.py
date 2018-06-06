@@ -29,6 +29,8 @@ class AirtestLogger(object):
 
     @staticmethod
     def _dumper(obj):
+        if hasattr(obj, "to_json"):
+            return obj.to_json()
         try:
             d = copy(obj.__dict__)
             try:
@@ -37,7 +39,7 @@ class AirtestLogger(object):
                 pass
             return d
         except AttributeError:
-            return None
+            return repr(obj)
 
     def log(self, tag, data, depth=None):
         ''' Not thread safe '''
