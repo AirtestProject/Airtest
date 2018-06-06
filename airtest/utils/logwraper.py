@@ -71,12 +71,11 @@ def Logwrap(f, logger):
         except Exception as e:
             data = {"traceback": traceback.format_exc(), "end_time": time.time()}
             fndata.update(data)
-            logger.log("error", fndata)
             raise
         else:
-            fndata.update({'end_time': time.time(), 'ret': res})
-            logger.log('function', fndata)
+            fndata.update({'ret': res, "end_time": time.time()})
         finally:
+            logger.log('function', fndata)
             logger.running_stack.pop()
         return res
     return wrapper

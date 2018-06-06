@@ -69,9 +69,6 @@ class LogToHtml(object):
                 step["__children__"] = children_steps
                 steps.append(step)
                 children_steps = []
-                # error message if exists
-                if log["tag"] == "error":
-                    self.test_result = False
             else:
                 children_steps.insert(0, log)
 
@@ -87,6 +84,10 @@ class LogToHtml(object):
         desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
         traceback = self._translate_traceback(step)
+
+        # set test failed if any traceback exists
+        if traceback:
+            self.test_result = False
 
         translated = {
             "title": title,
@@ -134,7 +135,7 @@ class LogToHtml(object):
         return screen
 
     def _translate_traceback(self, step):
-        if step["tag"] == "error":
+        if "traceback" in step["data"]:
             return step["data"]["traceback"]
 
     def _translate_code(self, step):
