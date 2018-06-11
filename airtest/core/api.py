@@ -267,8 +267,9 @@ def touch(v, times=1, **kwargs):
     else:
         try_log_screen()
         pos = v
-    for _ in times:
+    for _ in range(times):
         G.DEVICE.touch(pos, **kwargs)
+        time.sleep(0.05)
     delay_after_operation()
 
 
@@ -276,13 +277,13 @@ click = touch  # click is alias of touch
 
 
 @logwrap
-def double_click(v, **kwargs):
+def double_click(v):
     if isinstance(v, Template):
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:
         try_log_screen()
         pos = v
-    G.DEVICE.double_click(pos, **kwargs)
+    G.DEVICE.double_click(pos)
     delay_after_operation()
 
 

@@ -170,7 +170,7 @@ class Windows(Device):
         time.sleep(duration)
         self.mouse.release(button=button, coords=coords)
 
-    def double_click(self, pos, **kwargs):
+    def double_click(self, pos):
         coords = self._action_pos(pos)
         self.mouse.double_click(coords=coords)
 

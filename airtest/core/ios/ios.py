@@ -217,7 +217,7 @@ class IOS(Device):
 
         self.session.tap(x, y)
 
-    def double_click(self, pos, **kwargs):
+    def double_click(self, pos):
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
         self.session.double_tap(x, y)
 
