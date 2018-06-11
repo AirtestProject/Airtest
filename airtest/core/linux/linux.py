@@ -108,7 +108,7 @@ class Linux(Device):
         time.sleep(duration)
         self.mouse.release(button=button, coords=pos)
 
-    def double_click(self, pos, **kwargs):
+    def double_click(self, pos):
         self.mouse.double_click(coords=pos)
 
     def swipe(self, p1, p2, duration=0.8, steps=5):

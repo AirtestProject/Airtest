@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import time
 import warnings
-
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
@@ -289,6 +289,11 @@ class Android(Device):
             self.minitouch.touch(pos, duration=duration)
         else:
             self.adb.touch(pos)
+
+    def double_click(self, pos):
+        self.touch(pos)
+        time.sleep(0.05)
+        self.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
