@@ -252,25 +252,37 @@ def home():
 
 @logwrap
 @on_platform(["Android", "Windows", "IOS"])
-def touch(v, **kwargs):
+def touch(v, times=1, **kwargs):
     """
     Perform the touch action on the device screen
 
     :param v: target to touch, either a Template instance or absolute coordinates (x, y)
+    :param times: how many touches to be performed
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
     :platforms: Android, Windows, iOS
     """
     if isinstance(v, Template):
-        try:
-            pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
-        except TargetNotFoundError:
-            raise
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:
         try_log_screen()
         pos = v
+    for _ in times:
+        G.DEVICE.touch(pos, **kwargs)
+    delay_after_operation()
 
-    G.DEVICE.touch(pos, **kwargs)
+
+click = touch  # click is alias of touch
+
+
+@logwrap
+def double_click(v, **kwargs):
+    if isinstance(v, Template):
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
+    else:
+        try_log_screen()
+        pos = v
+    G.DEVICE.double_click(pos, **kwargs)
     delay_after_operation()
 
 
@@ -331,6 +343,7 @@ def pinch(in_or_out='in', center=None, percent=0.5):
     :return: None
     :platforms: Android
     """
+    try_log_screen()
     G.DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
     delay_after_operation()
 

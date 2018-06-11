@@ -31,6 +31,9 @@ class Device(with_metaclass(MetaDevice, object)):
     def touch(self, target, **kwargs):
         raise NotImplementedError
 
+    def double_click(self, target, **kwargs):
+        raise NotImplementedError
+
     def swipe(self, t1, t2, **kwargs):
         raise NotImplementedError
 
