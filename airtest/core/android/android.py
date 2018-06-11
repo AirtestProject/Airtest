@@ -272,25 +272,23 @@ class Android(Device):
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
 
-    def touch(self, pos, times=1, duration=0.01):
+    def touch(self, pos, duration=0.01):
         """
         Perform touch event on the device
 
         Args:
             pos: coordinates (x, y)
-            times: how many touches to be performed
             duration: how long to touch the screen
 
         Returns:
             None
 
         """
-        for _ in range(times):
-            if self.touch_method == TOUCH_METHOD.MINITOUCH:
-                pos = self._touch_point_by_orientation(pos)
-                self.minitouch.touch(pos, duration=duration)
-            else:
-                self.adb.touch(pos)
+        if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            pos = self._touch_point_by_orientation(pos)
+            self.minitouch.touch(pos, duration=duration)
+        else:
+            self.adb.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """

@@ -208,18 +208,18 @@ class IOS(Device):
         return screen
 
     @retry_session
-    def touch(self, pos, times=1, duration=0.01):
+    def touch(self, pos, duration=0.01):
         # trans pos of click
         pos = self._touch_point_by_orientation(pos)
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
 
-        if times == 2:
-            self.session.double_tap(x, y)
-        else:
-            for _ in range(times):
-                self.session.tap(x, y)
+        self.session.tap(x, y)
+
+    def double_click(self, pos, **kwargs):
+        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
+        self.session.double_tap(x, y)
 
     def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
         # trans pos of swipe
