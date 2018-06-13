@@ -47,7 +47,7 @@ class Minitouch(object):
 
         """
         self.install()
-        self.display_info = self.adb.display_info
+        self.display_info = self.adb.getPhysicalDisplayInfo()
         self.setup_server()
         if self.backend:
             self.setup_client_backend()
