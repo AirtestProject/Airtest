@@ -42,7 +42,7 @@ class ADB(object):
         self.connect()
         self._sdk_version = None
         self._line_breaker = None
-        self._display_info = None
+        self._display_info = {}
         self._display_info_lock = threading.Lock()
         self._forward_local_using = []
         self.__class__._instances.append(self)
@@ -736,7 +736,6 @@ class ADB(object):
         file_size = int(out.split()[3])
         return file_size
 
-
     def _cleanup_forwards(self):
         """
         Remove the local forward ports
@@ -946,8 +945,8 @@ class ADB(object):
             return int(m.group(1))
 
         # We couldn't obtain the orientation
-        warnings.warn("Guess orientation by height > width")
-        return 0 if self.display_info["height"] > self.display_info['width'] else 1
+        warnings.warn("Could not obtain the orientation, return 0")
+        return 0
 
     def get_top_activity(self):
         """
