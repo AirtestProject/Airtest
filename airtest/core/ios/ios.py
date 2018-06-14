@@ -140,7 +140,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, strType=False, filename=None, ensure_orientation=True):
+    def snapshot(self, filename=None, strType=False, ensure_orientation=True):
         """
         take snapshot
         filename: save screenshot to filename
