@@ -43,9 +43,9 @@ class Javacap(Yosemite):
             line = nbsp.readline(timeout=5.0)
             if line is None:
                 raise RuntimeError("javacap server setup timeout")
-            if "Capture server listening on" in line:
+            if b"Capture server listening on" in line:
                 break
-            if "Address already in use" in line:
+            if b"Address already in use" in line:
                 raise RuntimeError("javacap server setup error: %s" % line)
         return proc, nbsp, localport
 
