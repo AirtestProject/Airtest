@@ -1177,29 +1177,38 @@ class ADB(object):
             None if no IP address has been found, otherwise return the IP address
 
         """
-        try:
-            res = self.shell('netcfg')
-        except AdbShellError:
-            res = ''
-        matcher = re.search(r'wlan0.* ((\d+\.){3}\d+)/\d+', res)
-        if matcher:
-            return matcher.group(1)
-        else:
+
+        def get_ip_address_from_interface(interface):
             try:
-                res = self.shell('ifconfig')
+                res = self.shell('netcfg')
             except AdbShellError:
                 res = ''
-            matcher = re.search(r'wlan0.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
+            matcher = re.search(interface + r'.* ((\d+\.){3}\d+)/\d+', res)
             if matcher:
                 return matcher.group(1)
             else:
                 try:
-                    res = self.shell('getprop dhcp.wlan0.ipaddress')
+                    res = self.shell('ifconfig')
                 except AdbShellError:
                     res = ''
-                matcher = IP_PATTERN.search(res)
+                matcher = re.search(interface + r'.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
                 if matcher:
-                    return matcher.group(0)
+                    return matcher.group(1)
+                else:
+                    try:
+                        res = self.shell('getprop dhcp.{}.ipaddress'.format(interface))
+                    except AdbShellError:
+                        res = ''
+                    matcher = IP_PATTERN.search(res)
+                    if matcher:
+                        return matcher.group(0)
+            return None
+
+        interfaces = ('eth0', 'eth1', 'wlan0')
+        for i in interfaces:
+            ip = get_ip_address_from_interface(i)
+            if ip and not ip.startswith('172.') and not ip.startswith('127.') and not ip.startswith('169.'):
+                return ip
         return None
 
     def get_gateway_address(self):
