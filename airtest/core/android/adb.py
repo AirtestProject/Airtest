@@ -1,16 +1,16 @@
 
 # -*- coding: utf-8 -*-
 import os
-import platform
-import random
 import re
-import subprocess
 import sys
-import threading
 import time
+import random
+import platform
 import warnings
+import subprocess
+import threading
 
-from six import PY3, text_type
+from six import PY3, text_type, binary_type
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
@@ -23,7 +23,6 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
 from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
 
-# LOGGING = get_logger('adb')
 LOGGING = get_logger(__name__)
 
 
@@ -174,7 +173,10 @@ class ADB(object):
 
         if proc.returncode > 0:
             # adb connection error
-            if re.search(DeviceConnectionError.DEVICE_CONNECTION_ERROR, stderr):
+            pattern = DeviceConnectionError.DEVICE_CONNECTION_ERROR
+            if isinstance(stderr, binary_type):
+                pattern = pattern.encode("utf-8")
+            if re.search(pattern, stderr):
                 raise DeviceConnectionError(stderr)
             else:
                 raise AdbError(stdout, stderr)
@@ -725,7 +727,7 @@ class ADB(object):
     def file_size(self, filepath):
         """
         Get the file size
-        
+
         Args:
             filepath: path to the file
 
