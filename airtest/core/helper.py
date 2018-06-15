@@ -106,13 +106,13 @@ def import_device_cls(platform):
     if platform in G.CUSTOM_DEVICES:
         cls = G.CUSTOM_DEVICES[platform]
     elif platform == "android":
-        from .android import Android as cls
+        from airtest.core.android.android import Android as cls
     elif platform == "windows":
-        from .win import Windows as cls
+        from airtest.core.win.win import Windows as cls
     elif platform == "ios":
-        from .ios import IOS as cls
+        from airtest.core.ios.ios import IOS as cls
     elif platform == "linux":
-        from .linux import Linux as cls
+        from airtest.core.linux.linux import Linux as cls
     else:
         raise RuntimeError("Unknown platform: %s" % platform)
     return cls

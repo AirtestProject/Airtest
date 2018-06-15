@@ -140,7 +140,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, strType=False, filename=None, ensure_orientation=True):
+    def snapshot(self, filename=None, strType=False, ensure_orientation=True):
         """
         take snapshot
         filename: save screenshot to filename
@@ -214,10 +214,15 @@ class IOS(Device):
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-
-        self.session.tap(x, y)
+        if duration >= 0.5:
+            self.session.tap_hold(x, y, duration)
+        else:
+            self.session.tap(x, y)
 
     def double_click(self, pos):
+        # trans pos of click
+        pos = self._touch_point_by_orientation(pos)
+
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
         self.session.double_tap(x, y)
 

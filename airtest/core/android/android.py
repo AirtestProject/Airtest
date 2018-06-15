@@ -3,6 +3,7 @@
 import re
 import time
 import warnings
+from copy import copy
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
@@ -487,12 +488,12 @@ class Android(Device):
         if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.minicap.get_display_info()
         else:
-            display_info = self.adb.display_info
+            display_info = copy(self.adb.display_info)
         return display_info
 
     def get_current_resolution(self):
         """
-        Return current resolution after rotaion
+        Return current resolution after rotation
 
         Returns:
             width and height of the display
@@ -541,10 +542,12 @@ class Android(Device):
 
         """
         def refresh_ori(ori):
-            self.display_info["orientation"] = ori
-            self.display_info["rotation"] = ori * 90
-            self.adb.display_info["orientation"] = ori
-            self.adb.display_info["rotation"] = ori * 90
+            data = {
+                "orientation": ori,
+                "rotation": ori * 90,
+            }
+            self.display_info.update(data)
+            self.adb.display_info.update(data)
 
         self.rotation_watcher.reg_callback(refresh_ori)
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
