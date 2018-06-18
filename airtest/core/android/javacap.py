@@ -2,7 +2,7 @@
 from airtest.utils.logger import get_logger
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import on_method_ready
+from airtest.utils.snippet import on_method_ready, reg_cleanup
 from airtest.core.android.yosemite import Yosemite
 import struct
 LOGGING = get_logger(__name__)
@@ -47,6 +47,7 @@ class Javacap(Yosemite):
                 break
             if b"Address already in use" in line:
                 raise RuntimeError("javacap server setup error: %s" % line)
+        reg_cleanup(proc.kill)
         return proc, nbsp, localport
 
     def get_frames(self):
