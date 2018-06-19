@@ -182,9 +182,8 @@ class IOS(Device):
 
             # wda 截图是要根据orientation旋转
             elif self.cap_method == CAP_METHOD.WDACAP:
-                # seems no need to rotate now
-                pass
-                #screen = aircv.rotate(screen, 90, clockwise= (now_orientation == LANDSCAPE_RIGHT) )
+                # seems need to rotate in opencv opencv-contrib-python==3.2.0.7
+                screen = aircv.rotate(screen, 90, clockwise=(now_orientation == LANDSCAPE_RIGHT))
 
         # readed screen size
         h, w = screen.shape[:2]
@@ -319,7 +318,7 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS()
+    ios = IOS("http://10.254.51.239:8100")
 
     ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))
