@@ -65,7 +65,7 @@ def rotate(img, angle=90, clockwise=True):
 
     # 将角度旋转转化为逆时针旋转90°的次数:
     counter_rotate_time = (4 - angle / 90) % 4 if clockwise else (angle / 90) % 4
-    for i in range(counter_rotate_time):
+    for i in range(int(counter_rotate_time)):
         img = count_clock_rotate(img)
 
     return img
