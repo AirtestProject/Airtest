@@ -19,6 +19,7 @@ from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
+from airtest.core.ios.instruct_helper import InstructHelper
 from airtest.utils.logger import get_logger
 
 # roatations of ios
@@ -82,6 +83,9 @@ class IOS(Device):
 
         # fake minitouch to simulate swipe
         self.minitouch = fakeMiniTouch(self)
+
+        # helper of run process like iproxy
+        self.instruct_helper = InstructHelper()
 
     @property
     def uuid(self):
