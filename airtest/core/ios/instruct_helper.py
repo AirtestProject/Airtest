@@ -3,9 +3,11 @@ import subprocess
 import traceback
 import time
 import sys
+import random
 from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready, get_std_encoding
 from airtest.utils.logger import get_logger
+from airtest.utils.retry import retries
 
 LOGGING = get_logger(__name__)
 
@@ -31,7 +33,14 @@ class InstructHelper(object):
         for sub_proc in self.subprocessHandle:
             sub_proc.kill()
 
-    def do_proxy(self, remote_port, local_port):
+    # this function auto gen local port
+    @retries(3)
+    def setup_proxy(self, remote_port):
+        local_port = random.randint(11111, 20000)
+        self.do_proxy(local_port, remote_port)
+        return local_port, remote_port
+
+    def do_proxy(self, local_port, remote_port):
         """
         Start do proxy of ios device and self device
 
@@ -40,10 +49,7 @@ class InstructHelper(object):
 
         """
 
-        assert(str(remote_port).isdigit())
-        assert(str(local_port).isdigit())
-
-        cmds = [self.proxy_process, str(remote_port), str(local_port)]
+        cmds = [self.proxy_process, str(local_port), str(remote_port)]
 
         proc = subprocess.Popen(
             cmds,
