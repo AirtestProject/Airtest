@@ -120,21 +120,24 @@ class LogToHtml(object):
                 screen['src'] = src
                 break
 
+        operation_img_func = ["_cv_match", "try_log_pos", "try_log_vector"]
         for item in step["__children__"]:
-            if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
+            if item["data"]["name"] in operation_img_func and item["data"]["ret"]:
                 cv_result = item["data"]["ret"]
-                pos = cv_result['result']
-                # todo: count pos after target_pos
-                if isinstance(pos, (list, tuple)):
-                    screen['pos'].append((round(pos[0]), round(pos[1])))
-                rect = self.div_rect(cv_result['rectangle'])
-                screen['rect'].append(rect)
-                screen['confidence'] = cv_result['confidence']
-                break
+                if "result" in cv_result:
+                    pos = cv_result['result']
+                    if isinstance(pos, (list, tuple)):
+                        screen['pos'].append((round(pos[0]), round(pos[1])))
+                if "rectangle" in cv_result:
+                    screen['rect'].append(self.div_rect(cv_result['rectangle']))
+                if "confidence" in cv_result:
+                    screen['confidence'] = cv_result['confidence']
+                if "vector" in cv_result:
+                    screen["vector"].append([cv_result['resolution'][0] * cv_result['vector'][0], cv_result['resolution'][1] * cv_result["vector"][1]])
 
         if step["data"]["name"] == "swipe":
             v1 = step["data"]["call_args"]["v1"]
-            if v1["__class__"] == "Template":
+            if isinstance(v1, dict) and v1.get("__class__", "") == "Template":
                 org_vector = step["data"]["call_args"].get("vector", [0, 0])
                 fn_vector = [org_vector[0] * v1["resolution"][0], org_vector[1] * v1["resolution"][1]]
                 screen["vector"].append(fn_vector)
