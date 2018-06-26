@@ -72,6 +72,13 @@
       margin-top: -25px;
     }
 
+    img.vector {
+      position: absolute;
+      width:120px;
+      height:50px;
+      margin-top: -25px;
+    }
+
     img#gif{
       max-width: 100%;
       min-height: 50px;
@@ -292,6 +299,14 @@
                         {% endfor %}
                       {% endif %}
 
+                      {% if step.screen.vector %}
+                        {% for vector in step.screen.vector %}
+                          {% set pos=step.screen.pos[loop.index-1]%}
+                          {% set rotation=90 %}
+                          <img class="vector" src="{{static_root}}image/arrow.png" data-x="{{vector[0]}}" data-y="{{vector[1]}}" style="top:{{pos[1]}}px;left:{{pos[0]}}px;">
+                        {% endfor %}
+                      {% endif %}
+
                       <!-- rect area -->
                       {% if step.screen.rect %}
                         {% for rect in step.screen.rect %}
@@ -444,21 +459,45 @@
 
         var sp = $(this).siblings('img.spot');
         var rect = $(this).siblings('div.rect');
-        
+        var vt = $(this).siblings('img.vector');
+
         rect.css({
           'top':rect.data('top') * i ,
           'left':rect.data('left') * i ,
           'width':rect.data('width') * i,
           'height':rect.data('height') * i,
         });
-        
+
         var top = sp.data('top');
         var left = sp.data('left');
         sp.css({
           'top':top*i,
           'left':left*i,
-        })
-        
+        });
+
+
+        var vt_x = vt.data('x') * i;
+        var vt_y = - vt.data('y') * i;
+
+        var vt_width = Math.sqrt(vt_x * vt_x + vt_y * vt_y)
+
+        var rotation = 360*Math.atan2(vt_y, vt_x)/(2*Math.PI)
+        var rt =  'rotate(' + -rotation + 'deg)';
+        var rotate_css = {
+          '-ms-transform': rt,
+          '-webkit-transform': rt,
+          '-moz-transform': rt,
+          'transform': rt,
+          'transform-origin': '0px 25px',
+        };
+
+        vt.css(rotate_css);
+        vt.css({
+          'top':top*i,
+          'left':left*i,
+          'width': vt_width
+        });
+
         $(this).parents('.screen_holder').siblings('.screen_place').height(h*i);
       });
     }

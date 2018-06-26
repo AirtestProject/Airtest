@@ -131,7 +131,14 @@ class LogToHtml(object):
                 screen['rect'].append(rect)
                 screen['confidence'] = cv_result['confidence']
                 break
-        # print(screen)
+
+        if step["data"]["name"] == "swipe":
+            v1 = step["data"]["call_args"]["v1"]
+            if v1["__class__"] == "Template":
+                org_vector = step["data"]["call_args"].get("vector", [0, 0])
+                fn_vector = [org_vector[0] * v1["resolution"][0], org_vector[1] * v1["resolution"][1]]
+                screen["vector"].append(fn_vector)
+
         return screen
 
     def _translate_traceback(self, step):
