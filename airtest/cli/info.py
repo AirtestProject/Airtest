@@ -6,6 +6,7 @@ import re
 import sys
 import six
 import json
+from io import open
 
 
 def get_script_info(script_path):
@@ -16,7 +17,7 @@ def get_script_info(script_path):
 
     if not os.path.exists(pyfilepath) and six.PY2:
         pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
-    with open(pyfilepath) as pyfile:
+    with open(pyfilepath, encoding="utf-8") as pyfile:
         pyfilecontent = pyfile.read()
 
     author, title, desc = get_author_title_desc(pyfilecontent)
