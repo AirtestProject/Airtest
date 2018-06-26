@@ -242,7 +242,6 @@ def home():
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def touch(v, times=1, **kwargs):
     """
     Perform the touch action on the device screen
