@@ -104,6 +104,10 @@ class YosemiteIme(CustomIme):
         super(YosemiteIme, self).__init__(adb, None, YOSEMITE_IME_SERVICE)
         self.yosemite = Yosemite(adb)
 
+    def start(self):
+        self.yosemite.get_ready()
+        super(YosemiteIme, self).start()
+
     def text(self, value):
         """
         Input text with Yosemite input method
@@ -115,7 +119,6 @@ class YosemiteIme(CustomIme):
             output form `adb shell` command
 
         """
-        self.yosemite.get_ready()
         if not self.started:
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell

@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import time
 import warnings
-
+from copy import copy
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
@@ -272,25 +273,28 @@ class Android(Device):
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
 
-    def touch(self, pos, times=1, duration=0.01):
+    def touch(self, pos, duration=0.01):
         """
         Perform touch event on the device
 
         Args:
             pos: coordinates (x, y)
-            times: how many touches to be performed
             duration: how long to touch the screen
 
         Returns:
             None
 
         """
-        for _ in range(times):
-            if self.touch_method == TOUCH_METHOD.MINITOUCH:
-                pos = self._touch_point_by_orientation(pos)
-                self.minitouch.touch(pos, duration=duration)
-            else:
-                self.adb.touch(pos)
+        if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            pos = self._touch_point_by_orientation(pos)
+            self.minitouch.touch(pos, duration=duration)
+        else:
+            self.adb.touch(pos)
+
+    def double_click(self, pos):
+        self.touch(pos)
+        time.sleep(0.05)
+        self.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
@@ -484,12 +488,12 @@ class Android(Device):
         if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.minicap.get_display_info()
         else:
-            display_info = self.adb.display_info
+            display_info = copy(self.adb.display_info)
         return display_info
 
     def get_current_resolution(self):
         """
-        Return current resolution after rotaion
+        Return current resolution after rotation
 
         Returns:
             width and height of the display
@@ -538,10 +542,12 @@ class Android(Device):
 
         """
         def refresh_ori(ori):
-            self.display_info["orientation"] = ori
-            self.display_info["rotation"] = ori * 90
-            self.adb.display_info["orientation"] = ori
-            self.adb.display_info["rotation"] = ori * 90
+            data = {
+                "orientation": ori,
+                "rotation": ori * 90,
+            }
+            self.display_info.update(data)
+            self.adb.display_info.update(data)
 
         self.rotation_watcher.reg_callback(refresh_ori)
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))

@@ -8,13 +8,19 @@ from PIL import Image
 
 
 def generate_result(middle_point, pypts, confi):
-    """
-    Format the result: 定义图像识别结果格式
-    """
+    """Format the result: 定义图像识别结果格式."""
     ret = dict(result=middle_point,
                rectangle=pypts,
                confidence=confi)
     return ret
+
+
+def check_image_valid(im_source, im_search):
+    """Check if the input images valid or not."""
+    if im_source is not None and im_source.any() and im_search is not None and im_search.any():
+        return True
+    else:
+        return False
 
 
 def check_source_larger_than_search(im_source, im_search):
@@ -29,8 +35,8 @@ def check_source_larger_than_search(im_source, im_search):
 
 def img_mat_rgb_2_gray(img_mat):
     """
-        turn img_mat into gray_scale, so that template match can figure the img data.
-        "print(type(im_search[0][0])")  can check the pixel type.
+    Turn img_mat into gray_scale, so that template match can figure the img data.
+    "print(type(im_search[0][0])")  can check the pixel type.
     """
     assert isinstance(img_mat[0][0], np.ndarray), "input must be instance of np.ndarray"
     return cv2.cvtColor(img_mat, cv2.COLOR_BGR2GRAY)

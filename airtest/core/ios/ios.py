@@ -19,6 +19,7 @@ from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
+from airtest.core.ios.instruct_helper import InstructHelper
 from airtest.utils.logger import get_logger
 
 # roatations of ios
@@ -83,6 +84,9 @@ class IOS(Device):
         # fake minitouch to simulate swipe
         self.minitouch = fakeMiniTouch(self)
 
+        # helper of run process like iproxy
+        self.instruct_helper = InstructHelper()
+
     @property
     def uuid(self):
         return self.addr
@@ -140,7 +144,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, strType=False, filename=None, ensure_orientation=True):
+    def snapshot(self, filename=None, strType=False, ensure_orientation=True):
         """
         take snapshot
         filename: save screenshot to filename
@@ -182,9 +186,8 @@ class IOS(Device):
 
             # wda 截图是要根据orientation旋转
             elif self.cap_method == CAP_METHOD.WDACAP:
-                # seems no need to rotate now
-                pass
-                #screen = aircv.rotate(screen, 90, clockwise= (now_orientation == LANDSCAPE_RIGHT) )
+                # seems need to rotate in opencv opencv-contrib-python==3.2.0.7
+                screen = aircv.rotate(screen, 90, clockwise=(now_orientation == LANDSCAPE_RIGHT))
 
         # readed screen size
         h, w = screen.shape[:2]
@@ -208,20 +211,25 @@ class IOS(Device):
         return screen
 
     @retry_session
-    def touch(self, pos, times=1, duration=0.01):
+    def touch(self, pos, duration=0.01):
         # trans pos of click
         pos = self._touch_point_by_orientation(pos)
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-
-        if times == 2:
-            self.session.double_tap(x, y)
+        if duration >= 0.5:
+            self.session.tap_hold(x, y, duration)
         else:
-            for _ in range(times):
-                self.session.tap(x, y)
+            self.session.tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0.5):
+    def double_click(self, pos):
+        # trans pos of click
+        pos = self._touch_point_by_orientation(pos)
+
+        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
+        self.session.double_tap(x, y)
+
+    def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
         # trans pos of swipe
         fx, fy = self._touch_point_by_orientation(fpos)
         tx, ty = self._touch_point_by_orientation(tpos)
@@ -314,7 +322,7 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS()
+    ios = IOS("http://10.254.51.239:8100")
 
     ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))

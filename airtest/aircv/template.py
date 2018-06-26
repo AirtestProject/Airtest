@@ -63,7 +63,7 @@ def find_all_template(im_source, im_search, threshold=0.8, rgb=False, max_count=
 
         # 屏蔽已经取出的最优结果,进入下轮循环继续寻找:
         # cv2.floodFill(res, None, max_loc, (-1000,), max(max_val, 0), flags=cv2.FLOODFILL_FIXED_RANGE)
-        cv2.rectangle(res, (max_loc[0] - w / 2, max_loc[1] - h / 2), (max_loc[0] + w / 2, max_loc[1] + h / 2), (0, 0, 0), -1)
+        cv2.rectangle(res, (int(max_loc[0] - w / 2), int(max_loc[1] - h / 2)), (int(max_loc[0] + w / 2), int(max_loc[1] + h / 2)), (0, 0, 0), -1)
 
     return result if result else None
 

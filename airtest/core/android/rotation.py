@@ -2,7 +2,7 @@
 import threading
 import traceback
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger(__name__)
@@ -65,7 +65,7 @@ class RotationWatcher(object):
             line = self.ow_proc.stdout.readline()
             if line == b"":
                 if LOGGING is not None:  # may be None atexit
-                    LOGGING.error("orientationWatcher has ended")
+                    LOGGING.debug("orientationWatcher has ended")
                 else:
                     print("orientationWatcher has ended")
                 return None
@@ -80,6 +80,8 @@ class RotationWatcher(object):
                     break
                 LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
                 self.current_orientation = ori
+                if is_exiting():
+                    break
                 for cb in self.ow_callback:
                     try:
                         cb(ori)
