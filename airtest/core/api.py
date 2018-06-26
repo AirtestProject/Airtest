@@ -7,7 +7,7 @@ import time
 
 from six.moves.urllib.parse import parse_qsl, urlparse
 
-from airtest.core.cv import Template, loop_find, try_log_screen
+from airtest.core.cv import Template, loop_find, try_log_screen, try_log_pos, try_log_vector
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
@@ -257,6 +257,7 @@ def touch(v, times=1, **kwargs):
     else:
         try_log_screen()
         pos = v
+        try_log_pos(pos)
     for _ in range(times):
         G.DEVICE.touch(pos, **kwargs)
         time.sleep(0.05)
@@ -302,6 +303,8 @@ def swipe(v1, v2=None, vector=None, **kwargs):
         pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
     else:
         try_log_screen()
+        try_log_pos(v1)
+        try_log_vector(vector)
         pos1 = v1
 
     if v2:
