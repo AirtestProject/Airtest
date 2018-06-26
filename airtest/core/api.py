@@ -7,7 +7,7 @@ import time
 
 from six.moves.urllib.parse import parse_qsl, urlparse
 
-from airtest.core.cv import Template, loop_find, try_log_screen, try_log_pos, try_log_vector
+from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
@@ -249,7 +249,7 @@ def touch(v, times=1, **kwargs):
     :param v: target to touch, either a Template instance or absolute coordinates (x, y)
     :param times: how many touches to be performed
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
-    :return: None
+    :return: finial position to be clicked
     :platforms: Android, Windows, iOS
     """
     if isinstance(v, Template):
@@ -257,12 +257,11 @@ def touch(v, times=1, **kwargs):
     else:
         try_log_screen()
         pos = v
-        try_log_pos(pos)
     for _ in range(times):
         G.DEVICE.touch(pos, **kwargs)
         time.sleep(0.05)
     delay_after_operation()
-
+    return pos
 
 click = touch  # click is alias of touch
 
@@ -276,6 +275,7 @@ def double_click(v):
         pos = v
     G.DEVICE.double_click(pos)
     delay_after_operation()
+    return pos
 
 
 @logwrap
@@ -296,15 +296,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
                    screen e.g.(0.5, 0.5)
     :param **kwargs: platform specific `kwargs`, please refer to corresponding docs
     :raise Exception: general exception when not enough parameters to perform swap action have been provided
-    :return: None
+    :return: Origin position and target position
     :platforms: Android, Windows, iOS
     """
     if isinstance(v1, Template):
         pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
     else:
         try_log_screen()
-        try_log_pos(v1)
-        try_log_vector(vector)
         pos1 = v1
 
     if v2:
@@ -322,6 +320,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 
     G.DEVICE.swipe(pos1, pos2, **kwargs)
     delay_after_operation()
+    return pos1, pos2
 
 
 @logwrap

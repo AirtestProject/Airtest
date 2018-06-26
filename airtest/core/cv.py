@@ -61,36 +61,6 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         else:
             time.sleep(interval)
 
-@logwrap
-def try_log_vector(vector):
-    """
-    Save vector of swipe operation
-
-    Args:
-        vector: vector to be swiped.
-
-    Returns:
-        None
-    """
-    resolution = G.DEVICE.get_current_resolution()
-    return {"vector": vector, "resolution": resolution}
-
-@logwrap
-def try_log_pos(pos):
-    """
-    Save pos of click operation
-
-    Args:
-        pos: pos to be clicked.
-
-    Returns:
-        None
-
-    """
-    if not ST.LOG_DIR:
-        return
-    res = {"result": pos}
-    return res
 
 @logwrap
 def try_log_screen(screen=None):
@@ -111,7 +81,6 @@ def try_log_screen(screen=None):
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
     aircv.imwrite(filepath, screen)
-    # log_in_func({"screen": filename})
     return filename
 
 
