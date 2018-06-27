@@ -84,6 +84,7 @@ class LogToHtml(object):
         desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
         traceback = self._translate_traceback(step)
+        assertion = self._translate_assertion(step)
 
         # set test failed if any traceback exists
         if traceback:
@@ -96,8 +97,13 @@ class LogToHtml(object):
             "screen": screen,
             "desc": desc,
             "traceback": traceback,
+            "assert": assertion
         }
         return translated
+
+    def _translate_assertion(self, step):
+        if "assert" in step["data"]["name"] and "msg" in step["data"]["call_args"]:
+            return step["data"]["call_args"]["msg"]
 
     def _translate_screen(self, step, code):
         if step['tag'] != "function":
@@ -120,26 +126,33 @@ class LogToHtml(object):
                 screen['src'] = src
                 break
 
+        display_pos = None
         for item in step["__children__"]:
             if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
                 cv_result = item["data"]["ret"]
                 pos = cv_result['result']
-                # todo: count pos after target_pos
                 if isinstance(pos, (list, tuple)):
-                    screen['pos'].append((round(pos[0]), round(pos[1])))
+                    display_pos = [round(pos[0]), round(pos[1])]
                 rect = self.div_rect(cv_result['rectangle'])
                 screen['rect'].append(rect)
                 screen['confidence'] = cv_result['confidence']
                 break
 
-        if step["data"]["name"] == "touch" and isinstance(step["data"]["call_args"]["v"], list):
-            screen["pos"].append(step["data"]["call_args"]["v"])
+        if step["data"]["name"] in ["touch", "assert_exists", "assert_not_exists", "wait", "exists"]:
+            if isinstance(step["data"]["call_args"]["v"], (list, tuple)):
+                display_pos = step["data"]["call_args"]["v"]
+            elif "ret" in step["data"]:
+                display_pos = step["data"]["ret"]
 
-        if step["data"]["name"] == "swipe":
-            screen["pos"].append(step["data"]["ret"][0])
-            target_pos = step["data"]["ret"][1]
-            origin_pos = step["data"]["ret"][0]
-            screen["vector"].append([target_pos[0] - origin_pos[0], target_pos[1] - origin_pos[1]])
+        elif step["data"]["name"] == "swipe":
+            if "ret" in step["data"]:
+                screen["pos"].append(step["data"]["ret"][0])
+                target_pos = step["data"]["ret"][1]
+                origin_pos = step["data"]["ret"][0]
+                screen["vector"].append([target_pos[0] - origin_pos[0], target_pos[1] - origin_pos[1]])
+
+        if display_pos:
+            screen["pos"].append(display_pos)
 
         return screen
 
