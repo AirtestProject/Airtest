@@ -127,6 +127,7 @@ class LogToHtml(object):
                 break
 
         display_pos = None
+
         for item in step["__children__"]:
             if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
                 cv_result = item["data"]["ret"]
@@ -138,11 +139,12 @@ class LogToHtml(object):
                 screen['confidence'] = cv_result['confidence']
                 break
 
-        if step["data"]["name"] in ["touch", "assert_exists", "assert_not_exists", "wait", "exists"]:
-            if isinstance(step["data"]["call_args"]["v"], (list, tuple)):
-                display_pos = step["data"]["call_args"]["v"]
-            elif "ret" in step["data"]:
+        if step["data"]["name"] in ["touch", "assert_exists", "wait", "exists"]:
+            # 将图像匹配得到的pos修正为最终pos
+            if isinstance(step["data"].get("ret"), (list, tuple)):
                 display_pos = step["data"]["ret"]
+            elif isinstance(step["data"]["call_args"].get("v"), (list, tuple)):
+                display_pos = step["data"]["call_args"]["v"]
 
         elif step["data"]["name"] == "swipe":
             if "ret" in step["data"]:
@@ -181,8 +183,6 @@ class LogToHtml(object):
                 if not self.export_dir:
                     image_path = os.path.join(self.script_root, image_path)
                 arg["image"] = image_path
-        # pprint(step_data["name"])
-        # pprint(code)
         return code
 
     @staticmethod
