@@ -181,7 +181,13 @@ class LogToHtml(object):
             if isinstance(value, dict) and value.get("__class__") == "Template":
                 image_path = str(value['filename'])
                 if not self.export_dir:
-                    image_path = os.path.join(self.script_root, image_path)
+                    if os.path.isfile(os.path.join(self.script_root, image_path)):
+                        image_path = os.path.join(self.script_root, image_path)
+                    else:
+                        image_path = value['_filepath']
+                else:
+                    if not os.path.isfile(os.path.join(self.script_root, image_path)):
+                        shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
         return code
 
@@ -220,7 +226,7 @@ class LogToHtml(object):
         # todo: 最好用js里的多语言实现
         desc_zh = {
             "snapshot": lambda: u"截图描述: %s" % args.get("msg"),
-            "touch": lambda: u"点击 %s" % ("目标图片" if isinstance(args['v'], dict) else "屏幕坐标 %s" % args['v']),
+            "touch": lambda: u"点击 %s" % (u"目标图片" if isinstance(args['v'], dict) else u"屏幕坐标 %s" % args['v']),
             "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
             "exists": lambda: u"图片%s存在" % ("" if ret else "not"),
