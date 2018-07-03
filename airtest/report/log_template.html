@@ -26,7 +26,7 @@
     <script src="{{ static_root }}js/echarts/shine.js"></script>
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
-    <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>"
+    <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
     <script type="text/javascript">
         var lang = new Lang();
         lang.init({
@@ -72,11 +72,40 @@
       margin-top: -25px;
     }
 
-    img.vector {
+    div.arrow {
+      display: flex;
+      align-items: center;
+      left: 100px;
+      top: 100px;
       position: absolute;
-      width:120px;
-      height:50px;
-      margin-top: -25px;
+      width: 120px;
+      margin-top: -15px;
+      margin-left: -6px;
+    }
+
+    div.start {
+      width: 12px;
+      height: 12px;
+      border-radius: 6px;
+      background-color: red;
+    }
+
+    div.line {
+        /* width:500px; */
+      flex: 1;
+      background:red;
+      height:10px;
+    }
+
+    div.end {
+      width: 0;
+	  height: 0;
+	  border-top: 15px solid transparent;
+	  border-bottom: 15px solid transparent;
+	  border-left: 20px solid red;
+    }
+
+    img.vector {
     }
 
     img#gif{
@@ -302,9 +331,12 @@
                       {% if step.screen.vector %}
                         {% for vector in step.screen.vector %}
                           {% set pos=step.screen.pos[loop.index-1]%}
-                          {% set rotation=90 %}
-                          <img class="vector" src="{{static_root}}image/arrow.png" data-x="{{vector[0]}}" data-y="{{vector[1]}}" style="top:{{pos[1]}}px;left:{{pos[0]}}px;">
-                        {% endfor %}
+                            <div class="arrow" data-x="{{vector[0]}}" data-y="{{vector[1]}}">
+                              <div class="start"></div>
+                              <div class="line"></div>
+                              <div class="end"></div>
+                            </div>
+                          {% endfor %}
                       {% endif %}
 
                       <!-- rect area -->
@@ -459,7 +491,7 @@
 
         var sp = $(this).siblings('img.spot');
         var rect = $(this).siblings('div.rect');
-        var vt = $(this).siblings('img.vector');
+        var vt = $(this).siblings('div.arrow');
 
         rect.css({
           'top':rect.data('top') * i ,
@@ -488,9 +520,9 @@
           '-webkit-transform': rt,
           '-moz-transform': rt,
           'transform': rt,
-          'transform-origin': '0px 25px',
+          'transform-origin': '6px 15px',
         };
-
+        console.log(rt)
         vt.css(rotate_css);
         vt.css({
           'top':top*i,
