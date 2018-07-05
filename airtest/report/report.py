@@ -6,6 +6,7 @@ import io
 import sys
 import shutil
 import jinja2
+import traceback
 from copy import deepcopy
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
@@ -41,7 +42,11 @@ class LogToHtml(object):
         if not plugins:
             return
         for plugin_name in plugins:
-            __import__(plugin_name)
+            print("try loading plugin: %s" % plugin_name)
+            try:
+                __import__(plugin_name)
+            except:
+                traceback.print_exc()
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
