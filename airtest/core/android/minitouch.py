@@ -6,6 +6,7 @@ import sys
 import threading
 import time
 import warnings
+import json
 
 import six
 from six.moves import queue
@@ -13,6 +14,7 @@ from six.moves import queue
 from airtest.core.android.constant import STFLIB
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.core.android.constant import ORI_METHOD
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import (get_std_encoding, on_method_ready,
                                    ready_method, reg_cleanup)
@@ -28,14 +30,27 @@ class Minitouch(object):
     https://github.com/openstf/minitouch
     """
 
-    def __init__(self, adb, backend=False):
+    def __init__(self, adb, backend=False, ori_method=ORI_METHOD.MINICAP):
         self.adb = adb
         self.backend = backend
         self.server_proc = None
         self.client = None
         self.display_info = None
+        self.ori_method = ori_method
         self.max_x, self.max_y = None, None
         reg_cleanup(self.teardown)
+
+    def get_physical_displayinfo_with_minicap(self):
+        """
+        Get Physical displayinfo with minicap.
+
+        Returns:
+            Physical displayinfo
+
+        """
+        displayinfo_cmd = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
+        display_info = self.adb.shell("%s -i" % displayinfo_cmd)
+        return json.loads(display_info)
 
     @ready_method
     def install_and_setup(self):
@@ -47,7 +62,10 @@ class Minitouch(object):
 
         """
         self.install()
-        self.display_info = self.adb.getPhysicalDisplayInfo()
+        if self.ori_method == ORI_METHOD.MINICAP:
+            self.display_info = self.get_physical_displayinfo_with_minicap()
+        else:
+            self.display_info = self.adb.getPhysicalDisplayInfo()
         self.setup_server()
         if self.backend:
             self.setup_client_backend()
