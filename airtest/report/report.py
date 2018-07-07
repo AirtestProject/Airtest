@@ -6,6 +6,7 @@ import io
 import sys
 import shutil
 import jinja2
+import traceback
 from copy import deepcopy
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
@@ -41,7 +42,11 @@ class LogToHtml(object):
         if not plugins:
             return
         for plugin_name in plugins:
-            __import__(plugin_name)
+            print("try loading plugin: %s" % plugin_name)
+            try:
+                __import__(plugin_name)
+            except:
+                traceback.print_exc()
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -207,7 +212,7 @@ class LogToHtml(object):
         if step['tag'] != "function":
             return None
         name = step['data']['name']
-        ret = step['data'].get('ret')
+        res = step['data'].get('ret')
         args = {i["key"]: i["value"] for i in code["args"]}
 
         desc = {
@@ -215,7 +220,7 @@ class LogToHtml(object):
             "touch": lambda: u"Touch %s" % ("target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
             "swipe": u"Swipe on screen",
             "wait": u"Wait for target image to appear",
-            "exists": lambda: u"Image %s exists" % ("" if ret else "not"),
+            "exists": lambda: u"Image %s exists" % ("" if res else "not"),
             "text": lambda: u"Input text:%s" % args.get('text'),
             "keyevent": lambda: u"Click [%s] button" % args.get('keyname'),
             "sleep": lambda: u"Wait for %s seconds" % args.get('secs'),
@@ -229,7 +234,7 @@ class LogToHtml(object):
             "touch": lambda: u"点击 %s" % (u"目标图片" if isinstance(args['v'], dict) else u"屏幕坐标 %s" % args['v']),
             "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
-            "exists": lambda: u"图片%s存在" % ("" if ret else "not"),
+            "exists": lambda: u"图片%s存在" % ("" if res else "不"),
             "text": lambda: u"输入文字:%s" % args.get('text'),
             "keyevent": lambda: u"点击[%s]按键" % args.get('keyname'),
             "sleep": lambda: u"等待%s秒" % args.get('secs'),

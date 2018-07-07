@@ -134,6 +134,12 @@ Using ``connect_device`` API you can connect to any android device or windows ap
 
     connect_device("platform://host:port/uuid?param=value&param2=value2")
 
+platform: Android/Windows/iOS/...
+host: adb host for android, iproxy host for iOS, empty for other platforms
+port: adb port for android, iproxy port for iOS, empty for other platforms
+uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
+param: device initialization configuration fields. e.g. cap_method/ori_method/...
+value: device initialization configuration field values. see also `connect_device`_.
 
 Connect android device
 **************************
@@ -296,3 +302,4 @@ You can write some common used function in one ``.air`` script and import it fro
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
 .. _API code: ./airtest/core/api.py
+.. _connect_device: https://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html#airtest.core.api.connect_device
