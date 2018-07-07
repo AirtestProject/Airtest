@@ -134,7 +134,7 @@ class LogToHtml(object):
         display_pos = None
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
+            if item["data"]["name"] == "_cv_match" and "ret" in item["data"] and item["data"]["ret"]:
                 cv_result = item["data"]["ret"]
                 pos = cv_result['result']
                 if isinstance(pos, (list, tuple)):
