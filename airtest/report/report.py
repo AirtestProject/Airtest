@@ -122,7 +122,7 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and self.is_pos(item["data"].get("ret")):
+            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret"), str):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
@@ -134,7 +134,7 @@ class LogToHtml(object):
         display_pos = None
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "_cv_match" and self.is_pos(item["data"].get("ret")):
+            if item["data"]["name"] == "_cv_match" and isinstance(item["data"].get("ret"), dict):
                 cv_result = item["data"]["ret"]
                 pos = cv_result['result']
                 if self.is_pos(pos):
