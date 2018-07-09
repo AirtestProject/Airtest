@@ -64,6 +64,9 @@ class Device(with_metaclass(MetaDevice, object)):
     def get_current_resolution(self):
         self._raise_not_implemented_error()
 
+    def get_ip_address(self):
+        self._raise_not_implemented_error()
+
     def _raise_not_implemented_error(self):
         platform = self.__class__.__name__
         raise NotImplementedError("Method not implemented on %s" % platform)
