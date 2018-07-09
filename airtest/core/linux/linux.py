@@ -4,9 +4,9 @@ from airtest.core.device import Device
 from pywinauto import mouse, keyboard
 from Xlib import display, X
 from PIL import Image
+import socket
 import time
 import subprocess
-
 
 
 class Linux(Device):
@@ -172,3 +172,12 @@ class Linux(Device):
         screen = d.screen()
         w, h = (screen["width_in_pixels"], screen["height_in_pixels"])
         return w, h
+
+    def get_ip_address(self):
+        """
+        Return default external ip address of the linux os.
+
+        Returns:
+             :py:obj:`str`: ip address
+        """
+        return socket.gethostbyname(socket.gethostname())

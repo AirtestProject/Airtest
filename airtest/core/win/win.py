@@ -6,6 +6,7 @@ from pywinauto.win32functions import SetForegroundWindow  # ,SetProcessDPIAware
 from pywinauto import mouse, keyboard
 from functools import wraps
 from .screen import screenshot
+import socket
 import time
 import subprocess
 
@@ -341,3 +342,12 @@ class Windows(Device):
         pos = (int((pos[0] + rect.left + self._focus_rect[0]) * self._dpifactor), 
             int((pos[1] + rect.top + self._focus_rect[1]) * self._dpifactor))
         return pos
+
+    def get_ip_address(self):
+        """
+        Return default external ip address of the windows os.
+
+        Returns:
+             :py:obj:`str`: ip address
+        """
+        return socket.gethostbyname(socket.gethostname())
