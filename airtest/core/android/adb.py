@@ -560,6 +560,35 @@ class ADB(object):
 
         return out
 
+    def multiple_install_app(self, filepath, replace=False):
+        """
+            Perform `adb install-multiple` command
+
+            Args:
+                filepath: full path to file to be installed on the device
+                replace: force to replace existing application, default is False
+
+            Returns:
+                command output
+        """
+        if isinstance(filepath, str):
+            filepath = decode_path(filepath)
+
+        if not os.path.isfile(filepath):
+            raise RuntimeError("file: %s does not exists" % (repr(filepath)))
+
+        if not replace:
+            cmds = ["install-multiple", filepath]
+        else:
+            cmds = ["install-multiple", "-r", filepath]
+        out = self.cmd(cmds)
+
+        if re.search(r"Failure \[.*?\]", out):
+            print(out)
+            raise AirtestError("Installation Failure")
+
+        return out
+
     def pm_install(self, filepath, replace=False):
         """
         Perform `adb push` and `adb install` commands
