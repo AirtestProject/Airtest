@@ -29,6 +29,8 @@ class Android(Device):
                  ori_method=ORI_METHOD.MINICAP,
                  ):
         super(Android, self).__init__()
+        if not ADB().devices(state="device"):
+            raise Exception("ADB devices not found")
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
