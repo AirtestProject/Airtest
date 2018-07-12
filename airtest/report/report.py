@@ -8,6 +8,7 @@ import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from airtest.aircv import imread, get_resolution
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
 from six import PY3
@@ -194,6 +195,8 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
+                crop_img = screen = imread(image_path)
+                arg["resolution"] = get_resolution(crop_img)
         return code
 
     @staticmethod
