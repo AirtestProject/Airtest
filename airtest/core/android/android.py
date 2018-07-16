@@ -38,7 +38,8 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        self._display_info = {}
+        self._size_info = {}
+        self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
         self.minicap = Minicap(self.adb, ori_method=self.ori_method)
@@ -190,15 +191,15 @@ class Android(Device):
             return None
 
         # ensure the orientation is right
-        if ensure_orientation and self.display_info["orientation"]:
+        if ensure_orientation and self._current_orientation:
             # minicap screenshots are different for various sdk_version
             if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
                 h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                    screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
+                    screen = aircv.rotate(screen, self._current_orientation * 90, clockwise=False)
             # adb 截图总是要根据orientation旋转
             elif self.cap_method == CAP_METHOD.ADBCAP:
-                screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
+                screen = aircv.rotate(screen, self._current_orientation * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
         return screen
@@ -473,9 +474,16 @@ class Android(Device):
             display information
 
         """
-        if not self._display_info:
-            self._display_info = self.get_display_info()
-        return self._display_info
+        if not self._size_info:
+            self._size_info = self.get_display_info()
+        display_info = copy(self._size_info)
+        # update ow orientation, which is more accurate
+        if self._current_orientation is not None:
+            display_info.update({
+                "rotation": self._current_orientation * 90,
+                "orientation": self._current_orientation,
+            })
+        return display_info
 
     def get_display_info(self):
         """
@@ -488,7 +496,7 @@ class Android(Device):
         if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.minicap.get_display_info()
         else:
-            display_info = copy(self.adb.display_info)
+            display_info = self.adb.get_display_info()
         return display_info
 
     def get_current_resolution(self):
@@ -500,8 +508,8 @@ class Android(Device):
 
         """
         # 注意黑边问题，需要用安卓接口获取区分两种分辨率
-        w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [1, 3]:
+        w, h = self._size_info["width"], self._size_info["height"]
+        if self._current_orientation in [1, 3]:
             w, h = h, w
         return w, h
 
@@ -535,21 +543,15 @@ class Android(Device):
 
     def _register_rotation_watcher(self):
         """
-        Auto refresh `android.display` when rotation of screen has changed
+        Register callbacks for Android and minicap when rotation of screen has changed
+
+        callback is called in another thread, so be careful about thread-safety
 
         Returns:
             None
 
         """
-        def refresh_ori(ori):
-            data = {
-                "orientation": ori,
-                "rotation": ori * 90,
-            }
-            self.display_info.update(data)
-            self.adb.display_info.update(data)
-
-        self.rotation_watcher.reg_callback(refresh_ori)
+        self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
 
     def _touch_point_by_orientation(self, tuple_xy):
@@ -566,7 +568,7 @@ class Android(Device):
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self.display_info["width"], self.display_info["height"]),
-            self.display_info["orientation"]
+            (self._size_info["width"], self._size_info["height"]),
+            self._current_orientation
         )
         return x, y
