@@ -33,7 +33,7 @@ class Minitouch(object):
         self.backend = backend
         self.server_proc = None
         self.client = None
-        self.display_info = None
+        self.size_info = None
         self.max_x, self.max_y = None, None
         reg_cleanup(self.teardown)
 
@@ -47,7 +47,7 @@ class Minitouch(object):
 
         """
         self.install()
-        self.display_info = self.adb.getPhysicalDisplayInfo()
+        self.size_info = self.adb.getPhysicalDisplayInfo()
         self.setup_server()
         if self.backend:
             self.setup_client_backend()
@@ -112,9 +112,7 @@ class Minitouch(object):
             transformed coordinates (x, y)
 
         """
-        width, height = self.display_info['width'], self.display_info['height']
-        # if self.display_info['orientation'] in [1, 3]:
-        #     width, height = height, width
+        width, height = self.size_info['width'], self.size_info['height']
 
         nx = x * self.max_x / width
         ny = y * self.max_y / height
@@ -287,7 +285,7 @@ class Minitouch(object):
         from_x, from_y = self.__transform_xy(from_x, from_y)
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
-        w = self.display_info['width']
+        w = self.size_info['width']
         shift_x = 1 if from_x + 1 >= w else -1
         
         interval = float(duration) / (steps + 1)
@@ -338,7 +336,7 @@ class Minitouch(object):
             u 1
             c
         """
-        w, h = self.display_info['width'], self.display_info['height']
+        w, h = self.size_info['width'], self.size_info['height']
         if isinstance(center, (list, tuple)):
             x0, y0 = center
         elif center is None:

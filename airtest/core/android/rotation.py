@@ -56,7 +56,7 @@ class RotationWatcher(object):
         Start the RotationWatcher daemon thread
 
         Returns:
-            None
+            initial orientation
 
         """
         self._install_and_setup()
@@ -89,9 +89,13 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
+        self.current_orientation = _refresh_by_ow()
+
         self._t = threading.Thread(target=_run, name="rotationwatcher")
         # self._t.daemon = True
         self._t.start()
+
+        return self.current_orientation
 
     def reg_callback(self, ow_callback):
         """

@@ -37,6 +37,7 @@ class Minicap(object):
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
         self._stream_rotation = None
+        self._update_rotation_event = threading.Event()
 
     @ready_method
     def install_or_upgrade(self):
@@ -172,7 +173,7 @@ class Minicap(object):
         if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.get_display_info()
         else:
-            display_info = self.adb.display_info
+            display_info = self.adb.get_display_info()
         real_width = display_info["width"]
         real_height = display_info["height"]
         real_rotation = display_info["rotation"]
@@ -306,10 +307,13 @@ class Minicap(object):
             frame
 
         """
-        with self.stream_lock:
-            if self.frame_gen is None:
-                self.frame_gen = self.get_stream()
-            return six.next(self.frame_gen)
+        if self._update_rotation_event.is_set():
+            LOGGING.debug("do update rotation")
+            self.teardown_stream()
+            self._update_rotation_event.clear()
+        if self.frame_gen is None:
+            self.frame_gen = self.get_stream()
+        return six.next(self.frame_gen)
 
     def update_rotation(self, rotation):
         """
@@ -323,10 +327,7 @@ class Minicap(object):
 
         """
         LOGGING.debug("update_rotation: %s" % rotation)
-        with self.stream_lock:
-            if self._stream_rotation == rotation:
-                return
-        self.teardown_stream()
+        self._update_rotation_event.set()
 
     def teardown_stream(self):
         """
@@ -336,14 +337,13 @@ class Minicap(object):
             None
 
         """
-        with self.stream_lock:
-            if not self.frame_gen:
-                return
-            try:
-                self.frame_gen.send(1)
-            except (TypeError, StopIteration):
-                # TypeError: can't send non-None value to a just-started generator
-                pass
-            else:
-                LOGGING.warn("%s tear down failed" % self.frame_gen)
-            self.frame_gen = None
+        if not self.frame_gen:
+            return
+        try:
+            self.frame_gen.send(1)
+        except (TypeError, StopIteration):
+            # TypeError: can't send non-None value to a just-started generator
+            pass
+        else:
+            LOGGING.warn("%s tear down failed" % self.frame_gen)
+        self.frame_gen = None
