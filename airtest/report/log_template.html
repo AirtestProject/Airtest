@@ -297,7 +297,7 @@
                   <div class="col-xs-9">
                     {% for arg in step.code.args %}
                       {% if arg.image %}
-                        <img class="crop_image" src="{{arg.image}}" title="{{arg.image}}">
+                        <img class="crop_image" data-width="{{arg.resolution[0]}}" data-height="{{arg.resolution[1]}}" src="{{arg.image}}" title="{{arg.image}}">
                         <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
                         <p class="desc">resolution: {{arg.value.resolution}}</p>
                       {% else %}
@@ -442,7 +442,8 @@
   $(function(){
     var scale = {{scale}};
     var imgWidth = 0;
-    var imgPercent = 0.7; 
+    var imgHeight = 0;
+    var imgPercent = 0.5;
 
     $("img").error(function () {
       var orsrc = $(this).attr("src")
@@ -468,14 +469,31 @@
     $(".screen_holder").find("img.fancybox").load(function(e){
 
       imgWidth = Math.max($(this).width(), imgWidth);
+      imgHeight = Math.max($(this).height(), imgHeight)
       var dwidth = $("div.material.moa").width()
-      //图片最大宽度
-      var s = (dwidth*imgPercent)/imgWidth
+      if (imgWidth > imgHeight) {
+          //图片最大宽度
+          var s = (dwidth * imgPercent) / imgWidth
+      }
+      else {
+          var s = (dwidth * imgPercent) / imgHeight
+      }
       s = Math.round(s * 100) / 100
       scale_img(s);
     })
 
-    function scale_img(i){
+    function scale_img(i) {
+      $(".crop_image").each(function (e) {
+        let width = $(this).data("width")
+        let height = $(this).data("height")
+
+        crop_css = {
+          "hieght": height * i,
+          "width": width * i
+        }
+        $(this).css(crop_css)
+      })
+
       $(".screen_holder").find("img.fancybox").each(function(e){
         var h = $(this).height();
         var sc = 'scale('+ i +','+ i +')';
@@ -553,9 +571,15 @@
       if(imgWidth != 0){
         //实时计算
         var dwidth = $("div.material.moa").width()
-        //图片最大宽度
-        scale = (dwidth*imgPercent)/imgWidth
-        scale = Math.round(scale * 100) / 100          
+        if (imgWidth > imgHeight) {
+            //图片最大宽度
+            var scale = (dwidth * imgPercent) / imgWidth
+        }
+        else {
+            var scale = (dwidth * imgPercent) / imgHeight
+        }
+        // scale = (dwidth*imgPercent)/imgWidth
+        // scale = Math.round(scale * 100) / 100
       }
 
       scale_img(scale)
