@@ -25,14 +25,14 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, ori_method=ORI_METHOD.MINICAP):
+    def __init__(self, adb, projection=None, ori_function=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
         self.adb = adb
         self.projection = projection
-        self.ori_method = ori_method
+        self.ori_function = ori_function if callable(ori_function) else self.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
@@ -170,10 +170,7 @@ class Minicap(object):
             physical display size (width, height), counted projection (width, height) and real display orientation
 
         """
-        if self.ori_method == ORI_METHOD.MINICAP:
-            display_info = self.get_display_info()
-        else:
-            display_info = self.adb.get_display_info()
+        display_info = self.ori_function()
         real_width = display_info["width"]
         real_height = display_info["height"]
         real_rotation = display_info["rotation"]

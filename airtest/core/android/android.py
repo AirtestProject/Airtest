@@ -42,9 +42,9 @@ class Android(Device):
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb, ori_method=self.ori_method)
+        self.minicap = Minicap(self.adb, ori_function=self.get_display_info)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
