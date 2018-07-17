@@ -92,19 +92,20 @@ class Android(Device):
         """
         return self.adb.check_app(package)
 
-    def start_app(self, package, activity=None):
+    def start_app(self, package, activity=None, measure_time=False):
         """
         Start the application and activity
 
         Args:
             package: package name
             activity: activity name
+            measure_time: if measure time when start app
 
         Returns:
             None
 
         """
-        return self.adb.start_app(package, activity)
+        return self.adb.start_app(package, activity, measure_time)
 
     def stop_app(self, package):
         """

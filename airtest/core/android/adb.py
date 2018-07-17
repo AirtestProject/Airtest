@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import os
 import re
@@ -751,7 +750,7 @@ class ADB(object):
         except AdbShellError:
             return False
         else:
-            return not("No such file or directory" in out)
+            return not ("No such file or directory" in out)
 
     def file_size(self, filepath):
         """
@@ -929,7 +928,6 @@ class ADB(object):
             for prop in ['density']:
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
-
 
     def _getDisplayDensity(self, key, strip=True):
         """
@@ -1153,7 +1151,7 @@ class ADB(object):
             raise AirtestError('package "{}" not found'.format(package))
         return True
 
-    def start_app(self, package, activity=None):
+    def start_app(self, package, activity=None, measure_time=False):
         """
         Perform `adb shell monkey` commands to start the application, if `activity` argument is `None`, then
         `adb shell am start` command is used.
@@ -1161,15 +1159,31 @@ class ADB(object):
         Args:
             package: package name
             activity: activity name
+            measure_time: if measure time when start app
 
         Returns:
             None
 
         """
-        if not activity:
-            self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+        if measure_time:
+            if not activity:
+                raise AirtestError("Activity must be specified when measure app start time")
+            out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
+                              '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
+            if not re.search(r"Status:\s*ok", out):
+                raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
+
+            matcher = re.search(r"TotalTime:\s*(\d+)", out)
+            if matcher:
+                return int(matcher.group(1))
+            else:
+                return 0
+
         else:
-            self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
+            if not activity:
+                self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+            else:
+                self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
 
     def stop_app(self, package):
         """
@@ -1303,16 +1317,16 @@ class ADB(object):
 
     def get_storage(self):
         res = self.shell("df /data")
-        pat = re.compile(r".*\/data\s+(\S+)",re.DOTALL)
+        pat = re.compile(r".*\/data\s+(\S+)", re.DOTALL)
         if pat.match(res):
             _str = pat.match(res).group(1)
         else:
-            pat = re.compile(r".*\s+(\S+)\s+\S+\s+\S+\s+\S+\s+\/data",re.DOTALL)
+            pat = re.compile(r".*\s+(\S+)\s+\S+\s+\S+\s+\S+\s+\/data", re.DOTALL)
             _str = pat.match(res).group(1)
         if 'G' in _str:
             _num = round(float(_str[:-1]))
         elif 'M' in _str:
-            _num = round(float(_str[:-1])/1000.0)
+            _num = round(float(_str[:-1]) / 1000.0)
         else:
             _num = round(float(_str) / 1000.0 / 1000.0)
         if _num > 64:
@@ -1335,7 +1349,7 @@ class ADB(object):
         if not m:
             pat = re.compile(r'Processor\s+:\s+(\w+.*)')
             m = pat.match(res)
-        cpuName = m.group(1).replace('\r','')
+        cpuName = m.group(1).replace('\r', '')
         return dict(cpuNum=cpuNum, cpuName=cpuName)
 
     def get_cpufreq(self):
@@ -1358,7 +1372,7 @@ class ADB(object):
         if len(_list) > 1:
             m2 = re.search(r'(\S+\s+\S+\s+\S+).*', _list[2])
             if m2:
-               opengl = m2.group(1)
+                opengl = m2.group(1)
         return dict(gpuModel=gpuModel, opengl=opengl)
 
     def get_model(self):
