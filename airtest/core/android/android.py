@@ -191,15 +191,15 @@ class Android(Device):
             return None
 
         # ensure the orientation is right
-        if ensure_orientation and self._current_orientation:
+        if ensure_orientation and self.display_info["orientation"]:
             # minicap screenshots are different for various sdk_version
             if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
                 h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                    screen = aircv.rotate(screen, self._current_orientation * 90, clockwise=False)
+                    screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
             # adb 截图总是要根据orientation旋转
             elif self.cap_method == CAP_METHOD.ADBCAP:
-                screen = aircv.rotate(screen, self._current_orientation * 90, clockwise=False)
+                screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
         return screen
