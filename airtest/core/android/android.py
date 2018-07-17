@@ -144,7 +144,10 @@ class Android(Device):
             output from installation process
 
         """
-        return self.adb.install_app(filepath, replace=replace)
+        if self.sdk_version > 19:
+            return self.adb.multiple_install_app(filepath, replace=replace)
+        else:
+            return self.adb.install_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
         """
