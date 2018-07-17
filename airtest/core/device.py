@@ -43,7 +43,7 @@ class Device(with_metaclass(MetaDevice, object)):
     def text(self, text, enter=True):
         self._raise_not_implemented_error()
 
-    def start_app(self, package):
+    def start_app(self, package, **kwargs):
         self._raise_not_implemented_error()
 
     def stop_app(self, package):
