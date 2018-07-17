@@ -38,7 +38,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        self._size_info = {}
+        self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
@@ -474,9 +474,9 @@ class Android(Device):
             display information
 
         """
-        if not self._size_info:
-            self._size_info = self.get_display_info()
-        display_info = copy(self._size_info)
+        if not self._display_info:
+            self._display_info = self.get_display_info()
+        display_info = copy(self._display_info)
         # update ow orientation, which is more accurate
         if self._current_orientation is not None:
             display_info.update({
@@ -508,8 +508,8 @@ class Android(Device):
 
         """
         # 注意黑边问题，需要用安卓接口获取区分两种分辨率
-        w, h = self._size_info["width"], self._size_info["height"]
-        if self._current_orientation in [1, 3]:
+        w, h = self.display_info["width"], self.display_info["height"]
+        if self.display_info["orientation"] in [1, 3]:
             w, h = h, w
         return w, h
 
@@ -568,7 +568,7 @@ class Android(Device):
         x, y = tuple_xy
         x, y = XYTransformer.up_2_ori(
             (x, y),
-            (self._size_info["width"], self._size_info["height"]),
-            self._current_orientation
+            (self.display_info["width"], self.display_info["height"]),
+            self.display_info["orientation"]
         )
         return x, y
