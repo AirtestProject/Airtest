@@ -85,7 +85,7 @@ class LogToHtml(object):
     def _translate_step(self, step):
         """translate single step"""
         name = step["data"]["name"]
-        title = self._translate_title(name)
+        title = self._translate_title(name, step)
         code = self._translate_code(step)
         desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
@@ -253,7 +253,7 @@ class LogToHtml(object):
             ret = ret()
         return ret
 
-    def _translate_title(self, name):
+    def _translate_title(self, name, step):
         title = {
             "touch": u"Touch",
             "swipe": u"Swipe",
