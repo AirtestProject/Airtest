@@ -6,7 +6,6 @@ import sys
 import threading
 import time
 import warnings
-
 import six
 from six.moves import queue
 
@@ -28,12 +27,13 @@ class Minitouch(object):
     https://github.com/openstf/minitouch
     """
 
-    def __init__(self, adb, backend=False):
+    def __init__(self, adb, backend=False, ori_function=None):
         self.adb = adb
         self.backend = backend
         self.server_proc = None
         self.client = None
         self.size_info = None
+        self.ori_function = ori_function if callable(ori_function) else self.adb.getPhysicalDisplayInfo
         self.max_x, self.max_y = None, None
         reg_cleanup(self.teardown)
 
@@ -47,7 +47,7 @@ class Minitouch(object):
 
         """
         self.install()
-        self.size_info = self.adb.getPhysicalDisplayInfo()
+        self.size_info = self.ori_function()
         self.setup_server()
         if self.backend:
             self.setup_client_backend()

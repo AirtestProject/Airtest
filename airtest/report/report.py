@@ -8,6 +8,7 @@ import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from airtest.aircv import imread, get_resolution
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
 from six import PY3
@@ -122,7 +123,7 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen":
+            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret"), str):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
@@ -134,10 +135,10 @@ class LogToHtml(object):
         display_pos = None
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "_cv_match" and item["data"]["ret"]:
+            if item["data"]["name"] == "_cv_match" and isinstance(item["data"].get("ret"), dict):
                 cv_result = item["data"]["ret"]
                 pos = cv_result['result']
-                if isinstance(pos, (list, tuple)):
+                if self.is_pos(pos):
                     display_pos = [round(pos[0]), round(pos[1])]
                 rect = self.div_rect(cv_result['rectangle'])
                 screen['rect'].append(rect)
@@ -146,9 +147,9 @@ class LogToHtml(object):
 
         if step["data"]["name"] in ["touch", "assert_exists", "wait", "exists"]:
             # 将图像匹配得到的pos修正为最终pos
-            if isinstance(step["data"].get("ret"), (list, tuple)):
+            if self.is_pos(step["data"].get("ret")):
                 display_pos = step["data"]["ret"]
-            elif isinstance(step["data"]["call_args"].get("v"), (list, tuple)):
+            elif self.is_pos(step["data"]["call_args"].get("v")):
                 display_pos = step["data"]["call_args"]["v"]
 
         elif step["data"]["name"] == "swipe":
@@ -194,6 +195,8 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
+                crop_img = screen = imread(image_path)
+                arg["resolution"] = get_resolution(crop_img)
         return code
 
     @staticmethod
@@ -285,6 +288,9 @@ class LogToHtml(object):
             print(output_file)
 
         return html
+
+    def is_pos(self, v):
+        return isinstance(v, (list, tuple))
 
     def copy_tree(self, src, dst):
         try:
