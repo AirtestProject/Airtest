@@ -45,7 +45,6 @@ class RotationWatcher(object):
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         self.ow_proc = p
-        # reg_cleanup(self.ow_proc.kill)
 
     def teardown(self):
         if self.ow_proc:
@@ -70,7 +69,7 @@ class RotationWatcher(object):
                     print("orientationWatcher has ended")
                 return None
 
-            ori = int(line) / 90
+            ori = int(int(line) / 90)
             return ori
 
         def _run():
