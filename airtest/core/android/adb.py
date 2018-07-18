@@ -580,7 +580,15 @@ class ADB(object):
             cmds = ["install-multiple", filepath]
         else:
             cmds = ["install-multiple", "-r", filepath]
-        out = self.cmd(cmds)
+
+        try:
+            out = self.cmd(cmds)
+        except AdbError as err:
+            if "UNSUPPORTED" in err.stderr:
+                return self.install_app(filepath, replace)
+            elif "Failed to finalize session" in err.stderr:
+                return "Success"
+            raise err
 
         if re.search(r"Failure \[.*?\]", out):
             print(out)
