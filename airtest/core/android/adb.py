@@ -1151,7 +1151,7 @@ class ADB(object):
             raise AirtestError('package "{}" not found'.format(package))
         return True
 
-    def start_app(self, package, activity=None, measure_time=False):
+    def start_app(self, package, activity=None):
         """
         Perform `adb shell monkey` commands to start the application, if `activity` argument is `None`, then
         `adb shell am start` command is used.
@@ -1159,31 +1159,38 @@ class ADB(object):
         Args:
             package: package name
             activity: activity name
-            measure_time: if measure time when start app
 
         Returns:
             None
 
         """
-        if measure_time:
-            if not activity:
-                raise AirtestError("Activity must be specified when measure app start time")
-            out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
-                              '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
-            if not re.search(r"Status:\s*ok", out):
-                raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
-
-            matcher = re.search(r"TotalTime:\s*(\d+)", out)
-            if matcher:
-                return int(matcher.group(1))
-            else:
-                return 0
-
+        if not activity:
+            self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
         else:
-            if not activity:
-                self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
-            else:
-                self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
+            self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
+
+    def start_app_timing(self, package, activity):
+        """
+        Start the application and activity, and measure time
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            app launch time
+
+        """
+        out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
+                          '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
+        if not re.search(r"Status:\s*ok", out):
+            raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
+
+        matcher = re.search(r"TotalTime:\s*(\d+)", out)
+        if matcher:
+            return int(matcher.group(1))
+        else:
+            return 0
 
     def stop_app(self, package):
         """
