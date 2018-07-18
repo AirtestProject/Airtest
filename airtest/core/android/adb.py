@@ -559,7 +559,7 @@ class ADB(object):
 
         return out
 
-    def multiple_install_app(self, filepath, replace=False):
+    def install_multiple_app(self, filepath, replace=False):
         """
             Perform `adb install-multiple` command
 

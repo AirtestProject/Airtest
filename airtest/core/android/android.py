@@ -158,10 +158,20 @@ class Android(Device):
             output from installation process
 
         """
-        if self.sdk_version > 19:
-            return self.adb.multiple_install_app(filepath, replace=replace)
-        else:
-            return self.adb.install_app(filepath, replace=replace)
+        return self.adb.install_app(filepath, replace=replace)
+
+    def install_multiple_app(self, filepath, replace=False):
+        """
+        Install multiple the application on the device
+
+        Args:
+            filepath: full path to the `apk` file to be installed on the device
+            replace: True or False to replace the existing application
+
+        Returns:
+            output from installation process
+        """
+        return self.adb.install_multiple_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
         """
