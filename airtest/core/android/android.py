@@ -15,11 +15,11 @@ from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
+
 LOGGING = get_logger(__name__)
 
 
 class Android(Device):
-
     """Android Device Class"""
 
     def __init__(self, serialno=None, host=None,
@@ -92,20 +92,33 @@ class Android(Device):
         """
         return self.adb.check_app(package)
 
-    def start_app(self, package, activity=None, measure_time=False):
+    def start_app(self, package, activity=None):
         """
         Start the application and activity
 
         Args:
             package: package name
             activity: activity name
-            measure_time: if measure time when start app
 
         Returns:
             None
 
         """
-        return self.adb.start_app(package, activity, measure_time)
+        return self.adb.start_app(package, activity)
+
+    def start_app_timing(self, package, activity):
+        """
+        Start the application and activity, and measure time
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            app launch time
+
+        """
+        return self.adb.start_app_timing(package, activity)
 
     def stop_app(self, package):
         """
