@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import os
 import re
@@ -56,7 +55,13 @@ class ADB(object):
 
         """
         system = platform.system()
-        adb_path = DEFAULT_ADB_PATH[system]
+        machine = platform.machine()
+        adb_path = DEFAULT_ADB_PATH.get('{}-{}'.format(system, machine))
+        if not adb_path:
+            adb_path = DEFAULT_ADB_PATH.get(system)
+        if not adb_path:
+            raise RuntimeError("No adb executable supports this platform({}-{}).".format(system, machine))
+
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
@@ -560,7 +565,7 @@ class ADB(object):
 
         return out
 
-    def multiple_install_app(self, filepath, replace=False):
+    def install_multiple_app(self, filepath, replace=False):
         """
             Perform `adb install-multiple` command
 
@@ -581,7 +586,15 @@ class ADB(object):
             cmds = ["install-multiple", filepath]
         else:
             cmds = ["install-multiple", "-r", filepath]
-        out = self.cmd(cmds)
+
+        try:
+            out = self.cmd(cmds)
+        except AdbError as err:
+            if "UNSUPPORTED" in err.stderr:
+                return self.install_app(filepath, replace)
+            elif "Failed to finalize session" in err.stderr:
+                return "Success"
+            raise err
 
         if re.search(r"Failure \[.*?\]", out):
             print(out)
@@ -751,7 +764,7 @@ class ADB(object):
         except AdbShellError:
             return False
         else:
-            return not("No such file or directory" in out)
+            return not ("No such file or directory" in out)
 
     def file_size(self, filepath):
         """
@@ -929,7 +942,6 @@ class ADB(object):
             for prop in ['density']:
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
-
 
     def _getDisplayDensity(self, key, strip=True):
         """
@@ -1171,6 +1183,29 @@ class ADB(object):
         else:
             self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
 
+    def start_app_timing(self, package, activity):
+        """
+        Start the application and activity, and measure time
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            app launch time
+
+        """
+        out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
+                          '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
+        if not re.search(r"Status:\s*ok", out):
+            raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
+
+        matcher = re.search(r"TotalTime:\s*(\d+)", out)
+        if matcher:
+            return int(matcher.group(1))
+        else:
+            return 0
+
     def stop_app(self, package):
         """
         Perform `adb shell am force-stop` command to force stop the application
@@ -1303,16 +1338,16 @@ class ADB(object):
 
     def get_storage(self):
         res = self.shell("df /data")
-        pat = re.compile(r".*\/data\s+(\S+)",re.DOTALL)
+        pat = re.compile(r".*\/data\s+(\S+)", re.DOTALL)
         if pat.match(res):
             _str = pat.match(res).group(1)
         else:
-            pat = re.compile(r".*\s+(\S+)\s+\S+\s+\S+\s+\S+\s+\/data",re.DOTALL)
+            pat = re.compile(r".*\s+(\S+)\s+\S+\s+\S+\s+\S+\s+\/data", re.DOTALL)
             _str = pat.match(res).group(1)
         if 'G' in _str:
             _num = round(float(_str[:-1]))
         elif 'M' in _str:
-            _num = round(float(_str[:-1])/1000.0)
+            _num = round(float(_str[:-1]) / 1000.0)
         else:
             _num = round(float(_str) / 1000.0 / 1000.0)
         if _num > 64:
@@ -1335,7 +1370,7 @@ class ADB(object):
         if not m:
             pat = re.compile(r'Processor\s+:\s+(\w+.*)')
             m = pat.match(res)
-        cpuName = m.group(1).replace('\r','')
+        cpuName = m.group(1).replace('\r', '')
         return dict(cpuNum=cpuNum, cpuName=cpuName)
 
     def get_cpufreq(self):
@@ -1358,7 +1393,7 @@ class ADB(object):
         if len(_list) > 1:
             m2 = re.search(r'(\S+\s+\S+\s+\S+).*', _list[2])
             if m2:
-               opengl = m2.group(1)
+                opengl = m2.group(1)
         return dict(gpuModel=gpuModel, opengl=opengl)
 
     def get_model(self):

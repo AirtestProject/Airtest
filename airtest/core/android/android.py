@@ -15,11 +15,11 @@ from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
+
 LOGGING = get_logger(__name__)
 
 
 class Android(Device):
-
     """Android Device Class"""
 
     def __init__(self, serialno=None, host=None,
@@ -29,6 +29,8 @@ class Android(Device):
                  ori_method=ORI_METHOD.MINICAP,
                  ):
         super(Android, self).__init__()
+        if not ADB().devices(state="device"):
+            raise IndexError("ADB devices not found")
         self.serialno = serialno or ADB().devices(state="device")[0][0]
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
@@ -106,6 +108,20 @@ class Android(Device):
         """
         return self.adb.start_app(package, activity)
 
+    def start_app_timing(self, package, activity):
+        """
+        Start the application and activity, and measure time
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            app launch time
+
+        """
+        return self.adb.start_app_timing(package, activity)
+
     def stop_app(self, package):
         """
         Stop the application
@@ -145,6 +161,19 @@ class Android(Device):
 
         """
         return self.adb.install_app(filepath, replace=replace)
+
+    def install_multiple_app(self, filepath, replace=False):
+        """
+        Install multiple the application on the device
+
+        Args:
+            filepath: full path to the `apk` file to be installed on the device
+            replace: True or False to replace the existing application
+
+        Returns:
+            output from installation process
+        """
+        return self.adb.install_multiple_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
         """
