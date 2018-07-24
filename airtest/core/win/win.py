@@ -2,7 +2,8 @@
 from airtest import aircv
 from airtest.core.device import Device
 from pywinauto.application import Application
-from pywinauto.win32functions import SetForegroundWindow  # ,SetProcessDPIAware
+from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
+from pywinauto.win32structures import RECT
 from pywinauto import mouse, keyboard
 from functools import wraps
 from .screen import screenshot
@@ -248,10 +249,13 @@ class Windows(Device):
         Get rectangle
 
         Returns:
-            None
+            win32structures.RECT
 
         """
-        return self._top_window.rectangle()
+        if self._top_window:
+            return self._top_window.rectangle()
+        else:
+            return RECT(right=GetSystemMetrics(0), bottom=GetSystemMetrics(1))
 
     @require_app
     def get_title(self):
