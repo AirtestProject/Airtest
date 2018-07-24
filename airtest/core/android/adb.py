@@ -55,7 +55,13 @@ class ADB(object):
 
         """
         system = platform.system()
-        adb_path = DEFAULT_ADB_PATH[system]
+        machine = platform.machine()
+        adb_path = DEFAULT_ADB_PATH.get('{}-{}'.format(system, machine))
+        if not adb_path:
+            adb_path = DEFAULT_ADB_PATH.get(system)
+        if not adb_path:
+            raise RuntimeError("No adb executable supports this platform({}-{}).".format(system, machine))
+
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
