@@ -243,7 +243,6 @@ class Windows(Device):
         """
         SetForegroundWindow(self._top_window)
 
-    @require_app
     def get_rect(self):
         """
         Get rectangle
@@ -252,7 +251,7 @@ class Windows(Device):
             win32structures.RECT
 
         """
-        if self._top_window:
+        if self.app and self._top_window:
             return self._top_window.rectangle()
         else:
             return RECT(right=GetSystemMetrics(0), bottom=GetSystemMetrics(1))
