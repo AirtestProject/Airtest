@@ -124,9 +124,7 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            _ret = item["data"].get("ret", None)
-            _is_str = isinstance(_ret, unicode) if six.PY2 else isinstance(_ret, str)
-            if item["data"]["name"] == "try_log_screen" and _is_str:
+            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
