@@ -3,6 +3,7 @@
 import json
 import os
 import io
+import six
 import sys
 import shutil
 import jinja2
@@ -123,7 +124,9 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret"), str):
+            _ret = item["data"].get("ret", None)
+            _is_str = isinstance(_ret, unicode) if six.PY2 else isinstance(_ret, str)
+            if item["data"]["name"] == "try_log_screen" and _is_str:
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
@@ -161,7 +164,6 @@ class LogToHtml(object):
 
         if display_pos:
             screen["pos"].append(display_pos)
-
         return screen
 
     def _translate_traceback(self, step):
@@ -195,7 +197,7 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
-                crop_img = screen = imread(image_path)
+                crop_img = imread(os.path.join(self.script_root, str(value['filename'])))
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
