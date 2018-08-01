@@ -806,7 +806,7 @@ class ADB(object):
                 line_breaker = os.linesep
             else:
                 line_breaker = '\r' + os.linesep
-            self._line_breaker = line_breaker
+            self._line_breaker = line_breaker.encode("ascii")
         return self._line_breaker
 
     @property
