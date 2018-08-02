@@ -278,7 +278,7 @@
 
           <!--单步-->
           {% for step in steps %}
-          <div class="material moa {{ t }}" data-trace="{{step.traceback}}" id="{{ t }}_{{loop.index}}">
+          <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
 
             <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
             <hr>
@@ -390,9 +390,9 @@
             <div id="nav_steps">
               {% for step in steps %}
                 {% if step.traceback %}
-                <a class="a-circle bg-red" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                 {% else %}
-                <a class="a-circle bg-green nav_{{ t }}" href="#{{ t }}_{{loop.index}}">{{loop.index}}</a>
+                <a class="a-circle bg-green nav_main_script" href="#main_script_{{loop.index}}">{{loop.index}}</a>
                 {% endif %}
               {% endfor %}
               <a class="a-circle bg-green" href="#">Top</a>
