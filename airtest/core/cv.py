@@ -181,7 +181,8 @@ class Template(object):
         xmin, ymin, xmax, ymax = Predictor.get_predict_area(self.record_pos, image_wh, self.resolution, screen_resolution)
         # crop predict image from screen
         predict_area = aircv.crop_image(screen, (xmin, ymin, xmax, ymax))
-        # aircv.show(predict_area)
+        if not predict_area.any():
+            return None
         # find sift in that image
         ret_in_area = aircv.find_sift(predict_area, image, threshold=self.threshold, rgb=self.rgb)
         # calc cv ret if found
