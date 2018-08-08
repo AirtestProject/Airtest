@@ -237,7 +237,7 @@ class LogToHtml(object):
             "touch": lambda: u"点击 %s" % (u"目标图片" if isinstance(args['v'], dict) else u"屏幕坐标 %s" % args['v']),
             "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
-            "exists": lambda: u"图片%s存在" % ("" if res else "不"),
+            "exists": lambda: u"图片%s存在" % ("" if res else u"不"),
             "text": lambda: u"输入文字:%s" % args.get('text'),
             "keyevent": lambda: u"点击[%s]按键" % args.get('keyname'),
             "sleep": lambda: u"等待%s秒" % args.get('secs'),
