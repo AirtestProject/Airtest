@@ -37,6 +37,8 @@ Use `pip` to install Airtest python library.
     pip install -U airtest
 
 
+If your platform is in Mac/Linux, after pip insatll, please locate the adb in "{your_python_path}/site-packages/airtest/core/android/static/adb/{your_platform}", and "chmod +x adb" to grante execute permission.
+
 Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
 
 
