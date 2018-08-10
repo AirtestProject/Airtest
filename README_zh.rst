@@ -28,6 +28,16 @@ Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等�
 
     pip install airtest
 
+在Mac/Linux系统下，需要手动赋予adb可执行权限
+
+.. code:: shell
+
+    # mac系统
+    cd {your_python_path}/site-packages/airtest/core/android/static/adb/mac
+    # linux系统
+    # cd {your_python_path}/site-packages/airtest/core/android/static/adb/linux
+    chmod +x adb
+
 
 如果你需要使用GUI工具，请从 `官网`_ 下载AirtestIDE。
 
