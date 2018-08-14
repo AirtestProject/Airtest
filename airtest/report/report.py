@@ -3,6 +3,7 @@
 import json
 import os
 import io
+import six
 import sys
 import shutil
 import jinja2
@@ -123,7 +124,7 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret"), str):
+            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
@@ -161,7 +162,6 @@ class LogToHtml(object):
 
         if display_pos:
             screen["pos"].append(display_pos)
-
         return screen
 
     def _translate_traceback(self, step):
@@ -195,7 +195,7 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
-                crop_img = screen = imread(image_path)
+                crop_img = imread(os.path.join(self.script_root, str(value['filename'])))
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
@@ -237,7 +237,7 @@ class LogToHtml(object):
             "touch": lambda: u"点击 %s" % (u"目标图片" if isinstance(args['v'], dict) else u"屏幕坐标 %s" % args['v']),
             "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
-            "exists": lambda: u"图片%s存在" % ("" if res else "不"),
+            "exists": lambda: u"图片%s存在" % ("" if res else u"不"),
             "text": lambda: u"输入文字:%s" % args.get('text'),
             "keyevent": lambda: u"点击[%s]按键" % args.get('keyname'),
             "sleep": lambda: u"等待%s秒" % args.get('secs'),

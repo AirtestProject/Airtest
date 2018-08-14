@@ -29,9 +29,7 @@ class Android(Device):
                  ori_method=ORI_METHOD.MINICAP,
                  ):
         super(Android, self).__init__()
-        if not ADB().devices(state="device"):
-            raise IndexError("ADB devices not found")
-        self.serialno = serialno or ADB().devices(state="device")[0][0]
+        self.serialno = serialno or self.get_default_device()
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
@@ -50,6 +48,18 @@ class Android(Device):
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
+
+    def get_default_device(self):
+        """
+        Get local default device when no serailno
+
+        Returns:
+            local device serialno
+
+        """
+        if not ADB().devices(state="device"):
+            raise IndexError("ADB devices not found")
+        return ADB().devices(state="device")[0][0]
 
     @property
     def uuid(self):
