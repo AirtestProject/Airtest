@@ -128,6 +128,8 @@ class LogToHtml(object):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
+                else:
+                    src = os.path.join(self.log_root, src)
                 screen['src'] = src
                 break
 
