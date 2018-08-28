@@ -128,8 +128,6 @@ class LogToHtml(object):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
-                else:
-                    src = os.path.join(self.log_root, src)
                 screen['src'] = src
                 break
 
@@ -188,7 +186,9 @@ class LogToHtml(object):
                 image_path = str(value['filename'])
                 if not self.export_dir:
                     if os.path.isfile(os.path.join(self.script_root, image_path)):
-                        image_path = os.path.join(self.script_root, image_path)
+                        image_path = os.path.abspath(os.path.join(self.script_root, image_path))
+                        image_path = six.moves.urllib_parse.urljoin("file://",
+                                                                    six.moves.urllib.request.pathname2url(image_path))
                     else:
                         image_path = value['_filepath']
                 else:
