@@ -188,7 +188,8 @@ class LogToHtml(object):
                 image_path = str(value['filename'])
                 if not self.export_dir:
                     if os.path.isfile(os.path.join(self.script_root, image_path)):
-                        image_path = os.path.abspath(os.path.join(self.script_root, image_path))
+                        #image_path = os.path.abspath(os.path.join(self.script_root, image_path))
+                        image_path = os.path.join(self.script_root, image_path)
                         image_path = six.moves.urllib_parse.urljoin("file://",
                                                                     six.moves.urllib.request.pathname2url(image_path))
                     else:
