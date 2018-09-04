@@ -128,6 +128,9 @@ class LogToHtml(object):
                 src = item["data"]['ret']
                 if self.export_dir:
                     src = os.path.join(LOGDIR, src)
+                    screen['_filepath'] = src
+                else:
+                    screen['_filepath'] = os.path.join(self.log_root, src)
                 screen['src'] = src
                 break
 
@@ -384,6 +387,7 @@ def main(args):
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
     plugins = args.plugins
+    print("plugins:", plugins)
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, lang=lang, plugins=plugins)
