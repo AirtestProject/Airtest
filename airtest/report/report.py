@@ -195,7 +195,8 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
                 arg["image"] = image_path
-                crop_img = imread(os.path.join(self.script_root, str(value['filename'])))
+                crop_img = imread(image_path)  # using(xxx.air) 导致图片可能不在script_root
+                # crop_img = imread(os.path.join(self.script_root, str(value['filename'])))
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
