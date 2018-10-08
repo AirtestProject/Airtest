@@ -186,21 +186,14 @@ class LogToHtml(object):
         for k, arg in enumerate(args):
             value = arg["value"]
             if isinstance(value, dict) and value.get("__class__") == "Template":
-                image_path = filepath = str(value['filename'])
+                image_path = str(value['filename'])
                 if not self.export_dir:
-                    if os.path.isfile(os.path.join(self.script_root, filepath)):
-                        filepath = os.path.abspath(os.path.join(self.script_root, filepath))
-                    else:
-                        filepath = value['_filepath']
-                    # image_path == file:///filepath
-                    image_path = six.moves.urllib_parse.urljoin("file://",
-                                                                    six.moves.urllib.request.pathname2url(filepath))
+                    image_path = value['_filepath']
                 else:
-                    if not os.path.isfile(os.path.join(self.script_root, filepath)):
+                    if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)
-                    filepath = os.path.abspath(os.path.join(self.script_root, filepath))
                 arg["image"] = image_path
-                crop_img = imread(filepath)
+                crop_img = imread(value['_filepath'])
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
