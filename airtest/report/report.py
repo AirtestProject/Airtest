@@ -331,9 +331,6 @@ class LogToHtml(object):
             record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
         records = [os.path.join(self.log_root, f) for f in record_list]
 
-        if os.path.exists(self.static_root):
-            self.static_root = six.moves.urllib_parse.urljoin("file://",
-                                                               six.moves.urllib.request.pathname2url(self.static_root))
         if not self.static_root.endswith(os.path.sep):
             self.static_root = self.static_root.replace("\\", "/")
             self.static_root += "/"
