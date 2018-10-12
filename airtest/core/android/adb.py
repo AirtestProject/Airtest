@@ -1160,8 +1160,10 @@ class ADB(object):
             True if package has been found
 
         """
-        output = self.shell(['dumpsys', 'package', package]).strip()
-        if package not in output:
+        output = self.shell(['dumpsys', 'package', package])
+        pattern = r'Package\s+\[' + str(package) + '\]'
+        match = re.search(pattern, output)
+        if match is None:
             raise AirtestError('package "{}" not found'.format(package))
         return True
 
