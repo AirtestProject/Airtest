@@ -126,7 +126,7 @@ class LogToHtml(object):
         for item in step["__children__"]:
             if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
                 src = item["data"]['ret']
-                if self.export_dir:
+                if self.export_dir:  # all relative path
                     src = os.path.join(LOGDIR, src)
                     screen['_filepath'] = src
                 else:
@@ -186,12 +186,12 @@ class LogToHtml(object):
         for k, arg in enumerate(args):
             value = arg["value"]
             if isinstance(value, dict) and value.get("__class__") == "Template":
-                image_path = str(value['filename'])
-                if not self.export_dir:
-                    image_path = value['_filepath']
-                else:
+                if self.export_dir:  # all relative path
+                    image_path = value['filename']
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
-                        shutil.copy(value['_filepath'], self.script_root)
+                        shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
+                else:
+                    image_path = value['_filepath']
                 arg["image"] = image_path
                 crop_img = imread(value['_filepath'])
                 arg["resolution"] = get_resolution(crop_img)
