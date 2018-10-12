@@ -1199,9 +1199,6 @@ class ADB(object):
         """
         out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
                           '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
-        print(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
-                          '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
-        print(out)
         if not re.search(r"Status:\s*ok", out):
             raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
 
