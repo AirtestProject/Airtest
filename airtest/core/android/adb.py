@@ -1199,15 +1199,15 @@ class ADB(object):
         """
         out = self.shell(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
                           '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
-        print(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
-                          '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'])
-        print(out)
+
+        debug_info = "cmd: {}\n out: {}".format(['am', 'start', '-S', '-W', '%s/%s' % (package, activity),
+                          '-c', 'android.intent.category.LAUNCHER', '-a', 'android.intent.action.MAIN'], out)
         if not re.search(r"Status:\s*ok", out):
             raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
 
         matcher = re.search(r"TotalTime:\s*(\d+)", out)
         if matcher:
-            return int(matcher.group(1))
+            return int(matcher.group(1)), debug_info
         else:
             return 0
 
