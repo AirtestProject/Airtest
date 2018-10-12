@@ -1202,7 +1202,7 @@ class ADB(object):
         if not re.search(r"Status:\s*ok", out):
             raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
 
-        matcher = re.search(r"TotalTime:\s*(\d+)", out)
+        matcher = re.search(r"ThisTime:\s*(\d+)", out)
         if matcher:
             return int(matcher.group(1))
         else:
