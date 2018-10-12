@@ -252,7 +252,6 @@ def touch(v, times=1, **kwargs):
     :return: finial position to be clicked
     :platforms: Android, Windows, iOS
     """
-    print(2222222, G.BASEDIR)
     if isinstance(v, Template):
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:

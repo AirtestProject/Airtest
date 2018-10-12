@@ -130,8 +130,8 @@ class LogToHtml(object):
                     src = os.path.join(LOGDIR, src)
                     screen['_filepath'] = src
                 else:
-                    screen['_filepath'] = os.path.abspath(os.path.join(self.log_root, src))
-                screen['src'] = screen['_filepath']
+                    screen['_filepath'] = os.path.join(self.log_root, src)
+                screen['src'] = src
                 break
 
         display_pos = None
@@ -191,7 +191,7 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
                 else:
-                    image_path = os.path.abspath(value['_filepath'])
+                    image_path = value['_filepath']
                 arg["image"] = image_path
                 crop_img = imread(value['_filepath'])
                 arg["resolution"] = get_resolution(crop_img)
