@@ -377,7 +377,6 @@ def main(args):
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
     plugins = args.plugins
-    print("plugins:", plugins)
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, lang=lang, plugins=plugins)
