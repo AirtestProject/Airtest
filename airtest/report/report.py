@@ -290,9 +290,9 @@ class LogToHtml(object):
     def is_pos(self, v):
         return isinstance(v, (list, tuple))
 
-    def copy_tree(self, src, dst):
+    def copy_tree(self, src, dst, ignore=None):
         try:
-            shutil.copytree(src, dst)
+            shutil.copytree(src, dst, ignore=ignore)
         except Exception as e:
             print(e)
 
@@ -310,7 +310,7 @@ class LogToHtml(object):
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
-            self.copy_tree(self.log_root, logpath)
+            self.copy_tree(self.log_root, logpath, ignore=shutil.ignore_patterns(dirname))
         # copy static files
         for subdir in ["css", "fonts", "image", "js"]:
             self.copy_tree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
