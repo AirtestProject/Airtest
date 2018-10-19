@@ -329,7 +329,8 @@ class LogToHtml(object):
 
         if not record_list:
             record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
-        records = [os.path.join(self.log_root, f) for f in record_list]
+        records = [os.path.join(self.log_root, f) if not self.export_dir
+                   else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
 
         if not self.static_root.endswith(os.path.sep):
             self.static_root = self.static_root.replace("\\", "/")
