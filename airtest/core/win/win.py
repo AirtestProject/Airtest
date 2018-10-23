@@ -85,7 +85,7 @@ class Windows(Device):
         """
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename="tmp.png"):
+    def snapshot(self, filename=None):
         """
         Take a screenshot and save it to `tmp.png` filename by default
 
@@ -96,8 +96,6 @@ class Windows(Device):
             display the screenshot
 
         """
-        if not filename:
-            filename = "tmp.png"
         if self.handle:
             screen = screenshot(filename, self.handle)
         else:

@@ -205,16 +205,15 @@ def snapshot(filename=None, msg=""):
     :return: absolute path of the screenshot
     :platforms: Android, iOS, Windows
     """
-    if not filename:
-        filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    if not os.path.isabs(filename):
-        logdir = ST.LOG_DIR or "."
-        filepath = os.path.join(logdir, filename)
+    if filename:
+        if not os.path.isabs(filename):
+            logdir = ST.LOG_DIR or "."
+            filename = os.path.join(logdir, filename)
+        screen = G.DEVICE.snapshot(filename)
+        try_log_screen(screen)
     else:
-        filepath = filename
-    screen = G.DEVICE.snapshot(filepath)
-    try_log_screen(screen)
-    return filepath
+        try_log_screen()
+    return filename
 
 
 @logwrap
