@@ -590,11 +590,10 @@ class ADB(object):
         try:
             out = self.cmd(cmds)
         except AdbError as err:
-            if "UNSUPPORTED" in err.stderr or "Failed to create session" in err.stderr:
-                return self.install_app(filepath, replace)
-            elif "Failed to finalize session" in err.stderr:
+            if "Failed to finalize session".lower() in err.stderr.lower():
                 return "Success"
-            raise err
+            else:
+                return self.install_app(filepath, replace)
 
         if re.search(r"Failure \[.*?\]", out):
             print(out)
