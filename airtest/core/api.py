@@ -210,10 +210,9 @@ def snapshot(filename=None, msg=""):
             logdir = ST.LOG_DIR or "."
             filename = os.path.join(logdir, filename)
         screen = G.DEVICE.snapshot(filename)
-        try_log_screen(screen)
+        return try_log_screen(screen)
     else:
-        try_log_screen()
-    return filename
+        return try_log_screen()
 
 
 @logwrap
