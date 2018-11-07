@@ -15,7 +15,7 @@ if sys.platform == "win32":
 
 setup(
     name='airtest',
-    version='1.0.23',
+    version='1.0.24',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows/Linux',
@@ -50,5 +50,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
