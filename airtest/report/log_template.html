@@ -238,6 +238,9 @@
             {% else %}
             <h4 lang="en">Author: Anonymous</h4>
             {% endif %}
+            {% if info.title %}
+                <h4><span lang="en">Title:</span> {{info.title}}</h4>
+            {% endif %}
             <h4>{{run_start}} -- {{run_end}}</h4>
 
             <h2 class="header" lang="en">Assert: Test Steps Summary</h2>

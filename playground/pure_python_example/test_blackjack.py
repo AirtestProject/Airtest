@@ -40,4 +40,4 @@ snapshot(msg="app stopped")
 print("test finished")
 
 # generate html report
-simple_report("logs")
+simple_report("logs", __file__)

@@ -191,9 +191,9 @@ class LogToHtml(object):
                     if not os.path.isfile(os.path.join(self.script_root, image_path)):
                         shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
                 else:
-                    image_path = os.path.abspath(value['_filepath'])
+                    image_path = os.path.abspath(value['_filepath'] or value['filename'])
                 arg["image"] = image_path
-                crop_img = imread(value['_filepath'])
+                crop_img = imread(value['_filepath'] or value['filename'])
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
@@ -351,7 +351,7 @@ class LogToHtml(object):
         return self._render(template_name, output_file, **data)
 
 
-def simple_report(logpath, tplpath=".", logfile=LOGFILE, output=HTML_FILE):
+def simple_report(logpath, tplpath, logfile=LOGFILE, output=HTML_FILE):
     rpt = LogToHtml(tplpath, logpath, logfile=logfile)
     rpt.report(HTML_TPL, output_file=output)
 
