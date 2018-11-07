@@ -12,8 +12,11 @@ from io import open
 def get_script_info(script_path):
     """extract info from script, like basename, __author__, __title__ and __desc__."""
     script_name = os.path.basename(script_path)
-    pyfilename = script_name.replace(".air", ".py")
-    pyfilepath = os.path.join(script_path, pyfilename)
+    if script_path.endswith(".py"):
+        pyfilepath = script_path
+    else:
+        pyfilename = script_name.replace(".air", ".py")
+        pyfilepath = os.path.join(script_path, pyfilename)
 
     if not os.path.exists(pyfilepath) and six.PY2:
         pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
