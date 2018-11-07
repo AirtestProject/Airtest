@@ -87,10 +87,10 @@ class Windows(Device):
 
     def snapshot(self, filename=None):
         """
-        Take a screenshot and save it to `tmp.png` filename by default
+        Take a screenshot and save it in ST.LOG_DIR folder
 
         Args:
-            filename: name of file where to store the screenshot
+            filename: name of the file to give to the screenshot, {time}.jpg by default
 
         Returns:
             display the screenshot
