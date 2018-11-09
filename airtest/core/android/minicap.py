@@ -9,7 +9,7 @@ from airtest.core.android.constant import STFLIB, ORI_METHOD
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, retry_once
 
 
 LOGGING = get_logger(__name__)
@@ -295,6 +295,7 @@ class Minicap(object):
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
+    @retry_once
     def get_frame_from_stream(self):
         """
         Get one frame from minicap stream
