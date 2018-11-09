@@ -311,9 +311,10 @@ class LogToHtml(object):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
             self.copy_tree(self.log_root, logpath, ignore=shutil.ignore_patterns(dirname))
-        # copy static files
-        for subdir in ["css", "fonts", "image", "js"]:
-            self.copy_tree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
+        # if self.static_root is not a http server address, copy static files from local directory
+        if os.path.exists(self.static_root):
+            for subdir in ["css", "fonts", "image", "js"]:
+                self.copy_tree(os.path.join(self.static_root, subdir), os.path.join(dirpath, "static", subdir))
 
         return dirpath, logpath
 
@@ -325,7 +326,8 @@ class LogToHtml(object):
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
             output_file = os.path.join(self.script_root, HTML_FILE)
-            self.static_root = "static/"
+            if os.path.exists(self.static_root):
+                self.static_root = "static/"
 
         if not record_list:
             record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
