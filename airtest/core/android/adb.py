@@ -1003,9 +1003,10 @@ class ADB(object):
         """
         dat = self.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(dat)
+        # in Android8.0 or higher, the result may be more than one
+        m = activityRE.findall(dat)
         if m:
-            return (m.group(1), m.group(2), m.group(3))
+            return m[-1]
         else:
             raise AirtestError("Can not get top activity, output:%s" % dat)
 
