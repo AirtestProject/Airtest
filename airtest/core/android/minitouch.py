@@ -188,7 +188,74 @@ class Minitouch(object):
         self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(x, y))
         time.sleep(duration)
         self.handle("u 0\nc\n")
+        
+    def __swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
+        """
+        Perform swipe event
 
+        minitouch protocol example::
+
+            d 0 0 0 50
+            c
+            m 0 20 0 50
+            c
+            m 0 40 0 50
+            c
+            m 0 60 0 50
+            c
+            m 0 80 0 50
+            c
+            m 0 100 0 50
+            c
+            u 0
+            c
+
+        Args:
+            tuple_from_xy: start point
+            tuple_to_xy: end point
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
+
+        Returns:
+            None
+
+        """
+        from_x, from_y = tuple_from_xy
+        to_x, to_y = tuple_to_xy
+
+        from_x, from_y = self.__transform_xy(from_x, from_y)
+        to_x, to_y = self.__transform_xy(to_x, to_y)
+
+        interval = float(duration) / (steps + 1)
+        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
+        time.sleep(interval)
+        for i in range(1, steps):
+            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(
+                from_x + (to_x - from_x) * i / steps,
+                from_y + (to_y - from_y) * i / steps,
+            ))
+            time.sleep(interval)
+        for i in range(10):
+            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(to_x, to_y))
+        time.sleep(interval)
+        
+    @on_method_ready('install_and_setup')        
+    def swipe_plus(self, cordinates_list = []):
+        """
+        Perform multi-points swipe event successively.
+
+        Args:
+            cordinates_list: list of cordinates.
+            
+        Returns:
+            None
+
+        """
+        for tuple_from_xy,tuple_to_xy in cordinates_list:
+            self.__swipe(tuple_from_xy, tuple_to_xy)
+
+        self.handle("u 0\nc\n")
+        
     @on_method_ready('install_and_setup')
     def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
