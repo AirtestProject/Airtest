@@ -242,7 +242,7 @@ class Minitouch(object):
     @on_method_ready('install_and_setup')        
     def swipe_along(self, cordinates_list = []):
         """
-        Perform multi-points swipe event successively.
+        Perform swipe event across multiple points in sequence.
 
         Args:
             cordinates_list: list of cordinates.
