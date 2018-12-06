@@ -189,7 +189,7 @@ class Minitouch(object):
         time.sleep(duration)
         self.handle("u 0\nc\n")
         
-    def __swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
+    def __swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5, touch_down=True):
         """
         Perform swipe event (without up action).
 
@@ -215,6 +215,7 @@ class Minitouch(object):
             tuple_to_xy: end point
             duration: time interval for swipe duration, default is 0.8
             steps: size of swipe step, default is 5
+            touch_down: True if tuple_from_xy is the first point of swipe_along or swipe
 
         Returns:
             None
@@ -227,7 +228,7 @@ class Minitouch(object):
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration) / (steps + 1)
-        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
+        self.handle("{} 0 {:.0f} {:.0f} 50\nc\n".format("d" if touch_down else "m", from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
             self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(
@@ -240,19 +241,25 @@ class Minitouch(object):
         time.sleep(interval)
         
     @on_method_ready('install_and_setup')        
-    def swipe_along(self, coordinates_list):
+    def swipe_along(self, coordinates_list, duration=0.8, steps=5):
         """
         Perform swipe event across multiple points in sequence.
 
         Args:
-            coordinates_list: list of coordinates.
+            coordinates_list: list of coordinates: [(x1, y1), (x2, y2), (x3, y3)]
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
             
         Returns:
             None
 
         """
-        for tuple_from_xy,tuple_to_xy in coordinates_list:
-            self.__swipe(tuple_from_xy, tuple_to_xy)
+        tuple_from_xy, tuple_to_xy = coordinates_list[0:2]
+        self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
+        if len(coordinates_list) > 2:
+            for tuple_to_xy in coordinates_list[1:]:
+                tuple_from_xy = tuple_to_xy
+                self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, touch_down=False)
 
         self.handle("u 0\nc\n")
         
@@ -261,9 +268,6 @@ class Minitouch(object):
       
         """
         Perform swipe event.
-
-
-
 
         Args:
             tuple_from_xy: start point
@@ -276,7 +280,7 @@ class Minitouch(object):
 
         """
         
-        self.__swipe(tuple_from_xy, tuple_to_xy)        
+        self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
         self.handle("u 0\nc\n")
 
     @on_method_ready('install_and_setup')
