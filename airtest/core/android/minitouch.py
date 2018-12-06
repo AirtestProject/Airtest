@@ -245,7 +245,7 @@ class Minitouch(object):
         Perform swipe event across multiple points in sequence.
 
         Args:
-            cordinates_list: list of coordinates.
+            coordinates_list: list of coordinates.
             
         Returns:
             None
