@@ -188,10 +188,10 @@ class Minitouch(object):
         self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(x, y))
         time.sleep(duration)
         self.handle("u 0\nc\n")
-        
-    def __swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5, touch_down=True):
+
+    def __swipe_move(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
         """
-        Perform swipe event (without up action).
+        Return a sequence of swipe motion events (only MoveEvent)
 
         minitouch protocol example::
 
@@ -215,32 +215,27 @@ class Minitouch(object):
             tuple_to_xy: end point
             duration: time interval for swipe duration, default is 0.8
             steps: size of swipe step, default is 5
-            touch_down: True if tuple_from_xy is the first point of swipe_along or swipe
 
         Returns:
-            None
+            [MoveEvent(from_x, from_y), ..., MoveEvent(to_x, to_y)]
 
         """
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
-
         from_x, from_y = self.__transform_xy(from_x, from_y)
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
+        ret = []
         interval = float(duration) / (steps + 1)
-        self.handle("{} 0 {:.0f} {:.0f} 50\nc\n".format("d" if touch_down else "m", from_x, from_y))
-        time.sleep(interval)
+
         for i in range(1, steps):
-            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(
-                from_x + (to_x - from_x) * i / steps,
-                from_y + (to_y - from_y) * i / steps,
-            ))
-            time.sleep(interval)
-        for i in range(10):
-            self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(to_x, to_y))
-        time.sleep(interval)
-        
-    @on_method_ready('install_and_setup')        
+            ret.append(MoveEvent((from_x + (to_x - from_x) * i / steps,
+                                  from_y + (to_y - from_y) * i / steps)))
+            ret.append(SleepEvent(interval))
+        ret += [MoveEvent((to_x, to_y)), SleepEvent(interval)]
+        return ret
+
+    @on_method_ready('install_and_setup')
     def swipe_along(self, coordinates_list, duration=0.8, steps=5):
         """
         Perform swipe event across multiple points in sequence.
@@ -249,20 +244,20 @@ class Minitouch(object):
             coordinates_list: list of coordinates: [(x1, y1), (x2, y2), (x3, y3)]
             duration: time interval for swipe duration, default is 0.8
             steps: size of swipe step, default is 5
-            
+
         Returns:
             None
 
         """
-        tuple_from_xy, tuple_to_xy = coordinates_list[0:2]
-        self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
-        if len(coordinates_list) > 2:
-            for tuple_to_xy in coordinates_list[1:]:
-                tuple_from_xy = tuple_to_xy
-                self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, touch_down=False)
+        tuple_from_xy = coordinates_list[0]
+        swipe_events = [DownEvent(tuple_from_xy), SleepEvent(0.1)]
+        for tuple_to_xy in coordinates_list[1:]:
+            swipe_events += self.__swipe_move(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
+            tuple_from_xy = tuple_to_xy
 
-        self.handle("u 0\nc\n")
-        
+        swipe_events.append(UpEvent())
+        self.perform(swipe_events)
+
     @on_method_ready('install_and_setup')
     def swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
       
@@ -279,9 +274,11 @@ class Minitouch(object):
             None
 
         """
-        
-        self.__swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
-        self.handle("u 0\nc\n")
+
+        swipe_events = [DownEvent(tuple_from_xy), SleepEvent(0.1)]
+        swipe_events += self.__swipe_move(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
+        swipe_events.append(UpEvent())
+        self.perform(swipe_events)
 
     @on_method_ready('install_and_setup')
     def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
