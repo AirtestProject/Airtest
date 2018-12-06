@@ -240,18 +240,18 @@ class Minitouch(object):
         time.sleep(interval)
         
     @on_method_ready('install_and_setup')        
-    def swipe_along(self, cordinates_list = []):
+    def swipe_along(self, coordinates_list):
         """
         Perform swipe event across multiple points in sequence.
 
         Args:
-            cordinates_list: list of cordinates.
+            cordinates_list: list of coordinates.
             
         Returns:
             None
 
         """
-        for tuple_from_xy,tuple_to_xy in cordinates_list:
+        for tuple_from_xy,tuple_to_xy in coordinates_list:
             self.__swipe(tuple_from_xy, tuple_to_xy)
 
         self.handle("u 0\nc\n")
