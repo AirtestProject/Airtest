@@ -1,6 +1,7 @@
 # _*_ coding:UTF-8 _*_
 import sys
 import threading
+import socket
 from functools import wraps
 from six import string_types
 from six.moves import queue
@@ -105,6 +106,17 @@ def on_method_ready(method_name):
                 setattr(inst, key, True)
             return func(inst, *args, **kwargs)
         return ready_func
+    return wrapper
+
+
+def retry_once(func):
+    @wraps(func)
+    def wrapper(inst, *args, **kwargs):
+        try:
+            return func(inst, *args, **kwargs)
+        except socket.error:
+            inst.frame_gen = None
+            return func(inst, *args, **kwargs)
     return wrapper
 
 
