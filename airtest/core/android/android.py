@@ -363,7 +363,18 @@ class Android(Device):
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
+    def swipe_along(self, coordinates_list):
+        """
+        Perform swipe event across multiple points in sequence.
 
+        Args:
+            coordinates_list: list of coordinates.
+            
+        Returns:
+            None
+
+        """
+        self.minitouch.swipe_along(coordinates_list)
     def pinch(self, *args, **kwargs):
         """
         Perform pinch event on the device
