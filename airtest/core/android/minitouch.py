@@ -266,10 +266,7 @@ class Minitouch(object):
       
         """
         Perform swipe event.
-
-
-
-
+        
         Args:
             tuple_from_xy: start point
             tuple_to_xy: end point
@@ -278,7 +275,6 @@ class Minitouch(object):
 
         Returns:
             None
-
         """
         from_x, from_y = tuple_from_xy
         self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
