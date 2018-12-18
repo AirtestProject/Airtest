@@ -227,7 +227,6 @@ class Minitouch(object):
         to_x, to_y = self.__transform_xy(to_x, to_y)
 
         interval = float(duration) / (steps + 1)
-        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
         time.sleep(interval)
         for i in range(1, steps):
             self.handle("m 0 {:.0f} {:.0f} 50\nc\n".format(
@@ -251,7 +250,13 @@ class Minitouch(object):
             None
 
         """
-        for tuple_from_xy,tuple_to_xy in coordinates_list:
+        from_x, from_y = coordinates_list[0]
+        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
+        for pos,tuple_from_xy in enumerate(coordinates_list):
+            try:
+                tuple_to_xy = coordinates_list[pos+1]
+            except IndexError:
+                break
             self.__swipe(tuple_from_xy, tuple_to_xy)
 
         self.handle("u 0\nc\n")
@@ -275,7 +280,8 @@ class Minitouch(object):
             None
 
         """
-        
+        from_x, from_y = tuple_from_xy
+        self.handle("d 0 {:.0f} {:.0f} 50\nc\n".format(from_x, from_y))
         self.__swipe(tuple_from_xy, tuple_to_xy)        
         self.handle("u 0\nc\n")
 
