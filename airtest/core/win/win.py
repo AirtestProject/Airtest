@@ -65,7 +65,9 @@ class Windows(Device):
             self.app = self._app.connect(handle=handle)
             self._top_window = self.app.window(handle=handle).wrapper_object()
         else:
-            kwargs = dict((k, int(v) if v.isdigit() else v) for k, v in kwargs.items())
+            for k in ["process", "timeout"]:
+                if k in kwargs:
+                    kwargs[k] = int(kwargs[k])
             self.app = self._app.connect(**kwargs)
             self._top_window = self.app.top_window().wrapper_object()
         self.set_foreground()
