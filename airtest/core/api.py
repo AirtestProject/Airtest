@@ -319,7 +319,30 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     G.DEVICE.swipe(pos1, pos2, **kwargs)
     delay_after_operation()
     return pos1, pos2
+  
+@logwrap
+def unlock_pattern(v, sequence):
+    """
+    Unlock screen by handset unlock pattern.
 
+    :param v1: a Template instance of pattern.
+    :param sequence: a list of pattern sequence. example:[1,2,3,5,7,8,9]
+    :raise Exception: general exception when parameters wrong.
+    :return: None.
+    :platforms: Android
+    """
+
+    if isinstance(v, Template):
+        coordinates = find_all(v)
+    else:
+        raise Exception("param v not a Template")
+    coordinates_list = [coordinate['result'] for coordinate in coordinates]
+    if len(coordinates_list) !=9:
+        raise Exception("coordinate_list length not nine.")
+    coordinates_list.sort(key = lambda x:(x[1],x[0]))
+    coordinates_perform = [coordinates_list[pos-1] for pos in sequence]
+    G.DEVICE.swipe_along(coordinates_perform)
+    delay_after_operation()
 
 @logwrap
 def pinch(in_or_out='in', center=None, percent=0.5):
