@@ -41,6 +41,12 @@
         padding: 10px;
         margin-bottom: 10px;
     }
+    h2.danger {
+        background-color: #d43f3a;
+        color: white;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
 
     h2 {
       font-size: 25px;
@@ -238,10 +244,37 @@
             {% else %}
             <h4 lang="en">Author: Anonymous</h4>
             {% endif %}
-            {% if info.title %}
+			{% if info.title %}
                 <h4><span lang="en">Title:</span> {{info.title}}</h4>
+            {% if info.desc %}
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion"
+                           href="#collapseOne">
+                            Description: (click unfold/fold)
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        {{info.desc | nl2br}}
+                    </div>
+                </div>
+              </div>
             {% endif %}
             <h4>{{run_start}} -- {{run_end}}</h4>
+
+            {% if not test_result %}
+            <h2 class="danger" lang="en">Failure: Failed Steps</h2>
+            <div id="fail_steps">
+              {% for step in steps %}
+                {% if step.traceback %}
+                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
 
             <h2 class="header" lang="en">Assert: Test Steps Summary</h2>
             <hr>
