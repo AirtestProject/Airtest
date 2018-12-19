@@ -5,6 +5,8 @@ import json
 import struct
 import threading
 import six
+import socket
+from functools import wraps
 from airtest.core.android.constant import STFLIB, ORI_METHOD
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
@@ -13,6 +15,17 @@ from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 
 
 LOGGING = get_logger(__name__)
+
+
+def retry_when_socket_error(func):
+    @wraps(func)
+    def wrapper(inst, *args, **kwargs):
+        try:
+            return func(inst, *args, **kwargs)
+        except socket.error:
+            inst.frame_gen = None
+            return func(inst, *args, **kwargs)
+    return wrapper
 
 
 class Minicap(object):
@@ -295,6 +308,7 @@ class Minicap(object):
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
+    @retry_when_socket_error
     def get_frame_from_stream(self):
         """
         Get one frame from minicap stream
@@ -343,3 +357,5 @@ class Minicap(object):
         else:
             LOGGING.warn("%s tear down failed" % self.frame_gen)
         self.frame_gen = None
+
+

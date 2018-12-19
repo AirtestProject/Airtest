@@ -13,10 +13,7 @@ def imread(filename):
     if not os.path.isfile(filename):
         raise FileNotExistError("File not exist: %s" % filename)
     if PY3:
-        stream = open(filename, "rb")
-        bytes = bytearray(stream.read())
-        numpyarray = np.asarray(bytes, dtype=np.uint8)
-        img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+        img = cv2.imdecode(np.fromfile(filename, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
     else:
         filename = filename.encode(sys.getfilesystemencoding())
         img = cv2.imread(filename, 1)
