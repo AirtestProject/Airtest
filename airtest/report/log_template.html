@@ -244,13 +244,14 @@
             {% else %}
             <h4 lang="en">Author: Anonymous</h4>
             {% endif %}
-			{% if info.title %}
+            {% if info.title %}
                 <h4><span lang="en">Title:</span> {{info.title}}</h4>
+            {% endif %}
             {% if info.desc %}
               <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion"
+                        <a lang="en" data-toggle="collapse" data-parent="#accordion"
                            href="#collapseOne">
                             Description: (click unfold/fold)
                         </a>
