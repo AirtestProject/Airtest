@@ -36,14 +36,19 @@ class TestIme(unittest.TestCase):
             raise RuntimeError("At lease one adb device required")
         cls.adb.serialno = devices[0][0]
         cls.ime = YosemiteIme(cls.adb)
+        cls.ime.start()
 
     def test_text(self):
         self.ime.text("nimei")
         self.ime.text("你妹")
 
+    def test_code(self):
+        self.ime.text("test code")
+        self.ime.code("2")
+
     def test_0_install(self):
-        self.ime.yosemite.uninstall()
-        self.ime.text("你妹")
+        self.ime.yosemite.install_or_upgrade()
+        self.ime.text("安装")
 
     def test_end(cls):
         cls.ime.end()
