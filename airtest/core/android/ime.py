@@ -124,3 +124,19 @@ class YosemiteIme(CustomIme):
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
+
+    def code(self, code):
+        """
+        Sending editor action
+
+        Args:
+            code: editor action code, e.g., 2 = IME_ACTION_GO, 3 = IME_ACTION_SEARCH
+                Editor Action Code Ref: http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html
+
+        Returns:
+            output form `adb shell` command
+
+        """
+        if not self.started:
+            self.start()
+        self.adb.shell("am broadcast -a ADB_EDITOR_CODE --ei code {}".format(str(code)))
