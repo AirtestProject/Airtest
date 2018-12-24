@@ -352,7 +352,7 @@ def keyevent(keyname, **kwargs):
 
 
 @logwrap
-def text(text, enter=True):
+def text(text, enter=True, **kwargs):
     """
     Input text on the target device. Text input widget must be active first.
 
@@ -361,7 +361,7 @@ def text(text, enter=True):
     :return: None
     :platforms: Android, Windows, iOS
     """
-    G.DEVICE.text(text, enter=enter)
+    G.DEVICE.text(text, enter=enter, **kwargs)
     delay_after_operation()
 
 
