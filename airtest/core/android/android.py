@@ -312,7 +312,7 @@ class Android(Device):
             self.adb.shell(["input", "text", text])
 
         if search:
-            self.adb.shell(["am", "broadcast", "-a", "ADB_EDITOR_CODE", "--ei", "code", "3"])
+            self.yosemite_ime.code("3")
             return
 
         # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
