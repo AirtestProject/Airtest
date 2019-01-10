@@ -120,6 +120,12 @@ Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备�
 - `atx`_
 - `pywinauto`_
 
+关于我们
+-------------
+
+访问我们的 `官网`_ 获得更多信息，同时欢迎大家扫描下方二维码关注我们的微信公众号：AirtestProject
+
+.. image:: http://airtest.netease.com/static/img/social_media/wechat_qrcode.jpg
 
 .. _从官网开始上手吧: http://airtest.netease.com/
 .. _官网: http://airtest.netease.com/
