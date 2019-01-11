@@ -299,6 +299,7 @@ class Android(Device):
         Args:
             text: text to input
             enter: True or False whether to press `Enter` key
+            search: True or False whether to press `Search` key on IME after input
 
         Returns:
             None
@@ -318,7 +319,6 @@ class Android(Device):
         # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
-
 
     def touch(self, pos, duration=0.01):
         """
