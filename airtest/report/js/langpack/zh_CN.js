@@ -31,6 +31,8 @@ Lang.prototype.pack.zh = {
 		"Assert not exists": "断言目标不存在",
 		"Snapshot": "截图",
 		"Assert equal": "断言相等",
-		"Assert not equal": "断言不相等"
+		"Assert not equal": "断言不相等",
+		"Title": "标题",
+		"Description: (click unfold/fold)": "描述: (点击展开/折叠)"
 	}
 };
