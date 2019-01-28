@@ -8,7 +8,7 @@ from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, SDK_VERISON_NEW
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -236,8 +236,8 @@ class Android(Device):
                 h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
-            # adb 截图总是要根据orientation旋转
-            elif self.cap_method == CAP_METHOD.ADBCAP:
+            # adb 截图总是要根据orientation旋转，但是SDK版本大于等于25(Android7.1以后)无需额外旋转
+            elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_NEW:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
