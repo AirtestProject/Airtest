@@ -14,7 +14,7 @@
 
 *   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
 
-*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allows you to quickly locate failure point. NetEase build [Airlab](https://airlab.163.com/) on top of Airtest Project.
+*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allows you to quickly locate failure point. NetEase builds [Airlab](https://airlab.163.com/) on top of Airtest Project.
 
 *   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run test cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
@@ -25,7 +25,7 @@
 
 | | | | | | | |
 |-|-|-|-|-|-|-|
-Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|小程序|
+Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
 
 [160+ Android models supported](./docs/wiki/platforms.md#android)
 
@@ -58,7 +58,7 @@ You can find the complete Airtest documentation on [readthedocs](http://airtest.
 
 ## Examples
 
-Airtest aims at providing platform independent API, so that you can write tests once and be able to run it on multiple devices. 
+Airtest aims at providing platform independent API, so that you can write cases once and be able to run it on multiple devices. 
 
 1. Using [connect_device](http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device) API you can connect to any android/iOS device or windows application.
 
@@ -90,24 +90,24 @@ For more detailed info, please refer to [Airtest Python API reference](http://ai
 
 ## Running ``.air`` cases from CLI
 
-Using AirtestIDE, you can easily create and author automated cases as ``.air`` directories.
+Using AirtestIDE, you can easily create automated cases as ``.air`` directories.
 Airtest CLI provides the possibility to execute cases on different host machine and target device platforms without using AirtestIDE itself.
 
 ```Shell
-    # run test targeting on Android phone connected to your host machine via ADB
+    # run cases targeting on Android phone connected to your host machine via ADB
     airtest run "path to your .air dir" --device Android:///
 
-    # run test targeting on Windows application whose title matches Unity.*
+    # run cases targeting on Windows application whose title matches Unity.*
     airtest run "path to your .air dir" --device "Windows:///?title_re=Unity.*"
 
-    # generate HTML report after running test
+    # generate HTML report after running cases
     airtest report "path to your .air dir"
 
     # or use as python module
     python -m airtest run "path to your .air dir" --device Android:///
 ```
 
-Try running provided example case: ``airtest/playground/test_blackjack.air`` and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli).
+Try running provided example case: [``airtest/playground/test_blackjack.air``](./playground/test_blackjack.air) and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli).
 
 
 ## Contribution
