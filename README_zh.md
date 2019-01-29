@@ -10,9 +10,9 @@
 
 *   **跨平台：**Airtest支持几乎所有平台的UI自动化，适用于游戏和App。
 
-*   **各种运行：**Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化测试。
+*   **各种运行：**Airtest提供了跨平台的API，包括安装应用、模拟输入、断言等。 基于图像识别技术定位UI元素，你无需嵌入任何代码即可进行自动化。
 
-*   **扩展性：**Airtest提供了命令行和python接口，可以很容易地在大规模设备集群上运行。自动生成的HTML测试报告，包含详细步骤和录屏，让你迅速定位失败点。
+*   **扩展性：**Airtest提供了命令行和python接口，可以很容易地在大规模设备集群上运行。自动生成的HTML报告，包含详细步骤和录屏，让你迅速定位失败点。
 
 *   **AirtestIDE：** 是一个强大的GUI工具，可以帮助你录制和调试自动化脚本。 AirtestIDE支持了完整的自动化流程：``录制脚本->真机回放->生成报告``。
 
@@ -55,7 +55,7 @@ Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2
 
 ## 例子
 
-Airtest希望提供平台无关的API，让你的测试代码可以运行在不同平台的应用上。
+Airtest希望提供平台无关的API，让你的自动化代码可以运行在不同平台的应用上。
 
 1. 使用 [connect_device](http://airtest.readthedocs.io/zh_CN/latest/README_MORE.html#connect-device) 来连接任意Android设备或者Windows窗口。
 
@@ -87,8 +87,8 @@ Airtest希望提供平台无关的API，让你的测试代码可以运行在不�
 
 ## 用命令行运行 ``.air`` 脚本
 
-使用AirtestIDE你可以非常轻松地录制一个测试脚本并保存为 ``.air`` 目录结构。
-Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备上运行测试脚本。
+使用AirtestIDE你可以非常轻松地录制一个自动化脚本并保存为 ``.air`` 目录结构。
+Airtest命令行则让你能够脱离IDE，在不同宿主机器和被测设备上运行自动化脚本。
 
 ```Shell
     # 在本地ADB连接的安卓手机上运行脚本
