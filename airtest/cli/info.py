@@ -40,8 +40,13 @@ def get_author_title_desc(text):
     author = strip_str(file_info.get("author", ""))
     title = strip_str(file_info.get("title", ""))
     desc = strip_str(file_info.get("desc", ""))
+    desc = process_desc(desc)
     return author, title, desc
 
+def process_desc(desc):
+    lines = desc.split('\n')
+    lines = [line.strip() for line in lines]
+    return '\n'.join(lines)
 
 def strip_str(string):
     """Strip string."""

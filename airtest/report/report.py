@@ -3,12 +3,14 @@
 import json
 import os
 import io
+import re
 import six
 import sys
 import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
 from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
@@ -21,6 +23,16 @@ HTML_TPL = "log_template.html"
 HTML_FILE = "log.html"
 STATIC_DIR = os.path.dirname(__file__)
 
+
+_paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+
+@evalcontextfilter
+def nl2br(eval_ctx, value):
+    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
+                          for p in _paragraph_re.split(escape(value)))
+    if eval_ctx.autoescape:
+        result = Markup(result)
+    return result
 
 class LogToHtml(object):
     """Convert log to html display """
@@ -277,6 +289,7 @@ class LogToHtml(object):
             extensions=(),
             autoescape=True
         )
+        env.filters['nl2br'] = nl2br
         template = env.get_template(template_name)
         html = template.render(**template_vars)
 

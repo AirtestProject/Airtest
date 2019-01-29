@@ -385,6 +385,11 @@ class Minitouch(object):
 
         x1, y1 = x0 - w * percent / 2, y0 - h * percent / 2
         x2, y2 = x0 + w * percent / 2, y0 + h * percent / 2
+        # 对计算出的原始坐标进行实际滑动位置的转换
+        x0, y0 = self.__transform_xy(x0, y0)
+        x1, y1 = self.__transform_xy(x1, y1)
+        x2, y2 = self.__transform_xy(x2, y2)
+
         cmds = []
         if in_or_out == 'in':
             cmds.append("d 0 {:.0f} {:.0f} 50\nd 1 {:.0f} {:.0f} 50\nc\n".format(x1, y1, x2, y2))
