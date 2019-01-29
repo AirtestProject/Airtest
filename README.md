@@ -2,7 +2,7 @@
 
 **Cross-Platform UI Automation Framework for Games and Apps**
 
-**跨平台的UI自动化框架，适用于游戏和App** （[中文版点这里](./README_zh.rst)）
+**跨平台的UI自动化框架，适用于游戏和App** （[中文版点这里](./README_zh.md)）
 
 
 ![image](./demo.gif)
