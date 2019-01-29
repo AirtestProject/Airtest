@@ -33,6 +33,7 @@ Lang.prototype.pack.zh = {
 		"Assert equal": "断言相等",
 		"Assert not equal": "断言不相等",
 		"Title": "标题",
-		"Description: (click unfold/fold)": "描述: (点击展开/折叠)"
+		"Description:": "描述：",
+		"Time:": "时间："
 	}
 };
