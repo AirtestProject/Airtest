@@ -217,6 +217,23 @@
         max-height: 400px;
         text-align: center;
     }
+    /* 展开与收缩 */
+    .airdesc-wrap{
+        line-height: 1.8;
+        margin-top: 0px;
+        width: 100%;
+    }
+    .airdesc-wrap .airdesc{
+        padding: 0 20px;
+        overflow: hidden;
+    }
+
+    .airdesc-wrap .glyphicon {
+        width: 100%;
+        font-size: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
 
     </style>
   </head>
@@ -248,23 +265,15 @@
                 <h4><span lang="en">Title:</span> {{info.title}}</h4>
             {% endif %}
             {% if info.desc %}
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a lang="en" data-toggle="collapse" data-parent="#accordion"
-                           href="#collapseOne">
-                            Description: (click unfold/fold)
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse in">
-                    <div class="panel-body">
-                        {{info.desc | nl2br}}
+                <h4 lang="en">Description:</h4>
+                 <div class="airdesc-wrap">
+                    <div class="airdesc">
+                      <div class="desc-content">{{ info.desc| nl2br }}</div>
                     </div>
+                    <div href="javascript:void(0);" class="glyphicon glyphicon-chevron-down"></div>
                 </div>
-              </div>
             {% endif %}
-            <h4>{{run_start}} -- {{run_end}}</h4>
+            <h4><span lang="en">Time:</span>{{run_start}} -- {{run_end}}</h4>
 
             {% if not test_result %}
             <h2 class="danger" lang="en">Failure: Failed Steps</h2>
@@ -624,6 +633,28 @@
     $(window).resize();
     // 延迟加载图片
     lazyload();
+
+    // 自动收缩过长的脚本描述
+      var descHeight = 100;
+      if ($('.desc-content').height() > descHeight) {
+          $(".airdesc-wrap .airdesc").css({height: descHeight+"px"});
+      }
+    $(".airdesc-wrap").off('click').on('click','.glyphicon-chevron-down', function () {
+        $(".airdesc").animate({height: $('.desc-content').height()}, "slow");
+        $(this).removeClass('glyphicon-chevron-down glyphicon-chevron-up').addClass('glyphicon-chevron-up');
+    }).on('click','.glyphicon-chevron-up', function () {
+        if ($('.desc-content').height() > descHeight) {
+            $(".airdesc").animate({height: descHeight + "px"}, "normal");
+        }
+        $(this).removeClass('glyphicon-chevron-down glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+    });
+    $(".airdesc").on("click", function () {
+        if ($(".airdesc-wrap .glyphicon-chevron-down").length > 0) {
+            $(".airdesc-wrap .glyphicon-chevron-down").trigger("click");
+        } else {
+            $(".airdesc-wrap .glyphicon-chevron-up").trigger("click");
+        }
+    })
   });
   </script>
 
