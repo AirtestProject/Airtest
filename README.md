@@ -1,35 +1,32 @@
 Airtest
 =======
 
-.. image:: https://travis-ci.org/AirtestProject/Airtest.svg?branch=master
-    :target: https://travis-ci.org/AirtestProject/Airtest
+[![Build status](https://travis-ci.org/AirtestProject/Airtest.svg?branch=master)](https://travis-ci.org/AirtestProject/Airtest)
 
 **UI Test Automation Framework for Games and Apps**
 
-**跨平台的UI自动化测试框架，适用于游戏和App** （`中文版点这里`_）
+**跨平台的UI自动化测试框架，适用于游戏和App** （[中文版点这里](./README_zh.rst)）
 
 
-.. image:: demo.gif
+![image](./demo.gif)
 
 
-Getting Started
----------------
+## Getting Started
 
 Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps.
 
 Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
 
-AirtestIDE
-----------
-**AirtestIDE** is an out of the box GUI tool that helps to create and
+## AirtestIDE
+
+AirtestIDE is an out of the box GUI tool that helps to create and
 record test cases in a user-friendly way. AirtestIDE provides QA with
 a complete production workflow: ``record -> replay -> report``
 
-`Get Started from Airtest Project Homepage`_
+[Get Started from Airtest Project Homepage](http://airtest.netease.com/)
 
 
-Supported Platforms
--------------------
+## Supported Platforms
 
 Android|`iOS`_|Windows|Unity|Cocos2dx|Egret|Unreal4|
 
@@ -138,9 +135,9 @@ Thanks for all these great works that make this project better.
 - `pywinauto`_
 
 
-.. _中文版点这里: ./README_zh.rst
+.. _中文版点这里: 
 .. _homepage: http://airtest.netease.com/
-.. _Get Started from Airtest Project Homepage: http://airtest.netease.com/
+.. _Get Started from Airtest Project Homepage: 
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
 .. _simulated input: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
