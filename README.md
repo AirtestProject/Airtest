@@ -1,11 +1,8 @@
-Airtest
-=======
+# Airtest &middot; [![Build status](https://travis-ci.org/AirtestProject/Airtest.svg?branch=master)](https://travis-ci.org/AirtestProject/Airtest)
 
-[![Build status](https://travis-ci.org/AirtestProject/Airtest.svg?branch=master)](https://travis-ci.org/AirtestProject/Airtest)
+**Cross-Platform UI Automation Framework for Games and Apps**
 
-**UI Test Automation Framework for Games and Apps**
-
-**跨平台的UI自动化测试框架，适用于游戏和App** （[中文版点这里](./README_zh.rst)）
+**跨平台的UI自动化框架，适用于游戏和App** （[中文版点这里](./README_zh.rst)）
 
 
 ![image](./demo.gif)
@@ -13,68 +10,63 @@ Airtest
 
 ## Getting Started
 
-Airtest is a cross-platform automated testing framework focusing mainly on games, but can also be used for native apps.
+*   **Cross-Platform:** Airtest automated testing framework focusing mainly on games, but can also be used for native apps.
 
-Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate test on games without injecting any code. The test will generate an HTML report, which allows you to quickly locate failed test cases.
+*   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
 
-## AirtestIDE
+*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allows you to quickly locate failure point. NetEase build [Airlab](https://airlab.163.com/) on top of Airtest Project.
 
-AirtestIDE is an out of the box GUI tool that helps to create and
-record test cases in a user-friendly way. AirtestIDE provides QA with
-a complete production workflow: ``record -> replay -> report``
+*   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run test cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
 [Get Started from Airtest Project Homepage](http://airtest.netease.com/)
 
 
-## Supported Platforms
+#### Supported Platforms
 
-Android|`iOS`_|Windows|Unity|Cocos2dx|Egret|Unreal4|
+| | | | | | | |
+|-|-|-|-|-|-|-|
+Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|小程序|
 
-`details in here`_
+[160+ Android models supported](./docs/wiki/platforms.md#android)
 
 
-Installation
-------------
+## Installation
 
 Use `pip` to install Airtest python library. 
 
-.. code:: shell
-
+```Shell
     pip install -U airtest
-
+```
 
 On MacOS/Linux platform, you need to grante adb execute permission.
 
-.. code:: shell
-
+```Shell
     # for mac
     cd {your_python_path}/site-packages/airtest/core/android/static/adb/mac
     # for linux
     # cd {your_python_path}/site-packages/airtest/core/android/static/adb/linux
     chmod +x adb
+```
 
-Download AirtestIDE from our `homepage`_ if you need to use the GUI tool.
-
-
-Documentation
--------------
-
-You can find the complete Airtest documentation on `readthedocs`_.
+Download AirtestIDE from our [homepage](http://airtest.netease.com/) if you need to use the GUI tool.
 
 
-Example
--------
+## Documentation
+
+You can find the complete Airtest documentation on [readthedocs](http://airtest.readthedocs.io/).
+
+
+## Examples
 
 Airtest aims at providing platform independent API, so that you can write tests once and be able to run it on multiple devices. 
 
-1. Using `connect_device`_ API you can connect to any android/iOS device or windows application.
+1. Using [connect_device](http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device) API you can connect to any android/iOS device or windows application.
 
-2. Then perform `simulated input`_ to test your game or app. 
+2. Then perform [simulated input](http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input) to test your game or app. 
 
-3. And **do not** forget to `make assertions`_ of the expected test result. 
+3. **DO NOT** forget to [make assertions](http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion) of the expected result. 
 
-
-.. code:: python
+```Python
 
     from airtest.core.api import *
 
@@ -91,19 +83,17 @@ Airtest aims at providing platform independent API, so that you can write tests 
     keyevent("BACK")
     home()
     uninstall("package_name_of_your_apk")
+```
+
+For more detailed info, please refer to [Airtest Python API reference](http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html) or take a look at [API code](./airtest/core/api.py)
 
 
-For more detailed info, please refer to `Airtest Python API reference`_ or take a look at `API code`_
+## Running ``.air`` cases from CLI
 
+Using AirtestIDE, you can easily create and author automated cases as ``.air`` directories.
+Airtest CLI provides the possibility to execute cases on different host machine and target device platforms without using AirtestIDE itself.
 
-Running ``.air`` from CLI
--------------------------
-
-Using AirtestIDE, you can easily create and author automated tests as ``.air`` directories.
-Airtest CLI provides the possibility to execute tests on different host machine and target device platforms without using AirtestIDE itself.
-
-.. code:: shell
-
+```Shell
     # run test targeting on Android phone connected to your host machine via ADB
     airtest run "path to your .air dir" --device Android:///
 
@@ -115,40 +105,20 @@ Airtest CLI provides the possibility to execute tests on different host machine 
 
     # or use as python module
     python -m airtest run "path to your .air dir" --device Android:///
+```
 
-Try running provided test case: ``airtest/playground/test_blackjack.air`` and see `Usage of CLI`_.
+Try running provided example case: ``airtest/playground/test_blackjack.air`` and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli).
 
 
-Contribution
-------------
+## Contribution
 
 Pull requests are very welcome.
 
 
-Thanks
-------
+## Thanks
 
 Thanks for all these great works that make this project better.
 
-- `stf`_
-- `atx`_
-- `pywinauto`_
-
-
-.. _中文版点这里: 
-.. _homepage: http://airtest.netease.com/
-.. _Get Started from Airtest Project Homepage: 
-.. _readthedocs: http://airtest.readthedocs.io/
-.. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
-.. _simulated input: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
-.. _make assertions: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
-.. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
-.. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
-.. _API code: ./airtest/core/api.py
-.. _Usage of CLI: http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli
-.. _stf: https://github.com/openstf
-.. _atx: https://github.com/NetEaseGame/ATX
-.. _pywinauto: https://github.com/pywinauto/pywinauto
-.. _iOS: https://github.com/AirtestProject/iOS-Tagent
-.. _details in here: ./docs/wiki/platforms.md
-
+- [stf](https://github.com/openstf)
+- [atx](https://github.com/NetEaseGame/ATX)
+- [pywinauto](https://github.com/pywinauto/pywinauto)

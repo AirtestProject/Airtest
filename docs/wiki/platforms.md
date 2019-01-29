@@ -1,15 +1,6 @@
 Supported Platforms
 ===================
 
-## Overview
-
-|Platform|Android|iOS|Windows|Unity|Cocos2dx|Egret|Unreal4|
-|----|------|---|--------|---|--------|-----|------|
-|Airtest|yes|yes|yes|yes|yes|yes|yes|
-|Poco|yes|yes|yes|yes|yes|yes|no|
-|AirtestIDE|yes|yes|yes|yes|yes|yes|no|
-
-
 ## Android
 
 | 序号 | 测试机型                          | 兼容性 | 性能 | 备注 |
