@@ -112,7 +112,7 @@ Try running provided example case: [``airtest/playground/test_blackjack.air``](.
 
 ## Contribution
 
-Pull requests are very welcome.
+Pull requests are very welcome. [Help needed here](./docs/wiki/platforms.md#pull-request-)
 
 
 ## Thanks
