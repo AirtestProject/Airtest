@@ -147,12 +147,20 @@ Using ``connect_device`` API you can connect to any android/iOS device or window
 
     connect_device("platform://host:port/uuid?param=value&param2=value2")
 
-platform: Android/iOS/Windows...
-host: adb host for android, iproxy host for iOS, empty for other platforms
-port: adb port for android, iproxy port for iOS, empty for other platforms
-uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
-param: device initialization configuration fields. e.g. cap_method/ori_method/...
-value: device initialization configuration field values. see also `connect_device`_.
+- platform: Android/iOS/Windows...
+
+- host: adb host for android, iproxy host for iOS, empty for other platforms
+
+- port: adb port for android, iproxy port for iOS, empty for other platforms
+
+- uuid: uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS
+
+- param: device initialization configuration fields. e.g. cap_method/ori_method/...
+
+- value: device initialization configuration field values.
+
+
+see also `connect_device`_.
 
 Connect android device
 ***********************
@@ -303,7 +311,7 @@ get case info
 
 Import from other ``.air``
 --------------------------
-You can write some common used function in one ``.air`` script and import it from other scripts. Airtest provide ``using`` API to manage the context change including ``sys.path`` and ``Template`` search path. 
+You can write some common used function in one ``.air`` script and import it from other scripts. Airtest provide ``using`` API to manage the context change including ``sys.path`` and ``Template`` search path.
 
 .. code:: python
 
@@ -319,7 +327,6 @@ You can write some common used function in one ``.air`` script and import it fro
 .. _homepage: http://airtest.netease.com/
 .. _readthedocs: http://airtest.readthedocs.io/
 .. _pywinauto documentation: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.findwindows.html#pywinauto.findwindows.find_elements
-.. _connect_device: http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device
 .. _simulated input: http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input
 .. _iOS-Tagent: https://github.com/AirtestProject/iOS-Tagent
 .. _make assertions: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
@@ -327,3 +334,4 @@ You can write some common used function in one ``.air`` script and import it fro
 .. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
 .. _API code: ./airtest/core/api.py
 .. _connect_device: https://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html#airtest.core.api.connect_device
+.. _AirLab: https://airlab.163.com
