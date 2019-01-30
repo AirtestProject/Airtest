@@ -58,7 +58,7 @@ You can find the complete Airtest documentation on [readthedocs](http://airtest.
 
 ## Examples
 
-Airtest aims at providing platform independent API, so that you can write automated cases once and be able to run it on multiple devices. 
+Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices.
 
 1. Using [connect_device](http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device) API you can connect to any android/iOS device or windows application.
 

@@ -19,7 +19,7 @@ Airtest
 Getting Started
 ---------------
 
-*   **Cross-Platform:** Airtest automates games and apps on almost all platforms.
+*   **Cross-Platform:** Airtest automates games and apps on many different platforms.
 
 *   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
 
@@ -96,7 +96,7 @@ Example
 ------------
 
 Airtest provides simple APIs that are platform independent. This section
-describes how to create automated cases which does the following:
+describes how to automate a test case which does the following:
 
 1. connects to local android device with ``adb``
 2. installs the ``apk`` application
@@ -129,7 +129,7 @@ For more detailed info, please refer to `Airtest Python API reference`_ or take 
 Basic Usage
 ------------
 
-Airtest aims at providing platform independent API, so that you can write automated cases once and be able to run it on multiple devices. 
+Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices. 
 
 1. Using `connect_device`_ API you can connect to any android/iOS device or windows application. 
 
