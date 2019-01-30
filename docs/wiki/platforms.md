@@ -16,7 +16,7 @@ Supported Platforms
 
 *	由于Android设备类型特别多，此列表是部分已经验证过设备列表
 *	[部分厂商设备需要特殊设置：小米、三星、华为、vivo、OPPO、魅族...](http://airtest.netease.com/docs/cn/2_device_connection/2_android_faq.html#id7)
-*	如果你的设备不在此列表中，请点击右上角的`Edit this file`并发起[Pull Request](./platforms.md#pull-request-)
+*	如果你的设备不在此列表中，请点击右上角的`Edit this file`并发起[Pull Request](./platforms.md#pull-request-guide)
 
 
 | 序号 | 测试机型                          | 兼容性 | 性能 | 备注 |
@@ -186,7 +186,7 @@ Supported Platforms
 | 163  | 锤子 坚果 Pro 2（OS105）          | 通过   | 高   |      |
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
 
-## Pull Request指南
+## Pull Request Guide
 
 *	由于市面上的设备类型特别多，希望大家可以共同维护这份列表
 *	Airtest Team会定期整理这份列表，并尽力提高Airtest的兼容性
