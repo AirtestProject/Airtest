@@ -129,7 +129,7 @@ For more detailed info, please refer to `Airtest Python API reference`_ or take 
 Basic Usage
 ------------
 
-Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices. 
+Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices and platforms.
 
 1. Using `connect_device`_ API you can connect to any android/iOS device or windows application. 
 
@@ -164,7 +164,10 @@ Connect android device
 
 .. code:: python
 
-    # connect a local adb device using default params
+    # connect an android phone with adb
+    init_device("Android")
+
+    # or use connect_device api with default params
     connect_device("android:///")
 
     # connect a remote device using custom params
