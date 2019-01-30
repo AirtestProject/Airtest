@@ -1,7 +1,23 @@
 Supported Platforms
 ===================
 
+## iOS
+
+以[iOS-Tagent](https://github.com/AirtestProject/iOS-Tagent)文档为准，如下版本完全支持：
+
+|Xcode|iOS|
+|-----|---|
+|10|12|
+|9|11|
+
+其他版本的xcode和iOS未经完整测试，可能会出现非预期的错误情况。
+
 ## Android
+
+*	由于Android设备类型特别多，此列表是部分已经验证过设备列表
+*	[部分厂商设备需要特殊设置：小米、三星、华为、vivo、OPPO、魅族...](http://airtest.netease.com/docs/cn/2_device_connection/2_android_faq.html#id7)
+*	如果你的设备不在此列表中，请点击右上角的`Edit this file`并发起[Pull Request](./platforms.md#pull-request-)
+
 
 | 序号 | 测试机型                          | 兼容性 | 性能 | 备注 |
 |------|----------------------------------|-------|------|------|
@@ -139,7 +155,7 @@ Supported Platforms
 | 132  | 三星 Galaxy S7（SM-G9308）        | 通过   | 高   |      |
 | 133  | 三星 Galaxy S7 Edge（SM-G9350）   | 通过   | 高   |      |
 | 134  | 三星 Galaxy S8（SM-G9500）        | 通过   | 高   |      |
-| 135  | 三星 Galaxy S8|（SM-G9550）       | 通过   | 高   |      |
+| 135  | 三星 Galaxy S8（SM-G9550）       | 通过   | 高   |      |
 | 136  | 魅族 MX4（移动4G）                | 通过   | 低   |      |
 | 137  | 魅族 魅蓝     | 通过   | 低   |      |
 | 138  | 魅族 魅蓝 Note 2（M571C/电信4G）  | 通过   | 低   |      |
@@ -169,3 +185,28 @@ Supported Platforms
 | 162  | 一加 5（A5000）                   | 通过   | 高   |      |
 | 163  | 锤子 坚果 Pro 2（OS105）          | 通过   | 高   |      |
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
+
+## Pull Request指南
+
+*	由于市面上的设备类型特别多，希望大家可以共同维护这份列表
+*	Airtest Team会定期整理这份列表，并尽力提高Airtest的兼容性
+
+操作步骤：
+
+1. 点击右上角的`Edit this file`
+
+	![image](./editthisfile.png)
+
+2. 在列表尾部增加一行，不管是否验证通过都可以加上去
+
+	```
+	| 165  | OPPO R20      | 通过     | 高   |  |
+	| 166  | OPPO R21      | 不通过   | 高   |  |
+	```
+
+
+3. 发起[Pull Request](https://github.com/AirtestProject/Airtest/pulls)
+
+	![image](./pr.png)
+
+4. Pull Request成功之后，你会成为Airtest项目的[Contributor](https://github.com/AirtestProject/Airtest/graphs/contributors)
