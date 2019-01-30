@@ -23,9 +23,9 @@
 
 #### Supported Platforms
 
-| | | | | | | |
-|-|-|-|-|-|-|-|
-Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
+| | | | | | | | |
+|-|-|-|-|-|-|-|-|
+Android |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
 
 [160+ Android models supported](./docs/wiki/platforms.md#android)
 
