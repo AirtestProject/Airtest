@@ -186,6 +186,21 @@ Supported Platforms
 | 163  | 锤子 坚果 Pro 2（OS105）          | 通过   | 高   |      |
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
 
+
+## Android Emulator
+
+下列模拟器都经过验证，其中网易Mumu会定期验证最新版本。[Android模拟器连接指引](http://airtest.netease.com/docs/cn/2_device_connection/3_emulator_connection.html)
+
+
+*	[x] AVD
+*	[x] 网易Mumu	
+*	[x] 夜神
+*	[x] 逍遥	
+*	[x] iTools
+*	[x] 天天	
+*	[x] 海马玩
+*	[x] BlueStacks
+
 ## Pull Request Guide
 
 *	由于市面上的设备类型特别多，希望大家可以共同维护这份列表
