@@ -11,7 +11,7 @@ APK = "blackjack-release-signed.apk"
 
 
 # set log file if you want a html report
-set_logdir("logs")
+set_logdir("log")
 
 # connect android device with params: cap_method=javacap
 init_device("Android", cap_method="javacap")
@@ -44,4 +44,4 @@ snapshot(msg="app stopped")
 print("test finished")
 
 # generate html report
-simple_report("logs", __file__)
+simple_report("log", __file__)
