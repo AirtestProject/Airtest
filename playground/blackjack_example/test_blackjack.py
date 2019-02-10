@@ -9,12 +9,33 @@ from airtest.report.report import simple_report
 PKG = "org.cocos2d.blackjack"
 APK = "blackjack-release-signed.apk"
 
+def cli_setup(args=None):
+    from airtest.cli.parser import runner_parser
+    from airtest.cli.runner import setup_by_args
+    import sys
+    if not args:
+        if len(sys.argv) < 2:
+            print("no cmdline args")
+            return False
+        args = sys.argv
+    print(args)
+    ap = runner_parser()
+    args = ap.parse_args(args)
+    setup_by_args(args)
+    return True
 
-# set log file if you want a html report
-set_logdir("log")
 
-# connect android device with params: cap_method=javacap
-init_device("Android", cap_method="javacap")
+if not cli_setup():
+    # set log file if you want a html report
+    # set_logdir("log")
+    # connect android device with params: cap_method=javacap
+    # init_device("Android", cap_method="javacap")
+
+    # or setup env at once
+    auto_setup(
+        devices=["Android:///?cap_method=javacap&ori_method=adbori"],
+        logdir="log",
+    )
 
 # install and start the app
 wake()
