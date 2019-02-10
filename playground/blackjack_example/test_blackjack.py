@@ -12,16 +12,28 @@ APK = "blackjack-release-signed.apk"
 def cli_setup(args=None):
     from airtest.cli.parser import runner_parser
     from airtest.cli.runner import setup_by_args
+    import argparse
     import sys
+
     if not args:
         if len(sys.argv) < 2:
             print("no cmdline args")
             return False
         args = sys.argv
     print(args)
-    ap = runner_parser()
-    args = ap.parse_args(args)
-    setup_by_args(args)
+
+    ap = argparse.ArgumentParser()
+    if "--report" in args:
+        from airtest.report.report import main as report_main
+        from airtest.report.report import get_parger as report_parser
+        ap = report_parser(ap)
+        args = ap.parse_args(args)
+        report_main(args)
+        exit(0)
+    else:
+        ap = runner_parser(ap)
+        args = ap.parse_args(args)
+        setup_by_args(args)
     return True
 
 
