@@ -11,7 +11,7 @@ import warnings
 from io import open
 from airtest.core.api import G, auto_setup, log
 from airtest.core.settings import Settings as ST
-from airtest.utils.compat import decode_path
+from airtest.utils.compat import decode_path, script_dir
 from copy import copy
 
 
@@ -116,10 +116,7 @@ def setup_by_args(args):
         print("do not connect device")
 
     # set base dir to find tpl
-    if args.script.endswith(".air"):
-        dirpath = decode_path(args.script)
-    else:
-        dirpath = os.path.dirname(args.script) or "."
+    dirpath = script_dir(args.script)
 
     # set log dir
     if args.log is True:

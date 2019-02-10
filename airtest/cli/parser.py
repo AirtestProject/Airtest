@@ -42,7 +42,6 @@ def cli_setup(args=None):
     ap = argparse.ArgumentParser()
     if "--report" in args:
         from airtest.report.report import main as report_main
-        from airtest.report.report import get_parger as report_parser
         ap = report_parser(ap)
         args = ap.parse_args(args)
         report_main(args)

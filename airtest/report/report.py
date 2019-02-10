@@ -12,7 +12,7 @@ import traceback
 from copy import deepcopy
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
-from airtest.utils.compat import decode_path
+from airtest.utils.compat import decode_path, script_dir
 from six import PY3
 from pprint import pprint
 
@@ -387,13 +387,9 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
-    if args.script.endswith(".air"):
-        path = decode_path(args.script)
-    else:
-        path = os.path.dirname(args.script) or "."
+    path = script_dir(args.script)
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
-    print(log_root)
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None
