@@ -12,7 +12,6 @@ import traceback
 from copy import deepcopy
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
-from airtest.cli.info import get_script_info
 from airtest.utils.compat import decode_path
 from six import PY3
 from pprint import pprint
@@ -334,7 +333,9 @@ class LogToHtml(object):
     def report(self, template_name, output_file=None, record_list=None):
         self._load()
         steps = self._analyse()
-        info = json.loads(get_script_info(self.script_root))
+        # info = json.loads(get_script_info(self.script_root))
+        # todo: read info from log.txt
+        info = {}
 
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
@@ -380,14 +381,19 @@ def get_parger(ap):
     ap.add_argument("--export", help="export a portable report dir containing all resources")
     ap.add_argument("--lang", help="report language", default="en")
     ap.add_argument("--plugins", help="load reporter plugins", nargs="+")
+    ap.add_argument("--report", help="placeholder for report cmd", default=True, nargs="?")
     return ap
 
 
 def main(args):
     # script filepath
-    path = decode_path(args.script)
+    if args.script.endswith(".air"):
+        path = decode_path(args.script)
+    else:
+        path = os.path.dirname(args.script) or "."
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
+    print(log_root)
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None
