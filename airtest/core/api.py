@@ -100,11 +100,6 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     if devices:
         for dev in devices:
             connect_device(dev)
-    elif not G.DEVICE_LIST:
-        try:
-            connect_device("Android:///")
-        except IndexError:
-            pass
     if basedir:
         if os.path.isfile(basedir):
             basedir = os.path.dirname(basedir)
