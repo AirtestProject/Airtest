@@ -28,7 +28,8 @@ def script_dir_name(script_path):
 
 
 def script_log_dir(script_path, logdir):
-    logdir = decode_path(logdir)
     if logdir is True:
         logdir = os.path.join(script_path, DEFAULT_LOG_DIR)
+    elif logdir:
+        logdir = decode_path(logdir)
     return logdir
