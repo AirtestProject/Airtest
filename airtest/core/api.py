@@ -9,9 +9,10 @@ from six.moves.urllib.parse import parse_qsl, urlparse
 
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
+from airtest.core.settings import Settings as ST
+from airtest.utils.compat import script_log_dir
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
-from airtest.core.settings import Settings as ST
 
 
 """
@@ -96,16 +97,21 @@ def set_current(idx):
 def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     """
     Auto setup running env and try connect android device if not device connected.
+    :param basedir: basedir of script, __file__ is also acceptable.
+    :param devices: connect_device uri in list.
+    :param logdir: log dir for script report, default is None for no log, set to `True` for <basedir>/log.
+    :param project_root: project root dir for `using` api.
     """
-    if devices:
-        for dev in devices:
-            connect_device(dev)
     if basedir:
         if os.path.isfile(basedir):
             basedir = os.path.dirname(basedir)
         if basedir not in G.BASEDIR:
             G.BASEDIR.append(basedir)
+    if devices:
+        for dev in devices:
+            connect_device(dev)
     if logdir:
+        logdir = script_log_dir(basedir, logdir)
         set_logdir(logdir)
     if project_root:
         ST.PROJECT_ROOT = project_root

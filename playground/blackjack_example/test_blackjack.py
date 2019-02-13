@@ -11,10 +11,9 @@ APK = "blackjack-release-signed.apk"
 
 
 if not cli_setup():
-    auto_setup(
-        devices=["Android:///?cap_method=javacap&ori_method=adbori"],
-        logdir="log",
-    )
+    auto_setup(__file__, logdir=True, devices=[
+        "Android:///?cap_method=javacap&ori_method=adbori",
+    ])
 
 # install and start the app
 wake()
@@ -45,4 +44,4 @@ print("test finished")
 
 # generate html report
 from airtest.report.report import simple_report
-simple_report("log", __file__)
+simple_report(__file__)
