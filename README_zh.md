@@ -19,13 +19,11 @@
 [从官网开始上手吧](http://airtest.netease.com/)
 
 
-#### 跨平台支持
+#### [跨平台支持](./docs/wiki/platforms.md)
 
 | | | | | | | |
 |-|-|-|-|-|-|-|
 Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|白鹭引擎|[微信小程序](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
-
-[160+ Android型号支持](./docs/wiki/platforms.md#android)
 
 ## 安装
 
