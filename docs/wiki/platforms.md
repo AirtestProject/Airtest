@@ -1,6 +1,23 @@
 Supported Platforms
 ===================
 
+## Overview
+
+
+| Platforms                 | Airtest                        | Poco                                                                                                    |
+|---------------------------|--------------------------------|---------------------------------------------------------------------------------------------------------|
+| Android                   | √ [model list](#android)             | √                                                                                                       |
+| Emulator                  | √ [model list](#android-emulator)    | √                                                                                                       |
+| iOS                       | √ [model list](https://github.com/AirtestProject/iOS-Tagent) | [ios-tagent](https://github.com/AirtestProject/iOS-Tagent)                            |
+| Windows                   | √                              | Not yet                                                                                                 | 
+| Cocos2dx-js & Cocos2dx-lua| √                              | √ [integration doc](https://poco.readthedocs.io/en/latest/source/doc/integration.html#cocos2dx-lua)            |
+| Unity3D                   | √                              | √ [integration doc](https://poco-chinese.readthedocs.io/en/latest/source/doc/integration.html#unity3d)         |
+| Egret                     | √                              | √ [integration doc](https://github.com/AirtestProject/Poco-SDK/tree/master/Egret)                              |
+| WeChat Applet & Webview   | √                              | √ [tutorial](http://airtest.netease.com/docs/cn/6_poco_framework/poco_webview.html)                     |
+| Netease engines           | √                              | √ [tutorial](http://git-qa.gz.netease.com/maki/netease-ide-plugin)                                      |
+| Other engines             | √                              | √ [implementation doc](https://poco-chinese.readthedocs.io/en/latest/source/doc/implementation_guide.html)        |
+
+
 ## iOS
 
 以[iOS-Tagent](https://github.com/AirtestProject/iOS-Tagent)文档为准，如下版本完全支持：
