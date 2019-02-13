@@ -21,27 +21,11 @@
 [Get Started from Airtest Project Homepage](http://airtest.netease.com/)
 
 
-#### Supported Platforms
+#### [Supported Platforms](./docs/wiki/platforms.md)
 
 | | | | | | | | |
 |-|-|-|-|-|-|-|-|
 Android |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
-
-[160+ Android models supported](./docs/wiki/platforms.md#android)
-
-| Platforms                 | Airtest                                              | Poco                                                                                                                                      |
-|---------------------------|------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| Android                   | [wiki](./docs/wiki/platforms.md#android)             | Native Android APP                                                                                                                        |
-| Emulator                  | [wiki](./docs/wiki/platforms.md#android-emulator)    |                                                                                                                                           |
-| iOS                       | [wiki](https://github.com/AirtestProject/iOS-Tagent) | [wiki](https://github.com/AirtestProject/iOS-Tagent)                                                                                      |
-| Windows                   |                                                      | Coming soon                                                                                                                               |
-| Cocos2dx-js, Cocos2dx-lua | √                                                    | [Implementation Document](https://poco.readthedocs.io/en/latest/source/doc/integration.html#cocos2dx-lua)                                 |
-| Unity3D                   | √                                                    | [Implementation Document](https://poco-chinese.readthedocs.io/en/latest/source/doc/integration.html#unity3d)                              |
-| Egret                     | √                                                    | [Implementation Document](https://github.com/AirtestProject/Poco-SDK/tree/master/Egret)                                                   |
-| Other engines             | √                                                    | [Self-implementation](https://poco-chinese.readthedocs.io/en/latest/source/doc/implementation_guide.html)                                 |
-| WeChat Applet&Webview     | √                                                    | [Reference document](http://airtest.netease.com/docs/cn/6_poco_framework/poco_webview.html) may be invalidated along with WeChat's update |
-| MacOS/Linux               | Coming soon                                          | Coming soon                                                                                                                               |
-| Netease                   | √                                                    | [Help Document](http://git-qa.gz.netease.com/maki/netease-ide-plugin)                                                                     |
 
 ## Installation
 
