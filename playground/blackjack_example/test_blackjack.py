@@ -3,18 +3,18 @@
 __author__ = "刘欣"
 
 from airtest.core.api import *
-from airtest.report.report import simple_report
+from airtest.cli.parser import cli_setup
 
 
 PKG = "org.cocos2d.blackjack"
 APK = "blackjack-release-signed.apk"
 
 
-# set log file if you want a html report
-set_logdir("log")
-
-# connect android device with params: cap_method=javacap
-init_device("Android", cap_method="javacap")
+if not cli_setup():
+    auto_setup(
+        devices=["Android:///?cap_method=javacap&ori_method=adbori"],
+        logdir="log",
+    )
 
 # install and start the app
 wake()
@@ -44,4 +44,5 @@ snapshot(msg="app stopped")
 print("test finished")
 
 # generate html report
+from airtest.report.report import simple_report
 simple_report("log", __file__)

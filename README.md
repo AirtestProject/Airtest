@@ -35,7 +35,7 @@ Use `pip` to install Airtest python library.
     pip install -U airtest
 ```
 
-On MacOS/Linux platform, you need to grante adb execute permission.
+On MacOS/Linux platform, you need to grant adb execute permission.
 
 ```Shell
     # for mac

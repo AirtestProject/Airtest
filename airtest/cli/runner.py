@@ -11,7 +11,7 @@ import warnings
 from io import open
 from airtest.core.api import G, auto_setup, log
 from airtest.core.settings import Settings as ST
-from airtest.utils.compat import decode_path
+from airtest.utils.compat import decode_path, script_dir
 from copy import copy
 
 
@@ -116,12 +116,12 @@ def setup_by_args(args):
         print("do not connect device")
 
     # set base dir to find tpl
-    args.script = decode_path(args.script)
+    dirpath = script_dir(args.script)
 
     # set log dir
     if args.log is True:
-        print("save log in %s/log" % args.script)
-        args.log = os.path.join(args.script, "log")
+        args.log = os.path.join(dirpath, "log")
+        print("save log in '%s'" % args.log)
     elif args.log:
         print("save log in '%s'" % args.log)
         args.log = decode_path(args.log)
@@ -130,7 +130,8 @@ def setup_by_args(args):
 
     # guess project_root to be basedir of current .air path
     project_root = os.path.dirname(args.script) if not ST.PROJECT_ROOT else None
-    auto_setup(args.script, devices, args.log, project_root)
+
+    auto_setup(dirpath, devices, args.log, project_root)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):

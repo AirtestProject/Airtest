@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import argparse
+import sys
 from airtest.report.report import get_parger as report_parser
+from airtest.cli.runner import setup_by_args
 
 
 def get_parser():
@@ -26,3 +28,26 @@ def runner_parser(ap=None):
     ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
     ap.add_argument("--recording", help="record screen when running", nargs="?", const=True)
     return ap
+
+
+def cli_setup(args=None):
+    """future api for setup env by cli"""
+    if not args:
+        if len(sys.argv) < 2:
+            print("no cmdline args")
+            return False
+        args = sys.argv
+    print(args)
+
+    ap = argparse.ArgumentParser()
+    if "--report" in args:
+        from airtest.report.report import main as report_main
+        ap = report_parser(ap)
+        args = ap.parse_args(args)
+        report_main(args)
+        exit(0)
+    else:
+        ap = runner_parser(ap)
+        args = ap.parse_args(args)
+        setup_by_args(args)
+    return True
