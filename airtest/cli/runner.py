@@ -11,7 +11,7 @@ import warnings
 from io import open
 from airtest.core.api import G, auto_setup, log
 from airtest.core.settings import Settings as ST
-from airtest.utils.compat import decode_path, script_dir
+from airtest.utils.compat import decode_path, script_dir_name, script_log_dir
 from copy import copy
 
 
@@ -49,8 +49,7 @@ class AirtestCase(unittest.TestCase):
                     traceback.print_exc()
 
     def runTest(self):
-        scriptpath = self.args.script
-        pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
+        scriptpath, pyfilename = script_dir_name(self.args.script)
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
         self.scope["__file__"] = pyfilepath
@@ -116,15 +115,12 @@ def setup_by_args(args):
         print("do not connect device")
 
     # set base dir to find tpl
-    dirpath = script_dir(args.script)
+    dirpath, _ = script_dir_name(args.script)
 
     # set log dir
-    if args.log is True:
-        args.log = os.path.join(dirpath, "log")
+    if args.log:
+        args.log = script_log_dir(dirpath, args.log)
         print("save log in '%s'" % args.log)
-    elif args.log:
-        print("save log in '%s'" % args.log)
-        args.log = decode_path(args.log)
     else:
         print("do not save log")
 

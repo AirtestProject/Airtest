@@ -52,8 +52,6 @@ helper functions
 def set_logdir(dirpath):
     """set log dir for logfile and screenshots.
 
-    And create dir at `dirpath/ST.SCREEN_DIR` for screenshots
-
     Args:
         dirpath: directory to save logfile and screenshots
 

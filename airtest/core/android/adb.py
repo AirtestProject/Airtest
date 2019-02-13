@@ -942,6 +942,8 @@ class ADB(object):
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
+        return {}
+
     def _getDisplayDensity(self, key, strip=True):
         """
         Get display density

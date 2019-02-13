@@ -12,7 +12,8 @@ import traceback
 from copy import deepcopy
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
-from airtest.utils.compat import decode_path, script_dir
+from airtest.utils.compat import decode_path, script_dir_name
+from airtest.cli.info import get_script_info
 from six import PY3
 from pprint import pprint
 
@@ -37,9 +38,10 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", export_dir=None, logfile=LOGFILE, lang="en", plugins=None):
+    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=LOGFILE, lang="en", plugins=None):
         self.log = []
         self.script_root = script_root
+        self.script_name = script_name
         self.log_root = log_root
         self.static_root = static_root or STATIC_DIR
         self.test_result = True
@@ -333,9 +335,9 @@ class LogToHtml(object):
     def report(self, template_name, output_file=None, record_list=None):
         self._load()
         steps = self._analyse()
-        # info = json.loads(get_script_info(self.script_root))
-        # todo: read info from log.txt
-        info = {}
+
+        script_path = os.path.join(self.script_root, self.script_name)
+        info = json.loads(get_script_info(script_path))
 
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
@@ -367,8 +369,11 @@ class LogToHtml(object):
         return self._render(template_name, output_file, **data)
 
 
-def simple_report(logpath, tplpath, logfile=LOGFILE, output=HTML_FILE):
-    rpt = LogToHtml(tplpath, logpath, logfile=logfile)
+def simple_report(filepath, logpath=True, logfile=LOGFILE, output=HTML_FILE):
+    path, name = script_dir_name(filepath)
+    if logpath is True:
+        logpath = os.path.join(path, LOGDIR)
+    rpt = LogToHtml(path, logpath, logfile=logfile, script_name=name)
     rpt.report(HTML_TPL, output_file=output)
 
 
@@ -387,7 +392,7 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
-    path = script_dir(args.script)
+    path, name = script_dir_name(args.script)
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
     static_root = args.static_root or STATIC_DIR
@@ -397,7 +402,7 @@ def main(args):
     plugins = args.plugins
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, export_dir=export, lang=lang, plugins=plugins)
+    rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
     rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
