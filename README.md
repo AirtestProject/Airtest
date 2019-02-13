@@ -8,9 +8,7 @@
 ![image](./demo.gif)
 
 
-## Getting Started
-
-*   **Cross-Platform:** Airtest automates games and apps on almost all platforms.
+## Features
 
 *   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
 
@@ -18,8 +16,7 @@
 
 *   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
-[Get Started from Airtest Project Homepage](http://airtest.netease.com/)
-
+Get started from [airtest homepage](http://airtest.netease.com/) and find support in [google groups](https://groups.google.com/forum/#!forum/airtestproject)
 
 #### [Supported Platforms](./docs/wiki/platforms.md)
 
