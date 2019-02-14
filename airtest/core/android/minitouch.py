@@ -222,8 +222,6 @@ class Minitouch(object):
         """
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
-        from_x, from_y = self.__transform_xy(from_x, from_y)
-        to_x, to_y = self.__transform_xy(to_x, to_y)
 
         ret = []
         interval = float(duration) / (steps + 1)
@@ -274,7 +272,6 @@ class Minitouch(object):
             None
 
         """
-
         swipe_events = [DownEvent(tuple_from_xy), SleepEvent(0.1)]
         swipe_events += self.__swipe_move(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps)
         swipe_events.append(UpEvent())
