@@ -16,6 +16,8 @@
 
 *   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
+*   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. it allows writing instructions in Python, to achieve more advanced automation.
+
 Get started from [airtest homepage](http://airtest.netease.com/) and find support in [google groups](https://groups.google.com/forum/#!forum/airtestproject)
 
 #### [Supported Platforms](./docs/wiki/platforms.md)
