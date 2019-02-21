@@ -158,20 +158,19 @@ class Android(Device):
         """
         return self.adb.clear_app(package)
 
-    def install_app(self, filepath, replace=False, test=False):
+    def install_app(self, filepath, replace=False):
         """
         Install the application on the device
 
         Args:
             filepath: full path to the `apk` file to be installed on the device
             replace: True or False to replace the existing application
-            test: allow test packages if True, default is False
 
         Returns:
             output from installation process
 
         """
-        return self.adb.install_app(filepath, replace=replace, test=test)
+        return self.adb.install_app(filepath, replace=replace)
 
     def install_multiple_app(self, filepath, replace=False):
         """
