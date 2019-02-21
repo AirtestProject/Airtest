@@ -535,13 +535,14 @@ class ADB(object):
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
 
-    def install_app(self, filepath, replace=False):
+    def install_app(self, filepath, replace=False, test=False):
         """
         Perform `adb install` command
 
         Args:
             filepath: full path to file to be installed on the device
             replace: force to replace existing application, default is False
+            test: allow test packages if True, default is False
 
         Returns:
             command output
@@ -553,10 +554,11 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        if not replace:
-            cmds = ["install", filepath]
-        else:
-            cmds = ["install", "-r", filepath]
+        cmds = ["install", filepath]
+        if replace:
+            cmds.insert(1, "-r")
+        if test:
+            cmds.insert(1, "-t")
         out = self.cmd(cmds)
 
         if re.search(r"Failure \[.*?\]", out):
