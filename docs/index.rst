@@ -48,7 +48,7 @@ Airtest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-**UI Test Automation Framework for Games and Apps**
+**UI Automation Framework for Games and Apps**
 
 
 .. raw:: html
@@ -63,9 +63,7 @@ Airtest
     </div>
 
 
-Airtest is a cross-platform automated testing framework with main focus on games,
-which can also be used for native apps. Currently, Windows and Android are well supported.
-Support for iOS comes in near future.
+Airtest is a cross-platform UI automation framework for games and apps.
 
 If you are new to Airtest, `Airtest Project Homepage`_ is a good place to get started.
 
@@ -75,10 +73,10 @@ as well as providing a API reference documentation.
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Quickstart 
 
-   ../README_MORE.md
+   ../README_MORE.rst
 
 
 

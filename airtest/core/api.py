@@ -9,9 +9,10 @@ from six.moves.urllib.parse import parse_qsl, urlparse
 
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
-from airtest.core.helper import (G, delay_after_operation, import_device_cls,
-                                 logwrap, on_platform, set_logdir, using)
 from airtest.core.settings import Settings as ST
+from airtest.utils.compat import script_log_dir
+from airtest.core.helper import (G, delay_after_operation, import_device_cls,
+                                 logwrap, set_logdir, using, log)
 
 
 """
@@ -96,21 +97,21 @@ def set_current(idx):
 def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     """
     Auto setup running env and try connect android device if not device connected.
+    :param basedir: basedir of script, __file__ is also acceptable.
+    :param devices: connect_device uri in list.
+    :param logdir: log dir for script report, default is None for no log, set to `True` for <basedir>/log.
+    :param project_root: project root dir for `using` api.
     """
-    if devices:
-        for dev in devices:
-            connect_device(dev)
-    else:
-        try:
-            connect_device("Android:///")
-        except IndexError:
-            pass
     if basedir:
         if os.path.isfile(basedir):
             basedir = os.path.dirname(basedir)
         if basedir not in G.BASEDIR:
             G.BASEDIR.append(basedir)
+    if devices:
+        for dev in devices:
+            connect_device(dev)
     if logdir:
+        logdir = script_log_dir(basedir, logdir)
         set_logdir(logdir)
     if project_root:
         ST.PROJECT_ROOT = project_root
@@ -122,7 +123,6 @@ Device Operations
 
 
 @logwrap
-@on_platform(["Android"])
 def shell(cmd):
     """
     Start remote shell in the target device and execute the command
@@ -135,7 +135,6 @@ def shell(cmd):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def start_app(package, activity=None):
     """
     Start the target application on device
@@ -149,7 +148,6 @@ def start_app(package, activity=None):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def stop_app(package):
     """
     Stop the target application on device
@@ -162,7 +160,6 @@ def stop_app(package):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def clear_app(package):
     """
     Clear data of the target application on device
@@ -175,7 +172,6 @@ def clear_app(package):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def install(filepath):
     """
     Install application on device
@@ -188,7 +184,6 @@ def install(filepath):
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def uninstall(package):
     """
     Uninstall application on device
@@ -201,7 +196,6 @@ def uninstall(package):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def snapshot(filename=None, msg=""):
     """
     Take the screenshot of the target device and save it to the file.
@@ -212,20 +206,17 @@ def snapshot(filename=None, msg=""):
     :return: absolute path of the screenshot
     :platforms: Android, iOS, Windows
     """
-    if not filename:
-        filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    if not os.path.isabs(filename):
-        logdir = ST.LOG_DIR or "."
-        filepath = os.path.join(logdir, filename)
+    if filename:
+        if not os.path.isabs(filename):
+            logdir = ST.LOG_DIR or "."
+            filename = os.path.join(logdir, filename)
+        screen = G.DEVICE.snapshot(filename)
+        return try_log_screen(screen)
     else:
-        filepath = filename
-    screen = G.DEVICE.snapshot(filepath)
-    try_log_screen(screen)
-    return filepath
+        return try_log_screen()
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def wake():
     """
     Wake up and unlock the target device
@@ -239,7 +230,6 @@ def wake():
 
 
 @logwrap
-@on_platform(["Android", "IOS"])
 def home():
     """
     Return to the home screen of the target device.
@@ -251,31 +241,43 @@ def home():
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
-def touch(v, **kwargs):
+def touch(v, times=1, **kwargs):
     """
     Perform the touch action on the device screen
 
     :param v: target to touch, either a Template instance or absolute coordinates (x, y)
+    :param times: how many touches to be performed
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
-    :return: None
+    :return: finial position to be clicked
     :platforms: Android, Windows, iOS
     """
     if isinstance(v, Template):
-        try:
-            pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
-        except TargetNotFoundError:
-            raise
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:
         try_log_screen()
         pos = v
-
-    G.DEVICE.touch(pos, **kwargs)
+    for _ in range(times):
+        G.DEVICE.touch(pos, **kwargs)
+        time.sleep(0.05)
     delay_after_operation()
+    return pos
+
+click = touch  # click is alias of touch
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
+def double_click(v):
+    if isinstance(v, Template):
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
+    else:
+        try_log_screen()
+        pos = v
+    G.DEVICE.double_click(pos)
+    delay_after_operation()
+    return pos
+
+
+@logwrap
 def swipe(v1, v2=None, vector=None, **kwargs):
     """
     Perform the swipe action on the device screen.
@@ -293,7 +295,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
                    screen e.g.(0.5, 0.5)
     :param **kwargs: platform specific `kwargs`, please refer to corresponding docs
     :raise Exception: general exception when not enough parameters to perform swap action have been provided
-    :return: None
+    :return: Origin position and target position
     :platforms: Android, Windows, iOS
     """
     if isinstance(v1, Template):
@@ -317,10 +319,10 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 
     G.DEVICE.swipe(pos1, pos2, **kwargs)
     delay_after_operation()
+    return pos1, pos2
 
 
 @logwrap
-@on_platform(["Android"])
 def pinch(in_or_out='in', center=None, percent=0.5):
     """
     Perform the pinch action on the device screen
@@ -331,12 +333,12 @@ def pinch(in_or_out='in', center=None, percent=0.5):
     :return: None
     :platforms: Android
     """
+    try_log_screen()
     G.DEVICE.pinch(in_or_out=in_or_out, center=center, percent=percent)
     delay_after_operation()
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def keyevent(keyname, **kwargs):
     """
     Perform key event on the device
@@ -351,8 +353,7 @@ def keyevent(keyname, **kwargs):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
-def text(text, enter=True):
+def text(text, enter=True, **kwargs):
     """
     Input text on the target device. Text input widget must be active first.
 
@@ -361,7 +362,7 @@ def text(text, enter=True):
     :return: None
     :platforms: Android, Windows, iOS
     """
-    G.DEVICE.text(text, enter=enter)
+    G.DEVICE.text(text, enter=enter, **kwargs)
     delay_after_operation()
 
 
@@ -378,7 +379,6 @@ def sleep(secs=1.0):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def wait(v, timeout=None, interval=0.5, intervalfunc=None):
     """
     Wait to match the Template on the device screen
@@ -397,7 +397,6 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def exists(v):
     """
     Check whether given target exists on device screen
@@ -415,7 +414,6 @@ def exists(v):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def find_all(v):
     """
     Find all occurrences of the target on the device screen and return their coordinates
@@ -434,7 +432,6 @@ Assertions
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def assert_exists(v, msg=""):
     """
     Assert target exists on device screen
@@ -453,7 +450,6 @@ def assert_exists(v, msg=""):
 
 
 @logwrap
-@on_platform(["Android", "Windows", "IOS"])
 def assert_not_exists(v, msg=""):
     """
     Assert target does not exist on device screen

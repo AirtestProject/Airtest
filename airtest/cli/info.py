@@ -3,20 +3,29 @@ __author__ = 'wjjn3033'
 
 import os
 import re
+import sys
+import six
 import json
+from io import open
 
 
 def get_script_info(script_path):
-    """extract info from script, like __author__, __title__ and __desc__."""
-    pyfilename = os.path.basename(script_path).replace(".air", ".py")
-    pyfilepath = os.path.join(script_path, pyfilename)
+    """extract info from script, like basename, __author__, __title__ and __desc__."""
+    script_name = os.path.basename(script_path)
+    if script_path.endswith(".py"):
+        pyfilepath = script_path
+    else:
+        pyfilename = script_name.replace(".air", ".py")
+        pyfilepath = os.path.join(script_path, pyfilename)
 
-    with open(pyfilepath) as pyfile:
+    if not os.path.exists(pyfilepath) and six.PY2:
+        pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
+    with open(pyfilepath, encoding="utf-8") as pyfile:
         pyfilecontent = pyfile.read()
 
     author, title, desc = get_author_title_desc(pyfilecontent)
 
-    result_json = {"author": author, "title": title, "desc": desc}
+    result_json = {"name": script_name, "author": author, "title": title, "desc": desc}
     return json.dumps(result_json)
 
 
@@ -31,8 +40,13 @@ def get_author_title_desc(text):
     author = strip_str(file_info.get("author", ""))
     title = strip_str(file_info.get("title", ""))
     desc = strip_str(file_info.get("desc", ""))
+    desc = process_desc(desc)
     return author, title, desc
 
+def process_desc(desc):
+    lines = desc.split('\n')
+    lines = [line.strip() for line in lines]
+    return '\n'.join(lines)
 
 def strip_str(string):
     """Strip string."""

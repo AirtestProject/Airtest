@@ -3,12 +3,19 @@
 import json
 import os
 import io
+import re
+import six
 import sys
 import shutil
 import jinja2
-from collections import defaultdict
-from airtest.utils.compat import decode_path
+import traceback
+from copy import deepcopy
+from jinja2 import evalcontextfilter, Markup, escape
+from airtest.aircv import imread, get_resolution
+from airtest.utils.compat import decode_path, script_dir_name
+from airtest.cli.info import get_script_info
 from six import PY3
+from pprint import pprint
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -17,36 +24,44 @@ HTML_FILE = "log.html"
 STATIC_DIR = os.path.dirname(__file__)
 
 
+_paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+
+@evalcontextfilter
+def nl2br(eval_ctx, value):
+    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
+                          for p in _paragraph_re.split(escape(value)))
+    if eval_ctx.autoescape:
+        result = Markup(result)
+    return result
+
 class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", author="", export_dir=None, logfile=LOGFILE, lang="en", plugins=[]):
+    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=LOGFILE, lang="en", plugins=None):
         self.log = []
         self.script_root = script_root
+        self.script_name = script_name
         self.log_root = log_root
         self.static_root = static_root or STATIC_DIR
         self.test_result = True
         self.run_start = None
         self.run_end = None
-        self.author = author
         self.export_dir = export_dir
-        self.img_type = ('touch', 'swipe', 'wait', 'exists', 'assert_not_exists', 'assert_exists', 'snapshot')
         self.logfile = os.path.join(log_root, logfile)
-        self._load()
-        self.error_str = ""
-        self._steps = None
-        self.all_step = None
         self.lang = lang
-        self.plugins_module = []
         self.init_plugin_modules(plugins)
 
-    def init_plugin_modules(self, plugins):
-        for p in plugins:
-            sys.path.append(os.path.dirname(p))
-            # print "--------------", os.path.dirname(p), os.path.basename(p)
-            module = __import__(os.path.basename(p)).Report(export_dir=self.export_dir, log_root=self.log_root)
-            self.plugins_module.append(module)
+    @staticmethod
+    def init_plugin_modules(plugins):
+        if not plugins:
+            return
+        for plugin_name in plugins:
+            print("try loading plugin: %s" % plugin_name)
+            try:
+                __import__(plugin_name)
+            except:
+                traceback.print_exc()
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -54,266 +69,202 @@ class LogToHtml(object):
             for line in f.readlines():
                 self.log.append(json.loads(line))
 
-    def analyse(self):
-        """ 进一步解析成模板可显示的内容 """
+    def _analyse(self):
+        """ 解析log成可渲染的dict """
         steps = []
-        temp = {}
-        current_step = 'main_script'
-        all_step = defaultdict(list)
+        children_steps = []
 
         for log in self.log:
-            if log["depth"] == 0 and log.get("tag") in ["main_script"]:
-                # 根据脚本执行的pre,main,post，将log区分开
-                # to be fixed: 不区分pre/post了，以后用来区分子脚本
-                current_step = log.get("tag", "main_script")
+            depth = log['depth']
 
-            #拆分成每一个步骤，并且加上traceback的标志
-            #depth相同，后来的数据直接覆盖（目前只有截图数据会这样）
-            log.update(log["data"])
-            if 'start_time' not in temp and log.get('time'):
-                temp['start_time'] = log['time']
+            if not self.run_start:
+                self.run_start = log["time"]
+            self.run_end = log["time"]
 
-            if log['depth'] in temp:
-                temp[log['depth']].update(log)
+            if depth == 0:
+                # single log line, not in stack
+                steps.append(log)
+            elif depth == 1:
+                step = deepcopy(log)
+                step["__children__"] = children_steps
+                steps.append(step)
+                children_steps = []
             else:
-                temp[log['depth']] = log
+                children_steps.insert(0, log)
 
-            if log['depth'] == 1:
-                #depth到1才是一个完整操作语句，转换成模板需要的数据
-                #exists 中间有报错也是正常的 以depth = 1 为准
-                temp['end_time'] = log['time']
-                if log['tag'] == "error":
-                    # 假如有trace，把异常的信息临时记下来，如果是重复的异常就不重复显示在页面上了
-                    if self.error_str and self.error_str == log['data'].get('error_str'):
-                        continue
-                    else:
-                        self.error_str = log['data'].get('error_str') or ''
-                    temp['trace'] = True
-                    temp['traceback'] = log['data']['traceback']
-                    self.test_result = False
+        # pprint(steps)
+        translated_steps = [self._translate_step(s) for s in steps]
+        return translated_steps
+
+    def _translate_step(self, step):
+        """translate single step"""
+        name = step["data"]["name"]
+        title = self._translate_title(name, step)
+        code = self._translate_code(step)
+        desc = self._translate_desc(step, code)
+        screen = self._translate_screen(step, code)
+        traceback = self._translate_traceback(step)
+        assertion = self._translate_assertion(step)
+
+        # set test failed if any traceback exists
+        if traceback:
+            self.test_result = False
+
+        translated = {
+            "title": title,
+            "time": step["time"],
+            "code": code,
+            "screen": screen,
+            "desc": desc,
+            "traceback": traceback,
+            "assert": assertion
+        }
+        return translated
+
+    def _translate_assertion(self, step):
+        if "assert" in step["data"]["name"] and "msg" in step["data"]["call_args"]:
+            return step["data"]["call_args"]["msg"]
+
+    def _translate_screen(self, step, code):
+        if step['tag'] != "function":
+            return None
+        screen = {
+            "src": None,
+            "rect": [],
+            "pos": [],
+            "vector": [],
+            "confidence": None,
+        }
+
+        for item in step["__children__"]:
+            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
+                src = item["data"]['ret']
+                if self.export_dir:  # all relative path
+                    src = os.path.join(LOGDIR, src)
+                    screen['_filepath'] = src
                 else:
-                    temp['trace'] = False
+                    screen['_filepath'] = os.path.abspath(os.path.join(self.log_root, src))
+                screen['src'] = screen['_filepath']
+                break
 
-                temp = self.translate(temp)
-                if temp is not None:
-                    steps.append(temp)
-                    all_step[current_step].append(temp)
+        display_pos = None
 
-                temp = {}
+        for item in step["__children__"]:
+            if item["data"]["name"] == "_cv_match" and isinstance(item["data"].get("ret"), dict):
+                cv_result = item["data"]["ret"]
+                pos = cv_result['result']
+                if self.is_pos(pos):
+                    display_pos = [round(pos[0]), round(pos[1])]
+                rect = self.div_rect(cv_result['rectangle'])
+                screen['rect'].append(rect)
+                screen['confidence'] = cv_result['confidence']
+                break
 
-        self._steps = steps
-        self.all_step = all_step
-        if steps:
-            self.run_start = steps[0].get('start_time')
-            self.run_end = steps[-1].get('end_time')
+        if step["data"]["name"] in ["touch", "assert_exists", "wait", "exists"]:
+            # 将图像匹配得到的pos修正为最终pos
+            if self.is_pos(step["data"].get("ret")):
+                display_pos = step["data"]["ret"]
+            elif self.is_pos(step["data"]["call_args"].get("v")):
+                display_pos = step["data"]["call_args"]["v"]
 
-        return steps
+        elif step["data"]["name"] == "swipe":
+            if "ret" in step["data"]:
+                screen["pos"].append(step["data"]["ret"][0])
+                target_pos = step["data"]["ret"][1]
+                origin_pos = step["data"]["ret"][0]
+                screen["vector"].append([target_pos[0] - origin_pos[0], target_pos[1] - origin_pos[1]])
 
-    def translate(self, step):
-        """
-        按照depth = 1 的name来分类
-        touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用
-                            3=screenshot 2= _loop_find  1=本身操作
-        keyevent,text,sleep 和图片无关，直接显示一条说明就可以
-                            1= 本身
-        assert 类似于exist
-        """
-        scale = LogToHtml.scale
-        self.scale = scale
-        step['type'] = step[1]['name']
+        if display_pos:
+            screen["pos"].append(display_pos)
+        return screen
 
-        if step['type'] in self.img_type:
-            # 一般来说会有截图 没有这层就无法找到截图了
-            st = 1
-            while st in step:
-                if 'screen' in step[st]:
-                    screenshot = step[st]['screen']
-                    if self.export_dir:
-                        screenshot = os.path.join(LOGDIR, screenshot)
-                    else:
-                        screenshot = os.path.join(self.log_root, screenshot)
-                    step['screenshot'] = screenshot
-                    break
-                st += 1
+    def _translate_traceback(self, step):
+        if "traceback" in step["data"]:
+            return step["data"]["traceback"]
 
-            if step.get(2):
-                if step['type'] in self.img_type:
-                    # testlab那边会将所有执行的脚本内容放到同一个文件夹下，然而如果是本地执行会导致找不到pre/post脚本里的图片
-                    if len(step[2]['args']) > 0 and 'filename' in step[2]['args'][0]:
-                        image_path = str(step[2]['args'][0]['filename'])
-                        if not self.export_dir:
-                            image_path = os.path.join(self.script_root, image_path)
-                    else:
-                        image_path = ""
-                    if not os.path.isfile(image_path) and step.get("trace"):
-                        if self.lang != "en":
-                            step['desc'] = self.func_desc_zh(step)
-                        else:
-                            step['desc'] = self.func_desc(step)
-                        step['title'] = self.func_title(step)
-                        return step
-                    step['image_to_find'] = image_path
-                    if step[2]['args'] and len(step[2]['args']) > 0:
-                        step['resolution'] = step[2]['args'][0].get("resolution", None)
-                        step['record_pos'] = step[2]['args'][0].get("record_pos", None)
-                if not step['trace']:
-                    if step[2]["name"] == "loop_find":
-                        step['target_pos'] = step[2].get('ret')
-                        cv = step[2].get('cv', {})
-                        if cv:
-                            confidence = cv.get('confidence')
-                            # 图片rgb=True时记录的confidence格式:[confi_rgb, [conf_r, conf_g, conf_b]]
-                            if isinstance(confidence, list):
-                                confidence = confidence[0]
-                            step['confidence'] = self.to_percent(confidence)
-                            # 如果存在wnd_pos，说明是windows截图，由于target_pos是相对屏幕坐标，mark_pos是相对截屏坐标
-                            #       因此需要一次wnd_pos的标记偏移，才能保证报告中标记位置的正确。
-                            if 'wnd_pos' in step[2]:
-                                wnd_pos = step[2]['wnd_pos']
-                                mark_pos = (step['target_pos'][0] - wnd_pos[0], step['target_pos'][1] - wnd_pos[1])
-                            else:
-                                mark_pos = step['target_pos']
-
-                            step['rect'] = self.div_rect(cv.get('rectangle', []))
-                            if isinstance(mark_pos, (tuple, list)):
-                                step['top'] = round(mark_pos[1])
-                                step['left'] = round(mark_pos[0])
-
-            if step['type'] == 'touch':
-                try:
-                    target = step[1]['args'][0]
-                except (IndexError, KeyError):
-                    target = None
-                if isinstance(target, (tuple, list)):
-                    step['target_pos'] = target
-                    step['left'], step['top'] = target
-
-            # swipe 需要显示一个方向
-            if step['type'] == 'swipe':
-                vector = step[1]["kwargs"].get("vector")
-                if vector:
-                    step['swipe'] = self.dis_vector_zh(vector) if self.lang != 'en' else self.dis_vector(vector)
-                    step['vector'] = vector
-
-            # print step['type']
-            if step['type'] in ['assert_exists', 'assert_not_exists']:
-                args = step[1]["args"]
-                if len(args) >= 2:
-                    step['assert'] = args[1]
-
-            if step['type'] == 'exists':
-                # ret 为false表示图片没有找到
-                step['exists_ret'] = False if step[1].get('ret', False) is False else True
-
-        elif step['type'] in ['text', 'keyevent']:
-            step[step['type']] = step[1]['args'][0]
-
-        elif step['type'] == 'sleep':
-            step[step['type']] = step[1]['args'][0] if len(step[1]['args']) > 0 else 1
-
-        elif step['type'] in ['assert_equal', 'assert_not_equal']:
-            args = step[1]["args"]
-            msg = ""
-            if len(args) > 2:
-                msg = args[2]
-            elif step[1]["kwargs"] and "msg" in step[1]["kwargs"]:
-                msg = step[1]["kwargs"]["msg"]
-            step['assert'] = msg
-            # 单独对assert_equal和assert_not_equal进行步骤说明。
-            step['desc'] = u'%s [ "%s", "%s", "%s" ]' % (step['type'], args[0], args[1], msg)
-            step['title'] = self.func_title(step)
-            return step
-
-        else:
-            # 判断类型是否属于plugin扩展模块
-            for module in self.plugins_module:
-                step = module.report_parse(step)
-
-        if self.lang != "en":
-            step['desc'] = self.func_desc_zh(step)
-        else:
-            step['desc'] = self.func_desc(step)
-        step['title'] = self.func_title(step)
-        return step
+    def _translate_code(self, step):
+        if step["tag"] != "function":
+            return None
+        step_data = step["data"]
+        args = []
+        code = {
+            "name": step_data["name"],
+            "args": args,
+        }
+        for key, value in step_data["call_args"].items():
+            args.append({
+                "key": key,
+                "value": value,
+            })
+        for k, arg in enumerate(args):
+            value = arg["value"]
+            if isinstance(value, dict) and value.get("__class__") == "Template":
+                if self.export_dir:  # all relative path
+                    image_path = value['filename']
+                    if not os.path.isfile(os.path.join(self.script_root, image_path)):
+                        shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
+                else:
+                    image_path = os.path.abspath(value['_filepath'] or value['filename'])
+                arg["image"] = image_path
+                crop_img = imread(value['_filepath'] or value['filename'])
+                arg["resolution"] = get_resolution(crop_img)
+        return code
 
     @staticmethod
-    def to_percent(p):
-        if not p:
-            return ''
-        try:
-            p = float(p)
-        except ValueError:
-            return ''
-        return round(p * 100, 1)
-
-    @staticmethod
-    def div_rect(r, offset=None):
-        if not r:
-            return {}
-
+    def div_rect(r):
+        """count rect for js use"""
         xs = [p[0] for p in r]
         ys = [p[1] for p in r]
         left = min(xs)
         top = min(ys)
         w = max(xs) - left
         h = max(ys) - top
-
-        # offset参数，是在log中点击坐标和识别坐标不同时(人为点击偏移)，绘制识别区域也需要同样的偏移：
-        if offset:
-            left = left + offset[0]
-            top = top + offset[1]
-
         return {'left': left, 'top': top, 'width': w, 'height': h}
 
-    # @staticmethod
-    def func_desc_zh(self, step):
-        """ 把对应函数(depth=1)的name显示成中文 """
-        name = step['type']
+    def _translate_desc(self, step, code):
+        """ 函数描述 """
+        if step['tag'] != "function":
+            return None
+        name = step['data']['name']
+        res = step['data'].get('ret')
+        args = {i["key"]: i["value"] for i in code["args"]}
+
         desc = {
-            "snapshot": u"截图描述：%s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
-            "touch": u"寻找目标图片，触摸屏幕坐标%s" % repr(step.get('target_pos', '')),
-            "swipe": u"从目标坐标点%s向%s滑动%s" % (repr(step.get('target_pos', '')), step.get('swipe', ''), repr(step.get('vector', ""))),
+            "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
+            "touch": lambda: u"Touch %s" % ("target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
+            "swipe": u"Swipe on screen",
+            "wait": u"Wait for target image to appear",
+            "exists": lambda: u"Image %s exists" % ("" if res else "not"),
+            "text": lambda: u"Input text:%s" % args.get('text'),
+            "keyevent": lambda: u"Click [%s] button" % args.get('keyname'),
+            "sleep": lambda: u"Wait for %s seconds" % args.get('secs'),
+            "assert_exists": u"Assert target image exists",
+            "assert_not_exists": u"Assert target image does not exists",
+        }
+
+        # todo: 最好用js里的多语言实现
+        desc_zh = {
+            "snapshot": lambda: u"截图描述: %s" % args.get("msg"),
+            "touch": lambda: u"点击 %s" % (u"目标图片" if isinstance(args['v'], dict) else u"屏幕坐标 %s" % args['v']),
+            "swipe": u"滑动操作",
             "wait": u"等待目标图片出现",
-            "exists": u"图片%s存在" % ("" if step.get('exists_ret') else u"不"),
-
-            "text": u"输入文字:%s" % step.get('text', ''),
-            "keyevent": u"点击[%s]按键" % step.get('keyevent', ''),
-            "sleep": u"等待%s秒" % step.get('sleep', ''),
-
+            "exists": lambda: u"图片%s存在" % ("" if res else u"不"),
+            "text": lambda: u"输入文字:%s" % args.get('text'),
+            "keyevent": lambda: u"点击[%s]按键" % args.get('keyname'),
+            "sleep": lambda: u"等待%s秒" % args.get('secs'),
             "assert_exists": u"断言目标图片存在",
             "assert_not_exists": u"断言目标图片不存在",
-            "traceback": u"异常信息",
         }
 
-        for module in self.plugins_module:
-            desc.update(module.report_desc_zh(step))
+        if self.lang == "zh":
+            desc = desc_zh
 
-        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
+        ret = desc.get(name)
+        if callable(ret):
+            ret = ret()
+        return ret
 
-    # @staticmethod
-    def func_desc(self, step):
-        name = step['type']
-        desc = {
-            "snapshot": u"Screenshot description: %s" % step[1].get("data")["kwargs"]["msg"] if (step[1].get("data", {}).get("kwargs", {}) and step[1]["data"]["kwargs"].get("msg")) else '',
-            "touch": u"Search for target object, touch the screen coordinates %s" % repr(step.get('target_pos', '')),
-            "swipe": u"Swipe from {target_pos} to {direction} {vector}".format(target_pos=repr(step.get('target_pos', '')), direction=step.get('swipe', ''), vector=repr(step.get('vector', ''))),
-            "wait": u"Wait for target object to appear",
-            "exists": u"Picture %s exists" % ("" if step.get('exists_ret') else "not"),
-            "text": u"Input text:%s" % step.get('text', ''),
-            "keyevent": u"Click [%s] button" % step.get('keyevent', ''),
-            "sleep": u"Wait for %s seconds" % step.get('sleep', ''),
-            "assert_exists": u"Assert target object exists",
-            "assert_not_exists": u"Assert target object does not exists",
-            "traceback": u"Traceback",
-        }
-
-        for module in self.plugins_module:
-            desc.update(module.report_desc(step))
-
-        return desc.get(name, '%s%s' % (name, step.get(1).get('args', "") if 1 in step else ""))
-
-    # @staticmethod
-    def func_title(self, step):
+    def _translate_title(self, name, step):
         title = {
             "touch": u"Touch",
             "swipe": u"Swipe",
@@ -322,7 +273,6 @@ class LogToHtml(object):
             "text": u"Text",
             "keyevent": u"Keyevent",
             "sleep": u"Sleep",
-            "server_call": u"Server call",
             "assert_exists": u"Assert exists",
             "assert_not_exists": u"Assert not exists",
             "snapshot": u"Snapshot",
@@ -330,53 +280,17 @@ class LogToHtml(object):
             "assert_not_equal": u"Assert not equal",
         }
 
-        for module in self.plugins_module:
-            title.update(module.report_title())
-
-        name = step['type']
         return title.get(name, name)
 
     @staticmethod
-    def dis_vector(v):
-        x = v[0]
-        y = v[1]
-        a = ''
-        b = ''
-        if x > 0:
-            a = u'right'
-        if x < 0:
-            a = u'left'
-        if y < 0:
-            b = u'upper '
-        if y > 0:
-            b = u'lower '
-        return b + a
-
-    @staticmethod
-    def dis_vector_zh(v):
-        x = v[0]
-        y = v[1]
-        a = ''
-        b = ''
-        if x > 0:
-            a = u'右'
-        if x < 0:
-            a = u'左'
-        if y < 0:
-            b = u'上'
-        if y > 0:
-            b = u'下'
-        return a+b
-
-    @staticmethod
     def _render(template_name, output_file=None, **template_vars):
-        """ 用jinja2输出html
-        """
+        """ 用jinja2渲染html"""
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(STATIC_DIR),
             extensions=(),
             autoescape=True
         )
+        env.filters['nl2br'] = nl2br
         template = env.get_template(template_name)
         html = template.render(**template_vars)
 
@@ -387,9 +301,12 @@ class LogToHtml(object):
 
         return html
 
-    def copy_tree(self, src, dst):
+    def is_pos(self, v):
+        return isinstance(v, (list, tuple))
+
+    def copy_tree(self, src, dst, ignore=None):
         try:
-            shutil.copytree(src, dst)
+            shutil.copytree(src, dst, ignore=ignore)
         except Exception as e:
             print(e)
 
@@ -407,69 +324,57 @@ class LogToHtml(object):
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
-            self.copy_tree(self.log_root, logpath)
-        # copy static files
-        for subdir in ["css", "fonts", "image", "js"]:
-            self.copy_tree(os.path.join(STATIC_DIR, subdir), os.path.join(dirpath, "static", subdir))
+            self.copy_tree(self.log_root, logpath, ignore=shutil.ignore_patterns(dirname))
+        # if self.static_root is not a http server address, copy static files from local directory
+        if not self.static_root.startswith("http"):
+            for subdir in ["css", "fonts", "image", "js"]:
+                self.copy_tree(os.path.join(self.static_root, subdir), os.path.join(dirpath, "static", subdir))
 
         return dirpath, logpath
 
-    def render(self, template_name, output_file=None, record_list=None):
+    def report(self, template_name, output_file=None, record_list=None):
+        self._load()
+        steps = self._analyse()
+
+        script_path = os.path.join(self.script_root, self.script_name)
+        info = json.loads(get_script_info(script_path))
+
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
             output_file = os.path.join(self.script_root, HTML_FILE)
-            self.static_root = "static/"
-
-        if self.all_step is None:
-            self.analyse()
+            if not self.static_root.startswith("http"):
+                self.static_root = "static/"
 
         if not record_list:
             record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
-        records = [os.path.join(self.log_root, f) for f in record_list]
+        records = [os.path.join(LOGDIR, f) if self.export_dir
+                   else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
 
         if not self.static_root.endswith(os.path.sep):
+            self.static_root = self.static_root.replace("\\", "/")
             self.static_root += "/"
 
         data = {}
-        data['all_steps'] = self.all_step
-        data['host'] = self.script_root
-        data['script_name'] = get_script_name(self.script_root)
+        data['steps'] = steps
+        data['name'] = self.script_root
         data['scale'] = self.scale
         data['test_result'] = self.test_result
         data['run_end'] = self.run_end
         data['run_start'] = self.run_start
         data['static_root'] = self.static_root
-        data['author'] = self.author
-        data['records'] = records
         data['lang'] = self.lang
+        data['records'] = records
+        data['info'] = info
 
         return self._render(template_name, output_file, **data)
 
 
-def get_script_name(path):
-    pp = path.replace('\\', '/').split('/')
-    for p in pp:
-        if p.endswith('.owl'):
-            return p
-    return ''
-
-
-def get_file_author(file_path):
-    author = ''
-    if not os.path.exists(file_path) and not PY3:
-        file_path = file_path.encode(sys.getfilesystemencoding())
-    if os.path.exists(file_path):
-        fp = io.open(file_path, encoding="utf-8")
-        for line in fp:
-            if '__author__' in line and '=' in line:
-                author = line.split('=')[-1].strip()[1:-1]
-                break
-    return author
-
-
-def simple_report(logpath, tplpath=".", logfile=LOGFILE, output=HTML_FILE):
-    rpt = LogToHtml(tplpath, logpath, logfile=logfile)
-    rpt.render(HTML_TPL, output_file=output)
+def simple_report(filepath, logpath=True, logfile=LOGFILE, output=HTML_FILE):
+    path, name = script_dir_name(filepath)
+    if logpath is True:
+        logpath = os.path.join(path, LOGDIR)
+    rpt = LogToHtml(path, logpath, logfile=logfile, script_name=name)
+    rpt.report(HTML_TPL, output_file=output)
 
 
 def get_parger(ap):
@@ -480,27 +385,25 @@ def get_parger(ap):
     ap.add_argument("--record", help="custom screen record file path", nargs="+")
     ap.add_argument("--export", help="export a portable report dir containing all resources")
     ap.add_argument("--lang", help="report language", default="en")
-    ap.add_argument("--plugins", help="plugin report", nargs="+")
+    ap.add_argument("--plugins", help="load reporter plugins", nargs="+")
+    ap.add_argument("--report", help="placeholder for report cmd", default=True, nargs="?")
     return ap
 
 
 def main(args):
     # script filepath
-    path = decode_path(args.script)
-    basename = os.path.basename(path).split(".")[0]
-    py_file = os.path.join(path, basename + ".py")
-    author = get_file_author(py_file)
+    path, name = script_dir_name(args.script)
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
-    plugins = args.plugins or []
+    plugins = args.plugins
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, author, export_dir=export, lang=lang, plugins=plugins)
-    rpt.render(HTML_TPL, output_file=args.outfile, record_list=record_list)
+    rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
+    rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
 if __name__ == "__main__":

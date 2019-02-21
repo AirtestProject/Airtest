@@ -2,7 +2,7 @@
 import threading
 import traceback
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup, on_method_ready
+from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
 LOGGING = get_logger(__name__)
@@ -45,7 +45,6 @@ class RotationWatcher(object):
         if p.poll() is not None:
             raise RuntimeError("orientationWatcher setup error")
         self.ow_proc = p
-        # reg_cleanup(self.ow_proc.kill)
 
     def teardown(self):
         if self.ow_proc:
@@ -56,7 +55,7 @@ class RotationWatcher(object):
         Start the RotationWatcher daemon thread
 
         Returns:
-            None
+            initial orientation
 
         """
         self._install_and_setup()
@@ -65,12 +64,12 @@ class RotationWatcher(object):
             line = self.ow_proc.stdout.readline()
             if line == b"":
                 if LOGGING is not None:  # may be None atexit
-                    LOGGING.error("orientationWatcher has ended")
+                    LOGGING.debug("orientationWatcher has ended")
                 else:
                     print("orientationWatcher has ended")
                 return None
 
-            ori = int(line) / 90
+            ori = int(int(line) / 90)
             return ori
 
         def _run():
@@ -80,6 +79,8 @@ class RotationWatcher(object):
                     break
                 LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
                 self.current_orientation = ori
+                if is_exiting():
+                    break
                 for cb in self.ow_callback:
                     try:
                         cb(ori)
@@ -87,9 +88,13 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
+        self.current_orientation = _refresh_by_ow()
+
         self._t = threading.Thread(target=_run, name="rotationwatcher")
         # self._t.daemon = True
         self._t.start()
+
+        return self.current_orientation
 
     def reg_callback(self, ow_callback):
         """

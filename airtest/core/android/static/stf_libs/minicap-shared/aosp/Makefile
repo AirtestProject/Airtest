@@ -44,6 +44,10 @@ all: \
 	libs/android-27/arm64-v8a/minicap.so \
 	libs/android-27/x86/minicap.so \
 	libs/android-27/x86_64/minicap.so \
+	libs/android-28/armeabi-v7a/minicap.so \
+	libs/android-28/arm64-v8a/minicap.so \
+	libs/android-28/x86/minicap.so \
+	libs/android-28/x86_64/minicap.so \
 
 libs/android-9/armeabi-v7a/minicap.so: $(SOURCES) src/minicap_9.cpp
 	mkdir -p $(@D)
@@ -545,6 +549,60 @@ libs/android-27/mips64/minicap.so: $(SOURCES) src/minicap_27.cpp
 	docker run --rm \
 		-a stdout -a stderr \
 		-v /media/aosp/android-8.1.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_mips64-eng minicap
+
+libs/android-28/armeabi-v7a/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_arm-eng minicap
+
+libs/android-28/arm64-v8a/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_arm64-eng minicap
+
+libs/android-28/x86/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_x86-eng minicap
+
+libs/android-28/x86_64/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_x86_64-eng minicap
+
+libs/android-28/mips/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
+		-v $(this_dir):/app \
+		-v $(this_dir)$(@D):/artifacts \
+		openstf/aosp:jdk8 /aosp.sh build aosp_mips-eng minicap
+
+libs/android-28/mips64/minicap.so: $(SOURCES) src/minicap_28.cpp
+	mkdir -p $(@D)
+	docker run --rm \
+		-a stdout -a stderr \
+		-v /media/aosp/android-9.0.0_r1:/aosp \
 		-v $(this_dir):/app \
 		-v $(this_dir)$(@D):/artifacts \
 		openstf/aosp:jdk8 /aosp.sh build aosp_mips64-eng minicap

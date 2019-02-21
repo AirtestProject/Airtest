@@ -13,10 +13,7 @@ def imread(filename):
     if not os.path.isfile(filename):
         raise FileNotExistError("File not exist: %s" % filename)
     if PY3:
-        stream = open(filename, "rb")
-        bytes = bytearray(stream.read())
-        numpyarray = np.asarray(bytes, dtype=np.uint8)
-        img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+        img = cv2.imdecode(np.fromfile(filename, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
     else:
         filename = filename.encode(sys.getfilesystemencoding())
         img = cv2.imread(filename, 1)
@@ -65,7 +62,7 @@ def rotate(img, angle=90, clockwise=True):
 
     # 将角度旋转转化为逆时针旋转90°的次数:
     counter_rotate_time = (4 - angle / 90) % 4 if clockwise else (angle / 90) % 4
-    for i in range(counter_rotate_time):
+    for i in range(int(counter_rotate_time)):
         img = count_clock_rotate(img)
 
     return img

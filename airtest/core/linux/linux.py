@@ -4,9 +4,9 @@ from airtest.core.device import Device
 from pywinauto import mouse, keyboard
 from Xlib import display, X
 from PIL import Image
+import socket
 import time
 import subprocess
-
 
 
 class Linux(Device):
@@ -86,7 +86,6 @@ class Linux(Device):
         self.keyevent(text)
 
     def touch(self, pos, **kwargs):
-    # def touch(self, pos, times=1, duration=0.01):
         """
         Perform mouse click action
 
@@ -102,17 +101,15 @@ class Linux(Device):
 
         """
         duration = kwargs.get("duration", 0.01)
-        times = kwargs.get("times", 1)
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
-        coords = pos
 
-        if times > 1:
-            self.mouse.double_click(coords=coords)
-        else:
-            self.mouse.press(button=button, coords=coords)
-            time.sleep(duration)
-            self.mouse.release(button=button, coords=coords)
+        self.mouse.press(button=button, coords=pos)
+        time.sleep(duration)
+        self.mouse.release(button=button, coords=pos)
+
+    def double_click(self, pos):
+        self.mouse.double_click(coords=pos)
 
     def swipe(self, p1, p2, duration=0.8, steps=5):
         """
@@ -175,3 +172,12 @@ class Linux(Device):
         screen = d.screen()
         w, h = (screen["width_in_pixels"], screen["height_in_pixels"])
         return w, h
+
+    def get_ip_address(self):
+        """
+        Return default external ip address of the linux os.
+
+        Returns:
+             :py:obj:`str`: ip address
+        """
+        return socket.gethostbyname(socket.gethostname())

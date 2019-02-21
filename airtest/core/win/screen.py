@@ -57,4 +57,9 @@ def screenshot(filename, hwnd=None):
         (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
         bmpstr, 'raw', 'BGRX', 0, 1)
     cv2_image = pil_2_cv2(pil_image)
+
+    mfcDC.DeleteDC()
+    saveDC.DeleteDC()
+    win32gui.ReleaseDC(hwnd, hwndDC)
+    win32gui.DeleteObject(saveBitMap.GetHandle())
     return cv2_image

@@ -1,59 +1,54 @@
 # _*_ coding:UTF-8 _*_
 
 import os
-import sys
 import json
 import time
+import inspect
 import functools
 import traceback
+from copy import copy
 from .logger import get_logger
+from .snippet import reg_cleanup
 LOGGING = get_logger(__name__)
 
 
 class AirtestLogger(object):
     """logger """
-    def __init__(self, logfile, debug=False):
+    def __init__(self, logfile):
         super(AirtestLogger, self).__init__()
+        self.running_stack = []
         self.logfile = None
         self.logfd = None
-        self.debug = debug
-        self.running_stack = []
-        self.extra_log = {}
         self.set_logfile(logfile)
-        # atexit.register(self.handle_stacked_log)
+        reg_cleanup(self.handle_stacked_log)
 
     def set_logfile(self, logfile):
-        if logfile is None:
-            self.logfile = None
-            self.logfd = None
-        else:
-            self.handle_stacked_log()
+        if logfile:
             self.logfile = os.path.realpath(logfile)
             self.logfd = open(self.logfile, "w")
 
     @staticmethod
     def _dumper(obj):
+        if hasattr(obj, "to_json"):
+            return obj.to_json()
         try:
-            return obj.__dict__
-        except:
-            return None
+            d = copy(obj.__dict__)
+            try:
+                d["__class__"] = obj.__class__.__name__
+            except AttributeError:
+                pass
+            return d
+        except AttributeError:
+            return repr(obj)
 
-    def log(self, tag, data, in_stack=True):
+    def log(self, tag, data, depth=None):
         ''' Not thread safe '''
-        # if self.debug:
-        #     print(tag, data)
-        LOGGING.debug("%s: %s" % (tag, data))
-
-        if in_stack:
+        # LOGGING.debug("%s: %s" % (tag, data))
+        if depth is None:
             depth = len(self.running_stack)
-        else:
-            depth = 1
 
         if self.logfd:
-            try:
-                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper)
-            except UnicodeDecodeError:
-                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': repr(data).decode(sys.getfilesystemencoding())}, default=self._dumper)
+            log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()
 
@@ -67,31 +62,22 @@ class AirtestLogger(object):
 
 
 def Logwrap(f, logger):
-    LOGGER = logger
-
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         start = time.time()
-        fndata = {'name': f.__name__, 'args': args, 'kwargs': kwargs}
-        LOGGER.running_stack.append(fndata)
+        m = inspect.getcallargs(f, *args, **kwargs)
+        fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
+        logger.running_stack.append(fndata)
         try:
             res = f(*args, **kwargs)
         except Exception as e:
-            data = {"traceback": traceback.format_exc(), "time_used": time.time() - start, "error_str": repr(e).encode(sys.getfilesystemencoding())}
+            data = {"traceback": traceback.format_exc(), "end_time": time.time()}
             fndata.update(data)
-            fndata.update(LOGGER.extra_log)
-            LOGGER.log("error", fndata)
-            LOGGER.running_stack.pop()
             raise
         else:
-            time_used = time.time() - start
-            LOGGING.debug("%s%s Time used: %3fs" % ('>' * len(LOGGER.running_stack), f.__name__, time_used))
-            # sys.stdout.flush()
-            fndata.update({'time_used': time_used, 'ret': res})
-            fndata.update(LOGGER.extra_log)
-            LOGGER.log('function', fndata)
-            LOGGER.running_stack.pop()
+            fndata.update({'ret': res, "end_time": time.time()})
         finally:
-            LOGGER.extra_log = {}
+            logger.log('function', fndata)
+            logger.running_stack.pop()
         return res
     return wrapper

@@ -18,6 +18,8 @@ class WebChrome(Chrome):
         super(WebChrome, self).__init__(chrome_options=chrome_options)
         self.father_number = {0: 0}
         self.number = 0
+        self.operation_to_func = {"xpath": self.find_element_by_xpath, "id": self.find_element_by_id,
+                                  "name": self.find_element_by_name}
 
     def find_element_by_xpath(self, xpath):
         web_element = super(WebChrome, self).find_element_by_xpath(xpath)
@@ -41,10 +43,25 @@ class WebChrome(Chrome):
         self.switch_to_window(self.window_handles[self.number])
         time.sleep(0.5)
 
+    def assert_exist(self, path, operation):
+        try:
+            func = self.operation_to_func[operation]
+        except Exception:
+            print("There was no operation: ", operation)
+            return False
+        try:
+            func(path)
+        except Exception as e:
+            return False
+        return True
+
     def switch_to_last_window(self):
         self.number = self.father_number[self.number]
         self.switch_to_window(self.window_handles[self.number])
         time.sleep(0.5)
+
+    def snapshot(self):
+        self.gen_screen_log()
 
     @logwrap
     def get(self, address):
@@ -64,22 +81,22 @@ class WebChrome(Chrome):
         log_in_func({"args": ""})
         time.sleep(1)
 
-    def gen_screen_log(self, element):
-        size = element.size
-        location = element.location
-        x = size['width'] / 2 + location['x']
-        y = size['height'] / 2 + location['y']
+    def gen_screen_log(self, element=None):
+        if ST.LOG_DIR is None:
+            return None
         jpg_file_name = str(int(time.time())) + '.jpg'
-        try:
-            jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
-            self.save_screenshot(jpg_path)
+        jpg_path = os.path.join(ST.LOG_DIR, jpg_file_name)
+        self.save_screenshot(jpg_path)
+        saved = {"screen": jpg_file_name}
+        if element:
+            size = element.size
+            location = element.location
+            x = size['width'] / 2 + location['x']
+            y = size['height'] / 2 + location['y']
             if "darwin" in sys.platform:
                 x, y = x * 2, y * 2
-            extra_data ={"args": [[x, y]], "screen": jpg_file_name}
-            log_in_func(extra_data)
-        except Exception:
-            import traceback
-            traceback.print_exc()
+            saved.update({"args": [[x, y]],})
+        log_in_func(saved)
 
 class Element(WebElement):
 

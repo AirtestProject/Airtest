@@ -36,6 +36,7 @@ def get_std_encoding(stream):
 
 
 CLEANUP_CALLS = queue.Queue()
+IS_EXITING = False
 
 
 def reg_cleanup(func, *args, **kwargs):
@@ -52,7 +53,6 @@ def reg_cleanup(func, *args, **kwargs):
 
     """
     CLEANUP_CALLS.put((func, args, kwargs))
-    # atexit.register(func, *args, **kwargs)
 
 
 def _cleanup():
@@ -68,8 +68,14 @@ _shutdown = threading._shutdown
 
 
 def exitfunc():
+    global IS_EXITING
+    IS_EXITING = True
     _cleanup()
     _shutdown()
+
+
+def is_exiting():
+    return IS_EXITING
 
 
 # use threading._shutdown to exec cleanup when main thread exit

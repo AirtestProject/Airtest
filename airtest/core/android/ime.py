@@ -104,6 +104,10 @@ class YosemiteIme(CustomIme):
         super(YosemiteIme, self).__init__(adb, None, YOSEMITE_IME_SERVICE)
         self.yosemite = Yosemite(adb)
 
+    def start(self):
+        self.yosemite.get_ready()
+        super(YosemiteIme, self).start()
+
     def text(self, value):
         """
         Input text with Yosemite input method
@@ -115,9 +119,24 @@ class YosemiteIme(CustomIme):
             output form `adb shell` command
 
         """
-        self.yosemite.get_ready()
         if not self.started:
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
+
+    def code(self, code):
+        """
+        Sending editor action
+
+        Args:
+            code: editor action code, e.g., 2 = IME_ACTION_GO, 3 = IME_ACTION_SEARCH
+                Editor Action Code Ref: http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html
+
+        Returns:
+            output form `adb shell` command
+
+        """
+        if not self.started:
+            self.start()
+        self.adb.shell("am broadcast -a ADB_EDITOR_CODE --ei code {}".format(str(code)))

@@ -5,6 +5,8 @@ import json
 import struct
 import threading
 import six
+import socket
+from functools import wraps
 from airtest.core.android.constant import STFLIB, ORI_METHOD
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
@@ -13,6 +15,17 @@ from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 
 
 LOGGING = get_logger(__name__)
+
+
+def retry_when_socket_error(func):
+    @wraps(func)
+    def wrapper(inst, *args, **kwargs):
+        try:
+            return func(inst, *args, **kwargs)
+        except socket.error:
+            inst.frame_gen = None
+            return func(inst, *args, **kwargs)
+    return wrapper
 
 
 class Minicap(object):
@@ -25,18 +38,19 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, ori_method=ORI_METHOD.MINICAP):
+    def __init__(self, adb, projection=None, ori_function=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
         self.adb = adb
         self.projection = projection
-        self.ori_method = ori_method
+        self.ori_function = ori_function if callable(ori_function) else self.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
         self._stream_rotation = None
+        self._update_rotation_event = threading.Event()
 
     @ready_method
     def install_or_upgrade(self):
@@ -156,9 +170,8 @@ class Minicap(object):
             self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
             ensure_unicode=False,
         )
-        line_breaker_bytes = self.adb.line_breaker.encode("ascii")
-        jpg_data = raw_data.split(b"for JPG encoder" + line_breaker_bytes)[-1]
-        jpg_data = jpg_data.replace(line_breaker_bytes, b"\n")
+        jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1]
+        jpg_data = jpg_data.replace(self.adb.line_breaker, b"\n")
         return jpg_data
 
     def _get_params(self, projection=None):
@@ -169,10 +182,7 @@ class Minicap(object):
             physical display size (width, height), counted projection (width, height) and real display orientation
 
         """
-        if self.ori_method == ORI_METHOD.MINICAP:
-            display_info = self.get_display_info()
-        else:
-            display_info = self.adb.display_info
+        display_info = self.ori_function()
         real_width = display_info["width"]
         real_height = display_info["height"]
         real_rotation = display_info["rotation"]
@@ -298,6 +308,7 @@ class Minicap(object):
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
+    @retry_when_socket_error
     def get_frame_from_stream(self):
         """
         Get one frame from minicap stream
@@ -306,10 +317,13 @@ class Minicap(object):
             frame
 
         """
-        with self.stream_lock:
-            if self.frame_gen is None:
-                self.frame_gen = self.get_stream()
-            return six.next(self.frame_gen)
+        if self._update_rotation_event.is_set():
+            LOGGING.debug("do update rotation")
+            self.teardown_stream()
+            self._update_rotation_event.clear()
+        if self.frame_gen is None:
+            self.frame_gen = self.get_stream()
+        return six.next(self.frame_gen)
 
     def update_rotation(self, rotation):
         """
@@ -323,10 +337,7 @@ class Minicap(object):
 
         """
         LOGGING.debug("update_rotation: %s" % rotation)
-        with self.stream_lock:
-            if self._stream_rotation == rotation:
-                return
-        self.teardown_stream()
+        self._update_rotation_event.set()
 
     def teardown_stream(self):
         """
@@ -336,14 +347,15 @@ class Minicap(object):
             None
 
         """
-        with self.stream_lock:
-            if not self.frame_gen:
-                return
-            try:
-                self.frame_gen.send(1)
-            except (TypeError, StopIteration):
-                # TypeError: can't send non-None value to a just-started generator
-                pass
-            else:
-                LOGGING.warn("%s tear down failed" % self.frame_gen)
-            self.frame_gen = None
+        if not self.frame_gen:
+            return
+        try:
+            self.frame_gen.send(1)
+        except (TypeError, StopIteration):
+            # TypeError: can't send non-None value to a just-started generator
+            pass
+        else:
+            LOGGING.warn("%s tear down failed" % self.frame_gen)
+        self.frame_gen = None
+
+

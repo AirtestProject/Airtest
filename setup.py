@@ -15,15 +15,15 @@ if sys.platform == "win32":
 
 setup(
     name='airtest',
-    version='1.0.14',
+    version='1.0.26',
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows/Linux',
     long_description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows, present by NetEase Games',
     url='https://github.com/AirtestProject/Airtest',
     license='Apache License 2.0',
-    keywords=['automation', 'test', 'game', 'android', 'ios', 'windows', 'linux'],
-    packages=find_packages(exclude=['cover', 'examples', 'tests', 'dist']),
+    keywords=['automation', 'automated-test', 'game', 'android', 'ios', 'windows', 'linux'],
+    packages=find_packages(exclude=['cover', 'playground', 'tests', 'dist']),
     package_data={
         'android_deps': ["*.apk", "airtest/core/android/static"],
         'html_statics': ["airtest/report"]
@@ -50,5 +50,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )

@@ -3,15 +3,15 @@
 import unittest
 import os
 import sys
+import six
 import re
 import shutil
 import traceback
 import warnings
 from io import open
-from airtest.core.api import G, auto_setup
+from airtest.core.api import G, auto_setup, log
 from airtest.core.settings import Settings as ST
-from airtest.core.helper import log
-from airtest.utils.compat import decode_path
+from airtest.utils.compat import decode_path, script_dir_name, script_log_dir
 from copy import copy
 
 
@@ -49,16 +49,20 @@ class AirtestCase(unittest.TestCase):
                     traceback.print_exc()
 
     def runTest(self):
-        log("main_script", {"script": self.args.script})
-        scriptpath = self.args.script
-        pyfilename = os.path.basename(scriptpath).replace(self.SCRIPTEXT, ".py")
+        scriptpath, pyfilename = script_dir_name(self.args.script)
         pyfilepath = os.path.join(scriptpath, pyfilename)
         pyfilepath = os.path.abspath(pyfilepath)
         self.scope["__file__"] = pyfilepath
         with open(pyfilepath, 'r', encoding="utf8") as f:
             code = f.read()
         pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
-        exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
+
+        try:
+            exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
+        except Exception as err:
+            tb = traceback.format_exc()
+            log("Final Error", tb)
+            six.reraise(*sys.exc_info())
 
     @classmethod
     def exec_other_script(cls, scriptpath):
@@ -111,21 +115,19 @@ def setup_by_args(args):
         print("do not connect device")
 
     # set base dir to find tpl
-    args.script = decode_path(args.script)
+    dirpath, _ = script_dir_name(args.script)
 
     # set log dir
-    if args.log is True:
-        print("save log in %s/log" % args.script)
-        args.log = os.path.join(args.script, "log")
-    elif args.log:
+    if args.log:
+        args.log = script_log_dir(dirpath, args.log)
         print("save log in '%s'" % args.log)
-        args.log = decode_path(args.log)
     else:
         print("do not save log")
 
     # guess project_root to be basedir of current .air path
     project_root = os.path.dirname(args.script) if not ST.PROJECT_ROOT else None
-    auto_setup(args.script, devices, args.log, project_root)
+
+    auto_setup(dirpath, devices, args.log, project_root)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):

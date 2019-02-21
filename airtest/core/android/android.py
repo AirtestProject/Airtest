@@ -1,24 +1,25 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import time
 import warnings
-
+from copy import copy
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, SDK_VERISON_NEW
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
+
 LOGGING = get_logger(__name__)
 
 
 class Android(Device):
-
     """Android Device Class"""
 
     def __init__(self, serialno=None, host=None,
@@ -28,7 +29,7 @@ class Android(Device):
                  ori_method=ORI_METHOD.MINICAP,
                  ):
         super(Android, self).__init__()
-        self.serialno = serialno or ADB().devices(state="device")[0][0]
+        self.serialno = serialno or self.get_default_device()
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
@@ -38,14 +39,27 @@ class Android(Device):
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         self._display_info = {}
+        self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb, ori_method=self.ori_method)
+        self.minicap = Minicap(self.adb, ori_function=self.get_display_info)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
+
+    def get_default_device(self):
+        """
+        Get local default device when no serailno
+
+        Returns:
+            local device serialno
+
+        """
+        if not ADB().devices(state="device"):
+            raise IndexError("ADB devices not found")
+        return ADB().devices(state="device")[0][0]
 
     @property
     def uuid(self):
@@ -104,6 +118,20 @@ class Android(Device):
         """
         return self.adb.start_app(package, activity)
 
+    def start_app_timing(self, package, activity):
+        """
+        Start the application and activity, and measure time
+
+        Args:
+            package: package name
+            activity: activity name
+
+        Returns:
+            app launch time
+
+        """
+        return self.adb.start_app_timing(package, activity)
+
     def stop_app(self, package):
         """
         Stop the application
@@ -130,9 +158,24 @@ class Android(Device):
         """
         return self.adb.clear_app(package)
 
-    def install_app(self, filepath, replace=False):
+    def install_app(self, filepath, replace=False, test=False):
         """
         Install the application on the device
+
+        Args:
+            filepath: full path to the `apk` file to be installed on the device
+            replace: True or False to replace the existing application
+            test: allow test packages if True, default is False
+
+        Returns:
+            output from installation process
+
+        """
+        return self.adb.install_app(filepath, replace=replace, test=test)
+
+    def install_multiple_app(self, filepath, replace=False):
+        """
+        Install multiple the application on the device
 
         Args:
             filepath: full path to the `apk` file to be installed on the device
@@ -140,9 +183,8 @@ class Android(Device):
 
         Returns:
             output from installation process
-
         """
-        return self.adb.install_app(filepath, replace=replace)
+        return self.adb.install_multiple_app(filepath, replace=replace)
 
     def uninstall_app(self, package):
         """
@@ -195,8 +237,8 @@ class Android(Device):
                 h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
-            # adb 截图总是要根据orientation旋转
-            elif self.cap_method == CAP_METHOD.ADBCAP:
+            # adb 截图总是要根据orientation旋转，但是SDK版本大于等于25(Android7.1以后)无需额外旋转
+            elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_NEW:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
             aircv.imwrite(filename, screen)
@@ -251,46 +293,56 @@ class Android(Device):
         """
         self.keyevent("HOME")
 
-    def text(self, text, enter=True):
+    def text(self, text, enter=True, **kwargs):
         """
         Input text on the device
 
         Args:
             text: text to input
             enter: True or False whether to press `Enter` key
+            search: True or False whether to press `Search` key on IME after input
 
         Returns:
             None
 
         """
+        search = False if "search" not in kwargs else kwargs["search"]
+
         if self.ime_method == IME_METHOD.YOSEMITEIME:
             self.yosemite_ime.text(text)
         else:
             self.adb.shell(["input", "text", text])
 
+        if search:
+            self.yosemite_ime.code("3")
+            return
+
         # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
 
-    def touch(self, pos, times=1, duration=0.01):
+    def touch(self, pos, duration=0.01):
         """
         Perform touch event on the device
 
         Args:
             pos: coordinates (x, y)
-            times: how many touches to be performed
             duration: how long to touch the screen
 
         Returns:
             None
 
         """
-        for _ in range(times):
-            if self.touch_method == TOUCH_METHOD.MINITOUCH:
-                pos = self._touch_point_by_orientation(pos)
-                self.minitouch.touch(pos, duration=duration)
-            else:
-                self.adb.touch(pos)
+        if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            pos = self._touch_point_by_orientation(pos)
+            self.minitouch.touch(pos, duration=duration)
+        else:
+            self.adb.touch(pos)
+
+    def double_click(self, pos):
+        self.touch(pos)
+        time.sleep(0.05)
+        self.touch(pos)
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
@@ -471,7 +523,14 @@ class Android(Device):
         """
         if not self._display_info:
             self._display_info = self.get_display_info()
-        return self._display_info
+        display_info = copy(self._display_info)
+        # update ow orientation, which is more accurate
+        if self._current_orientation is not None:
+            display_info.update({
+                "rotation": self._current_orientation * 90,
+                "orientation": self._current_orientation,
+            })
+        return display_info
 
     def get_display_info(self):
         """
@@ -484,12 +543,12 @@ class Android(Device):
         if self.ori_method == ORI_METHOD.MINICAP:
             display_info = self.minicap.get_display_info()
         else:
-            display_info = self.adb.display_info
+            display_info = self.adb.get_display_info()
         return display_info
 
     def get_current_resolution(self):
         """
-        Return current resolution after rotaion
+        Return current resolution after rotation
 
         Returns:
             width and height of the display
@@ -531,19 +590,15 @@ class Android(Device):
 
     def _register_rotation_watcher(self):
         """
-        Auto refresh `android.display` when rotation of screen has changed
+        Register callbacks for Android and minicap when rotation of screen has changed
+
+        callback is called in another thread, so be careful about thread-safety
 
         Returns:
             None
 
         """
-        def refresh_ori(ori):
-            self.display_info["orientation"] = ori
-            self.display_info["rotation"] = ori * 90
-            self.adb.display_info["orientation"] = ori
-            self.adb.display_info["rotation"] = ori * 90
-
-        self.rotation_watcher.reg_callback(refresh_ori)
+        self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
         self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
 
     def _touch_point_by_orientation(self, tuple_xy):

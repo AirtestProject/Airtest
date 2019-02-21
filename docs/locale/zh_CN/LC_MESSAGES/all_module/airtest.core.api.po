@@ -3,19 +3,21 @@
 # This file is distributed under the same license as the airtest package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: airtest \n"
+"Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2019-01-30 15:53+0800\n"
+"PO-Revision-Date: 2019-01-30 17:49+0800\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../../all_module/airtest.core.api.rst:2
 msgid "airtest\\.core\\.api module"
@@ -23,135 +25,152 @@ msgstr ""
 
 #: airtest.core.api:1 of
 msgid "This module contains the Airtest Core APIs."
-msgstr ""
+msgstr "这个模块包含了Airtest核心API。"
 
-#: airtest.core.api.connect_device:1 of
-msgid "Initialize device with uri and set the device as the current one."
-msgstr ""
+#: airtest.core.api.init_device:1 of
+msgid "Initialize device if not yet, and set as current device."
+msgstr "初始化设备，并设置为当前设备。"
 
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
-#: airtest.core.api.clear_app airtest.core.api.connect_device
-#: airtest.core.api.exists airtest.core.api.find_all airtest.core.api.install
-#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.clear_app airtest.core.api.click
+#: airtest.core.api.connect_device airtest.core.api.exists
+#: airtest.core.api.find_all airtest.core.api.init_device
+#: airtest.core.api.install airtest.core.api.keyevent airtest.core.api.pinch
 #: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
-msgid "参数"
+msgid "Parameters"
+msgstr "参数"
+
+#: airtest.core.api.init_device:3 of
+msgid "Android, IOS or Windows"
 msgstr ""
 
-#: airtest.core.api.connect_device:3 of
-msgid ""
-"an URI where to connect to device, e.g. "
-"`android://adbhost:adbport/serialno?param=value&param2=value2`"
-msgstr ""
+#: airtest.core.api.init_device:4 of
+msgid "uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS"
+msgstr "目标设备的uuid，例如Android的序列号，Windows的窗口句柄，或iOS的uuid"
+
+#: airtest.core.api.init_device:5 of
+msgid "Optional platform specific keyword args, e.g. `cap_method=JAVACAP` for Android"
+msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACAP``参数"
 
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
-#: airtest.core.api.clear_app airtest.core.api.connect_device
-#: airtest.core.api.device airtest.core.api.exists airtest.core.api.find_all
-#: airtest.core.api.home airtest.core.api.install airtest.core.api.keyevent
-#: airtest.core.api.pinch airtest.core.api.set_current airtest.core.api.shell
-#: airtest.core.api.sleep airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.clear_app airtest.core.api.click
+#: airtest.core.api.connect_device airtest.core.api.device
+#: airtest.core.api.exists airtest.core.api.find_all airtest.core.api.home
+#: airtest.core.api.init_device airtest.core.api.install
+#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
+#: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
-#: airtest.core.api.connect_device:4 of
+#: airtest.core.api.connect_device:4 airtest.core.api.init_device:6 of
 msgid "device instance"
-msgstr ""
+msgstr "device对象"
+
+#: airtest.core.api.connect_device:1 of
+msgid "Initialize device with uri, and set as current device."
+msgstr "用URI字符串来初始化设备，并且设置为当前设备。"
+
+#: airtest.core.api.connect_device:3 of
+msgid "an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&param2=value2`"
+msgstr "一个用于初始化设备的URI字符串，例如 ``android://adbhost:adbport/serialno?param=value&param2=value2``"
 
 #: airtest.core.api.connect_device of
 msgid "Example"
-msgstr ""
+msgstr "示例"
 
 #: airtest.core.api.connect_device:6 of
 msgid "``android:///`` # local adb device using default params"
-msgstr ""
+msgstr "``android:///`` # 当前Android设备，使用默认参数连接"
 
 #: airtest.core.api.connect_device:7 of
-msgid ""
-"``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``"
-"  # remote adb device using custom params"
-msgstr ""
+msgid "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # remote device using custom params"
+msgstr "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # 远程Android设备，并且使用了自定义参数"
 
 #: airtest.core.api.connect_device:8 of
 msgid "``windows:///`` # local Windows application"
-msgstr ""
+msgstr "``windows:///`` # 本地Windows桌面"
 
 #: airtest.core.api.connect_device:9 of
 msgid "``ios:///`` # iOS device"
-msgstr ""
-
-#: airtest.core.api.assert_equal airtest.core.api.assert_exists
-#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
-#: airtest.core.api.clear_app airtest.core.api.connect_device
-#: airtest.core.api.device airtest.core.api.exists airtest.core.api.find_all
-#: airtest.core.api.home airtest.core.api.install airtest.core.api.keyevent
-#: airtest.core.api.pinch airtest.core.api.set_current airtest.core.api.shell
-#: airtest.core.api.sleep airtest.core.api.snapshot airtest.core.api.start_app
-#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
-#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
-#: airtest.core.api.wake of
-msgid "platforms"
-msgstr ""
-
-#: airtest.core.api.connect_device:11 airtest.core.api.device:4
-#: airtest.core.api.set_current:6 airtest.core.api.snapshot:7 of
-msgid "Android, iOS, Windows"
-msgstr ""
+msgstr "``ios:///`` # iOS 设备"
 
 #: airtest.core.api.device:1 of
 msgid "Return the current active device."
-msgstr ""
+msgstr "返回当前正在使用中的设备。"
 
 #: airtest.core.api.device:3 of
 msgid "current device instance"
-msgstr ""
+msgstr "当前设备实例"
 
 #: airtest.core.api.set_current:1 of
 msgid "Set current active device."
-msgstr ""
+msgstr "设置当前设备。"
 
 #: airtest.core.api.set_current:3 of
-msgid "index of initialized device instance"
-msgstr ""
+msgid "uuid or index of initialized device instance"
+msgstr "uuid或已初始化的设备列表中的编号，从0开始"
 
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
-msgid "引发"
+msgid "Raises"
 msgstr ""
 
 #: airtest.core.api.set_current:4 of
-msgid "raised when device index is out of device list"
-msgstr ""
+msgid "raised when device idx is not found"
+msgstr "当查找不到设备时"
 
 #: airtest.core.api.assert_equal:7 airtest.core.api.assert_not_equal:7
 #: airtest.core.api.clear_app:4 airtest.core.api.home:3
 #: airtest.core.api.install:4 airtest.core.api.keyevent:5
 #: airtest.core.api.pinch:6 airtest.core.api.set_current:5
 #: airtest.core.api.sleep:4 airtest.core.api.start_app:5
-#: airtest.core.api.stop_app:4 airtest.core.api.swipe:16
-#: airtest.core.api.text:5 airtest.core.api.touch:5
+#: airtest.core.api.stop_app:4 airtest.core.api.text:5
 #: airtest.core.api.uninstall:4 airtest.core.api.wake:3 of
 msgid "None"
 msgstr ""
 
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.clear_app airtest.core.api.click airtest.core.api.exists
+#: airtest.core.api.find_all airtest.core.api.home airtest.core.api.install
+#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
+#: airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
+#: airtest.core.api.wake of
+msgid "platforms"
+msgstr "支持平台"
+
+#: airtest.core.api.set_current:6 airtest.core.api.snapshot:7 of
+msgid "Android, iOS, Windows"
+msgstr ""
+
+#: airtest.core.api.auto_setup:1 of
+msgid "Auto setup running env and try connect android device if not device connected."
+msgstr "自动初始化运行环境，并且当没有设备连接时，默认尝试连接Android设备。"
+
 #: airtest.core.api.shell:1 of
 msgid "Start remote shell in the target device and execute the command"
-msgstr ""
+msgstr "在目标设备上运行远程shell指令"
 
 #: airtest.core.api.shell:3 of
 msgid "command to be run on device, e.g. \"ls /data/local/tmp\""
-msgstr ""
+msgstr "需要在设备上运行的指令，例如 ``ls /data/local/tmp``"
 
 #: airtest.core.api.shell:4 of
 msgid "the output of the shell cmd"
-msgstr ""
+msgstr "shell指令的输出内容"
 
 #: airtest.core.api.pinch:7 airtest.core.api.shell:5 of
 msgid "Android"
@@ -159,15 +178,15 @@ msgstr ""
 
 #: airtest.core.api.start_app:1 of
 msgid "Start the target application on device"
-msgstr ""
+msgstr "在设备上启动目标应用"
 
 #: airtest.core.api.start_app:3 of
 msgid "name of the package to be started, e.g. \"com.netease.my\""
-msgstr ""
+msgstr "想要启动的应用包名package name，例如 ``com.netease.my``"
 
 #: airtest.core.api.start_app:4 of
 msgid "the activity to start, default is None which means the main activity"
-msgstr ""
+msgstr "需要启动的activity，默认为None，意为main activity"
 
 #: airtest.core.api.clear_app:5 airtest.core.api.home:4
 #: airtest.core.api.install:5 airtest.core.api.start_app:6
@@ -178,254 +197,248 @@ msgstr ""
 
 #: airtest.core.api.stop_app:1 of
 msgid "Stop the target application on device"
-msgstr ""
+msgstr "终止目标应用在设备上的运行"
 
 #: airtest.core.api.stop_app:3 of
 msgid "name of the package to stop, see also `start_app`"
-msgstr ""
+msgstr "需要终止运行的应用包名 package name，另见 ``start_app``"
 
 #: airtest.core.api.clear_app:1 of
 msgid "Clear data of the target application on device"
-msgstr ""
+msgstr "清理设备上的目标应用数据"
 
 #: airtest.core.api.clear_app:3 of
 msgid "name of the package,  see also `start_app`"
-msgstr ""
+msgstr "包名 package name，另见 ``start_app``"
 
 #: airtest.core.api.install:1 of
 msgid "Install application on device"
-msgstr ""
+msgstr "安装应用到设备上"
 
 #: airtest.core.api.install:3 of
 msgid "the path to file to be installed on target device"
-msgstr ""
+msgstr "需要被安装的应用路径"
 
 #: airtest.core.api.uninstall:1 of
 msgid "Uninstall application on device"
-msgstr ""
+msgstr "卸载设备上的应用"
 
 #: airtest.core.api.uninstall:3 of
 msgid "name of the package, see also `start_app`"
-msgstr ""
+msgstr "需要被卸载的包名 package name，另见 ``start_app``"
 
 #: airtest.core.api.snapshot:1 of
 msgid "Take the screenshot of the target device and save it to the file."
-msgstr ""
+msgstr "对目标设备进行一次截图，并且保存到文件中。"
 
 #: airtest.core.api.snapshot:3 of
-msgid ""
-"name of the file where to save the screenshot. If the relative path is "
-"provided, the default location is ``ST.LOG_DIR``"
-msgstr ""
+msgid "name of the file where to save the screenshot. If the relative path is provided, the default location is ``ST.LOG_DIR``"
+msgstr "保存截图的文件名，默认保存路径为 ``ST.LOG_DIR``中"
 
 #: airtest.core.api.snapshot:5 of
 msgid "short description for screenshot, it will be recorded in the report"
-msgstr ""
+msgstr "截图文件的简短描述，将会被显示在报告页面中"
 
 #: airtest.core.api.snapshot:6 of
 msgid "absolute path of the screenshot"
-msgstr ""
+msgstr "截图文件的绝对路径"
 
 #: airtest.core.api.wake:1 of
 msgid "Wake up and unlock the target device"
-msgstr ""
+msgstr "唤醒并解锁目标设备"
 
 #: airtest.core.api.wake:6 of
 msgid "Might not work on some models"
-msgstr ""
+msgstr "在部分品牌手机上可能无法生效"
 
 #: airtest.core.api.home:1 of
 msgid "Return to the home screen of the target device."
-msgstr ""
+msgstr "返回HOME界面。"
 
-#: airtest.core.api.touch:1 of
+#: airtest.core.api.click:1 airtest.core.api.touch:1 of
 msgid "Perform the touch action on the device screen"
-msgstr ""
+msgstr "在当前设备画面上进行一次点击"
 
-#: airtest.core.api.touch:3 of
+#: airtest.core.api.click:3 airtest.core.api.touch:3 of
 msgid "target to touch, either a Template instance or absolute coordinates (x, y)"
-msgstr ""
+msgstr "点击位置，可以是一个Template图片实例，或是一个绝对坐标 ``(x, y)``"
 
-#: airtest.core.api.keyevent:4 airtest.core.api.swipe:14
-#: airtest.core.api.touch:4 of
+#: airtest.core.api.click:4 airtest.core.api.touch:4 of
+msgid "how many touches to be performed"
+msgstr "点击次数"
+
+#: airtest.core.api.click:5 airtest.core.api.keyevent:4
+#: airtest.core.api.swipe:14 airtest.core.api.touch:5 of
 msgid "platform specific `kwargs`, please refer to corresponding docs"
-msgstr ""
+msgstr "平台相关的参数 ``kwargs``，请参考对应的平台接口文档"
+
+#: airtest.core.api.click:6 airtest.core.api.touch:6 of
+msgid "finial position to be clicked"
+msgstr "实际点击位置坐标 ``(x, y)``"
 
 #: airtest.core.api.assert_equal:8 airtest.core.api.assert_exists:7
 #: airtest.core.api.assert_not_equal:8 airtest.core.api.assert_not_exists:7
-#: airtest.core.api.exists:5 airtest.core.api.find_all:5
-#: airtest.core.api.keyevent:6 airtest.core.api.sleep:5
-#: airtest.core.api.swipe:17 airtest.core.api.text:6 airtest.core.api.touch:6
-#: airtest.core.api.wait:9 of
+#: airtest.core.api.click:7 airtest.core.api.exists:5
+#: airtest.core.api.find_all:5 airtest.core.api.keyevent:6
+#: airtest.core.api.sleep:5 airtest.core.api.swipe:17 airtest.core.api.text:6
+#: airtest.core.api.touch:7 airtest.core.api.wait:9 of
 msgid "Android, Windows, iOS"
 msgstr ""
 
 #: airtest.core.api.swipe:1 of
 msgid "Perform the swipe action on the device screen."
-msgstr ""
+msgstr "在当前设备画面上进行一次滑动操作。"
 
 #: airtest.core.api.swipe:6 of
 msgid "There are two ways of assigning the parameters"
-msgstr ""
+msgstr "有两种传入参数的方式"
 
 #: airtest.core.api.swipe:4 of
 msgid "``swipe(v1, v2=Template(...))``   # swipe from v1 to v2"
-msgstr ""
+msgstr "``swipe(v1, v2=Template(...))``   # 从 v1 滑动到 v2"
 
 #: airtest.core.api.swipe:5 of
-msgid ""
-"``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along "
-"the vector."
-msgstr ""
+msgid "``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along the vector."
+msgstr "``swipe(v1, vector=(x, y))``      # 从 v1 开始滑动，沿着vector方向。"
 
 #: airtest.core.api.swipe:8 of
-msgid ""
-"the start point of swipe, either a Template instance or absolute "
-"coordinates (x, y)"
-msgstr ""
+msgid "the start point of swipe, either a Template instance or absolute coordinates (x, y)"
+msgstr "滑动的起点，可以是一个Template图片实例，或是绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.swipe:10 of
-msgid ""
-"the end point of swipe, either a Template instance or absolute "
-"coordinates (x, y)"
-msgstr ""
+msgid "the end point of swipe, either a Template instance or absolute coordinates (x, y)"
+msgstr "滑动的终点，可以是一个Template图片实例，或是绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.swipe:12 of
-msgid ""
-"a vector coordinates of swipe action, either absolute coordinates (x, y) "
-"or percentage of screen e.g.(0.5, 0.5)"
-msgstr ""
+msgid "a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)"
+msgstr "滑动动作的矢量坐标，可以是绝对坐标 ``(x,y)`` 或是屏幕百分比，例如 ``(0.5, 0.5)``"
 
 #: airtest.core.api.swipe:15 of
-msgid ""
-"general exception when not enough parameters to perform swap action have "
-"been provided"
-msgstr ""
+msgid "general exception when not enough parameters to perform swap action have been provided"
+msgstr "当没有足够的参数来执行滑动时引发异常"
+
+#: airtest.core.api.swipe:16 of
+msgid "Origin position and target position"
+msgstr "原点位置和目标位置"
 
 #: airtest.core.api.pinch:1 of
 msgid "Perform the pinch action on the device screen"
-msgstr ""
+msgstr "在设备屏幕上执行一个双指pinch捏合操作"
 
 #: airtest.core.api.pinch:3 of
 msgid "pinch in or pinch out, enum in [\"in\", \"out\"]"
-msgstr ""
+msgstr "向内捏合或向外扩大，在[\"in\", \"out\"] 中枚举一个值"
 
 #: airtest.core.api.pinch:4 of
 msgid "center of pinch action, default as None which is the center of the screen"
-msgstr ""
+msgstr "pinch动作的中心位置，默认值为None则为屏幕中心点"
 
 #: airtest.core.api.pinch:5 of
 msgid "percentage of the screen of pinch action, default is 0.5"
-msgstr ""
+msgstr "pinch动作的屏幕百分比，默认值为0.5"
 
 #: airtest.core.api.keyevent:1 of
 msgid "Perform key event on the device"
-msgstr ""
+msgstr "在设备上执行keyevent按键事件"
 
 #: airtest.core.api.keyevent:3 of
 msgid "platform specific key name"
-msgstr ""
+msgstr "平台相关的按键名称"
 
 #: airtest.core.api.text:1 of
 msgid "Input text on the target device. Text input widget must be active first."
-msgstr ""
+msgstr "在目标设备上输入文本，文本框需要处于激活状态。"
 
 #: airtest.core.api.text:3 of
 msgid "text to input, unicode is supported"
-msgstr ""
+msgstr "要输入的文本"
 
 #: airtest.core.api.text:4 of
 msgid "input `Enter` keyevent after text input, default is True"
-msgstr ""
+msgstr "是否在输入完毕后，执行一次 ``Enter`` ，默认是True"
 
 #: airtest.core.api.sleep:1 of
 msgid "Set the sleep interval. It will be recorded in the report"
-msgstr ""
+msgstr "设置一个等待sleep时间，它将会被显示在报告中"
 
 #: airtest.core.api.sleep:3 of
 msgid "seconds to sleep"
-msgstr ""
+msgstr "sleep的时长"
 
 #: airtest.core.api.wait:1 of
 msgid "Wait to match the Template on the device screen"
-msgstr ""
+msgstr "等待当前画面上出现某个匹配的Template图片"
 
 #: airtest.core.api.wait:3 of
 msgid "target object to wait for, Template instance"
-msgstr ""
+msgstr "要等待出现的目标Template实例"
 
 #: airtest.core.api.wait:4 of
-msgid ""
-"time interval to wait for the match, default is None which is "
-"``ST.FIND_TIMEOUT``"
-msgstr ""
+msgid "time interval to wait for the match, default is None which is ``ST.FIND_TIMEOUT``"
+msgstr "等待匹配的最大超时时长，默认为None即默认取 ``ST.FIND_TIMEOUT`` 的值"
 
 #: airtest.core.api.wait:5 of
 msgid "time interval in seconds to attempt to find a match"
-msgstr ""
+msgstr "尝试查找匹配项的时间间隔（以秒为单位）"
 
 #: airtest.core.api.wait:6 of
 msgid "called after each unsuccessful attempt to find the corresponding match"
-msgstr ""
+msgstr "在首次尝试查找匹配失败后的回调函数"
 
 #: airtest.core.api.wait:7 of
 msgid "raised if target is not found after the time limit expired"
-msgstr ""
+msgstr "在超时后仍未找到目标则触发"
 
 #: airtest.core.api.wait:8 of
 msgid "coordinates of the matched target"
-msgstr ""
+msgstr "匹配目标的坐标"
 
 #: airtest.core.api.exists:1 of
 msgid "Check whether given target exists on device screen"
-msgstr ""
+msgstr "检查设备上是否存在给定目标"
 
 #: airtest.core.api.assert_exists:3 airtest.core.api.assert_not_exists:3
 #: airtest.core.api.exists:3 of
 msgid "target to be checked"
-msgstr ""
+msgstr "要检查的目标"
 
 #: airtest.core.api.exists:4 of
-msgid ""
-"False if target is not found, otherwise returns the coordinates of the "
-"target"
-msgstr ""
+msgid "False if target is not found, otherwise returns the coordinates of the target"
+msgstr "如果未找到目标，则返回False，否则返回目标的坐标"
 
 #: airtest.core.api.find_all:1 of
-msgid ""
-"Find all occurrences of the target on the device screen and return their "
-"coordinates"
-msgstr ""
+msgid "Find all occurrences of the target on the device screen and return their coordinates"
+msgstr "在设备屏幕上查找所有出现的目标并返回其坐标列表"
 
 #: airtest.core.api.find_all:3 of
 msgid "target to find"
-msgstr ""
+msgstr "寻找目标"
 
 #: airtest.core.api.find_all:4 of
 msgid "list of coordinates, [(x, y), (x1, y1), ...]"
-msgstr ""
+msgstr "坐标列表， [(x, y), (x1, y1), ...]"
 
 #: airtest.core.api.assert_exists:1 of
 msgid "Assert target exists on device screen"
-msgstr ""
+msgstr "设备屏幕上存在断言目标"
 
 #: airtest.core.api.assert_equal:5 airtest.core.api.assert_exists:4
 #: airtest.core.api.assert_not_equal:5 airtest.core.api.assert_not_exists:4 of
 msgid "short description of assertion, it will be recorded in the report"
-msgstr ""
+msgstr "断言的简短描述，它将被记录在报告中"
 
 #: airtest.core.api.assert_equal:6 airtest.core.api.assert_exists:5
 #: airtest.core.api.assert_not_exists:5 of
 msgid "if assertion fails"
-msgstr ""
+msgstr "如果断言失败"
 
 #: airtest.core.api.assert_exists:6 of
 msgid "coordinates of the target"
-msgstr ""
+msgstr "目标坐标"
 
 #: airtest.core.api.assert_not_exists:1 of
 msgid "Assert target does not exist on device screen"
-msgstr ""
+msgstr "设备屏幕上不存在断言目标"
 
 #: airtest.core.api.assert_not_exists:6 of
 msgid "None."
@@ -433,19 +446,19 @@ msgstr ""
 
 #: airtest.core.api.assert_equal:1 of
 msgid "Assert two values are equal"
-msgstr ""
+msgstr "断言两个值相等"
 
 #: airtest.core.api.assert_equal:3 airtest.core.api.assert_not_equal:3 of
 msgid "first value"
-msgstr ""
+msgstr "第一个值"
 
 #: airtest.core.api.assert_equal:4 airtest.core.api.assert_not_equal:4 of
 msgid "second value"
-msgstr ""
+msgstr "第二个值"
 
 #: airtest.core.api.assert_not_equal:1 of
 msgid "Assert two values are not equal"
-msgstr ""
+msgstr "断言两个值不相等"
 
 #: airtest.core.api.assert_not_equal:6 of
 msgid "if assertion"
@@ -469,3 +482,17 @@ msgstr ""
 #~ msgid "Raises"
 #~ msgstr ""
 
+#~ msgid "Initialize device with uri and set the device as the current one."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``"
+#~ "  # remote adb device using custom"
+#~ " params"
+#~ msgstr ""
+
+#~ msgid "index of initialized device instance"
+#~ msgstr ""
+
+#~ msgid "raised when device index is out of device list"
+#~ msgstr ""

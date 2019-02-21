@@ -1,82 +1,64 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2017, Game-Netease
+# Copyright (C) 2018, Game-Netease
 # This file is distributed under the same license as the airtest package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: airtest \n"
+"Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:07+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2019-01-30 11:38+0800\n"
+"PO-Revision-Date: 2019-01-30 14:17+0800\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_CN\n"
 
 #: ../../index.rst:45
 msgid "Welcome to Airtest documentation!"
-msgstr "欢迎来到Airtest官方文档"
+msgstr "欢迎来到Airtest官方文档！"
 
 #: ../../index.rst:48
 msgid "Airtest"
 msgstr ""
 
 #: ../../index.rst:51
-msgid "**UI Test Automation Framework for Games and Apps**"
+msgid "**UI Automation Framework for Games and Apps**"
 msgstr "**跨平台的UI自动化测试框架，适用于游戏和App**"
 
 #: ../../index.rst:66
+msgid "Airtest is a cross-platform UI automation framework for games and apps."
+msgstr "Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。"
+
+#: ../../index.rst:68
 msgid ""
-"Airtest is a cross-platform automated testing framework with main focus "
-"on games, which can also be used for native apps. Currently, Windows and "
-"Android are well supported. Support for iOS comes in near future."
-msgstr "Airtest是一个跨平台的UI自动化测试框架，适用于游戏和App。目前支持Windows和Android平台，iOS支持正在开发中。"
+"If you are new to Airtest, `Airtest Project Homepage`_ is a good place to "
+"get started."
+msgstr "如果你是Airtest新手用户，从 `官网`_ 开始上手吧。"
 
 #: ../../index.rst:70
 msgid ""
-"If you are new to Airtest, `Airtest Project Homepage`_ is a good place to"
-" get started."
-msgstr "如果你是Airtest新手用户，从 `官网`_ 开始上手吧！"
+"The following documentation will guide you through main ideas of Airtest, as "
+"well as providing a API reference documentation."
+msgstr "以下文档会介绍Airtest的基本用法，以及提供API文档。"
 
-#: ../../index.rst:72
-msgid ""
-"The following documentation will guide you through main ideas of Airtest,"
-" as well as providing a API reference documentation."
-msgstr "以下文档会介绍Airtest的基本思路和API文档。"
-
-#: ../../index.rst:77
+#: ../../index.rst:75
 msgid "Quickstart"
 msgstr "快速开始"
 
-#: ../../index.rst:85
+#: ../../index.rst:83
 msgid "Cross Platform API"
 msgstr "跨平台的API"
 
-#: ../../index.rst:93
+#: ../../index.rst:91
 msgid "Platform Specific API"
-msgstr "平台相关API"
+msgstr "平台相关的API"
 
-#: ../../index.rst:103
+#: ../../index.rst:101
 msgid "Modules Content"
-msgstr ""
-
-#~ msgid "Airtest: Automated Testing Framework"
-#~ msgstr "Airtest自动化测试框架"
-
-#~ msgid ""
-#~ "This document provides all the basic "
-#~ "information that are needed to start "
-#~ "using the Airtest automation test "
-#~ "framework. It covers the main framework"
-#~ " ideas and concepts and shows "
-#~ "examples for various use cases as "
-#~ "well."
-#~ msgstr "Airtest是一个专注于游戏自动化测试的UI测试框架，也可以用于各种源生App。支持Windows和Android平台，iOS支持正在开发中。Airtest基于图像识别技术，并提供了跨平台的API，包括安装应用、模拟输入、断言等。测试脚本运行后可以自动生成详细的HTML测试报告。**AirtestIDE**是一个开箱即用的GUI工具，可以帮助录制和调试测试脚本。AirtestIDE给QA人员提供了完整的工作流程支持：录制脚本->真机回放->生成报告"
-
-#~ msgid "Main API"
-#~ msgstr "主要API"
-
+msgstr "模块内容"
