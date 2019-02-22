@@ -11,16 +11,18 @@ from .utils import generate_result, check_image_valid
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 
-class KeypointMatch:
+class KeypointMatching(object):
     """基于特征点的识别基类: KAZE."""
 
+    # 日志中的方法名
+    METHOD_NAME = "KAZE"
     # 参数: FILTER_RATIO为SIFT优秀特征点过滤比例值(0-1范围，建议值0.4-0.6)
     FILTER_RATIO = 0.59
     # 参数: SIFT识别时只找出一对相似特征点时的置信度(confidence)
     ONE_POINT_CONFI = 0.5
 
     def __init__(self, im_source, im_search, threshold=0.8, rgb=True):
-        super(KeypointMatch, self).__init__()
+        super(KeypointMatching, self).__init__()
         self.im_source = im_source
         self.im_search = im_search
         self.threshold = threshold
@@ -74,7 +76,7 @@ class KeypointMatch:
         confidence = self._cal_confidence(resize_img)
 
         best_match = generate_result(middle_point, pypts, confidence)
-        print("[aircv][kaze] self.threshold=%s, result=%s" % (self.threshold, best_match))
+        print("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
         return best_match if confidence >= self.threshold else None
 
     def _cal_confidence(self, resize_img):
@@ -87,26 +89,35 @@ class KeypointMatch:
         confidence = (1 + confidence) / 2
         return confidence
 
-    def _init_detector(self):
+    def init_detector(self):
         """Init keypoint detector object."""
         self.detector = cv2.KAZE_create()
         # create BFMatcher object:
         self.matcher = cv2.BFMatcher(cv2.NORM_L1)  # cv2.NORM_L1 cv2.NORM_L2 cv2.NORM_HAMMING(not useable)
 
+    def get_keypoints_and_descriptors(self, image):
+        """获取图像特征点和描述符."""
+        keypoints, descriptors = self.detector.detectAndCompute(image, None)
+        return keypoints, descriptors
+
+    def match_keypoints(self, des_sch, des_src):
+        """Match descriptors (特征值匹配)."""
+        # 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:
+        return self.matcher.knnMatch(des_sch, des_src, k=2)
+
     def _get_key_points(self):
         """根据传入图像,计算图像所有的特征点,并得到匹配特征点对."""
-        # 准备工作: 初始化kaze算子
-        self.detector = self._init_detector()
+        # 准备工作: 初始化算子
+        self.init_detector()
         # 第一步：获取特征点集，并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src
-        kp_sch, des_sch = self.detector.detectAndCompute(self.im_search, None)
-        kp_src, des_src = self.detector.detectAndCompute(self.im_source, None)
+        kp_sch, des_sch = self.get_keypoints_and_descriptors(self.im_search)
+        kp_src, des_src = self.get_keypoints_and_descriptors(self.im_source)
         # When apply knnmatch , make sure that number of features in both test and
         #       query image is greater than or equal to number of nearest neighbors in knn match.
         if len(kp_sch) < 2 or len(kp_src) < 2:
             raise NoMatchPointError("Not enough feature points in input images !")
-
-        # 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:
-        matches = self.matcher.knnMatch(des_sch, des_src, k=2)  # match descriptors (特征值匹配)
+        # match descriptors (特征值匹配)
+        matches = self.match_keypoints(des_sch, des_src)
 
         # good为特征点初选结果，剔除掉前两名匹配太接近的特征点，不是独特优秀的特征点直接筛除(多目标识别情况直接不适用)
         good = []
