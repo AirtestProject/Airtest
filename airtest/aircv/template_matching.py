@@ -19,6 +19,7 @@ LOGGING = get_logger(__name__)
 class TemplateMatching(object):
     """模板匹配."""
 
+    METHOD_NAME = "Template"
     MAX_RESULT_COUNT = 10
 
     def __init__(self, im_source, im_search, threshold=0.8, rgb=True):
@@ -76,7 +77,7 @@ class TemplateMatching(object):
         # 求取识别位置: 目标中心 + 目标区域:
         middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
         best_match = generate_result(middle_point, rectangle, confidence)
-        LOGGING.debug("threshold=%s, result=%s" % (self.threshold, best_match))
+        LOGGING.debug("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
 
         return best_match if confidence >= self.threshold else None
 

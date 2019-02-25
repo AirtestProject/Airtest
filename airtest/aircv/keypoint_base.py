@@ -6,9 +6,12 @@
 import cv2
 import numpy as np
 
+from airtest.utils.logger import get_logger
 from .error import *  # noqa
 from .utils import generate_result, check_image_valid
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
+
+LOGGING = get_logger(__name__)
 
 
 class KeypointMatching(object):
@@ -76,7 +79,7 @@ class KeypointMatching(object):
         confidence = self._cal_confidence(resize_img)
 
         best_match = generate_result(middle_point, pypts, confidence)
-        print("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
+        LOGGING.debug("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
         return best_match if confidence >= self.threshold else None
 
     def _cal_confidence(self, resize_img):
