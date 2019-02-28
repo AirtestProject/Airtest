@@ -158,7 +158,7 @@ class Template(object):
             # get function definition and execute:
             func = MATCHING_METHODS.get(method, None)
             if func is None:
-                G.LOGGING.warning("Undefined method in CVSTRATEGY: %s", method)
+                G.LOGGING.warning("Undefined method in CVSTRATEGY: %s, try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief'.", method)
             else:
                 ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
@@ -171,7 +171,7 @@ class Template(object):
         try:
             ret = func(*args, **kwargs).find_best_result()
         except aircv.NoModuleError as err:
-            G.LOGGING.debug("'surf'/'sift'/'brief' is implemented in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with contrib module.")
+            G.LOGGING.debug("'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
             return None
         except aircv.BaseError as err:
             G.LOGGING.debug(repr(err))

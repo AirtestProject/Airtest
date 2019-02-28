@@ -33,47 +33,47 @@ class TestAircv(unittest.TestCase):
 
     def test_find_template(self):
         """Template matching."""
-        result = TemplateMatching(self.template_src, self.template_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()
+        result = TemplateMatching(self.template_sch, self.template_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()
         self.assertIsInstance(result, dict)
 
     def test_find_all_template(self):
         """Template matching."""
-        result = TemplateMatching(self.template_src, self.template_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_all_results()
+        result = TemplateMatching(self.template_sch, self.template_src, threshold=self.THRESHOLD, rgb=self.RGB).find_all_results()
         self.assertIsInstance(result, list)
 
     def test_find_kaze(self):
         """KAZE matching."""
-        result = KAZEMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 较慢,稍微稳定一点
+        result = KAZEMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 较慢,稍微稳定一点
         self.assertIsInstance(result, dict)
 
     def test_find_brisk(self):
         """BRISK matching."""
-        result = BRISKMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 快,效果一般,不太稳定
+        result = BRISKMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 快,效果一般,不太稳定
         self.assertIsInstance(result, dict)
 
     def test_find_akaze(self):
         """AKAZE matching."""
-        result = AKAZEMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 较快,效果较差,很不稳定
+        result = AKAZEMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 较快,效果较差,很不稳定
         self.assertIsInstance(result, dict)
 
     def test_find_orb(self):
         """ORB matching."""
-        result = ORBMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 很快,效果垃圾
+        result = ORBMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 很快,效果垃圾
         self.assertIsInstance(result, dict)
 
     def test_contrib_find_sift(self):
         """SIFT matching (----need OpenCV contrib module----)."""
-        result = SIFTMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 慢,最稳定
+        result = SIFTMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 慢,最稳定
         self.assertIsInstance(result, dict)
 
     def test_contrib_find_surf(self):
         """SURF matching (----need OpenCV contrib module----)."""
-        result = SURFMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 快,效果不错
+        result = SURFMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 快,效果不错
         self.assertIsInstance(result, dict)
 
     def test_contrib_find_brief(self):
         """BRIEF matching (----need OpenCV contrib module----)."""
-        result = BRIEFMatching(self.keypoint_src, self.keypoint_sch, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 识别特征点少,只适合强特征图像的匹配
+        result = BRIEFMatching(self.keypoint_sch, self.keypoint_src, threshold=self.THRESHOLD, rgb=self.RGB).find_best_result()  # 识别特征点少,只适合强特征图像的匹配
         self.assertIsInstance(result, dict)
 
     def test_contrib_func_find_sift(self):
