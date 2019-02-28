@@ -18,7 +18,7 @@ class InstructHelper(object):
     or help run other Instruction
     """
 
-    proxy_process = '/usr/local/bin/iproxy'
+    proxy_process = 'iproxy'
 
     def __init__(self):
         self.subprocessHandle = []

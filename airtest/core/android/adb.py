@@ -553,10 +553,9 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        if not replace:
-            cmds = ["install", filepath]
-        else:
-            cmds = ["install", "-r", filepath]
+        cmds = ["install", "-t", filepath]
+        if replace:
+            cmds.insert(1, "-r")
         out = self.cmd(cmds)
 
         if re.search(r"Failure \[.*?\]", out):
@@ -582,10 +581,9 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        if not replace:
-            cmds = ["install-multiple", filepath]
-        else:
-            cmds = ["install-multiple", "-r", filepath]
+        cmds = ["install-multiple", "-t", filepath]
+        if replace:
+            cmds.insert(1, "-r")
 
         try:
             out = self.cmd(cmds)
