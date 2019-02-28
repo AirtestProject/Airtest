@@ -12,6 +12,14 @@ from .error import *  # noqa
 from .keypoint_base import KeypointMatching
 
 
+def check_cv_version_is_new():
+    """opencv版本是3.0或4.0以上, API接口与2.0的不同."""
+    if cv2.__version__.startswith("3.") or cv2.__version__.startswith("4."):
+        return True
+    else:
+        return False
+
+
 class BRIEFMatching(KeypointMatching):
     """FastFeature Matching."""
 
@@ -20,8 +28,8 @@ class BRIEFMatching(KeypointMatching):
     def init_detector(self):
         """Init keypoint detector object."""
         # BRIEF is a feature descriptor, recommand CenSurE as a fast detector:
-        if cv2.__version__.startswith("3."):
-            # OpenCV3.x, star/brief is in contrib module, you need to compile it seperately.
+        if check_cv_version_is_new():
+            # OpenCV3/4, star/brief is in contrib module, you need to compile it seperately.
             try:
                 self.star_detector = cv2.xfeatures2d.StarDetector_create()
                 self.brief_extractor = cv2.xfeatures2d.BriefDescriptorExtractor_create()
@@ -63,8 +71,8 @@ class SIFTMatching(KeypointMatching):
     def init_detector(self):
         """Init keypoint detector object."""
         # BRIEF is a feature descriptor, recommand CenSurE as a fast detector:
-        if cv2.__version__.startswith("3."):
-            # OpenCV3.x, star/brief is in contrib module, you need to compile it seperately.
+        if check_cv_version_is_new():
+            # OpenCV3/4, sift is in contrib module, you need to compile it seperately.
             try:
                 self.detector = cv2.xfeatures2d.SIFT_create(edgeThreshold=10)
             except:
@@ -104,8 +112,8 @@ class SURFMatching(KeypointMatching):
     def init_detector(self):
         """Init keypoint detector object."""
         # BRIEF is a feature descriptor, recommand CenSurE as a fast detector:
-        if cv2.__version__.startswith("3."):
-            # OpenCV3.x, star/brief is in contrib module, you need to compile it seperately.
+        if check_cv_version_is_new():
+            # OpenCV3/4, surf is in contrib module, you need to compile it seperately.
             try:
                 self.detector = cv2.xfeatures2d.SURF_create(self.HESSIAN_THRESHOLD, upright=self.UPRIGHT)
             except:

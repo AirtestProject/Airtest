@@ -4,14 +4,27 @@
 """Detect keypoints with KAZE."""
 
 import cv2
+import time
 import numpy as np
 
 from airtest.utils.logger import get_logger
+
 from .error import *  # noqa
 from .utils import generate_result, check_image_valid
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 LOGGING = get_logger(__name__)
+
+
+def print_run_time(func):
+
+    def wrapper(self, *args, **kwargs):
+        start_time = time.time()
+        ret = func(self, *args, **kwargs)
+        LOGGING.debug("%s() run time is %.2f s." % (func.__name__, time.time() - start_time))
+        return ret
+
+    return wrapper
 
 
 class KeypointMatching(object):
@@ -24,7 +37,7 @@ class KeypointMatching(object):
     # 参数: SIFT识别时只找出一对相似特征点时的置信度(confidence)
     ONE_POINT_CONFI = 0.5
 
-    def __init__(self, im_source, im_search, threshold=0.8, rgb=True):
+    def __init__(self, im_search, im_source, threshold=0.8, rgb=True):
         super(KeypointMatching, self).__init__()
         self.im_source = im_source
         self.im_search = im_search
@@ -41,6 +54,7 @@ class KeypointMatching(object):
         # 求出特征点后，self.im_source中获得match的那些点进行聚类
         raise NotImplementedError
 
+    @print_run_time
     def find_best_result(self):
         """基于kaze进行图像识别，只筛选出最优区域."""
         # 第一步：检验图像是否正常：

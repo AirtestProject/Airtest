@@ -8,12 +8,25 @@
     2. rgb: 彩色三通道,进行彩色权识别.
 """
 
-
 import cv2
+import time
+
 from airtest.utils.logger import get_logger
 from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
 from .cal_confidence import cal_rgb_confidence
+
 LOGGING = get_logger(__name__)
+
+
+def print_run_time(func):
+
+    def wrapper(self, *args, **kwargs):
+        start_time = time.time()
+        ret = func(self, *args, **kwargs)
+        LOGGING.debug("%s() run time is %.2f s." % (func.__name__, time.time() - start_time))
+        return ret
+
+    return wrapper
 
 
 class TemplateMatching(object):
@@ -22,13 +35,14 @@ class TemplateMatching(object):
     METHOD_NAME = "Template"
     MAX_RESULT_COUNT = 10
 
-    def __init__(self, im_source, im_search, threshold=0.8, rgb=True):
+    def __init__(self, im_search, im_source, threshold=0.8, rgb=True):
         super(TemplateMatching, self).__init__()
         self.im_source = im_source
         self.im_search = im_search
         self.threshold = threshold
         self.rgb = rgb
 
+    @print_run_time
     def find_all_results(self):
         """基于模板匹配查找多个目标区域的方法."""
         # 第一步：校验图像输入
@@ -62,6 +76,7 @@ class TemplateMatching(object):
 
         return result if result else None
 
+    @print_run_time
     def find_best_result(self):
         """基于kaze进行图像识别，只筛选出最优区域."""
         """函数功能：找到最优结果."""
