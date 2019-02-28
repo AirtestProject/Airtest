@@ -62,18 +62,18 @@ class KeypointMatching(object):
             return None
 
         # 第二步：获取特征点集并匹配出特征点对: 返回值 good, pypts, kp_sch, kp_src
-        kp_sch, kp_src, good = self._get_key_points()
+        self.kp_sch, self.kp_src, self.good = self._get_key_points()
 
         # 第三步：根据匹配点对(good),提取出来识别区域:
-        if len(good) in [0, 1]:
+        if len(self.good) in [0, 1]:
             # 匹配点对为0,无法提取识别区域;为1则无法获取目标区域,直接返回None作为匹配结果:
             return None
-        elif len(good) in [2, 3]:
+        elif len(self.good) in [2, 3]:
             # 匹配点对为2或3,根据点对求出目标区域,据此算出可信度:
-            if len(good) == 2:
-                origin_result = self._handle_two_good_points(kp_src, kp_sch, good)
+            if len(self.good) == 2:
+                origin_result = self._handle_two_good_points(self.kp_sch, self.kp_src, self.good)
             else:
-                origin_result = self._handle_three_good_points(kp_src, kp_sch, good)
+                origin_result = self._handle_three_good_points(self.kp_sch, self.kp_src, self.good)
             # 某些特殊情况下直接返回None作为匹配结果:
             if origin_result is None:
                 return origin_result
@@ -81,7 +81,7 @@ class KeypointMatching(object):
                 middle_point, pypts, w_h_range = origin_result
         else:
             # 匹配点对 >= 4个，使用单矩阵映射求出目标区域，据此算出可信度：
-            middle_point, pypts, w_h_range = self._many_good_pts(kp_sch, kp_src, good)
+            middle_point, pypts, w_h_range = self._many_good_pts(self.kp_sch, self.kp_src, self.good)
 
         # 第四步：根据识别区域，求出结果可信度，并将结果进行返回:
         # 对识别结果进行合理性校验: 小于5个像素的，或者缩放超过5倍的，一律视为不合法直接raise.
@@ -93,8 +93,33 @@ class KeypointMatching(object):
         confidence = self._cal_confidence(resize_img)
 
         best_match = generate_result(middle_point, pypts, confidence)
-        LOGGING.debug("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
+        LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
         return best_match if confidence >= self.threshold else None
+
+    def show_match_image(self):
+        """Show how the keypoints matches."""
+        from random import random
+        h_sch, w_sch = self.im_search.shape[:2]
+        h_src, w_src = self.im_source.shape[:2]
+        try:
+            import numpy as np
+        except ImportError:
+            import traceback
+            traceback.print_exc()
+            return None
+        else:
+            # first you have to do the matching
+            self.find_best_result()
+            # then initialize the result image:
+            matching_info_img = np.zeros([max(h_sch, h_src), w_sch + w_src, 3], np.uint8)
+            matching_info_img[:h_sch, :w_sch, :] = self.im_search
+            matching_info_img[:h_src, w_sch:, :] = self.im_source
+            # render the match image at last:
+            for m in self.good:
+                color = tuple([int(random() * 255) for _ in range(3)])
+                cv2.line(matching_info_img, (int(self.kp_sch[m.queryIdx].pt[0]), int(self.kp_sch[m.queryIdx].pt[1])), (int(self.kp_src[m.trainIdx].pt[0] + w_sch), int(self.kp_src[m.trainIdx].pt[1])), color)
+
+            return matching_info_img
 
     def _cal_confidence(self, resize_img):
         """计算confidence."""
@@ -153,7 +178,7 @@ class KeypointMatching(object):
 
         return kp_sch, kp_src, good
 
-    def _handle_two_good_points(self, kp_src, kp_sch, good):
+    def _handle_two_good_points(self, kp_sch, kp_src, good):
         """处理两对特征点的情况."""
         pts_sch1 = int(kp_sch[good[0].queryIdx].pt[0]), int(kp_sch[good[0].queryIdx].pt[1])
         pts_sch2 = int(kp_sch[good[1].queryIdx].pt[0]), int(kp_sch[good[1].queryIdx].pt[1])
@@ -162,7 +187,7 @@ class KeypointMatching(object):
 
         return self._get_origin_result_with_two_points(pts_sch1, pts_sch2, pts_src1, pts_src2)
 
-    def _handle_three_good_points(self, kp_src, kp_sch, good):
+    def _handle_three_good_points(self, kp_sch, kp_src, good):
         """处理三对特征点的情况."""
         # 拿出sch和src的两个点(点1)和(点2点3的中点)，
         # 然后根据两个点原则进行后处理(注意ke_sch和kp_src以及queryIdx和trainIdx):

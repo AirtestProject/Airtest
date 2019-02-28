@@ -92,7 +92,7 @@ class TemplateMatching(object):
         # 求取识别位置: 目标中心 + 目标区域:
         middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
         best_match = generate_result(middle_point, rectangle, confidence)
-        LOGGING.debug("[aircv][%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
+        LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
 
         return best_match if confidence >= self.threshold else None
 
