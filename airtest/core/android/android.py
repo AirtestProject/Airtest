@@ -93,13 +93,14 @@ class Android(Device):
 
     def check_app(self, package):
         """
-        Check is package exists on the device
+        Check if package exists on the device
 
         Args:
             package: package name
 
         Returns:
-            True or False whether the package exists on the device or not
+            AirtestError: if package is not found
+            True if package exists on the device
 
         """
         return self.adb.check_app(package)
