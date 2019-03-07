@@ -9,7 +9,7 @@ class Settings(object):
     LOG_DIR = None
     LOG_FILE = "log.txt"
     RESIZE_METHOD = staticmethod(cocos_min_strategy)
-    CVSTRATEGY = ["tpl", "kaze"]  # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
+    CVSTRATEGY = ["tpl", "surf"]  # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
     KEYPOINT_MATCHING_PREDICTION = True
     THRESHOLD = 0.7  # [0, 1]
     THRESHOLD_STRICT = 0.7  # [0, 1]
