@@ -100,7 +100,7 @@ airtest report "path to your .air dir"
 python -m airtest run "path to your .air dir" --device Android:///
 ```
 
-Try running provided example case: [``airtest/playground/test_blackjack.air``](./playground/test_blackjack.air) and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli).
+Try running provided example case: [``airtest/playground/test_blackjack.air``](./playground/test_blackjack.air) and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli). Here is a [multi-device runner sample](https://github.com/AirtestProject/multi-device-runner).
 
 
 ## Contribution
