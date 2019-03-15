@@ -1,5 +1,5 @@
 include requirements.txt
-recursive-include airtest/core/android/static/ *
+recursive-include airtest/core/android/static *
 include airtest/core/android/static/*/*/*
 include airtest/core/android/static/*/*
 include airtest/core/android/static/stf_libs/minicap-shared/aosp/libs/*/*/*.*
