@@ -280,6 +280,7 @@ class Android(Device):
         self.home()
         self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
+        time.sleep(0.5)
         self.keyevent("HOME")
 
     def home(self):
