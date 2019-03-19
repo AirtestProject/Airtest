@@ -414,6 +414,23 @@ def exists(v):
 
 
 @logwrap
+def rect_exists(v):
+    """
+    Check whether given target exists on device screen
+
+    :param v: target to be checked
+    :return: False if target is not found, otherwise returns the rectangle of the target
+    :platforms: Android, Windows, iOS
+    """
+    try:
+        rect = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP, rectangle=True)
+    except TargetNotFoundError:
+        return False
+    else:
+        return rect
+
+
+@logwrap
 def find_all(v):
     """
     Find all occurrences of the target on the device screen and return their coordinates

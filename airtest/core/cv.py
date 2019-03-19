@@ -17,7 +17,7 @@ from six import PY3
 
 
 @logwrap
-def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None):
+def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None, rectangle=False):
     """
     Search for image template in the screen until timeout
 
@@ -46,7 +46,10 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         else:
             if threshold:
                 query.threshold = threshold
-            match_pos = query.match_in(screen)
+            if rectangle:
+                match_pos = query.match_in_rect(screen)
+            else:
+                match_pos = query.match_in(screen)
             if match_pos:
                 try_log_screen(screen)
                 return match_pos
@@ -125,6 +128,14 @@ class Template(object):
             return None
         focus_pos = TargetPos().getXY(match_result, self.target_pos)
         return focus_pos
+
+    def match_in_rect(self, screen):
+        match_result = self._cv_match(screen)
+        G.LOGGING.debug("match result: %s", match_result)
+        if not match_result:
+            return None
+        focus_rect = TargetPos().getRect(match_result)
+        return focus_rect
 
     def match_all_in(self, screen):
         image = self._imread()

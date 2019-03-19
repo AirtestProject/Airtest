@@ -40,3 +40,10 @@ class TargetPos(object):
         else:
             print("invalid target_pos:%s, use mid point instead" % pos)
             return cvret["result"]
+
+    def getRect(self, cvret):
+        rect = cvret.get("rectangle")
+        if not rect:
+            print("could not get rectangle, use mid point instead")
+            return cvret["result"]
+        return rect
