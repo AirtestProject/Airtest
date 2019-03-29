@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 class PlotResult(object):
-    """绘制结果."""
+    """绘制单张图片的方法对比结果."""
 
     def __init__(self, dir_path="", file_name=""):
         super(PlotResult, self).__init__()

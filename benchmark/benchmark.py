@@ -10,7 +10,7 @@ from profile_recorder import ProfileRecorder
 
 
 def profile_different_methods(search_file, screen_file, method_list, dir_path, file_name):
-    """对固定的方法进行性能测试."""
+    """对指定的图片进行性能测试."""
     profiler = ProfileRecorder(0.05)
     # 加载图片
     profiler.load_images(search_file, screen_file)

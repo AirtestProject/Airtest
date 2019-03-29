@@ -1,117 +1,117 @@
-# Airtest &middot; [![Build status](https://travis-ci.org/AirtestProject/Airtest.svg?branch=master)](https://travis-ci.org/AirtestProject/Airtest)
+# Airtest - benchmark
 
-**Cross-Platform UI Automation Framework for Games and Apps**
+[中文版文档](README_cn.md)
 
-**跨平台的UI自动化框架，适用于游戏和App** （[中文版点这里](./README_zh.md)）
-
-
-![image](./demo.gif)
+**Algorithm Performance Comparison of Various Image Recognition Algorithms.** 
 
 
-## Features
 
-*   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
 
-*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of Airtest Project.
+## I. Introduction
+	
+  There're different kinds of image recognition algorithms integrated into the airtest framework.
+  Including template matching and image recognition methods based on feature points extracting.
 
-*   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
+### ① Purpose of this repository:
+ 
+ - Analyze the performance of different key-point matching methods;
+ - Provide the basis for selecting the image matching methods in the airtest scripts.
 
-*   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. it allows writing instructions in Python, to achieve more advanced automation.
+### ② Image Matching Methods:
+ - Template matching
+	 - Not applicable for cross-resolution matching;
+	 - There will be a result anyway;
+	 - name: `"tpl"`
+ - Key-point mathing
+	 - Suitable for cross-resolution recognition;
+	 - Maybe no matching results
+	 - names: `["kaze", "brisk", "akaze", "orb", "sift", "surf", "brief"]`
 
-Get started from [airtest homepage](http://airtest.netease.com/) and find support in [google groups](https://groups.google.com/forum/#!forum/airtestproject)
-
-#### [Supported Platforms](./docs/wiki/platforms.md)
-
-| | | | | | | | |
-|-|-|-|-|-|-|-|-|
-Android |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
-
-## Installation
-
-Use `pip` to install Airtest python library. 
-
-```Shell
-pip install -U airtest
+### ③ How to set matching methods in Airtest scripts:
+```python
+from airtest.core.settings import Settings as ST
+# image matching will follow the method list, until found the result or timeout:
+ST.CVSTRATEGY = ["surf", "tpl"]
 ```
 
-On MacOS/Linux platform, you need to grant adb execute permission.
 
-```Shell
-# for mac
-cd {your_python_path}/site-packages/airtest/core/android/static/adb/mac
-# for linux
-# cd {your_python_path}/site-packages/airtest/core/android/static/adb/linux
-chmod +x adb
+
+
+## II. Run test
+
+ - Install running environment: `pip install -r requirements.txt`
+ - Run test script: `python benchmark.py`
+
+
+
+
+## III. Result
+
+In `benchmark.py`:
+
+### ① Performance comparison of different methods for a single image:
+```python
+method_list = ["kaze", "brisk", "akaze", "orb", "sift", "surf", "brief"]
+# Draw the CPU and mem profile curve of the image matching. Big image [2907, 1403]  Small image [1079, 804]
+search_file, screen_file = "sample\\high_dpi\\tpl1551940579340.png", "sample\\high_dpi\\tpl1551944272194.png"
+dir_path, file_name = "result", "high_dpi.json"
+test_and_profile_and_plot(search_file, screen_file, dir_path, file_name, method_list)
 ```
+![Picture 1](result/hdpi_methods_compare.png)
 
-Download AirtestIDE from our [homepage](http://airtest.netease.com/) if you need to use the GUI tool.
+ - **Performance analysis:**
+   - **Memory:**
+	   - The top picture is the memory curve;
+	   - Memory usage: `kaze > sift > akaze > surf > brief > brisk > orb`.
+   - **CPU:**
+	   - The middle picture is the CPU curve;
+	   - CPU useage: `kaze > surf > akaze > brisk > sift > brief > orb`.
+   - **Time useage:**
+	   - The horizontal axis is time(s), and the program log has the `run time` output;
+	   - runtime: `kaze > sift > akaze > surf > brisk > brief > orb`.
+   - **Matched key-points number:**
+	   - The bottom image shows the number of key-points;
+	   - kp_sch is the number of key-points of the search image;
+	   - kp_src is the number of key-points of the screen image;
+	   - good is the number of matched key-points
+	   - key-point number: `kaze > akaze > surf > brisk > sift > brief > orb`
 
+### ② Performance comparison of methods for different images
 
-## Documentation
-
-You can find the complete Airtest documentation on [readthedocs](http://airtest.readthedocs.io/).
-
-
-## Examples
-
-Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices and platforms.
-
-1. Using [connect_device](http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device) API you can connect to any android/iOS device or windows application.
-1. Then perform [simulated input](http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input) to automate your game or app.
-1. **DO NOT** forget to [make assertions](http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion) of the expected result. 
-
-```Python
-from airtest.core.api import *
-
-# connect an android phone with adb
-init_device("Android")
-# or use connect_device api
-# connect_device("Android:///")
-
-install("path/to/your/apk")
-start_app("package_name_of_your_apk")
-touch(Template("image_of_a_button.png"))
-swipe(Template("slide_start.png"), Template("slide_end.png"))
-assert_exists(Template("success.png"))
-keyevent("BACK")
-home()
-uninstall("package_name_of_your_apk")
+```python
+method_list = ["kaze", "brisk", "akaze", "orb", "sift", "surf", "brief"]
+# Test different images and write performance test data
+test_and_profile_all_images(method_list)
+# Draw the methods compare result of different images
+plot_profiled_all_images_table(method_list)
 ```
+![Picture 2](result/different_images_matching_compare.png)
 
-For more detailed info, please refer to [Airtest Python API reference](http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html) or take a look at [API code](./airtest/core/api.py)
-
-
-## Running ``.air`` cases from CLI
-
-Using AirtestIDE, you can easily create automated cases as ``.air`` directories.
-Airtest CLI provides the possibility to execute cases on different host machine and target device platforms without using AirtestIDE itself.
-
-```Shell
-# run cases targeting on Android phone connected to your host machine via ADB
-airtest run "path to your .air dir" --device Android:///
-
-# run cases targeting on Windows application whose title matches Unity.*
-airtest run "path to your .air dir" --device "Windows:///?title_re=Unity.*"
-
-# generate HTML report after running cases
-airtest report "path to your .air dir"
-
-# or use as python module
-python -m airtest run "path to your .air dir" --device Android:///
-```
-
-Try running provided example case: [``airtest/playground/test_blackjack.air``](./playground/test_blackjack.air) and see [Usage of CLI](http://airtest.readthedocs.io/en/latest/README_MORE.html#running-air-from-cli). Here is a [multi-device runner sample](https://github.com/AirtestProject/multi-device-runner).
+ - **Performance analysis:**
+   - **Maximum memory:**
+	   - The top picture is the memory curve，The horizontal axis is image names;
+	   - Max memory: `kaze > sift > akaze > surf > brief > brisk > orb`
+   - **Maximum CPU:**
+	   - The middle picture is the CPU curve;
+	   - Max CPU: `kaze > surf > akaze > brisk > sift > brief > orb`
+   - **Matching results:**
+	   - `sift > surf > kaze > akaze > brisk > brief > orb`
 
 
-## Contribution
-
-Pull requests are very welcome. [Help needed here](./docs/wiki/platforms.md#pull-request-guide)
 
 
-## Thanks
+## IV. Code structure
 
-Thanks for all these great works that make this project better.
+ - **profile_recorder.py**
+	 - `CheckKeypointResult`: Perform key-point matching to check the results;
+	 - `RecordThread`: Thread for recording CPU and memory;
+	 - `ProfileRecorder`: Perform image matching, record performance data and write to file.
 
-- [stf](https://github.com/openstf)
-- [atx](https://github.com/NetEaseGame/ATX)
-- [pywinauto](https://github.com/pywinauto/pywinauto)
+ - **plot.py**
+	 - `PlotResult`: Draw the compare results of target images matching.
+
+ - **benchmark.py**
+	 - `profile_different_methods`: Perform performance compare process, and write to the specified file;
+	 - `plot_one_image_result`: Draw performance data results graph for the specified image;
+	 - `test_and_profile_all_images`: Perform matching on a specific images, record performance data and write to file;
+	 - `plot_profiled_all_images_table`: Draw a comparison result chart based on the result of the image matching testing.
