@@ -2,14 +2,14 @@
 
 [中文版文档](README_cn.md)
 
-**Algorithm Performance Comparison of Various Image Recognition Algorithms.** 
+**Benchmark comparison of Various Image Recognition AlgorithmsImage Recognition Algorithms.** 
 
 
 
 
 ## I. Introduction
 	
-  There're different kinds of image recognition algorithms integrated into the airtest framework.
+  There are different kinds of image recognition algorithms integrated into the airtest framework.
   Including template matching and image recognition methods based on feature points extracting.
 
 ### ① Purpose of this repository:
@@ -20,7 +20,7 @@
 ### ② Image Matching Methods:
  - Template matching
 	 - Not applicable for cross-resolution matching;
-	 - There will be a result anyway;
+	 - There will always be a result;
 	 - name: `"tpl"`
  - Key-point mathing
 	 - Suitable for cross-resolution recognition;
@@ -30,7 +30,7 @@
 ### ③ How to set matching methods in Airtest scripts:
 ```python
 from airtest.core.settings import Settings as ST
-# image matching will follow the method list, until found the result or timeout:
+# image matching will follow the method list, until the result is found or timeout:
 ST.CVSTRATEGY = ["surf", "tpl"]
 ```
 
@@ -71,9 +71,9 @@ test_and_profile_and_plot(search_file, screen_file, dir_path, file_name, method_
 	   - runtime: `kaze > sift > akaze > surf > brisk > brief > orb`.
    - **Matched key-points number:**
 	   - The bottom image shows the number of key-points;
-	   - kp_sch is the number of key-points of the search image;
-	   - kp_src is the number of key-points of the screen image;
-	   - good is the number of matched key-points
+	   - 'kp_sch' bar is the number of key-points of the search image;
+	   - 'kp_src' bar is the number of key-points of the screen image;
+	   - 'good' bar is the number of matched key-points
 	   - key-point number: `kaze > akaze > surf > brisk > sift > brief > orb`
 
 ### ② Performance comparison of methods for different images
