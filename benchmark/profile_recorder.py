@@ -161,7 +161,9 @@ class ProfileRecorder(object):
                 continue
             time.sleep(3)  # 留出绘图空白区
             start_time = time.time()  # 记录开始时间
+            print("--->>> start '%s' matching:\n" % name)
             kp_sch, kp_src, good, result = self.check_macthing_object.get_and_plot_keypoints(name)  # 根据方法名绘制对应的识别结果
+            print("\n\n\n")
             end_time = time.time()  # 记录结束时间
             time.sleep(3)  # 留出绘图空白区
             # 记录本次匹配的相关数据
