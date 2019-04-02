@@ -1381,6 +1381,10 @@ class ADB(object):
         res = str(num) + 'GHz'
         return res.strip()
 
+    def get_cpuabi(self):
+        res = self.shell("getprop ro.product.cpu.abi")
+        return res.strip()
+
     def get_gpu(self):
         res = self.shell("dumpsys SurfaceFlinger")
         pat = re.compile(r'GLES:\s+(.*)')
@@ -1420,6 +1424,7 @@ class ADB(object):
             "display": self.getPhysicalDisplayInfo,
             "cpuinfo": self.get_cpuinfo,
             "cpufreq": self.get_cpufreq,
+            "cpuabi": self.get_cpuabi,
             "sdkversion": self.sdk_version,
             "gpu": self.get_gpu,
             "model": self.get_model,
