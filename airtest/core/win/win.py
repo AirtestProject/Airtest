@@ -246,6 +246,7 @@ class Windows(Device):
 
         Args:
             path: full path to the application
+            kwargs: reference: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.application.html#pywinauto.application.Application.start
 
         Returns:
             None
