@@ -3,8 +3,9 @@
 
 import cv2
 import numpy as np
-from .error import TemplateInputError
 from PIL import Image
+
+from .error import TemplateInputError
 
 
 def generate_result(middle_point, pypts, confi):

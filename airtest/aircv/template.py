@@ -1,9 +1,9 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""[summary] 模板匹配对用户提供的调节参数:
+"""模板匹配.
 
-[description]
+对用户提供的调节参数:
     1. threshod: 筛选阈值，默认为0.8
     2. rgb: 彩色三通道,进行彩色权识别.
 """

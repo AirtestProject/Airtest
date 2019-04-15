@@ -1,4 +1,4 @@
-from .aircv import *
-from .error import *
-from .sift import find_sift
-from .template import find_template, find_all_template
+from .aircv import *  # noqa
+from .error import *  # noqa
+from .sift import find_sift  # noqa
+from .template import find_template, find_all_template  # noqa

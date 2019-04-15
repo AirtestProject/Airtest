@@ -553,10 +553,9 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        if not replace:
-            cmds = ["install", filepath]
-        else:
-            cmds = ["install", "-r", filepath]
+        cmds = ["install", "-t", filepath]
+        if replace:
+            cmds.insert(1, "-r")
         out = self.cmd(cmds)
 
         if re.search(r"Failure \[.*?\]", out):
@@ -582,10 +581,9 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        if not replace:
-            cmds = ["install-multiple", filepath]
-        else:
-            cmds = ["install-multiple", "-r", filepath]
+        cmds = ["install-multiple", "-t", filepath]
+        if replace:
+            cmds.insert(1, "-r")
 
         try:
             out = self.cmd(cmds)
@@ -1380,6 +1378,10 @@ class ADB(object):
         res = str(num) + 'GHz'
         return res.strip()
 
+    def get_cpuabi(self):
+        res = self.shell("getprop ro.product.cpu.abi")
+        return res.strip()
+
     def get_gpu(self):
         res = self.shell("dumpsys SurfaceFlinger")
         pat = re.compile(r'GLES:\s+(.*)')
@@ -1419,6 +1421,7 @@ class ADB(object):
             "display": self.getPhysicalDisplayInfo,
             "cpuinfo": self.get_cpuinfo,
             "cpufreq": self.get_cpufreq,
+            "cpuabi": self.get_cpuabi,
             "sdkversion": self.sdk_version,
             "gpu": self.get_gpu,
             "model": self.get_model,
