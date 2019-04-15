@@ -161,9 +161,12 @@ class Windows(Device):
 
     def _fix_op_pos(self, pos):
         """Fix operation position."""
-        pos = list(pos)
-        pos[0] = pos[0] + self.monitor["left"]
-        pos[1] = pos[1] + self.monitor["top"]
+        # 如果是全屏的话，就进行双屏修正，否则就正常即可
+        if not self.handle:
+            pos = list(pos)
+            pos[0] = pos[0] + self.monitor["left"]
+            pos[1] = pos[1] + self.monitor["top"]
+
         return pos
 
     def touch(self, pos, **kwargs):
@@ -184,8 +187,8 @@ class Windows(Device):
         duration = kwargs.get("duration", 0.01)
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
-        pos = self._fix_op_pos(pos)
         coords = self._action_pos(pos)
+        coords = self._fix_op_pos(coords)
 
         self.mouse.press(button=button, coords=coords)
         time.sleep(duration)
