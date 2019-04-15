@@ -207,7 +207,7 @@ class Windows(Device):
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y))
 
-    def start_app(self, path, *args):
+    def start_app(self, path, **kwargs):
         """
         Start the application
 
@@ -218,7 +218,7 @@ class Windows(Device):
             None
 
         """
-        self.app = self._app.start(path)
+        self.app = self._app.start(path, **kwargs)
 
     def stop_app(self, pid):
         """

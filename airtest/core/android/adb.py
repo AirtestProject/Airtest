@@ -1052,11 +1052,8 @@ class ADB(object):
         Returns:
             True or False whether the screen is locked or not
 
-        Notes:
-            Does not work on Xiaomi 2S
-
         """
-        lockScreenRE = re.compile('mShowingLockscreen=(true|false)')
+        lockScreenRE = re.compile('(?:mShowingLockscreen|isStatusBarKeyguard)=(true|false)')
         m = lockScreenRE.search(self.shell('dumpsys window policy'))
         if not m:
             raise AirtestError("Couldn't determine screen lock state")
