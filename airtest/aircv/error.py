@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Declaration: Define all BaseError Classes used in aircv."""
+"""
+Declaration:
+    Define all BaseError Classes used in aircv.
+"""
 
 
 class BaseError(Exception):
@@ -11,7 +14,6 @@ class BaseError(Exception):
         self.message = message
 
     def __repr__(self):
-        """Output message."""
         return repr(self.message)
 
 
