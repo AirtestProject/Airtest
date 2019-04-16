@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-30 15:53+0800\n"
-"PO-Revision-Date: 2019-01-30 17:49+0800\n"
+"POT-Creation-Date: 2019-04-16 10:10+0800\n"
+"PO-Revision-Date: 2019-04-16 10:22+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: zh_CN\n"
 "X-Generator: Poedit 2.2.1\n"
+"Language: en_GB\n"
 
 #: ../../all_module/airtest.core.api.rst:2
 msgid "airtest\\.core\\.api module"
@@ -33,10 +33,11 @@ msgstr "初始化设备，并设置为当前设备。"
 
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
-#: airtest.core.api.clear_app airtest.core.api.click
-#: airtest.core.api.connect_device airtest.core.api.exists
-#: airtest.core.api.find_all airtest.core.api.init_device
-#: airtest.core.api.install airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.auto_setup airtest.core.api.clear_app
+#: airtest.core.api.click airtest.core.api.connect_device
+#: airtest.core.api.exists airtest.core.api.find_all
+#: airtest.core.api.init_device airtest.core.api.install
+#: airtest.core.api.keyevent airtest.core.api.pinch
 #: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
@@ -69,7 +70,7 @@ msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACA
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
 msgid "Returns"
-msgstr ""
+msgstr "返回值"
 
 #: airtest.core.api.connect_device:4 airtest.core.api.init_device:6 of
 msgid "device instance"
@@ -123,7 +124,7 @@ msgstr "uuid或已初始化的设备列表中的编号，从0开始"
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
 msgid "Raises"
-msgstr ""
+msgstr "抛出异常"
 
 #: airtest.core.api.set_current:4 of
 msgid "raised when device idx is not found"
@@ -158,7 +159,23 @@ msgstr ""
 
 #: airtest.core.api.auto_setup:1 of
 msgid "Auto setup running env and try connect android device if not device connected."
-msgstr "自动初始化运行环境，并且当没有设备连接时，默认尝试连接Android设备。"
+msgstr "自动配置运行环境，如果当前没有连接设备的话，就默认尝试连接Android设备。"
+
+#: airtest.core.api.auto_setup:3 of
+msgid "basedir of script, __file__ is also acceptable."
+msgstr "设置当前脚本的所在路径，也可以直接传 ``__file__`` 变量进来"
+
+#: airtest.core.api.auto_setup:4 of
+msgid "connect_device uri in list."
+msgstr "一个内容为 ``connect_device uri`` 字符串的列表"
+
+#: airtest.core.api.auto_setup:5 of
+msgid "log dir for script report, default is None for no log, set to `True` for <basedir>/log."
+msgstr "可设置脚本运行时的log保存路径，默认值为None则不保存log，如果设置为True则自动保存在<basedir>/log目录中"
+
+#: airtest.core.api.auto_setup:6 of
+msgid "project root dir for `using` api."
+msgstr "用于设置PROJECT_ROOT变量，方便 ``using`` 接口的调用"
 
 #: airtest.core.api.shell:1 of
 msgid "Start remote shell in the target device and execute the command"
@@ -462,7 +479,7 @@ msgstr "断言两个值不相等"
 
 #: airtest.core.api.assert_not_equal:6 of
 msgid "if assertion"
-msgstr ""
+msgstr "如果断言异常"
 
 #~ msgid "参数"
 #~ msgstr ""
@@ -495,4 +512,23 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "raised when device index is out of device list"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Auto setup running env and try "
+#~ "connect android device if not device "
+#~ "connected."
+#~ msgstr "自动初始化运行环境，并且当没有设备连接时，默认尝试连接Android设备。"
+
+#~ msgid ""
+#~ "Auto setup running env and try "
+#~ "connect android device if not device "
+#~ "connected. :param basedir: basedir of "
+#~ "script, __file__ is also acceptable. "
+#~ ":param devices: connect_device uri in "
+#~ "list. :param logdir: log dir for "
+#~ "script report, default is None for "
+#~ "no log, set to `True` for "
+#~ "<basedir>/log. :param project_root: project "
+#~ "root dir for `using` api."
 #~ msgstr ""
