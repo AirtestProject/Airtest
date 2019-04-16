@@ -46,8 +46,6 @@ class Windows(Device):
 
         self.screen = mss()
         self.monitor = self.screen.monitors[0]  # 双屏的时候，self.monitor为整个双屏
-        self.singlemonitor = self.screen.monitors[1]  # 双屏的时候，self.singlemonitor为主屏
-        self.secondmonitor = self.screen.monitors[2]  # 双屏的时候，self.secondmonitor为副屏
 
     @property
     def uuid(self):
