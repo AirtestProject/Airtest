@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import mss
 import time
 import socket
 import subprocess
