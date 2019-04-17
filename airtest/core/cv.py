@@ -14,7 +14,7 @@ from airtest import aircv
 from airtest.aircv import cv2
 from airtest.core.helper import G, logwrap
 from airtest.core.settings import Settings as ST  # noqa
-from airtest.core.error import TargetNotFoundError
+from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
 from airtest.aircv.template_matching import TemplateMatching
@@ -158,7 +158,7 @@ class Template(object):
             # get function definition and execute:
             func = MATCHING_METHODS.get(method, None)
             if func is None:
-                G.LOGGING.warning("Undefined method in CVSTRATEGY: %s, try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief'.", method)
+                raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
                 ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:

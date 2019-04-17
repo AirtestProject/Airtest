@@ -101,25 +101,19 @@ class KeypointMatching(object):
         from random import random
         h_sch, w_sch = self.im_search.shape[:2]
         h_src, w_src = self.im_source.shape[:2]
-        try:
-            import numpy as np
-        except ImportError:
-            import traceback
-            traceback.print_exc()
-            return None
-        else:
-            # first you have to do the matching
-            self.find_best_result()
-            # then initialize the result image:
-            matching_info_img = np.zeros([max(h_sch, h_src), w_sch + w_src, 3], np.uint8)
-            matching_info_img[:h_sch, :w_sch, :] = self.im_search
-            matching_info_img[:h_src, w_sch:, :] = self.im_source
-            # render the match image at last:
-            for m in self.good:
-                color = tuple([int(random() * 255) for _ in range(3)])
-                cv2.line(matching_info_img, (int(self.kp_sch[m.queryIdx].pt[0]), int(self.kp_sch[m.queryIdx].pt[1])), (int(self.kp_src[m.trainIdx].pt[0] + w_sch), int(self.kp_src[m.trainIdx].pt[1])), color)
 
-            return matching_info_img
+        # first you have to do the matching
+        self.find_best_result()
+        # then initialize the result image:
+        matching_info_img = np.zeros([max(h_sch, h_src), w_sch + w_src, 3], np.uint8)
+        matching_info_img[:h_sch, :w_sch, :] = self.im_search
+        matching_info_img[:h_src, w_sch:, :] = self.im_source
+        # render the match image at last:
+        for m in self.good:
+            color = tuple([int(random() * 255) for _ in range(3)])
+            cv2.line(matching_info_img, (int(self.kp_sch[m.queryIdx].pt[0]), int(self.kp_sch[m.queryIdx].pt[1])), (int(self.kp_src[m.trainIdx].pt[0] + w_sch), int(self.kp_src[m.trainIdx].pt[1])), color)
+
+        return matching_info_img
 
     def _cal_confidence(self, resize_img):
         """计算confidence."""

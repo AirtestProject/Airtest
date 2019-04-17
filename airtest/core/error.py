@@ -19,6 +19,14 @@ class AirtestError(BaseError):
     pass
 
 
+class InvalidMatchingMethodError(BaseError):
+    """
+        This is InvalidMatchingMethodError BaseError
+        When an invalid matching method is used in settings.
+    """
+    pass
+
+
 class TargetNotFoundError(AirtestError):
     """
         This is TargetNotFoundError BaseError
