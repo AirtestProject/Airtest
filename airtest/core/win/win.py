@@ -45,6 +45,7 @@ class Windows(Device):
 
         self.screen = mss()
         self.monitor = self.screen.monitors[0]  # 双屏的时候，self.monitor为整个双屏
+        self.main_monitor = self.screen.monitors[1]  # 双屏的时候，self.main_monitor为主屏
 
     @property
     def uuid(self):
@@ -214,8 +215,8 @@ class Windows(Device):
         x2, y2 = self._fix_op_pos(p2)
         # 双屏时，涉及到了移动的比例换算:
         if len(self.screen.monitors) > 2:
-            ratio_x = (self.monitor["width"] + self.monitor["left"]) / self.singlemonitor["width"]
-            ratio_y = (self.monitor["height"] + self.monitor["top"]) / self.singlemonitor["height"]
+            ratio_x = (self.monitor["width"] + self.monitor["left"]) / self.main_monitor["width"]
+            ratio_y = (self.monitor["height"] + self.monitor["top"]) / self.main_monitor["height"]
             x2 = int(x1 + (x2 - x1) * ratio_x)
             y2 = int(y1 + (y2 - y1) * ratio_y)
             p1, p2 = (x1, y1), (x2, y2)
