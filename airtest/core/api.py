@@ -173,15 +173,16 @@ def clear_app(package):
 
 
 @logwrap
-def install(filepath):
+def install(filepath, **kwargs):
     """
     Install application on device
 
     :param filepath: the path to file to be installed on target device
+    :param kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
     :platforms: Android, iOS
     """
-    return G.DEVICE.install_app(filepath)
+    return G.DEVICE.install_app(filepath, **kwargs)
 
 
 @logwrap
