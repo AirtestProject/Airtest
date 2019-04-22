@@ -2,18 +2,35 @@
 # -*- coding: utf-8 -*-
 
 """"Airtest图像识别专用."""
+
 import os
 import sys
 import time
 import types
+from six import PY3
+from copy import deepcopy
+
 from airtest import aircv
 from airtest.aircv import cv2
-from airtest.core.error import TargetNotFoundError
 from airtest.core.helper import G, logwrap
-from airtest.core.settings import Settings as ST
+from airtest.core.settings import Settings as ST  # noqa
+from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
-from copy import deepcopy
-from six import PY3
+
+from airtest.aircv.template_matching import TemplateMatching
+from airtest.aircv.keypoint_matching import KAZEMatching, BRISKMatching, AKAZEMatching, ORBMatching
+from airtest.aircv.keypoint_matching_contrib import SIFTMatching, SURFMatching, BRIEFMatching
+
+MATCHING_METHODS = {
+    "tpl": TemplateMatching,
+    "kaze": KAZEMatching,
+    "brisk": BRISKMatching,
+    "akaze": AKAZEMatching,
+    "orb": ORBMatching,
+    "sift": SIFTMatching,
+    "surf": SURFMatching,
+    "brief": BRIEFMatching,
+}
 
 
 @logwrap
@@ -138,23 +155,24 @@ class Template(object):
         image = self._resize_image(image, screen, ST.RESIZE_METHOD)
         ret = None
         for method in ST.CVSTRATEGY:
-            if method == "tpl":
-                ret = self._try_match(self._find_template, image, screen)
-            elif method == "sift":
-                ret = self._try_match(self._find_sift_in_predict_area, image, screen)
-                if not ret:
-                    ret = self._try_match(self._find_sift, image, screen)
+            # get function definition and execute:
+            func = MATCHING_METHODS.get(method, None)
+            if func is None:
+                raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
-                G.LOGGING.warning("Undefined method in CV_STRATEGY: %s", method)
+                ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
                 break
         return ret
 
     @staticmethod
-    def _try_match(method, *args, **kwargs):
-        G.LOGGING.debug("try match with %s" % method.__name__)
+    def _try_match(func, *args, **kwargs):
+        G.LOGGING.debug("try match with %s" % func.__name__)
         try:
-            ret = method(*args, **kwargs)
+            ret = func(*args, **kwargs).find_best_result()
+        except aircv.NoModuleError as err:
+            G.LOGGING.debug("'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
+            return None
         except aircv.BaseError as err:
             G.LOGGING.debug(repr(err))
             return None
@@ -165,15 +183,9 @@ class Template(object):
         return aircv.imread(self.filepath)
 
     def _find_all_template(self, image, screen):
-        return aircv.find_all_template(screen, image, threshold=self.threshold, rgb=self.rgb)
+        return TemplateMatching(image, screen, threshold=self.threshold, rgb=self.rgb).find_all_results()
 
-    def _find_template(self, image, screen):
-        return aircv.find_template(screen, image, threshold=self.threshold, rgb=self.rgb)
-
-    def _find_sift(self, image, screen):
-        return aircv.find_sift(screen, image, threshold=self.threshold, rgb=self.rgb)
-
-    def _find_sift_in_predict_area(self, image, screen):
+    def _find_keypoint_result_in_predict_area(self, func, image, screen):
         if not self.record_pos:
             return None
         # calc predict area in screen
@@ -183,8 +195,8 @@ class Template(object):
         predict_area = aircv.crop_image(screen, (xmin, ymin, xmax, ymax))
         if not predict_area.any():
             return None
-        # find sift in that image
-        ret_in_area = aircv.find_sift(predict_area, image, threshold=self.threshold, rgb=self.rgb)
+        # keypoint matching in predicted area:
+        ret_in_area = func(image, predict_area, threshold=self.threshold, rgb=self.rgb)
         # calc cv ret if found
         if not ret_in_area:
             return None

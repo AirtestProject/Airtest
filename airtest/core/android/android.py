@@ -93,13 +93,14 @@ class Android(Device):
 
     def check_app(self, package):
         """
-        Check is package exists on the device
+        Check if package exists on the device
 
         Args:
             package: package name
 
         Returns:
-            True or False whether the package exists on the device or not
+            AirtestError: if package is not found
+            True if package exists on the device
 
         """
         return self.adb.check_app(package)
@@ -158,19 +159,20 @@ class Android(Device):
         """
         return self.adb.clear_app(package)
 
-    def install_app(self, filepath, replace=False):
+    def install_app(self, filepath, replace=False, install_options=None):
         """
         Install the application on the device
 
         Args:
             filepath: full path to the `apk` file to be installed on the device
             replace: True or False to replace the existing application
+            install_options: list of options, default is []
 
         Returns:
             output from installation process
 
         """
-        return self.adb.install_app(filepath, replace=replace)
+        return self.adb.install_app(filepath, replace=replace, install_options=install_options)
 
     def install_multiple_app(self, filepath, replace=False):
         """
@@ -280,6 +282,7 @@ class Android(Device):
         self.home()
         self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
         self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
+        time.sleep(0.5)
         self.keyevent("HOME")
 
     def home(self):

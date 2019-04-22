@@ -91,14 +91,14 @@ def crop_image(img, rect):
         raise Exception("to crop a image, rect should be a list like: [x_min, y_min, x_max, y_max].")
 
 
-def mark_point(img, point):
+def mark_point(img, point, circle=False, color=100, radius=20):
     """ 调试用的: 标记一个点 """
     x, y = point
     # cv2.rectangle(img, (x, y), (x+10, y+10), 255, 1, lineType=cv2.CV_AA)
-    radius = 20
-    cv2.circle(img, (x, y), radius, 255, thickness=2)
-    cv2.line(img, (x-radius, y), (x+radius, y), 100)  # x line
-    cv2.line(img, (x, y-radius), (x, y+radius), 100)  # y line
+    if circle:
+        cv2.circle(img, (x, y), radius, 255, thickness=2)
+    cv2.line(img, (x - radius, y), (x + radius, y), color)  # x line
+    cv2.line(img, (x, y - radius), (x, y + radius), color)  # y line
     return img
 
 
