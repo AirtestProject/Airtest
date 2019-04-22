@@ -535,13 +535,20 @@ class ADB(object):
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
 
-    def install_app(self, filepath, replace=False):
+    def install_app(self, filepath, replace=False, install_options=None):
         """
         Perform `adb install` command
 
         Args:
             filepath: full path to file to be installed on the device
             replace: force to replace existing application, default is False
+
+                e.g.["-t",  # allow test packages
+                    "-l",  # forward lock application,
+                    "-s",  # install application on sdcard,
+                    "-d",  # allow version code downgrade (debuggable packages only)
+                    "-g",  # grant all runtime permissions
+                ]
 
         Returns:
             command output
@@ -553,9 +560,11 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        cmds = ["install", "-t", filepath]
+        if not install_options or type(install_options) != list:
+            install_options = []
         if replace:
-            cmds.insert(1, "-r")
+            install_options.append("-r")
+        cmds = ["install", ] + install_options + [filepath, ]
         out = self.cmd(cmds)
 
         if re.search(r"Failure \[.*?\]", out):
@@ -564,13 +573,21 @@ class ADB(object):
 
         return out
 
-    def install_multiple_app(self, filepath, replace=False):
+    def install_multiple_app(self, filepath, replace=False, install_options=None):
         """
             Perform `adb install-multiple` command
 
             Args:
                 filepath: full path to file to be installed on the device
                 replace: force to replace existing application, default is False
+                install_options:  list of options
+                    e.g.["-t",  # allow test packages
+                        "-l",  # forward lock application,
+                        "-s",  # install application on sdcard,
+                        "-d",  # allow version code downgrade (debuggable packages only)
+                        "-g",  # grant all runtime permissions
+                        "-p",  # partial application install (install-multiple only)
+                    ]
 
             Returns:
                 command output
@@ -581,9 +598,11 @@ class ADB(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("file: %s does not exists" % (repr(filepath)))
 
-        cmds = ["install-multiple", "-t", filepath]
+        if not install_options or type(install_options) != list:
+            install_options = []
         if replace:
-            cmds.insert(1, "-r")
+            install_options.append("-r")
+        cmds = ["install-multiple", ] + install_options + [filepath, ]
 
         try:
             out = self.cmd(cmds)
