@@ -117,7 +117,8 @@ class LogToHtml(object):
             "screen": screen,
             "desc": desc,
             "traceback": traceback,
-            "assert": assertion
+            "assert": assertion,
+            "timestamp": step["timestamp"],
         }
         return translated
 

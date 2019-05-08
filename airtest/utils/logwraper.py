@@ -48,7 +48,7 @@ class AirtestLogger(object):
             depth = len(self.running_stack)
 
         if self.logfd:
-            log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper)
+            log_data = json.dumps({'tag': tag, 'depth': depth, 'timestamp': time.time(), 'time': time.strftime("%Y-%m-%d %H:%M:%S"), 'data': data}, default=self._dumper)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()
 
