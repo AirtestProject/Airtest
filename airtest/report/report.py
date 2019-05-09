@@ -10,6 +10,7 @@ import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
 from airtest.utils.compat import decode_path, script_dir_name
@@ -26,6 +27,7 @@ STATIC_DIR = os.path.dirname(__file__)
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
+
 @evalcontextfilter
 def nl2br(eval_ctx, value):
     result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
@@ -33,6 +35,16 @@ def nl2br(eval_ctx, value):
     if eval_ctx.autoescape:
         result = Markup(result)
     return result
+
+
+def timefmt(timestamp):
+    """
+    Formatting of timestamp in Jinja2 templates
+    :param timestamp: timestamp of steps
+    :return: "%Y-%m-%d %H:%M:%S"
+    """
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
 
 class LogToHtml(object):
     """Convert log to html display """
@@ -118,7 +130,6 @@ class LogToHtml(object):
             "desc": desc,
             "traceback": traceback,
             "assert": assertion,
-            "timestamp": step["timestamp"],
         }
         return translated
 
@@ -292,6 +303,7 @@ class LogToHtml(object):
             autoescape=True
         )
         env.filters['nl2br'] = nl2br
+        env.filters['datetime'] = timefmt
         template = env.get_template(template_name)
         html = template.render(**template_vars)
 

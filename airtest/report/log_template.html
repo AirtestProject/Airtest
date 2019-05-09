@@ -275,7 +275,7 @@
                     <div href="javascript:void(0);" class="glyphicon glyphicon-chevron-down"></div>
                 </div>
             {% endif %}
-            <h4><span lang="en">Time:</span>{{run_start}} -- {{run_end}}</h4>
+            <h4><span lang="en">Time:</span>{{run_start | datetime}} -- {{run_end | datetime}}</h4>
 
             {% if not test_result %}
             <h2 class="danger" lang="en">Failure: Failed Steps</h2>
@@ -328,7 +328,7 @@
           {% for step in steps %}
           <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
 
-            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
+            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time | datetime}}]</span></h2>
             <hr>
             <div class="step_content">
               <!--单步操作-->
