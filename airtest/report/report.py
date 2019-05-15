@@ -43,7 +43,10 @@ def timefmt(timestamp):
     :param timestamp: timestamp of steps
     :return: "%Y-%m-%d %H:%M:%S"
     """
-    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    except TypeError:
+        return timestamp
 
 
 class LogToHtml(object):
