@@ -10,6 +10,7 @@ import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
 from airtest.utils.compat import decode_path, script_dir_name
@@ -32,6 +33,19 @@ def nl2br(eval_ctx, value):
     if eval_ctx.autoescape:
         result = Markup(result)
     return result
+
+
+def timefmt(timestamp):
+    """
+    Formatting of timestamp in Jinja2 templates
+    :param timestamp: timestamp of steps
+    :return: "%Y-%m-%d %H:%M:%S"
+    """
+    try:
+        return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    except TypeError:
+        return timestamp
+
 
 class LogToHtml(object):
     """Convert log to html display """
