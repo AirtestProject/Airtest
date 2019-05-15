@@ -22,8 +22,8 @@
     <link href="{{static_root}}css/animate.css" rel="stylesheet">
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
-    <script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>
-    <script src="{{ static_root }}js/echarts/shine.js"></script>
+    <!--<script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>-->
+    <!--<script src="{{ static_root }}js/echarts/shine.js"></script>-->
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
@@ -323,7 +323,8 @@
             {% endif %}
           </div>
           </div>
-
+          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
+          {{ extra_block|safe }}
           <!--单步-->
           {% for step in steps %}
           <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
@@ -451,7 +452,7 @@
         </div>
       </div>  
     </div>
-  
+
     {% block footer %}
     <div class="footer">
         <span lang="en">Related information</span>
