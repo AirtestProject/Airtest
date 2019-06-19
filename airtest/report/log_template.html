@@ -22,8 +22,8 @@
     <link href="{{static_root}}css/animate.css" rel="stylesheet">
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
-    <script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>
-    <script src="{{ static_root }}js/echarts/shine.js"></script>
+    <!--<script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>-->
+    <!--<script src="{{ static_root }}js/echarts/shine.js"></script>-->
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
@@ -64,6 +64,8 @@
 
     div.screen_holder img {
       /*max-height: 600px;*/
+      min-width:20px;
+      min-height:20px;
     }
 
     img.crop_image {
@@ -273,7 +275,7 @@
                     <div href="javascript:void(0);" class="glyphicon glyphicon-chevron-down"></div>
                 </div>
             {% endif %}
-            <h4><span lang="en">Time:</span>{{run_start}} -- {{run_end}}</h4>
+            <h4><span lang="en">Time:</span>{{run_start | datetime}} -- {{run_end | datetime}}</h4>
 
             {% if not test_result %}
             <h2 class="danger" lang="en">Failure: Failed Steps</h2>
@@ -321,12 +323,13 @@
             {% endif %}
           </div>
           </div>
-
+          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
+          {{ extra_block|safe }}
           <!--单步-->
           {% for step in steps %}
           <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
 
-            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
+            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time | datetime}}]</span></h2>
             <hr>
             <div class="step_content">
               <!--单步操作-->
@@ -449,7 +452,7 @@
         </div>
       </div>  
     </div>
-  
+
     {% block footer %}
     <div class="footer">
         <span lang="en">Related information</span>

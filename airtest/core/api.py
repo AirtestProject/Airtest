@@ -97,6 +97,7 @@ def set_current(idx):
 def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     """
     Auto setup running env and try connect android device if not device connected.
+
     :param basedir: basedir of script, __file__ is also acceptable.
     :param devices: connect_device uri in list.
     :param logdir: log dir for script report, default is None for no log, set to `True` for <basedir>/log.
@@ -172,15 +173,16 @@ def clear_app(package):
 
 
 @logwrap
-def install(filepath):
+def install(filepath, **kwargs):
     """
     Install application on device
 
     :param filepath: the path to file to be installed on target device
+    :param kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
     :platforms: Android, iOS
     """
-    return G.DEVICE.install_app(filepath)
+    return G.DEVICE.install_app(filepath, **kwargs)
 
 
 @logwrap

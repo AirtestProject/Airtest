@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
+
+import time
+import socket
+import subprocess
+from mss import mss
+from functools import wraps
+
+from pywinauto.application import Application
+from pywinauto import mouse, keyboard
+from pywinauto.win32structures import RECT
+from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
+
+from .screen import screenshot
+
 from airtest import aircv
 from airtest.core.device import Device
-from pywinauto.application import Application
-from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
-from pywinauto.win32structures import RECT
-from pywinauto import mouse, keyboard
-from functools import wraps
-from .screen import screenshot
-import socket
-import time
-import subprocess
-
 from airtest.core.settings import Settings as ST  # noqa
 
 
@@ -38,6 +42,10 @@ class Windows(Device):
         self.mouse = mouse
         self.keyboard = keyboard
         self._init_connect(handle, kwargs)
+
+        self.screen = mss()
+        self.monitor = self.screen.monitors[0]  # 双屏的时候，self.monitor为整个双屏
+        self.main_monitor = self.screen.monitors[1]  # 双屏的时候，self.main_monitor为主屏
 
     @property
     def uuid(self):
@@ -149,6 +157,16 @@ class Windows(Device):
         """
         self.keyevent(text)
 
+    def _fix_op_pos(self, pos):
+        """Fix operation position."""
+        # 如果是全屏的话，就进行双屏修正，否则就正常即可
+        if not self.handle:
+            pos = list(pos)
+            pos[0] = pos[0] + self.monitor["left"]
+            pos[1] = pos[1] + self.monitor["top"]
+
+        return pos
+
     def touch(self, pos, **kwargs):
         """
         Perform mouse click action
@@ -168,12 +186,14 @@ class Windows(Device):
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
         coords = self._action_pos(pos)
+        coords = self._fix_op_pos(coords)
 
         self.mouse.press(button=button, coords=coords)
         time.sleep(duration)
         self.mouse.release(button=button, coords=coords)
 
     def double_click(self, pos):
+        pos = self._fix_op_pos(pos)
         coords = self._action_pos(pos)
         self.mouse.double_click(coords=coords)
 
@@ -190,6 +210,17 @@ class Windows(Device):
             None
 
         """
+        # 设置坐标时相对于整个屏幕的坐标:
+        x1, y1 = self._fix_op_pos(p1)
+        x2, y2 = self._fix_op_pos(p2)
+        # 双屏时，涉及到了移动的比例换算:
+        if len(self.screen.monitors) > 2:
+            ratio_x = (self.monitor["width"] + self.monitor["left"]) / self.main_monitor["width"]
+            ratio_y = (self.monitor["height"] + self.monitor["top"]) / self.main_monitor["height"]
+            x2 = int(x1 + (x2 - x1) * ratio_x)
+            y2 = int(y1 + (y2 - y1) * ratio_y)
+            p1, p2 = (x1, y1), (x2, y2)
+
         from_x, from_y = self._action_pos(p1)
         to_x, to_y = self._action_pos(p2)
 
@@ -207,18 +238,19 @@ class Windows(Device):
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y))
 
-    def start_app(self, path, *args):
+    def start_app(self, path, **kwargs):
         """
         Start the application
 
         Args:
             path: full path to the application
+            kwargs: reference: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.application.html#pywinauto.application.Application.start
 
         Returns:
             None
 
         """
-        self.app = self._app.start(path)
+        self.app = self._app.start(path, **kwargs)
 
     def stop_app(self, pid):
         """
@@ -343,8 +375,8 @@ class Windows(Device):
 
         """
         rect = self.get_rect()
-        pos = (int((pos[0] + rect.left + self._focus_rect[0]) * self._dpifactor), 
-            int((pos[1] + rect.top + self._focus_rect[1]) * self._dpifactor))
+        pos = (int((pos[0] + rect.left + self._focus_rect[0]) * self._dpifactor),
+               int((pos[1] + rect.top + self._focus_rect[1]) * self._dpifactor))
         return pos
 
     def get_ip_address(self):
