@@ -50,7 +50,8 @@ if not sys.platform.startswith('win'):
             'win32ui',
             'pywinauto',
             'pywinauto.application',
-            'pywinauto.win32functions'
+            'pywinauto.win32functions',
+            'pywinauto.win32structures',
             ]:
 
         sys.modules[mod_name] = mock.MagicMock()
