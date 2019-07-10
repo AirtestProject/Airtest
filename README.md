@@ -18,13 +18,13 @@
 
 *   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. it allows writing instructions in Python, to achieve more advanced automation.
 
-Get started from [airtest homepage](http://airtest.netease.com/) and find support in [google groups](https://groups.google.com/forum/#!forum/airtestproject)
+Get started from [airtest homepage](http://airtest.netease.com/)
 
 #### [Supported Platforms](./docs/wiki/platforms.md)
 
 | | | | | | | | |
 |-|-|-|-|-|-|-|-|
-Android |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
+[Android](http://airtest.netease.com/docs/en/1_quick_start/2_test_with_Android_device.html) |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|[Windows](http://airtest.netease.com/docs/en/1_quick_start/4_get_started_with_Windows_test.html)|[Unity](http://airtest.netease.com/docs/en/1_quick_start/1_how_to_write_the_first_script_for_your_game.html)|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)| [web](http://airtest.netease.com/docs/en/1_quick_start/5_get_started_with_web_test.html)
 
 ## Installation
 
