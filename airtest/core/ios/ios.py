@@ -8,6 +8,7 @@ import time
 import json
 import base64
 import wda
+import traceback
 
 if six.PY3:
     from urllib.parse import urljoin
@@ -93,8 +94,11 @@ class IOS(Device):
 
     @property
     def session(self):
-        if not self.defaultSession:
-            self.defaultSession = self.driver.session()
+        try:
+            if not self.defaultSession:
+                self.defaultSession = self.driver.session()
+        except:
+            traceback.print_exc()
         return self.defaultSession
 
     def _fetchNewSession(self):
@@ -158,6 +162,7 @@ class IOS(Device):
         elif self.cap_method == CAP_METHOD.WDACAP:
             data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
 
+        # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
         if strType:
             if filename:
                 with open(filename, 'wb') as f:
@@ -169,31 +174,13 @@ class IOS(Device):
             screen = aircv.utils.string_2_img(data)
         except:
             # may be black/locked screen or other reason, print exc for debugging
-            import traceback
             traceback.print_exc()
             return None
 
-        now_orientation = self.orientation
-
-        # ensure the orientation is right
-        if ensure_orientation and now_orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
-
-            # minicap screenshots are different for various sdk_version
-            if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
-                h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
-                if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                    screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
-
-            # wda 截图是要根据orientation旋转
-            elif self.cap_method == CAP_METHOD.WDACAP:
-                # seems need to rotate in opencv opencv-contrib-python==3.2.0.7
-                screen = aircv.rotate(screen, 90, clockwise=(now_orientation == LANDSCAPE_RIGHT))
-
-        # readed screen size
         h, w = screen.shape[:2]
 
         # save last res for portrait
-        if now_orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
+        if self.orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
             self._size['height'] = w
             self._size['width'] = h
         else:
