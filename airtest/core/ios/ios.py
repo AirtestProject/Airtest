@@ -138,7 +138,8 @@ class IOS(Device):
             offset_x, offset_y, offset_width and offset_height of the display
 
         """
-        self.get_current_resolution()
+        w, h = self.get_current_resolution()
+        return 0, 0, w, h
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
