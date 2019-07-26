@@ -438,6 +438,16 @@ class Android(Device):
         """
         return self.adb.get_top_activity()
 
+    def get_current_app(self):
+        """
+        Get the currently running app package name
+
+        Returns:
+            package: name of the package to refresh render resolution, e.g. "com.netease.my"
+
+        """
+        return self.adb.get_current_app()
+
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
@@ -562,6 +572,27 @@ class Android(Device):
             w, h = h, w
         return w, h
 
+    def get_render_resolution(self, refresh=False):
+        """
+        Return render resolution after rotation
+
+        Args:
+            refresh: whether to force refresh render resolution
+
+        Returns:
+            offset_x, offset_y, offset_width and offset_height of the display
+
+        """
+        if refresh or 'offset_x' not in self._display_info:
+            self.ajust_all_screen()
+        x, y, w, h = self._display_info.get('offset_x', 0), \
+            self._display_info.get('offset_y', 0), \
+            self._display_info.get('offset_width', 0), \
+            self._display_info.get('offset_height', 0)
+        if self.display_info["orientation"] in [1, 3]:
+            x, y, w, h = y, x, h, w
+        return x, y, w, h
+
     def start_recording(self, *args, **kwargs):
         """
         Start recording the device display
@@ -621,3 +652,18 @@ class Android(Device):
             self.display_info["orientation"]
         )
         return x, y
+
+    def ajust_all_screen(self):
+        """
+        Ajust the render resolution for all_screen device.
+
+        Return:
+            None
+
+        """
+        info = self.display_info
+        ret = self.adb.get_display_of_all_screen(info)
+        if ret:
+            info.update(ret)
+            self._display_info = info
+            print(info)

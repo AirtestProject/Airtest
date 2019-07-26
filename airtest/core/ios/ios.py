@@ -130,6 +130,16 @@ class IOS(Device):
         return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,\
         'physical_width': self._size['width'], 'physical_height': self._size['height']}
 
+    def get_render_resolution(self):
+        """
+        Return render resolution after rotation
+
+        Returns:
+            offset_x, offset_y, offset_width and offset_height of the display
+
+        """
+        self.get_current_resolution()
+
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
         if self.display_info["orientation"] in [LANDSCAPE, LANDSCAPE_RIGHT]:
