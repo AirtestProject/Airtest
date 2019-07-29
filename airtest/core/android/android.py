@@ -666,4 +666,3 @@ class Android(Device):
         if ret:
             info.update(ret)
             self._display_info = info
-            print(info)
