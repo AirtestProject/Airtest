@@ -653,9 +653,9 @@ class Android(Device):
         )
         return x, y
 
-    def ajust_all_screen(self):
+    def adjust_all_screen(self):
         """
-        Ajust the render resolution for all_screen device.
+        Adjust the render resolution for all_screen device.
 
         Return:
             None
