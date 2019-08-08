@@ -430,20 +430,6 @@ def main(args):
 
 if __name__ == "__main__":
     import argparse
-    import sys
-    import webbrowser
-    args = [
-        r"C:\Users\chenjiyun\Desktop\test_blackjack.air",
-        "--log_root",
-        r"C:\Users\chenjiyun\AppData\Local\Temp\AirtestIDE\scripts\02d295673a287ea8abc74db7beeac7e1",
-        # r'C:\Users\chenjiyun\AppData\Local\Temp\AirtestIDE\scripts\f887db50c69f216f5e5b4d1279f1fdfd',
-        "--outfile",
-        r"C:\Users\chenjiyun\Desktop\test_blackjack.air\log.html",
-        '--lang',
-        'zh'
-    ]
-    sys.argv.extend(args)
     ap = argparse.ArgumentParser()
     args = get_parger(ap).parse_args()
     main(args)
-    webbrowser.open(r"C:\Users\chenjiyun\Desktop\test_blackjack.air\log.html")
