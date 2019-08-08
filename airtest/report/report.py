@@ -16,7 +16,6 @@ from airtest.aircv import imread, get_resolution
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from six import PY3
-from pprint import pprint
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -95,6 +94,8 @@ class LogToHtml(object):
             if not self.run_start:
                 self.run_start = log["time"]
             self.run_end = log["time"]
+            if log['data']['name'] == 'record_ui':
+                a = 1
 
             if depth == 0:
                 # single log line, not in stack
@@ -150,6 +151,9 @@ class LogToHtml(object):
             "vector": [],
             "confidence": None,
         }
+
+        if step["data"]["name"] == "record_ui":
+            a=1
 
         for item in step["__children__"]:
             if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
@@ -381,6 +385,7 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
+        data['data'] = json.dumps(data)
 
         return self._render(template_name, output_file, **data)
 
@@ -408,6 +413,7 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
+    print(args)
     path, name = script_dir_name(args.script)
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
@@ -419,11 +425,25 @@ def main(args):
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
-    rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
+    html = rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
 if __name__ == "__main__":
     import argparse
+    import sys
+    import webbrowser
+    args = [
+        r"C:\Users\chenjiyun\Desktop\test_blackjack.air",
+        "--log_root",
+        r"C:\Users\chenjiyun\AppData\Local\Temp\AirtestIDE\scripts\02d295673a287ea8abc74db7beeac7e1",
+        # r'C:\Users\chenjiyun\AppData\Local\Temp\AirtestIDE\scripts\f887db50c69f216f5e5b4d1279f1fdfd',
+        "--outfile",
+        r"C:\Users\chenjiyun\Desktop\test_blackjack.air\log.html",
+        '--lang',
+        'zh'
+    ]
+    sys.argv.extend(args)
     ap = argparse.ArgumentParser()
     args = get_parger(ap).parse_args()
     main(args)
+    webbrowser.open(r"C:\Users\chenjiyun\Desktop\test_blackjack.air\log.html")

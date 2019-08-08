@@ -1,0 +1,558 @@
+function StepPannel(data, root){
+  this.data = data
+  this.original_steps = data.steps
+  this.steps = [].concat(data.steps)
+  this.static = data.static_root
+  this.currentStep = -1
+  this.currentWrong = -1
+  this.pagesize = 10
+  this.currentPage = 1
+  this.stepLeft = $('#step-left .step-list')
+  this.stepRight = $('#step-right')
+  this.scale = 0
+  this.order = 'acc' // or dec
+  this.duration = 'acc' // or dec
+  this.status = 'acc' // or dec
+
+  this.init = function(){
+    // 初始化
+    this.initStepData()
+    this.bindEvents()
+    this.init_pagenation()
+    this.setSteps()
+  }
+
+  this.bindEvents = function(){
+    // 绑定事件
+    var that = this
+    this.stepLeft.delegate('.step', 'click',function(e){
+      that.setStepRight(e.currentTarget.getAttribute('index'))
+    })
+    $('.filter#all').click(function(){
+      that.steps = [].concat(that.original_steps)
+      that.refreshSteps()
+    })
+    $('.filter#success').click(function(){
+      that.steps = that.filterSuccessSteps()
+      that.refreshSteps()
+    })
+    $('.filter#fail').click(function(){
+      that.steps = that.filterFailSteps()
+      that.refreshSteps()
+    })
+    $('.filter#assert').click(function(){
+      that.steps = that.filterAssertSteps()
+      that.refreshSteps()
+    })
+    $('#jump-wrong').click(function(){
+      that.steps = [].concat(that.original_steps)
+      that.currentWrong = that.findCurrentWrongStep()
+      if(that.currentWrong>=0){
+        that.currentStep = that.currentWrong
+        that.currentPage = Math.ceil(that.currentStep / that.pagesize)
+        that.setStepsLeft()
+        that.setPagenation()
+        that.setStepRight(that.currentStep)
+      }
+    })
+    $('.order#order').click(function(){
+      that.order = that.order == 'acc' ? 'dec' : 'acc'
+      that.steps.sort(that.sortSteps('index', that.order == 'acc'))
+      that.setSteps()
+    })
+    $('.order#duration').click(function(){
+      that.steps.sort(that.sortSteps('duration', that.duration == 'acc'))
+      that.duration = that.duration == 'acc' ? 'dec' : 'acc'
+      that.setSteps()
+    })
+    $('.order#status').click(function(){
+      that.steps.sort(that.sortSteps('status', that.status == 'acc'))
+      that.status = that.status == 'acc' ? 'dec' : 'acc'
+      that.setSteps()
+    })
+  }
+
+  this.sortSteps = function(attr, rev){
+    //第二个参数没有传递 默认升序排列
+    if(rev ==  undefined){
+        rev = 1;
+    }else{
+        rev = (rev) ? 1 : -1;
+    }
+    return function(a,b){
+        a = a[attr];
+        b = b[attr];
+        if(a < b){
+            return rev * -1;
+        }
+        if(a > b){
+            return rev * 1;
+        }
+        return 0;
+    }
+  }
+
+  this.initStepRight = function(){
+    // 设置高亮
+    if($('pre.trace').length>0){
+      hljs.highlightBlock($('pre.trace')[0], null, false);
+    }
+    var that = this
+    if($(".step-args .fancybox").length>0){
+      $('.fancybox .screen').load(function(e){
+        // 存在截屏，并加载成功
+        that.resetScale(this)
+        that.resetScreenshot()
+      })
+    }
+  }
+
+  this.refreshSteps = function(){
+    this.currentPage = 1
+    this.currentStep = this.steps[0].index
+    this.setSteps()
+  }
+
+  this.setSteps = function(){
+    // 重设步骤页面内容
+    this.setStepsLeft()
+    this.setStepRight((this.currentPage-1)* this.pagesize)
+    this.setPagenation()
+  }
+
+  this.initStepData = function(){
+    for(var i = 0; i< this.steps.length; i++){
+      step = this.steps[i]
+      if(i == this.steps.length-1){
+        step.duration = this.data.run_end - step.time
+      } else{
+        step.duration = this.steps[i+1].time - step.time
+      }
+      step.index =  i
+      step.status =  step.traceback ? 'fail' : 'success'
+    }
+  }
+
+  this.setStepsLeft = function(){
+    html = ''
+    start = (this.currentPage-1)* this.pagesize
+    end = (this.currentPage)*this.pagesize
+    end =  end>this.steps.length ? this.steps.length : end
+    for(var i = start; i< end; i++){
+      step = this.steps[i]
+      html += '<div class="step" index="%s">'.format(step.index) +
+                '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
+                '<span class="order"># %s</span>'.format(step.index +1) +
+                '<span class="step_title" lang="en">%s</span>'.format(step.title) +
+                '<span class="step-time">%s</span>'.format(getDelta(step.duration)) +
+              '</div>'
+    }
+    this.stepLeft.html(html)
+  }
+  this.setStepRight = function(index){
+    index = parseInt(index)
+    if(!isNaN(index) && index>= 0 && index<=this.steps.length){
+      this.setStepRightHtml(index)
+      this.initStepRight()
+    }
+  }
+
+  this.setStepRightHtml = function(index){
+    this.stepLeft.find('.step.active').removeClass('active')
+    this.stepLeft.find(".step[index='%s']".format(index)).addClass('active')
+    step = this.steps[index]
+    this.currentStep = index
+    success = step.traceback ? "fail" : "success"
+    pass = step.traceback ? "Failed" : "Passed"
+    title = step.code ? step.desc||step.code.name : step.desc
+    title = title || step.title
+    var head = "<div class='step-head'><span class='step-status %s'>%s</span><span>Step %s: %s</span></div>"
+                  .format(success, pass , step.index+1, title)
+    var infos = this.getStepRightInfo(step)
+    var args = this.getStepRightArgs(step)
+    this.stepRight.html(head + infos + args)
+  }
+
+  this.getStepRightInfo = function(step){
+    // HTML 本步骤成功与否、耗时 
+    try{
+      return ("<div class='step-infos'>"+
+                "<div class='infos-li'>" +
+                  "<span lang='en'>Status: </span>" +
+                  "<span class='content-val %s'>%s</span>" +
+                  "<img src='%simage/step_%s.svg'>" +
+                "</div>" +
+                "<div class='infos-li'>" +
+                  "<span lang='en'>Duration: </span>" +
+                  "<img src='%simage/time.svg'>" +
+                  "<span class='content-val'>%s</span>" +
+                "</div>" +
+                "<div class='infos-li step-behavior'>" +
+                  "<span lang='en'>Behavior: </span>" +
+                  "<span class='content-val bold'>%s</span>" +
+                "</div>" +
+              "</div>").format(success, pass, this.static, success,
+                              this.static, getDelta(step.duration),
+                              step.code.name)
+    } catch {
+      return ""
+    }
+  }
+
+  this.getStepRightArgs = function(step){
+    // 操作的参数
+    try{
+      argHtml = ''
+      if(step.code){
+        for(var i=0; i < step.code.args.length; i++){
+          arg = step.code.args[i]
+          if(arg.image){
+            argHtml += ('<img class="crop_image desc" data-width="%s" data-height="%s" src="%s" title="%s">' +
+                    '<p class="desc">resolution: %s</p>')
+                    .format(arg.resolution[0], arg.resolution[1], arg.image, arg.image, arg.value.resolution)
+          }else{
+            val = typeof arg.value == 'object' ? JSON.stringify(arg.value) : arg.value
+            argHtml += '<p class="desc">%s: %s</p>'.format(arg.key,val)
+          }
+        }
+      }
+    } catch(e) {
+      console.error(e)
+    }
+
+    // 相似度
+    if(step.screen && step.screen.confidence){
+      argHtml += '<p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Confidence: </span>%s</p>'.format(step.screen.confidence)
+    }
+
+    argHtml =  argHtml || '<p class="desc">None</p>'
+    argHtml = "<div class='fluid infos'>" + argHtml + "</div>"
+    argHtml += "<div class='fluid screens'>" + this.getStepRightScrren(step) + "</div>"
+    argHtml += "<div class='fluid traces'>" + this.getStepRightTrace(step) + "</div>"
+    return "<div class='step-args'><div class='bold'>Args:</div>" + argHtml + "</div>"
+  }
+
+  this.getStepRightScrren = function(step){
+    if(step.screen && step.screen.src){
+      src = step.screen.src
+      // 截屏
+      img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
+
+      // 点击位置
+      targets = ''
+      for(var i=0; i < step.screen.pos.length; i++){
+        pos = step.screen.pos[i]
+        targets += '<img class="target" src="%simage/target.png" data-top="%s" data-left="%s" style="top:%spx;left:%spx;">'
+                  .format(this.static, pos[1], pos[0], pos[1], pos[0])
+      }
+
+      // 线
+      vectors = ''
+      for(var i=0; i < step.screen.vector.length; i++){
+        v = step.screen.vector[i]
+        vectors += ('<div class="arrow" data-index="%s" data-x="%s" data-y="%s">' +
+                    '<div class="start"></div>' +
+                    '<div class="line"></div>' +
+                    '<div class="end"></div>' +
+                  '</div>').format(this.currentStep, v[0], v[1])
+      }
+      
+      // 还有个rect <!-- rect area -->
+      rectors = ''
+      for(var i=0;i<step.screen.rect.length; i++){
+        rect = step.screen.rect[i]
+        rectors += "<div class='rect' ret='%s' style='left:%spx;top:%spx;width:%spx;height:%spx'></div>"
+                   .format(JSON.stringify(rect), rect.left, rect.top, rect.width, rect.height)
+      }
+
+      return '<div class="fancybox">%s</div>'.format(img + targets + vectors + rectors)
+    } else{
+      return ""
+    }
+  }
+
+  this.getStepRightTrace = function(step){
+    if(step.traceback){
+      return '<div class="desc"><pre class="trace"><code class="python">%s</code></pre></div>'.format(step.traceback)
+    } else{
+      return ""
+    }
+  }
+
+  this.resetScale = function(dom){
+    /**
+     * @description: 重新计算截屏缩放的比例
+     * @param {dom} dom img对象
+     */
+    imgWidth = dom.naturalWidth
+    dwidth = dom.width
+    this.scale = dwidth / imgWidth
+    this.scale  = Math.round(this.scale  * 100) / 100
+  }
+
+  this.resetScreenshot = function(){
+    // 重新设置targt、方框、连接线位置
+    this.convertSize($('.step-args .crop_image'))
+    this.convertPos($('.fancybox .target'), true)
+    this.convertSize($('.fancybox .rect'))
+    this.convertPos($('.fancybox .rect'))
+    this.showArrow($(".fancybox .arrow"))
+    $('.fancybox').css({
+      'width': $('.fancybox .screen').width()
+    })
+  }
+
+  this.convertPos = function(domList, withSize){
+    for(var i=0; i<domList.length; i++){
+      pos = $(domList[i]).position()
+      x = pos.left * this.scale
+      y = pos.top * this.scale
+      if(withSize){
+        x -= domList[i].offsetWidth/2
+        y -= domList[i].offsetHeight/2
+      }
+      domList[i].style.left = this.convertPosPersentage(x, 'horizontal')
+      domList[i].style.top = this.convertPosPersentage(y, 'vertical')
+    }
+  }
+
+  this.convertSize = function(domList){
+    for(var i=0;i<domList.length; i++){
+      w = domList[i].clientWidth
+      h = domList[i].clientHeight
+      domList[i].style.width = (w * this.scale) + 'px'
+      domList[i].style.height = (h * this.scale) + 'px'
+    }
+  }
+
+  this.showArrow = function(dom){
+    var start = this.steps[this.currentStep].screen.pos[0]
+    var vector = this.steps[this.currentStep].screen.vector[0]
+    if(vector && start){
+      var vt_x = vector[0] * this.scale;
+      var vt_y = - vector[1] * this.scale;
+      var vt_width = Math.sqrt(vt_x * vt_x + vt_y * vt_y)
+      var rotation = 360*Math.atan2(vt_y, vt_x)/(2*Math.PI)
+      var rt =  'rotate(' + -rotation + 'deg)';
+      var rotate_css = {
+        '-ms-transform': rt,
+        '-webkit-transform': rt,
+        '-moz-transform': rt,
+        'transform': rt,
+        'transform-origin': '6px 15px',
+      };
+      dom.css(rotate_css);
+      dom.css({
+        'top': this.convertPosPersentage(start[1]* this.scale, 'vertical'),
+        'left': this.convertPosPersentage(start[0]*this.scale, 'horizontal'),
+        'width': vt_width
+      });
+    }
+  }
+
+  this.filterSuccessSteps = function(){
+    // 筛选成功步骤
+    arr = []
+    for(var i=0; i<this.original_steps.length; i++){
+      step = this.original_steps[i]
+      if(step.traceback)
+        continue
+      else
+        arr.push(step)
+    }
+    return arr
+  }
+
+  this.filterFailSteps = function(){
+    // 筛选失败步骤
+    arr = []
+    for(var i=0; i<this.original_steps.length; i++){
+      step = this.original_steps[i]
+      if(step.traceback)
+        arr.push(step)
+      else
+        continue
+    }
+    return arr
+  }
+
+  this.filterAssertSteps = function(){
+    // 筛选断言步骤
+    arr = []
+    for(var i=0; i<this.original_steps.length; i++){
+      step = this.original_steps[i]
+      if(step.assert)
+        arr.push(step)
+      else
+        continue
+    }
+    return arr
+  }
+
+  this.findCurrentWrongStep = function(){
+    // 跳至错误步骤
+    arr = this.filterFailSteps()
+    if(arr.length>0){
+      if(this.currentWrong == arr[arr.length-1].index)
+        return arr[0].index
+      for(var i=0; i<arr.length; i++){
+        if(arr[i].index > this.currentWrong)
+          return arr[i].index
+      }
+    }
+    return -1
+  }
+
+  this.init_pagenation = function(){
+    //生成分页控件  
+    this.paging = new Paging();
+    var that = this
+    this.paging.init({
+      target:'#pageTool',
+      pagesize: this.pagesize,
+      count: this.steps.length,
+      prevTpl: "<",
+      nextTpl: ">",
+      toolbar:true,
+      pageSizeList: this.steps.length>100 ? [10, 20, 50, 100, 'All'] : [10, 20, 50, 100],
+      changePagesize:function(ps){
+        if(ps == 'All')
+          that.pagesize = this.steps.length
+        else
+          that.pagesize = parseInt(ps)
+        that.currentPage = 1
+        that.setStepsLeft()
+      },
+      callback:function(p){
+        that.currentPage = parseInt(p)
+        that.setStepsLeft()
+      }
+    });
+    $('#pageTool').prepend('<span class="stpes-total"><span lang="en">Total </span><span class="steps-account"></span></span>')
+  }
+
+  this.setPagenation = function(){
+    if(this.steps.length > this.pagesize)
+      $('#pageTool').show()
+    else
+      $('#pageTool').hide()
+    $('#pageTool .steps-account').html(this.steps.length)
+    this.paging.go(this.currentPage)
+  }
+
+  this.convertPosPersentage = function(pixcel, key){
+    ret = ''
+    if(key == 'horizontal'){
+      ret = pixcel /$('.fancybox .screen').width() * 100 + '%'
+    }
+    else if (key == 'vertical'){
+      ret = pixcel / $('.fancybox .screen').height() * 100 + '%'
+    }
+    return ret
+  }
+}
+
+
+String.prototype.format= function(){
+  var args = Array.prototype.slice.call(arguments);
+  var count=0;
+  return this.replace(/%s/g,function(s,i){
+    return args[count++];
+  });
+}
+
+Date.prototype.Format = function (fmt) { //author: meizz 
+  var o = {
+    "M+": this.getMonth() + 1, //月份 
+    "d+": this.getDate(), //日 
+    "h+": this.getHours(), //小时 
+    "m+": this.getMinutes(), //分 
+    "s+": this.getSeconds(), //秒 
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+    "S": this.getMilliseconds() //毫秒 
+  };
+  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+  for (var k in o)
+  if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+  return fmt;
+}
+
+function getDate(timestamp){
+  return (new Date(timestamp * 1000)).Format("yyyy / MM / dd")
+}
+
+function getTime(timestamp){
+  return (new Date(timestamp * 1000)).Format("hh:mm:ss")
+}
+
+function getDelta(delta){
+  // 计算消耗时间，end - start，以0:1:6'22'' 格式
+  delta = parseInt((delta)*1000)
+  ms = delta % 1000
+  delta = parseInt(delta / 1000)
+  s = delta % 60
+  delta = parseInt(delta/ 60)
+  m = delta % 60
+  h = parseInt(delta/ 60)
+
+  msg = ''
+  if(h == 0)
+    if(m == 0)
+      if(s==0)
+        msg =  ms + "ms"
+      else
+        msg = s + "s " + ms + "ms"
+    else
+      msg = m + 'min ' + s + "s " + ms + "ms"
+  else
+    msg = h + 'hr ' + m + 'min ' + s + "s " + ms + "ms"
+  return msg
+}
+
+function toggleCollapse(dom){
+  if(dom.hasClass('collapse')){
+    dom.removeClass('collapse')
+  } else{
+    dom.addClass('collapse')
+  }
+}
+
+
+function init_page(){
+  $('.summary .info-sub.start').html(getDate(data.run_start))
+  $('.summary .info-sub.time').html(getTime(data.run_start) + '-' + getTime(data.run_end))
+  $('.summary .info-value.duration').html(getDelta(data.run_end - data.run_start))
+}
+
+$(function(){
+  init_page()
+  stepPanel = new StepPannel(data)
+  stepPanel.init()
+  $("img").error(function () {
+    var orsrc = $(this).attr("src")
+    if(!orsrc){ return }
+    if(orsrc.indexOf("report.gif") > -1){
+      setTimeout(function(){
+        $(this).attr("src", 'report.gif?timestamp=' + new Date().getTime());
+      }.bind(this), 5000)
+      return
+    }
+    $(this).unbind("error")
+    .addClass('error-img')
+    .attr("src", data.static_root + "image/broken.png")
+    .attr("orgin-src", orsrc);
+  });
+
+  // 延迟加载图片
+  lazyload();
+
+  // 自动收缩过长的脚本描述
+  var descHeight = 100;
+  descWrap = $('.summary .airdesc')
+  if($('.summary .desc-content').height()>descHeight) {
+    toggleCollapse(descWrap)
+    $(".summary .show-more").click(function(){
+      toggleCollapse(descWrap)
+    })
+  }
+})
