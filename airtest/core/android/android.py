@@ -584,7 +584,7 @@ class Android(Device):
 
         """
         if refresh or 'offset_x' not in self._display_info:
-            self.ajust_all_screen()
+            self.adjust_all_screen()
         x, y, w, h = self._display_info.get('offset_x', 0), \
             self._display_info.get('offset_y', 0), \
             self._display_info.get('offset_width', 0), \
