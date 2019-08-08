@@ -3,7 +3,7 @@ function StepPannel(data, root){
   this.original_steps = data.steps
   this.steps = [].concat(data.steps)
   this.static = data.static_root
-  this.currentStep = -1
+  this.currentStep = 0
   this.currentWrong = -1
   this.pagesize = 20
   this.currentPage = 1
@@ -109,15 +109,17 @@ function StepPannel(data, root){
 
   this.refreshSteps = function(){
     this.currentPage = 1
-    this.currentStep = this.steps[0].index
     this.setSteps()
   }
 
   this.setSteps = function(){
     // 重设步骤页面内容
     this.setStepsLeft()
-    this.setStepRight((this.currentPage-1)* this.pagesize)
     this.setPagenation()
+    this.setStepRight(this.steps[0].index)
+    this.paging.render({
+      'count': this.steps.length
+    })
   }
 
   this.initStepData = function(){
@@ -151,7 +153,7 @@ function StepPannel(data, root){
   }
   this.setStepRight = function(index){
     index = parseInt(index)
-    if(!isNaN(index) && index>= 0 && index<=this.steps.length){
+    if(!isNaN(index) && index>= 0 && index<=this.original_steps.length){
       this.setStepRightHtml(index)
       this.initStepRight()
     }
@@ -160,7 +162,7 @@ function StepPannel(data, root){
   this.setStepRightHtml = function(index){
     this.stepLeft.find('.step.active').removeClass('active')
     this.stepLeft.find(".step[index='%s']".format(index)).addClass('active')
-    step = this.steps[index]
+    step = this.original_steps[index]
     this.currentStep = index
     success = step.traceback ? "fail" : "success"
     pass = step.traceback ? "Failed" : "Passed"
@@ -326,8 +328,8 @@ function StepPannel(data, root){
   }
 
   this.showArrow = function(dom){
-    var start = this.steps[this.currentStep].screen.pos[0]
-    var vector = this.steps[this.currentStep].screen.vector[0]
+    var start = this.original_steps[this.currentStep].screen.pos[0]
+    var vector = this.original_steps[this.currentStep].screen.vector[0]
     if(vector && start){
       var vt_x = vector[0] * this.scale;
       var vt_y = - vector[1] * this.scale;

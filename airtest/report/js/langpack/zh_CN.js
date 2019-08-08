@@ -58,6 +58,6 @@ Lang.prototype.pack.zh = {
 		"Duration:": "耗时：",
 		"Status:": "结果：",
 		"Total": "共",
-		"© 1997 - 2019 NetEase, Inc. All Rights Reserved.": "© 1997 - 2019s 网易公司版权所有"
+		"© 1997 - 2019 NetEase, Inc. All Rights Reserved.": "© 1997 - 2019 网易公司版权所有"
 	}
 };
