@@ -200,9 +200,18 @@ body{
 }
 .steps-content {
   background: rgb(18,28,52);
-}
-.step-left, .step-right {
-  display: inline-block;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -moz-box;
+  display: -moz-flex;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+  -moz-box-align: stretch;
+  -moz-align-items: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
 }
 .step-left{
   min-width: 320px;

@@ -5,7 +5,7 @@ function StepPannel(data, root){
   this.static = data.static_root
   this.currentStep = -1
   this.currentWrong = -1
-  this.pagesize = 10
+  this.pagesize = 20
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
   this.stepRight = $('#step-right')
