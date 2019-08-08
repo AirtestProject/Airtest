@@ -94,8 +94,6 @@ class LogToHtml(object):
             if not self.run_start:
                 self.run_start = log["time"]
             self.run_end = log["time"]
-            if log['data']['name'] == 'record_ui':
-                a = 1
 
             if depth == 0:
                 # single log line, not in stack
@@ -151,9 +149,6 @@ class LogToHtml(object):
             "vector": [],
             "confidence": None,
         }
-
-        if step["data"]["name"] == "record_ui":
-            a=1
 
         for item in step["__children__"]:
             if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
@@ -413,7 +408,6 @@ def get_parger(ap):
 
 def main(args):
     # script filepath
-    print(args)
     path, name = script_dir_name(args.script)
     record_list = args.record or []
     log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
@@ -425,7 +419,7 @@ def main(args):
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
-    html = rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
+    rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
 if __name__ == "__main__":
