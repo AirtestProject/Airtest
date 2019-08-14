@@ -1,3 +1,11 @@
+/*
+ * @Description: 
+ * @Author: Era Chen
+ * @Email: chenjiyun@corp.netease.com
+ * @Date: 2019-08-08 17:41:44
+ * @LastEditors: Era Chen
+ * @LastEditTime: 2019-08-14 11:11:41
+ */
 function StepPannel(data, root){
   this.data = data
   this.original_steps = data.steps
@@ -30,19 +38,19 @@ function StepPannel(data, root){
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
-      that.refreshSteps()
+      that.filterSteps(this)
     })
     $('.filter#success').click(function(){
       that.steps = that.filterSuccessSteps()
-      that.refreshSteps()
+      that.filterSteps(this)
     })
     $('.filter#fail').click(function(){
       that.steps = that.filterFailSteps()
-      that.refreshSteps()
+      that.filterSteps(this)
     })
     $('.filter#assert').click(function(){
       that.steps = that.filterAssertSteps()
-      that.refreshSteps()
+      that.filterSteps(this)
     })
     $('#jump-wrong').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -107,7 +115,9 @@ function StepPannel(data, root){
     }
   }
 
-  this.refreshSteps = function(){
+  this.filterSteps = function(dom){
+    $('.steps .filter').removeClass('active')
+    $(dom).addClass('active')
     this.currentPage = 1
     this.setSteps()
   }

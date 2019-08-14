@@ -2,7 +2,7 @@
 body{
   margin: 0;
   padding: 0;
-  background: rgb(18, 24, 42);
+  background: linear-gradient(#0A0011, #0C0B1F, #101628, #151D2F, #11182A, #150D21, #0A0011);
   color: rgb(237,237,237);
   font-size: 14px;
 }
@@ -101,30 +101,18 @@ body{
 }
 .summary .airdesc .show-more{
   content: '';
-  height: 30px;
-  width: 30px;
+  height: 25px;
+  width: 25px;
   display: block;
   background: url(../image/less.svg) no-repeat;
   background-size: contain;
   margin-left: 50px;
   opacity: 0.5;
   position: absolute;
-  animation: down 1s ease-in-out;
-  -moz-animation: down 1s ease-in-out;	/* Firefox */
-  -webkit-animation: down 1s ease-in-out;	/* Safari 和 Chrome */
-  -o-animation: down 1s ease-in-out;	/* Opera */
-  animation-iteration-count: infinite;
-  -moz-animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  -o-animation-iteration-count: infinite;
 }
 .summary .airdesc.collapse .show-more{
-  background: url(../image/more.svg) no-repeat;
-  background-size: contain;
-}
-
-.summary .airdesc.collapse .show-more{
-  display: block
+  display: block;
+  transform: rotate(180deg);
 }
 .summary .airdesc {
   padding-bottom: 30px;
@@ -186,17 +174,22 @@ body{
   margin-left: 10px;
 }
 .head-right .filter{
-  border: solid 1px rgb(42,60,80);
-  border-radius: 3px;
-  padding: 0 10px;
   margin: 0 3px;
-  background: rgb(42,60,80);
-  cursor: context-menu;
 }
 .head-right .jump-wrong {
   margin-right: 40px;
-  color: yellow;
+}
+.head-right .jump-wrong, .head-right .filter{
+  border-radius: 3px;
+  padding: 0 10px;
+  background: #1F3057;
   cursor: context-menu;
+}
+.head-right .jump-wrong:hover, .head-right .filter:hover{
+  background: #283D6F
+}
+.head-right .filter.active{
+  background: #111B32
 }
 .steps-content {
   background: rgb(18,28,52);
@@ -221,7 +214,7 @@ body{
 }
 .step-right{
   border-left: dashed 1px rgb(102,102,102);
-  padding: 10px 0 0 20px;
+  padding: 30px 0px 0 60px;
   margin-left: 30px;
   vertical-align: top;
   min-height: 500px;
@@ -258,7 +251,7 @@ body{
   margin-bottom: 15px;
 }
 .step-right .step-status{
-  margin-right: 10px;
+  margin-right: 20px;
   border-radius: 5px;
   font-size: 18px;
   font-weight: bolder;
@@ -428,34 +421,44 @@ body{
 }
 
 .footer {
-  background: black;
   height: 120px;
-  padding: 25px 100px 0 100px;
   color: #999;
+  min-width: 1160px;
+  border-top: solid 1px #172036;
+}
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 0;
+}
+.foo {
+  min-width: 300px;
+  width: 20%;
+}
+.foo:last-child {
+  min-width: 455px;
+  font-size: 14px;
 }
 .footer a{
   text-decoration: none;
   display: block;
   color: inherit;
 }
-.footer .foo {
-  display: inline-block;
-  width: 48%;
-}
 .footer .foo >div {
   display: inline-block;
   vertical-align: middle;
 }
-.interfaces {
-  width: 150px;
-  padding-left: 250px;
+.footer .interfaces .icon:first-child{
+  border: none;
 }
 .footer .interfaces .icon{
   margin: 15px 0;
+  display: inline-block;
+  padding: 0 16px;
+  border-left: solid 1px #666666;
 }
-.footer .interfaces img{
-  max-width: 20px;
-  max-height: 20px;
+.footer .icon img{
   vertical-align: middle;
 }
 .footer .apps .icon {
@@ -463,15 +466,10 @@ body{
   line-height: 40px;
   margin-right: 30px;
 }
-.footer .apps img{
-  max-width: 40px;
-  max-height: 40px;
-  vertical-align: middle;
-  margin-right: 10px;
-}
 .footer .corp img{
-  width: 150px;
-  vertical-align: middle
+  width: 105px;
+  vertical-align: middle;
+  margin-right: 20px;
 }
 
 
