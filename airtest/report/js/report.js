@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-14 11:11:41
+ * @LastEditTime: 2019-08-15 19:38:44
  */
 function StepPannel(data, root){
   this.data = data
@@ -562,7 +562,7 @@ $(function(){
   var descHeight = 100;
   descWrap = $('.summary .airdesc')
   if($('.summary .desc-content').height()>descHeight) {
-    toggleCollapse(descWrap)
+    descWrap.addClass('long collapse')
     $(".summary .show-more").click(function(){
       toggleCollapse(descWrap)
     })

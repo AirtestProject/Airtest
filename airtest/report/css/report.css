@@ -99,7 +99,7 @@ body{
 .summary .info-execute .info-name{
   line-height: 18px;
 }
-.summary .airdesc .show-more{
+.summary .airdesc.long .show-more{
   content: '';
   height: 25px;
   width: 25px;
