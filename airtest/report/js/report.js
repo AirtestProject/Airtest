@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-15 19:38:44
+ * @LastEditTime: 2019-08-15 21:25:08
  */
 function StepPannel(data, root){
   this.data = data
@@ -529,7 +529,43 @@ function toggleCollapse(dom){
   }
 }
 
+function urlArgs(){
+  var args = {};
+  var query = location.search.substring(1);
+  var pairs = query.split("&");
+  for(var i = 0;i < pairs.length; i++){
+      var pos = pairs[i].indexOf("=");
+      if(pos == -1) continue;
+      var name = pairs[i].substring(0, pos);
+      var value = pairs[i].substring(pos + 1);
+      value = decodeURIComponent(value);
+      args[name] = value;
+  }
+  return args;
+}
 
+
+var formatStr = function(str) {
+  return (str.charAt(0).toUpperCase()+str.slice(1)).replace(/_/g, ' ') + ':'
+};
+
+function loadDeviceInfo(){
+  // 根据search信息，在summary下面插入设备信息，仅限多机运行的时候使用
+  args = urlArgs()
+  if(args.type) {
+    var container = $('#device')
+    container.addClass('show')
+    var keys = ["device", "connect", "accomplished", "rate", "succeed", 'failed', "no_of_device", "no_of_script", "type"]
+    args.rate = (args.succeed / args.accomplished * 100).toFixed(2) + '%'
+    args.failed = args.accomplished - args.succeed
+    args['no_of_device'] = args.device_no
+    args['no_of_script'] = args.script_no
+    var fragment  = keys.map(function(k){
+      return '<div class="info %s"><span lang="en">%s</span>%s</div>'.format(k, formatStr(k), args[k])
+    })
+    container.html(fragment)
+  }
+}
 function init_page(){
   $('.summary .info-sub.start').html(getDate(data.run_start))
   $('.summary .info-sub.time').html(getTime(data.run_start) + '-' + getTime(data.run_end))
@@ -567,4 +603,7 @@ $(function(){
       toggleCollapse(descWrap)
     })
   }
+
+  // 加载设备信息，如果有的话
+  loadDeviceInfo()
 })

@@ -136,6 +136,27 @@ body{
   background: rgb(18,28,52)
 }
 
+#device{
+  display: none;
+  flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  padding: 40px 0 30px 80px;
+  background: #121c34;
+  margin-bottom: 49px;
+
+}
+#device.show{
+  display: -ms-flexbox;
+  display: flex;
+}
+#device .info{
+  width: 50%;
+  line-height: 30px;
+}
+#device .info span:first-child{
+  margin-right: 10px;
+}
+
 
 
 .steps-head {
@@ -471,7 +492,6 @@ body{
   vertical-align: middle;
   margin-right: 20px;
 }
-
 
 
 
