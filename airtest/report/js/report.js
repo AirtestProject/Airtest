@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-15 21:25:08
+ * @LastEditTime: 2019-08-19 10:09:48
  */
 function StepPannel(data, root){
   this.data = data
@@ -135,10 +135,10 @@ function StepPannel(data, root){
   this.initStepData = function(){
     for(var i = 0; i< this.steps.length; i++){
       step = this.steps[i]
-      if(i == this.steps.length-1){
-        step.duration = this.data.run_end - step.time
+      if(i == 0){
+        step.duration = step.time - this.data.run_start
       } else{
-        step.duration = this.steps[i+1].time - step.time
+        step.duration = step.time - this.steps[i-1].time
       }
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
