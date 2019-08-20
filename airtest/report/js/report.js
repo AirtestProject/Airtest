@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-19 10:09:48
+ * @LastEditTime: 2019-08-20 17:51:21
  */
 function StepPannel(data, root){
   this.data = data
@@ -124,12 +124,14 @@ function StepPannel(data, root){
 
   this.setSteps = function(){
     // 重设步骤页面内容
-    this.setStepsLeft()
-    this.setPagenation()
-    this.setStepRight(this.steps[0].index)
-    this.paging.render({
-      'count': this.steps.length
-    })
+    if(this.steps.length>0){
+      this.setStepsLeft()
+      this.setPagenation()
+      this.setStepRight(this.steps[0].index)
+      this.paging.render({
+        'count': this.steps.length
+      })
+    }
   }
 
   this.initStepData = function(){
@@ -563,6 +565,8 @@ function loadDeviceInfo(){
     var fragment  = keys.map(function(k){
       return '<div class="info %s"><span lang="en">%s</span>%s</div>'.format(k, formatStr(k), args[k])
     })
+    back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
+    $('#back_multi').html(back)
     container.html(fragment)
   }
 }

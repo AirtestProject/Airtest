@@ -41,11 +41,11 @@
       <div class="row">
         
         <div id="main" class="main col-md-12">
-
-          {% if not steps %}
-          <h2 lang="en">I am sorry, this log file is empty! </h2>
-          {% endif %}
+          <div id="back_multi"></div>
           <h1 class="title">Airtest Report {{info.title}}</h1>
+          {% if not steps %}
+          <h2 lang="en" class="empty-report">I am sorry, this log file is empty! </h2>
+          {% endif %}
           <div class="summary" >
 
             <div class="show-{{'vertical' if info.desc else 'horizontal'}}">
@@ -157,6 +157,39 @@
             {% endif %}
             </div>
         </div>
+        
+      {% block footer %}
+      <div class="footer">
+        <div class="footer-content">
+          <div class="foo">
+            <div class="interfaces">
+              <a class="icon" href="https://github.com/AirtestProject/Airtest"  target="_blank">
+                <img src="{{static_root}}image/Airtest.png" alt="airtest">
+              </a>
+              <a class="icon" href="https://github.com/AirtestProject/poco"  target="_blank">
+                <img src="{{static_root}}image/poco.png" alt="Poco">
+              </a>
+            </div>
+          </div>
+          <div class="foo">
+            <div class="apps">
+              <a class="icon ide" href="http://airtest.netease.com/"  target="_blank">
+                <img src="{{static_root}}image/AirtestIDE.png" alt="AirtestIDE">
+              </a>
+              <a class="icon" href="https://airlab.163.com/"  target="_blank">
+                <img src="{{static_root}}image/AirLab.png" alt="AirLab">
+              </a>
+            </div>
+          </div>
+          <div class="foo">
+            <div class="corp">
+                <img src="{{static_root}}image/netease.png" alt="NetEase">
+                <span lang="en">© 1997 - 2019 NetEase, Inc. All Rights Reserved.</span>
+            </div>
+          </div>
+        </div>
+      </div> 
+      {% endblock %}
       </div>
       <!-- 录屏 -->
       <div class="row gif-wrap">
@@ -173,39 +206,6 @@
           </div>
         </div>
     </div>
-
-    {% block footer %}
-    <div class="footer">
-      <div class="footer-content">
-        <div class="foo">
-          <div class="interfaces">
-            <a class="icon" href="https://github.com/AirtestProject/Airtest"  target="_blank">
-              <img src="{{static_root}}image/Airtest.png" alt="airtest">
-            </a>
-            <a class="icon" href="https://github.com/AirtestProject/poco"  target="_blank">
-              <img src="{{static_root}}image/poco.png" alt="Poco">
-            </a>
-          </div>
-        </div>
-        <div class="foo">
-          <div class="apps">
-            <a class="icon ide" href="http://airtest.netease.com/"  target="_blank">
-              <img src="{{static_root}}image/AirtestIDE.png" alt="AirtestIDE">
-            </a>
-            <a class="icon" href="https://airlab.163.com/"  target="_blank">
-              <img src="{{static_root}}image/AirLab.png" alt="AirLab">
-            </a>
-          </div>
-        </div>
-        <div class="foo">
-          <div class="corp">
-              <img src="{{static_root}}image/netease.png" alt="NetEase">
-              <span lang="en">© 1997 - 2019 NetEase, Inc. All Rights Reserved.</span>
-          </div>
-        </div>
-      </div>
-    </div> 
-    {% endblock %}
   
   
   <!-- <script src="{{static_root}}js/bootstrap.min.js"></script> -->

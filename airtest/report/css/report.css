@@ -1,23 +1,56 @@
 @charset "utf-8";
-body{
-  margin: 0;
+* {
   padding: 0;
+  margin: 0;
+}
+html{
+  height: 100%;
+}
+body{
   background: linear-gradient(#0A0011, #0C0B1F, #101628, #151D2F, #11182A, #150D21, #0A0011);
   color: rgb(237,237,237);
   font-size: 14px;
+  height: 100%;
+  position: relative;
 }
 
 .container-fluid{
   margin: auto;
   padding-right: 100px;
   padding-left: 100px;
-  margin-bottom: 100px;
+  margin-bottom: 220px;
   min-width: 960px;
+  min-height: calc(100% - 222px);
+  position: relative;
+}
+#back_multi .back {
+  position: fixed;
+  left: 20px;
+  top: 50px;
+  width: 50px;
+  height: 50px;
+  display: block;
+  border: solid 1px #2f4682;
+  border-radius: 40px;
+}
+#back_multi .back:hover {
+  background: #223159;
+}
+#back_multi .back img {
+  width: 25px;
+  margin-top: 12px;
+  margin-left: 12px;
+}
+h2.empty-report{
+  text-align: center;
+  margin-bottom: 60px;
+  margin-top: -36px;
 }
 .title{
   font-size: 32px;
   text-align: center;
-  margin-bottom: 100px;
+  padding-bottom: 100px;
+  padding-top: 50px;
 }
 .info-title{
   font-size: 20px;
@@ -318,6 +351,7 @@ body{
   margin: auto;
   position: relative;
   max-width: 100%;
+  margin-top: 15px;
 }
 .step-right .step-args .fluid {
   display: inline-block;
@@ -446,6 +480,10 @@ body{
   color: #999;
   min-width: 1160px;
   border-top: solid 1px #172036;
+  position: absolute;
+  width: 100%;
+  bottom: -219px;
+  left: 0;
 }
 .footer-content {
   display: flex;
