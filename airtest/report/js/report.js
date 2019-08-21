@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-20 17:51:21
+ * @LastEditTime: 2019-08-21 16:12:56
  */
 function StepPannel(data, root){
   this.data = data
@@ -607,6 +607,22 @@ $(function(){
       toggleCollapse(descWrap)
     })
   }
+
+  // 复制脚本地址到粘贴版
+  $('#copy_path').click(function(){
+    const input = document.createElement('input')
+    input.setAttribute('readonly', 'readonly');
+    input.setAttribute('value', this.getAttribute('path'));
+    document.body.appendChild(input);
+    if (document.execCommand('copy')) {
+      input.select();
+      document.execCommand('copy');
+      console.log('复制成功');
+    } else{
+      alert('Copy is not supported by the current browser, please change to chrome')
+    }
+    document.body.removeChild(input);
+  })
 
   // 加载设备信息，如果有的话
   loadDeviceInfo()

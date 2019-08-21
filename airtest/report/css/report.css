@@ -120,6 +120,15 @@ h2.empty-report{
 .summary .info-execute{
   line-height: 18px;
   margin: 20px 0;
+  cursor: context-menu;
+  position: relative;
+}
+.summary .info-execute #copy_path{
+  display: inline-block;
+  margin-left: 10px;
+  width: 20px;
+  vertical-align: bottom;
+  cursor: context-menu;
 }
 .summary .circle-img{
   background: rgb(216,216,216);

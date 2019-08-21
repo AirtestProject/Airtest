@@ -9,14 +9,24 @@ import json
 from io import open
 
 
-def get_script_info(script_path):
+def get_script_info(path):
     """extract info from script, like basename, __author__, __title__ and __desc__."""
-    script_name = os.path.basename(script_path)
-    if script_path.endswith(".py"):
-        pyfilepath = script_path
+    name = os.path.splitext(os.path.basename(path))[0]
+    name_air = name + '.air'
+    name_py = name + '.py'
+    if path.endswith(".py"):
+        parent_name = os.path.basename(os.path.dirname(path))
+        pyfilepath = path
+        if parent_name == name_air:
+            script_name = name_air
+            script_path = os.path.dirname(path)
+        else:
+            script_name = name_py
+            script_path = path
     else:
-        pyfilename = script_name.replace(".air", ".py")
-        pyfilepath = os.path.join(script_path, pyfilename)
+        script_name = name_air
+        script_path = path
+        pyfilepath = os.path.join(path, name_py)
 
     if not os.path.exists(pyfilepath) and six.PY2:
         pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
@@ -25,7 +35,7 @@ def get_script_info(script_path):
 
     author, title, desc = get_author_title_desc(pyfilecontent)
 
-    result_json = {"name": script_name, "author": author, "title": title, "desc": desc}
+    result_json = {"name": script_name, "path": script_path, "author": author, "title": title, "desc": desc}
     return json.dumps(result_json)
 
 

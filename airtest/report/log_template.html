@@ -93,7 +93,9 @@
                     </div>
                     <div class="info-execute">
                       <div class="circle-img"></div>
-                      <div class="info-file">{{info.name}}</div>
+                      <div class="info-file" title="{{info.path}}">{{info.name}}
+                        <img id="copy_path" path="{{info.path}}" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" />
+                      </div>
                     </div>
                   </div>
                 </div>
