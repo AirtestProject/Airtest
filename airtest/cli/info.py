@@ -11,6 +11,7 @@ from io import open
 
 def get_script_info(script_path):
     """extract info from script, like basename, __author__, __title__ and __desc__."""
+    script_path = os.path.normpath(script_path)
     script_name = os.path.basename(script_path)
     if script_path.endswith(".py"):
         pyfilepath = script_path
