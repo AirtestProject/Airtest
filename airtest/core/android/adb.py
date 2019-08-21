@@ -1017,7 +1017,7 @@ class ADB(object):
             AirtestError: if top activity cannot be obtained
 
         Returns:
-            top activity as a tuple
+            top activity as a tuple: (package_name, activity_name, pid)
 
         """
         dat = self.shell('dumpsys activity top')
@@ -1028,24 +1028,6 @@ class ADB(object):
             return m[-1]
         else:
             raise AirtestError("Can not get top activity, output:%s" % dat)
-
-    def get_current_app(self):
-        """
-        Perform `adb shell dumpsys window windows` command. Search for "mCurrentFocus" to get the currently running app package name
-
-        Raises:
-            AirtestError: if package name cannot be obtained
-
-        Returns:
-            package: name of the package to refresh render resolution, e.g. "com.netease.my"
-
-        """
-        dat = self.shell("dumpsys window windows")
-        package = self._search_for_current_package(dat)
-        if package:
-            return package
-        else:
-            raise AirtestError("Can not get the currently running app package name, output:%s" % dat)
 
     def is_keyboard_shown(self):
         """
