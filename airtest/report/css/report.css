@@ -426,7 +426,8 @@ h2.empty-report{
   border-left: 20px solid red;
 }
 .step-right pre.trace {
-  white-space: pre-wrap
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 #pageTool {
   margin-top: 50px;
