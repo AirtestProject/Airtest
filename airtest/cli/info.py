@@ -11,6 +11,7 @@ from io import open
 
 def get_script_info(path):
     """extract info from script, like basename, __author__, __title__ and __desc__."""
+    path = os.path.normpath(path)
     name = os.path.splitext(os.path.basename(path))[0]
     name_air = name + '.air'
     name_py = name + '.py'
