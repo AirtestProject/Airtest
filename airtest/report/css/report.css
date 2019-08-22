@@ -177,6 +177,9 @@ h2.empty-report{
 .gallery .content, .step-list .content{
   background: rgb(18,28,52)
 }
+.step-list .no-steps{
+  text-align: center;
+}
 
 #device{
   display: none;
@@ -461,8 +464,8 @@ h2.empty-report{
   color: rgb(74,144,226);
   font-size: 12px;
   position: absolute;
-  top: 15px;
-  right: -22px;
+  top: 4px;
+  right: -14px;
 }
 #pageTool .ui-paging-container{
   position: absolute;

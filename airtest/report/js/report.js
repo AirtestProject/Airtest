@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-22 11:13:16
+ * @LastEditTime: 2019-08-22 21:41:11
  */
 function StepPannel(data, root){
   this.data = data
@@ -58,9 +58,7 @@ function StepPannel(data, root){
       if(that.currentWrong>=0){
         that.currentStep = that.currentWrong
         that.currentPage = Math.ceil(that.currentStep / that.pagesize)
-        that.setStepsLeft()
-        that.setPagenation()
-        that.setStepRight(that.currentStep)
+        that.setSteps(that.currentStep)
       }
     })
     $('.order#order').click(function(){
@@ -125,16 +123,11 @@ function StepPannel(data, root){
     this.setSteps()
   }
 
-  this.setSteps = function(){
+  this.setSteps = function(step){
     // 重设步骤页面内容
-    if(this.steps.length>0){
-      this.setStepsLeft()
-      this.setPagenation()
-      this.setStepRight(this.steps[0].index)
-      this.paging.render({
-        'count': this.steps.length
-      })
-    }
+    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    this.setPagenation()
+    this.setStepRight(step)
   }
 
   this.initStepData = function(){
@@ -151,7 +144,7 @@ function StepPannel(data, root){
   }
 
   this.setStepsLeft = function(){
-    html = ''
+    html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
     start = (this.currentPage-1)* this.pagesize
     end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
@@ -441,6 +434,7 @@ function StepPannel(data, root){
         that.setStepsLeft()
       },
       callback:function(p){
+        console.log('go....', p)
         that.currentPage = parseInt(p)
         that.setStepsLeft()
       }
@@ -453,6 +447,9 @@ function StepPannel(data, root){
       $('#pageTool').show()
     else
       $('#pageTool').hide()
+    this.paging.render({
+      'count': this.steps.length
+    })
     $('#pageTool .steps-account').html(this.steps.length)
     this.paging.go(this.currentPage)
   }
