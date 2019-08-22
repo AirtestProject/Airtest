@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-21 16:12:56
+ * @LastEditTime: 2019-08-22 11:13:16
  */
 function StepPannel(data, root){
   this.data = data
@@ -66,16 +66,19 @@ function StepPannel(data, root){
     $('.order#order').click(function(){
       that.order = that.order == 'acc' ? 'dec' : 'acc'
       that.steps.sort(that.sortSteps('index', that.order == 'acc'))
+      that.currentPage = 1
       that.setSteps()
     })
     $('.order#duration').click(function(){
       that.steps.sort(that.sortSteps('duration', that.duration == 'acc'))
       that.duration = that.duration == 'acc' ? 'dec' : 'acc'
+      that.currentPage = 1
       that.setSteps()
     })
     $('.order#status').click(function(){
       that.steps.sort(that.sortSteps('status', that.status == 'acc'))
       that.status = that.status == 'acc' ? 'dec' : 'acc'
+      that.currentPage = 1
       that.setSteps()
     })
   }
