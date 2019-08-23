@@ -51,15 +51,11 @@
             <div class="show-{{'vertical' if info.desc else 'horizontal'}}">
               <div class="info info1">
                 <div class="info-left">
-                  <img src="{{static_root}}image/{{'success' if test_result else 'fail'}}.svg" alt="{{'success' if test_result else 'fail'}}.svg">
+                  <img id='result-img' />
                 </div>
                 <div class="info-right">
                   <div class="info-title"><span lang='en'>Airtest Report</span>
-                    {% if test_result %}
-                    <label class="green" lang="en">[Passed]</label>
-                    {% else %}
-                    <label class="red" lang="en">[Failed]</label>
-                    {% endif %}
+                    <label id='result-desc' lang="en"></label>
                   </div>
                   <div class="info-content">
                     <div class='info-sub start'></div>

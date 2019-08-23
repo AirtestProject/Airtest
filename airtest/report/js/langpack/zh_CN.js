@@ -10,6 +10,7 @@ Lang.prototype.pack.zh = {
 		"Cases": "测试报告",
 		"[Passed]": "[运行成功]",
 		"[Failed]": "[运行失败]",
+		'[Terminated]': "[任务超时]",
 		"Executors": "执行者",
 		"Author:": "作者：",
 		"Author: Anonymous": "作者：佚名",

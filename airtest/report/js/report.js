@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-22 21:41:11
+ * @LastEditTime: 2019-08-23 20:46:44
  */
 function StepPannel(data, root){
   this.data = data
@@ -146,6 +146,7 @@ function StepPannel(data, root){
   this.setStepsLeft = function(){
     html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
     start = (this.currentPage-1)* this.pagesize
+    start = start < 0 ? 0 : start
     end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
     for(var i = start; i< end; i++){
@@ -161,7 +162,7 @@ function StepPannel(data, root){
   }
   this.setStepRight = function(index){
     index = parseInt(index)
-    if(!isNaN(index) && index>= 0 && index<=this.original_steps.length){
+    if(!isNaN(index) && index>= 0 && index<this.original_steps.length){
       this.setStepRightHtml(index)
       this.initStepRight()
     }
@@ -434,7 +435,6 @@ function StepPannel(data, root){
         that.setStepsLeft()
       },
       callback:function(p){
-        console.log('go....', p)
         that.currentPage = parseInt(p)
         that.setStepsLeft()
       }
@@ -551,9 +551,10 @@ var formatStr = function(str) {
   return (str.charAt(0).toUpperCase()+str.slice(1)).replace(/_/g, ' ') + ':'
 };
 
-function loadDeviceInfo(){
+function loadUrlInfo(){
   // 根据search信息，在summary下面插入设备信息，仅限多机运行的时候使用
   args = urlArgs()
+  result = data.test_result ? 'Passed' : 'Failed'
   if(args.type) {
     var container = $('#device')
     container.addClass('show')
@@ -568,8 +569,19 @@ function loadDeviceInfo(){
     back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
+    result = args.status == 'terminated' ? 'Terminated' : result
   }
+  set_task_status(result)
 }
+
+function set_task_status(result){
+  src = "%simage/%s.svg".format(data.static_root, result=='Passed' ? 'success' : 'fail')
+  $('.summary #result-img').attr('src', src)
+  $('.summary #result-img').attr('alt', result)
+  $('.summary #result-desc').addClass(result=='Passed' ? 'green' : 'red')
+  $('.summary #result-desc').html("[%s]".format(result))
+}
+
 function init_page(){
   $('.summary .info-sub.start').html(getDate(data.run_start))
   $('.summary .info-sub.time').html(getTime(data.run_start) + '-' + getTime(data.run_end))
@@ -624,6 +636,6 @@ $(function(){
     document.body.removeChild(input);
   })
 
-  // 加载设备信息，如果有的话
-  loadDeviceInfo()
+  // 从地址search部分加载设备信息等
+  loadUrlInfo()
 })
