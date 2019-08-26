@@ -165,6 +165,8 @@ h2.empty-report{
   overflow-y: hidden;
   line-height: 24px;
   font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .summary .airdesc.collapse .desc-content{
   height: 160px;
