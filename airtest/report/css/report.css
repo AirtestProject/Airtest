@@ -365,11 +365,11 @@ h2.empty-report{
   margin: auto;
   position: relative;
   max-width: 100%;
-  margin-top: 15px;
 }
 .step-right .step-args .fluid {
   display: inline-block;
   vertical-align: top;
+  margin-bottom: 20px;
 }
 .fluid.infos{
   min-width: 300px;
