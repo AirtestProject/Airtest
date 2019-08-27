@@ -92,8 +92,7 @@ class LogToHtml(object):
             depth = log['depth']
 
             if not self.run_start:
-                self.run_start = log.get('data', {}).get('start_time', '')
-                self.run_start = self.run_start or log["time"]
+                self.run_start = log.get('data', {}).get('start_time', '') or log["time"]
             self.run_end = log["time"]
 
             if depth == 0:
