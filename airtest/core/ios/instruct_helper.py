@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import subprocess
-import traceback
 import time
 import sys
 import random
