@@ -4,9 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
-    <title lang="en">
-    {{name}} test report
-    </title>
+    <title>Airtest Report {{info.title}}</title>
     
     <!--[if lt IE 9]>
     <script src="https://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
@@ -14,12 +12,12 @@
     <![endif]-->
     
 
-    <link href="{{static_root}}css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{static_root}}css/main.css" rel="stylesheet">
+    <!-- <link href="{{static_root}}css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link href="{{static_root}}css/main.css" rel="stylesheet"> -->
 
     <link href="{{static_root}}css/report.css" rel="stylesheet">
-    <link href="{{static_root}}css/jquery.fancybox.css" rel="stylesheet">
-    <link href="{{static_root}}css/animate.css" rel="stylesheet">
+    <!-- <link href="{{static_root}}css/jquery.fancybox.css" rel="stylesheet"> -->
+    <!-- <link href="{{static_root}}css/animate.css" rel="stylesheet"> -->
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
     <!--<script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>-->
@@ -28,287 +26,171 @@
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
     <script type="text/javascript">
-        var lang = new Lang();
-        lang.init({
-            defaultLang: 'en',
-            currentLang: '{{ lang }}'
-        });
+      data = {{data|safe}}
+      lang = new Lang();
+      lang.init({
+        defaultLang: 'en',
+        currentLang: '{{ lang }}'
+      });
     </script>
-    <style>
-    h2.header {
-        background-color: #3498db;
-        color: white;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    h2.danger {
-        background-color: #d43f3a;
-        color: white;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-
-    h2 {
-      font-size: 25px;
-    }
-
-    body {
-      overflow-x: hidden;
-    }
-
-    div.screen_holder {
-      /*position: relative;*/
-      position: absolute;
-      margin-top: 10px;
-    }
-
-    div.screen_holder img {
-      /*max-height: 600px;*/
-      min-width:20px;
-      min-height:20px;
-    }
-
-    img.crop_image {
-      display: block;
-    }
-
-    img.spot {
-      position: absolute;
-      width:50px;
-      height:50px;
-      margin-left: -25px;
-      margin-top: -25px;
-    }
-
-    div.arrow {
-      display: flex;
-      align-items: center;
-      left: 100px;
-      top: 100px;
-      position: absolute;
-      width: 120px;
-      margin-top: -15px;
-      margin-left: -6px;
-    }
-
-    div.start {
-      width: 12px;
-      height: 12px;
-      border-radius: 6px;
-      background-color: red;
-    }
-
-    div.line {
-        /* width:500px; */
-      flex: 1;
-      background:red;
-      height:10px;
-    }
-
-    div.end {
-      width: 0;
-	  height: 0;
-	  border-top: 15px solid transparent;
-	  border-bottom: 15px solid transparent;
-	  border-left: 20px solid red;
-    }
-
-    img.vector {
-    }
-
-    img#gif{
-      max-width: 100%;
-      min-height: 50px;
-      max-height: 380px;
-    }
-    
-    div.rect {
-      position: absolute;
-      border:2px solid red;
-      border-radius: 5px;
-      z-index: 99;
-    }
-
-    p.desc {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .moa label {
-      font-size: 16px;
-    }
-
-    .moa .point {
-      font-size: 20px;
-      padding: 10px;
-      display: inline-block;
-    }
-
-    pre {
-      background-color: #23241f;
-    }
-
-    img.error-img {
-      max-width: 70px !important;
-    }
-
-    .ztree span.glyphicon {
-      color: red;
-    }
-
-    .scale {
-      transform-origin:top left;
-    }
-
-    #main {
-      padding-top: 10px;
-      min-height: 600px;
-    }
-
-    .fast-nav-step {
-      position: fixed;
-      right: 30px;
-      bottom: 10px;
-      z-index: 10;
-      padding: 10px 20px;
-      margin-left: 30px;
-      background: rgba(222,222,222,0.8);
-    }
-
-    .fast-nav-step label {
-      display: block;
-      border-bottom: 1px solid #7f8c8d;
-      padding-bottom: 6px;
-      margin-bottom: 12px;
-      color: #34495e;
-    }
-
-    .a-circle {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 25px;
-
-      padding-top: 4px;
-
-      text-align: center;
-      color: white; 
-      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-    }
-    
-    .fast-nav-step .a-circle:hover {
-      opacity: 0.9;
-      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);    
-    }
-
-    #nav_steps {
-      max-height: 600px;
-      transition: max-height 0.25s ease-in;
-    }
-
-    #nav_steps.collapsed {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.15s ease-out;
-    }
-
-    div.assert {
-      padding-left: 20px;
-    }
-    .gif-wrap {
-        max-height: 400px;
-        text-align: center;
-    }
-    /* 展开与收缩 */
-    .airdesc-wrap{
-        line-height: 1.8;
-        margin-top: 0px;
-        width: 100%;
-    }
-    .airdesc-wrap .airdesc{
-        padding: 0 20px;
-        overflow: hidden;
-    }
-
-    .airdesc-wrap .glyphicon {
-        width: 100%;
-        font-size: 20px;
-        text-align: center;
-        cursor: pointer;
-    }
-
-    </style>
   </head>
 
   <body>
 
-    <div class="container-fluid" style="max-width:1400px;">
+    <div class="container-fluid">
       <div class="row">
+        
         <div id="main" class="main col-md-12">
-
+          <div id="back_multi"></div>
+          <h1 class="title">Airtest Report {{info.title}}</h1>
           {% if not steps %}
-          <h2 lang="en">I am sorry, this log file is empty! </h2>
+          <h2 lang="en" class="empty-report">I am sorry, this log file is empty! </h2>
           {% endif %}
+          <div class="summary" >
 
-          <div class="material moa" >
-              <h2><span lang="en">Test Case</span> {{info.name}}
-              {% if test_result %}
-              <label class="green" lang="en">[Passed]</label>
-              {% else %}
-              <label class="red" lang="en">[Failed]</label>
-              {% endif %}
-            </h2>
-            {% if info.author %}
-                <h4><span lang="en">Author:</span> {{info.author}}</h4>
-            {% else %}
-            <h4 lang="en">Author: Anonymous</h4>
-            {% endif %}
-            {% if info.title %}
-                <h4><span lang="en">Title:</span> {{info.title}}</h4>
-            {% endif %}
-            {% if info.desc %}
-                <h4 lang="en">Description:</h4>
-                 <div class="airdesc-wrap">
-                    <div class="airdesc">
-                      <div class="desc-content">{{ info.desc| nl2br }}</div>
-                    </div>
-                    <div href="javascript:void(0);" class="glyphicon glyphicon-chevron-down"></div>
+            <div class="show-{{'vertical' if info.desc else 'horizontal'}}">
+              <div class="info info1">
+                <div class="info-left">
+                  <img id='result-img' />
                 </div>
-            {% endif %}
-            <h4><span lang="en">Time:</span>{{run_start | datetime}} -- {{run_end | datetime}}</h4>
+                <div class="info-right">
+                  <div class="info-title"><span lang='en'>Airtest Report</span>
+                    <label id='result-desc' lang="en"></label>
+                  </div>
+                  <div class="info-content">
+                    <div class='info-sub start'></div>
+                    <div class='info-sub time'></div>
+                  </div>
+                  <div class="info-toal">
+                    <div class="info-step">
+                      <span class="info-name" lang="en">Steps: </span>
+                      <span class="info-value">{{steps|length}}</span>
+                    </div>
+                    <div class="info-time">
+                      <span class="info-name" lang="en">Time: </span>
+                      <span class="info-value duration">xxx</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            {% if not test_result %}
-            <h2 class="danger" lang="en">Failure: Failed Steps</h2>
-            <div id="fail_steps">
-              {% for step in steps %}
-                {% if step.traceback %}
-                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
-                {% endif %}
-              {% endfor %}
+              <div class="info info2">
+                <div class="info-left"></div>
+                <div class="info-right">
+                  <div class="info-title"><span lang='en'>Executors</span></div>
+                  <div class="info-content">
+                    <div class="info-execute">
+                      <div class="circle-img"></div>
+                      {% if info.author %}
+                        <div class="info-name"><span lang="en">Author:</span> {{info.author}}</div>
+                      {% else %}
+                        <div class="info-name" lang="en">Author: Anonymous</div>
+                      {% endif %}
+                    </div>
+                    <div class="info-execute">
+                      <div class="circle-img"></div>
+                      <div class="info-file" title="{{info.path}}">{{info.name}}
+                        <img id="copy_path" path="{{info.path}}" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {% if info.desc %}
+            <div class="info info3">
+              <div class="info-title" lang="en">Description:</div>
+              <div class="airdesc-wrap">
+                  <div class="airdesc">
+                    <div class="desc-content">{{ info.desc|safe }}</div>
+                    <div class="show-more"></div>
+                  </div>
+              </div>
             </div>
             {% endif %}
+          </div>
+          <div class="device" id='device'>
+          </div>
 
-            <h2 class="header" lang="en">Assert: Test Steps Summary</h2>
-            <hr>
-            <div class="row">
-            {% for step in steps %}
-              {% if step.assert %}
-                <div class="col-xs-4 assert">
-                    <span lang="en">Test step</span>
-                  {% if step.traceback %}
-                  <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
-                  {% else %}
-                  <a class="a-circle bg-green" href="#main_script_{{loop.index}}">{{loop.index}}</a>
-                  {% endif %}
-                    <span lang="en">Expected result:</span>{{step.assert}}
-                </div>
-              {% endif %}
-            {% endfor %}
+          <div class="gallery">
+            <div class="info-title"><span lang="en">Cases</span></div>
+            <div class="content">
+              <h1>图片展览。。。。。</h1>
             </div>
           </div>
 
-          <!-- 录屏 -->
-          <div class="row gif-wrap">
+          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
+          {{ extra_block|safe }}
+          <!--单步-->
+          {% if steps|length  >0 %}
+          
+          <div class="steps">
+            <div class="content">
+              <div class="steps-head">
+                <div class="head-left">
+                  <div class="order" id='order'><span lang="en">order</span></div>
+                  <div class="order" id='duration'><span lang="en">duration</span></div>
+                  <div class="order" id='status'><span lang="en">status</span></div>
+                </div>
+                <div class="head-right">
+                  <span lang="en" class="jump-wrong" id='jump-wrong'>Jump to wrong step</span>
+                  <span lang="en">Filter by:</span>
+                  <span class="filters">
+                    <span lang="en" class="filter" id="all" alt="show all steps">All</span>
+                    <span lang="en" class="filter" id='success' alt="show success steps only">Success</span>
+                    <span lang="en" class="filter" id='fail' alt="show failed steps only">Failed</span>
+                    <span lang="en" class="filter" id="assert" alt="show steps with assertion only">Assert</span>
+                  </span>
+                </div>
+              </div>
+              <div class="steps-content">
+                <div class="step-left" id='step-left'>
+                  <div class="step-list"></div>
+                  <div id="pageTool"></div>
+                </div>
+                <div class="step-right" id='step-right'></div>
+              </div>
+            </div>
+            {% endif %}
+            </div>
+        </div>
+        
+      {% block footer %}
+      <div class="footer">
+        <div class="footer-content">
+          <div class="foo">
+            <div class="interfaces">
+              <a class="icon" href="https://github.com/AirtestProject/Airtest"  target="_blank">
+                <img src="{{static_root}}image/Airtest.png" alt="airtest">
+              </a>
+              <a class="icon" href="https://github.com/AirtestProject/poco"  target="_blank">
+                <img src="{{static_root}}image/poco.png" alt="Poco">
+              </a>
+            </div>
+          </div>
+          <div class="foo">
+            <div class="apps">
+              <a class="icon ide" href="http://airtest.netease.com/"  target="_blank">
+                <img src="{{static_root}}image/AirtestIDE.png" alt="AirtestIDE">
+              </a>
+              <a class="icon" href="https://airlab.163.com/"  target="_blank">
+                <img src="{{static_root}}image/AirLab.png" alt="AirLab">
+              </a>
+            </div>
+          </div>
+          <div class="foo">
+            <div class="corp">
+                <img src="{{static_root}}image/netease.png" alt="NetEase">
+                <span lang="en">© 1997 - 2019 NetEase, Inc. All Rights Reserved.</span>
+            </div>
+          </div>
+        </div>
+      </div> 
+      {% endblock %}
+      </div>
+      <!-- 录屏 -->
+      <div class="row gif-wrap">
           <div class="col-md-6">
             {% if records %}
               {% for r in records %}
@@ -318,351 +200,19 @@
                     </video>
                 </div>
               {% endfor %}
-            {% else %}
-              <p lang="en">No record information found.</p>
             {% endif %}
           </div>
-          </div>
-          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
-          {{ extra_block|safe }}
-          <!--单步-->
-          {% for step in steps %}
-          <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
-
-            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time | datetime}}]</span></h2>
-            <hr>
-            <div class="step_content">
-              <!--单步操作-->
-
-              <!--代码和参数显示-->
-                {% if step.code.name %}
-                <div class="row">
-                  <div class="col-xs-3">
-                    <div class="point">
-                      <span class="glyphicon glyphicon-play"></span>
-                    </div>
-                      <label><span lang="en">{{step.code.name}}</span></label>
-                  </div>
-                  <div class="col-xs-9">
-                    {% for arg in step.code.args %}
-                      {% if arg.image %}
-                        <img class="crop_image" data-width="{{arg.resolution[0]}}" data-height="{{arg.resolution[1]}}" src="{{arg.image}}" title="{{arg.image}}">
-                        <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
-                        <p class="desc">resolution: {{arg.value.resolution}}</p>
-                      {% else %}
-                        <!-- 其他参数 -->
-                        <p class="desc">{{arg.key}}: {{arg.value}}</p>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                </div>
-                {% endif %}
-
-              <!--运行时的截图-->
-              {% if step.screen.src %}
-                <div class="row">
-                  <div class="col-xs-3">
-                    <div class="point">
-                      <span class="glyphicon glyphicon-play"></span>
-                    </div>
-                      <label><span lang="en">screenshot</span></label>
-                  </div>
-                  <!-- scale移除文档流， 使用js对screen_place赋值高度来占位 -->
-                  <div class="col-xs-9" style="overflow-x:auto; overflow-y:hidden;">
-                    <div class="screen_holder">
-                      <img class="fancybox scale lazyload" data-src="{{step.screen.src}}" url="{{step.screen.src}}" title="{{step.screen.src}}">
-                      {% if step.screen.pos %}
-                        {% for pos in step.screen.pos %}
-                          <img class="spot animated infinite rubberBand" src="{{static_root}}image/target.png" data-top="{{pos[1]}}" data-left="{{pos[0]}}" style="top:{{pos[1]}}px;left:{{pos[0]}}px;">
-                        {% endfor %}
-                      {% endif %}
-
-                      {% if step.screen.vector %}
-                        {% for vector in step.screen.vector %}
-                          {% set pos=step.screen.pos[loop.index-1]%}
-                            <div class="arrow" data-x="{{vector[0]}}" data-y="{{vector[1]}}">
-                              <div class="start"></div>
-                              <div class="line"></div>
-                              <div class="end"></div>
-                            </div>
-                          {% endfor %}
-                      {% endif %}
-
-                      <!-- rect area -->
-                      {% if step.screen.rect %}
-                        {% for rect in step.screen.rect %}
-                          <div class="rect" {% for k,v in rect.items() %} data-{{k}}="{{v}}"{% endfor %}></div>
-                        {% endfor %}
-                      {% endif %}
-                    </div>
-                    <br />
-                    <div class="screen_place"></div>
-                  </div>
-                </div>
-
-                {% if step.screen.confidence %}
-                    <p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Matching confidence:</span> {{step.screen.confidence}}</p>
-                {% endif %}
-              {% endif %}
-
-              <!--描述信息-->
-              {% if step.desc %}
-              <p class="desc"><span class="point glyphicon glyphicon-play"></span>{{step.desc}}</p>
-              {% endif %}
-
-              <!--单步结果-->
-              {% if not step.traceback %}
-              <div class="alert alert-success">
-                <span class="glyphicon glyphicon-ok"></span>
-                  <span lang="en">Execution succeeded</span>
-              </div>
-              {% else %}
-              <div class="alert alert-danger">
-                <span class="glyphicon glyphicon-alert"></span>
-                  <span lang="en">Execution failed</span>
-              </div>
-              <div>
-                <pre><code class="python">{{step.traceback}}</code></pre>
-              </div>
-              {% endif %}
-
-            </div>
-          </div>
-          {% endfor %}
-
-          <!-- 导航栏 -->
-          <div class="fast-nav-step">
-              <label><span lang="en">Steps navigation</span>
-              <button class="btn btn-info btn-sm" id="collapse_nav_step"><i class="glyphicon glyphicon-chevron-down"></i></button>
-              <button class="btn btn-info btn-sm" id="expand_nav_step"><i class="glyphicon glyphicon-chevron-up"></i></button>
-            </label>
-            <div id="nav_steps">
-              {% for step in steps %}
-                {% if step.traceback %}
-                <a class="a-circle bg-red" href="#main_script_{{loop.index}}">{{loop.index}}</a>
-                {% else %}
-                <a class="a-circle bg-green nav_main_script" href="#main_script_{{loop.index}}">{{loop.index}}</a>
-                {% endif %}
-              {% endfor %}
-              <a class="a-circle bg-green" href="#">Top</a>
-            </div>
-          </div>
-
-
         </div>
-      </div>  
     </div>
-
-    {% block footer %}
-    <div class="footer">
-        <span lang="en">Related information</span>
-    </div> 
-    {% endblock %}
   
   
-  <script src="{{static_root}}js/bootstrap.min.js"></script>
+  <!-- <script src="{{static_root}}js/bootstrap.min.js"></script> -->
 
   <!-- hightlight js -->
   <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">  
   <script src="{{static_root}}js/highlight.min.js"></script>  
-  <script >hljs.initHighlightingOnLoad();</script>
-
-  <script>
-  $(function() {
-      iframe = window.frameElement;
-      if (iframe) {
-          window.frameElement.setAttribute("allowfullscreen", "allowfullscreen")
-      }
-    $("#collapse_nav_step").click(function() {
-      $("#nav_steps").addClass('collapsed');
-      $(this).hide();
-      $("#expand_nav_step").show();
-    });
-
-    $("#expand_nav_step").click(function() {
-      $("#nav_steps").removeClass('collapsed');
-      $(this).hide();
-      $("#collapse_nav_step").show();
-    });
-    $("#collapse_nav_step").click();
-    $("#collapse_nav_step").hide(); // init
-  });
-
-  $(function(){
-    var scale = {{scale}};
-    var imgWidth = 0;
-    var imgHeight = 0;
-    var imgPercent = 0.5;
-
-    $("img").error(function () {
-      var orsrc = $(this).attr("src")
-      if(!orsrc){ return }
-      if(orsrc.indexOf("report.gif") > -1){
-        setTimeout(function(){
-          //console.log($(this).attr("src"));
-          $(this).attr("src", 'report.gif?timestamp=' + new Date().getTime());
-          //console.log($(this).attr("src"));
-        }.bind(this), 5000)
-        return
-      }
-
-      $(this).unbind("error")
-      .addClass('error-img')
-      .attr("src", "{{static_root}}image/broken.png")
-      .attr("orgin-src", orsrc);
-    });
-    
-    //to trigger error event manual 
-    $("#gif").attr("src", "report.gif?timestamp=" + new Date().getTime());
-
-    $(".screen_holder").find("img.fancybox").load(function(e){
-
-      imgWidth = Math.max($(this).width(), imgWidth);
-      imgHeight = Math.max($(this).height(), imgHeight)
-      var dwidth = $("div.material.moa").width()
-      if (imgWidth > imgHeight) {
-          //图片最大宽度
-          var s = (dwidth * imgPercent) / imgWidth
-      }
-      else {
-          var s = (dwidth * imgPercent) / imgHeight
-      }
-      s = Math.round(s * 100) / 100
-      scale_img(s);
-    })
-
-    function scale_img(i) {
-      $(".crop_image").each(function (e) {
-        let width = $(this).data("width")
-        let height = $(this).data("height")
-
-        crop_css = {
-          "hieght": height * i,
-          "width": width * i
-        }
-        $(this).css(crop_css)
-      })
-
-      $(".screen_holder").find("img.fancybox").each(function(e){
-        var h = $(this).height();
-        var sc = 'scale('+ i +','+ i +')';
-        
-        var scale_css = {
-          '-ms-transform': sc,
-          '-webkit-transform': sc,
-          '-moz-transform': sc,
-          'transform': sc,
-        }
-        
-        $(this).css(scale_css)
-
-        var sp = $(this).siblings('img.spot');
-        var rect = $(this).siblings('div.rect');
-        var vt = $(this).siblings('div.arrow');
-
-        rect.css({
-          'top':rect.data('top') * i ,
-          'left':rect.data('left') * i ,
-          'width':rect.data('width') * i,
-          'height':rect.data('height') * i,
-        });
-
-        var top = sp.data('top');
-        var left = sp.data('left');
-        sp.css({
-          'top':top*i,
-          'left':left*i,
-        });
-
-
-        var vt_x = vt.data('x') * i;
-        var vt_y = - vt.data('y') * i;
-
-        var vt_width = Math.sqrt(vt_x * vt_x + vt_y * vt_y)
-
-        var rotation = 360*Math.atan2(vt_y, vt_x)/(2*Math.PI)
-        var rt =  'rotate(' + -rotation + 'deg)';
-        var rotate_css = {
-          '-ms-transform': rt,
-          '-webkit-transform': rt,
-          '-moz-transform': rt,
-          'transform': rt,
-          'transform-origin': '6px 15px',
-        };
-        console.log(rt)
-        vt.css(rotate_css);
-        vt.css({
-          'top':top*i,
-          'left':left*i,
-          'width': vt_width
-        });
-
-        $(this).parents('.screen_holder').siblings('.screen_place').height(h*i);
-      });
-    }
-    //resize img
-    scale_img(scale);
-
-    $(window).resize(function() {
-      var ww = $('body').width();
-      if (ww < 900){
-        scale = 0.25;
-      }
-      else if (ww < 1100 ){
-        scale = 0.3;
-      }
-      else if( ww < 1300){
-        scale = 0.4;  
-      }else{
-        scale = 0.5;
-      }
-
-      if(imgWidth != 0){
-        //实时计算
-        var dwidth = $("div.material.moa").width()
-        if (imgWidth > imgHeight) {
-            //图片最大宽度
-            var scale = (dwidth * imgPercent) / imgWidth
-        }
-        else {
-            var scale = (dwidth * imgPercent) / imgHeight
-        }
-        // scale = (dwidth*imgPercent)/imgWidth
-        // scale = Math.round(scale * 100) / 100
-      }
-
-      scale_img(scale)
-    });
-    $(window).resize();
-    // 延迟加载图片
-    lazyload();
-
-    // 自动收缩过长的脚本描述
-      var descHeight = 100;
-      if ($('.desc-content').height() > descHeight) {
-          $(".airdesc-wrap .airdesc").css({height: descHeight+"px"});
-      }
-    $(".airdesc-wrap").off('click').on('click','.glyphicon-chevron-down', function () {
-        $(".airdesc").animate({height: $('.desc-content').height()}, "slow");
-        $(this).removeClass('glyphicon-chevron-down glyphicon-chevron-up').addClass('glyphicon-chevron-up');
-    }).on('click','.glyphicon-chevron-up', function () {
-        if ($('.desc-content').height() > descHeight) {
-            $(".airdesc").animate({height: descHeight + "px"}, "normal");
-        }
-        $(this).removeClass('glyphicon-chevron-down glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-    });
-    $(".airdesc").on("click", function () {
-        if ($(".airdesc-wrap .glyphicon-chevron-down").length > 0) {
-            $(".airdesc-wrap .glyphicon-chevron-down").trigger("click");
-        } else {
-            $(".airdesc-wrap .glyphicon-chevron-up").trigger("click");
-        }
-    })
-  });
-  </script>
-
-  <script>
-  $(window).resize();
-  </script>
-  </body>
+  <!-- 分页 https://github.com/tianxiangbing/paging -->
+  <script type="text/javascript" src="{{static_root}}js/paging.js"></script>
+  <script src="{{static_root}}js/report.js"></script>  
+</body>
 </html>

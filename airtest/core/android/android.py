@@ -438,16 +438,6 @@ class Android(Device):
         """
         return self.adb.get_top_activity()
 
-    def get_current_app(self):
-        """
-        Get the currently running app package name
-
-        Returns:
-            package: name of the package to refresh render resolution, e.g. "com.netease.my"
-
-        """
-        return self.adb.get_current_app()
-
     def get_top_activity_name_and_pid(self):
         dat = self.adb.shell('dumpsys activity top')
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
