@@ -15,7 +15,6 @@ from airtest.aircv import imread, get_resolution
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from six import PY3
-from pprint import pprint
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -78,7 +77,7 @@ class LogToHtml(object):
             depth = log['depth']
 
             if not self.run_start:
-                self.run_start = log["time"]
+                self.run_start = log.get('data', {}).get('start_time', '') or log["time"]
             self.run_end = log["time"]
 
             if depth == 0:
@@ -365,6 +364,7 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
+        data['data'] = json.dumps(data)
 
         return self._render(template_name, output_file, **data)
 
