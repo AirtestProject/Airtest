@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-08-23 20:46:44
+ * @LastEditTime: 2019-09-03 17:09:18
  */
 function StepPannel(data, root){
   this.data = data
@@ -134,9 +134,9 @@ function StepPannel(data, root){
     for(var i = 0; i< this.steps.length; i++){
       step = this.steps[i]
       if(i == 0){
-        step.duration = step.time - this.data.run_start
+        step.duration = getFormatDuration(step.time, this.data.run_start)
       } else{
-        step.duration = step.time - this.steps[i-1].time
+        step.duration = getFormatDuration(step.time, this.steps[i-1].time)
       }
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
@@ -155,7 +155,7 @@ function StepPannel(data, root){
                 '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
                 '<span class="order"># %s</span>'.format(step.index +1) +
                 '<span class="step_title" lang="en">%s</span>'.format(step.title) +
-                '<span class="step-time">%s</span>'.format(getDelta(step.duration)) +
+                '<span class="step-time">%s</span>'.format(step.duration) +
               '</div>'
     }
     this.stepLeft.html(html)
@@ -203,7 +203,7 @@ function StepPannel(data, root){
                   "<span class='content-val bold'>%s</span>" +
                 "</div>" +
               "</div>").format(success, pass, this.static, success,
-                              this.static, getDelta(step.duration),
+                              this.static, step.duration,
                               step.code.name)
     } catch {
       return ""
@@ -491,17 +491,32 @@ Date.prototype.Format = function (fmt) { //author: meizz
   return fmt;
 }
 
-function getDate(timestamp){
-  return (new Date(timestamp * 1000)).Format("yyyy / MM / dd")
+function getFormatDate(timestamp){
+  timestamp = getTimestamp(timestamp)
+  return (new Date(timestamp)).Format("yyyy / MM / dd")
 }
 
-function getTime(timestamp){
-  return (new Date(timestamp * 1000)).Format("hh:mm:ss")
+function getFormatTime(timestamp){
+  timestamp = getTimestamp(timestamp)
+  return (new Date(timestamp)).Format("hh:mm:ss")
+}
+
+function getFormatDuration(end, start) {
+  var delta = getTimestamp(end) - getTimestamp(start)
+  return getDelta(parseInt(delta))
+}
+
+function getTimestamp(time) {
+  // time有可能是时间戳，也可能是格式化的，返回为毫秒
+  if(Number(time)){
+    return Number(time) * 1000
+  } else{
+    return (new Date(time).getTime())
+  }
 }
 
 function getDelta(delta){
   // 计算消耗时间，end - start，以0:1:6'22'' 格式
-  delta = parseInt((delta)*1000)
   ms = delta % 1000
   delta = parseInt(delta / 1000)
   s = delta % 60
@@ -583,9 +598,9 @@ function set_task_status(result){
 }
 
 function init_page(){
-  $('.summary .info-sub.start').html(getDate(data.run_start))
-  $('.summary .info-sub.time').html(getTime(data.run_start) + '-' + getTime(data.run_end))
-  $('.summary .info-value.duration').html(getDelta(data.run_end - data.run_start))
+  $('.summary .info-sub.start').html(getFormatDate(data.run_start))
+  $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
+  $('.summary .info-value.duration').html(getFormatDuration(data.run_end, data.run_start))
 }
 
 $(function(){
