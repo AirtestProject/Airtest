@@ -26,6 +26,7 @@ STATIC_DIR = os.path.dirname(__file__)
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
+
 @evalcontextfilter
 def nl2br(eval_ctx, value):
     result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
