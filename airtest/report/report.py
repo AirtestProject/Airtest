@@ -324,7 +324,8 @@ class LogToHtml(object):
 
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
-        dirname = os.path.basename(self.script_root).replace(".air", ".log")
+        # let dirname = <script name>.log
+        dirname = self.script_name.replace(os.path.splitext(self.script_name)[1], ".log")
         # mkdir
         dirpath = os.path.join(self.export_dir, dirname)
         if os.path.isdir(dirpath):
