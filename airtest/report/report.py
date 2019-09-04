@@ -330,8 +330,14 @@ class LogToHtml(object):
         dirpath = os.path.join(self.export_dir, dirname)
         if os.path.isdir(dirpath):
             shutil.rmtree(dirpath, ignore_errors=True)
+
         # copy script
-        self.copy_tree(self.script_root, dirpath)
+        def ignore_export_dir(dirname, filenames):
+            # 忽略当前导出的目录，防止递归导出
+            if os.path.commonprefix([dirpath, dirname]) == dirpath:
+                return filenames
+            return []
+        self.copy_tree(self.script_root, dirpath, ignore=ignore_export_dir)
         # copy log
         logpath = os.path.join(dirpath, LOGDIR)
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
