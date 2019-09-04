@@ -20,8 +20,8 @@
     <!-- <link href="{{static_root}}css/animate.css" rel="stylesheet"> -->
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
-    <script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>
-    <script src="{{ static_root }}js/echarts/shine.js"></script>
+    <!--<script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>-->
+    <!--<script src="{{ static_root }}js/echarts/shine.js"></script>-->
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
@@ -39,7 +39,7 @@
 
     <div class="container-fluid">
       <div class="row">
-        
+
         <div id="main" class="main col-md-12">
           <div id="back_multi"></div>
           <h1 class="title">Airtest Report {{info.title}}</h1>
@@ -72,12 +72,7 @@
                     </div>
                   </div>
                 </div>
-<<<<<<< HEAD
-            {% endif %}
-            <h4><span lang="en">Time:</span>{{run_start}} -- {{run_end}}</h4>
-=======
               </div>
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
 
               <div class="info info2">
                 <div class="info-left"></div>
@@ -102,7 +97,7 @@
                 </div>
               </div>
             </div>
-            
+
             {% if info.desc %}
             <div class="info info3">
               <div class="info-title" lang="en">Description:</div>
@@ -125,60 +120,11 @@
             </div>
           </div>
 
-<<<<<<< HEAD
-          <!-- 录屏 -->
-          <div class="row gif-wrap">
-          <div class="col-md-6">
-            {% if records %}
-              {% for r in records %}
-                <div align="center" class="embed-responsive embed-responsive-16by9">
-                    <video class="embed-responsive-item" controls>
-                        <source src="{{ r }}" type="video/mp4">
-                    </video>
-                </div>
-              {% endfor %}
-            {% else %}
-              <p lang="en">No record information found.</p>
-            {% endif %}
-          </div>
-          </div>
-
-          <!--单步-->
-          {% for step in steps %}
-          <div class="material moa main_script" data-trace="{{step.traceback}}" id="main_script_{{loop.index}}">
-
-            <h2 class="header">Step {{loop.index}} <span class="step_title" lang="en">{{step.title}}</span> <span class="step_title">[{{step.time}}]</span></h2>
-            <hr>
-            <div class="step_content">
-              <!--单步操作-->
-
-              <!--代码和参数显示-->
-                {% if step.code.name %}
-                <div class="row">
-                  <div class="col-xs-3">
-                    <div class="point">
-                      <span class="glyphicon glyphicon-play"></span>
-                    </div>
-                      <label><span lang="en">{{step.code.name}}</span></label>
-                  </div>
-                  <div class="col-xs-9">
-                    {% for arg in step.code.args %}
-                      {% if arg.image %}
-                        <img class="crop_image" data-width="{{arg.resolution[0]}}" data-height="{{arg.resolution[1]}}" src="{{arg.image}}" title="{{arg.image}}">
-                        <!-- 显示截图相关的参数 (供后续的图像识别的调试使用) -->
-                        <p class="desc">resolution: {{arg.value.resolution}}</p>
-                      {% else %}
-                        <!-- 其他参数 -->
-                        <p class="desc">{{arg.key}}: {{arg.value}}</p>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-=======
           <!-- 可以额外显示自定义模块，支持插入Html内容 -->
           {{ extra_block|safe }}
           <!--单步-->
           {% if steps|length  >0 %}
-          
+
           <div class="steps">
             <div class="content">
               <div class="steps-head">
@@ -186,7 +132,6 @@
                   <div class="order" id='order'><span lang="en">order</span></div>
                   <div class="order" id='duration'><span lang="en">duration</span></div>
                   <div class="order" id='status'><span lang="en">status</span></div>
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
                 </div>
                 <div class="head-right">
                   <span lang="en" class="jump-wrong" id='jump-wrong'>Jump to wrong step</span>
@@ -210,7 +155,7 @@
             {% endif %}
             </div>
         </div>
-        
+
       {% block footer %}
       <div class="footer">
         <div class="footer-content">
@@ -241,7 +186,7 @@
             </div>
           </div>
         </div>
-      </div> 
+      </div>
       {% endblock %}
       </div>
       <!-- 录屏 -->
@@ -259,6 +204,7 @@
           </div>
         </div>
     </div>
+
   
   <!-- <script src="{{static_root}}js/bootstrap.min.js"></script> -->
 

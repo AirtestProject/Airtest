@@ -4,11 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
-<<<<<<< HEAD
  * @LastEditTime: 2019-09-03 17:09:18
-=======
- * @LastEditTime: 2019-08-23 20:46:44
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
  */
 function StepPannel(data, root){
   this.data = data
@@ -138,15 +134,9 @@ function StepPannel(data, root){
     for(var i = 0; i< this.steps.length; i++){
       step = this.steps[i]
       if(i == 0){
-<<<<<<< HEAD
         step.duration = getFormatDuration(step.time, this.data.run_start)
       } else{
         step.duration = getFormatDuration(step.time, this.steps[i-1].time)
-=======
-        step.duration = step.time - this.data.run_start
-      } else{
-        step.duration = step.time - this.steps[i-1].time
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
       }
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
@@ -165,11 +155,7 @@ function StepPannel(data, root){
                 '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
                 '<span class="order"># %s</span>'.format(step.index +1) +
                 '<span class="step_title" lang="en">%s</span>'.format(step.title) +
-<<<<<<< HEAD
                 '<span class="step-time">%s</span>'.format(step.duration) +
-=======
-                '<span class="step-time">%s</span>'.format(getDelta(step.duration)) +
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
               '</div>'
     }
     this.stepLeft.html(html)
@@ -199,7 +185,7 @@ function StepPannel(data, root){
   }
 
   this.getStepRightInfo = function(step){
-    // HTML 本步骤成功与否、耗时 
+    // HTML 本步骤成功与否、耗时
     try{
       return ("<div class='step-infos'>"+
                 "<div class='infos-li'>" +
@@ -217,11 +203,7 @@ function StepPannel(data, root){
                   "<span class='content-val bold'>%s</span>" +
                 "</div>" +
               "</div>").format(success, pass, this.static, success,
-<<<<<<< HEAD
                               this.static, step.duration,
-=======
-                              this.static, getDelta(step.duration),
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
                               step.code.name)
     } catch {
       return ""
@@ -285,7 +267,7 @@ function StepPannel(data, root){
                     '<div class="end"></div>' +
                   '</div>').format(this.currentStep, v[0], v[1])
       }
-      
+
       // 还有个rect <!-- rect area -->
       rectors = ''
       for(var i=0;i<step.screen.rect.length; i++){
@@ -433,7 +415,7 @@ function StepPannel(data, root){
   }
 
   this.init_pagenation = function(){
-    //生成分页控件  
+    //生成分页控件
     this.paging = new Paging();
     var that = this
     this.paging.init({
@@ -493,15 +475,15 @@ String.prototype.format= function(){
   });
 }
 
-Date.prototype.Format = function (fmt) { //author: meizz 
+Date.prototype.Format = function (fmt) { //author: meizz
   var o = {
-    "M+": this.getMonth() + 1, //月份 
-    "d+": this.getDate(), //日 
-    "h+": this.getHours(), //小时 
-    "m+": this.getMinutes(), //分 
-    "s+": this.getSeconds(), //秒 
-    "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
-    "S": this.getMilliseconds() //毫秒 
+    "M+": this.getMonth() + 1, //月份
+    "d+": this.getDate(), //日
+    "h+": this.getHours(), //小时
+    "m+": this.getMinutes(), //分
+    "s+": this.getSeconds(), //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds() //毫秒
   };
   if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
   for (var k in o)
@@ -509,7 +491,6 @@ Date.prototype.Format = function (fmt) { //author: meizz
   return fmt;
 }
 
-<<<<<<< HEAD
 function getFormatDate(timestamp){
   timestamp = getTimestamp(timestamp)
   return (new Date(timestamp)).Format("yyyy / MM / dd")
@@ -532,22 +513,10 @@ function getTimestamp(time) {
   } else{
     return (new Date(time).getTime())
   }
-=======
-function getDate(timestamp){
-  return (new Date(timestamp * 1000)).Format("yyyy / MM / dd")
-}
-
-function getTime(timestamp){
-  return (new Date(timestamp * 1000)).Format("hh:mm:ss")
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
 }
 
 function getDelta(delta){
   // 计算消耗时间，end - start，以0:1:6'22'' 格式
-<<<<<<< HEAD
-=======
-  delta = parseInt((delta)*1000)
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
   ms = delta % 1000
   delta = parseInt(delta / 1000)
   s = delta % 60
@@ -629,15 +598,9 @@ function set_task_status(result){
 }
 
 function init_page(){
-<<<<<<< HEAD
   $('.summary .info-sub.start').html(getFormatDate(data.run_start))
   $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
   $('.summary .info-value.duration').html(getFormatDuration(data.run_end, data.run_start))
-=======
-  $('.summary .info-sub.start').html(getDate(data.run_start))
-  $('.summary .info-sub.time').html(getTime(data.run_start) + '-' + getTime(data.run_end))
-  $('.summary .info-value.duration').html(getDelta(data.run_end - data.run_start))
->>>>>>> 3709e88... Merge branch 'optimize_report' into 'master'
 }
 
 $(function(){
