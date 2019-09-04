@@ -42,10 +42,7 @@ def timefmt(timestamp):
     :param timestamp: timestamp of steps
     :return: "%Y-%m-%d %H:%M:%S"
     """
-    try:
-        return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
-    except TypeError:
-        return timestamp
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class LogToHtml(object):
@@ -356,7 +353,9 @@ class LogToHtml(object):
 
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
-            output_file = os.path.join(self.script_root, HTML_FILE)
+            # output_file可传入文件名，或绝对路径
+            output_file = output_file if output_file and os.path.isabs(output_file) \
+                else os.path.join(self.script_root, output_file or HTML_FILE)
             if not self.static_root.startswith("http"):
                 self.static_root = "static/"
 
