@@ -130,7 +130,7 @@ class LogToHtml(object):
             "screen": screen,
             "desc": desc,
             "traceback": traceback,
-            "assert": assertion
+            "assert": assertion,
         }
         return translated
 
@@ -304,6 +304,7 @@ class LogToHtml(object):
             autoescape=True
         )
         env.filters['nl2br'] = nl2br
+        env.filters['datetime'] = timefmt
         template = env.get_template(template_name)
         html = template.render(**template_vars)
 
