@@ -382,6 +382,7 @@ h2.empty-report{
 .step-right .screen{
   max-width: 100%;
   max-height: 600px;
+  border: solid 1px #212f53;
 }
 .step-right .target{
   position: absolute;
