@@ -94,11 +94,8 @@ class IOS(Device):
 
     @property
     def session(self):
-        try:
-            if not self.defaultSession:
-                self.defaultSession = self.driver.session()
-        except:
-            traceback.print_exc()
+        if not self.defaultSession:
+            self.defaultSession = self.driver.session()
         return self.defaultSession
 
     def _fetchNewSession(self):
