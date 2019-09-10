@@ -7,15 +7,20 @@ import sys
 import six
 import json
 from io import open
+from airtest.utils.compat import EXT
 
 
 def get_script_info(script_path):
     """extract info from script, like basename, __author__, __title__ and __desc__."""
+    script_path = os.path.normpath(script_path)
     script_name = os.path.basename(script_path)
     if script_path.endswith(".py"):
         pyfilepath = script_path
+        parent_name = os.path.basename(os.path.dirname(script_path))
+        if parent_name.endswith(EXT):
+            script_name = parent_name
     else:
-        pyfilename = script_name.replace(".air", ".py")
+        pyfilename = script_name.replace(EXT, ".py")
         pyfilepath = os.path.join(script_path, pyfilename)
 
     if not os.path.exists(pyfilepath) and six.PY2:
@@ -25,7 +30,7 @@ def get_script_info(script_path):
 
     author, title, desc = get_author_title_desc(pyfilecontent)
 
-    result_json = {"name": script_name, "author": author, "title": title, "desc": desc}
+    result_json = {"name": script_name, "path": script_path, "author": author, "title": title, "desc": desc}
     return json.dumps(result_json)
 
 
@@ -43,10 +48,12 @@ def get_author_title_desc(text):
     desc = process_desc(desc)
     return author, title, desc
 
+
 def process_desc(desc):
     lines = desc.split('\n')
     lines = [line.strip() for line in lines]
     return '\n'.join(lines)
+
 
 def strip_str(string):
     """Strip string."""

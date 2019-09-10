@@ -562,6 +562,27 @@ class Android(Device):
             w, h = h, w
         return w, h
 
+    def get_render_resolution(self, refresh=False):
+        """
+        Return render resolution after rotation
+
+        Args:
+            refresh: whether to force refresh render resolution
+
+        Returns:
+            offset_x, offset_y, offset_width and offset_height of the display
+
+        """
+        if refresh or 'offset_x' not in self._display_info:
+            self.adjust_all_screen()
+        x, y, w, h = self._display_info.get('offset_x', 0), \
+            self._display_info.get('offset_y', 0), \
+            self._display_info.get('offset_width', 0), \
+            self._display_info.get('offset_height', 0)
+        if self.display_info["orientation"] in [1, 3]:
+            x, y, w, h = y, x, h, w
+        return x, y, w, h
+
     def start_recording(self, *args, **kwargs):
         """
         Start recording the device display
@@ -621,3 +642,17 @@ class Android(Device):
             self.display_info["orientation"]
         )
         return x, y
+
+    def adjust_all_screen(self):
+        """
+        Adjust the render resolution for all_screen device.
+
+        Return:
+            None
+
+        """
+        info = self.display_info
+        ret = self.adb.get_display_of_all_screen(info)
+        if ret:
+            info.update(ret)
+            self._display_info = info

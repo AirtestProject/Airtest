@@ -5,7 +5,8 @@ import sys
 import cv2
 import numpy as np
 from .error import FileNotExistError
-from six import PY3
+from six import PY2, PY3
+from airtest.aircv.utils import cv2_2_pil
 
 
 def imread(filename):
@@ -21,12 +22,11 @@ def imread(filename):
 
 
 def imwrite(filename, img):
-    """写出图片到本地路径"""
-    if PY3:
-        cv2.imencode('.jpg', img)[1].tofile(filename)
-    else:
+    """写出图片到本地路径，压缩"""
+    if PY2:
         filename = filename.encode(sys.getfilesystemencoding())
-        cv2.imwrite(filename, img)
+    pil_img = cv2_2_pil(img)
+    pil_img.save(filename, quality=10, optimize=True)
 
 
 def show(img, title="show_img", test_flag=False):

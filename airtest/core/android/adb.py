@@ -1017,7 +1017,7 @@ class ADB(object):
             AirtestError: if top activity cannot be obtained
 
         Returns:
-            top activity as a tuple
+            top activity as a tuple: (package_name, activity_name, pid)
 
         """
         dat = self.shell('dumpsys activity top')
@@ -1160,7 +1160,7 @@ class ADB(object):
             output = ""
         if 'package:' not in output:
             raise AirtestError('package not found, output:[%s]' % output)
-        return output.split(":")[1].strip()
+        return output.split("package:")[1].strip()
 
     def check_app(self, package):
         """
@@ -1458,6 +1458,49 @@ class ADB(object):
             else:
                 ret[k] = v
         return ret
+
+    def get_display_of_all_screen(self, info):
+        """
+        Perform `adb shell dumpsys window windows` commands to get window display of application.
+
+        Args:
+            info: device screen properties
+
+        Returns:
+            None if adb command failed to run, otherwise return device screen properties
+
+        """
+        output = self.shell("dumpsys window windows")
+        windows = output.split("Window #")
+        offsetx, offsety, x, y = info['width'], info['height'], 0, 0
+        package = self._search_for_current_package(output)
+        for w in windows:
+            if "package=%s" % package in w:
+                arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
+                if len(arr) >= 1 and len(arr[0]) == 4:
+                    offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
+                    if info["orientation"] in [1, 3]:
+                        offsetx, offsety, x, y = offsety, offsetx, y, x
+                    x, y = x - offsetx, y - offsety
+        return {
+            "offset_x": offsetx,
+            "offset_y": offsety,
+            "offset_width": x,
+            "offset_height": y
+        }
+
+    def _search_for_current_package(self, ret):
+        """
+        Search for current app package name from the output of command "adb shell dumpsys window windows"
+
+        Returns:
+            package name if exists else ""
+        """
+        packageRE = re.compile('\s*mCurrentFocus=Window{.* ([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+}')
+        m = packageRE.findall(ret)
+        if m:
+            return m[-1]
+        return ""
 
 
 def cleanup_adb_forward():

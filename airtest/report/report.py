@@ -10,12 +10,12 @@ import shutil
 import jinja2
 import traceback
 from copy import deepcopy
+from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from six import PY3
-from pprint import pprint
 
 LOGDIR = "log"
 LOGFILE = "log.txt"
@@ -26,6 +26,7 @@ STATIC_DIR = os.path.dirname(__file__)
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
+
 @evalcontextfilter
 def nl2br(eval_ctx, value):
     result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
@@ -33,6 +34,16 @@ def nl2br(eval_ctx, value):
     if eval_ctx.autoescape:
         result = Markup(result)
     return result
+
+
+def timefmt(timestamp):
+    """
+    Formatting of timestamp in Jinja2 templates
+    :param timestamp: timestamp of steps
+    :return: "%Y-%m-%d %H:%M:%S"
+    """
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
 
 class LogToHtml(object):
     """Convert log to html display """
@@ -78,7 +89,7 @@ class LogToHtml(object):
             depth = log['depth']
 
             if not self.run_start:
-                self.run_start = log["time"]
+                self.run_start = log.get('data', {}).get('start_time', '') or log["time"]
             self.run_end = log["time"]
 
             if depth == 0:
@@ -117,7 +128,7 @@ class LogToHtml(object):
             "screen": screen,
             "desc": desc,
             "traceback": traceback,
-            "assert": assertion
+            "assert": assertion,
         }
         return translated
 
@@ -291,6 +302,7 @@ class LogToHtml(object):
             autoescape=True
         )
         env.filters['nl2br'] = nl2br
+        env.filters['datetime'] = timefmt
         template = env.get_template(template_name)
         html = template.render(**template_vars)
 
@@ -312,13 +324,20 @@ class LogToHtml(object):
 
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
-        dirname = os.path.basename(self.script_root).replace(".air", ".log")
+        # let dirname = <script name>.log
+        dirname = self.script_name.replace(os.path.splitext(self.script_name)[1], ".log")
         # mkdir
         dirpath = os.path.join(self.export_dir, dirname)
         if os.path.isdir(dirpath):
             shutil.rmtree(dirpath, ignore_errors=True)
+
         # copy script
-        self.copy_tree(self.script_root, dirpath)
+        def ignore_export_dir(dirname, filenames):
+            # 忽略当前导出的目录，防止递归导出
+            if os.path.commonprefix([dirpath, dirname]) == dirpath:
+                return filenames
+            return []
+        self.copy_tree(self.script_root, dirpath, ignore=ignore_export_dir)
         # copy log
         logpath = os.path.join(dirpath, LOGDIR)
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
@@ -341,7 +360,9 @@ class LogToHtml(object):
 
         if self.export_dir:
             self.script_root, self.log_root = self._make_export_dir()
-            output_file = os.path.join(self.script_root, HTML_FILE)
+            # output_file可传入文件名，或绝对路径
+            output_file = output_file if output_file and os.path.isabs(output_file) \
+                else os.path.join(self.script_root, output_file or HTML_FILE)
             if not self.static_root.startswith("http"):
                 self.static_root = "static/"
 
@@ -365,6 +386,7 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
+        data['data'] = json.dumps(data)
 
         return self._render(template_name, output_file, **data)
 
