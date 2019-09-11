@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-03 17:09:18
+ * @LastEditTime: 2019-09-11 12:44:08
  */
 function StepPannel(data, root){
   this.data = data
@@ -27,7 +27,9 @@ function StepPannel(data, root){
     this.initStepData()
     this.bindEvents()
     this.init_pagenation()
-    this.setSteps()
+    // this.setSteps()
+    this.steps = this.filterAssertSteps()
+    this.filterSteps($('.filter#assert'))
   }
 
   this.bindEvents = function(){
@@ -154,7 +156,7 @@ function StepPannel(data, root){
       html += '<div class="step" index="%s">'.format(step.index) +
                 '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
                 '<span class="order"># %s</span>'.format(step.index +1) +
-                '<span class="step_title" lang="en">%s</span>'.format(step.title) +
+                '<span class="step_title" lang="en">%s</span>'.format(step.assert || step.title) +
                 '<span class="step-time">%s</span>'.format(step.duration) +
               '</div>'
     }
@@ -584,7 +586,8 @@ function loadUrlInfo(){
     back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
-    result = args.status == 'terminated' ? 'Terminated' : result
+    result = args.status ? args.status : result
+    $(".footer").hide()
   }
   set_task_status(result)
 }
