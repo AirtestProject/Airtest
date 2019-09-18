@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-11 12:44:08
+ * @LastEditTime: 2019-09-18 18:50:11
  */
 function StepPannel(data, root){
   this.data = data
@@ -13,7 +13,7 @@ function StepPannel(data, root){
   this.static = data.static_root
   this.currentStep = 0
   this.currentWrong = -1
-  this.pagesize = 20
+  this.pagesize = 5
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
   this.stepRight = $('#step-right')
@@ -27,16 +27,23 @@ function StepPannel(data, root){
     this.initStepData()
     this.bindEvents()
     this.init_pagenation()
-    // this.setSteps()
-    this.steps = this.filterAssertSteps()
-    this.filterSteps($('.filter#assert'))
+    var steps = this.filterAssertSteps()
+    if(steps.length >0){
+      this.steps = steps
+      this.filterSteps($('.filter#assert'))
+    } else{
+      this.setSteps()
+    }
   }
 
   this.bindEvents = function(){
     // 绑定事件
     var that = this
     this.stepLeft.delegate('.step', 'click',function(e){
-      that.setStepRight(e.currentTarget.getAttribute('index'))
+      if(e.target.className.indexOf("step-context") >=0 )
+        that.jumpToCurrStep(Number(e.target.getAttribute('index')))
+      else
+        that.setStepRight(e.currentTarget.getAttribute('index'))
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -145,6 +152,16 @@ function StepPannel(data, root){
     }
   }
 
+  this.jumpToCurrStep = function(step) {
+    // 跳至指定步骤
+    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    this.steps = [].concat(this.original_steps)
+    this.currentPage = Math.floor(step / this.pagesize) +1
+    this.setPagenation()
+    this.setStepRight(step)
+    $('.steps .filter').removeClass('active')
+  }
+
   this.setStepsLeft = function(){
     html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
     start = (this.currentPage-1)* this.pagesize
@@ -158,6 +175,7 @@ function StepPannel(data, root){
                 '<span class="order"># %s</span>'.format(step.index +1) +
                 '<span class="step_title" lang="en">%s</span>'.format(step.assert || step.title) +
                 '<span class="step-time">%s</span>'.format(step.duration) +
+                '<img class="step-context" src="%simage/eye.svg" alt="eye.svg" index="%s"/>'.format(this.static, step.index) +
               '</div>'
     }
     this.stepLeft.html(html)
@@ -207,7 +225,8 @@ function StepPannel(data, root){
               "</div>").format(success, pass, this.static, success,
                               this.static, step.duration,
                               step.code.name)
-    } catch {
+    } catch (err) {
+      console.log(err)
       return ""
     }
   }

@@ -305,6 +305,17 @@ h2.empty-report{
 .step-left .step>img{
   vertical-align: middle;
 }
+.step-left .step .step-context {
+  position: absolute;
+  width: 20px;
+  top: 10px;
+  right: -25px;
+  cursor: context-menu;
+  opacity: 0.6;
+}
+.step-left .step .step-context:hover{
+  opacity: 1;
+}
 .step-left .order{
   margin: 0 5px;
 }
