@@ -7,7 +7,7 @@ Lang.prototype.pack.zh = {
 		"Test Case": "测试用例",
 		"Steps: ": "步骤数：",
 		"Time: ": "耗时",
-		"Cases": "测试报告",
+		"Quick view": "快览",
 		"[Passed]": "[运行成功]",
 		"[Failed]": "[运行失败]",
 		'[Terminated]': "[任务超时]",

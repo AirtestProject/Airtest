@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-18 18:50:11
+ * @LastEditTime: 2019-09-18 20:47:09
  */
 function StepPannel(data, root){
   this.data = data
@@ -13,7 +13,7 @@ function StepPannel(data, root){
   this.static = data.static_root
   this.currentStep = 0
   this.currentWrong = -1
-  this.pagesize = 5
+  this.pagesize = 20
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
   this.stepRight = $('#step-right')
@@ -26,6 +26,7 @@ function StepPannel(data, root){
     // 初始化
     this.initStepData()
     this.bindEvents()
+    this.init_gallery()
     this.init_pagenation()
     var steps = this.filterAssertSteps()
     if(steps.length >0){
@@ -44,6 +45,9 @@ function StepPannel(data, root){
         that.jumpToCurrStep(Number(e.target.getAttribute('index')))
       else
         that.setStepRight(e.currentTarget.getAttribute('index'))
+    })
+    $('.gallery .content').delegate('.thumbnail', 'click', function(e){
+      that.jumpToCurrStep(Number(this.getAttribute('index')))
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -152,6 +156,22 @@ function StepPannel(data, root){
     }
   }
 
+  this.init_gallery = function(){
+    var that = this
+    var fragment = this.original_steps.map(function(step){
+      if(step.screen && step.screen.thumbnail) {
+        return '<div class="thumbnail" index="%s">'.format(step.index) + 
+                  '<img src="%s" alt="%s"/>'.format(step.screen.thumbnail, step.screen.thumbnail) +
+                  '<div class="time">%s</div>'.format(getFormatDuration2(step.time, that.data.run_start)) +
+                '</div>'
+      } else{
+        return ""
+      }
+    })
+    if(fragment.length>0)
+      $('.gallery .content').html(fragment.join(''))
+  }
+
   this.jumpToCurrStep = function(step) {
     // 跳至指定步骤
     step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
@@ -183,6 +203,8 @@ function StepPannel(data, root){
   this.setStepRight = function(index){
     index = parseInt(index)
     if(!isNaN(index) && index>= 0 && index<this.original_steps.length){
+      $('.gallery .thumbnail.active').removeClass('active')
+      $('.gallery .thumbnail[index="%s"]'.format(index)).addClass('active')
       this.setStepRightHtml(index)
       this.initStepRight()
     }
@@ -523,8 +545,16 @@ function getFormatTime(timestamp){
 }
 
 function getFormatDuration(end, start) {
+  // 返回耗时，格式为 0hr1min6s22ms
   var delta = getTimestamp(end) - getTimestamp(start)
   return getDelta(parseInt(delta))
+}
+
+function getFormatDuration2(end, start) {
+  // 返回耗时，格式为 00:00:19
+  var delta = getTimestamp(end) - getTimestamp(start)
+  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
+  return (new Date(midnight + delta)).Format("hh:mm:ss")
 }
 
 function getTimestamp(time) {
@@ -537,7 +567,7 @@ function getTimestamp(time) {
 }
 
 function getDelta(delta){
-  // 计算消耗时间，end - start，以0:1:6'22'' 格式
+  // 计算消耗时间，end - start，以0hr1min6s22ms 格式
   ms = delta % 1000
   delta = parseInt(delta / 1000)
   s = delta % 60

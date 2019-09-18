@@ -49,7 +49,6 @@ h2.empty-report{
 .title{
   font-size: 32px;
   text-align: center;
-  padding-bottom: 100px;
   padding-top: 50px;
 }
 .info-title{
@@ -59,7 +58,7 @@ h2.empty-report{
 .summary{
   margin: 30px 0;
   background: #121c34;
-  padding-top: 50px;
+  padding-top: 30px;
   padding-left: 30px;
 }
 .summary .show-vertical, .summary .info3, .summary .show-horizontal .info{
@@ -173,14 +172,39 @@ h2.empty-report{
 }
 
 .gallery{
-  /* todo... */
-  display: none;
+  margin-bottom: 30px;
 }
-.gallery .content, .step-list .content{
-  background: rgb(18,28,52)
+.gallery .info-title{
+  margin-bottom: 10px;
+}
+.gallery .content{
+  background: rgb(18,28,52);
+  overflow-x: scroll;
+  white-space: nowrap;
+  background: #121c34;
+  padding-top: 20px;
+}
+.gallery .thumbnail {
+  display: inline-block;
+  border: solid 1px transparent;
+}
+.gallery .thumbnail.active {
+  border: solid 1px rgb(74,144,226);
+}
+.gallery .thumbnail img{
+  max-width: 120px;
+  max-height: 130px;
+}
+.gallery .thumbnail .time{
+  text-align: center;
+  font-size: 12px;
+  margin: 3px 0;
 }
 .step-list .no-steps{
   text-align: center;
+}
+.step-list .content{
+  background: rgb(18,28,52)
 }
 
 #device{
@@ -625,6 +649,33 @@ h2.empty-report{
 
 
 
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px; /*滚动条的宽度*/
+  height: 6px; /*滚动条的高度*/
+}
+::-webkit-scrollbar-thumb:horizontal { /*水平滚动条的样式*/
+  background-color: #324163;
+  -webkit-border-radius: 6px;
+  outline: 2px solid #fff;
+}
+::-webkit-scrollbar-track-piece {
+  background-color: rgb(10, 10, 28); /*滚动条的背景颜色*/
+  -webkit-border-radius: 0; /*滚动条的圆角宽度*/
+}
+::-webkit-scrollbar-thumb:vertical { /*垂直滚动条的样式*/
+  height: 50px;
+  background-color: #324163;
+  -webkit-border-radius: 4px;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  border: 1px solid #324163;
+}
+::-webkit-scrollbar-thumb:hover { /*滚动条的hover样式*/
+  height: 50px;
+  background-color: #9f9f9f;
+  -webkit-border-radius: 4px;
+}
 
 
 /* 分页 */

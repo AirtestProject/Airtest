@@ -6,6 +6,7 @@ import io
 import re
 import six
 import sys
+from PIL import Image
 import shutil
 import jinja2
 import traceback
@@ -13,6 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
+from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from six import PY3
@@ -156,6 +158,7 @@ class LogToHtml(object):
                 else:
                     screen['_filepath'] = os.path.abspath(os.path.join(self.log_root, src))
                 screen['src'] = screen['_filepath']
+                screen['thumbnail'] = self._get_thumbnail(os.path.join(self.log_root, src), screen['src'])
                 break
 
         display_pos = None
@@ -188,6 +191,19 @@ class LogToHtml(object):
         if display_pos:
             screen["pos"].append(display_pos)
         return screen
+
+    @classmethod
+    def _get_thumbnail(cls, path, filename):
+        """compress screenshot"""
+        name, ext = os.path.splitext(filename)
+        new_name = "%s_small%s" % (name, ext)
+        if not os.path.isfile(new_name):
+            try:
+                img = Image.open(path)
+                compress_image(img, new_name)
+            except Exception:
+                traceback.print_exc()
+        return new_name
 
     def _translate_traceback(self, step):
         if "traceback" in step["data"]:
