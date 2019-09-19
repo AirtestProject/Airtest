@@ -153,12 +153,12 @@ class LogToHtml(object):
             if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
                 src = item["data"]['ret']
                 if self.export_dir:  # all relative path
-                    src = os.path.join(LOGDIR, src)
-                    screen['_filepath'] = src
+                    screen['_filepath'] = os.path.join(LOGDIR, src)
                 else:
                     screen['_filepath'] = os.path.abspath(os.path.join(self.log_root, src))
                 screen['src'] = screen['_filepath']
-                screen['thumbnail'] = self._get_thumbnail(os.path.join(self.log_root, src), screen['src'])
+                self.get_thumbnail(os.path.join(self.log_root, src))
+                screen['thumbnail'] = self.get_small_name(screen['src'])
                 break
 
         display_pos = None
@@ -193,17 +193,23 @@ class LogToHtml(object):
         return screen
 
     @classmethod
-    def _get_thumbnail(cls, path, filename):
+    def get_thumbnail(cls, path):
         """compress screenshot"""
-        name, ext = os.path.splitext(filename)
-        new_name = "%s_small%s" % (name, ext)
-        if not os.path.isfile(new_name):
+        new_path = cls.get_small_name(path)
+        if not os.path.isfile(new_path):
             try:
                 img = Image.open(path)
-                compress_image(img, new_name)
+                compress_image(img, new_path)
             except Exception:
                 traceback.print_exc()
-        return new_name
+            return new_path
+        else:
+            return None
+
+    @classmethod
+    def get_small_name(cls, filename):
+        name, ext = os.path.splitext(filename)
+        return "%s_small%s" % (name, ext)
 
     def _translate_traceback(self, step):
         if "traceback" in step["data"]:
