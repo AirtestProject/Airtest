@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-18 20:47:09
+ * @LastEditTime: 2019-09-23 15:07:18
  */
 function StepPannel(data, root){
   this.data = data
@@ -189,11 +189,12 @@ function StepPannel(data, root){
     end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
     for(var i = start; i< end; i++){
-      step = this.steps[i]
+      var step = this.steps[i]
+      var title = step.assert ? '<span lang="en">Assert: </span>' + step.assert : step.title
       html += '<div class="step" index="%s">'.format(step.index) +
                 '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
                 '<span class="order"># %s</span>'.format(step.index +1) +
-                '<span class="step_title" lang="en">%s</span>'.format(step.assert || step.title) +
+                '<span class="step_title" lang="en">%s</span>'.format(title) +
                 '<span class="step-time">%s</span>'.format(step.duration) +
                 '<img class="step-context" src="%simage/eye.svg" alt="eye.svg" index="%s"/>'.format(this.static, step.index) +
               '</div>'

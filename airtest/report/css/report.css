@@ -352,6 +352,7 @@ h2.empty-report{
   font-size:  24px;
   font-weight: bold;
   margin-bottom: 15px;
+  word-break: break-all;
 }
 .step-right .step-status{
   margin-right: 20px;

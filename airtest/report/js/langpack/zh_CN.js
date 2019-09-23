@@ -61,6 +61,7 @@ Lang.prototype.pack.zh = {
 		"Snapshot": "截图",
 		"Assert equal": "断言相等",
 		"Assert not equal": "断言不相等",
+		"Assert:": "断言：",
 		"Title": "标题",
 		"Description:": "描述：",
 		"Time:": "时间：",
