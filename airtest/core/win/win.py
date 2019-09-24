@@ -12,6 +12,7 @@ from pywinauto.win32structures import RECT
 from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
 
 from .screen import screenshot
+from .directinput import key_press, key_release
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -157,6 +158,7 @@ class Windows(Device):
         """
         self.keyevent(text)
 
+<<<<<<< HEAD
     def _fix_op_pos(self, pos):
         """Fix operation position."""
         # 如果是全屏的话，就进行双屏修正，否则就正常即可
@@ -166,6 +168,38 @@ class Windows(Device):
             pos[1] = pos[1] + self.monitor["top"]
 
         return pos
+=======
+    @staticmethod
+    def key_press(key):
+        """Simulates a key press event.
+
+        :param key: A string indicating which key to be pressed.
+                    Available key options are:
+                    {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T',
+                    'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A',
+                    'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", '`',
+                    'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+                    ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK',
+                    'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9',
+                    'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8',
+                    'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6',
+                    'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0',
+                    'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
+                    'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
+                    'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
+                    'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}
+        """
+        key_press(key)
+
+    @staticmethod
+    def key_release(key):
+        """Simulates a key release event.
+
+        :param key: A string indicating which key to be released.
+        """
+        key_release(key)
+>>>>>>> fd84fe7... Support DirectInput
 
     def touch(self, pos, **kwargs):
         """
