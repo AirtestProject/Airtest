@@ -173,6 +173,11 @@ class Windows(Device):
     def key_press(key):
         """Simulates a key press event.
 
+        Sends a scancode to the computer to report which key has been pressed.
+        Some games use DirectInput devices, and respond only to scancodes,
+        not virtual keys. You can simulate DirectInput key presses using this
+        method, instead of keyevent(...).
+
         :param key: A string indicating which key to be pressed.
                     Available key options are:
                     {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -195,6 +200,11 @@ class Windows(Device):
     @staticmethod
     def key_release(key):
         """Simulates a key release event.
+
+        Sends a scancode to the computer to report which key has been released.
+        Some games use DirectInput devices, and respond only to scancodes,
+        not virtual keys. You can simulate DirectInput key releases using this
+        method.
 
         :param key: A string indicating which key to be released.
         """
@@ -274,7 +284,8 @@ class Windows(Device):
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
 
-        :param pos: The screen coordinates to move the mouse to.
+        :param pos: A tuple (x, y), where x and y are x and y coordinates of the screen
+                    to move the mouse to, respectively.
         """
         self.mouse.move(coords=self._action_pos(pos))
 
@@ -282,6 +293,8 @@ class Windows(Device):
         """Simulates a `mousedown` event.
 
         :param button: A string indicating which mouse button to be pressed.
+                       Available mouse button options are:
+                       {'left', 'middle', 'right'}.
         """
         buttons = {'left', 'middle', 'right'}
         button = button if button in buttons else 'left'
@@ -289,7 +302,7 @@ class Windows(Device):
         self.mouse.press(button=button, coords=coords)
 
     def mouse_up(self, button='left'):
-        """Simulates a `mouseup` event
+        """Simulates a `mouseup` event.
 
         :param button: A string indicating which mouse button to be released.
         """
