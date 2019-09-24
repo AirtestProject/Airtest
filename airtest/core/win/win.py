@@ -5,6 +5,7 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
+import win32api
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
@@ -158,7 +159,6 @@ class Windows(Device):
         """
         self.keyevent(text)
 
-<<<<<<< HEAD
     def _fix_op_pos(self, pos):
         """Fix operation position."""
         # 如果是全屏的话，就进行双屏修正，否则就正常即可
@@ -168,7 +168,7 @@ class Windows(Device):
             pos[1] = pos[1] + self.monitor["top"]
 
         return pos
-=======
+
     @staticmethod
     def key_press(key):
         """Simulates a key press event.
@@ -199,7 +199,6 @@ class Windows(Device):
         :param key: A string indicating which key to be released.
         """
         key_release(key)
->>>>>>> fd84fe7... Support DirectInput
 
     def touch(self, pos, **kwargs):
         """
@@ -271,6 +270,33 @@ class Windows(Device):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y))
+
+    def mouse_move(self, pos):
+        """Simulates a `mousemove` event.
+
+        :param pos: The screen coordinates to move the mouse to.
+        """
+        self.mouse.move(coords=self._action_pos(pos))
+
+    def mouse_down(self, button='left'):
+        """Simulates a `mousedown` event.
+
+        :param button: A string indicating which mouse button to be pressed.
+        """
+        buttons = {'left', 'middle', 'right'}
+        button = button if button in buttons else 'left'
+        coords = self._action_pos(win32api.GetCursorPos())
+        self.mouse.press(button=button, coords=coords)
+
+    def mouse_up(self, button='left'):
+        """Simulates a `mouseup` event
+
+        :param button: A string indicating which mouse button to be released.
+        """
+        buttons = {'left', 'middle', 'right'}
+        button = button if button in buttons else 'left'
+        coords = self._action_pos(win32api.GetCursorPos())
+        self.mouse.release(button=button, coords=coords)
 
     def start_app(self, path, **kwargs):
         """

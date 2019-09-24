@@ -387,7 +387,8 @@ def key_press(key):
                 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
                 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
                 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
-                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}
+                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
+    :platform: Windows.
     """
     G.DEVICE.key_press(key)
 
@@ -397,8 +398,36 @@ def key_release(key):
     """Simulates a key release event.
 
     :param key: A string indicating which key to be released.
+    :platform: Windows.
     """
     G.DEVICE.key_release(key)
+
+
+@logwrap
+def mouse_move(pos):
+    """Simulates a `mousemove` event.
+
+    :param pos: The screen coordinates to move the mouse to.
+    """
+    G.DEVICE.mouse_move(pos)
+
+
+@logwrap
+def mouse_down(button='left'):
+    """Simulates a `mousedown` event.
+
+    :param button: A string indicating which mouse button to be pressed.
+    """
+    G.DEVICE.mouse_press(button)
+
+
+@logwrap
+def mouse_up(button='left'):
+    """Simulates a `mouseup` event.
+
+    :param button: A string indicating which mouse button to be released.
+    """
+    G.DEVICE.mouse_release(button)
 
 
 @logwrap
