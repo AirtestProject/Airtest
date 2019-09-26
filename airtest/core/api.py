@@ -423,8 +423,8 @@ def mouse_move(pos):
                off-by-one errors when it comes to the exact coordinates of
                the position on screen.
 
-    :param pos: A tuple (x, y), where x and y are x and y coordinates of the screen
-                to move the mouse to, respectively.
+    :param pos: A tuple (x, y), where x and y are x and y coordinates of the
+                screen to move the mouse to, respectively.
     :platform: Windows.
     """
     G.DEVICE.mouse_move(pos)
