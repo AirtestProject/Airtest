@@ -226,10 +226,9 @@ def key_release(key):
 def send_keyboard_input(hex_code, flags):
     """Simulates a key press/release event with SendInput.
 
-    Args:
-        hex_code: Scancode of the particular key to be pressed/released in
-                  hexadecimal.
-        flags: Flags indicating various aspects of the keystroke.
+    :param hex_code: Scancode of the particular key to be pressed/released in
+                     hexadecimal.
+    :param flags: Flags indicating various aspects of the keystroke.
     """
     inputs = Input(type=ctypes.c_ulong(win32con.INPUT_KEYBOARD),
                    ki=KeyBdInput(wScan=hex_code, dwFlags=flags))
