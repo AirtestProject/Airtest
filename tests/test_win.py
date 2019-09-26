@@ -49,6 +49,8 @@ class TestWin(unittest.TestCase):
     def test_mouse_move(self):
         self.windows.mouse_move((100, 100))
         self.assertTupleEqual(win32api.GetCursorPos(), (100, 100))
+        self.windows.mouse_move((150, 50))
+        self.assertTupleEqual(win32api.GetCursorPos(), (150, 50))
 
     def test_mouse_down_and_mouse_up(self):
         self.windows.mouse_down('left')
