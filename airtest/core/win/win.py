@@ -175,7 +175,7 @@ class Windows(Device):
 
         Sends a scancode to the computer to report which key has been pressed.
         Some games use DirectInput devices, and respond only to scancodes, not
-        virtual keys. You can simulate DirectInput key presses using this
+        virtual key codes. You can simulate DirectInput key presses using this
         method, instead of the keyevent(...) method, which uses virtual key
         codes.
 
@@ -204,7 +204,7 @@ class Windows(Device):
 
         Sends a scancode to the computer to report which key has been released.
         Some games use DirectInput devices, and respond only to scancodes, not
-        virtual keys. You can simulate DirectInput key releases using this
+        virtual key codes. You can simulate DirectInput key releases using this
         method. A call to the key_release(...) method usually follows a call to
         the key_press(..) method of the same key.
 

@@ -385,7 +385,7 @@ msgid "Simulates a key press event."
 msgstr "模拟一个按下按键的事件。"
 
 #: airtest.core.api.key_press: 3 of
-msgid "Sends a scancode to the computer to report which key has been pressed. Some games use DirectInput devices, and respond only to scancodes, not virtual keys. You can simulate DirectInput key presses using this method, instead of the keyevent(...) method, which uses virtual key codes."
+msgid "Sends a scancode to the computer to report which key has been pressed. Some games use DirectInput devices, and respond only to scancodes, not virtual key codes. You can simulate DirectInput key presses using this method, instead of the keyevent(...) method, which uses virtual key codes."
 msgstr "发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press(...)方法来模拟发送键盘扫描码，而不是上述发送虚拟键码的keyevent(...)方法。"
 
 #: airtest.core.api.key_press: 9 of
@@ -401,7 +401,7 @@ msgid "Simulates a key release event."
 msgstr "模拟一个释放按键的事件。"
 
 #: airtest.core.api.key_release: 3 of
-msgid "Sends a scancode to the computer to report which key has been released. Some games use DirectInput devices, and respond only to scancodes, not virtual keys. You can simulate DirectInput key releases using this method. A call to the key_release(...) method usually follows a call to the key_press(..) method of the same key."
+msgid "Sends a scancode to the computer to report which key has been released. Some games use DirectInput devices, and respond only to scancodes, not virtual key codes. You can simulate DirectInput key releases using this method. A call to the key_release(...) method usually follows a call to the key_press(..) method of the same key."
 msgstr "发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release(...)方法来模拟发送键盘扫描码。一般情况下key_release(...)方法与所释放按键的key_press(...)方法搭配使用。"
 
 #: airtest.core.api.key_release: 9 of

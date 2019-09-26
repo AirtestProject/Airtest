@@ -13,7 +13,7 @@ EXTENDED_KEYS = {
     'NUMPAD_/': 0xB5,
     'RALT': 0xB8,
     'HOME': 0xC7,
-    'Up': 0xC8,
+    'UP': 0xC8,
     'PAGE_UP': 0xC9,
     'LEFT': 0xCB,
     'RIGHT': 0xCD,
@@ -182,7 +182,7 @@ def key_press(key):
 
     Sends a scancode to the computer to report which key has been pressed.
     Some games use DirectInput devices, and respond only to scancodes, not
-    virtual keys. You can simulate DirectInput key presses using this
+    virtual key codes. You can simulate DirectInput key presses using this
     method, instead of the keyevent(...) method, which uses virtual key
     codes.
 
@@ -205,7 +205,7 @@ def key_release(key):
 
     Sends a scancode to the computer to report which key has been released.
     Some games use DirectInput devices, and respond only to scancodes, not
-    virtual keys. You can simulate DirectInput key releases using this
+    virtual key codes. You can simulate DirectInput key releases using this
     method. A call to the key_release(...) method usually follows a call to
     the key_press(..) method of the same key.
 
