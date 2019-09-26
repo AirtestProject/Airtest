@@ -16,7 +16,7 @@ class TestWin(unittest.TestCase):
         cls.windows = Windows()
 
     def test_shell(self):
-        result=self.windows.shell("dir").decode('ascii', 'ignore')
+        result=self.windows.shell("dir").decode('utf-8', 'ignore')
         self.assertIn(".", result)
         self.assertIn("..", result)
 
