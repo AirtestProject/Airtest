@@ -189,13 +189,20 @@ def key_press(key):
     :param key: A string indicating which key to be pressed.
                 Available key options are listed in KEYS and EXTENDED_KEYS.
     """
-    key = key.upper()
-    if key in KEYS:
-        hex_code = KEYS[key]
+    key_name = key.upper()
+    try:
+        hex_code = KEYS[key_name]
+    except KeyError:
+        pass
+    else:
         flags = KEYEVENTF_SCANCODE
         send_keyboard_input(hex_code, flags)
-    elif key in EXTENDED_KEYS:
-        hex_code = EXTENDED_KEYS[key]
+        return
+    try:
+        hex_code = EXTENDED_KEYS[key_name]
+    except KeyError:
+        raise ValueError('invalid literal for key_press(): %s' % key)
+    else:
         flags = win32con.KEYEVENTF_EXTENDEDKEY | KEYEVENTF_SCANCODE
         send_keyboard_input(hex_code, flags)
 
@@ -211,13 +218,20 @@ def key_release(key):
 
     :param key: A string indicating which key to be released.
     """
-    key = key.upper()
-    if key in KEYS:
-        hex_code = KEYS[key]
+    key_name = key.upper()
+    try:
+        hex_code = KEYS[key_name]
+    except KeyError:
+        pass
+    else:
         flags = KEYEVENTF_SCANCODE | win32con.KEYEVENTF_KEYUP
         send_keyboard_input(hex_code, flags)
-    elif key in EXTENDED_KEYS:
-        hex_code = EXTENDED_KEYS[key]
+        return
+    try:
+        hex_code = EXTENDED_KEYS[key_name]
+    except KeyError:
+        raise ValueError('invalid literal for key_release(): %s' % key)
+    else:
         flags = (win32con.KEYEVENTF_EXTENDEDKEY | KEYEVENTF_SCANCODE |
                  win32con.KEYEVENTF_KEYUP)
         send_keyboard_input(hex_code, flags)
