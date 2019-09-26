@@ -189,11 +189,16 @@ def key_press(key):
     :param key: A string indicating which key to be pressed.
                 Available key options are listed in KEYS and EXTENDED_KEYS.
     """
-    key_name = key.upper()
+    try:
+        key_name = key.upper()
+    except AttributeError:
+        raise ValueError('invalid literal for key_press(): %s' % key)
     try:
         hex_code = KEYS[key_name]
     except KeyError:
         pass
+    except AttributeError:
+        raise ValueError('invalid literal for key_press(): %s' % key)
     else:
         flags = KEYEVENTF_SCANCODE
         send_keyboard_input(hex_code, flags)
@@ -218,7 +223,10 @@ def key_release(key):
 
     :param key: A string indicating which key to be released.
     """
-    key_name = key.upper()
+    try:
+        key_name = key.upper()
+    except AttributeError:
+        raise ValueError('invalid literal for key_release(): %s' % key)
     try:
         hex_code = KEYS[key_name]
     except KeyError:
