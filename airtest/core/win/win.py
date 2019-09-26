@@ -33,6 +33,7 @@ class Windows(Device):
     """Windows client."""
 
     def __init__(self, handle=None, dpifactor=1, **kwargs):
+        super(Windows, self).__init__()
         self.app = None
         self.handle = int(handle) if handle else None
         # windows high dpi scale factor, no exact way to auto detect this value for a window
