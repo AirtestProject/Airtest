@@ -43,8 +43,8 @@ msgstr "初始化设备，并设置为当前设备。"
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.key_press airtest.core.api.key_release
-#: airtest.core.api mouse_move airtest.core.api mouse_down
-#: airtest.core.api mouse_up of
+#: airtest.core.api.mouse_move airtest.core.api.mouse_down
+#: airtest.core.api.mouse_up of
 msgid "Parameters"
 msgstr "参数"
 
@@ -154,8 +154,8 @@ msgstr ""
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake
 #: airtest.core.api.key_press airtest.core.api.key_release
-#: airtest.core.api mouse_move airtest.core.api mouse_down
-#: airtest.core.api mouse_up of
+#: airtest.core.api.mouse_move airtest.core.api.mouse_down
+#: airtest.core.api.mouse_up of
 msgid "platforms"
 msgstr "支持平台"
 
