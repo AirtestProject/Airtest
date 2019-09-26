@@ -197,8 +197,6 @@ def key_press(key):
         hex_code = KEYS[key_name]
     except KeyError:
         pass
-    except AttributeError:
-        raise ValueError('invalid literal for key_press(): %s' % key)
     else:
         flags = KEYEVENTF_SCANCODE
         send_keyboard_input(hex_code, flags)
