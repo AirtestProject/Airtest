@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-25 18:04:02
+ * @LastEditTime: 2019-09-26 11:03:15
  */
 function StepPannel(data, root){
   this.data = data
@@ -505,7 +505,7 @@ function StepPannel(data, root){
 
   this.init_video = function(){
     var container = $('.gif-wrap')
-    if(true) {
+    if($('.gif-wrap .embed-responsive').length>0) {
       $('.gif-wrap .minimize').click(function(){
         container.removeClass('show')
       })
@@ -515,6 +515,8 @@ function StepPannel(data, root){
       $('.gif-wrap .close').click(function(){
         container.hide()
       })
+    }else {
+      container.hide()
     }
   }
 
