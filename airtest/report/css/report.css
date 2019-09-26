@@ -525,6 +525,7 @@ h2.empty-report{
   text-align: right;
   background: rgba(0, 0, 0, 0.7);
   min-width: 100px;
+  height: 38px;
 }
 .row.gif-wrap .pattern1, .row.gif-wrap .col-md-6{
   display: none;
@@ -539,32 +540,31 @@ h2.empty-report{
   display: none;
 }
 .row.gif-wrap .pattern {
-  margin-right: 20px;
+  margin-right: 14px;
 }
 .row.gif-wrap .pattern>div{
   display: inline-block;
   padding: 8px;
   width: 20px;
   height: 20px;
-  margin-left: -10px;
+  margin-left: 2px;
+}
+.row.gif-wrap .pattern .minimize {
+  width: 18px;
 }
 .row.gif-wrap .embed-responsive{
   display: inline-block;
   position: relative;
 }
-.row.gif-wrap .embed-responsive:hover .open_in_new_tab{
-  opacity: 1;
-}
 .row.gif-wrap .embed-responsive .open_in_new_tab{
   position: absolute;
-  top: 8px;
-  right: 8px;
-  opacity: 0;
+  top: -34px;
+  right: 100px;
   transition: all 0.3s ease-out;
   background: rgba(0, 0, 0, 0.7);
   padding: 8px;
   border-radius: 44px;
-  width: 15px;
+  width: 16px;
   height: 15px;
   z-index: 2;
 }
