@@ -302,9 +302,9 @@ class Windows(Device):
                        {'left', 'middle', 'right'}.
         """
         buttons = {'left', 'middle', 'right'}
-        button = button if button in buttons else 'left'
-        coords = self._action_pos(win32api.GetCursorPos())
-        self.mouse.press(button=button, coords=coords)
+        if button in buttons:
+            coords = self._action_pos(win32api.GetCursorPos())
+            self.mouse.press(button=button, coords=coords)
 
     def mouse_up(self, button='left'):
         """Simulates a `mouseup` event.
@@ -315,9 +315,9 @@ class Windows(Device):
         :param button: A string indicating which mouse button to be released.
         """
         buttons = {'left', 'middle', 'right'}
-        button = button if button in buttons else 'left'
-        coords = self._action_pos(win32api.GetCursorPos())
-        self.mouse.release(button=button, coords=coords)
+        if button in buttons:
+            coords = self._action_pos(win32api.GetCursorPos())
+            self.mouse.release(button=button, coords=coords)
 
     def start_app(self, path, **kwargs):
         """
