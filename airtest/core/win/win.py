@@ -170,8 +170,7 @@ class Windows(Device):
 
         return pos
 
-    @staticmethod
-    def key_press(key):
+    def key_press(self, key):
         """Simulates a key press event.
 
         Sends a scancode to the computer to report which key has been pressed.
@@ -199,8 +198,7 @@ class Windows(Device):
         """
         key_press(key)
 
-    @staticmethod
-    def key_release(key):
+    def key_release(self, key):
         """Simulates a key release event.
 
         Sends a scancode to the computer to report which key has been released.
