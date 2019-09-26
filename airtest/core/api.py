@@ -439,7 +439,7 @@ def mouse_down(button='left'):
                    {'left', 'middle', 'right'}.
     :platform: Windows.
     """
-    G.DEVICE.mouse_press(button)
+    G.DEVICE.mouse_down(button)
 
 
 @logwrap
@@ -452,7 +452,7 @@ def mouse_up(button='left'):
     :param button: A string indicating which mouse button to be released.
     :platform: Windows.
     """
-    G.DEVICE.mouse_release(button)
+    G.DEVICE.mouse_up(button)
 
 
 @logwrap
