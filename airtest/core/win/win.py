@@ -290,8 +290,8 @@ class Windows(Device):
                    off-by-one errors when it comes to the exact coordinates of
                    the position on screen.
 
-        :param pos: A tuple (x, y), where x and y are x and y coordinates of the screen
-                    to move the mouse to, respectively.
+        :param pos: A tuple (x, y), where x and y are x and y coordinates of
+                    the screen to move the mouse to, respectively.
         """
         self.mouse.move(coords=self._action_pos(pos))
 
