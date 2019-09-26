@@ -372,6 +372,12 @@ def text(text, enter=True, **kwargs):
 def key_press(key):
     """Simulates a key press event.
 
+    Sends a scancode to the computer to report which key has been pressed.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual keys. You can simulate DirectInput key presses using this
+    method, instead of the keyevent(...) method, which uses virtual key
+    codes.
+
     :param key: A string indicating which key to be pressed.
                 Available key options are:
                 {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -387,8 +393,8 @@ def key_press(key):
                 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
                 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
                 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
-                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
-    :platform: Windows.
+                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}
+    platform: Windows.
     """
     G.DEVICE.key_press(key)
 
@@ -397,8 +403,14 @@ def key_press(key):
 def key_release(key):
     """Simulates a key release event.
 
+    Sends a scancode to the computer to report which key has been released.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual keys. You can simulate DirectInput key releases using this
+    method. A call to the key_release(...) method usually follows a call to
+    the key_press(..) method of the same key.
+
     :param key: A string indicating which key to be released.
-    :platform: Windows.
+    platform: Windows.
     """
     G.DEVICE.key_release(key)
 
@@ -407,7 +419,13 @@ def key_release(key):
 def mouse_move(pos):
     """Simulates a `mousemove` event.
 
-    :param pos: The screen coordinates to move the mouse to.
+    known bug: Due to a bug in the pywinauto module, users might experience
+               off-by-one errors when it comes to the exact coordinates of
+               the position on screen.
+
+    :param pos: A tuple (x, y), where x and y are x and y coordinates of the screen
+                to move the mouse to, respectively.
+    platform: Windows.
     """
     G.DEVICE.mouse_move(pos)
 
@@ -417,6 +435,9 @@ def mouse_down(button='left'):
     """Simulates a `mousedown` event.
 
     :param button: A string indicating which mouse button to be pressed.
+                   Available mouse button options are:
+                   {'left', 'middle', 'right'}.
+    platform: Windows.
     """
     G.DEVICE.mouse_press(button)
 
@@ -425,7 +446,11 @@ def mouse_down(button='left'):
 def mouse_up(button='left'):
     """Simulates a `mouseup` event.
 
+    A call to the mouse_up(...) method usually follows a call to the
+    mouse_down(...) method of the same mouse button.
+
     :param button: A string indicating which mouse button to be released.
+    platform: Windows.
     """
     G.DEVICE.mouse_release(button)
 

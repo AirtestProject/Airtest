@@ -6,6 +6,7 @@ from ctypes.wintypes import DWORD, LONG, WORD, WPARAM
 import win32con
 
 
+# Extended keys and their corresponding scancodes
 EXTENDED_KEYS = {
     'NUMPAD_ENTER': 0x9C,
     'RCTRL': 0x9D,
@@ -26,6 +27,7 @@ EXTENDED_KEYS = {
     'MENU': 0xDD
 }
 
+# Keys and their corresponding scancodes
 KEYS = {
     'ESCAPE': 0x01,
     '1': 0x02,
@@ -176,11 +178,16 @@ class Input(ctypes.Structure):
 
 
 def key_press(key):
-    """
-    Simulates a key press event.
+    """Simulates a key press event.
 
-    Args:
-        key: A key to be pressed.
+    Sends a scancode to the computer to report which key has been pressed.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual keys. You can simulate DirectInput key presses using this
+    method, instead of the keyevent(...) method, which uses virtual key
+    codes.
+
+    :param key: A string indicating which key to be pressed.
+                Available key options are listed in KEYS and EXTENDED_KEYS.
     """
     key = key.upper()
     if key in KEYS:
@@ -196,8 +203,13 @@ def key_press(key):
 def key_release(key):
     """Simulates a key release event.
 
-    Args:
-        key: A key to be released.
+    Sends a scancode to the computer to report which key has been released.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual keys. You can simulate DirectInput key releases using this
+    method. A call to the key_release(...) method usually follows a call to
+    the key_press(..) method of the same key.
+
+    :param key: A string indicating which key to be released.
     """
     key = key.upper()
     if key in KEYS:
@@ -215,8 +227,8 @@ def send_keyboard_input(hex_code, flags):
     """Simulates a key press/release event with SendInput.
 
     Args:
-        hex_code: Scan code of the particular key to be pressed/released
-                  in hexadecimal.
+        hex_code: Scancode of the particular key to be pressed/released in
+                  hexadecimal.
         flags: Flags indicating various aspects of the keystroke.
     """
     inputs = Input(type=ctypes.c_ulong(win32con.INPUT_KEYBOARD),

@@ -41,7 +41,10 @@ msgstr "初始化设备，并设置为当前设备。"
 #: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
-#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
+#: airtest.core.api.key_press airtest.core.api.key_release
+#: airtest.core.api mouse_move airtest.core.api mouse_down
+#: airtest.core.api mouse_up of
 msgid "Parameters"
 msgstr "参数"
 
@@ -149,7 +152,10 @@ msgstr ""
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
-#: airtest.core.api.wake of
+#: airtest.core.api.wake
+#: airtest.core.api.key_press airtest.core.api.key_release
+#: airtest.core.api mouse_move airtest.core.api mouse_down
+#: airtest.core.api mouse_up of
 msgid "platforms"
 msgstr "支持平台"
 
@@ -373,6 +379,70 @@ msgstr "要输入的文本"
 #: airtest.core.api.text:4 of
 msgid "input `Enter` keyevent after text input, default is True"
 msgstr "是否在输入完毕后，执行一次 ``Enter`` ，默认是True"
+
+#: airtest.core.api.key_press: 1 of
+msgid "Simulates a key press event."
+msgstr "模拟一个按下按键的事件。"
+
+#: airtest.core.api.key_press: 3 of
+msgid "Sends a scancode to the computer to report which key has been pressed. Some games use DirectInput devices, and respond only to scancodes, not virtual keys. You can simulate DirectInput key presses using this method, instead of the keyevent(...) method, which uses virtual key codes."
+msgstr "发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press(...)方法来模拟发送键盘扫描码，而不是上述发送虚拟键码的keyevent(...)方法。"
+
+#: airtest.core.api.key_press: 9 of
+msgid "A string indicating which key to be pressed."
+msgstr "一个字符串来表示哪个按键将被按下。"
+
+#: airtest.core.api.key_press: 10 of
+msgid "Available key options are:"
+msgstr "支持的key的类型如下："
+
+#: airtest.core.api.key_release: 1 of
+msgid "Simulates a key release event."
+msgstr "模拟一个释放按键的事件。"
+
+#: airtest.core.api.key_release: 3 of
+msgid "Sends a scancode to the computer to report which key has been released. Some games use DirectInput devices, and respond only to scancodes, not virtual keys. You can simulate DirectInput key releases using this method. A call to the key_release(...) method usually follows a call to the key_press(..) method of the same key."
+msgstr "发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release(...)方法来模拟发送键盘扫描码。一般情况下key_release(...)方法与所释放按键的key_press(...)方法搭配使用。"
+
+#: airtest.core.api.key_release: 9 of
+msgid "A string indicating which key to be released."
+msgstr "一个字符串来表示哪个按键将被释放。"
+
+#: airtest.core.api.mouse_move:1 of
+msgid "Simulates a `mousemove` event."
+msgstr "模拟一个移动鼠标的事件。"
+
+#: airtest.core.api.mouse_move:3 of
+msgid "known bug"
+msgstr "已知的bug"
+
+#: airtest.core.api.mouse_move:3 of
+msgid "Due to a bug in the pywinauto module, users might experience off-by-one errors when it comes to the exact coordinates of the position on screen."
+msgstr "因为pywinauto这个模块的bug，用户可能在使用此方法时遇到移动后位置与目标位置的x和y坐标有1个单位的偏差。"
+
+#: airtest.core.api.mouse_move:7 of
+msgid "A tuple (x, y), where x and y are x and y coordinates of the screen to move the mouse to, respectively."
+msgstr "一个(x, y)的tuple, 其中x和y分别表示目标位置在屏幕上的x和y坐标。"
+
+#: airtest.core.api.mouse_down:1 of
+msgid "Simulates a `mousedown` event."
+msgstr "模拟一个按下鼠标按键的事件。"
+
+#: airtest.core.api.mouse_down:3 of
+msgid "A string indicating which mouse button to be pressed. Available mouse button options are: {'left', 'middle', 'right'}."
+msgstr "一个字符串来表示将按下哪个鼠标按键。有以下的鼠标按键选项：{'left', 'middle', 'right'}。"
+
+#: airtest.core.api.mouse_up:1 of
+msgid "Simulates a `mouseup` event."
+msgstr "模拟一个释放鼠标按键的事件。"
+
+#: airtest.core.api.mouse_up:3 of
+msgid "A call to the mouse_up(...) method usually follows a call to the mouse_down(...) method of the same mouse button."
+msgstr "一般情况下mouse_up(...)方法与所释放鼠标按键的mouse_down(...)方法搭配使用。"
+
+#: airtest.core.api.mouse_up:6 of
+msgid "A string indicating which mouse button to be released."
+msgstr "一个字符串来表示将释放哪个鼠标按键。"
 
 #: airtest.core.api.sleep:1 of
 msgid "Set the sleep interval. It will be recorded in the report"
