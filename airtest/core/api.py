@@ -393,8 +393,8 @@ def key_press(key):
                 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
                 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
                 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
-                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}
-    platform: Windows.
+                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
+    :platform: Windows.
     """
     G.DEVICE.key_press(key)
 
@@ -410,7 +410,7 @@ def key_release(key):
     the key_press(..) method of the same key.
 
     :param key: A string indicating which key to be released.
-    platform: Windows.
+    :platform: Windows.
     """
     G.DEVICE.key_release(key)
 
@@ -425,7 +425,7 @@ def mouse_move(pos):
 
     :param pos: A tuple (x, y), where x and y are x and y coordinates of the screen
                 to move the mouse to, respectively.
-    platform: Windows.
+    :platform: Windows.
     """
     G.DEVICE.mouse_move(pos)
 
@@ -437,7 +437,7 @@ def mouse_down(button='left'):
     :param button: A string indicating which mouse button to be pressed.
                    Available mouse button options are:
                    {'left', 'middle', 'right'}.
-    platform: Windows.
+    :platform: Windows.
     """
     G.DEVICE.mouse_press(button)
 
@@ -450,7 +450,7 @@ def mouse_up(button='left'):
     mouse_down(...) method of the same mouse button.
 
     :param button: A string indicating which mouse button to be released.
-    platform: Windows.
+    :platform: Windows.
     """
     G.DEVICE.mouse_release(button)
 

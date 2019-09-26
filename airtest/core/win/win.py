@@ -194,7 +194,7 @@ class Windows(Device):
                     'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
                     'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
                     'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
-                    'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}
+                    'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
         """
         key_press(key)
 
