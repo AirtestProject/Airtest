@@ -5,12 +5,14 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
+import win32api
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
 from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
 
+from .directinput import key_press, key_release
 from .screen import screenshot
 
 from airtest import aircv
@@ -31,6 +33,7 @@ class Windows(Device):
     """Windows client."""
 
     def __init__(self, handle=None, dpifactor=1, **kwargs):
+        super(Windows, self).__init__()
         self.app = None
         self.handle = int(handle) if handle else None
         # windows high dpi scale factor, no exact way to auto detect this value for a window
@@ -167,6 +170,47 @@ class Windows(Device):
 
         return pos
 
+    def key_press(self, key):
+        """Simulates a key press event.
+
+        Sends a scancode to the computer to report which key has been pressed.
+        Some games use DirectInput devices, and respond only to scancodes, not
+        virtual key codes. You can simulate DirectInput key presses using this
+        method, instead of the keyevent(...) method, which uses virtual key
+        codes.
+
+        :param key: A string indicating which key to be pressed.
+                    Available key options are:
+                    {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T',
+                    'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A',
+                    'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", '`',
+                    'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+                    ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK',
+                    'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9',
+                    'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8',
+                    'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6',
+                    'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0',
+                    'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
+                    'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
+                    'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
+                    'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
+        """
+        key_press(key)
+
+    def key_release(self, key):
+        """Simulates a key release event.
+
+        Sends a scancode to the computer to report which key has been released.
+        Some games use DirectInput devices, and respond only to scancodes, not
+        virtual key codes. You can simulate DirectInput key releases using this
+        method. A call to the key_release(...) method usually follows a call to
+        the key_press(..) method of the same key.
+
+        :param key: A string indicating which key to be released.
+        """
+        key_release(key)
+
     def touch(self, pos, **kwargs):
         """
         Perform mouse click action
@@ -237,6 +281,52 @@ class Windows(Device):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y))
+
+    def mouse_move(self, pos):
+        """Simulates a `mousemove` event.
+
+        known bug: Due to a bug in the pywinauto module, users might experience
+                   off-by-one errors when it comes to the exact coordinates of
+                   the position on screen.
+
+        :param pos: A tuple (x, y), where x and y are x and y coordinates of
+                    the screen to move the mouse to, respectively.
+        """
+        if not isinstance(pos, tuple) or len(pos) != 2:  # pos is not a 2-tuple
+            raise ValueError(f'invalid literal for mouse_move: {pos}')
+        try:
+            self.mouse.move(coords=self._action_pos(pos))
+        except ValueError:  # in case where x, y are not numbers
+            raise ValueError(f'invalid literal for mouse_move: {pos}')
+
+    def mouse_down(self, button='left'):
+        """Simulates a `mousedown` event.
+
+        :param button: A string indicating which mouse button to be pressed.
+                       Available mouse button options are:
+                       {'left', 'middle', 'right'}.
+        """
+        buttons = {'left', 'middle', 'right'}
+        if button not in buttons:
+            raise ValueError(f'invalid literal for mouse_down(): {button}')
+        else:
+            coords = self._action_pos(win32api.GetCursorPos())
+            self.mouse.press(button=button, coords=coords)
+
+    def mouse_up(self, button='left'):
+        """Simulates a `mouseup` event.
+
+        A call to the mouse_up(...) method usually follows a call to the
+        mouse_down(...) method of the same mouse button.
+
+        :param button: A string indicating which mouse button to be released.
+        """
+        buttons = {'left', 'middle', 'right'}
+        if button not in buttons:
+            raise ValueError(f'invalid literal for mouse_up(): {button}')
+        else:
+            coords = self._action_pos(win32api.GetCursorPos())
+            self.mouse.release(button=button, coords=coords)
 
     def start_app(self, path, **kwargs):
         """
