@@ -369,6 +369,93 @@ def text(text, enter=True, **kwargs):
 
 
 @logwrap
+def key_press(key):
+    """Simulates a key press event.
+
+    Sends a scancode to the computer to report which key has been pressed.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual key codes. You can simulate DirectInput key presses using this
+    method, instead of the keyevent(...) method, which uses virtual key
+    codes.
+
+    :param key: A string indicating which key to be pressed.
+                Available key options are:
+                {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T',
+                'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A',
+                'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", '`',
+                'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+                ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK',
+                'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9',
+                'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8',
+                'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6',
+                'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0',
+                'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
+                'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
+                'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
+                'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
+    :platform: Windows.
+    """
+    G.DEVICE.key_press(key)
+
+
+@logwrap
+def key_release(key):
+    """Simulates a key release event.
+
+    Sends a scancode to the computer to report which key has been released.
+    Some games use DirectInput devices, and respond only to scancodes, not
+    virtual key codes. You can simulate DirectInput key releases using this
+    method. A call to the key_release(...) method usually follows a call to
+    the key_press(..) method of the same key.
+
+    :param key: A string indicating which key to be released.
+    :platform: Windows.
+    """
+    G.DEVICE.key_release(key)
+
+
+@logwrap
+def mouse_move(pos):
+    """Simulates a `mousemove` event.
+
+    known bug: Due to a bug in the pywinauto module, users might experience
+               off-by-one errors when it comes to the exact coordinates of
+               the position on screen.
+
+    :param pos: A tuple (x, y), where x and y are x and y coordinates of the
+                screen to move the mouse to, respectively.
+    :platform: Windows.
+    """
+    G.DEVICE.mouse_move(pos)
+
+
+@logwrap
+def mouse_down(button='left'):
+    """Simulates a `mousedown` event.
+
+    :param button: A string indicating which mouse button to be pressed.
+                   Available mouse button options are:
+                   {'left', 'middle', 'right'}.
+    :platform: Windows.
+    """
+    G.DEVICE.mouse_down(button)
+
+
+@logwrap
+def mouse_up(button='left'):
+    """Simulates a `mouseup` event.
+
+    A call to the mouse_up(...) method usually follows a call to the
+    mouse_down(...) method of the same mouse button.
+
+    :param button: A string indicating which mouse button to be released.
+    :platform: Windows.
+    """
+    G.DEVICE.mouse_up(button)
+
+
+@logwrap
 def sleep(secs=1.0):
     """
     Set the sleep interval. It will be recorded in the report
