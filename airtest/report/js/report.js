@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-24 14:12:15
+ * @LastEditTime: 2019-09-26 11:03:15
  */
 function StepPannel(data, root){
   this.data = data
@@ -35,6 +35,7 @@ function StepPannel(data, root){
     } else{
       this.setSteps()
     }
+    this.init_video()
   }
 
   this.bindEvents = function(){
@@ -174,7 +175,6 @@ function StepPannel(data, root){
     }else{
       $('.gallery .content').html(fragment)
     }
-
   }
 
   this.jumpToCurrStep = function(step) {
@@ -501,6 +501,23 @@ function StepPannel(data, root){
     })
     $('#pageTool .steps-account').html(this.steps.length)
     this.paging.go(this.currentPage)
+  }
+
+  this.init_video = function(){
+    var container = $('.gif-wrap')
+    if($('.gif-wrap .embed-responsive').length>0) {
+      $('.gif-wrap .minimize').click(function(){
+        container.removeClass('show')
+      })
+      $('.gif-wrap .maximize').click(function(){
+        container.addClass('show')
+      })
+      $('.gif-wrap .close').click(function(){
+        container.hide()
+      })
+    }else {
+      container.hide()
+    }
   }
 
   this.convertPosPersentage = function(pixcel, key){

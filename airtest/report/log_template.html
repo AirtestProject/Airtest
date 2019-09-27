@@ -10,18 +10,10 @@
     <script src="https://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    
-
-    <!-- <link href="{{static_root}}css/bootstrap.min.css" rel="stylesheet"> -->
-    <!-- <link href="{{static_root}}css/main.css" rel="stylesheet"> -->
 
     <link href="{{static_root}}css/report.css" rel="stylesheet">
-    <!-- <link href="{{static_root}}css/jquery.fancybox.css" rel="stylesheet"> -->
-    <!-- <link href="{{static_root}}css/animate.css" rel="stylesheet"> -->
 
     <script src="{{static_root}}js/jquery-1.10.2.min.js"></script>
-    <!--<script src="{{ static_root }}js/echarts/echarts.common.min.js"></script>-->
-    <!--<script src="{{ static_root }}js/echarts/shine.js"></script>-->
     <script src="{{ static_root }}js/jquery-lang.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/langpack/zh_CN.js" charset="utf-8" type="text/javascript"></script>
     <script src="{{ static_root }}js/lazyload.js" charset="utf-8" type="text/javascript"></script>
@@ -189,11 +181,29 @@
       {% endblock %}
       </div>
       <!-- 录屏 -->
-      <div class="row gif-wrap">
+      <div class="row gif-wrap show">
+          <div class="menu">
+            <div class="pattern pattern1">
+              <div class="minimize">
+                <img title="minimize" src="{{static_root}}image/minimize.svg" />
+              </div>
+              <div class="close">
+                <img title="close" src="{{static_root}}image/close.svg" />
+              </div>
+            </div>
+            <div class="pattern pattern2">
+              <div class="maximize">
+                <img title="maximize" src="{{static_root}}image/maximize.svg" />
+              </div>
+            </div>
+          </div>
           <div class="col-md-6">
             {% if records %}
               {% for r in records %}
                 <div align="center" class="embed-responsive embed-responsive-16by9">
+                    <a href="{{ r }}" target="_blank" class="open_in_new_tab">
+                      <img title="open in new tab" src="{{static_root}}image/open_in_new_tab.svg" />
+                    </a>
                     <video class="embed-responsive-item" controls>
                         <source src="{{ r }}" type="video/mp4">
                     </video>
@@ -204,13 +214,8 @@
         </div>
     </div>
 
-  
-  <!-- <script src="{{static_root}}js/bootstrap.min.js"></script> -->
-
-  <!-- hightlight js -->
   <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">  
   <script src="{{static_root}}js/highlight.min.js"></script>  
-  <!-- 分页 https://github.com/tianxiangbing/paging -->
   <script type="text/javascript" src="{{static_root}}js/paging.js"></script>
   <script src="{{static_root}}js/report.js"></script>  
 </body>
