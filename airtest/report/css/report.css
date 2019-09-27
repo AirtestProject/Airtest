@@ -519,12 +519,67 @@ h2.empty-report{
   position: fixed;
   bottom: 0;
   right: 0;
-  max-width: 500px;
-  max-height: 500px;
 }
-.row.gif-wrap .embed-responsive-item {
+.row.gif-wrap .menu{
+  display: block;
+  text-align: right;
+  background: rgba(0, 0, 0, 0.7);
+  min-width: 100px;
+  height: 38px;
+}
+.row.gif-wrap .pattern1, .row.gif-wrap .col-md-6{
+  display: none;
+}
+.row.gif-wrap.show .pattern1, .row.gif-wrap.show .col-md-6{
+  display: block;
+}
+.row.gif-wrap .pattern2{
+  display: block;
+}
+.row.gif-wrap.show .pattern2{
+  display: none;
+}
+.row.gif-wrap .pattern {
+  margin-right: 14px;
+}
+.row.gif-wrap .pattern>div{
+  display: inline-block;
+  padding: 8px;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+}
+.row.gif-wrap .pattern .minimize {
+  width: 18px;
+}
+.row.gif-wrap .embed-responsive{
+  display: inline-block;
+  position: relative;
+}
+.row.gif-wrap .embed-responsive .open_in_new_tab{
+  position: absolute;
+  top: -34px;
+  right: 100px;
+  transition: all 0.3s ease-out;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  border-radius: 44px;
+  width: 16px;
+  height: 15px;
+  z-index: 2;
+}
+.row.gif-wrap img{
   max-width: 100%;
   max-height: 100%;
+  opacity: 0.6;
+}
+.row.gif-wrap img:hover{
+  opacity: 1;
+  transform: scale(1.1);
+}
+.row.gif-wrap .embed-responsive-item {
+  max-width: 500px;
+  max-height: 500px;
 }
 
 .footer {
