@@ -292,7 +292,12 @@ class Windows(Device):
         :param pos: A tuple (x, y), where x and y are x and y coordinates of
                     the screen to move the mouse to, respectively.
         """
-        self.mouse.move(coords=self._action_pos(pos))
+        if not isinstance(pos, tuple) or len(pos) != 2:  # pos is not a 2-tuple
+            raise ValueError(f'invalid literal for mouse_move: {pos}')
+        try:
+            self.mouse.move(coords=self._action_pos(pos))
+        except ValueError:  # in case where x, y are not numbers
+            raise ValueError(f'invalid literal for mouse_move: {pos}')
 
     def mouse_down(self, button='left'):
         """Simulates a `mousedown` event.
@@ -302,7 +307,9 @@ class Windows(Device):
                        {'left', 'middle', 'right'}.
         """
         buttons = {'left', 'middle', 'right'}
-        if button in buttons:
+        if button not in buttons:
+            raise ValueError(f'invalid literal for mouse_down(): {button}')
+        else:
             coords = self._action_pos(win32api.GetCursorPos())
             self.mouse.press(button=button, coords=coords)
 
@@ -315,7 +322,9 @@ class Windows(Device):
         :param button: A string indicating which mouse button to be released.
         """
         buttons = {'left', 'middle', 'right'}
-        if button in buttons:
+        if button not in buttons:
+            raise ValueError(f'invalid literal for mouse_up(): {button}')
+        else:
             coords = self._action_pos(win32api.GetCursorPos())
             self.mouse.release(button=button, coords=coords)
 
