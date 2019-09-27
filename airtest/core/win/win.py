@@ -293,11 +293,11 @@ class Windows(Device):
                     the screen to move the mouse to, respectively.
         """
         if not isinstance(pos, tuple) or len(pos) != 2:  # pos is not a 2-tuple
-            raise ValueError(f'invalid literal for mouse_move: {pos}')
+            raise ValueError('invalid literal for mouse_move: {}'.format(pos))
         try:
             self.mouse.move(coords=self._action_pos(pos))
         except ValueError:  # in case where x, y are not numbers
-            raise ValueError(f'invalid literal for mouse_move: {pos}')
+            raise ValueError('invalid literal for mouse_move: {}'.format(pos))
 
     def mouse_down(self, button='left'):
         """Simulates a `mousedown` event.
@@ -307,8 +307,8 @@ class Windows(Device):
                        {'left', 'middle', 'right'}.
         """
         buttons = {'left', 'middle', 'right'}
-        if button not in buttons:
-            raise ValueError(f'invalid literal for mouse_down(): {button}')
+        if not isinstance(button, str) or button not in buttons:
+            raise ValueError('invalid literal for mouse_down(): {}'.format(button))
         else:
             coords = self._action_pos(win32api.GetCursorPos())
             self.mouse.press(button=button, coords=coords)
@@ -322,8 +322,8 @@ class Windows(Device):
         :param button: A string indicating which mouse button to be released.
         """
         buttons = {'left', 'middle', 'right'}
-        if button not in buttons:
-            raise ValueError(f'invalid literal for mouse_up(): {button}')
+        if not isinstance(button, str) or button not in buttons:
+            raise ValueError('invalid literal for mouse_up(): {}'.format(button))
         else:
             coords = self._action_pos(win32api.GetCursorPos())
             self.mouse.release(button=button, coords=coords)

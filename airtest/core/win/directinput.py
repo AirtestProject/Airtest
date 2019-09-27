@@ -192,7 +192,7 @@ def key_press(key):
     try:
         key_name = key.upper()
     except AttributeError:
-        raise ValueError(f'invalid literal for key_press(): {key}')
+        raise ValueError('invalid literal for key_press(): {}'.format(key))
     try:
         hex_code = KEYS[key_name]
     except KeyError:
@@ -204,7 +204,7 @@ def key_press(key):
     try:
         hex_code = EXTENDED_KEYS[key_name]
     except KeyError:
-        raise ValueError(f'invalid literal for key_press(): {key}')
+        raise ValueError('invalid literal for key_press(): {}'.format(key))
     else:
         flags = win32con.KEYEVENTF_EXTENDEDKEY | KEYEVENTF_SCANCODE
         send_keyboard_input(hex_code, flags)
@@ -224,7 +224,7 @@ def key_release(key):
     try:
         key_name = key.upper()
     except AttributeError:
-        raise ValueError(f'invalid literal for key_release(): {key}')
+        raise ValueError('invalid literal for key_release(): {}'.format(key))
     try:
         hex_code = KEYS[key_name]
     except KeyError:
@@ -236,7 +236,7 @@ def key_release(key):
     try:
         hex_code = EXTENDED_KEYS[key_name]
     except KeyError:
-        raise ValueError(f'invalid literal for key_release(): {key}')
+        raise ValueError('invalid literal for key_release(): {}'.format(key))
     else:
         flags = (win32con.KEYEVENTF_EXTENDEDKEY | KEYEVENTF_SCANCODE |
                  win32con.KEYEVENTF_KEYUP)
