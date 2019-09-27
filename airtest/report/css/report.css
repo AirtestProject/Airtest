@@ -272,7 +272,6 @@ h2.empty-report{
   margin-right: 40px;
 }
 .head-right .jump-wrong, .head-right .filter{
-  border-radius: 3px;
   padding: 0 10px;
   background: #1F3057;
   cursor: context-menu;
@@ -281,7 +280,7 @@ h2.empty-report{
   background: #283D6F
 }
 .head-right .filter.active{
-  background: #111B32
+  background: #8B632A;
 }
 .steps-content {
   background: rgb(18,28,52);
