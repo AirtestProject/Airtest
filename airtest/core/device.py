@@ -43,21 +43,6 @@ class Device(with_metaclass(MetaDevice, object)):
     def text(self, text, enter=True):
         self._raise_not_implemented_error()
 
-    def key_press(self, key):
-        self._raise_not_implemented_error()
-
-    def key_release(self, key):
-        self._raise_not_implemented_error()
-
-    def mouse_move(self, pos):
-        self._raise_not_implemented_error()
-
-    def mouse_down(self, button):
-        self._raise_not_implemented_error()
-
-    def mouse_up(self, button):
-        self._raise_not_implemented_error()
-
     def start_app(self, package, **kwargs):
         self._raise_not_implemented_error()
 
