@@ -44,12 +44,11 @@ body{
 h2.empty-report{
   text-align: center;
   margin-bottom: 60px;
-  margin-top: -36px;
+  margin-top: 30px;
 }
 .title{
   font-size: 32px;
   text-align: center;
-  padding-bottom: 100px;
   padding-top: 50px;
 }
 .info-title{
@@ -59,7 +58,7 @@ h2.empty-report{
 .summary{
   margin: 30px 0;
   background: #121c34;
-  padding-top: 50px;
+  padding-top: 30px;
   padding-left: 30px;
 }
 .summary .show-vertical, .summary .info3, .summary .show-horizontal .info{
@@ -173,14 +172,39 @@ h2.empty-report{
 }
 
 .gallery{
-  /* todo... */
-  display: none;
+  margin-bottom: 30px;
 }
-.gallery .content, .step-list .content{
-  background: rgb(18,28,52)
+.gallery .info-title{
+  margin-bottom: 10px;
+}
+.gallery .content{
+  background: rgb(18,28,52);
+  overflow-x: scroll;
+  white-space: nowrap;
+  background: #121c34;
+  padding-top: 20px;
+}
+.gallery .thumbnail {
+  display: inline-block;
+  border: solid 1px transparent;
+}
+.gallery .thumbnail.active {
+  border: solid 1px rgb(74,144,226);
+}
+.gallery .thumbnail img{
+  max-width: 120px;
+  max-height: 130px;
+}
+.gallery .thumbnail .time{
+  text-align: center;
+  font-size: 12px;
+  margin: 3px 0;
 }
 .step-list .no-steps{
   text-align: center;
+}
+.step-list .content{
+  background: rgb(18,28,52)
 }
 
 #device{
@@ -248,7 +272,6 @@ h2.empty-report{
   margin-right: 40px;
 }
 .head-right .jump-wrong, .head-right .filter{
-  border-radius: 3px;
   padding: 0 10px;
   background: #1F3057;
   cursor: context-menu;
@@ -257,7 +280,7 @@ h2.empty-report{
   background: #283D6F
 }
 .head-right .filter.active{
-  background: #111B32
+  background: #8B632A;
 }
 .steps-content {
   background: rgb(18,28,52);
@@ -305,6 +328,17 @@ h2.empty-report{
 .step-left .step>img{
   vertical-align: middle;
 }
+.step-left .step .step-context {
+  position: absolute;
+  width: 20px;
+  top: 10px;
+  right: -25px;
+  cursor: context-menu;
+  opacity: 0.6;
+}
+.step-left .step .step-context:hover{
+  opacity: 1;
+}
 .step-left .order{
   margin: 0 5px;
 }
@@ -317,6 +351,7 @@ h2.empty-report{
   font-size:  24px;
   font-weight: bold;
   margin-bottom: 15px;
+  word-break: break-all;
 }
 .step-right .step-status{
   margin-right: 20px;
@@ -483,12 +518,67 @@ h2.empty-report{
   position: fixed;
   bottom: 0;
   right: 0;
-  max-width: 500px;
-  max-height: 500px;
 }
-.row.gif-wrap .embed-responsive-item {
+.row.gif-wrap .menu{
+  display: block;
+  text-align: right;
+  background: rgba(0, 0, 0, 0.7);
+  min-width: 100px;
+  height: 38px;
+}
+.row.gif-wrap .pattern1, .row.gif-wrap .col-md-6{
+  display: none;
+}
+.row.gif-wrap.show .pattern1, .row.gif-wrap.show .col-md-6{
+  display: block;
+}
+.row.gif-wrap .pattern2{
+  display: block;
+}
+.row.gif-wrap.show .pattern2{
+  display: none;
+}
+.row.gif-wrap .pattern {
+  margin-right: 14px;
+}
+.row.gif-wrap .pattern>div{
+  display: inline-block;
+  padding: 8px;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+}
+.row.gif-wrap .pattern .minimize {
+  width: 18px;
+}
+.row.gif-wrap .embed-responsive{
+  display: inline-block;
+  position: relative;
+}
+.row.gif-wrap .embed-responsive .open_in_new_tab{
+  position: absolute;
+  top: -34px;
+  right: 100px;
+  transition: all 0.3s ease-out;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  border-radius: 44px;
+  width: 16px;
+  height: 15px;
+  z-index: 2;
+}
+.row.gif-wrap img{
   max-width: 100%;
   max-height: 100%;
+  opacity: 0.6;
+}
+.row.gif-wrap img:hover{
+  opacity: 1;
+  transform: scale(1.1);
+}
+.row.gif-wrap .embed-responsive-item {
+  max-width: 500px;
+  max-height: 500px;
 }
 
 .footer {
@@ -614,6 +704,33 @@ h2.empty-report{
 
 
 
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px; /*滚动条的宽度*/
+  height: 6px; /*滚动条的高度*/
+}
+::-webkit-scrollbar-thumb:horizontal { /*水平滚动条的样式*/
+  background-color: #324163;
+  -webkit-border-radius: 6px;
+  outline: 2px solid #fff;
+}
+::-webkit-scrollbar-track-piece {
+  background-color: rgb(10, 10, 28); /*滚动条的背景颜色*/
+  -webkit-border-radius: 0; /*滚动条的圆角宽度*/
+}
+::-webkit-scrollbar-thumb:vertical { /*垂直滚动条的样式*/
+  height: 50px;
+  background-color: #324163;
+  -webkit-border-radius: 4px;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  border: 1px solid #324163;
+}
+::-webkit-scrollbar-thumb:hover { /*滚动条的hover样式*/
+  height: 50px;
+  background-color: #9f9f9f;
+  -webkit-border-radius: 4px;
+}
 
 
 /* 分页 */

@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-03 17:09:18
+ * @LastEditTime: 2019-09-26 11:03:15
  */
 function StepPannel(data, root){
   this.data = data
@@ -26,15 +26,29 @@ function StepPannel(data, root){
     // 初始化
     this.initStepData()
     this.bindEvents()
+    this.init_gallery()
     this.init_pagenation()
-    this.setSteps()
+    var steps = this.filterAssertSteps()
+    if(steps.length >0){
+      this.steps = steps
+      this.filterSteps($('.filter#assert'))
+    } else{
+      this.setSteps()
+    }
+    this.init_video()
   }
 
   this.bindEvents = function(){
     // 绑定事件
     var that = this
     this.stepLeft.delegate('.step', 'click',function(e){
-      that.setStepRight(e.currentTarget.getAttribute('index'))
+      if(e.target.className.indexOf("step-context") >=0 )
+        that.jumpToCurrStep(Number(e.target.getAttribute('index')))
+      else
+        that.setStepRight(e.currentTarget.getAttribute('index'))
+    })
+    $('.gallery .content').delegate('.thumbnail', 'click', function(e){
+      that.jumpToCurrStep(Number(this.getAttribute('index')))
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -143,6 +157,36 @@ function StepPannel(data, root){
     }
   }
 
+  this.init_gallery = function(){
+    var that = this
+    var fragment = this.original_steps.map(function(step){
+      if(step.screen && step.screen.thumbnail) {
+        return '<div class="thumbnail" index="%s">'.format(step.index) + 
+                  '<img src="%s" alt="%s"/>'.format(step.screen.thumbnail, step.screen.thumbnail) +
+                  '<div class="time">%s</div>'.format(getFormatDuration2(step.time, that.data.run_start)) +
+                '</div>'
+      } else{
+        return ""
+      }
+    })
+    fragment = fragment.join('')
+    if(fragment == ''){
+      $('.gallery').hide()
+    }else{
+      $('.gallery .content').html(fragment)
+    }
+  }
+
+  this.jumpToCurrStep = function(step) {
+    // 跳至指定步骤
+    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    this.steps = [].concat(this.original_steps)
+    this.currentPage = Math.floor(step / this.pagesize) +1
+    this.setPagenation()
+    this.setStepRight(step)
+    $('.steps .filter').removeClass('active')
+  }
+
   this.setStepsLeft = function(){
     html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
     start = (this.currentPage-1)* this.pagesize
@@ -150,12 +194,14 @@ function StepPannel(data, root){
     end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
     for(var i = start; i< end; i++){
-      step = this.steps[i]
+      var step = this.steps[i]
+      var title = step.assert ? '<span lang="en">Assert: </span>' + step.assert : step.title
       html += '<div class="step" index="%s">'.format(step.index) +
                 '<img src="%simage/step_%s.svg" alt="%s.svg"/>'.format(this.static, step.status, step.status) +
                 '<span class="order"># %s</span>'.format(step.index +1) +
-                '<span class="step_title" lang="en">%s</span>'.format(step.title) +
+                '<span class="step_title" lang="en">%s</span>'.format(title) +
                 '<span class="step-time">%s</span>'.format(step.duration) +
+                '<img class="step-context" src="%simage/eye.svg" alt="eye.svg" index="%s"/>'.format(this.static, step.index) +
               '</div>'
     }
     this.stepLeft.html(html)
@@ -163,6 +209,8 @@ function StepPannel(data, root){
   this.setStepRight = function(index){
     index = parseInt(index)
     if(!isNaN(index) && index>= 0 && index<this.original_steps.length){
+      $('.gallery .thumbnail.active').removeClass('active')
+      $('.gallery .thumbnail[index="%s"]'.format(index)).addClass('active')
       this.setStepRightHtml(index)
       this.initStepRight()
     }
@@ -205,7 +253,8 @@ function StepPannel(data, root){
               "</div>").format(success, pass, this.static, success,
                               this.static, step.duration,
                               step.code.name)
-    } catch {
+    } catch (err) {
+      console.log(err)
       return ""
     }
   }
@@ -454,6 +503,23 @@ function StepPannel(data, root){
     this.paging.go(this.currentPage)
   }
 
+  this.init_video = function(){
+    var container = $('.gif-wrap')
+    if($('.gif-wrap .embed-responsive').length>0) {
+      $('.gif-wrap .minimize').click(function(){
+        container.removeClass('show')
+      })
+      $('.gif-wrap .maximize').click(function(){
+        container.addClass('show')
+      })
+      $('.gif-wrap .close').click(function(){
+        container.hide()
+      })
+    }else {
+      container.hide()
+    }
+  }
+
   this.convertPosPersentage = function(pixcel, key){
     ret = ''
     if(key == 'horizontal'){
@@ -502,8 +568,16 @@ function getFormatTime(timestamp){
 }
 
 function getFormatDuration(end, start) {
+  // 返回耗时，格式为 0hr1min6s22ms
   var delta = getTimestamp(end) - getTimestamp(start)
   return getDelta(parseInt(delta))
+}
+
+function getFormatDuration2(end, start) {
+  // 返回耗时，格式为 00:00:19
+  var delta = getTimestamp(end) - getTimestamp(start)
+  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
+  return (new Date(midnight + delta)).Format("hh:mm:ss")
 }
 
 function getTimestamp(time) {
@@ -516,7 +590,7 @@ function getTimestamp(time) {
 }
 
 function getDelta(delta){
-  // 计算消耗时间，end - start，以0:1:6'22'' 格式
+  // 计算消耗时间，end - start，以0hr1min6s22ms 格式
   ms = delta % 1000
   delta = parseInt(delta / 1000)
   s = delta % 60
@@ -584,7 +658,8 @@ function loadUrlInfo(){
     back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
-    result = args.status == 'terminated' ? 'Terminated' : result
+    result = args.status ? args.status : result
+    $(".footer").hide()
   }
   set_task_status(result)
 }

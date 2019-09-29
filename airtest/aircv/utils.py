@@ -68,3 +68,11 @@ def cv2_2_pil(cv2_image):
     cv2_im = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB)
     pil_im = Image.fromarray(cv2_im)
     return pil_im
+
+
+def compress_image(pil_img, path, w=300, h=300):
+    '''
+        生成缩略图
+    '''
+    pil_img.thumbnail((w, h))
+    pil_img.save(path, quality=30)
