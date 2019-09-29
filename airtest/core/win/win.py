@@ -12,7 +12,7 @@ from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
 from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
 
-from .directinput import key_press, key_release
+from .ctypesinput import key_press, key_release
 from .screen import screenshot
 
 from airtest import aircv
