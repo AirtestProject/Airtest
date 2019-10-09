@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.core.cv.rst:2
 msgid "airtest\\.core\\.cv module"
@@ -30,7 +30,7 @@ msgid "Search for image template in the screen until timeout"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.cv.loop_find:3 of
@@ -66,7 +66,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.cv.loop_find:11 of
@@ -104,11 +104,15 @@ msgid "this class predicts the press_point and the area to search im_search."
 msgstr ""
 
 #: airtest.core.cv.Predictor.count_record_pos:1 of
-msgid "计算坐标对应的中点偏移值相对于分辨率的百分比"
+msgid "计算坐标对应的中点偏移值相对于分辨率的百分比."
 msgstr ""
 
 #: airtest.core.cv.Predictor.get_predict_point:1 of
-msgid "预测缩放后的点击位置点"
+msgid "预测缩放后的点击位置点."
+msgstr ""
+
+#: airtest.core.cv.Predictor.get_predict_area:1 of
+msgid "Get predicted area in screen."
 msgstr ""
 
 #~ msgid "参数"
@@ -138,5 +142,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "计算坐标对应的中点偏移值相对于分辨率的百分比"
+#~ msgstr ""
+
+#~ msgid "预测缩放后的点击位置点"
 #~ msgstr ""
 

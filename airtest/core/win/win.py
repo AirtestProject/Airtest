@@ -244,6 +244,7 @@ class Windows(Device):
     def swipe(self, p1, p2, duration=0.8, steps=5):
         """
         Perform swipe (mouse press and mouse release)
+
         Args:
             p1: start point
             p2: end point
@@ -285,9 +286,10 @@ class Windows(Device):
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
 
-        known bug Due to a bug in the pywinauto module, users might experience
-                   off-by-one errors when it comes to the exact coordinates of
-                   the position on screen.
+        Known bug:
+            Due to a bug in the pywinauto module, users might experience \
+            off-by-one errors when it comes to the exact coordinates of \
+            the position on screen.
 
         :param pos: A tuple (x, y), where x and y are x and y coordinates of
                     the screen to move the mouse to, respectively.

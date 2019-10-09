@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.core.android.rotation.rst:2
 msgid "airtest\\.core\\.android\\.rotation module"
@@ -37,17 +37,17 @@ msgstr ""
 #: airtest.core.android.rotation.RotationWatcher.start
 #: airtest.core.android.rotation.XYTransformer.ori_2_up
 #: airtest.core.android.rotation.XYTransformer.up_2_ori of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.rotation.RotationWatcher.start:3 of
-msgid "None"
+msgid "initial orientation"
 msgstr ""
 
 #: airtest.core.android.rotation.RotationWatcher.reg_callback
 #: airtest.core.android.rotation.XYTransformer.ori_2_up
 #: airtest.core.android.rotation.XYTransformer.up_2_ori of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.rotation.RotationWatcher.reg_callback:3 of
@@ -96,5 +96,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "None"
 #~ msgstr ""
 
