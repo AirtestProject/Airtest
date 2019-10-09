@@ -8,20 +8,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.core.android.minitouch.rst:2
 msgid "airtest\\.core\\.android\\.minitouch module"
 msgstr ""
 
-#: airtest.core.android.minitouch.Minitouch:1 of
+#: airtest.core.android.minitouch.Minitouch:1
+#: airtest.core.android.minitouch.MotionEvent:1 of
 msgid "Bases: :class:`object`"
 msgstr ""
 
@@ -45,10 +46,12 @@ msgstr ""
 #: airtest.core.android.minitouch.Minitouch.setup_client_backend
 #: airtest.core.android.minitouch.Minitouch.setup_server
 #: airtest.core.android.minitouch.Minitouch.swipe
+#: airtest.core.android.minitouch.Minitouch.swipe_along
 #: airtest.core.android.minitouch.Minitouch.teardown
 #: airtest.core.android.minitouch.Minitouch.touch
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe
 #: airtest.core.android.minitouch.Minitouch.uninstall of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.install:3
@@ -57,9 +60,11 @@ msgstr ""
 #: airtest.core.android.minitouch.Minitouch.safe_send:7
 #: airtest.core.android.minitouch.Minitouch.setup_client:10
 #: airtest.core.android.minitouch.Minitouch.setup_client_backend:3
-#: airtest.core.android.minitouch.Minitouch.swipe:25
+#: airtest.core.android.minitouch.Minitouch.swipe:8
+#: airtest.core.android.minitouch.Minitouch.swipe_along:7
 #: airtest.core.android.minitouch.Minitouch.teardown:3
 #: airtest.core.android.minitouch.Minitouch.touch:15
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:32
 #: airtest.core.android.minitouch.Minitouch.uninstall:3 of
 msgid "None"
 msgstr ""
@@ -85,16 +90,18 @@ msgid "Perform touch event"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.pinch:3
-#: airtest.core.android.minitouch.Minitouch.swipe:3
-#: airtest.core.android.minitouch.Minitouch.touch:4 of
+#: airtest.core.android.minitouch.Minitouch.touch:4
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:3 of
 msgid "minitouch protocol example::"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.operate
 #: airtest.core.android.minitouch.Minitouch.safe_send
 #: airtest.core.android.minitouch.Minitouch.swipe
-#: airtest.core.android.minitouch.Minitouch.touch of
-msgid "参数"
+#: airtest.core.android.minitouch.Minitouch.swipe_along
+#: airtest.core.android.minitouch.Minitouch.touch
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe of
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.touch:12 of
@@ -105,24 +112,42 @@ msgstr ""
 msgid "time interval for touch event, default is 0.01"
 msgstr ""
 
-#: airtest.core.android.minitouch.Minitouch.swipe:1 of
-msgid "Perform swipe event"
+#: airtest.core.android.minitouch.Minitouch.swipe_along:1 of
+msgid "Perform swipe event across multiple points in sequence."
 msgstr ""
 
-#: airtest.core.android.minitouch.Minitouch.swipe:20 of
-msgid "start point"
+#: airtest.core.android.minitouch.Minitouch.swipe_along:3 of
+msgid "list of coordinates: [(x1, y1), (x2, y2), (x3, y3)]"
 msgstr ""
 
-#: airtest.core.android.minitouch.Minitouch.swipe:21 of
-msgid "end point"
-msgstr ""
-
-#: airtest.core.android.minitouch.Minitouch.swipe:22 of
+#: airtest.core.android.minitouch.Minitouch.swipe:5
+#: airtest.core.android.minitouch.Minitouch.swipe_along:4
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:29 of
 msgid "time interval for swipe duration, default is 0.8"
 msgstr ""
 
-#: airtest.core.android.minitouch.Minitouch.swipe:23 of
+#: airtest.core.android.minitouch.Minitouch.swipe:6
+#: airtest.core.android.minitouch.Minitouch.swipe_along:5
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:30 of
 msgid "size of swipe step, default is 5"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:1 of
+msgid "Perform swipe event."
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:3
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:27 of
+msgid "start point"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.swipe:4
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:28 of
+msgid "end point"
+msgstr ""
+
+#: airtest.core.android.minitouch.Minitouch.two_finger_swipe:1 of
+msgid "Perform two finger swipe action"
 msgstr ""
 
 #: airtest.core.android.minitouch.Minitouch.pinch:1 of
@@ -152,6 +177,13 @@ msgstr ""
 msgid ":exc:`RuntimeError` -- is invalid arguments are provided"
 msgstr ""
 
+#: airtest.core.android.minitouch.Minitouch.perform:1 of
+msgid ""
+"Perform a sequence of motion events including: UpEvent, DownEvent, "
+"MoveEvent, SleepEvent :param motion_events: a list of MotionEvent "
+"instances :param interval: minimum interval between events :return: None"
+msgstr ""
+
 #: airtest.core.android.minitouch.Minitouch.safe_send:1 of
 msgid "Send data to client"
 msgstr ""
@@ -176,6 +208,17 @@ msgstr ""
 msgid "Stop the server and client"
 msgstr ""
 
+#: airtest.core.android.minitouch.MotionEvent:1 of
+msgid "Motion Event to be performed by Minitouch"
+msgstr ""
+
+#: airtest.core.android.minitouch.DownEvent:1
+#: airtest.core.android.minitouch.MoveEvent:1
+#: airtest.core.android.minitouch.SleepEvent:1
+#: airtest.core.android.minitouch.UpEvent:1 of
+msgid "Bases: :class:`airtest.core.android.minitouch.MotionEvent`"
+msgstr ""
+
 #~ msgid "返回"
 #~ msgstr ""
 
@@ -186,5 +229,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Perform swipe event"
 #~ msgstr ""
 

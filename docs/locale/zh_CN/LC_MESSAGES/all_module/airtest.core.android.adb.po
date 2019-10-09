@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.core.android.adb.rst:2
 msgid "airtest\\.core\\.android\\.adb module"
@@ -40,11 +40,15 @@ msgstr ""
 #: airtest.core.android.adb.ADB.disconnect
 #: airtest.core.android.adb.ADB.display_info
 #: airtest.core.android.adb.ADB.exists_file
-#: airtest.core.android.adb.ADB.forward
+#: airtest.core.android.adb.ADB.file_size airtest.core.android.adb.ADB.forward
 #: airtest.core.android.adb.ADB.getDisplayOrientation
+#: airtest.core.android.adb.ADB.getMaxXY
 #: airtest.core.android.adb.ADB.getPhysicalDisplayInfo
+#: airtest.core.android.adb.ADB.getRestrictedScreen
 #: airtest.core.android.adb.ADB.get_available_forward_local
+#: airtest.core.android.adb.ADB.get_device_info
 #: airtest.core.android.adb.ADB.get_display_info
+#: airtest.core.android.adb.ADB.get_display_of_all_screen
 #: airtest.core.android.adb.ADB.get_forwards
 #: airtest.core.android.adb.ADB.get_gateway_address
 #: airtest.core.android.adb.ADB.get_ip_address
@@ -53,6 +57,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.get_top_activity
 #: airtest.core.android.adb.ADB.getprop
 #: airtest.core.android.adb.ADB.install_app
+#: airtest.core.android.adb.ADB.install_multiple_app
 #: airtest.core.android.adb.ADB.is_keyboard_shown
 #: airtest.core.android.adb.ADB.is_locked
 #: airtest.core.android.adb.ADB.is_screenon
@@ -67,6 +72,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.remove_forward
 #: airtest.core.android.adb.ADB.sdk_version airtest.core.android.adb.ADB.shell
 #: airtest.core.android.adb.ADB.snapshot airtest.core.android.adb.ADB.start_app
+#: airtest.core.android.adb.ADB.start_app_timing
 #: airtest.core.android.adb.ADB.start_cmd
 #: airtest.core.android.adb.ADB.start_server
 #: airtest.core.android.adb.ADB.start_shell
@@ -75,7 +81,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.uninstall_app
 #: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.builtin_adb_path:3 of
@@ -114,7 +120,8 @@ msgstr ""
 msgid "Perform `adb version` command and return the command output"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.install_app:6
+#: airtest.core.android.adb.ADB.install_app:13
+#: airtest.core.android.adb.ADB.install_multiple_app:14
 #: airtest.core.android.adb.ADB.pm_uninstall:6
 #: airtest.core.android.adb.ADB.shell:7
 #: airtest.core.android.adb.ADB.uninstall_app:4
@@ -130,10 +137,12 @@ msgstr ""
 #: airtest.core.android.adb.ADB.clear_app airtest.core.android.adb.ADB.cmd
 #: airtest.core.android.adb.ADB.connect airtest.core.android.adb.ADB.devices
 #: airtest.core.android.adb.ADB.exists_file
-#: airtest.core.android.adb.ADB.forward
+#: airtest.core.android.adb.ADB.file_size airtest.core.android.adb.ADB.forward
+#: airtest.core.android.adb.ADB.get_display_of_all_screen
 #: airtest.core.android.adb.ADB.get_package_version
 #: airtest.core.android.adb.ADB.getprop
 #: airtest.core.android.adb.ADB.install_app
+#: airtest.core.android.adb.ADB.install_multiple_app
 #: airtest.core.android.adb.ADB.keyevent airtest.core.android.adb.ADB.list_app
 #: airtest.core.android.adb.ADB.logcat airtest.core.android.adb.ADB.path_app
 #: airtest.core.android.adb.ADB.pm_install
@@ -141,12 +150,13 @@ msgstr ""
 #: airtest.core.android.adb.ADB.raw_shell
 #: airtest.core.android.adb.ADB.remove_forward
 #: airtest.core.android.adb.ADB.shell airtest.core.android.adb.ADB.start_app
+#: airtest.core.android.adb.ADB.start_app_timing
 #: airtest.core.android.adb.ADB.start_cmd
 #: airtest.core.android.adb.ADB.start_shell
 #: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.touch
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
@@ -205,6 +215,10 @@ msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:10 of
 msgid "command(s) standard output (stdout)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.close_proc_pipe:1 of
+msgid "close stdin/stdout/stderr of subprocess.Popen."
 msgstr ""
 
 #: airtest.core.android.adb.ADB.devices:1 of
@@ -403,13 +417,65 @@ msgid "Perform `adb install` command"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.install_app:3
+#: airtest.core.android.adb.ADB.install_multiple_app:3
 #: airtest.core.android.adb.ADB.pm_install:5 of
 msgid "full path to file to be installed on the device"
 msgstr ""
 
+#: airtest.core.android.adb.ADB.install_app:4 of
+msgid ""
+"force to replace existing application, default is False  e.g.[\"-t\",  # "
+"allow test packages     \"-l\",  # forward lock application,     \"-s\","
+"  # install application on sdcard,     \"-d\",  # allow version code "
+"downgrade (debuggable packages only)     \"-g\",  # grant all runtime "
+"permissions ]"
+msgstr ""
+
 #: airtest.core.android.adb.ADB.install_app:4
+#: airtest.core.android.adb.ADB.install_multiple_app:4
 #: airtest.core.android.adb.ADB.pm_install:6 of
 msgid "force to replace existing application, default is False"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:9 of
+msgid "e.g.[\"-t\",  # allow test packages"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:7 of
+msgid ""
+"\"-l\",  # forward lock application, \"-s\",  # install application on "
+"sdcard, \"-d\",  # allow version code downgrade (debuggable packages "
+"only) \"-g\",  # grant all runtime permissions"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_app:11
+#: airtest.core.android.adb.ADB.install_multiple_app:12 of
+msgid "]"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_multiple_app:1 of
+msgid "Perform `adb install-multiple` command"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_multiple_app:5 of
+msgid ""
+"list of options e.g.[\"-t\",  # allow test packages     \"-l\",  # "
+"forward lock application,     \"-s\",  # install application on sdcard,"
+"     \"-d\",  # allow version code downgrade (debuggable packages only)"
+"     \"-g\",  # grant all runtime permissions     \"-p\",  # partial "
+"application install (install-multiple only) ]"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_multiple_app:5 of
+msgid "list of options e.g.[\"-t\",  # allow test packages"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.install_multiple_app:7 of
+msgid ""
+"\"-l\",  # forward lock application, \"-s\",  # install application on "
+"sdcard, \"-d\",  # allow version code downgrade (debuggable packages "
+"only) \"-g\",  # grant all runtime permissions \"-p\",  # partial "
+"application install (install-multiple only)"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.pm_install:1 of
@@ -502,12 +568,21 @@ msgstr ""
 msgid "Check if the file exits on the device"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.exists_file:3 of
+#: airtest.core.android.adb.ADB.exists_file:3
+#: airtest.core.android.adb.ADB.file_size:3 of
 msgid "path to the file"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.exists_file:5 of
 msgid "True or False if file found or not"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.file_size:1 of
+msgid "Get the file size"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.file_size:5 of
+msgid "The file size"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.line_breaker:1 of
@@ -533,7 +608,8 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.display_info:6
-#: airtest.core.android.adb.ADB.get_display_info:3 of
+#: airtest.core.android.adb.ADB.get_display_info:3
+#: airtest.core.android.adb.ADB.get_display_of_all_screen:3 of
 msgid "device screen properties"
 msgstr ""
 
@@ -543,28 +619,30 @@ msgid ""
 "max values for x and y coordinates)"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:6 of
-msgid "Display size and resolution to be obtained:"
+#: airtest.core.android.adb.ADB.getMaxXY:1 of
+msgid "Get device display maximum values for x and y coordinates"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:2 of
+#: airtest.core.android.adb.ADB.getMaxXY:3 of
+msgid "max x and max y coordinates"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getRestrictedScreen:1 of
+msgid "Get value for mRestrictedScreen (without black border / virtual keyboard)`"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getRestrictedScreen:3 of
+msgid "screen resolution mRestrictedScreen value as tuple (x, y)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:1 of
 msgid ""
-"physical display size (physical_width, physical_height) of the device - "
-"this is used by `minitouch` as a coordinates system"
+"Get value for display dimension and density from `mPhysicalDisplayInfo` "
+"value obtained from `dumpsys` command."
 msgstr ""
 
-#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:4 of
-msgid ""
-"screen effective resolution (width, height) - this is used by game image "
-"adaptation as a coordinates system"
-msgstr ""
-
-#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:6 of
-msgid "click range resolution (max_x, max_y)"
-msgstr ""
-
-#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:8 of
-msgid "display size and resolution information"
+#: airtest.core.android.adb.ADB.getPhysicalDisplayInfo:3 of
+msgid "physical display info for dimension and density"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.getDisplayOrientation:1 of
@@ -588,7 +666,11 @@ msgid ":exc:`AirtestError` -- if top activity cannot be obtained"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_top_activity:5 of
-msgid "top activity as a tuple"
+msgid "(package_name, activity_name, pid)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_top_activity of
+msgid "Return type"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_keyboard_shown:1 of
@@ -629,14 +711,6 @@ msgstr ""
 msgid "True or False whether the screen is locked or not"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.is_locked:8 of
-msgid "Notes"
-msgstr ""
-
-#: airtest.core.android.adb.ADB.is_locked:9 of
-msgid "Does not work on Xiaomi 2S"
-msgstr ""
-
 #: airtest.core.android.adb.ADB.unlock:1 of
 msgid ""
 "Perform `adb shell input keyevent MENU` and `adb shell input keyevent "
@@ -658,6 +732,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.get_package_version:3
 #: airtest.core.android.adb.ADB.path_app:3
 #: airtest.core.android.adb.ADB.start_app:4
+#: airtest.core.android.adb.ADB.start_app_timing:3
 #: airtest.core.android.adb.ADB.stop_app:3 of
 msgid "package name"
 msgstr ""
@@ -732,8 +807,17 @@ msgid ""
 "`activity` argument is `None`, then `adb shell am start` command is used."
 msgstr ""
 
-#: airtest.core.android.adb.ADB.start_app:5 of
+#: airtest.core.android.adb.ADB.start_app:5
+#: airtest.core.android.adb.ADB.start_app_timing:4 of
 msgid "activity name"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_app_timing:1 of
+msgid "Start the application and activity, and measure time"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.start_app_timing:6 of
+msgid "app launch time"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.stop_app:1 of
@@ -779,6 +863,28 @@ msgid ""
 "address"
 msgstr ""
 
+#: airtest.core.android.adb.ADB.get_device_info:1 of
+msgid ""
+"Get android device information, including: "
+"memory/storage/display/cpu/gpu/model/manufacturer..."
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_device_info:3 of
+msgid "Dict of info"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_of_all_screen:1 of
+msgid ""
+"Perform `adb shell dumpsys window windows` commands to get window display"
+" of application."
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_of_all_screen:5 of
+msgid ""
+"None if adb command failed to run, otherwise return device screen "
+"properties"
+msgstr ""
+
 #~ msgid "返回"
 #~ msgstr ""
 
@@ -789,5 +895,36 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Display size and resolution to be obtained:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "physical display size (physical_width, "
+#~ "physical_height) of the device - this"
+#~ " is used by `minitouch` as a "
+#~ "coordinates system"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "screen effective resolution (width, height)"
+#~ " - this is used by game image"
+#~ " adaptation as a coordinates system"
+#~ msgstr ""
+
+#~ msgid "click range resolution (max_x, max_y)"
+#~ msgstr ""
+
+#~ msgid "display size and resolution information"
+#~ msgstr ""
+
+#~ msgid "top activity as a tuple"
+#~ msgstr ""
+
+#~ msgid "Notes"
+#~ msgstr ""
+
+#~ msgid "Does not work on Xiaomi 2S"
 #~ msgstr ""
 

@@ -3,19 +3,21 @@
 # This file is distributed under the same license as the airtest package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: airtest \n"
+"Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2019-10-09 17:37+0800\n"
+"PO-Revision-Date: 2019-10-09 17:48+0800\n"
+"Last-Translator: \n"
+"Language: zh\n"
+"Language-Team: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../../all_module/airtest.core.android.android.rst:2
 msgid "airtest\\.core\\.android\\.android module"
@@ -29,44 +31,25 @@ msgstr ""
 msgid "Android Device Class"
 msgstr ""
 
-#: airtest.core.android.android.Android.list_app:1 of
-msgid "Return list of packages"
-msgstr ""
+#: airtest.core.android.android.Android.get_default_device:1 of
+msgid "Get local default device when no serialno"
+msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
 
-#: airtest.core.android.android.Android.check_app
-#: airtest.core.android.android.Android.clear_app
-#: airtest.core.android.android.Android.getprop
-#: airtest.core.android.android.Android.install_app
-#: airtest.core.android.android.Android.list_app
-#: airtest.core.android.android.Android.path_app
-#: airtest.core.android.android.Android.pinch
-#: airtest.core.android.android.Android.snapshot
-#: airtest.core.android.android.Android.start_app
-#: airtest.core.android.android.Android.start_recording
-#: airtest.core.android.android.Android.stop_app
-#: airtest.core.android.android.Android.stop_recording
-#: airtest.core.android.android.Android.swipe
-#: airtest.core.android.android.Android.text
-#: airtest.core.android.android.Android.touch
-#: airtest.core.android.android.Android.uninstall_app of
-msgid "参数"
-msgstr ""
-
-#: airtest.core.android.android.Android.list_app:3 of
-msgid "if True, only third party applications are listed"
-msgstr ""
-
+#: airtest.core.android.android.Android.adjust_all_screen
 #: airtest.core.android.android.Android.check_app
 #: airtest.core.android.android.Android.clear_app
 #: airtest.core.android.android.Android.display_info
 #: airtest.core.android.android.Android.get_current_resolution
+#: airtest.core.android.android.Android.get_default_device
 #: airtest.core.android.android.Android.get_display_info
 #: airtest.core.android.android.Android.get_ip_address
+#: airtest.core.android.android.Android.get_render_resolution
 #: airtest.core.android.android.Android.get_top_activity
 #: airtest.core.android.android.Android.get_top_activity_name
 #: airtest.core.android.android.Android.getprop
 #: airtest.core.android.android.Android.home
 #: airtest.core.android.android.Android.install_app
+#: airtest.core.android.android.Android.install_multiple_app
 #: airtest.core.android.android.Android.is_keyboard_shown
 #: airtest.core.android.android.Android.is_locked
 #: airtest.core.android.android.Android.is_screenon
@@ -78,6 +61,7 @@ msgstr ""
 #: airtest.core.android.android.Android.shell
 #: airtest.core.android.android.Android.snapshot
 #: airtest.core.android.android.Android.start_app
+#: airtest.core.android.android.Android.start_app_timing
 #: airtest.core.android.android.Android.start_recording
 #: airtest.core.android.android.Android.stop_app
 #: airtest.core.android.android.Android.stop_recording
@@ -87,21 +71,59 @@ msgstr ""
 #: airtest.core.android.android.Android.uninstall_app
 #: airtest.core.android.android.Android.unlock
 #: airtest.core.android.android.Android.wake of
-msgid "返回"
+msgid "Returns"
 msgstr ""
+
+#: airtest.core.android.android.Android.get_default_device:3 of
+msgid "local device serialno"
+msgstr "本地设备序列号serialno"
+
+#: airtest.core.android.android.Android.list_app:1 of
+msgid "Return list of packages"
+msgstr "返回packages列表"
+
+#: airtest.core.android.android.Android.check_app
+#: airtest.core.android.android.Android.clear_app
+#: airtest.core.android.android.Android.get_render_resolution
+#: airtest.core.android.android.Android.getprop
+#: airtest.core.android.android.Android.install_app
+#: airtest.core.android.android.Android.install_multiple_app
+#: airtest.core.android.android.Android.keyevent
+#: airtest.core.android.android.Android.list_app
+#: airtest.core.android.android.Android.logcat
+#: airtest.core.android.android.Android.path_app
+#: airtest.core.android.android.Android.pinch
+#: airtest.core.android.android.Android.shell
+#: airtest.core.android.android.Android.snapshot
+#: airtest.core.android.android.Android.start_app
+#: airtest.core.android.android.Android.start_app_timing
+#: airtest.core.android.android.Android.start_recording
+#: airtest.core.android.android.Android.stop_app
+#: airtest.core.android.android.Android.stop_recording
+#: airtest.core.android.android.Android.swipe
+#: airtest.core.android.android.Android.text
+#: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.uninstall_app of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.android.android.Android.list_app:3 of
+msgid "if True, only third party applications are listed"
+msgstr "如果为True，只返回所有第三方应用列表"
 
 #: airtest.core.android.android.Android.list_app:5 of
 msgid "array of applications"
-msgstr ""
+msgstr "应用列表"
 
 #: airtest.core.android.android.Android.path_app:1 of
 msgid "Print the full path to the package"
-msgstr ""
+msgstr "打印出package的完整路径"
 
 #: airtest.core.android.android.Android.check_app:3
 #: airtest.core.android.android.Android.clear_app:3
 #: airtest.core.android.android.Android.path_app:3
 #: airtest.core.android.android.Android.start_app:3
+#: airtest.core.android.android.Android.start_app_timing:3
 #: airtest.core.android.android.Android.stop_app:3
 #: airtest.core.android.android.Android.uninstall_app:3 of
 msgid "package name"
@@ -109,165 +131,142 @@ msgstr ""
 
 #: airtest.core.android.android.Android.path_app:5 of
 msgid "the full path to the package"
-msgstr ""
+msgstr "package的完整路径"
 
 #: airtest.core.android.android.Android.check_app:1 of
-msgid "Check is package exists on the device"
-msgstr ""
+msgid "Check if package exists on the device"
+msgstr "检查package在设备中是否存在"
 
 #: airtest.core.android.android.Android.check_app:5 of
-msgid "True or False whether the package exists on the device or not"
+msgid "True if package exists on the device"
+msgstr "如果存在，返回True"
+
+#: airtest.core.android.android.Android.check_app of
+msgid "raises"
 msgstr ""
+
+#: airtest.core.android.android.Android.check_app:7 of
+msgid ":exc:`AirtestError` -- raised if package is not found"
+msgstr ":exc:`AirtestError` -- 如果不存在，抛出异常"
 
 #: airtest.core.android.android.Android.start_app:1 of
 msgid "Start the application and activity"
-msgstr ""
+msgstr "启动应用"
 
-#: airtest.core.android.android.Android.start_app:4 of
+#: airtest.core.android.android.Android.start_app:4
+#: airtest.core.android.android.Android.start_app_timing:4 of
 msgid "activity name"
 msgstr ""
 
+#: airtest.core.android.android.Android.adjust_all_screen:3
 #: airtest.core.android.android.Android.clear_app:5
 #: airtest.core.android.android.Android.home:3
-#: airtest.core.android.android.Android.keyevent:5
+#: airtest.core.android.android.Android.keyevent:6
 #: airtest.core.android.android.Android.pinch:6
-#: airtest.core.android.android.Android.shell:5
+#: airtest.core.android.android.Android.shell:6
 #: airtest.core.android.android.Android.start_app:6
 #: airtest.core.android.android.Android.start_recording:6
 #: airtest.core.android.android.Android.stop_app:5
 #: airtest.core.android.android.Android.stop_recording:6
-#: airtest.core.android.android.Android.swipe:8
-#: airtest.core.android.android.Android.text:6
-#: airtest.core.android.android.Android.touch:7
+#: airtest.core.android.android.Android.swipe:9
+#: airtest.core.android.android.Android.text:7
+#: airtest.core.android.android.Android.touch:6
 #: airtest.core.android.android.Android.unlock:7
 #: airtest.core.android.android.Android.wake:3 of
 msgid "None"
 msgstr ""
 
+#: airtest.core.android.android.Android.start_app_timing:1 of
+msgid "Start the application and activity, and measure time"
+msgstr "启动应用，并且返回启动耗费时间"
+
+#: airtest.core.android.android.Android.start_app_timing:6 of
+msgid "app launch time"
+msgstr "app启动时间"
+
 #: airtest.core.android.android.Android.stop_app:1 of
 msgid "Stop the application"
-msgstr ""
+msgstr "停止应用"
 
 #: airtest.core.android.android.Android.clear_app:1 of
 msgid "Clear all application data"
-msgstr ""
+msgstr "清理应用数据"
 
 #: airtest.core.android.android.Android.install_app:1 of
 msgid "Install the application on the device"
-msgstr ""
+msgstr "将应用安装到手机上"
 
-#: airtest.core.android.android.Android.install_app:3 of
+#: airtest.core.android.android.Android.install_app:3
+#: airtest.core.android.android.Android.install_multiple_app:3 of
 msgid "full path to the `apk` file to be installed on the device"
-msgstr ""
+msgstr "`apk` 文件在PC上的完整路径"
 
-#: airtest.core.android.android.Android.install_app:4 of
+#: airtest.core.android.android.Android.install_app:4
+#: airtest.core.android.android.Android.install_multiple_app:4 of
 msgid "True or False to replace the existing application"
-msgstr ""
+msgstr "如果应用已存在，是否替换"
 
-#: airtest.core.android.android.Android.install_app:6 of
+#: airtest.core.android.android.Android.install_app:5 of
+msgid "list of options, default is []"
+msgstr "install命令的额外选项，默认是[]"
+
+#: airtest.core.android.android.Android.install_app:7
+#: airtest.core.android.android.Android.install_multiple_app:6 of
 msgid "output from installation process"
+msgstr "安装进程的输出内容"
+
+#: airtest.core.android.android.Android.install_multiple_app:1 of
+msgid "Install multiple the application on the device"
 msgstr ""
 
 #: airtest.core.android.android.Android.uninstall_app:1 of
 msgid "Uninstall the application from the device"
-msgstr ""
+msgstr "从设备中卸载应用"
 
 #: airtest.core.android.android.Android.uninstall_app:5 of
 msgid "output from the uninstallation process"
-msgstr ""
+msgstr "卸载进程中的输出内容"
 
 #: airtest.core.android.android.Android.snapshot:1 of
 msgid ""
 "Take the screenshot of the display. The output is send to stdout by "
 "default."
-msgstr ""
+msgstr "截取一张当前手机画面，默认会发送到stdout"
 
 #: airtest.core.android.android.Android.snapshot:3 of
 msgid ""
-"name of the file where to store the screenshot, default is None which si "
+"name of the file where to store the screenshot, default is None which is "
 "stdout"
-msgstr ""
+msgstr "保存截图的文件名，默认为None的话将会发送到stdout"
 
 #: airtest.core.android.android.Android.snapshot:4 of
 msgid "True or False whether to keep the orientation same as display"
-msgstr ""
+msgstr "截图方向是否要与当前显示情况一致，默认为True"
 
 #: airtest.core.android.android.Android.snapshot:6 of
 msgid "screenshot output"
-msgstr ""
+msgstr "截图输出"
 
 #: airtest.core.android.android.Android.shell:1 of
-msgid ""
-"Return `adb shell` interpreter :param \\*args: optional shell commands "
-":param \\*\\*kwargs: optional shell commands"
+msgid "Return `adb shell` interpreter"
+msgstr "返回 `adb shell` 解释器"
+
+#: airtest.core.android.android.Android.shell:3
+#: airtest.core.android.android.Android.shell:4 of
+msgid "optional shell commands"
 msgstr ""
 
 #: airtest.core.android.android.Android.keyevent:1 of
-msgid ""
-"Perform keyevent on the device :param keyname: keyeven name :param "
-"\\*\\*kwargs: optional arguments"
+msgid "Perform keyevent on the device"
+msgstr "在设备上执行keyevent"
+
+#: airtest.core.android.android.Android.keyevent:3 of
+msgid "keyevent name"
 msgstr ""
 
-#: airtest.core.android.android.Android.wake:1 of
-msgid "Perform wake up event"
-msgstr ""
-
-#: airtest.core.android.android.Android.home:1 of
-msgid "Press HOME button"
-msgstr ""
-
-#: airtest.core.android.android.Android.text:1 of
-msgid "Input text on the device"
-msgstr ""
-
-#: airtest.core.android.android.Android.text:3 of
-msgid "text to input"
-msgstr ""
-
-#: airtest.core.android.android.Android.text:4 of
-msgid "True or False whether to press `Enter` key"
-msgstr ""
-
-#: airtest.core.android.android.Android.touch:1 of
-msgid "Perform touch event on the device"
-msgstr ""
-
-#: airtest.core.android.android.Android.touch:3 of
-msgid "coordinates (x, y)"
-msgstr ""
-
-#: airtest.core.android.android.Android.touch:4 of
-msgid "how many touches to be performed"
-msgstr ""
-
-#: airtest.core.android.android.Android.touch:5 of
-msgid "how long to touch the screen"
-msgstr ""
-
-#: airtest.core.android.android.Android.swipe:1 of
-msgid "Perform swipe event on the device"
-msgstr ""
-
-#: airtest.core.android.android.Android.swipe:3 of
-msgid "start point"
-msgstr ""
-
-#: airtest.core.android.android.Android.swipe:4 of
-msgid "end point"
-msgstr ""
-
-#: airtest.core.android.android.Android.swipe:5 of
-msgid "how long to swipe the screen, default 0.5"
-msgstr ""
-
-#: airtest.core.android.android.Android.swipe:6 of
-msgid "how big is the swipe step, default 5"
-msgstr ""
-
-#: airtest.core.android.android.Android.pinch:1 of
-msgid "Perform pinch event on the device"
-msgstr ""
-
+#: airtest.core.android.android.Android.keyevent:4
+#: airtest.core.android.android.Android.logcat:3
+#: airtest.core.android.android.Android.logcat:4
 #: airtest.core.android.android.Android.pinch:3
 #: airtest.core.android.android.Android.pinch:4
 #: airtest.core.android.android.Android.start_recording:3
@@ -277,19 +276,81 @@ msgstr ""
 msgid "optional arguments"
 msgstr ""
 
-#: airtest.core.android.android.Android.logcat:1 of
-msgid ""
-"Perform `logcat`operations :param \\*args: optional arguments :param "
-"\\*\\*kwargs: optional arguments"
+#: airtest.core.android.android.Android.wake:1 of
+msgid "Perform wake up event"
+msgstr "执行唤醒操作"
+
+#: airtest.core.android.android.Android.home:1 of
+msgid "Press HOME button"
+msgstr "按下HOME键"
+
+#: airtest.core.android.android.Android.text:1 of
+msgid "Input text on the device"
+msgstr "向设备中输入字符串"
+
+#: airtest.core.android.android.Android.text:3 of
+msgid "text to input"
+msgstr "要输入的字符串"
+
+#: airtest.core.android.android.Android.text:4 of
+msgid "True or False whether to press `Enter` key"
+msgstr "是否按下`Enter`键"
+
+#: airtest.core.android.android.Android.text:5 of
+msgid "True or False whether to press `Search` key on IME after input"
+msgstr "是否要按下输入法键盘中的search键"
+
+#: airtest.core.android.android.Android.touch:1 of
+msgid "Perform touch event on the device"
+msgstr "在设备上执行点击"
+
+#: airtest.core.android.android.Android.touch:3 of
+msgid "coordinates (x, y)"
 msgstr ""
 
-#: airtest.core.android.android.Android.logcat:5 of
+#: airtest.core.android.android.Android.touch:4 of
+msgid "how long to touch the screen"
+msgstr "点击屏幕的时长"
+
+#: airtest.core.android.android.Android.swipe:1 of
+msgid "Perform swipe event on the device"
+msgstr "在设备上执行滑动操作"
+
+#: airtest.core.android.android.Android.swipe:3 of
+msgid "start point"
+msgstr "开始坐标"
+
+#: airtest.core.android.android.Android.swipe:4 of
+msgid "end point"
+msgstr "结束坐标"
+
+#: airtest.core.android.android.Android.swipe:5 of
+msgid "how long to swipe the screen, default 0.5"
+msgstr "在屏幕上滑动的时长，默认是0.5"
+
+#: airtest.core.android.android.Android.swipe:6 of
+msgid "how big is the swipe step, default 5"
+msgstr "滑动过程中的步数，默认为5"
+
+#: airtest.core.android.android.Android.swipe:7 of
+msgid "the number of fingers. 1 or 2."
+msgstr "滑动的手指数量，1或者2，默认为1"
+
+#: airtest.core.android.android.Android.pinch:1 of
+msgid "Perform pinch event on the device"
+msgstr "在设备上执行pinch操作（放大缩小）"
+
+#: airtest.core.android.android.Android.logcat:1 of
+msgid "Perform `logcat`operations"
+msgstr "执行 `logcat`"
+
+#: airtest.core.android.android.Android.logcat:6 of
 msgid "`logcat` output"
-msgstr ""
+msgstr "`logcat` 输出"
 
 #: airtest.core.android.android.Android.getprop:1 of
 msgid "Get properties for given key"
-msgstr ""
+msgstr "根据传入的key获取properties内容"
 
 #: airtest.core.android.android.Android.getprop:3 of
 msgid "key name"
@@ -297,7 +358,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.getprop:4 of
 msgid "True or False whether to strip the output or not"
-msgstr ""
+msgstr "是否对输出内容进行strip"
 
 #: airtest.core.android.android.Android.getprop:6 of
 msgid "property value(s)"
@@ -305,7 +366,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.get_ip_address:4 of
 msgid "Perform several set of commands to obtain the IP address"
-msgstr ""
+msgstr "执行以下几种命令行来获取IP地址"
 
 #: airtest.core.android.android.Android.get_ip_address:2 of
 msgid "`adb shell netcfg | grep wlan0`"
@@ -321,7 +382,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.get_ip_address:6 of
 msgid "None if no IP address has been found, otherwise return the IP address"
-msgstr ""
+msgstr "如果获取IP失败，返回None，否则返回IP地址"
 
 #: airtest.core.android.android.Android.get_top_activity:1 of
 msgid "Get the top activity"
@@ -338,7 +399,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.is_keyboard_shown:1 of
 msgid "Return True or False whether soft keyboard is shown or not"
-msgstr ""
+msgstr "如果软键盘正在启用，返回True，否则False"
 
 #: airtest.core.android.android.Android.is_keyboard_shown:4
 #: airtest.core.android.android.Android.is_locked:4
@@ -348,11 +409,10 @@ msgid "Notes"
 msgstr ""
 
 #: airtest.core.android.android.Android.is_keyboard_shown:5
-#: airtest.core.android.android.Android.is_locked:5
 #: airtest.core.android.android.Android.is_screenon:5
 #: airtest.core.android.android.Android.unlock:5 of
 msgid "Might not work on all devices"
-msgstr ""
+msgstr "不一定在所有设备上都可用"
 
 #: airtest.core.android.android.Android.is_keyboard_shown:7
 #: airtest.core.android.android.Android.is_locked:7
@@ -362,61 +422,60 @@ msgstr ""
 
 #: airtest.core.android.android.Android.is_screenon:1 of
 msgid "Return True or False whether the screen is on or not"
-msgstr ""
+msgstr "如果屏幕是亮着的，返回True，否则False"
 
 #: airtest.core.android.android.Android.is_locked:1 of
 msgid "Return True or False whether the device is locked or not"
-msgstr ""
+msgstr "如果是锁定状态返回True，否则False"
+
+#: airtest.core.android.android.Android.is_locked:5 of
+msgid "Might not work on some devices"
+msgstr "部分设备上可能不可用"
 
 #: airtest.core.android.android.Android.unlock:1 of
 msgid "Unlock the device"
-msgstr ""
+msgstr "解锁设备"
 
-#: airtest.core.android.android.Android.display_info:1 of
-msgid ""
-"Return the display info (orientation, rotation and max values for x and y"
-" coordinates)"
-msgstr ""
-
-#: airtest.core.android.android.Android.display_info:3 of
-msgid "display information"
-msgstr ""
-
+#: airtest.core.android.android.Android.display_info:1
 #: airtest.core.android.android.Android.get_display_info:1 of
-msgid ""
-"Return the display physical info (orientation, rotation and max values "
-"for x and y coordinates)"
-msgstr ""
+msgid "Return the display info (width, height, orientation and max_x, max_y)"
+msgstr "返回显示信息(width, height, orientation 和 max_x, max_y)"
 
+#: airtest.core.android.android.Android.display_info:3
 #: airtest.core.android.android.Android.get_display_info:3 of
-msgid "display physical information"
-msgstr ""
+msgid "display information"
+msgstr "显示信息"
 
 #: airtest.core.android.android.Android.get_current_resolution:1 of
-msgid "Return current resolution after rotaion"
-msgstr ""
+msgid "Return current resolution after rotation"
+msgstr "返回旋转后的当前分辨率"
 
 #: airtest.core.android.android.Android.get_current_resolution:3 of
 msgid "width and height of the display"
+msgstr "宽, 高"
+
+#: airtest.core.android.android.Android.get_render_resolution:1 of
+msgid "Return render resolution after rotation"
+msgstr "返回旋转后的渲染分辨率"
+
+#: airtest.core.android.android.Android.get_render_resolution:3 of
+msgid "whether to force refresh render resolution"
+msgstr "是否强制刷新渲染分辨率"
+
+#: airtest.core.android.android.Android.get_render_resolution:5 of
+msgid "offset_x, offset_y, offset_width and offset_height of the display"
 msgstr ""
 
 #: airtest.core.android.android.Android.start_recording:1 of
 msgid "Start recording the device display"
-msgstr ""
+msgstr "开始对设备画面进行录制"
 
 #: airtest.core.android.android.Android.stop_recording:1 of
-msgid "Stop recording the device display"
-msgstr ""
+msgid ""
+"Stop recording the device display. Recoding file will be kept in the "
+"device."
+msgstr "停止对设备画面的录制。录制出的文件将会放在设备中。"
 
-#~ msgid "参数"
-#~ msgstr ""
-
-#~ msgid "返回"
-#~ msgstr ""
-
-#~ msgid "Parameters"
-#~ msgstr ""
-
-#~ msgid "Returns"
-#~ msgstr ""
-
+#: airtest.core.android.android.Android.adjust_all_screen:1 of
+msgid "Adjust the render resolution for all_screen device."
+msgstr "对全面屏设备进行渲染分辨率的调整。"

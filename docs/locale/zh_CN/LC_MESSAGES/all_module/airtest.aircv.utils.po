@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,11 @@ msgid "airtest\\.aircv\\.utils module"
 msgstr ""
 
 #: airtest.aircv.utils.generate_result:1 of
-msgid "Format the result: 定义图像识别结果格式"
+msgid "Format the result: 定义图像识别结果格式."
+msgstr ""
+
+#: airtest.aircv.utils.check_image_valid:1 of
+msgid "Check if the input images valid or not."
 msgstr ""
 
 #: airtest.aircv.utils.check_source_larger_than_search:1 of
@@ -31,7 +35,21 @@ msgstr ""
 
 #: airtest.aircv.utils.img_mat_rgb_2_gray:1 of
 msgid ""
-"turn img_mat into gray_scale, so that template match can figure the img "
+"Turn img_mat into gray_scale, so that template match can figure the img "
 "data. \"print(type(im_search[0][0])\")  can check the pixel type."
 msgstr ""
+
+#: airtest.aircv.utils.compress_image:1 of
+msgid "生成缩略图"
+msgstr ""
+
+#~ msgid "Format the result: 定义图像识别结果格式"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "turn img_mat into gray_scale, so that"
+#~ " template match can figure the img"
+#~ " data. \"print(type(im_search[0][0])\")  can "
+#~ "check the pixel type."
+#~ msgstr ""
 

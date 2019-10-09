@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,10 +27,11 @@ msgstr ""
 
 #: airtest.core.error.AdbError:1 airtest.core.error.BaseError:1
 #: airtest.core.error.ICmdError:1 of
-msgid "Bases: :class:`exceptions.Exception`"
+msgid "Bases: :class:`Exception`"
 msgstr ""
 
 #: airtest.core.error.AirtestError:1 airtest.core.error.DeviceConnectionError:1
+#: airtest.core.error.InvalidMatchingMethodError:1
 #: airtest.core.error.MinicapError:1 airtest.core.error.MinitouchError:1
 #: airtest.core.error.PerformanceError:1 of
 msgid "Bases: :class:`airtest.core.error.BaseError`"
@@ -38,6 +39,12 @@ msgstr ""
 
 #: airtest.core.error.AirtestError:1 of
 msgid "This is Airtest BaseError"
+msgstr ""
+
+#: airtest.core.error.InvalidMatchingMethodError:1 of
+msgid ""
+"This is InvalidMatchingMethodError BaseError When an invalid matching "
+"method is used in settings."
 msgstr ""
 
 #: airtest.core.error.ScriptParamError:1
@@ -80,4 +87,7 @@ msgstr ""
 #: airtest.core.error.MinitouchError:1 of
 msgid "This is MinitouchError BaseError When Minicap have something wrong"
 msgstr ""
+
+#~ msgid "Bases: :class:`exceptions.Exception`"
+#~ msgstr ""
 
