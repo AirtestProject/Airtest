@@ -129,31 +129,27 @@ msgstr ""
 msgid "text to input"
 msgstr ""
 
-#: airtest.core.win.win.Windows.key_press: 1 of
+#: airtest.core.win.win.Windows.key_press:1 of
 msgid "Simulates a key press event."
 msgstr "模拟一个按下按键的事件。"
 
-#: airtest.core.win.win.Windows.key_press: 3 of
+#: airtest.core.win.win.Windows.key_press:3 of
 msgid "Sends a scancode to the computer to report which key has been pressed. Some games use DirectInput devices, and respond only to scancodes, not virtual key codes. You can simulate DirectInput key presses using this method, instead of the keyevent(...) method, which uses virtual key codes."
-msgstr "发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press(...)方法来模拟发送键盘扫描码，而不是上述发送虚拟键码的keyevent(...)方法。"
+msgstr "发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press()方法来模拟发送键盘扫描码，而不是上述发送虚拟键码的keyevent()方法。"
 
-#: airtest.core.win.win.Windows.key_press: 9 of
-msgid "A string indicating which key to be pressed."
-msgstr "一个字符串来表示哪个按键将被按下。"
+#: airtest.core.win.win.Windows.key_press:9 of
+msgid "A string indicating which key to be pressed. Available key options are: {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', \"'\", '`', 'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE', 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP', 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', 'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}."
+msgstr "一个字符串来表示哪个按键将被按下。可用的选择有：{'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', \"'\", '`', 'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE', 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP', 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', 'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}."
 
-#: airtest.core.win.win.Windows.key_press: 10 of
-msgid "Available key options are:"
-msgstr "支持的key的类型如下："
-
-#: airtest.core.win.win.Windows.key_release: 1 of
+#: airtest.core.win.win.Windows.key_release:1 of
 msgid "Simulates a key release event."
 msgstr "模拟一个释放按键的事件。"
 
-#: airtest.core.win.win.Windows.key_release: 3 of
+#: airtest.core.win.win.Windows.key_release:3 of
 msgid "Sends a scancode to the computer to report which key has been released. Some games use DirectInput devices, and respond only to scancodes, not virtual key codes. You can simulate DirectInput key releases using this method. A call to the key_release(...) method usually follows a call to the key_press(..) method of the same key."
-msgstr "发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release(...)方法来模拟发送键盘扫描码。一般情况下key_release(...)方法与所释放按键的key_press(...)方法搭配使用。"
+msgstr "发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release()方法来模拟发送键盘扫描码。一般情况下key_release()方法与所释放按键的key_press()方法搭配使用。"
 
-#: airtest.core.win.win.Windows.key_release: 9 of
+#: airtest.core.win.win.Windows.key_release:9 of
 msgid "A string indicating which key to be released."
 msgstr "一个字符串来表示哪个按键将被释放。"
 
@@ -181,12 +177,8 @@ msgid "Simulates a `mousemove` event."
 msgstr "模拟一个移动鼠标的事件。"
 
 #: airtest.core.win.win.Windows.mouse_move:3 of
-msgid "known bug"
-msgstr "已知的bug"
-
-#: airtest.core.win.win.Windows.mouse_move:3 of
-msgid "Due to a bug in the pywinauto module, users might experience off-by-one errors when it comes to the exact coordinates of the position on screen."
-msgstr "因为pywinauto这个模块的bug，用户可能在使用此方法时遇到移动后位置与目标位置的x和y坐标有1个单位的偏差。"
+msgid "known bug Due to a bug in the pywinauto module, users might experience off-by-one errors when it comes to the exact coordinates of the position on screen."
+msgstr "已知的bug：因为pywinauto库存在的bug，用户可能在使用此方法时遇到移动后位置与目标位置的x和y坐标有1个像素点偏差的情况。"
 
 #: airtest.core.win.win.Windows.mouse_move:7 of
 msgid "A tuple (x, y), where x and y are x and y coordinates of the screen to move the mouse to, respectively."
@@ -205,8 +197,8 @@ msgid "Simulates a `mouseup` event."
 msgstr "模拟一个释放鼠标按键的事件。"
 
 #: airtest.core.win.win.Windows.mouse_up:3 of
-msgid "A call to the mouse_up(...) method usually follows a call to the mouse_down(...) method of the same mouse button."
-msgstr "一般情况下mouse_up(...)方法与所释放鼠标按键的mouse_down(...)方法搭配使用。"
+msgid "A call to the mouse_up() method usually follows a call to the mouse_down() method of the same mouse button."
+msgstr "一般情况下mouse_up()方法与所释放鼠标按键的mouse_down()方法搭配使用。"
 
 #: airtest.core.win.win.Windows.mouse_up:6 of
 msgid "A string indicating which mouse button to be released."
