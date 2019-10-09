@@ -52,6 +52,7 @@ if not sys.platform.startswith('win'):
             'pywinauto.application',
             'pywinauto.win32functions',
             'pywinauto.win32structures',
+            'airtest.core.win.ctypesinput'
             ]:
 
         sys.modules[mod_name] = mock.MagicMock()
