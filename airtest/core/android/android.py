@@ -51,7 +51,7 @@ class Android(Device):
 
     def get_default_device(self):
         """
-        Get local default device when no serailno
+        Get local default device when no serialno
 
         Returns:
             local device serialno
@@ -99,8 +99,10 @@ class Android(Device):
             package: package name
 
         Returns:
-            AirtestError: if package is not found
             True if package exists on the device
+
+        Raises:
+             AirtestError: raised if package is not found
 
         """
         return self.adb.check_app(package)
@@ -205,7 +207,7 @@ class Android(Device):
         Take the screenshot of the display. The output is send to stdout by default.
 
         Args:
-            filename: name of the file where to store the screenshot, default is None which si stdout
+            filename: name of the file where to store the screenshot, default is None which is stdout
             ensure_orientation: True or False whether to keep the orientation same as display
 
         Returns:
@@ -248,6 +250,7 @@ class Android(Device):
     def shell(self, *args, **kwargs):
         """
         Return `adb shell` interpreter
+
         Args:
             *args: optional shell commands
             **kwargs: optional shell commands
@@ -261,8 +264,9 @@ class Android(Device):
     def keyevent(self, keyname, **kwargs):
         """
         Perform keyevent on the device
+
         Args:
-            keyname: keyeven name
+            keyname: keyevent name
             **kwargs: optional arguments
 
         Returns:
@@ -391,6 +395,7 @@ class Android(Device):
     def logcat(self, *args, **kwargs):
         """
         Perform `logcat`operations
+
         Args:
             *args: optional arguments
             **kwargs: optional arguments
@@ -418,6 +423,7 @@ class Android(Device):
     def get_ip_address(self):
         """
         Perform several set of commands to obtain the IP address
+
             * `adb shell netcfg | grep wlan0`
             * `adb shell ifconfig`
             * `adb getprop dhcp.wlan0.ipaddress`

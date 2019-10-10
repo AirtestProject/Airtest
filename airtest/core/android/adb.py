@@ -1253,6 +1253,7 @@ class ADB(object):
     def get_ip_address(self):
         """
         Perform several set of commands to obtain the IP address
+
             * `adb shell netcfg | grep wlan0`
             * `adb shell ifconfig`
             * `adb getprop dhcp.wlan0.ipaddress`

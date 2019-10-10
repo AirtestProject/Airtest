@@ -1,0 +1,139 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.ios.rotation.rst:2
+msgid "airtest.core.ios.rotation module"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher:1
+#: airtest.core.ios.rotation.XYTransformer:1 of
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher:1 of
+msgid "RotationWatcher class"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher.start:1 of
+msgid "Start the RotationWatcher daemon thread"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher.start
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori of
+msgid "Returns"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher.start:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher.reg_callback
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.core.ios.rotation.RotationWatcher.reg_callback:3 of
+msgid "Returns:"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer:1 of
+msgid "transform the coordinates (x, y) by orientation (upright <--> original)"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori:1 of
+msgid "Transform the coordinates upright --> original"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up:3
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori:3 of
+msgid "coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up:4
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori:4 of
+msgid "screen width and height"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up:5
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori:5 of
+msgid "orientation"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up:7
+#: airtest.core.ios.rotation.XYTransformer.up_2_ori:7 of
+msgid "transformed coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.ios.rotation.XYTransformer.ori_2_up:1 of
+msgid "Transform the coordinates original --> upright"
+msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "RotationWatcher class"
+#~ msgstr ""
+
+#~ msgid "Start the RotationWatcher daemon thread"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "None"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Returns:"
+#~ msgstr ""
+
+#~ msgid "transform the coordinates (x, y) by orientation (upright <--> original)"
+#~ msgstr ""
+
+#~ msgid "Transform the coordinates upright --> original"
+#~ msgstr ""
+
+#~ msgid "coordinates (x, y)"
+#~ msgstr ""
+
+#~ msgid "screen width and height"
+#~ msgstr ""
+
+#~ msgid "orientation"
+#~ msgstr ""
+
+#~ msgid "transformed coordinates (x, y)"
+#~ msgstr ""
+
+#~ msgid "Transform the coordinates original --> upright"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`object`"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+

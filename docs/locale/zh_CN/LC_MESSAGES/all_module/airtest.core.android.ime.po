@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:51+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.core.android.ime.rst:2
 msgid "airtest\\.core\\.android\\.ime module"
@@ -25,9 +25,10 @@ msgstr ""
 msgid "Decode UTF-8 values"
 msgstr ""
 
+#: airtest.core.android.ime.YosemiteIme.code
 #: airtest.core.android.ime.YosemiteIme.text
 #: airtest.core.android.ime.ensure_unicode of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.ime.ensure_unicode:3 of
@@ -36,9 +37,11 @@ msgstr ""
 
 #: airtest.core.android.ime.CustomIme.end
 #: airtest.core.android.ime.CustomIme.start
+#: airtest.core.android.ime.YosemiteIme.code
+#: airtest.core.android.ime.YosemiteIme.start
 #: airtest.core.android.ime.YosemiteIme.text
 #: airtest.core.android.ime.ensure_unicode of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.ime.ensure_unicode:5 of
@@ -53,12 +56,14 @@ msgstr ""
 msgid "Input Methods Class Object"
 msgstr ""
 
-#: airtest.core.android.ime.CustomIme.start:1 of
+#: airtest.core.android.ime.CustomIme.start:1
+#: airtest.core.android.ime.YosemiteIme.start:1 of
 msgid "Enable input method"
 msgstr ""
 
 #: airtest.core.android.ime.CustomIme.end:3
-#: airtest.core.android.ime.CustomIme.start:3 of
+#: airtest.core.android.ime.CustomIme.start:3
+#: airtest.core.android.ime.YosemiteIme.start:3 of
 msgid "None"
 msgstr ""
 
@@ -82,8 +87,20 @@ msgstr ""
 msgid "text to be inputted"
 msgstr ""
 
+#: airtest.core.android.ime.YosemiteIme.code:6
 #: airtest.core.android.ime.YosemiteIme.text:5 of
 msgid "output form `adb shell` command"
+msgstr ""
+
+#: airtest.core.android.ime.YosemiteIme.code:1 of
+msgid "Sending editor action"
+msgstr ""
+
+#: airtest.core.android.ime.YosemiteIme.code:3 of
+msgid ""
+"editor action code, e.g., 2 = IME_ACTION_GO, 3 = IME_ACTION_SEARCH Editor"
+" Action Code Ref: "
+"http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html"
 msgstr ""
 
 #~ msgid "参数"
