@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.aircv.keypoint_matching_contrib.rst:2
+msgid "airtest.aircv.keypoint\\_matching\\_contrib module"
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib:1 of
+msgid "Detect keypoints with BRIEF/SIFT/SURF. Need opencv-contrib module."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.check_cv_version_is_new:1 of
+msgid "opencv版本是3.0或4.0以上, API接口与2.0的不同."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.BRIEFMatching:1
+#: airtest.aircv.keypoint_matching_contrib.SIFTMatching:1
+#: airtest.aircv.keypoint_matching_contrib.SURFMatching:1 of
+msgid "Bases: :class:`airtest.aircv.keypoint_base.KeypointMatching`"
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.BRIEFMatching:1 of
+msgid "FastFeature Matching."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.BRIEFMatching.init_detector:1
+#: airtest.aircv.keypoint_matching_contrib.SIFTMatching.init_detector:1
+#: airtest.aircv.keypoint_matching_contrib.SURFMatching.init_detector:1 of
+msgid "Init keypoint detector object."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.BRIEFMatching.get_keypoints_and_descriptors:1
+#: airtest.aircv.keypoint_matching_contrib.SIFTMatching.get_keypoints_and_descriptors:1
+#: airtest.aircv.keypoint_matching_contrib.SURFMatching.get_keypoints_and_descriptors:1
+#: of
+msgid "获取图像特征点和描述符."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.BRIEFMatching.match_keypoints:1
+#: airtest.aircv.keypoint_matching_contrib.SIFTMatching.match_keypoints:1
+#: airtest.aircv.keypoint_matching_contrib.SURFMatching.match_keypoints:1 of
+msgid "Match descriptors (特征值匹配)."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.SIFTMatching:1 of
+msgid "SIFT Matching."
+msgstr ""
+
+#: airtest.aircv.keypoint_matching_contrib.SURFMatching:1 of
+msgid "SURF Matching."
+msgstr ""
+
+#~ msgid "Bases: :class:`airtest.aircv.keypoint_base.KeypointMatching`"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`airtest.aircv.keypoint_base.KeypointMatching`"
+#~ msgstr ""
+

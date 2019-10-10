@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2017, Game-Netease
+# Copyright (C) 2018, Game-Netease
 # This file is distributed under the same license as the airtest package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
 #
 #, fuzzy
 msgid ""
@@ -17,11 +17,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
-#: ../../all_module/airtest.cli.parser.rst:2
-msgid "airtest\\.cli\\.parser module"
+#: ../../all_module/airtest.core.ios.constant.rst:2
+msgid "airtest.core.ios.constant module"
 msgstr ""
 
-#: airtest.cli.parser.cli_setup:1 of
-msgid "future api for setup env by cli"
+#: airtest.core.ios.constant.CAP_METHOD:1
+#: airtest.core.ios.constant.IME_METHOD:1
+#: airtest.core.ios.constant.TOUCH_METHOD:1 of
+msgid "Bases: :class:`object`"
 msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`object`"
+#~ msgstr ""
 

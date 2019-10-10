@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2017, Game-Netease
+# Copyright (C) 2018, Game-Netease
 # This file is distributed under the same license as the airtest package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
 #
 #, fuzzy
 msgid ""
@@ -17,37 +17,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
-#: ../../all_module/airtest.aircv.template.rst:2
-msgid "airtest\\.aircv\\.template module"
+#: ../../all_module/airtest.aircv.template_matching.rst:2
+msgid "airtest.aircv.template\\_matching module"
 msgstr ""
 
-#: airtest.aircv.template:1 of
+#: airtest.aircv.template_matching:1
+#: airtest.aircv.template_matching.TemplateMatching:1 of
 msgid "模板匹配."
 msgstr ""
 
-#: airtest.aircv.template:6 of
+#: airtest.aircv.template_matching:6 of
 msgid "对用户提供的调节参数:"
 msgstr ""
 
-#: airtest.aircv.template:4 of
+#: airtest.aircv.template_matching:4 of
 msgid "threshod: 筛选阈值，默认为0.8"
 msgstr ""
 
-#: airtest.aircv.template:5 of
+#: airtest.aircv.template_matching:5 of
 msgid "rgb: 彩色三通道,进行彩色权识别."
 msgstr ""
 
-#: airtest.aircv.template.find_template:1 of
-msgid "函数功能：找到最优结果."
+#: airtest.aircv.template_matching.TemplateMatching:1 of
+msgid "Bases: :class:`object`"
 msgstr ""
 
-#: airtest.aircv.template.find_all_template:1 of
-msgid "根据输入图片和参数设置,返回所有的图像识别结果."
-msgstr ""
-
-#~ msgid "[summary] 模板匹配对用户提供的调节参数:"
+#~ msgid "Bases: :class:`object`"
 #~ msgstr ""
 
-#~ msgid "[description]"
+#~ msgid "基类：:class:`object`"
 #~ msgstr ""
 

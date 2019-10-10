@@ -8,17 +8,24 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 20:07+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../all_module/airtest.report.report.rst:2
 msgid "airtest\\.report\\.report module"
+msgstr ""
+
+#: airtest.report.report.timefmt:1 of
+#, python-format
+msgid ""
+"Formatting of timestamp in Jinja2 templates :param timestamp: timestamp "
+"of steps :return: \"%Y-%m-%d %H:%M:%S\""
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
@@ -29,33 +36,12 @@ msgstr ""
 msgid "Convert log to html display"
 msgstr ""
 
-#: airtest.report.report.LogToHtml.analyse:1 of
-msgid "进一步解析成模板可显示的内容"
+#: airtest.report.report.LogToHtml.get_thumbnail:1 of
+msgid "compress screenshot"
 msgstr ""
 
-#: airtest.report.report.LogToHtml.translate:1 of
-msgid "按照depth = 1 的name来分类 touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用"
-msgstr ""
-
-#: airtest.report.report.LogToHtml.translate:3 of
-msgid "3=screenshot 2= _loop_find  1=本身操作"
-msgstr ""
-
-#: airtest.report.report.LogToHtml.translate:4 of
-msgid "keyevent,text,sleep 和图片无关，直接显示一条说明就可以"
-msgstr ""
-
-#: airtest.report.report.LogToHtml.translate:5 of
-msgid "1= 本身"
-msgstr ""
-
-#: airtest.report.report.LogToHtml.translate:6 of
-msgid "assert 类似于exist"
-msgstr ""
-
-#: airtest.report.report.LogToHtml.func_desc:1
-#: airtest.report.report.LogToHtml.func_desc_zh:1 of
-msgid "把对应函数(depth=1)的name显示成中文"
+#: airtest.report.report.LogToHtml.div_rect:1 of
+msgid "count rect for js use"
 msgstr ""
 
 #~ msgid "server_call没有log assert 类似于exist"
@@ -68,5 +54,26 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "把对应的poco操作显示成中文"
+#~ msgstr ""
+
+#~ msgid "进一步解析成模板可显示的内容"
+#~ msgstr ""
+
+#~ msgid "按照depth = 1 的name来分类 touch,swipe,wait,exist 都是搜索图片位置，然后执行操作，包括3层调用"
+#~ msgstr ""
+
+#~ msgid "3=screenshot 2= _loop_find  1=本身操作"
+#~ msgstr ""
+
+#~ msgid "keyevent,text,sleep 和图片无关，直接显示一条说明就可以"
+#~ msgstr ""
+
+#~ msgid "1= 本身"
+#~ msgstr ""
+
+#~ msgid "assert 类似于exist"
+#~ msgstr ""
+
+#~ msgid "把对应函数(depth=1)的name显示成中文"
 #~ msgstr ""
 

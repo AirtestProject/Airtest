@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-08 11:34+0800\n"
+"POT-Creation-Date: 2019-10-09 15:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,6 +23,20 @@ msgstr ""
 
 #: airtest.cli.runner.AirtestCase:1 of
 msgid "Bases: :class:`unittest.case.TestCase`"
+msgstr ""
+
+#: airtest.cli.runner.AirtestCase.setUpClass:1 of
+msgid ""
+"Hook method for setting up class fixture before running tests in the "
+"class."
+msgstr ""
+
+#: airtest.cli.runner.AirtestCase.setUp:1 of
+msgid "Hook method for setting up the test fixture before exercising it."
+msgstr ""
+
+#: airtest.cli.runner.AirtestCase.tearDown:1 of
+msgid "Hook method for deconstructing the test fixture after testing it."
 msgstr ""
 
 #: airtest.cli.runner.AirtestCase.exec_other_script:1 of

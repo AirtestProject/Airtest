@@ -12,8 +12,8 @@ from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
 from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
 
-from .ctypesinput import key_press, key_release
-from .screen import screenshot
+from airtest.core.win.ctypesinput import key_press, key_release
+from airtest.core.win.screen import screenshot
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -176,7 +176,7 @@ class Windows(Device):
         Sends a scancode to the computer to report which key has been pressed.
         Some games use DirectInput devices, and respond only to scancodes, not
         virtual key codes. You can simulate DirectInput key presses using this
-        method, instead of the keyevent(...) method, which uses virtual key
+        method, instead of the keyevent() method, which uses virtual key
         codes.
 
         :param key: A string indicating which key to be pressed.
@@ -192,7 +192,7 @@ class Windows(Device):
                     'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6',
                     'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0',
                     'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE',
-                    'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'Up',
+                    'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP',
                     'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN',
                     'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}.
         """
@@ -204,8 +204,8 @@ class Windows(Device):
         Sends a scancode to the computer to report which key has been released.
         Some games use DirectInput devices, and respond only to scancodes, not
         virtual key codes. You can simulate DirectInput key releases using this
-        method. A call to the key_release(...) method usually follows a call to
-        the key_press(..) method of the same key.
+        method. A call to the key_release() method usually follows a call to
+        the key_press() method of the same key.
 
         :param key: A string indicating which key to be released.
         """
@@ -244,6 +244,7 @@ class Windows(Device):
     def swipe(self, p1, p2, duration=0.8, steps=5):
         """
         Perform swipe (mouse press and mouse release)
+
         Args:
             p1: start point
             p2: end point
@@ -285,9 +286,10 @@ class Windows(Device):
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
 
-        known bug: Due to a bug in the pywinauto module, users might experience
-                   off-by-one errors when it comes to the exact coordinates of
-                   the position on screen.
+        Known bug:
+            Due to a bug in the pywinauto module, users might experience \
+            off-by-one errors when it comes to the exact coordinates of \
+            the position on screen.
 
         :param pos: A tuple (x, y), where x and y are x and y coordinates of
                     the screen to move the mouse to, respectively.
@@ -316,8 +318,8 @@ class Windows(Device):
     def mouse_up(self, button='left'):
         """Simulates a `mouseup` event.
 
-        A call to the mouse_up(...) method usually follows a call to the
-        mouse_down(...) method of the same mouse button.
+        A call to the mouse_up() method usually follows a call to the
+        mouse_down() method of the same mouse button.
 
         :param button: A string indicating which mouse button to be released.
         """

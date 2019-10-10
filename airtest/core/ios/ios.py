@@ -47,9 +47,12 @@ def retry_session(func):
 
 class IOS(Device):
     """ios client
-        # befor this you have to run WebDriverAgent
-        # xcodebuild -project path/to/WebDriverAgent.xcodeproj -scheme WebDriverAgentRunner -destination "id=$(idevice_id -l)" test
-        # iproxy $port 8100 $udid
+
+        - before this you have to run `WebDriverAgent <https://github.com/AirtestProject/iOS-Tagent>`_
+
+        - ``xcodebuild -project path/to/WebDriverAgent.xcodeproj -scheme WebDriverAgentRunner -destination "id=$(idevice_id -l)" test``
+
+        - ``iproxy $port 8100 $udid``
     """
 
     def __init__(self, addr=DEFAULT_ADDR):
