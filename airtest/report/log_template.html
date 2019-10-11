@@ -62,6 +62,14 @@
                       <span class="info-name" lang="en">Time: </span>
                       <span class="info-value duration">xxx</span>
                     </div>
+                    {% if log %}
+                    <div class="info-log">
+                      <span class="info-name" lang="en">Log: </span>
+                      <span class="info-value log">
+                        <a href="{{log}}" target="_blank" download="log.txt">log.txt</a>
+                      </span>
+                    </div>
+                    {% endif %}
                   </div>
                 </div>
               </div>
@@ -214,9 +222,9 @@
         </div>
     </div>
 
-  <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">  
-  <script src="{{static_root}}js/highlight.min.js"></script>  
+  <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">
+  <script src="{{static_root}}js/highlight.min.js"></script>
   <script type="text/javascript" src="{{static_root}}js/paging.js"></script>
-  <script src="{{static_root}}js/report.js"></script>  
+  <script src="{{static_root}}js/report.js"></script>
 </body>
 </html>

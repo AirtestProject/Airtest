@@ -373,6 +373,14 @@ class LogToHtml(object):
 
         return dirpath, logpath
 
+    def get_relative_log(self, output_file):
+        try:
+            html_dir = os.path.dirname(output_file)
+            return os.path.relpath(os.path.join(self.log_root, 'log.txt') ,html_dir)
+        except Exception:
+            traceback.print_exc()
+            return ""
+
     def report(self, template_name, output_file=None, record_list=None):
         self._load()
         steps = self._analyse()
@@ -409,6 +417,7 @@ class LogToHtml(object):
         data['records'] = records
         data['info'] = info
         data['data'] = json.dumps(data)
+        data['log'] = self.get_relative_log(output_file)
 
         return self._render(template_name, output_file, **data)
 
