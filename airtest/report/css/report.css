@@ -107,9 +107,13 @@ h2.empty-report{
 }
 .summary .info-toal>div{
   display: inline-block;
+  height: 30px;
 }
 .summary .info-toal .info-step{
   margin-right: 100px;
+}
+.summary .info-toal .info-log{
+  width: 100%;
 }
 .summary .info-toal .info-value{
   color: rgb(74,144,226);
