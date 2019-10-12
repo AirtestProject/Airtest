@@ -396,6 +396,8 @@ h2.empty-report{
 }
 .step-right .step-args .crop_image {
   margin-top: 7px;
+  max-width: calc(100% - 80px);
+  max-height: 100%;
 }
 .step-right .step-args .desc{
   margin-left: 50px;
