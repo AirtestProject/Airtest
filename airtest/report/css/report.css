@@ -120,6 +120,13 @@ h2.empty-report{
   font-size: 18px;
   padding-left: 5px;
 }
+.summary .info-toal .info-value a{
+  color: rgb(74,144,226);
+}
+.summary .info-toal .info-value img{
+  margin-left: 10px;
+  width: 15px;
+}
 .summary .info-execute{
   line-height: 18px;
   margin: 20px 0;
@@ -365,7 +372,7 @@ h2.empty-report{
   padding: 3px 7px;
 }
 .step-right .step-status.success{
-  background: #97cc64;
+  background: #417505;
 }
 .step-right .step-status.fail{
   background: #fd5a3e
