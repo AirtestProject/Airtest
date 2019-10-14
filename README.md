@@ -24,11 +24,54 @@ Get started from [airtest homepage](http://airtest.netease.com/)
 
 | | | | | | | | |
 |-|-|-|-|-|-|-|-|
+[Android](http://airtest.netease.com/docs/en/1_quick_start/2_test_with_Android_device.html) |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|[Windows](http://airtest.netease.com/docs/en/1_quick_start/4_get_started_with_Windows_test.html)|[Unity](http://airtest.netease.com/docs/en/1_quick_start/1_how_to_write_the_first_script_for_your_game.html)|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/b# Airtest &middot; [![Build status](https://travis-ci.org/AirtestProject/Airtest.svg?branch=master)](https://travis-ci.org/AirtestProject/Airtest)
+
+**Cross-Platform UI Automation Framework for Games and Apps**
+
+**跨平台的UI自动化框架，适用于游戏和App** （[中文版点这里](./README_zh.md)）
+
+
+![image](./demo.gif)
+
+
+## Features
+
+*   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements so that you can automate games and apps without injecting any code. 
+
+*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of Airtest Project.
+
+*   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
+
+*   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. it allows writing instructions in Python, to achieve more advanced automation.
+
+Get started from [airtest homepage](http://airtest.netease.com/)
+
+#### [Supported Platforms](./docs/wiki/platforms.md)
+
+| | | | | | | | |
+|-|-|-|-|-|-|-|-|
 [Android](http://airtest.netease.com/docs/en/1_quick_start/2_test_with_Android_device.html) |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|[Windows](http://airtest.netease.com/docs/en/1_quick_start/4_get_started_with_Windows_test.html)|[Unity](http://airtest.netease.com/docs/en/1_quick_start/1_how_to_write_the_first_script_for_your_game.html)|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)| [web](http://airtest.netease.com/docs/en/1_quick_start/5_get_started_with_web_test.html)
 
 ## Installation
 
 Use `pip` to install the Airtest python library. 
+
+```Shell
+pip install -U airtest
+```
+
+On MacOS/Linux platform, you need to grant adb execute permission.
+
+```Shell
+# for mac
+cd {your_python_path}/site-packages/airtest/core/android/static/adb/mac
+# for linux
+# cd {your_python_path}/site-packages/airtest/core/android/static/adb/linux
+chmod +x adblog/tutorial/WechatSmallProgram/)| [web](http://airtest.netease.com/docs/en/1_quick_start/5_get_started_with_web_test.html)
+
+## Installation
+
+Use `pip` to install Airtest python library. 
 
 ```Shell
 pip install -U airtest
