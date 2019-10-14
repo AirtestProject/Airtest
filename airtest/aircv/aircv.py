@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from .error import FileNotExistError
 from six import PY2, PY3
-from airtest.aircv.utils import cv2_2_pil
+from airtest.aircv.utils import cv2_2_pil, compress_image
 
 
 def imread(filename):
@@ -26,7 +26,7 @@ def imwrite(filename, img):
     if PY2:
         filename = filename.encode(sys.getfilesystemencoding())
     pil_img = cv2_2_pil(img)
-    pil_img.save(filename, quality=10, optimize=True)
+    compress_image(pil_img, filename, 1200, 1200)
 
 
 def show(img, title="show_img", test_flag=False):

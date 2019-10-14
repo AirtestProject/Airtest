@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from airtest.core.settings import Settings
 from .error import TemplateInputError
 
 
@@ -70,9 +71,9 @@ def cv2_2_pil(cv2_image):
     return pil_im
 
 
-def compress_image(pil_img, path, w=300, h=300):
+def compress_image(pil_img, path, max_width=300, max_height=300):
     '''
         生成缩略图
     '''
-    pil_img.thumbnail((w, h))
-    pil_img.save(path, quality=30)
+    pil_img.thumbnail((max_width, max_height), Image.ANTIALIAS)
+    pil_img.save(path, quality=Settings.SNAPSHOT_QUALITY, optimize=True)
