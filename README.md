@@ -10,13 +10,13 @@
 
 ## Features
 
-*   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements, so that you can automate games and apps without injecting any code. 
+*   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements so that you can automate games and apps without injecting any code. 
 
-*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of Airtest Project.
+*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of the Airtest Project.
 
 *   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
-*   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. it allows writing instructions in Python, to achieve more advanced automation.
+*   **Poco:** [Poco](https://github.com/AirtestProject/Poco) adds the ability to directly access object(UI widget) hierarchy across the major platforms and game engines. It allows writing instructions in Python, to achieve more advanced automation.
 
 Get started from [airtest homepage](http://airtest.netease.com/)
 
@@ -28,7 +28,7 @@ Get started from [airtest homepage](http://airtest.netease.com/)
 
 ## Installation
 
-Use `pip` to install Airtest python library. 
+Use `pip` to install the Airtest python library. 
 
 ```Shell
 pip install -U airtest
@@ -54,7 +54,7 @@ You can find the complete Airtest documentation on [readthedocs](http://airtest.
 
 ## Examples
 
-Airtest aims at providing platform independent API, so that you can write automated cases once and run it on multiple devices and platforms.
+Airtest aims at providing platform-independent API so that you can write automated cases once and run it on multiple devices and platforms.
 
 1. Using [connect_device](http://airtest.readthedocs.io/en/latest/README_MORE.html#connect-device) API you can connect to any android/iOS device or windows application.
 1. Then perform [simulated input](http://airtest.readthedocs.io/en/latest/README_MORE.html#simulate-input) to automate your game or app.
@@ -84,7 +84,7 @@ For more detailed info, please refer to [Airtest Python API reference](http://ai
 ## Running ``.air`` cases from CLI
 
 Using AirtestIDE, you can easily create automated cases as ``.air`` directories.
-Airtest CLI provides the possibility to execute cases on different host machine and target device platforms without using AirtestIDE itself.
+Airtest CLI provides the possibility to execute cases on different host machines and target device platforms without using AirtestIDE itself.
 
 ```Shell
 # run cases targeting on Android phone connected to your host machine via ADB
@@ -96,7 +96,7 @@ airtest run "path to your .air dir" --device "Windows:///?title_re=Unity.*"
 # generate HTML report after running cases
 airtest report "path to your .air dir"
 
-# or use as python module
+# or use as a python module
 python -m airtest run "path to your .air dir" --device Android:///
 ```
 
