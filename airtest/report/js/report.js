@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-14 15:27:18
+ * @LastEditTime: 2019-10-15 12:14:17
  */
 function StepPannel(data, root){
   this.data = data
@@ -252,7 +252,7 @@ function StepPannel(data, root){
                 "</div>" +
               "</div>").format(success, pass, this.static, success,
                               this.static, step.duration,
-                              step ? step.code.name:"null")
+                              step.code ? step.code.name:"null")
     } catch (err) {
       console.log(err)
       return ""

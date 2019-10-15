@@ -64,16 +64,15 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(message, traceback=""):
+def log(data):
     """
     Insert user log, will be displayed in Html report.
 
-    :param message: log message
-    :param traceback: log traceback if exists, use traceback.format_exc to get best format
+    :param data: log message or Exception
     :return: None
     """
     if G.LOGGER:
-        G.LOGGER.log("info", {"name": message, "traceback": traceback}, 0)
+        G.LOGGER.log("info", data, 0)
 
 
 def logwrap(f):
