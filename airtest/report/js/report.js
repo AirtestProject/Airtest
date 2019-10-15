@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-15 12:14:17
+ * @LastEditTime: 2019-10-15 18:55:10
  */
 function StepPannel(data, root){
   this.data = data
@@ -36,6 +36,7 @@ function StepPannel(data, root){
       this.setSteps()
     }
     this.init_video()
+    this.highlightBlock()
   }
 
   this.bindEvents = function(){
@@ -93,6 +94,12 @@ function StepPannel(data, root){
       that.currentPage = 1
       that.setSteps()
     })
+    $("#close-console").click(function(){
+      $('#console').fadeOut(300)
+    })
+    $("#show-console").click(function(){
+      $('#console').fadeIn(300)
+    })
   }
 
   this.sortSteps = function(attr, rev){
@@ -117,9 +124,7 @@ function StepPannel(data, root){
 
   this.initStepRight = function(){
     // 设置高亮
-    if($('pre.trace').length>0){
-      hljs.highlightBlock($('pre.trace')[0], null, false);
-    }
+    this.highlightBlock()
     var that = this
     if($(".step-args .fancybox").length>0){
       $('.fancybox .screen').load(function(e){
@@ -127,6 +132,12 @@ function StepPannel(data, root){
         that.resetScale(this)
         that.resetScreenshot()
       })
+    }
+  }
+
+  this.highlightBlock = function(){
+    if($('pre.trace').length>0){
+      hljs.highlightBlock($('pre.trace')[0], null, false);
     }
   }
 
