@@ -41,24 +41,22 @@ class AirtestLogger(object):
         except AttributeError:
             return repr(obj)
 
-    def log(self, tag, data, depth=None):
+    def log(self, tag, content, depth=None):
         ''' Not thread safe '''
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
-        trace = ""
         if self.logfd:
-            if not isinstance(data, str):
-                if isinstance(data, Exception):
-                    trace = ''.join(traceback.format_exception(type(data), data, data.__traceback__))
-                    data = data.__class__.__name__
-                else:
-                    raise AssertionError("TypeError: data must be str or Exception")
-            log_data = json.dumps({'tag': tag,
-                                   'depth': depth,
-                                   'time': time.time(),
-                                   'data': {"name": data, "traceback": trace}},
-                                  default=self._dumper)
+            if isinstance(content, str):
+                data = {"name": content}
+            elif isinstance(content, Exception):
+                data = {
+                    "name": content.__class__.__name__,
+                    "traceback": ''.join(traceback.format_exception(type(content), content, content.__traceback__))
+                }
+            else:
+                data = content
+            log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.time(), 'data': data}, default=self._dumper)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()
 
