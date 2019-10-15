@@ -53,7 +53,7 @@ class AirtestLogger(object):
                     trace = ''.join(traceback.format_exception(type(data), data, data.__traceback__))
                     data = data.__class__.__name__
                 else:
-                    raise AssertionError("TypeError: message must be str or Exception")
+                    raise AssertionError("TypeError: data must be str or Exception")
             log_data = json.dumps({'tag': tag,
                                    'depth': depth,
                                    'time': time.time(),
