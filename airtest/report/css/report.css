@@ -113,6 +113,14 @@ h2.empty-report{
 .summary .info-toal .info-step, .summary .info-toal .info-console{
   margin-right: 100px;
 }
+.summary .info-toal .info-console img#show-console {
+  width: 25px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+.summary .info-toal .info-console img#show-console:hover{
+  content: url(../image/console_hover.svg);
+}
 .summary .info-toal .info-value{
   color: rgb(74,144,226);
   font-size: 18px;
