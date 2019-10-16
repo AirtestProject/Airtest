@@ -381,6 +381,15 @@ class LogToHtml(object):
             traceback.print_exc()
             return ""
 
+    def get_console(self, output_file):
+        html_dir = os.path.dirname(output_file)
+        console = ""
+        file = os.path.join(html_dir, 'console.txt')
+        if os.path.isfile(file):
+            for line in open(file):
+                console = console + line
+        return console
+
     def report(self, template_name, output_file=None, record_list=None):
         self._load()
         steps = self._analyse()
@@ -416,8 +425,9 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
-        data['data'] = json.dumps(data)
         data['log'] = self.get_relative_log(output_file)
+        data['console'] = self.get_console(output_file)
+        data['data'] = json.dumps(data)
 
         return self._render(template_name, output_file, **data)
 

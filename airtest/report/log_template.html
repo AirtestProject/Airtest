@@ -62,6 +62,18 @@
                       <span class="info-name" lang="en">Time: </span>
                       <span class="info-value duration">xxx</span>
                     </div>
+                    {% if console %}
+                    <div class="info-console">
+                      <span class="info-name" lang="en">Console: </span>
+                      <img id='show-console' src="{{static_root}}image/console_normal.svg" /></a>
+                      <div id='console' class="mask hide">
+                        <div class="hljs content">
+                          <img id='close-console' src="{{static_root}}image/close.svg" /></a>
+                          <div class="console-content"><pre class="trace">{{console}}</pre></div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
                     {% if log %}
                     <div class="info-log">
                       <span class="info-name" lang="en">Log: </span>
