@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-15 12:14:17
+ * @LastEditTime: 2019-10-16 14:31:07
  */
 function StepPannel(data, root){
   this.data = data
@@ -82,7 +82,7 @@ function StepPannel(data, root){
       that.setSteps()
     })
     $('.order#duration').click(function(){
-      that.steps.sort(that.sortSteps('duration', that.duration == 'acc'))
+      that.steps.sort(that.sortSteps('duration_ms', that.duration == 'acc'))
       that.duration = that.duration == 'acc' ? 'dec' : 'acc'
       that.currentPage = 1
       that.setSteps()
@@ -148,10 +148,11 @@ function StepPannel(data, root){
     for(var i = 0; i< this.steps.length; i++){
       step = this.steps[i]
       if(i == 0){
-        step.duration = getFormatDuration(step.time, this.data.run_start)
+        step.duration_ms = getDelta(step.time, this.data.run_start)
       } else{
-        step.duration = getFormatDuration(step.time, this.steps[i-1].time)
+        step.duration_ms = getDelta(step.time, this.steps[i-1].time)
       }
+      step.duration = getFormatDuration(step.duration_ms)
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
     }
@@ -163,7 +164,7 @@ function StepPannel(data, root){
       if(step.screen && step.screen.thumbnail) {
         return '<div class="thumbnail" index="%s">'.format(step.index) + 
                   '<img src="%s" alt="%s"/>'.format(step.screen.thumbnail, step.screen.thumbnail) +
-                  '<div class="time">%s</div>'.format(getFormatDuration2(step.time, that.data.run_start)) +
+                  '<div class="time">%s</div>'.format(getFormatDuration2(getDelta(step.time, that.data.run_start))) +
                 '</div>'
       } else{
         return ""
@@ -567,31 +568,9 @@ function getFormatTime(timestamp){
   return (new Date(timestamp)).Format("hh:mm:ss")
 }
 
-function getFormatDuration(end, start) {
-  // 返回耗时，格式为 0hr1min6s22ms
-  var delta = getTimestamp(end) - getTimestamp(start)
-  return getDelta(parseInt(delta))
-}
-
-function getFormatDuration2(end, start) {
-  // 返回耗时，格式为 00:00:19
-  var delta = getTimestamp(end) - getTimestamp(start)
-  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
-  return (new Date(midnight + delta)).Format("hh:mm:ss")
-}
-
-function getTimestamp(time) {
-  // time有可能是时间戳，也可能是格式化的，返回为毫秒
-  if(Number(time)){
-    return Number(time) * 1000
-  } else{
-    return (new Date(time).getTime())
-  }
-}
-
-function getDelta(delta){
-  // 计算消耗时间，end - start，以0hr1min6s22ms 格式
-  ms = delta % 1000
+function getFormatDuration(delta) {
+  // 格式化耗时， 格式为 0hr1min6s22ms
+  ms = parseInt(delta % 1000)
   delta = parseInt(delta / 1000)
   s = delta % 60
   delta = parseInt(delta/ 60)
@@ -610,6 +589,26 @@ function getDelta(delta){
   else
     msg = h + 'hr ' + m + 'min ' + s + "s " + ms + "ms"
   return msg
+}
+
+function getFormatDuration2(delta) {
+  // 返回耗时，格式为 00:00:19
+  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
+  return (new Date(midnight + delta)).Format("hh:mm:ss")
+}
+
+function getDelta(end, start) {
+  // 返回耗时 单位为毫秒, end 和 start 可能是timestamp，也可能是化数据
+  return getTimestamp(end) - getTimestamp(start)
+}
+
+function getTimestamp(time) {
+  // time有可能是时间戳，也可能是格式化的，返回为毫秒
+  if(Number(time)){
+    return Number(time) * 1000
+  } else{
+    return (new Date(time).getTime())
+  }
 }
 
 function toggleCollapse(dom){
@@ -675,7 +674,7 @@ function set_task_status(result){
 function init_page(){
   $('.summary .info-sub.start').html(getFormatDate(data.run_start))
   $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
-  $('.summary .info-value.duration').html(getFormatDuration(data.run_end, data.run_start))
+  $('.summary .info-value.duration').html(getFormatDuration(getDelta(data.run_end, data.run_start)))
 }
 
 $(function(){
