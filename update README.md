@@ -12,7 +12,7 @@
 
 *   **Write Once, Run Anywhere:** Airtest provides cross-platform APIs, including app installation, simulated input, assertion and so forth. Airtest uses image recognition technology to locate UI elements so that you can automate games and apps without injecting any code. 
 
-*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using commandline or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of the Airtest Project.
+*   **Fully Scalable:** Airtest cases can be easily run on large device farms, using command-line or python API. HTML reports with detailed info and screen recording allow you to quickly locate failure points. NetEase builds [Airlab](https://airlab.163.com/) on top of the Airtest Project.
 
 *   **AirtestIDE:** AirtestIDE is an out of the box GUI tool that helps to create and run cases in a user-friendly way. AirtestIDE supports a complete automation workflow: ``create -> run -> report``.
 
@@ -34,7 +34,7 @@ Use `pip` to install the Airtest python library.
 pip install -U airtest
 ```
 
-On MacOS/Linux platform, you need to grant adb execute permission.
+On the macOS/Linux platform, you need to grant adb execute permission.
 
 ```Shell
 # for mac
