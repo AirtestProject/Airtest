@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-16 16:34:15
+ * @LastEditTime: 2019-10-23 11:32:15
  */
 function StepPannel(data, root){
   this.data = data
@@ -201,9 +201,9 @@ function StepPannel(data, root){
 
   this.setStepsLeft = function(){
     html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
-    start = (this.currentPage-1)* this.pagesize
+    var start = (this.currentPage-1)* this.pagesize
     start = start < 0 ? 0 : start
-    end = (this.currentPage)*this.pagesize
+    var end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
     for(var i = start; i< end; i++){
       var step = this.steps[i]
@@ -479,6 +479,7 @@ function StepPannel(data, root){
     //生成分页控件  
     this.paging = new Paging();
     var that = this
+    var list_len = this.steps.length
     this.paging.init({
       target:'#pageTool',
       pagesize: this.pagesize,
@@ -486,12 +487,9 @@ function StepPannel(data, root){
       prevTpl: "<",
       nextTpl: ">",
       toolbar:true,
-      pageSizeList: this.steps.length>100 ? [10, 20, 50, 100, 'All'] : [10, 20, 50, 100],
+      pageSizeList: list_len>100 ? [10, 20, 50, 100, list_len] : [10, 20, 50, 100],
       changePagesize:function(ps){
-        if(ps == 'All')
-          that.pagesize = this.steps.length
-        else
-          that.pagesize = parseInt(ps)
+        that.pagesize = parseInt(ps)
         that.currentPage = 1
         that.setStepsLeft()
       },
@@ -500,7 +498,7 @@ function StepPannel(data, root){
         that.setStepsLeft()
       }
     });
-    $('#pageTool').prepend('<span class="stpes-total"><span lang="en">Total </span><span class="steps-account"></span></span>')
+    $('#pageTool').prepend('<span class="steps-total"><span lang="en">Total </span><span class="steps-account"></span></span>')
   }
 
   this.setPagenation = function(){
