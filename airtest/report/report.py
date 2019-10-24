@@ -390,7 +390,13 @@ class LogToHtml(object):
                 console = console + line
         return console
 
-    def report(self, template_name, output_file=None, record_list=None):
+    def report_data(self, output_file=None, record_list=None):
+        """
+        Generate data for the report page
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
         self._load()
         steps = self._analyse()
 
@@ -428,7 +434,17 @@ class LogToHtml(object):
         data['log'] = self.get_relative_log(output_file)
         data['console'] = self.get_console(output_file)
         data['data'] = json.dumps(data)
+        return data
 
+    def report(self, template_name, output_file=None, record_list=None):
+        """
+        Generate the report page, you can add custom data and overload it if needed
+        :param template_name: default is HTML_TPL
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
+        data = self.report_data(output_file=output_file, record_list=record_list)
         return self._render(template_name, output_file, **data)
 
 

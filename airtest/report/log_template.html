@@ -124,15 +124,14 @@
           </div>
           <div class="device" id='device'>
           </div>
-
+          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
+          {{ extra_block|safe }}
           <div class="gallery">
             <div class="info-title"><span lang="en">Quick view</span></div>
             <div class="content">
             </div>
           </div>
 
-          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
-          {{ extra_block|safe }}
           <!--单步-->
           {% if steps|length  >0 %}
           
