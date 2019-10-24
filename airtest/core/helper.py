@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import functools
-import shutil
 import time
 import sys
 import os
+import traceback
 from airtest.core.settings import Settings as ST
 from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.utils.logger import get_logger
@@ -64,15 +63,22 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(data):
+def log(arg, trace=""):
     """
     Insert user log, will be displayed in Html report.
 
     :param data: log message or Exception
+    :param trace: log traceback if exists, use traceback.format_exc to get best format
     :return: None
     """
     if G.LOGGER:
-        G.LOGGER.log("info", data, 0)
+        if isinstance(arg, Exception):
+            G.LOGGER.log({
+                    "name": arg.__class__.__name__,
+                    "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
+                })
+        else:
+            G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0)
 
 
 def logwrap(f):
