@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-23 11:32:15
+ * @LastEditTime: 2019-10-28 11:29:26
  */
 function StepPannel(data, root){
   this.data = data
@@ -136,8 +136,8 @@ function StepPannel(data, root){
   }
 
   this.highlightBlock = function(){
-    if($('pre.trace').length>0){
-      hljs.highlightBlock($('pre.trace')[0], null, false);
+    if($('#step-right pre.trace').length>0){
+      hljs.highlightBlock($('#step-right pre.trace')[0], null, false);
     }
   }
 
