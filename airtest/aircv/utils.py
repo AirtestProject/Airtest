@@ -77,6 +77,6 @@ def compress_image(pil_img, path, max_width=300, max_height=300):
         生成缩略图
     '''
     pil_img.thumbnail((max_width, max_height), Image.ANTIALIAS)
-    if Settings.SNAPSHOT_QUALITY <= 0:
+    if Settings.SNAPSHOT_QUALITY <= 0 or Settings.SNAPSHOT_QUALITY >= 100:
         raise ScriptParamError("Settings.SNAPSHOT_QUALITY should be an integer in the range [1,99]")
     pil_img.save(path, quality=round(Settings.SNAPSHOT_QUALITY), optimize=True)
