@@ -73,7 +73,7 @@ def log(arg, trace=""):
     """
     if G.LOGGER:
         if isinstance(arg, Exception):
-            G.LOGGER.log({
+            G.LOGGER.log("info", {
                     "name": arg.__class__.__name__,
                     "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
                 })
