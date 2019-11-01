@@ -5,7 +5,9 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from airtest.core.settings import Settings
 from .error import TemplateInputError
+from airtest.core.error import ScriptParamError
 
 
 def generate_result(middle_point, pypts, confi):
@@ -70,9 +72,11 @@ def cv2_2_pil(cv2_image):
     return pil_im
 
 
-def compress_image(pil_img, path, w=300, h=300):
+def compress_image(pil_img, path, max_width=300, max_height=300):
     '''
         生成缩略图
     '''
-    pil_img.thumbnail((w, h))
-    pil_img.save(path, quality=30)
+    pil_img.thumbnail((max_width, max_height), Image.ANTIALIAS)
+    if Settings.SNAPSHOT_QUALITY <= 0 or Settings.SNAPSHOT_QUALITY >= 100:
+        raise ScriptParamError("Settings.SNAPSHOT_QUALITY should be an integer in the range [1,99]")
+    pil_img.save(path, quality=round(Settings.SNAPSHOT_QUALITY), optimize=True)
