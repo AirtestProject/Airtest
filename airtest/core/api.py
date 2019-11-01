@@ -94,7 +94,7 @@ def set_current(idx):
     G.DEVICE = current_dev
 
 
-def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
+def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compress=0):
     """
     Auto setup running env and try connect android device if not device connected.
 
@@ -116,6 +116,8 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
         set_logdir(logdir)
     if project_root:
         ST.PROJECT_ROOT = project_root
+    if compress:
+        ST.SNAPSHOT_QUALITY = compress
 
 
 """
