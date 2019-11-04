@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-10-28 11:29:26
+ * @LastEditTime: 2019-11-04 18:27:14
  */
 function StepPannel(data, root){
   this.data = data
@@ -36,6 +36,9 @@ function StepPannel(data, root){
       this.setSteps()
     }
     this.init_video()
+    if ($('#console pre.trace').length > 0) {
+      hljs.highlightBlock($('#console pre.trace')[0], null, false)
+    }
     this.highlightBlock()
   }
 
@@ -336,8 +339,10 @@ function StepPannel(data, root){
         rectors += "<div class='rect' ret='%s' style='left:%spx;top:%spx;width:%spx;height:%spx'></div>"
                    .format(JSON.stringify(rect), rect.left, rect.top, rect.width, rect.height)
       }
+      var res = step.screen.resolution
+      res = res ? 'w=%s h=%s'.format(res[0], res[1]): ""
 
-      return '<div class="fancybox">%s</div>'.format(img + targets + vectors + rectors)
+      return '<div class="fancybox" %s >%s</div>'.format(res, img + targets + vectors + rectors)
     } else{
       return ""
     }
@@ -356,7 +361,7 @@ function StepPannel(data, root){
      * @description: 重新计算截屏缩放的比例
      * @param {dom} dom img对象
      */
-    imgWidth = dom.naturalWidth
+    imgWidth = $('.fancybox').attr('w') || dom.naturalWidth
     dwidth = dom.width
     this.scale = dwidth / imgWidth
     this.scale  = Math.round(this.scale  * 100) / 100

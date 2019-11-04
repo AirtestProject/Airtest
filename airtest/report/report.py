@@ -150,8 +150,15 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
-                src = item["data"]['ret']
+            if item["data"]["name"] == "try_log_screen":
+                snapshot = item["data"].get("ret", None)
+                if isinstance(snapshot, six.text_type):
+                    src = snapshot
+                elif isinstance(snapshot, dict):
+                    src = snapshot['screen']
+                    screen['resolution'] = snapshot['resolution']
+                else:
+                    continue
                 if self.export_dir:  # all relative path
                     screen['_filepath'] = os.path.join(LOGDIR, src)
                 else:
