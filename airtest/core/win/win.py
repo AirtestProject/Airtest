@@ -282,13 +282,6 @@ class Windows(Device):
         # 设置坐标时相对于整个屏幕的坐标:
         x1, y1 = self._fix_op_pos(p1)
         x2, y2 = self._fix_op_pos(p2)
-        # 双屏时，涉及到了移动的比例换算:
-        if len(self.screen.monitors) > 2:
-            ratio_x = (self.monitor["width"] + self.monitor["left"]) / self.main_monitor["width"]
-            ratio_y = (self.monitor["height"] + self.monitor["top"]) / self.main_monitor["height"]
-            x2 = int(x1 + (x2 - x1) * ratio_x)
-            y2 = int(y1 + (y2 - y1) * ratio_y)
-            p1, p2 = (x1, y1), (x2, y2)
 
         from_x, from_y = self._action_pos(p1)
         to_x, to_y = self._action_pos(p2)
