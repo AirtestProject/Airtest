@@ -229,12 +229,36 @@ class Windows(Device):
         duration = kwargs.get("duration", 0.01)
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
-        coords = self._action_pos(pos)
-        coords = self._fix_op_pos(coords)
+        steps = kwargs.get("steps", 1)
+        offset = kwargs.get("offset", 0)
 
-        self.mouse.press(button=button, coords=coords)
+        start = self._action_pos(win32api.GetCursorPos())
+        end = self._action_pos(pos)
+        start_x, start_y = self._fix_op_pos(start)
+        end_x, end_y = self._fix_op_pos(end)
+
+        interval = float(duration) / steps
+        time.sleep(interval)
+
+        for i in range(1, steps):
+            x = int(start_x + (end_x-start_x) * i / steps)
+            y = int(start_y + (end_y-start_y) * i / steps)
+            self.mouse.move(coords=(x, y))
+            time.sleep(interval)
+
+        self.mouse.move(coords=(end_x, end_y))
+
+        for i in range(1, offset+1):
+            self.mouse.move(coords=(end_x+i, end_y+i))
+            time.sleep(0.01)
+
+        for i in range(offset):
+            self.mouse.move(coords=(end_x+offset-i, end_y+offset-i))
+            time.sleep(0.01)
+
+        self.mouse.press(button=button, coords=(end_x, end_y))
         time.sleep(duration)
-        self.mouse.release(button=button, coords=coords)
+        self.mouse.release(button=button, coords=(end_x, end_y))
 
     def double_click(self, pos):
         pos = self._fix_op_pos(pos)
