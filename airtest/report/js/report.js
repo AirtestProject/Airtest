@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-11-04 18:27:14
+ * @LastEditTime: 2019-11-07 17:55:11
  */
 function StepPannel(data, root){
   this.data = data
@@ -17,6 +17,8 @@ function StepPannel(data, root){
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
   this.stepRight = $('#step-right')
+  this.magnifyContainer = $('#magnify .content')
+  this.magnifyPic = $('#magnify')
   this.scale = 0
   this.order = 'acc' // or dec
   this.duration = 'acc' // or dec
@@ -53,6 +55,17 @@ function StepPannel(data, root){
     })
     $('.gallery .content').delegate('.thumbnail', 'click', function(e){
       that.jumpToCurrStep(Number(this.getAttribute('index')))
+    })
+    this.stepRight.delegate('.fancybox', "click", function(e) {
+      that.showMagnifyPic(this.outerHTML)
+    })
+    this.stepRight.delegate('.crop_image', "click", function(e) {
+      that.showMagnifyPic(this.outerHTML)
+    })
+    this.magnifyPic.click(function(e) {
+      if (e.target.tagName.toLowerCase() != 'img'){
+        that.hideMagnifyPic()
+      }
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -130,10 +143,11 @@ function StepPannel(data, root){
     this.highlightBlock()
     var that = this
     if($(".step-args .fancybox").length>0){
-      $('.fancybox .screen').load(function(e){
+      $('#step-right .fancybox .screen').load(function(e){
         // 存在截屏，并加载成功
         that.resetScale(this)
-        that.resetScreenshot()
+        that.convertSize($('.step-args .crop_image'), 80, 35)
+        that.resetScreenshot($('#step-right .fancybox'))
       })
     }
   }
@@ -200,6 +214,28 @@ function StepPannel(data, root){
     this.setPagenation()
     this.setStepRight(step)
     $('.steps .filter').removeClass('active')
+  }
+
+  this.showMagnifyPic = function(fragment) {
+    this.magnifyContainer.html(fragment)
+    this.magnifyContainer.children().removeAttr('style')
+    var fancybox = this.magnifyContainer.find('.fancybox')
+    if (fancybox.length > 0){
+      var that = this
+      $('#magnify .fancybox .screen').load(function(e){
+        // 存在截屏，并加载成功
+        if (this.height > this.parentNode.offsetHeight){
+          this.style.height = this.parentNode.offsetHeight + 'px'
+        }
+        that.resetScale(this)
+        that.resetScreenshot($('#magnify .fancybox'))
+      })
+    }
+    this.magnifyPic.fadeIn(300)
+  }
+
+  this.hideMagnifyPic = function() {
+    this.magnifyPic.fadeOut(300)
   }
 
   this.setStepsLeft = function(){
@@ -309,35 +345,37 @@ function StepPannel(data, root){
 
   this.getStepRightScrren = function(step){
     if(step.screen && step.screen.src){
-      src = step.screen.src
+      var src = step.screen.src
       // 截屏
-      img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
+      var img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
 
       // 点击位置
-      targets = ''
+      var targets = ''
       for(var i=0; i < step.screen.pos.length; i++){
-        pos = step.screen.pos[i]
-        targets += '<img class="target" src="%simage/target.png" data-top="%s" data-left="%s" style="top:%spx;left:%spx;">'
-                  .format(this.static, pos[1], pos[0], pos[1], pos[0])
+        var pos = step.screen.pos[i]
+        var rect = JSON.stringify({'left': pos[0], "top": pos[1]})
+        targets += "<img class='target' src='%simage/target.png' rect=%s>"
+                  .format(this.static, rect)
       }
 
       // 线
-      vectors = ''
+      var vectors = ''
       for(var i=0; i < step.screen.vector.length; i++){
-        v = step.screen.vector[i]
-        vectors += ('<div class="arrow" data-index="%s" data-x="%s" data-y="%s">' +
+        var v = step.screen.vector[i]
+        var rect = JSON.stringify({'left': v[0], "top": v[1]})
+        vectors += ("<div class='arrow' data-index='%s' rect=%s>" +
                     '<div class="start"></div>' +
                     '<div class="line"></div>' +
                     '<div class="end"></div>' +
-                  '</div>').format(this.currentStep, v[0], v[1])
+                  '</div>').format(this.currentStep, rect)
       }
       
       // 还有个rect <!-- rect area -->
-      rectors = ''
+      var rectors = ''
       for(var i=0;i<step.screen.rect.length; i++){
-        rect = step.screen.rect[i]
-        rectors += "<div class='rect' ret='%s' style='left:%spx;top:%spx;width:%spx;height:%spx'></div>"
-                   .format(JSON.stringify(rect), rect.left, rect.top, rect.width, rect.height)
+        var rect = step.screen.rect[i]
+        rectors += "<div class='rect' rect='%s' ></div>"
+                   .format(JSON.stringify(rect))
       }
       var res = step.screen.resolution
       res = res ? 'w=%s h=%s'.format(res[0], res[1]): ""
@@ -361,48 +399,54 @@ function StepPannel(data, root){
      * @description: 重新计算截屏缩放的比例
      * @param {dom} dom img对象
      */
-    imgWidth = $('.fancybox').attr('w') || dom.naturalWidth
+    imgWidth = dom.parentNode.getAttribute('w') || dom.naturalWidth
     dwidth = dom.width
     this.scale = dwidth / imgWidth
-    this.scale  = Math.round(this.scale  * 100) / 100
   }
 
-  this.resetScreenshot = function(){
+  this.resetScreenshot = function(fancybox){
     // 重新设置targt、方框、连接线位置
-    this.convertSize($('.step-args .crop_image'))
-    this.convertPos($('.fancybox .target'), true)
-    this.convertSize($('.fancybox .rect'))
-    this.convertPos($('.fancybox .rect'))
-    this.showArrow($(".fancybox .arrow"))
-    $('.fancybox').css({
-      'width': $('.fancybox .screen').width()
+    var screen = fancybox.find('.screen')
+    this.convertPos(fancybox.find('.target'), screen, true)
+    this.convertSize(fancybox.find('.rect'))
+    this.convertPos(fancybox.find('.rect'), screen)
+    this.showArrow(fancybox.find(".arrow"), screen)
+    fancybox.css({
+      'width': screen.width()
     })
   }
 
-  this.convertPos = function(domList, withSize){
+  this.convertPos = function(domList, screen,  withSize){
     for(var i=0; i<domList.length; i++){
-      pos = $(domList[i]).position()
-      x = pos.left * this.scale
-      y = pos.top * this.scale
+      var rect = JSON.parse(domList[i].getAttribute('rect'))
+      x = rect.left * this.scale
+      y = rect.top * this.scale
       if(withSize){
         x -= domList[i].offsetWidth/2
         y -= domList[i].offsetHeight/2
       }
-      domList[i].style.left = this.convertPosPersentage(x, 'horizontal')
-      domList[i].style.top = this.convertPosPersentage(y, 'vertical')
+      domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
+      domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
     }
   }
 
-  this.convertSize = function(domList){
+  this.convertSize = function(domList, minWidth, minHeight) {
     for(var i=0;i<domList.length; i++){
-      w = domList[i].clientWidth
-      h = domList[i].clientHeight
-      domList[i].style.width = (w * this.scale) + 'px'
-      domList[i].style.height = (h * this.scale) + 'px'
+      if (domList[i].tagName.toLowerCase() == 'img'){
+        w = domList[i].clientWidth
+        h = domList[i].clientHeight
+      } else{
+        var rect = JSON.parse(domList[i].getAttribute('rect'))
+        w = rect.width
+        h = rect.height
+      }
+      var scale = Math.max(this.scale, (minWidth || 0)/w, (minHeight || 0)/h)
+      domList[i].style.width = (w * scale) + 'px'
+      domList[i].style.height = (h * scale) + 'px'
     }
   }
 
-  this.showArrow = function(dom){
+  this.showArrow = function(dom, screen){
     var start = this.original_steps[this.currentStep].screen.pos[0]
     var vector = this.original_steps[this.currentStep].screen.vector[0]
     if(vector && start){
@@ -420,8 +464,8 @@ function StepPannel(data, root){
       };
       dom.css(rotate_css);
       dom.css({
-        'top': this.convertPosPersentage(start[1]* this.scale, 'vertical'),
-        'left': this.convertPosPersentage(start[0]*this.scale, 'horizontal'),
+        'top': this.convertPosPersentage(start[1]* this.scale, screen, 'vertical'),
+        'left': this.convertPosPersentage(start[0]*this.scale, screen, 'horizontal'),
         'width': vt_width
       });
     }
@@ -535,13 +579,13 @@ function StepPannel(data, root){
     }
   }
 
-  this.convertPosPersentage = function(pixcel, key){
+  this.convertPosPersentage = function(pixcel, screen, key){
     ret = ''
     if(key == 'horizontal'){
-      ret = pixcel /$('.fancybox .screen').width() * 100 + '%'
+      ret = pixcel / screen.width() * 100 + '%'
     }
     else if (key == 'vertical'){
-      ret = pixcel / $('.fancybox .screen').height() * 100 + '%'
+      ret = pixcel / screen.height() * 100 + '%'
     }
     return ret
   }

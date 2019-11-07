@@ -433,12 +433,12 @@ h2.empty-report{
   max-width: calc(100% - 330px);
   min-width: 500px;
 }
-.step-right .screen{
+.fancybox .screen{
   max-width: 100%;
-  max-height: 600px;
   border: solid 1px #212f53;
+  max-height: 600px;
 }
-.step-right .target{
+.fancybox .target{
   position: absolute;
   width: 50px;
   height: 50px;
@@ -451,13 +451,13 @@ h2.empty-report{
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
 }
-.step-right .rect {
+.fancybox .rect {
   position: absolute;
   border: solid 2px red;
   border-radius: 3px;
   background: transparent;
 }
-.step-right .arrow {
+.fancybox .arrow {
   display: flex;
   align-items: center;
   left: 100px;
@@ -467,18 +467,18 @@ h2.empty-report{
   margin-top: -15px;
   margin-left: -6px;
 }
-.step-right .arrow .start {
+.fancybox .arrow .start {
   width: 12px;
   height: 12px;
   border-radius: 6px;
   background-color: red;
 }
-.step-right .arrow .line {
+.fancybox .arrow .line {
   flex: 1;
   background: red;
   height: 10px;
 }
-.step-right .arrow .end {
+.fancybox .arrow .end {
   width: 0;
   height: 0;
   border-top: 15px solid transparent;
@@ -620,6 +620,28 @@ pre.trace {
 .mask .content .console-content{
   height: 100%;
   overflow-y: auto;
+}
+#magnify.mask{
+  background: rgba(255, 255, 255, 0.7);
+}
+#magnify .content{
+  padding: 0;
+  height: calc(100% - 100px);
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+#magnify .fancybox, #magnify .crop_image{
+  display:block;
+  max-width:100%;
+  max-height:100%;
+  position: relative;
+}
+#magnify .fancybox .screen{
+  height: auto;
+  max-height: 100%;
+  margin: auto;
+  display: block;
 }
 #close-console {
   position: absolute;
