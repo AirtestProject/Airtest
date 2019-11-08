@@ -359,6 +359,9 @@ h2.empty-report{
 .step-left .order{
   margin: 0 5px;
 }
+.step-left .step_title {
+  word-break: break-all;
+}
 .step-left .step-time{
   position: absolute;
   right: 10px;
