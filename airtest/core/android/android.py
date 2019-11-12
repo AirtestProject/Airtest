@@ -8,7 +8,8 @@ from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, SDK_VERISON_NEW
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD,\
+    SDK_VERISON_NEW, SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -38,6 +39,9 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
+        # Android10 temporary solution, using adbtouch instead of minitouch
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method != TOUCH_METHOD.ADBTOUCH:
+            self.touch_method = TOUCH_METHOD.ADBTOUCH
         self._display_info = {}
         self._current_orientation = None
         # init components
