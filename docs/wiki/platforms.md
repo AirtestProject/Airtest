@@ -202,7 +202,7 @@ Supported Platforms
 | 162  | 一加 5（A5000）                   | 通过   | 高   |      |
 | 163  | 锤子 坚果 Pro 2（OS105）          | 通过   | 高   |      |
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
-
+| 165  | NOKIA X5	| 通过   | 高   |      |
 
 ## Android Emulator
 
