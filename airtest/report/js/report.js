@@ -6,6 +6,7 @@
  * @LastEditors: Era Chen
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @LastEditTime: 2019-11-07 17:55:11
 =======
  * @LastEditTime: 2019-12-09 17:36:09
@@ -13,6 +14,9 @@
 =======
  * @LastEditTime: 2019-12-10 09:45:48
 >>>>>>> 5e06018... fix android connection when method is empty
+=======
+ * @LastEditTime: 2019-11-20 16:54:21
+>>>>>>> 8be22ac... back to detail page
  */
 function StepPannel(data, root){
   this.data = data
@@ -733,7 +737,7 @@ function loadUrlInfo(){
     var fragment  = keys.map(function(k){
       return '<div class="info %s" title="%s"><span lang="en">%s</span>%s</div>'.format(k,args[k], formatStr(k), args[k])
     })
-    back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
+    back = '<a href="%s#detail" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
     result = args.status ? args.status : result
