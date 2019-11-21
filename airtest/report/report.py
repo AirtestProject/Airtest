@@ -393,7 +393,7 @@ class LogToHtml(object):
         console = ""
         file = os.path.join(html_dir, 'console.txt')
         if os.path.isfile(file):
-            for line in open(file):
+            for line in open(file, encoding='utf-8'):
                 console = console + line
         return console
 
