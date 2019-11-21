@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
 import re
 import json
@@ -34,7 +34,7 @@ class Minicap(object):
     reference https://github.com/openstf/minicap
     """
 
-    VERSION = 5
+    VERSION = 6
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
