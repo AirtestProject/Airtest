@@ -284,7 +284,7 @@ function StepPannel(data, root){
   }
 
   this.getStepRightInfo = function(step){
-    // HTML 本步骤成功与否、耗时
+    // HTML 本步骤成功与否、耗时 
     try{
       return ("<div class='step-infos'>"+
                 "<div class='infos-li'>" +
@@ -369,7 +369,7 @@ function StepPannel(data, root){
                     '<div class="end"></div>' +
                   '</div>').format(this.currentStep, rect)
       }
-
+      
       // 还有个rect <!-- rect area -->
       var rectors = ''
       for(var i=0;i<step.screen.rect.length; i++){
@@ -525,7 +525,7 @@ function StepPannel(data, root){
   }
 
   this.init_pagenation = function(){
-    //生成分页控件
+    //生成分页控件  
     this.paging = new Paging();
     var that = this
     var list_len = this.steps.length
@@ -600,15 +600,15 @@ String.prototype.format= function(){
   });
 }
 
-Date.prototype.Format = function (fmt) { //author: meizz
+Date.prototype.Format = function (fmt) { //author: meizz 
   var o = {
-    "M+": this.getMonth() + 1, //月份
-    "d+": this.getDate(), //日
-    "h+": this.getHours(), //小时
-    "m+": this.getMinutes(), //分
-    "s+": this.getSeconds(), //秒
-    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-    "S": this.getMilliseconds() //毫秒
+    "M+": this.getMonth() + 1, //月份 
+    "d+": this.getDate(), //日 
+    "h+": this.getHours(), //小时 
+    "m+": this.getMinutes(), //分 
+    "s+": this.getSeconds(), //秒 
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+    "S": this.getMilliseconds() //毫秒 
   };
   if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
   for (var k in o)
