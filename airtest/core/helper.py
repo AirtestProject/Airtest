@@ -2,6 +2,7 @@
 import time
 import sys
 import os
+import six
 import traceback
 from airtest.core.settings import Settings as ST
 from airtest.utils.logwraper import Logwrap, AirtestLogger
@@ -77,8 +78,10 @@ def log(arg, trace=""):
                     "name": arg.__class__.__name__,
                     "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
                 })
-        else:
+        elif isinstance(arg, six.string_types):
             G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0)
+        else:
+            raise TypeError("arg must be Exception or string")
 
 
 def logwrap(f):
