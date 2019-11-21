@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-11-07 17:55:11
+ * @LastEditTime: 2019-11-20 16:54:21
  */
 function StepPannel(data, root){
   this.data = data
@@ -712,7 +712,7 @@ function loadUrlInfo(){
     var fragment  = keys.map(function(k){
       return '<div class="info %s"><span lang="en">%s</span>%s</div>'.format(k, formatStr(k), args[k])
     })
-    back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
+    back = '<a href="%s#detail" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
     result = args.status ? args.status : result
