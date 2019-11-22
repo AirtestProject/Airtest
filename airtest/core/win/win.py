@@ -5,6 +5,7 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
+import pywintypes
 import win32api
 
 from pywinauto.application import Application
