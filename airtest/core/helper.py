@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import functools
-import shutil
 import time
 import sys
 import os
+import six
+import traceback
 from airtest.core.settings import Settings as ST
 from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.utils.logger import get_logger
@@ -64,16 +64,24 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(message, traceback=""):
+def log(arg, trace=""):
     """
     Insert user log, will be displayed in Html report.
 
-    :param message: log message
-    :param traceback: log traceback if exists, use traceback.format_exc to get best format
+    :param data: log message or Exception
+    :param trace: log traceback if exists, use traceback.format_exc to get best format
     :return: None
     """
     if G.LOGGER:
-        G.LOGGER.log("info", {"name": message, "traceback": traceback}, 0)
+        if isinstance(arg, Exception):
+            G.LOGGER.log("info", {
+                    "name": arg.__class__.__name__,
+                    "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
+                })
+        elif isinstance(arg, six.string_types):
+            G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0)
+        else:
+            raise TypeError("arg must be Exception or string")
 
 
 def logwrap(f):

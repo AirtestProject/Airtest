@@ -150,8 +150,15 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
-                src = item["data"]['ret']
+            if item["data"]["name"] == "try_log_screen":
+                snapshot = item["data"].get("ret", None)
+                if isinstance(snapshot, six.text_type):
+                    src = snapshot
+                elif isinstance(snapshot, dict):
+                    src = snapshot['screen']
+                    screen['resolution'] = snapshot['resolution']
+                else:
+                    continue
                 if self.export_dir:  # all relative path
                     screen['_filepath'] = os.path.join(LOGDIR, src)
                 else:
@@ -373,7 +380,30 @@ class LogToHtml(object):
 
         return dirpath, logpath
 
-    def report(self, template_name, output_file=None, record_list=None):
+    def get_relative_log(self, output_file):
+        try:
+            html_dir = os.path.dirname(output_file)
+            return os.path.relpath(os.path.join(self.log_root, 'log.txt') ,html_dir)
+        except Exception:
+            traceback.print_exc()
+            return ""
+
+    def get_console(self, output_file):
+        html_dir = os.path.dirname(output_file)
+        console = ""
+        file = os.path.join(html_dir, 'console.txt')
+        if os.path.isfile(file):
+            for line in open(file, encoding='utf-8'):
+                console = console + line
+        return console
+
+    def report_data(self, output_file=None, record_list=None):
+        """
+        Generate data for the report page
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
         self._load()
         steps = self._analyse()
 
@@ -408,8 +438,20 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
+        data['log'] = self.get_relative_log(output_file)
+        data['console'] = self.get_console(output_file)
         data['data'] = json.dumps(data)
+        return data
 
+    def report(self, template_name, output_file=None, record_list=None):
+        """
+        Generate the report page, you can add custom data and overload it if needed
+        :param template_name: default is HTML_TPL
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
+        data = self.report_data(output_file=output_file, record_list=record_list)
         return self._render(template_name, output_file, **data)
 
 
