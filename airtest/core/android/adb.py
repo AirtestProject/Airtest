@@ -33,9 +33,11 @@ class ADB(object):
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
 
-    def __init__(self, serialno=None, adb_path=None, server_addr=None):
+    def __init__(self, serialno=None, adb_path=None, server_addr=None, display_id=None, input_event=None):
         self.serialno = serialno
         self.adb_path = adb_path or self.builtin_adb_path()
+        self.display_id = display_id
+        self.input_event = input_event
         self._set_cmd_options(server_addr)
         self.connect()
         self._sdk_version = None
@@ -683,7 +685,10 @@ class ADB(object):
             command output (stdout)
 
         """
-        raw = self.cmd('shell screencap -p', ensure_unicode=False)
+        if self.display_id:
+            raw = self.cmd('shell screencap -d {0} -p'.format(self.display_id), ensure_unicode=False)
+        else:
+            raw = self.cmd('shell screencap -p', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
