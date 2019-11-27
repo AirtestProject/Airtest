@@ -27,24 +27,27 @@ class Android(Device):
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
-                 ):
+                 display_id=None,
+                 input_event=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
         self.ori_method = ori_method.upper()
+        self.display_id = display_id
+        self.input_event = input_event
         # init adb
-        self.adb = ADB(self.serialno, server_addr=host)
+        self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb, ori_function=self.get_display_info)
+        self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info,input_event=self.input_event)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
