@@ -70,7 +70,12 @@ class Android(Device):
 
     @property
     def uuid(self):
-        return self.serialno
+        ult = [self.serialno]
+        if self.display_id:
+            ult.append(self.display_id)
+        if self.input_event:
+            ult.append(self.input_event)
+        return "_".join(ult)
 
     def list_app(self, third_only=False):
         """
