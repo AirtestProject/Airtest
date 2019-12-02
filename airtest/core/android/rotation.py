@@ -129,13 +129,13 @@ class XYTransformer(object):
         """
         x, y = tuple_xy
         w, h = tuple_wh
-
+        
         if orientation == 1:
-            x, y = w - y, x
+            x, y = h - y, x
         elif orientation == 2:
             x, y = w - x, h - y
         elif orientation == 3:
-            x, y = y, h - x
+            x, y = y, h - x        
         return x, y
 
     @staticmethod
