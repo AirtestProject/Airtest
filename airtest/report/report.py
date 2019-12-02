@@ -410,16 +410,6 @@ class LogToHtml(object):
         script_path = os.path.join(self.script_root, self.script_name)
         info = json.loads(get_script_info(script_path))
 
-        if self.export_dir:
-            self.script_root, self.log_root = self._make_export_dir()
-            # output_file可传入文件名，或绝对路径
-            output_file = output_file if output_file and os.path.isabs(output_file) \
-                else os.path.join(self.script_root, output_file or HTML_FILE)
-            if not self.static_root.startswith("http"):
-                self.static_root = "static/"
-
-        if not record_list:
-            record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
         records = [os.path.join(LOGDIR, f) if self.export_dir
                    else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
 
@@ -443,7 +433,7 @@ class LogToHtml(object):
         data['data'] = json.dumps(data)
         return data
 
-    def report(self, template_name, output_file=None, record_list=None):
+    def report(self, template_name=HTML_TPL, output_file=None, record_list=None):
         """
         Generate the report page, you can add custom data and overload it if needed
         :param template_name: default is HTML_TPL
@@ -451,6 +441,19 @@ class LogToHtml(object):
         :param record_list: List of screen recording files
         :return:
         """
+        if not self.script_name:
+            path, self.script_name = script_dir_name(self.script_root)
+
+        if self.export_dir:
+            script_export_root, self.log_root = self._make_export_dir()
+            # output_file可传入文件名，或绝对路径
+            output_file = output_file if output_file and os.path.isabs(output_file) \
+                else os.path.join(script_export_root, output_file or HTML_FILE)
+            if not self.static_root.startswith("http"):
+                self.static_root = "static/"
+
+        if not record_list:
+            record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
         data = self.report_data(output_file=output_file, record_list=record_list)
         return self._render(template_name, output_file, **data)
 
