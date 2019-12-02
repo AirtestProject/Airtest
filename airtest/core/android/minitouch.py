@@ -140,9 +140,9 @@ class Minitouch(object):
         self.localport, deviceport = self.adb.setup_forward("localabstract:minitouch_{}".format)
         deviceport = deviceport[len("localabstract:"):]
         if self.input_event:
-            p = self.adb.start_shell(f"/data/local/tmp/minitouch -n '{deviceport}' -d '{self.input_event}' 2>&1")
+            p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' -d '{1}' 2>&1".format(deviceport,self.input_event))
         else:
-            p = self.adb.start_shell(f"/data/local/tmp/minitouch -n '{deviceport}' 2>&1")
+            p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' 2>&1".format(deviceport))
         nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:
             line = nbsp.readline(timeout=5.0)
