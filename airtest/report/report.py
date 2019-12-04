@@ -241,12 +241,16 @@ class LogToHtml(object):
             if isinstance(value, dict) and value.get("__class__") == "Template":
                 if self.export_dir:  # all relative path
                     image_path = value['filename']
-                    if not os.path.isfile(os.path.join(self.script_root, image_path)):
-                        shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
+                    if not os.path.isfile(os.path.join(self.script_root, image_path)) and value['_filepath']:
+                        # copy image used by using statement
+                        shutil.copyfile(value['_filepath'], os.path.join(self.script_root, value['filename']))
                 else:
                     image_path = os.path.abspath(value['_filepath'] or value['filename'])
                 arg["image"] = image_path
-                crop_img = imread(value['_filepath'] or value['filename'])
+                if not value['_filepath'] and not os.path.exists(value['filename']):
+                    crop_img = imread(os.path.join(self.script_root, value['filename']))
+                else:
+                    crop_img = imread(value['_filepath'] or value['filename'])
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
@@ -445,10 +449,10 @@ class LogToHtml(object):
             path, self.script_name = script_dir_name(self.script_root)
 
         if self.export_dir:
-            script_export_root, self.log_root = self._make_export_dir()
+            self.script_root, self.log_root = self._make_export_dir()
             # output_file可传入文件名，或绝对路径
             output_file = output_file if output_file and os.path.isabs(output_file) \
-                else os.path.join(script_export_root, output_file or HTML_FILE)
+                else os.path.join(self.script_root, output_file or HTML_FILE)
             if not self.static_root.startswith("http"):
                 self.static_root = "static/"
 
