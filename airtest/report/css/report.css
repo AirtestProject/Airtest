@@ -145,6 +145,10 @@ h2.empty-report{
   width: 20px;
   vertical-align: bottom;
   cursor: context-menu;
+  opacity: 0.6;
+}
+.summary .info-execute #copy_path:hover{
+  opacity: 1;
 }
 .summary .circle-img{
   background: rgb(216,216,216);
@@ -236,10 +240,32 @@ h2.empty-report{
 #device.show{
   display: -ms-flexbox;
   display: flex;
+  justify-content: flex-start;
 }
 #device .info{
-  width: 50%;
+  width: 48%;
   line-height: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#device .info.connect{
+  position: relative;
+  padding-right: 30px;
+}
+#device .info .copy_device{
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: url(../image/copy.svg) no-repeat;
+  background-size: contain;
+  position: absolute;
+  right: 4px;
+  top: 3px;
+  opacity: 0.6;
+}
+#device .info .copy_device:hover{
+  opacity: 1;
 }
 #device .info span:first-child{
   margin-right: 10px;
