@@ -4,7 +4,11 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
+<<<<<<< HEAD
  * @LastEditTime: 2019-11-07 17:55:11
+=======
+ * @LastEditTime: 2019-12-09 17:36:09
+>>>>>>> 071b6cb... fix bug for get android address from url
  */
 function StepPannel(data, root){
   this.data = data
@@ -680,7 +684,7 @@ function toggleCollapse(dom){
 function urlArgs(){
   var args = {};
   var query = location.search.substring(1);
-  var pairs = query.split("&");
+  var pairs = query.split(/&|\?/);
   for(var i = 0;i < pairs.length; i++){
       var pos = pairs[i].indexOf("=");
       if(pos == -1) continue;
@@ -688,6 +692,18 @@ function urlArgs(){
       var value = pairs[i].substring(pos + 1);
       value = decodeURIComponent(value);
       args[name] = value;
+  }
+  // Connect :Android:///04157df490cb0b3f?cap_method=JAVACAP&&ori_method=ADBORI&&touch_method=ADBTOUCH
+  // && 也会被分割
+  if(args['connect']){
+    var methods = []
+    if(args['cap_method'])
+      methods.push("cap_method=JAVACAP")
+    if(args['ori_method'])
+      methods.push("ori_method=ADBORI")
+    if(args['touch_method'])
+      methods.push("touch_method=ADBTOUCH")
+    args['connect'] = args['connect'] + '?' + methods.join('&&')
   }
   return args;
 }
@@ -710,7 +726,7 @@ function loadUrlInfo(){
     args['no_of_device'] = args.device_no
     args['no_of_script'] = args.script_no
     var fragment  = keys.map(function(k){
-      return '<div class="info %s"><span lang="en">%s</span>%s</div>'.format(k, formatStr(k), args[k])
+      return '<div class="info %s" title="%s"><span lang="en">%s</span>%s</div>'.format(k,args[k], formatStr(k), args[k])
     })
     back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
@@ -719,6 +735,25 @@ function loadUrlInfo(){
     $(".footer").hide()
   }
   set_task_status(result)
+  $('.info.connect').append("<div class='copy_device'></div>")
+  $(".info .copy_device").click(function(){
+    copyToClipboard(this.parentNode.getAttribute('title'))
+  })
+}
+
+function copyToClipboard(msg){
+  const input = document.createElement('input')
+  input.setAttribute('readonly', 'readonly');
+  input.setAttribute('value', msg);
+  document.body.appendChild(input);
+  if (document.execCommand('copy')) {
+    input.select();
+    document.execCommand('copy');
+    console.log('复制成功');
+  } else{
+    alert('Copy is not supported by the current browser, please change to chrome')
+  }
+  document.body.removeChild(input);
 }
 
 function set_task_status(result){
@@ -769,18 +804,7 @@ $(function(){
 
   // 复制脚本地址到粘贴版
   $('#copy_path').click(function(){
-    const input = document.createElement('input')
-    input.setAttribute('readonly', 'readonly');
-    input.setAttribute('value', this.getAttribute('path'));
-    document.body.appendChild(input);
-    if (document.execCommand('copy')) {
-      input.select();
-      document.execCommand('copy');
-      console.log('复制成功');
-    } else{
-      alert('Copy is not supported by the current browser, please change to chrome')
-    }
-    document.body.removeChild(input);
+    copyToClipboard(this.getAttribute('path'))
   })
 
   // 从地址search部分加载设备信息等
