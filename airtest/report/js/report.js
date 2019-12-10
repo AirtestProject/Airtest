@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
- * @LastEditTime: 2019-12-09 17:36:09
+ * @LastEditTime: 2019-12-10 09:45:48
  */
 function StepPannel(data, root){
   this.data = data
@@ -699,7 +699,8 @@ function urlArgs(){
       methods.push("ori_method=ADBORI")
     if(args['touch_method'])
       methods.push("touch_method=ADBTOUCH")
-    args['connect'] = args['connect'] + '?' + methods.join('&&')
+    if(methods.length>0)
+      args['connect'] = args['connect'] + '?' + methods.join('&&')
   }
   return args;
 }
