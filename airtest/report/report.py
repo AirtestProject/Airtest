@@ -395,10 +395,13 @@ class LogToHtml(object):
     def get_console(self, output_file):
         html_dir = os.path.dirname(output_file)
         console = ""
-        file = os.path.join(html_dir, 'console.txt')
-        if os.path.isfile(file):
-            for line in open(file, encoding='utf-8'):
-                console = console + line
+        try:
+            file = os.path.join(html_dir, 'console.txt')
+            if os.path.isfile(file):
+                for line in open(file, encoding=sys.getdefaultencoding()):
+                    console = console + line
+        except:
+            console = traceback.format_exc()
         return console
 
     def report_data(self, output_file=None, record_list=None):
