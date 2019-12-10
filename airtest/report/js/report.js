@@ -5,10 +5,14 @@
  * @Date: 2019-08-08 17:41:44
  * @LastEditors: Era Chen
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @LastEditTime: 2019-11-07 17:55:11
 =======
  * @LastEditTime: 2019-12-09 17:36:09
 >>>>>>> 071b6cb... fix bug for get android address from url
+=======
+ * @LastEditTime: 2019-12-10 09:45:48
+>>>>>>> 5e06018... fix android connection when method is empty
  */
 function StepPannel(data, root){
   this.data = data
@@ -703,7 +707,8 @@ function urlArgs(){
       methods.push("ori_method=ADBORI")
     if(args['touch_method'])
       methods.push("touch_method=ADBTOUCH")
-    args['connect'] = args['connect'] + '?' + methods.join('&&')
+    if(methods.length>0)
+      args['connect'] = args['connect'] + '?' + methods.join('&&')
   }
   return args;
 }
