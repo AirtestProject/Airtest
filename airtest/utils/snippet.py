@@ -102,7 +102,6 @@ def on_method_ready(method_name):
             if not getattr(inst, key, None):
                 method = getattr(inst, method_name)
                 method()
-                setattr(inst, key, True)
             return func(inst, *args, **kwargs)
         return ready_func
     return wrapper
