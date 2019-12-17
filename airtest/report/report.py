@@ -390,16 +390,25 @@ class LogToHtml(object):
 
     def get_console(self, output_file):
         html_dir = os.path.dirname(output_file)
-        console = ""
-        try:
-            file = os.path.join(html_dir, 'console.txt')
-            if os.path.isfile(file):
-                with io.open(file, encoding="utf-8") as f:
-                    for line in f.readlines():
-                        console = console + line
-        except:
-            console = traceback.format_exc()
-        return console
+        file = os.path.join(html_dir, 'console.txt')
+        content = ""
+        if os.path.isfile(file):
+            try:
+                content = self.readFile(file)
+            except Exception:
+                try:
+                    content = self.readFile(file, "gbk")
+                except Exception:
+                    content = traceback.format_exc() + content
+                    content = content + "Can not read console.txt. Please check file in:\n" + file
+        return content
+
+    def readFile(self, filename, code='utf-8'):
+        content = ""
+        with io.open(filename, encoding=code) as f:
+            for line in f.readlines():
+                content = content + line
+        return content
 
     def report_data(self, output_file=None, record_list=None):
         """
