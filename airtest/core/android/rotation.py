@@ -129,7 +129,7 @@ class XYTransformer(object):
         """
         x, y = tuple_xy
         w, h = tuple_wh
-        
+
         if orientation == 1:
             x, y = w - y, x
         elif orientation == 2:
