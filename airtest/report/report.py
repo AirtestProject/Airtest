@@ -394,8 +394,9 @@ class LogToHtml(object):
         try:
             file = os.path.join(html_dir, 'console.txt')
             if os.path.isfile(file):
-                for line in open(file, encoding=sys.getdefaultencoding()):
-                    console = console + line
+                with io.open(file, encoding="utf-8") as f:
+                    for line in f.readlines():
+                        console = console + line
         except:
             console = traceback.format_exc()
         return console
