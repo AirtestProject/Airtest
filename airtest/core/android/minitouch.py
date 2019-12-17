@@ -113,10 +113,7 @@ class Minitouch(object):
             transformed coordinates (x, y)
 
         """
-        if self.size_info["orientation"] == 1:
-            height, width = self.size_info['width'], self.size_info['height']
-        else:
-            width, height = self.size_info['width'], self.size_info['height']
+        width, height = self.size_info['width'], self.size_info['height']
 
         nx = x * self.max_x / width
         ny = y * self.max_y / height
