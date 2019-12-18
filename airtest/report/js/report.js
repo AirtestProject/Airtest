@@ -3,20 +3,8 @@
  * @Author: Era Chen
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
- * @LastEditors: Era Chen
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- * @LastEditTime: 2019-11-07 17:55:11
-=======
- * @LastEditTime: 2019-12-09 17:36:09
->>>>>>> 071b6cb... fix bug for get android address from url
-=======
- * @LastEditTime: 2019-12-10 09:45:48
->>>>>>> 5e06018... fix android connection when method is empty
-=======
- * @LastEditTime: 2019-11-20 16:54:21
->>>>>>> 8be22ac... back to detail page
+ * @LastEditors  : Era Chen
+ * @LastEditTime : 2019-12-18 17:47:29
  */
 function StepPannel(data, root){
   this.data = data
@@ -51,7 +39,12 @@ function StepPannel(data, root){
     }
     this.init_video()
     if ($('#console pre.trace').length > 0) {
-      hljs.highlightBlock($('#console pre.trace')[0], null, false)
+      setTimeout(function(){
+        // 当log超过2w行，转换成高亮模式会导致卡顿
+        if ($('#console pre.trace').text().length < 20000) {
+          hljs.highlightBlock($('#console pre.trace')[0], null, false)
+          }
+      }, 0)
     }
     this.highlightBlock()
   }
