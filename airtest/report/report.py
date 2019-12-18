@@ -14,6 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
+from airtest.core.settings import Settings as ST
 from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
@@ -206,7 +207,7 @@ class LogToHtml(object):
         if not os.path.isfile(new_path):
             try:
                 img = Image.open(path)
-                compress_image(img, new_path)
+                compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
             except Exception:
                 traceback.print_exc()
             return new_path

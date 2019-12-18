@@ -126,7 +126,7 @@ class Windows(Device):
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
             screen = aircv.crop_image(screen, rect)
         if filename:
-            aircv.imwrite(filename, screen)
+            aircv.imwrite(filename, screen, ST.SNAPSHOT_QUALITY)
         return screen
 
     def keyevent(self, keyname, **kwargs):

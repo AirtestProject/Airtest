@@ -97,7 +97,7 @@ def try_log_screen(screen=None):
         screen = G.DEVICE.snapshot()
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
-    aircv.imwrite(filepath, screen)
+    aircv.imwrite(filepath, screen, ST.SNAPSHOT_QUALITY)
     return {"screen": filename, "resolution": aircv.get_resolution(screen)}
 
 
