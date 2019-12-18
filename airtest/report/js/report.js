@@ -3,8 +3,8 @@
  * @Author: Era Chen
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
- * @LastEditors: Era Chen
- * @LastEditTime: 2019-12-10 09:45:48
+ * @LastEditors  : Era Chen
+ * @LastEditTime : 2019-12-18 17:47:29
  */
 function StepPannel(data, root){
   this.data = data
@@ -39,7 +39,12 @@ function StepPannel(data, root){
     }
     this.init_video()
     if ($('#console pre.trace').length > 0) {
-      hljs.highlightBlock($('#console pre.trace')[0], null, false)
+      setTimeout(function(){
+        // 当log超过2w行，转换成高亮模式会导致卡顿
+        if ($('#console pre.trace').text().length < 20000) {
+          hljs.highlightBlock($('#console pre.trace')[0], null, false)
+          }
+      }, 0)
     }
     this.highlightBlock()
   }
