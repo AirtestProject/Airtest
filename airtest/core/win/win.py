@@ -5,6 +5,7 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
+import pywintypes
 import win32api
 
 from pywinauto.application import Application
@@ -229,12 +230,36 @@ class Windows(Device):
         duration = kwargs.get("duration", 0.01)
         right_click = kwargs.get("right_click", False)
         button = "right" if right_click else "left"
-        coords = self._action_pos(pos)
-        coords = self._fix_op_pos(coords)
+        steps = kwargs.get("steps", 1)
+        offset = kwargs.get("offset", 0)
 
-        self.mouse.press(button=button, coords=coords)
+        start = self._action_pos(win32api.GetCursorPos())
+        end = self._action_pos(pos)
+        start_x, start_y = self._fix_op_pos(start)
+        end_x, end_y = self._fix_op_pos(end)
+
+        interval = float(duration) / steps
+        time.sleep(interval)
+
+        for i in range(1, steps):
+            x = int(start_x + (end_x-start_x) * i / steps)
+            y = int(start_y + (end_y-start_y) * i / steps)
+            self.mouse.move(coords=(x, y))
+            time.sleep(interval)
+
+        self.mouse.move(coords=(end_x, end_y))
+
+        for i in range(1, offset+1):
+            self.mouse.move(coords=(end_x+i, end_y+i))
+            time.sleep(0.01)
+
+        for i in range(offset):
+            self.mouse.move(coords=(end_x+offset-i, end_y+offset-i))
+            time.sleep(0.01)
+
+        self.mouse.press(button=button, coords=(end_x, end_y))
         time.sleep(duration)
-        self.mouse.release(button=button, coords=coords)
+        self.mouse.release(button=button, coords=(end_x, end_y))
 
     def double_click(self, pos):
         pos = self._fix_op_pos(pos)
@@ -258,13 +283,6 @@ class Windows(Device):
         # 设置坐标时相对于整个屏幕的坐标:
         x1, y1 = self._fix_op_pos(p1)
         x2, y2 = self._fix_op_pos(p2)
-        # 双屏时，涉及到了移动的比例换算:
-        if len(self.screen.monitors) > 2:
-            ratio_x = (self.monitor["width"] + self.monitor["left"]) / self.main_monitor["width"]
-            ratio_y = (self.monitor["height"] + self.monitor["top"]) / self.main_monitor["height"]
-            x2 = int(x1 + (x2 - x1) * ratio_x)
-            y2 = int(y1 + (y2 - y1) * ratio_y)
-            p1, p2 = (x1, y1), (x2, y2)
 
         from_x, from_y = self._action_pos(p1)
         to_x, to_y = self._action_pos(p2)
