@@ -212,8 +212,8 @@ def snapshot(filename=None, msg=""):
         if not os.path.isabs(filename):
             logdir = ST.LOG_DIR or "."
             filename = os.path.join(logdir, filename)
-        screen = G.DEVICE.snapshot(filename)
-        return try_log_screen(screen)
+        G.DEVICE.snapshot(filename)
+        return filename
     else:
         return try_log_screen()
 
