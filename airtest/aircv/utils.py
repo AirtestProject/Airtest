@@ -79,4 +79,4 @@ def compress_image(pil_img, path, quality, max_width=300, max_height=300):
     quality = int(round(quality))
     if quality <= 0 or quality >= 100:
         raise ScriptParamError("SNAPSHOT_QUALITY (" + str(quality) + ") should be an integer in the range [1,99]")
-    pil_img.save(path, quality, optimize=True)
+    pil_img.save(path, quality=quality, optimize=True)
