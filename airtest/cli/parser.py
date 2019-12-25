@@ -7,7 +7,9 @@ from airtest.cli.runner import setup_by_args
 
 def get_parser():
     ap = argparse.ArgumentParser()
-    subparsers = ap.add_subparsers(dest="action", help="run/info/report")
+    subparsers = ap.add_subparsers(dest="action", help="version/run/info/report")
+    # subparser version
+    subparsers.add_parser("version", help="show version and exit")
     # subparser run
     ap_run = subparsers.add_parser("run", help="run script")
     runner_parser(ap_run)

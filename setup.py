@@ -1,5 +1,23 @@
+import os
 import sys
+import codecs
 from setuptools import setup, find_packages
+
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            # __version__ = "1.x.x"
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
 
 
 def parse_requirements(filename):
@@ -15,7 +33,7 @@ if sys.platform == "win32":
 
 setup(
     name='airtest',
-    version='1.1.1',
+    version=get_version("airtest/__init__.py"),
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows/Linux',
