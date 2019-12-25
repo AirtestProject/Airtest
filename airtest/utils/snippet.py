@@ -1,9 +1,11 @@
 # _*_ coding:UTF-8 _*_
+import os
 import sys
 import threading
 from functools import wraps
 from six import string_types
 from six.moves import queue
+from airtest import __version__
 
 
 def split_cmd(cmds):
@@ -102,6 +104,7 @@ def on_method_ready(method_name):
             if not getattr(inst, key, None):
                 method = getattr(inst, method_name)
                 method()
+                setattr(inst, key, True)
             return func(inst, *args, **kwargs)
         return ready_func
     return wrapper
@@ -110,8 +113,18 @@ def on_method_ready(method_name):
 def ready_method(func):
     @wraps(func)
     def wrapper(inst, *args, **kwargs):
-        key = "_%s_ready" % func.__name__
         ret = func(inst, *args, **kwargs)
-        setattr(inst, key, True)
         return ret
     return wrapper
+
+
+def get_airtest_version():
+    # type: () -> str
+    pip_pkg_dir = os.path.join(os.path.dirname(__file__), "..", "..")
+    pip_pkg_dir = os.path.abspath(pip_pkg_dir)
+
+    return (
+        'airtest {} from {} (python {})'.format(
+            __version__, pip_pkg_dir, sys.version[:3],
+        )
+    )

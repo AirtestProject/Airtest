@@ -5,13 +5,13 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
-import pywintypes
+import pywintypes  # noqa
 import win32api
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
-from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
+from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics
 
 from airtest.core.win.ctypesinput import key_press, key_release
 from airtest.core.win.screen import screenshot
