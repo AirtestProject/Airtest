@@ -17,7 +17,6 @@ else:
 
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.settings import Settings as ST
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
@@ -160,7 +159,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, filename=None, strType=False, ensure_orientation=True):
+    def snapshot(self, filename=None, strType=False, quality=10):
         """
         take snapshot
         filename: save screenshot to filename
@@ -205,7 +204,7 @@ class IOS(Device):
 
         # save as file if needed
         if filename:
-            aircv.imwrite(filename, screen, ST.SNAPSHOT_QUALITY)
+            aircv.imwrite(filename, screen, quality)
 
         return screen
 

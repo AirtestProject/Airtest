@@ -7,7 +7,6 @@ from copy import copy
 from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
-from airtest.core.settings import Settings as ST
 from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD,\
     SDK_VERISON_NEW, SDK_VERISON_ANDROID10
@@ -207,7 +206,7 @@ class Android(Device):
         """
         return self.adb.uninstall_app(package)
 
-    def snapshot(self, filename=None, ensure_orientation=True):
+    def snapshot(self, filename=None, ensure_orientation=True, quality=10):
         """
         Take the screenshot of the display. The output is send to stdout by default.
 
@@ -249,7 +248,7 @@ class Android(Device):
             elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_NEW:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
-            aircv.imwrite(filename, screen, ST.SNAPSHOT_QUALITY)
+            aircv.imwrite(filename, screen, quality)
         return screen
 
     def shell(self, *args, **kwargs):
