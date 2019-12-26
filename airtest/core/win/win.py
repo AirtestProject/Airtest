@@ -18,7 +18,6 @@ from airtest.core.win.screen import screenshot
 
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.settings import Settings as ST
 
 
 def require_app(func):
@@ -100,7 +99,7 @@ class Windows(Device):
         """
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename=None):
+    def snapshot(self, filename=None, quality=10):
         """
         Take a screenshot and save it in ST.LOG_DIR folder
 
@@ -127,7 +126,7 @@ class Windows(Device):
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
             screen = aircv.crop_image(screen, rect)
         if filename:
-            aircv.imwrite(filename, screen, ST.SNAPSHOT_QUALITY)
+            aircv.imwrite(filename, screen, quality)
         return screen
 
     def keyevent(self, keyname, **kwargs):
