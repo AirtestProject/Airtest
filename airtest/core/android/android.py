@@ -213,6 +213,7 @@ class Android(Device):
         Args:
             filename: name of the file where to store the screenshot, default is None which is stdout
             ensure_orientation: True or False whether to keep the orientation same as display
+            quality: The image quality, integer in range [1, 99]
 
         Returns:
             screenshot output
