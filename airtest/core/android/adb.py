@@ -13,7 +13,7 @@ from six import PY3, text_type, binary_type
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_NEW)
+                                           SDK_VERISON_ANDROID7)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
                                 DeviceConnectionError)
 from airtest.utils.compat import decode_path
@@ -347,7 +347,7 @@ class ADB(object):
             command output
 
         """
-        if self.sdk_version < SDK_VERISON_NEW:
+        if self.sdk_version < SDK_VERISON_ANDROID7:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
             cmd = split_cmd(cmd) + [";", "echo", "---$?---"]
@@ -818,7 +818,7 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if self.sdk_version >= SDK_VERISON_NEW:
+            if self.sdk_version >= SDK_VERISON_ANDROID7:
                 line_breaker = os.linesep
             else:
                 line_breaker = '\r' + os.linesep
