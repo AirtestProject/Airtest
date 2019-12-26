@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import sys
 from airtest.utils.compat import decode_path
 
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
