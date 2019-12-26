@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
-
 from airtest.cli.parser import get_parser
-from airtest.utils.snippet import get_airtest_version
+from airtest.utils.version import show_version
 
 
 def main(argv=None):
@@ -19,9 +16,7 @@ def main(argv=None):
         from airtest.cli.runner import run_script
         run_script(args)
     elif args.action == "version":
-        sys.stdout.write(get_airtest_version())
-        sys.stdout.write(os.linesep)
-        sys.exit()
+        show_version()
     else:
         ap.print_help()
 

@@ -33,7 +33,7 @@ if sys.platform == "win32":
 
 setup(
     name='airtest',
-    version=get_version("airtest/__init__.py"),
+    version=get_version("airtest/utils/version.py"),
     author='Netease Games',
     author_email='gzliuxin@corp.netease.com',
     description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows/Linux',
