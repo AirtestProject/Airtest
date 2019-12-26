@@ -105,6 +105,7 @@ class Windows(Device):
 
         Args:
             filename: name of the file to give to the screenshot, {time}.jpg by default
+            quality: The image quality, integer in range [1, 99]
 
         Returns:
             display the screenshot

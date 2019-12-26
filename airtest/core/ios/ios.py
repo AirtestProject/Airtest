@@ -163,6 +163,7 @@ class IOS(Device):
         """
         take snapshot
         filename: save screenshot to filename
+        quality: The image quality, integer in range [1, 99]
         """
         data = None
 
