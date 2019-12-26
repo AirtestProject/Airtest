@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from airtest.cli.parser import get_parser
-from airtest.utils.version import show_version
 
 
 def main(argv=None):
@@ -16,6 +15,7 @@ def main(argv=None):
         from airtest.cli.runner import run_script
         run_script(args)
     elif args.action == "version":
+        from airtest.utils.version import show_version
         show_version()
     else:
         ap.print_help()
