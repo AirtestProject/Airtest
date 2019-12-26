@@ -27,12 +27,13 @@ class Minitouch(object):
     https://github.com/openstf/minitouch
     """
 
-    def __init__(self, adb, backend=False, ori_function=None):
+    def __init__(self, adb, backend=False, ori_function=None, input_event=None):
         self.adb = adb
         self.backend = backend
         self.server_proc = None
         self.client = None
         self.size_info = None
+        self.input_event = input_event
         self.ori_function = ori_function if callable(ori_function) else self.adb.getPhysicalDisplayInfo
         self.max_x, self.max_y = None, None
         reg_cleanup(self.teardown)
@@ -135,7 +136,10 @@ class Minitouch(object):
 
         self.localport, deviceport = self.adb.setup_forward("localabstract:minitouch_{}".format)
         deviceport = deviceport[len("localabstract:"):]
-        p = self.adb.start_shell("/data/local/tmp/minitouch -n '%s' 2>&1" % deviceport)
+        if self.input_event:
+            p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' -d '{1}' 2>&1".format(deviceport,self.input_event))
+        else:
+            p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' 2>&1".format(deviceport))
         nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
         while True:
             line = nbsp.readline(timeout=5.0)

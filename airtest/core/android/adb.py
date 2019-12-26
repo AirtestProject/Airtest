@@ -13,7 +13,7 @@ from six import PY3, text_type, binary_type
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_NEW)
+                                           SDK_VERISON_ANDROID7)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
                                 DeviceConnectionError)
 from airtest.utils.compat import decode_path
@@ -33,9 +33,11 @@ class ADB(object):
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
 
-    def __init__(self, serialno=None, adb_path=None, server_addr=None):
+    def __init__(self, serialno=None, adb_path=None, server_addr=None, display_id=None, input_event=None):
         self.serialno = serialno
         self.adb_path = adb_path or self.builtin_adb_path()
+        self.display_id = display_id
+        self.input_event = input_event
         self._set_cmd_options(server_addr)
         self.connect()
         self._sdk_version = None
@@ -347,7 +349,7 @@ class ADB(object):
             command output
 
         """
-        if self.sdk_version < SDK_VERISON_NEW:
+        if self.sdk_version < SDK_VERISON_ANDROID7:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
             cmd = split_cmd(cmd) + [";", "echo", "---$?---"]
@@ -683,7 +685,10 @@ class ADB(object):
             command output (stdout)
 
         """
-        raw = self.cmd('shell screencap -p', ensure_unicode=False)
+        if self.display_id:
+            raw = self.cmd('shell screencap -d {0} -p'.format(self.display_id), ensure_unicode=False)
+        else:
+            raw = self.cmd('shell screencap -p', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
@@ -818,7 +823,7 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if self.sdk_version >= SDK_VERISON_NEW:
+            if self.sdk_version >= SDK_VERISON_ANDROID7:
                 line_breaker = os.linesep
             else:
                 line_breaker = '\r' + os.linesep
