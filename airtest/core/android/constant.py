@@ -14,7 +14,7 @@ DEFAULT_ADB_PATH = {
     "Linux-armv7l": os.path.join(STATICPATH, "adb", "linux_arm", "adb"),
 }
 DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
-SDK_VERISON_NEW = 24
+SDK_VERISON_ANDROID7 = 24
 # Android 10 SDK version
 SDK_VERISON_ANDROID10 = 29
 DEBUG = True
