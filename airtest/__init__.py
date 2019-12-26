@@ -1,1 +1,1 @@
-__version__ = "1.1.2"
+from airtest.utils.version import __version__
