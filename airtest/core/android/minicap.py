@@ -150,6 +150,8 @@ class Minicap(object):
             display_info = self.adb.shell("{0} -d {1} -i".format(self.CMD, self.display_id))
         else:
             display_info = self.adb.shell("%s -i" % self.CMD)
+        match = re.compile(r'({.*})', re.DOTALL).search(display_info)
+        display_info = match.group(0) if match else display_info
         display_info = json.loads(display_info)
         display_info["orientation"] = display_info["rotation"] / 90
         # 针对调整过手机分辨率的情况
