@@ -4,7 +4,7 @@
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
  * @LastEditors  : Era Chen
- * @LastEditTime : 2019-12-18 17:47:29
+ * @LastEditTime : 2020-01-09 16:53:46
  */
 function StepPannel(data, root){
   this.data = data
@@ -298,6 +298,10 @@ function StepPannel(data, root){
                   "<img src='%simage/step_%s.svg'>" +
                 "</div>" +
                 "<div class='infos-li'>" +
+                  "<span lang='en'>Start: </span>" +
+                  "<span class='content-val'>%s</span>" +
+                "</div>" +
+                "<div class='infos-li'>" +
                   "<span lang='en'>Duration: </span>" +
                   "<img src='%simage/time.svg'>" +
                   "<span class='content-val'>%s</span>" +
@@ -307,6 +311,7 @@ function StepPannel(data, root){
                   "<span class='content-val bold'>%s</span>" +
                 "</div>" +
               "</div>").format(success, pass, this.static, success,
+                              step.time ? getFormatDateTime(step.time): '--',
                               this.static, step.duration,
                               step.code ? step.code.name:"null")
     } catch (err) {
@@ -619,6 +624,11 @@ Date.prototype.Format = function (fmt) { //author: meizz
   for (var k in o)
   if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
   return fmt;
+}
+
+function getFormatDateTime(timestamp){
+  timestamp = getTimestamp(timestamp)
+  return (new Date(timestamp)).Format("yyyy-MM-dd hh:mm:ss")
 }
 
 function getFormatDate(timestamp){
