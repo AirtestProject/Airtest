@@ -1,6 +1,6 @@
 import sys
 import os
-from six import PY3
+from six import PY3, raise_from, reraise
 
 
 EXT = ".air"  # script dir extension
@@ -33,3 +33,10 @@ def script_log_dir(script_path, logdir):
     elif logdir:
         logdir = decode_path(logdir)
     return logdir
+
+
+def raisefrom(exc_type, message, exc):
+    if sys.version_info[:2] >= (3, 2):
+        raise_from(exc_type(message), exc)
+    else:
+        reraise(exc_type, '%s - %s' % (message, exc), sys.exc_info()[2])
