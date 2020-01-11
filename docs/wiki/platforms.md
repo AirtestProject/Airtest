@@ -203,6 +203,7 @@ Supported Platforms
 | 163  | 锤子 坚果 Pro 2（OS105）          | 通过   | 高   |      |
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
 | 165  | NOKIA X5	| 通过   | 高   |      |
+| 166  | duerOS 车机IVI     | 通过   | 高   |   需要勾选use adb orientation，否则屏幕显示不全
 
 ## Android Emulator
 

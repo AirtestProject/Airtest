@@ -9,20 +9,32 @@ import warnings
 import subprocess
 import threading
 
-from six import PY3, text_type, binary_type
+from six import PY3, text_type, binary_type, raise_from
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_NEW)
+                                           SDK_VERISON_ANDROID7)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
-                                DeviceConnectionError)
-from airtest.utils.compat import decode_path
+                                DeviceConnectionError, AdbTimeoutExpired)
+from airtest.utils.compat import decode_path, raisefrom
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
 from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
 
 LOGGING = get_logger(__name__)
+
+if sys.platform.startswith("win"):
+    # Don't display the Windows GPF dialog if the invoked program dies.
+    try:
+        SUBPROCESS_FLAG = subprocess.CREATE_NO_WINDOW  # in Python 3.7+
+    except AttributeError:
+        import ctypes
+        SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
+        ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)  # win32con.CREATE_NO_WINDOW?
+        SUBPROCESS_FLAG = 0x8000000
+else:
+    SUBPROCESS_FLAG = 0
 
 
 class ADB(object):
@@ -33,9 +45,11 @@ class ADB(object):
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
 
-    def __init__(self, serialno=None, adb_path=None, server_addr=None):
+    def __init__(self, serialno=None, adb_path=None, server_addr=None, display_id=None, input_event=None):
         self.serialno = serialno
         self.adb_path = adb_path or self.builtin_adb_path()
+        self.display_id = display_id
+        self.input_event = input_event
         self._set_cmd_options(server_addr)
         self.connect()
         self._sdk_version = None
@@ -148,11 +162,12 @@ class ADB(object):
             cmds,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            creationflags=SUBPROCESS_FLAG
         )
         return proc
 
-    def cmd(self, cmds, device=True, ensure_unicode=True):
+    def cmd(self, cmds, device=True, ensure_unicode=True, timeout=None):
         """
         Run the adb command(s) in subprocess and return the standard output
 
@@ -160,6 +175,7 @@ class ADB(object):
             cmds: command(s) to be run
             device: if True, the device serial number must be specified by -s serialno argument
             ensure_unicode: encode/decode unicode of standard outputs (stdout, stderr)
+            timeout: timeout in seconds
 
         Raises:
             DeviceConnectionError: if any error occurs when connecting the device
@@ -170,7 +186,26 @@ class ADB(object):
 
         """
         proc = self.start_cmd(cmds, device)
-        stdout, stderr = proc.communicate()
+        if timeout:
+            if sys.version_info[:2] >= (3, 3):
+                # in Python 3.3+
+                try:
+                    stdout, stderr = proc.communicate(timeout=timeout)
+                except subprocess.TimeoutExpired as e:
+                    proc.kill()
+                    stdout, stderr = proc.communicate()
+                    raise_from(AdbTimeoutExpired(stdout, stderr, e), None)
+            else:
+                timer = threading.Timer(timeout, proc.kill)
+                try:
+                    timer.start()
+                    stdout, stderr = proc.communicate()
+                finally:
+                    timer.cancel()
+                    if proc.returncode > 0:
+                        raise AdbTimeoutExpired(stdout, stderr, ("Command '%s' timed out after %s seconds" % (cmds, timeout)))
+        else:
+            stdout, stderr = proc.communicate()
 
         if ensure_unicode:
             stdout = stdout.decode(get_std_encoding(sys.stdout))
@@ -287,14 +322,10 @@ class ADB(object):
             None
 
         """
-        proc = self.start_cmd("wait-for-device")
-        timer = threading.Timer(timeout, proc.kill)
-        timer.start()
-        ret = proc.wait()
-        if ret == 0:
-            timer.cancel()
-        else:
-            raise DeviceConnectionError("device not ready")
+        try:
+            self.cmd("wait-for-device", timeout=timeout)
+        except AdbTimeoutExpired as e:
+            raisefrom(DeviceConnectionError, "device not ready", e)
 
     def start_shell(self, cmds):
         """
@@ -347,7 +378,7 @@ class ADB(object):
             command output
 
         """
-        if self.sdk_version < SDK_VERISON_NEW:
+        if self.sdk_version < SDK_VERISON_ANDROID7:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
             cmd = split_cmd(cmd) + [";", "echo", "---$?---"]
@@ -683,7 +714,10 @@ class ADB(object):
             command output (stdout)
 
         """
-        raw = self.cmd('shell screencap -p', ensure_unicode=False)
+        if self.display_id:
+            raw = self.cmd('shell screencap -d {0} -p'.format(self.display_id), ensure_unicode=False)
+        else:
+            raw = self.cmd('shell screencap -p', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
@@ -818,7 +852,7 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if self.sdk_version >= SDK_VERISON_NEW:
+            if self.sdk_version >= SDK_VERISON_ANDROID7:
                 line_breaker = os.linesep
             else:
                 line_breaker = '\r' + os.linesep

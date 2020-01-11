@@ -1,4 +1,5 @@
 # _*_ coding:UTF-8 _*_
+import os
 import sys
 import threading
 from functools import wraps
@@ -102,6 +103,7 @@ def on_method_ready(method_name):
             if not getattr(inst, key, None):
                 method = getattr(inst, method_name)
                 method()
+                setattr(inst, key, True)
             return func(inst, *args, **kwargs)
         return ready_func
     return wrapper
@@ -110,8 +112,6 @@ def on_method_ready(method_name):
 def ready_method(func):
     @wraps(func)
     def wrapper(inst, *args, **kwargs):
-        key = "_%s_ready" % func.__name__
         ret = func(inst, *args, **kwargs)
-        setattr(inst, key, True)
         return ret
     return wrapper

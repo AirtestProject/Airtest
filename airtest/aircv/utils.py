@@ -6,7 +6,6 @@ import numpy as np
 from PIL import Image
 
 from .error import TemplateInputError
-from airtest.core.error import ScriptParamError
 
 
 def generate_result(middle_point, pypts, confi):
@@ -78,5 +77,5 @@ def compress_image(pil_img, path, quality, max_width=300, max_height=300):
     pil_img.thumbnail((max_width, max_height), Image.ANTIALIAS)
     quality = int(round(quality))
     if quality <= 0 or quality >= 100:
-        raise ScriptParamError("SNAPSHOT_QUALITY (" + str(quality) + ") should be an integer in the range [1,99]")
+        raise Exception("SNAPSHOT_QUALITY (" + str(quality) + ") should be an integer in the range [1,99]")
     pil_img.save(path, quality=quality, optimize=True)

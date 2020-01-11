@@ -26,7 +26,7 @@ def imread(filename, flatten=False):
     return img
 
 
-def imwrite(filename, img, quality):
+def imwrite(filename, img, quality=10):
     """写出图片到本地路径，压缩"""
     if PY2:
         filename = filename.encode(sys.getfilesystemencoding())

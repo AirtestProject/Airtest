@@ -5,20 +5,19 @@ import socket
 import subprocess
 from mss import mss
 from functools import wraps
-import pywintypes
+import pywintypes  # noqa
 import win32api
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
-from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics  # ,SetProcessDPIAware
+from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics
 
 from airtest.core.win.ctypesinput import key_press, key_release
 from airtest.core.win.screen import screenshot
 
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.settings import Settings as ST  # noqa
 
 
 def require_app(func):
@@ -100,12 +99,13 @@ class Windows(Device):
         """
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename=None):
+    def snapshot(self, filename=None, quality=10):
         """
         Take a screenshot and save it in ST.LOG_DIR folder
 
         Args:
             filename: name of the file to give to the screenshot, {time}.jpg by default
+            quality: The image quality, integer in range [1, 99]
 
         Returns:
             display the screenshot
@@ -127,7 +127,7 @@ class Windows(Device):
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
             screen = aircv.crop_image(screen, rect)
         if filename:
-            aircv.imwrite(filename, screen, ST.SNAPSHOT_QUALITY)
+            aircv.imwrite(filename, screen, quality)
         return screen
 
     def keyevent(self, keyname, **kwargs):
