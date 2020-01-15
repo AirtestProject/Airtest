@@ -37,6 +37,7 @@ class CAP_METHOD(object):
 
 class TOUCH_METHOD(object):
     MINITOUCH = "MINITOUCH"
+    MAXTOUCH = "MAXTOUCH"
     ADBTOUCH = "ADBTOUCH"
 
 
@@ -48,4 +49,3 @@ class IME_METHOD(object):
 class ORI_METHOD(object):
     ADB = "ADBORI"
     MINICAP = "MINICAPORI"
-
