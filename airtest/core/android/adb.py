@@ -1535,7 +1535,8 @@ class ADB(object):
         m = packageRE.findall(ret)
         if m:
             return m[-1]
-        return ""
+        else:
+            return self.get_top_activity()[0]
 
 
 def cleanup_adb_forward():
