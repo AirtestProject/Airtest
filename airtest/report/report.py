@@ -14,6 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from jinja2 import evalcontextfilter, Markup, escape
 from airtest.aircv import imread, get_resolution
+from airtest.core.settings import Settings as ST
 from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
@@ -150,8 +151,15 @@ class LogToHtml(object):
         }
 
         for item in step["__children__"]:
-            if item["data"]["name"] == "try_log_screen" and isinstance(item["data"].get("ret", None), six.text_type):
-                src = item["data"]['ret']
+            if item["data"]["name"] == "try_log_screen":
+                snapshot = item["data"].get("ret", None)
+                if isinstance(snapshot, six.text_type):
+                    src = snapshot
+                elif isinstance(snapshot, dict):
+                    src = snapshot['screen']
+                    screen['resolution'] = snapshot['resolution']
+                else:
+                    continue
                 if self.export_dir:  # all relative path
                     screen['_filepath'] = os.path.join(LOGDIR, src)
                 else:
@@ -199,7 +207,7 @@ class LogToHtml(object):
         if not os.path.isfile(new_path):
             try:
                 img = Image.open(path)
-                compress_image(img, new_path)
+                compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
             except Exception:
                 traceback.print_exc()
             return new_path
@@ -234,12 +242,16 @@ class LogToHtml(object):
             if isinstance(value, dict) and value.get("__class__") == "Template":
                 if self.export_dir:  # all relative path
                     image_path = value['filename']
-                    if not os.path.isfile(os.path.join(self.script_root, image_path)):
-                        shutil.copy(value['_filepath'], self.script_root)  # copy image used by using statement
+                    if not os.path.isfile(os.path.join(self.script_root, image_path)) and value['_filepath']:
+                        # copy image used by using statement
+                        shutil.copyfile(value['_filepath'], os.path.join(self.script_root, value['filename']))
                 else:
                     image_path = os.path.abspath(value['_filepath'] or value['filename'])
                 arg["image"] = image_path
-                crop_img = imread(value['_filepath'] or value['filename'])
+                if not value['_filepath'] and not os.path.exists(value['filename']):
+                    crop_img = imread(os.path.join(self.script_root, value['filename']))
+                else:
+                    crop_img = imread(value['_filepath'] or value['filename'])
                 arg["resolution"] = get_resolution(crop_img)
         return code
 
@@ -373,23 +385,49 @@ class LogToHtml(object):
 
         return dirpath, logpath
 
-    def report(self, template_name, output_file=None, record_list=None):
+    def get_relative_log(self, output_file):
+        try:
+            html_dir = os.path.dirname(output_file)
+            return os.path.relpath(os.path.join(self.log_root, 'log.txt') ,html_dir)
+        except Exception:
+            traceback.print_exc()
+            return ""
+
+    def get_console(self, output_file):
+        html_dir = os.path.dirname(output_file)
+        file = os.path.join(html_dir, 'console.txt')
+        content = ""
+        if os.path.isfile(file):
+            try:
+                content = self.readFile(file)
+            except Exception:
+                try:
+                    content = self.readFile(file, "gbk")
+                except Exception:
+                    content = traceback.format_exc() + content
+                    content = content + "Can not read console.txt. Please check file in:\n" + file
+        return content
+
+    def readFile(self, filename, code='utf-8'):
+        content = ""
+        with io.open(filename, encoding=code) as f:
+            for line in f.readlines():
+                content = content + line
+        return content
+
+    def report_data(self, output_file=None, record_list=None):
+        """
+        Generate data for the report page
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
         self._load()
         steps = self._analyse()
 
         script_path = os.path.join(self.script_root, self.script_name)
         info = json.loads(get_script_info(script_path))
 
-        if self.export_dir:
-            self.script_root, self.log_root = self._make_export_dir()
-            # output_file可传入文件名，或绝对路径
-            output_file = output_file if output_file and os.path.isabs(output_file) \
-                else os.path.join(self.script_root, output_file or HTML_FILE)
-            if not self.static_root.startswith("http"):
-                self.static_root = "static/"
-
-        if not record_list:
-            record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
         records = [os.path.join(LOGDIR, f) if self.export_dir
                    else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
 
@@ -408,8 +446,33 @@ class LogToHtml(object):
         data['lang'] = self.lang
         data['records'] = records
         data['info'] = info
+        data['log'] = self.get_relative_log(output_file)
+        data['console'] = self.get_console(output_file)
         data['data'] = json.dumps(data)
+        return data
 
+    def report(self, template_name=HTML_TPL, output_file=None, record_list=None):
+        """
+        Generate the report page, you can add custom data and overload it if needed
+        :param template_name: default is HTML_TPL
+        :param output_file: The file name or full path of the output file, default HTML_FILE
+        :param record_list: List of screen recording files
+        :return:
+        """
+        if not self.script_name:
+            path, self.script_name = script_dir_name(self.script_root)
+
+        if self.export_dir:
+            self.script_root, self.log_root = self._make_export_dir()
+            # output_file可传入文件名，或绝对路径
+            output_file = output_file if output_file and os.path.isabs(output_file) \
+                else os.path.join(self.script_root, output_file or HTML_FILE)
+            if not self.static_root.startswith("http"):
+                self.static_root = "static/"
+
+        if not record_list:
+            record_list = [f for f in os.listdir(self.log_root) if f.endswith(".mp4")]
+        data = self.report_data(output_file=output_file, record_list=record_list)
         return self._render(template_name, output_file, **data)
 
 

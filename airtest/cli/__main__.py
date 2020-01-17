@@ -14,6 +14,9 @@ def main(argv=None):
     elif args.action == "run":
         from airtest.cli.runner import run_script
         run_script(args)
+    elif args.action == "version":
+        from airtest.utils.version import show_version
+        show_version()
     else:
         ap.print_help()
 

@@ -56,7 +56,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
     G.LOGGING.info("Try finding:\n%s", query)
     start_time = time.time()
     while True:
-        screen = G.DEVICE.snapshot(filename=None)
+        screen = G.DEVICE.snapshot(filename=None, quality=ST.SNAPSHOT_QUALITY)
 
         if screen is None:
             G.LOGGING.warning("Screen is None, may be locked")
@@ -94,11 +94,11 @@ def try_log_screen(screen=None):
     if not ST.LOG_DIR:
         return
     if screen is None:
-        screen = G.DEVICE.snapshot()
+        screen = G.DEVICE.snapshot(quality=ST.SNAPSHOT_QUALITY)
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
-    aircv.imwrite(filepath, screen)
-    return filename
+    aircv.imwrite(filepath, screen, ST.SNAPSHOT_QUALITY)
+    return {"screen": filename, "resolution": aircv.get_resolution(screen)}
 
 
 class Template(object):

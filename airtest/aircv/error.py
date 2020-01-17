@@ -51,4 +51,3 @@ class NoMatchPointError(BaseError):
 
 class MatchResultCheckError(BaseError):
     """Exception raised for errors 0 keypoint found in the input images."""
-

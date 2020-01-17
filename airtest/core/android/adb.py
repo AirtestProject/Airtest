@@ -9,14 +9,14 @@ import warnings
 import subprocess
 import threading
 
-from six import PY3, text_type, binary_type
+from six import PY3, text_type, binary_type, raise_from
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_NEW)
+                                           SDK_VERISON_ANDROID7)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
                                 DeviceConnectionError)
-from airtest.utils.compat import decode_path
+from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeout, SUBPROCESS_FLAG
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
@@ -33,9 +33,11 @@ class ADB(object):
     status_offline = "offline"
     SHELL_ENCODING = "utf-8"
 
-    def __init__(self, serialno=None, adb_path=None, server_addr=None):
+    def __init__(self, serialno=None, adb_path=None, server_addr=None, display_id=None, input_event=None):
         self.serialno = serialno
         self.adb_path = adb_path or self.builtin_adb_path()
+        self.display_id = display_id
+        self.input_event = input_event
         self._set_cmd_options(server_addr)
         self.connect()
         self._sdk_version = None
@@ -148,11 +150,12 @@ class ADB(object):
             cmds,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            creationflags=SUBPROCESS_FLAG
         )
         return proc
 
-    def cmd(self, cmds, device=True, ensure_unicode=True):
+    def cmd(self, cmds, device=True, ensure_unicode=True, timeout=None):
         """
         Run the adb command(s) in subprocess and return the standard output
 
@@ -160,6 +163,7 @@ class ADB(object):
             cmds: command(s) to be run
             device: if True, the device serial number must be specified by -s serialno argument
             ensure_unicode: encode/decode unicode of standard outputs (stdout, stderr)
+            timeout: timeout in seconds
 
         Raises:
             DeviceConnectionError: if any error occurs when connecting the device
@@ -170,7 +174,10 @@ class ADB(object):
 
         """
         proc = self.start_cmd(cmds, device)
-        stdout, stderr = proc.communicate()
+        if timeout:
+            stdout, stderr = proc_communicate_timeout(proc, timeout)
+        else:
+            stdout, stderr = proc.communicate()
 
         if ensure_unicode:
             stdout = stdout.decode(get_std_encoding(sys.stdout))
@@ -287,14 +294,10 @@ class ADB(object):
             None
 
         """
-        proc = self.start_cmd("wait-for-device")
-        timer = threading.Timer(timeout, proc.kill)
-        timer.start()
-        ret = proc.wait()
-        if ret == 0:
-            timer.cancel()
-        else:
-            raise DeviceConnectionError("device not ready")
+        try:
+            self.cmd("wait-for-device", timeout=timeout)
+        except RuntimeError as e:
+            raisefrom(DeviceConnectionError, "device not ready", e)
 
     def start_shell(self, cmds):
         """
@@ -347,7 +350,7 @@ class ADB(object):
             command output
 
         """
-        if self.sdk_version < SDK_VERISON_NEW:
+        if self.sdk_version < SDK_VERISON_ANDROID7:
             # for sdk_version < 25, adb shell do not raise error
             # https://stackoverflow.com/questions/9379400/adb-error-codes
             cmd = split_cmd(cmd) + [";", "echo", "---$?---"]
@@ -683,7 +686,10 @@ class ADB(object):
             command output (stdout)
 
         """
-        raw = self.cmd('shell screencap -p', ensure_unicode=False)
+        if self.display_id:
+            raw = self.cmd('shell screencap -d {0} -p'.format(self.display_id), ensure_unicode=False)
+        else:
+            raw = self.cmd('shell screencap -p', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
@@ -818,7 +824,7 @@ class ADB(object):
 
         """
         if not self._line_breaker:
-            if self.sdk_version >= SDK_VERISON_NEW:
+            if self.sdk_version >= SDK_VERISON_ANDROID7:
                 line_breaker = os.linesep
             else:
                 line_breaker = '\r' + os.linesep
@@ -1475,14 +1481,15 @@ class ADB(object):
         windows = output.split("Window #")
         offsetx, offsety, x, y = info['width'], info['height'], 0, 0
         package = self._search_for_current_package(output)
-        for w in windows:
-            if "package=%s" % package in w:
-                arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
-                if len(arr) >= 1 and len(arr[0]) == 4:
-                    offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
-                    if info["orientation"] in [1, 3]:
-                        offsetx, offsety, x, y = offsety, offsetx, y, x
-                    x, y = x - offsetx, y - offsety
+        if package:
+            for w in windows:
+                if "package=%s" % package in w:
+                    arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
+                    if len(arr) >= 1 and len(arr[0]) == 4:
+                        offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
+                        if info["orientation"] in [1, 3]:
+                            offsetx, offsety, x, y = offsety, offsetx, y, x
+                        x, y = x - offsetx, y - offsety
         return {
             "offset_x": offsetx,
             "offset_y": offsety,
@@ -1497,10 +1504,15 @@ class ADB(object):
         Returns:
             package name if exists else ""
         """
-        packageRE = re.compile('\s*mCurrentFocus=Window{.* ([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+}')
-        m = packageRE.findall(ret)
-        if m:
-            return m[-1]
+        try:
+            packageRE = re.compile('\s*mCurrentFocus=Window{.* ([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+}')
+            m = packageRE.findall(ret)
+            if m:
+                return m[-1]
+            else:
+                return self.get_top_activity()[0]
+        except Exception as e:
+            print("[Error] Cannot get current top activity")
         return ""
 
 

@@ -3,8 +3,8 @@
  * @Author: Era Chen
  * @Email: chenjiyun@corp.netease.com
  * @Date: 2019-08-08 17:41:44
- * @LastEditors: Era Chen
- * @LastEditTime: 2019-09-26 11:03:15
+ * @LastEditors  : Era Chen
+ * @LastEditTime : 2020-01-09 16:53:46
  */
 function StepPannel(data, root){
   this.data = data
@@ -17,6 +17,8 @@ function StepPannel(data, root){
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
   this.stepRight = $('#step-right')
+  this.magnifyContainer = $('#magnify .content')
+  this.magnifyPic = $('#magnify')
   this.scale = 0
   this.order = 'acc' // or dec
   this.duration = 'acc' // or dec
@@ -36,6 +38,15 @@ function StepPannel(data, root){
       this.setSteps()
     }
     this.init_video()
+    if ($('#console pre.trace').length > 0) {
+      setTimeout(function(){
+        // 当log超过2w行，转换成高亮模式会导致卡顿
+        if ($('#console pre.trace').text().length < 20000) {
+          hljs.highlightBlock($('#console pre.trace')[0], null, false)
+          }
+      }, 0)
+    }
+    this.highlightBlock()
   }
 
   this.bindEvents = function(){
@@ -49,6 +60,17 @@ function StepPannel(data, root){
     })
     $('.gallery .content').delegate('.thumbnail', 'click', function(e){
       that.jumpToCurrStep(Number(this.getAttribute('index')))
+    })
+    this.stepRight.delegate('.fancybox', "click", function(e) {
+      that.showMagnifyPic(this.outerHTML)
+    })
+    this.stepRight.delegate('.crop_image', "click", function(e) {
+      that.showMagnifyPic(this.outerHTML)
+    })
+    this.magnifyPic.click(function(e) {
+      if (e.target.tagName.toLowerCase() != 'img'){
+        that.hideMagnifyPic()
+      }
     })
     $('.filter#all').click(function(){
       that.steps = [].concat(that.original_steps)
@@ -82,7 +104,7 @@ function StepPannel(data, root){
       that.setSteps()
     })
     $('.order#duration').click(function(){
-      that.steps.sort(that.sortSteps('duration', that.duration == 'acc'))
+      that.steps.sort(that.sortSteps('duration_ms', that.duration == 'acc'))
       that.duration = that.duration == 'acc' ? 'dec' : 'acc'
       that.currentPage = 1
       that.setSteps()
@@ -92,6 +114,12 @@ function StepPannel(data, root){
       that.status = that.status == 'acc' ? 'dec' : 'acc'
       that.currentPage = 1
       that.setSteps()
+    })
+    $("#close-console").click(function(){
+      $('#console').fadeOut(300)
+    })
+    $("#show-console").click(function(){
+      $('#console').fadeIn(300)
     })
   }
 
@@ -117,16 +145,21 @@ function StepPannel(data, root){
 
   this.initStepRight = function(){
     // 设置高亮
-    if($('pre.trace').length>0){
-      hljs.highlightBlock($('pre.trace')[0], null, false);
-    }
+    this.highlightBlock()
     var that = this
     if($(".step-args .fancybox").length>0){
-      $('.fancybox .screen').load(function(e){
+      $('#step-right .fancybox .screen').load(function(e){
         // 存在截屏，并加载成功
         that.resetScale(this)
-        that.resetScreenshot()
+        that.convertSize($('.step-args .crop_image'), 80, 35)
+        that.resetScreenshot($('#step-right .fancybox'))
       })
+    }
+  }
+
+  this.highlightBlock = function(){
+    if($('#step-right pre.trace').length>0){
+      hljs.highlightBlock($('#step-right pre.trace')[0], null, false);
     }
   }
 
@@ -148,10 +181,11 @@ function StepPannel(data, root){
     for(var i = 0; i< this.steps.length; i++){
       step = this.steps[i]
       if(i == 0){
-        step.duration = getFormatDuration(step.time, this.data.run_start)
+        step.duration_ms = getDelta(step.time, this.data.run_start)
       } else{
-        step.duration = getFormatDuration(step.time, this.steps[i-1].time)
+        step.duration_ms = getDelta(step.time, this.steps[i-1].time)
       }
+      step.duration = getFormatDuration(step.duration_ms)
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
     }
@@ -163,7 +197,7 @@ function StepPannel(data, root){
       if(step.screen && step.screen.thumbnail) {
         return '<div class="thumbnail" index="%s">'.format(step.index) + 
                   '<img src="%s" alt="%s"/>'.format(step.screen.thumbnail, step.screen.thumbnail) +
-                  '<div class="time">%s</div>'.format(getFormatDuration2(step.time, that.data.run_start)) +
+                  '<div class="time">%s</div>'.format(getFormatDuration2(getDelta(step.time, that.data.run_start))) +
                 '</div>'
       } else{
         return ""
@@ -187,11 +221,33 @@ function StepPannel(data, root){
     $('.steps .filter').removeClass('active')
   }
 
+  this.showMagnifyPic = function(fragment) {
+    this.magnifyContainer.html(fragment)
+    this.magnifyContainer.children().removeAttr('style')
+    var fancybox = this.magnifyContainer.find('.fancybox')
+    if (fancybox.length > 0){
+      var that = this
+      $('#magnify .fancybox .screen').load(function(e){
+        // 存在截屏，并加载成功
+        if (this.height > this.parentNode.offsetHeight){
+          this.style.height = this.parentNode.offsetHeight + 'px'
+        }
+        that.resetScale(this)
+        that.resetScreenshot($('#magnify .fancybox'))
+      })
+    }
+    this.magnifyPic.fadeIn(300)
+  }
+
+  this.hideMagnifyPic = function() {
+    this.magnifyPic.fadeOut(300)
+  }
+
   this.setStepsLeft = function(){
     html = this.steps.length>0 ? '' : '<h4 class="no-steps"><span lang="en">Warning: No steps</span></h3>'
-    start = (this.currentPage-1)* this.pagesize
+    var start = (this.currentPage-1)* this.pagesize
     start = start < 0 ? 0 : start
-    end = (this.currentPage)*this.pagesize
+    var end = (this.currentPage)*this.pagesize
     end =  end>this.steps.length ? this.steps.length : end
     for(var i = start; i< end; i++){
       var step = this.steps[i]
@@ -233,13 +289,17 @@ function StepPannel(data, root){
   }
 
   this.getStepRightInfo = function(step){
-    // HTML 本步骤成功与否、耗时
+    // HTML 本步骤成功与否、耗时 
     try{
       return ("<div class='step-infos'>"+
                 "<div class='infos-li'>" +
                   "<span lang='en'>Status: </span>" +
                   "<span class='content-val %s'>%s</span>" +
                   "<img src='%simage/step_%s.svg'>" +
+                "</div>" +
+                "<div class='infos-li'>" +
+                  "<span lang='en'>Start: </span>" +
+                  "<span class='content-val'>%s</span>" +
                 "</div>" +
                 "<div class='infos-li'>" +
                   "<span lang='en'>Duration: </span>" +
@@ -251,8 +311,9 @@ function StepPannel(data, root){
                   "<span class='content-val bold'>%s</span>" +
                 "</div>" +
               "</div>").format(success, pass, this.static, success,
+                              step.time ? getFormatDateTime(step.time): '--',
                               this.static, step.duration,
-                              step.code.name)
+                              step.code ? step.code.name:"null")
     } catch (err) {
       console.log(err)
       return ""
@@ -294,38 +355,42 @@ function StepPannel(data, root){
 
   this.getStepRightScrren = function(step){
     if(step.screen && step.screen.src){
-      src = step.screen.src
+      var src = step.screen.src
       // 截屏
-      img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
+      var img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
 
       // 点击位置
-      targets = ''
+      var targets = ''
       for(var i=0; i < step.screen.pos.length; i++){
-        pos = step.screen.pos[i]
-        targets += '<img class="target" src="%simage/target.png" data-top="%s" data-left="%s" style="top:%spx;left:%spx;">'
-                  .format(this.static, pos[1], pos[0], pos[1], pos[0])
+        var pos = step.screen.pos[i]
+        var rect = JSON.stringify({'left': pos[0], "top": pos[1]})
+        targets += "<img class='target' src='%simage/target.png' rect=%s>"
+                  .format(this.static, rect)
       }
 
       // 线
-      vectors = ''
+      var vectors = ''
       for(var i=0; i < step.screen.vector.length; i++){
-        v = step.screen.vector[i]
-        vectors += ('<div class="arrow" data-index="%s" data-x="%s" data-y="%s">' +
+        var v = step.screen.vector[i]
+        var rect = JSON.stringify({'left': v[0], "top": v[1]})
+        vectors += ("<div class='arrow' data-index='%s' rect=%s>" +
                     '<div class="start"></div>' +
                     '<div class="line"></div>' +
                     '<div class="end"></div>' +
-                  '</div>').format(this.currentStep, v[0], v[1])
+                  '</div>').format(this.currentStep, rect)
       }
-
+      
       // 还有个rect <!-- rect area -->
-      rectors = ''
+      var rectors = ''
       for(var i=0;i<step.screen.rect.length; i++){
-        rect = step.screen.rect[i]
-        rectors += "<div class='rect' ret='%s' style='left:%spx;top:%spx;width:%spx;height:%spx'></div>"
-                   .format(JSON.stringify(rect), rect.left, rect.top, rect.width, rect.height)
+        var rect = step.screen.rect[i]
+        rectors += "<div class='rect' rect='%s' ></div>"
+                   .format(JSON.stringify(rect))
       }
+      var res = step.screen.resolution
+      res = res ? 'w=%s h=%s'.format(res[0], res[1]): ""
 
-      return '<div class="fancybox">%s</div>'.format(img + targets + vectors + rectors)
+      return '<div class="fancybox" %s >%s</div>'.format(res, img + targets + vectors + rectors)
     } else{
       return ""
     }
@@ -344,48 +409,54 @@ function StepPannel(data, root){
      * @description: 重新计算截屏缩放的比例
      * @param {dom} dom img对象
      */
-    imgWidth = dom.naturalWidth
+    imgWidth = dom.parentNode.getAttribute('w') || dom.naturalWidth
     dwidth = dom.width
     this.scale = dwidth / imgWidth
-    this.scale  = Math.round(this.scale  * 100) / 100
   }
 
-  this.resetScreenshot = function(){
+  this.resetScreenshot = function(fancybox){
     // 重新设置targt、方框、连接线位置
-    this.convertSize($('.step-args .crop_image'))
-    this.convertPos($('.fancybox .target'), true)
-    this.convertSize($('.fancybox .rect'))
-    this.convertPos($('.fancybox .rect'))
-    this.showArrow($(".fancybox .arrow"))
-    $('.fancybox').css({
-      'width': $('.fancybox .screen').width()
+    var screen = fancybox.find('.screen')
+    this.convertPos(fancybox.find('.target'), screen, true)
+    this.convertSize(fancybox.find('.rect'))
+    this.convertPos(fancybox.find('.rect'), screen)
+    this.showArrow(fancybox.find(".arrow"), screen)
+    fancybox.css({
+      'width': screen.width()
     })
   }
 
-  this.convertPos = function(domList, withSize){
+  this.convertPos = function(domList, screen,  withSize){
     for(var i=0; i<domList.length; i++){
-      pos = $(domList[i]).position()
-      x = pos.left * this.scale
-      y = pos.top * this.scale
+      var rect = JSON.parse(domList[i].getAttribute('rect'))
+      x = rect.left * this.scale
+      y = rect.top * this.scale
       if(withSize){
         x -= domList[i].offsetWidth/2
         y -= domList[i].offsetHeight/2
       }
-      domList[i].style.left = this.convertPosPersentage(x, 'horizontal')
-      domList[i].style.top = this.convertPosPersentage(y, 'vertical')
+      domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
+      domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
     }
   }
 
-  this.convertSize = function(domList){
+  this.convertSize = function(domList, minWidth, minHeight) {
     for(var i=0;i<domList.length; i++){
-      w = domList[i].clientWidth
-      h = domList[i].clientHeight
-      domList[i].style.width = (w * this.scale) + 'px'
-      domList[i].style.height = (h * this.scale) + 'px'
+      if (domList[i].tagName.toLowerCase() == 'img'){
+        w = domList[i].clientWidth
+        h = domList[i].clientHeight
+      } else{
+        var rect = JSON.parse(domList[i].getAttribute('rect'))
+        w = rect.width
+        h = rect.height
+      }
+      var scale = Math.max(this.scale, (minWidth || 0)/w, (minHeight || 0)/h)
+      domList[i].style.width = (w * scale) + 'px'
+      domList[i].style.height = (h * scale) + 'px'
     }
   }
 
-  this.showArrow = function(dom){
+  this.showArrow = function(dom, screen){
     var start = this.original_steps[this.currentStep].screen.pos[0]
     var vector = this.original_steps[this.currentStep].screen.vector[0]
     if(vector && start){
@@ -403,8 +474,8 @@ function StepPannel(data, root){
       };
       dom.css(rotate_css);
       dom.css({
-        'top': this.convertPosPersentage(start[1]* this.scale, 'vertical'),
-        'left': this.convertPosPersentage(start[0]*this.scale, 'horizontal'),
+        'top': this.convertPosPersentage(start[1]* this.scale, screen, 'vertical'),
+        'left': this.convertPosPersentage(start[0]*this.scale, screen, 'horizontal'),
         'width': vt_width
       });
     }
@@ -464,9 +535,10 @@ function StepPannel(data, root){
   }
 
   this.init_pagenation = function(){
-    //生成分页控件
+    //生成分页控件  
     this.paging = new Paging();
     var that = this
+    var list_len = this.steps.length
     this.paging.init({
       target:'#pageTool',
       pagesize: this.pagesize,
@@ -474,12 +546,9 @@ function StepPannel(data, root){
       prevTpl: "<",
       nextTpl: ">",
       toolbar:true,
-      pageSizeList: this.steps.length>100 ? [10, 20, 50, 100, 'All'] : [10, 20, 50, 100],
+      pageSizeList: list_len>100 ? [10, 20, 50, 100, list_len] : [10, 20, 50, 100],
       changePagesize:function(ps){
-        if(ps == 'All')
-          that.pagesize = this.steps.length
-        else
-          that.pagesize = parseInt(ps)
+        that.pagesize = parseInt(ps)
         that.currentPage = 1
         that.setStepsLeft()
       },
@@ -488,7 +557,7 @@ function StepPannel(data, root){
         that.setStepsLeft()
       }
     });
-    $('#pageTool').prepend('<span class="stpes-total"><span lang="en">Total </span><span class="steps-account"></span></span>')
+    $('#pageTool').prepend('<span class="steps-total"><span lang="en">Total </span><span class="steps-account"></span></span>')
   }
 
   this.setPagenation = function(){
@@ -520,13 +589,13 @@ function StepPannel(data, root){
     }
   }
 
-  this.convertPosPersentage = function(pixcel, key){
+  this.convertPosPersentage = function(pixcel, screen, key){
     ret = ''
     if(key == 'horizontal'){
-      ret = pixcel /$('.fancybox .screen').width() * 100 + '%'
+      ret = pixcel / screen.width() * 100 + '%'
     }
     else if (key == 'vertical'){
-      ret = pixcel / $('.fancybox .screen').height() * 100 + '%'
+      ret = pixcel / screen.height() * 100 + '%'
     }
     return ret
   }
@@ -541,20 +610,25 @@ String.prototype.format= function(){
   });
 }
 
-Date.prototype.Format = function (fmt) { //author: meizz
+Date.prototype.Format = function (fmt) { //author: meizz 
   var o = {
-    "M+": this.getMonth() + 1, //月份
-    "d+": this.getDate(), //日
-    "h+": this.getHours(), //小时
-    "m+": this.getMinutes(), //分
-    "s+": this.getSeconds(), //秒
-    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-    "S": this.getMilliseconds() //毫秒
+    "M+": this.getMonth() + 1, //月份 
+    "d+": this.getDate(), //日 
+    "h+": this.getHours(), //小时 
+    "m+": this.getMinutes(), //分 
+    "s+": this.getSeconds(), //秒 
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+    "S": this.getMilliseconds() //毫秒 
   };
   if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
   for (var k in o)
   if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
   return fmt;
+}
+
+function getFormatDateTime(timestamp){
+  timestamp = getTimestamp(timestamp)
+  return (new Date(timestamp)).Format("yyyy-MM-dd hh:mm:ss")
 }
 
 function getFormatDate(timestamp){
@@ -567,31 +641,9 @@ function getFormatTime(timestamp){
   return (new Date(timestamp)).Format("hh:mm:ss")
 }
 
-function getFormatDuration(end, start) {
-  // 返回耗时，格式为 0hr1min6s22ms
-  var delta = getTimestamp(end) - getTimestamp(start)
-  return getDelta(parseInt(delta))
-}
-
-function getFormatDuration2(end, start) {
-  // 返回耗时，格式为 00:00:19
-  var delta = getTimestamp(end) - getTimestamp(start)
-  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
-  return (new Date(midnight + delta)).Format("hh:mm:ss")
-}
-
-function getTimestamp(time) {
-  // time有可能是时间戳，也可能是格式化的，返回为毫秒
-  if(Number(time)){
-    return Number(time) * 1000
-  } else{
-    return (new Date(time).getTime())
-  }
-}
-
-function getDelta(delta){
-  // 计算消耗时间，end - start，以0hr1min6s22ms 格式
-  ms = delta % 1000
+function getFormatDuration(delta) {
+  // 格式化耗时， 格式为 0hr1min6s22ms
+  ms = parseInt(delta % 1000)
   delta = parseInt(delta / 1000)
   s = delta % 60
   delta = parseInt(delta/ 60)
@@ -612,6 +664,26 @@ function getDelta(delta){
   return msg
 }
 
+function getFormatDuration2(delta) {
+  // 返回耗时，格式为 00:00:19
+  var midnight = (new Date(new Date().setHours(0, 0, 0, 0))).getTime()
+  return (new Date(midnight + delta)).Format("hh:mm:ss")
+}
+
+function getDelta(end, start) {
+  // 返回耗时 单位为毫秒, end 和 start 可能是timestamp，也可能是化数据
+  return getTimestamp(end) - getTimestamp(start)
+}
+
+function getTimestamp(time) {
+  // time有可能是时间戳，也可能是格式化的，返回为毫秒
+  if(Number(time)){
+    return Number(time) * 1000
+  } else{
+    return (new Date(time).getTime())
+  }
+}
+
 function toggleCollapse(dom){
   if(dom.hasClass('collapse')){
     dom.removeClass('collapse')
@@ -623,7 +695,7 @@ function toggleCollapse(dom){
 function urlArgs(){
   var args = {};
   var query = location.search.substring(1);
-  var pairs = query.split("&");
+  var pairs = query.split(/&|\?/);
   for(var i = 0;i < pairs.length; i++){
       var pos = pairs[i].indexOf("=");
       if(pos == -1) continue;
@@ -631,6 +703,19 @@ function urlArgs(){
       var value = pairs[i].substring(pos + 1);
       value = decodeURIComponent(value);
       args[name] = value;
+  }
+  // Connect :Android:///04157df490cb0b3f?cap_method=JAVACAP&&ori_method=ADBORI&&touch_method=ADBTOUCH
+  // && 也会被分割
+  if(args['connect']){
+    var methods = []
+    if(args['cap_method'])
+      methods.push("cap_method=JAVACAP")
+    if(args['ori_method'])
+      methods.push("ori_method=ADBORI")
+    if(args['touch_method'])
+      methods.push("touch_method=ADBTOUCH")
+    if(methods.length>0)
+      args['connect'] = args['connect'] + '?' + methods.join('&&')
   }
   return args;
 }
@@ -653,15 +738,34 @@ function loadUrlInfo(){
     args['no_of_device'] = args.device_no
     args['no_of_script'] = args.script_no
     var fragment  = keys.map(function(k){
-      return '<div class="info %s"><span lang="en">%s</span>%s</div>'.format(k, formatStr(k), args[k])
+      return '<div class="info %s" title="%s"><span lang="en">%s</span>%s</div>'.format(k,args[k], formatStr(k), args[k])
     })
-    back = '<a href="%s" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
+    back = '<a href="%s#detail" class="back" title="Back to multi-device report"><img src="%simage/back.svg"></a>'.format(args.back, data.static_root)
     $('#back_multi').html(back)
     container.html(fragment)
     result = args.status ? args.status : result
     $(".footer").hide()
   }
   set_task_status(result)
+  $('.info.connect').append("<div class='copy_device'></div>")
+  $(".info .copy_device").click(function(){
+    copyToClipboard(this.parentNode.getAttribute('title'))
+  })
+}
+
+function copyToClipboard(msg){
+  const input = document.createElement('input')
+  input.setAttribute('readonly', 'readonly');
+  input.setAttribute('value', msg);
+  document.body.appendChild(input);
+  if (document.execCommand('copy')) {
+    input.select();
+    document.execCommand('copy');
+    console.log('复制成功');
+  } else{
+    alert('Copy is not supported by the current browser, please change to chrome')
+  }
+  document.body.removeChild(input);
 }
 
 function set_task_status(result){
@@ -675,7 +779,7 @@ function set_task_status(result){
 function init_page(){
   $('.summary .info-sub.start').html(getFormatDate(data.run_start))
   $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
-  $('.summary .info-value.duration').html(getFormatDuration(data.run_end, data.run_start))
+  $('.summary .info-value.duration').html(getFormatDuration(getDelta(data.run_end, data.run_start)))
 }
 
 $(function(){
@@ -712,18 +816,7 @@ $(function(){
 
   // 复制脚本地址到粘贴版
   $('#copy_path').click(function(){
-    const input = document.createElement('input')
-    input.setAttribute('readonly', 'readonly');
-    input.setAttribute('value', this.getAttribute('path'));
-    document.body.appendChild(input);
-    if (document.execCommand('copy')) {
-      input.select();
-      document.execCommand('copy');
-      console.log('复制成功');
-    } else{
-      alert('Copy is not supported by the current browser, please change to chrome')
-    }
-    document.body.removeChild(input);
+    copyToClipboard(this.getAttribute('path'))
   })
 
   // 从地址search部分加载设备信息等

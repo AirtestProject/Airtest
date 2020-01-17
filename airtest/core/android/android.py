@@ -8,7 +8,8 @@ from airtest import aircv
 from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, SDK_VERISON_NEW
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD,\
+    SDK_VERISON_ANDROID7, SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
@@ -27,24 +28,30 @@ class Android(Device):
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
-                 ):
+                 display_id=None,
+                 input_event=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
         self.cap_method = cap_method.upper()
         self.touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
         self.ori_method = ori_method.upper()
+        self.display_id = display_id
+        self.input_event = input_event
         # init adb
-        self.adb = ADB(self.serialno, server_addr=host)
+        self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
+        # Android10 temporary solution, using adbtouch instead of minitouch
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method != TOUCH_METHOD.ADBTOUCH:
+            self.touch_method = TOUCH_METHOD.ADBTOUCH
         self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
-        self.minicap = Minicap(self.adb, ori_function=self.get_display_info)
+        self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info,input_event=self.input_event)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
@@ -63,7 +70,12 @@ class Android(Device):
 
     @property
     def uuid(self):
-        return self.serialno
+        ult = [self.serialno]
+        if self.display_id:
+            ult.append(self.display_id)
+        if self.input_event:
+            ult.append(self.input_event)
+        return "_".join(ult)
 
     def list_app(self, third_only=False):
         """
@@ -202,13 +214,14 @@ class Android(Device):
         """
         return self.adb.uninstall_app(package)
 
-    def snapshot(self, filename=None, ensure_orientation=True):
+    def snapshot(self, filename=None, ensure_orientation=True, quality=10):
         """
         Take the screenshot of the display. The output is send to stdout by default.
 
         Args:
             filename: name of the file where to store the screenshot, default is None which is stdout
             ensure_orientation: True or False whether to keep the orientation same as display
+            quality: The image quality, integer in range [1, 99]
 
         Returns:
             screenshot output
@@ -241,10 +254,10 @@ class Android(Device):
                 if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
                     screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
             # adb 截图总是要根据orientation旋转，但是SDK版本大于等于25(Android7.1以后)无需额外旋转
-            elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_NEW:
+            elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_ANDROID7:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
-            aircv.imwrite(filename, screen)
+            aircv.imwrite(filename, screen, quality)
         return screen
 
     def shell(self, *args, **kwargs):

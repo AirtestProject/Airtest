@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
 import re
 import json
@@ -34,17 +34,18 @@ class Minicap(object):
     reference https://github.com/openstf/minicap
     """
 
-    VERSION = 5
+    VERSION = 6
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, ori_function=None):
+    def __init__(self, adb, projection=None, ori_function=None, display_id=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
         self.adb = adb
         self.projection = projection
+        self.display_id = display_id
         self.ori_function = ori_function if callable(ori_function) else self.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
@@ -145,7 +146,12 @@ class Minicap(object):
             display information
 
         """
-        display_info = self.adb.shell("%s -i" % self.CMD)
+        if self.display_id:
+            display_info = self.adb.shell("{0} -d {1} -i".format(self.CMD, self.display_id))
+        else:
+            display_info = self.adb.shell("%s -i" % self.CMD)
+        match = re.compile(r'({.*})', re.DOTALL).search(display_info)
+        display_info = match.group(0) if match else display_info
         display_info = json.loads(display_info)
         display_info["orientation"] = display_info["rotation"] / 90
         # 针对调整过手机分辨率的情况
@@ -180,10 +186,16 @@ class Minicap(object):
 
         """
         params, display_info = self._get_params(projection)
-        raw_data = self.adb.raw_shell(
-            self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
-            ensure_unicode=False,
-        )
+        if self.display_id:
+            raw_data = self.adb.raw_shell(
+                self.CMD + " -d " + str(self.display_id) + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
+                ensure_unicode=False,
+            )
+        else:
+            raw_data = self.adb.raw_shell(
+                self.CMD + " -n 'airtest_minicap' -P %dx%d@%dx%d/%d -s" % params,
+                ensure_unicode=False,
+            )
         jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1]
         jpg_data = jpg_data.replace(self.adb.line_breaker, b"\n")
         return jpg_data
@@ -301,10 +313,16 @@ class Minicap(object):
         deviceport = deviceport[len("localabstract:"):]
         other_opt = "-l" if lazy else ""
         params, display_info = self._get_params()
-        proc = self.adb.start_shell(
-            "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
-            tuple([self.CMD, deviceport] + list(params) + [other_opt]),
-        )
+        if self.display_id:
+            proc = self.adb.start_shell(
+                "%s -d %s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
+                tuple([self.CMD, self.display_id, deviceport] + list(params) + [other_opt]),
+            )
+        else:
+            proc = self.adb.start_shell(
+                "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
+                tuple([self.CMD, deviceport] + list(params) + [other_opt]),
+            )
         nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server")
         while True:
             line = nbsp.readline(timeout=5.0)

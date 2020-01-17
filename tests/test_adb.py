@@ -1,6 +1,6 @@
 # encoding=utf-8
 from airtest.core.android.adb import ADB, AdbError, AdbShellError, DeviceConnectionError
-from testconf import IMG, APK, PKG, try_remove
+from .testconf import IMG, APK, PKG, try_remove
 from types import GeneratorType
 import os
 import unittest
@@ -21,11 +21,11 @@ class TestADBWithoutDevice(unittest.TestCase):
         self.adb.start_server()
 
     def test_version(self):
-        self.assertIn("1.0.39", self.adb.version())
+        self.assertIn("1.0.40", self.adb.version())
 
     def test_other_adb_server(self):
         adb = ADB(server_addr=("localhost", 5037))
-        self.assertIn("1.0.39", adb.version())
+        self.assertIn("1.0.40", adb.version())
 
     def test_start_cmd(self):
         proc = self.adb.start_cmd("devices", device=False)
@@ -65,6 +65,13 @@ class TestADBWithDevice(unittest.TestCase):
 
     def test_get_status(self):
         self.assertEqual(self.adb.get_status(), self.adb.status_device)
+
+    def test_cmd(self):
+        output = self.adb.cmd("shell whoami")
+        self.assertIsInstance(output, text_type)
+
+        with self.assertRaises(RuntimeError):
+            self.adb.cmd("shell top", timeout=2)
 
     def test_wait_for_device(self):
         self.adb.wait_for_device()

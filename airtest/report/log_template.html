@@ -31,7 +31,7 @@
 
     <div class="container-fluid">
       <div class="row">
-
+        
         <div id="main" class="main col-md-12">
           <div id="back_multi"></div>
           <h1 class="title">Airtest Report {{info.title}}</h1>
@@ -62,6 +62,26 @@
                       <span class="info-name" lang="en">Time: </span>
                       <span class="info-value duration">xxx</span>
                     </div>
+                    {% if console %}
+                    <div class="info-console">
+                      <span class="info-name" lang="en">Console: </span>
+                      <img id='show-console' src="{{static_root}}image/console_normal.svg" /></a>
+                      <div id='console' class="mask hide">
+                        <div class="hljs content">
+                          <img id='close-console' src="{{static_root}}image/close.svg" /></a>
+                          <div class="console-content"><pre class="trace">{{console}}</pre></div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
+                    {% if log %}
+                    <div class="info-log">
+                      <span class="info-name" lang="en">Log: </span>
+                      <span class="info-value log">
+                        <a href="{{log}}" target="_blank" download="log.txt">log.txt <img src="{{static_root}}image/download_log.svg" /></a>
+                      </span>
+                    </div>
+                    {% endif %}
                   </div>
                 </div>
               </div>
@@ -89,7 +109,7 @@
                 </div>
               </div>
             </div>
-
+            
             {% if info.desc %}
             <div class="info info3">
               <div class="info-title" lang="en">Description:</div>
@@ -104,18 +124,17 @@
           </div>
           <div class="device" id='device'>
           </div>
-
+          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
+          {{ extra_block|safe }}
           <div class="gallery">
             <div class="info-title"><span lang="en">Quick view</span></div>
             <div class="content">
             </div>
           </div>
 
-          <!-- 可以额外显示自定义模块，支持插入Html内容 -->
-          {{ extra_block|safe }}
           <!--单步-->
           {% if steps|length  >0 %}
-
+          
           <div class="steps">
             <div class="content">
               <div class="steps-head">
@@ -146,7 +165,7 @@
             {% endif %}
             </div>
         </div>
-
+        
       {% block footer %}
       <div class="footer">
         <div class="footer-content">
@@ -177,7 +196,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> 
       {% endblock %}
       </div>
       <!-- 录屏 -->
@@ -212,11 +231,16 @@
             {% endif %}
           </div>
         </div>
+        <!-- max pic -->
+      <div id='magnify' class="mask hide">
+        <div class="content">
+        </div>
+      </div>
     </div>
 
-  <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">  
-  <script src="{{static_root}}js/highlight.min.js"></script>  
+  <link href="{{static_root}}css/monokai_sublime.min.css" rel="stylesheet">
+  <script src="{{static_root}}js/highlight.min.js"></script>
   <script type="text/javascript" src="{{static_root}}js/paging.js"></script>
-  <script src="{{static_root}}js/report.js"></script>  
+  <script src="{{static_root}}js/report.js"></script>
 </body>
 </html>

@@ -66,6 +66,7 @@ Lang.prototype.pack.zh = {
 		"Description:": "描述：",
 		"Time:": "时间：",
 		"Behavior:": "动作：",
+		"Start:": "时间：",
 		"Duration:": "耗时：",
 		"Status:": "结果：",
 		"Total": "共",

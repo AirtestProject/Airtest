@@ -7,6 +7,7 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready, get_std_encoding
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
+from airtest.utils.compat import SUBPROCESS_FLAG
 
 LOGGING = get_logger(__name__)
 
@@ -54,7 +55,8 @@ class InstructHelper(object):
             cmds,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            creationflags=SUBPROCESS_FLAG
         )
         # something like port binding fail
         time.sleep(0.5)

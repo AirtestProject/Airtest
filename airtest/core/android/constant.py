@@ -2,6 +2,7 @@
 import os
 import re
 import sys
+import subprocess
 from airtest.utils.compat import decode_path
 
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
@@ -14,7 +15,9 @@ DEFAULT_ADB_PATH = {
     "Linux-armv7l": os.path.join(STATICPATH, "adb", "linux_arm", "adb"),
 }
 DEFAULT_ADB_SERVER = ('127.0.0.1', 5037)
-SDK_VERISON_NEW = 24
+SDK_VERISON_ANDROID7 = 24
+# Android 10 SDK version
+SDK_VERISON_ANDROID10 = 29
 DEBUG = True
 STFLIB = os.path.join(STATICPATH, "stf_libs")
 ROTATIONWATCHER_APK = os.path.join(STATICPATH, "apks", "RotationWatcher.apk")

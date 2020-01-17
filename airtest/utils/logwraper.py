@@ -46,14 +46,7 @@ class AirtestLogger(object):
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
-
         if self.logfd:
-            if not isinstance(data.get('name', ''), str):
-                if isinstance(data.get('name', ''), Exception):
-                    data['traceback'] = data['name'].message
-                    data['name'] = data['name'].__class__.__name__
-                else:
-                    raise AssertionError("TypeError: message must be str or Exception")
             log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.time(), 'data': data}, default=self._dumper)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()

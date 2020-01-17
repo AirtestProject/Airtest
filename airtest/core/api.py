@@ -94,7 +94,7 @@ def set_current(idx):
     G.DEVICE = current_dev
 
 
-def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
+def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compress=0):
     """
     Auto setup running env and try connect android device if not device connected.
 
@@ -116,6 +116,8 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
         set_logdir(logdir)
     if project_root:
         ST.PROJECT_ROOT = project_root
+    if compress:
+        ST.SNAPSHOT_QUALITY = compress
 
 
 """
@@ -198,13 +200,14 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename=None, msg=""):
+def snapshot(filename=None, msg="", quality=ST.SNAPSHOT_QUALITY):
     """
     Take the screenshot of the target device and save it to the file.
 
     :param filename: name of the file where to save the screenshot. If the relative path is provided, the default
                      location is ``ST.LOG_DIR``
     :param msg: short description for screenshot, it will be recorded in the report
+    :param quality: The image quality, integer in range [1, 99]
     :return: absolute path of the screenshot
     :platforms: Android, iOS, Windows
     """
@@ -212,7 +215,7 @@ def snapshot(filename=None, msg=""):
         if not os.path.isabs(filename):
             logdir = ST.LOG_DIR or "."
             filename = os.path.join(logdir, filename)
-        screen = G.DEVICE.snapshot(filename)
+        screen = G.DEVICE.snapshot(filename, quality=quality)
         return try_log_screen(screen)
     else:
         return try_log_screen()
@@ -424,7 +427,7 @@ def find_all(v):
     :return: list of coordinates, [(x, y), (x1, y1), ...]
     :platforms: Android, Windows, iOS
     """
-    screen = G.DEVICE.snapshot()
+    screen = G.DEVICE.snapshot(quality=ST.SNAPSHOT_QUALITY)
     return v.match_all_in(screen)
 
 
