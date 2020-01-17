@@ -1509,14 +1509,15 @@ class ADB(object):
         windows = output.split("Window #")
         offsetx, offsety, x, y = info['width'], info['height'], 0, 0
         package = self._search_for_current_package(output)
-        for w in windows:
-            if "package=%s" % package in w:
-                arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
-                if len(arr) >= 1 and len(arr[0]) == 4:
-                    offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
-                    if info["orientation"] in [1, 3]:
-                        offsetx, offsety, x, y = offsety, offsetx, y, x
-                    x, y = x - offsetx, y - offsety
+        if package:
+            for w in windows:
+                if "package=%s" % package in w:
+                    arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
+                    if len(arr) >= 1 and len(arr[0]) == 4:
+                        offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
+                        if info["orientation"] in [1, 3]:
+                            offsetx, offsety, x, y = offsety, offsetx, y, x
+                        x, y = x - offsetx, y - offsety
         return {
             "offset_x": offsetx,
             "offset_y": offsety,
@@ -1531,12 +1532,16 @@ class ADB(object):
         Returns:
             package name if exists else ""
         """
-        packageRE = re.compile('\s*mCurrentFocus=Window{.* ([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+}')
-        m = packageRE.findall(ret)
-        if m:
-            return m[-1]
-        else:
-            return self.get_top_activity()[0]
+        try:
+            packageRE = re.compile('\s*mCurrentFocus=Window{.* ([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+}')
+            m = packageRE.findall(ret)
+            if m:
+                return m[-1]
+            else:
+                return self.get_top_activity()[0]
+        except Exception as e:
+            print("[Error] Cannot get current top activity")
+        return ""
 
 
 def cleanup_adb_forward():
