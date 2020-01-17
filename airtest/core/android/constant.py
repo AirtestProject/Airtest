@@ -28,19 +28,6 @@ YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
 
-if sys.platform.startswith("win"):
-    # Don't display the Windows GPF dialog if the invoked program dies.
-    try:
-        SUBPROCESS_FLAG = subprocess.CREATE_NO_WINDOW  # in Python 3.7+
-    except AttributeError:
-        import ctypes
-        SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
-        ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)  # win32con.CREATE_NO_WINDOW?
-        SUBPROCESS_FLAG = 0x8000000
-else:
-    SUBPROCESS_FLAG = 0
-
-
 class CAP_METHOD(object):
     MINICAP = "MINICAP"
     MINICAP_STREAM = "MINICAP_STREAM"

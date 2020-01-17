@@ -13,10 +13,10 @@ from six import PY3, text_type, binary_type, raise_from
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_ANDROID7, SUBPROCESS_FLAG)
+                                           SDK_VERISON_ANDROID7)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
-                                DeviceConnectionError, AdbTimeoutExpired)
-from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeout
+                                DeviceConnectionError)
+from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeout, SUBPROCESS_FLAG
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
