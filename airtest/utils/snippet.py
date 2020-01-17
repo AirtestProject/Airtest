@@ -113,5 +113,8 @@ def ready_method(func):
     @wraps(func)
     def wrapper(inst, *args, **kwargs):
         ret = func(inst, *args, **kwargs)
+        key = "_%s_ready" % func.__name__
+        if not getattr(inst, key, None):
+            setattr(inst, key, True)
         return ret
     return wrapper

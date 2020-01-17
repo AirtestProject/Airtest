@@ -1,5 +1,7 @@
 import sys
 import os
+import subprocess
+import threading
 from six import PY3, raise_from, reraise
 
 
@@ -40,3 +42,36 @@ def raisefrom(exc_type, message, exc):
         raise_from(exc_type(message), exc)
     else:
         reraise(exc_type, '%s - %s' % (message, exc), sys.exc_info()[2])
+
+
+def proc_communicate_timeout(proc, timeout):
+    """
+    Enable subprocess.Popen to accept timeout parameters, compatible with py2 and py3
+
+    :param proc: subprocess.Popen()
+    :param timeout: timeout in seconds
+    :return: result of proc.communicate()
+    :raises: RuntimeError when timeout
+    """
+    if sys.version_info[:2] >= (3, 3):
+        # in Python 3.3+
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired as e:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            exp = RuntimeError("Command {cmd} timed out after {timeout} seconds: stdout['{stdout}'], "
+                                    "stderr['{stderr}']".format(cmd=proc.args, timeout=e.timeout,
+                                                                stdout=stdout, stderr=stderr))
+            raise_from(exp, None)
+    else:
+        timer = threading.Timer(timeout, proc.kill)
+        try:
+            timer.start()
+            stdout, stderr = proc.communicate()
+        finally:
+            timer.cancel()
+            if proc.returncode > 0:
+                raise RuntimeError("Command timed out after {timeout} seconds: stdout['{stdout}'], "
+                                   "stderr['{stderr}']".format(timeout=timeout, stdout=stdout, stderr=stderr))
+    return stdout, stderr
