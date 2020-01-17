@@ -13,28 +13,16 @@ from six import PY3, text_type, binary_type, raise_from
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
-                                           SDK_VERISON_ANDROID7)
+                                           SDK_VERISON_ANDROID7, SUBPROCESS_FLAG)
 from airtest.core.error import (AdbError, AdbShellError, AirtestError,
                                 DeviceConnectionError, AdbTimeoutExpired)
-from airtest.utils.compat import decode_path, raisefrom
+from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeout
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
 from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
 
 LOGGING = get_logger(__name__)
-
-if sys.platform.startswith("win"):
-    # Don't display the Windows GPF dialog if the invoked program dies.
-    try:
-        SUBPROCESS_FLAG = subprocess.CREATE_NO_WINDOW  # in Python 3.7+
-    except AttributeError:
-        import ctypes
-        SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
-        ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)  # win32con.CREATE_NO_WINDOW?
-        SUBPROCESS_FLAG = 0x8000000
-else:
-    SUBPROCESS_FLAG = 0
 
 
 class ADB(object):
@@ -187,23 +175,7 @@ class ADB(object):
         """
         proc = self.start_cmd(cmds, device)
         if timeout:
-            if sys.version_info[:2] >= (3, 3):
-                # in Python 3.3+
-                try:
-                    stdout, stderr = proc.communicate(timeout=timeout)
-                except subprocess.TimeoutExpired as e:
-                    proc.kill()
-                    stdout, stderr = proc.communicate()
-                    raise_from(AdbTimeoutExpired(stdout, stderr, e), None)
-            else:
-                timer = threading.Timer(timeout, proc.kill)
-                try:
-                    timer.start()
-                    stdout, stderr = proc.communicate()
-                finally:
-                    timer.cancel()
-                    if proc.returncode > 0:
-                        raise AdbTimeoutExpired(stdout, stderr, ("Command '%s' timed out after %s seconds" % (cmds, timeout)))
+            stdout, stderr = proc_communicate_timeout(proc, timeout)
         else:
             stdout, stderr = proc.communicate()
 
@@ -324,7 +296,7 @@ class ADB(object):
         """
         try:
             self.cmd("wait-for-device", timeout=timeout)
-        except AdbTimeoutExpired as e:
+        except RuntimeError as e:
             raisefrom(DeviceConnectionError, "device not ready", e)
 
     def start_shell(self, cmds):
