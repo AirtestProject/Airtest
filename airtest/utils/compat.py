@@ -17,6 +17,19 @@ else:
         return path.decode(sys.getfilesystemencoding()) if path else path
 
 
+if sys.platform.startswith("win"):
+    # Don't display the Windows GPF dialog if the invoked program dies.
+    try:
+        SUBPROCESS_FLAG = subprocess.CREATE_NO_WINDOW  # in Python 3.7+
+    except AttributeError:
+        import ctypes
+        SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
+        ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)  # win32con.CREATE_NO_WINDOW?
+        SUBPROCESS_FLAG = 0x8000000
+else:
+    SUBPROCESS_FLAG = 0
+
+
 def script_dir_name(script_path):
     """get script dir for old & new cli api compatibility"""
     script_path = decode_path(script_path)

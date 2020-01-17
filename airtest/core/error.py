@@ -63,22 +63,6 @@ class AdbShellError(AdbError):
     pass
 
 
-class AdbTimeoutExpired(Exception):
-    """
-    This exception is raised when the timeout expires while waiting for ADB command.
-    """
-    def __init__(self, stdout, stderr, exp=None):
-        self.stdout = stdout
-        self.stderr = stderr
-        self.exp = exp
-
-    def __str__(self):
-        if self.exp:
-            return self.exp.__str__() + "\n stdout[%s] stderr[%s]" % (self.stdout, self.stderr)
-        else:
-            return "stdout[%s] stderr[%s]" % (self.stdout, self.stderr)
-
-
 class DeviceConnectionError(BaseError):
     """
         device connection error
