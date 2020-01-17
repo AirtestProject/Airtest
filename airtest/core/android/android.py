@@ -51,7 +51,7 @@ class Android(Device):
         self.rotation_watcher = RotationWatcher(self.adb)
         self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info,input_event=self.input_event)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info, input_event=self.input_event)
         self.maxtouch = Maxtouch(self.adb, ori_function=self.get_display_info)
 
         self.yosemite_ime = YosemiteIme(self.adb)
@@ -358,6 +358,7 @@ class Android(Device):
             pos = self._touch_point_by_orientation(pos)
             self.minitouch.touch(pos, duration=duration)
         elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            pos = self._touch_point_by_orientation(pos)
             self.maxtouch.touch(pos, duration=duration)
         else:
             self.adb.touch(pos)

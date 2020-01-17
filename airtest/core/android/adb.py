@@ -798,8 +798,8 @@ class ADB(object):
         Returns:
             The file size
         """
-        out = self.shell(["ls", "-l", filepath])
-        file_size = int(out.split()[3])
+        out = self.shell(["stat", "-c", "%s", filepath])
+        file_size = int(out)
         return file_size
 
     def _cleanup_forwards(self):
