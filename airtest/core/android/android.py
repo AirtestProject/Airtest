@@ -383,9 +383,9 @@ class Android(Device):
             None
 
         """
-        p1 = self._touch_point_by_orientation(p1)
-        p2 = self._touch_point_by_orientation(p2)
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
             if fingers == 1:
                 self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
             elif fingers == 2:
@@ -393,6 +393,8 @@ class Android(Device):
             else:
                 raise Exception("param fingers should be 1 or 2")
         elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
             if fingers == 1:
                 self.maxtouch.swipe(p1, p2, duration=duration, steps=steps)
             elif fingers == 2:
