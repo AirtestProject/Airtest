@@ -25,6 +25,7 @@ ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 YOSEMITE_APK = os.path.join(STATICPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
 YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
+MAXTOUCH_JAR = os.path.join(STATICPATH, "apks", "maxpresent.jar")
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
 
@@ -37,6 +38,7 @@ class CAP_METHOD(object):
 
 class TOUCH_METHOD(object):
     MINITOUCH = "MINITOUCH"
+    MAXTOUCH = "MAXTOUCH"
     ADBTOUCH = "ADBTOUCH"
 
 
@@ -48,4 +50,3 @@ class IME_METHOD(object):
 class ORI_METHOD(object):
     ADB = "ADBORI"
     MINICAP = "MINICAPORI"
-

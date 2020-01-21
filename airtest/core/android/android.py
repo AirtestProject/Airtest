@@ -13,6 +13,7 @@ from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, 
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
 from airtest.core.android.minitouch import Minitouch
+from airtest.core.android.maxtouch import Maxtouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
@@ -42,16 +43,17 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        # Android10 temporary solution, using adbtouch instead of minitouch
-        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method != TOUCH_METHOD.ADBTOUCH:
-            self.touch_method = TOUCH_METHOD.ADBTOUCH
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method == TOUCH_METHOD.MINITOUCH:
+            self.touch_method = TOUCH_METHOD.MAXTOUCH
         self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb)
         self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
         self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info,input_event=self.input_event)
+        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info, input_event=self.input_event)
+        self.maxtouch = Maxtouch(self.adb, ori_function=self.get_display_info)
+
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
@@ -355,6 +357,9 @@ class Android(Device):
         if self.touch_method == TOUCH_METHOD.MINITOUCH:
             pos = self._touch_point_by_orientation(pos)
             self.minitouch.touch(pos, duration=duration)
+        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            pos = self._touch_point_by_orientation(pos)
+            self.maxtouch.touch(pos, duration=duration)
         else:
             self.adb.touch(pos)
 
@@ -387,6 +392,15 @@ class Android(Device):
                 self.minitouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
             else:
                 raise Exception("param fingers should be 1 or 2")
+        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            p1 = self._touch_point_by_orientation(p1)
+            p2 = self._touch_point_by_orientation(p2)
+            if fingers == 1:
+                self.maxtouch.swipe(p1, p2, duration=duration, steps=steps)
+            elif fingers == 2:
+                self.maxtouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
+            else:
+                raise Exception("param fingers should be 1 or 2")
         else:
             duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
             self.adb.swipe(p1, p2, duration=duration)
@@ -403,7 +417,10 @@ class Android(Device):
             None
 
         """
-        return self.minitouch.pinch(*args, **kwargs)
+        if self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            return self.maxtouch.pinch(*args, **kwargs)
+        else:
+            return self.minitouch.pinch(*args, **kwargs)
 
     def logcat(self, *args, **kwargs):
         """
