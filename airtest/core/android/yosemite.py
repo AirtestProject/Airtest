@@ -37,7 +37,7 @@ class Yosemite(object):
         installed_version = self.adb.get_package_version(package)
         LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
         if installed_version is None or apk_version > int(installed_version):
-            self.adb.install_app(apk_path, replace=True)
+            self.adb.install_app(apk_path, replace=True, install_options=["-t", "-g"])
 
     @on_method_ready('install_or_upgrade')
     def get_ready(self):
