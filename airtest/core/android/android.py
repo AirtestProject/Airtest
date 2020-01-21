@@ -43,7 +43,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method != TOUCH_METHOD.MAXTOUCH:
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method == TOUCH_METHOD.MINITOUCH:
             self.touch_method = TOUCH_METHOD.MAXTOUCH
         self._display_info = {}
         self._current_orientation = None
