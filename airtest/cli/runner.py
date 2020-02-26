@@ -124,10 +124,16 @@ def setup_by_args(args):
     else:
         print("do not save log")
 
+    # set snapshot quality
+    if hasattr(args, "compress"):
+        compress = args.compress
+    else:
+        compress = ST.SNAPSHOT_QUALITY
+
     # guess project_root to be basedir of current .air path
     project_root = os.path.dirname(args.script) if not ST.PROJECT_ROOT else None
 
-    auto_setup(dirpath, devices, args.log, project_root, args.compress)
+    auto_setup(dirpath, devices, args.log, project_root, compress)
 
 
 def run_script(parsed_args, testcase_cls=AirtestCase):
