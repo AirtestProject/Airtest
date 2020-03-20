@@ -342,14 +342,15 @@ h2.empty-report{
 }
 .step-left{
   min-width: 320px;
-  padding: 30px 20px;
+  padding: 30px 50px 30px 20px;
   width: 32%;
   max-width: 500px;
+  max-height: 900px;
+  overflow-y: auto;
 }
 .step-right{
   border-left: dashed 1px rgb(102,102,102);
   padding: 30px 0px 0 60px;
-  margin-left: 30px;
   vertical-align: top;
   min-height: 500px;
   width: 100%;
