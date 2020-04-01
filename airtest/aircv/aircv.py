@@ -80,7 +80,7 @@ def crop_image(img, rect):
         (airtest中有用到)
     """
 
-    if isinstance(rect, (list, tuple)):
+    if isinstance(rect, (list, tuple)) and len(rect) == 4:
         height, width = img.shape[:2]
         # 获取在图像中的实际有效区域：
         x_min, y_min, x_max, y_max = [int(i) for i in rect]
