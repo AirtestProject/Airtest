@@ -243,10 +243,12 @@ def home():
 
 
 @logwrap
-def touch(v, times=1, **kwargs):
+def touch(v, times=1, x_offset=0, y_offset=0, **kwargs):
     """
     Perform the touch action on the device screen
 
+    :param y_offset: offset for y-axis, increase number to move position down, decrease number to move it up
+    :param x_offset: offset for x-axis, increase number to move position right, decrease number to move it left
     :param v: target to touch, either a Template instance or absolute coordinates (x, y)
     :param times: how many touches to be performed
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
@@ -258,6 +260,8 @@ def touch(v, times=1, **kwargs):
     else:
         try_log_screen()
         pos = v
+    # apply offset for pos
+    pos = (pos[0]+x_offset, pos[1]+y_offset)
     for _ in range(times):
         G.DEVICE.touch(pos, **kwargs)
         time.sleep(0.05)
