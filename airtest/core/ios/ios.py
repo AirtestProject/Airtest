@@ -2,12 +2,19 @@
 # -*- coding: utf-8 -*-
 
 
+from airtest.core.ios.wda_fix_version import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
+from airtest.utils.logger import get_logger
+from airtest.core.ios.instruct_helper import InstructHelper
+from airtest.core.ios.fake_minitouch import fakeMiniTouch
+from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.device import Device
+from airtest import aircv
 import requests
 import six
 import time
 import json
 import base64
-import wda
 import traceback
 
 if six.PY3:
@@ -15,23 +22,18 @@ if six.PY3:
 else:
     from urlparse import urljoin
 
-from airtest import aircv
-from airtest.core.device import Device
-from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
-from airtest.core.ios.rotation import XYTransformer, RotationWatcher
-from airtest.core.ios.fake_minitouch import fakeMiniTouch
-from airtest.core.ios.instruct_helper import InstructHelper
-from airtest.utils.logger import get_logger
 
 # roatations of ios
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from wda import WDAError
+# from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+# from wda import WDAError
 
 
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
 # retry when saved session failed
+
+
 def retry_session(func):
     def wrapper(self, *args, **kwargs):
         try:
@@ -44,6 +46,7 @@ def retry_session(func):
             else:
                 raise err
     return wrapper
+
 
 class IOS(Device):
     """ios client
@@ -73,8 +76,8 @@ class IOS(Device):
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        wda.DEBUG = False
-        self.driver = wda.Client(self.addr)
+        DEBUG = False
+        self.driver = Client(self.addr)
 
         # record device's width
         self._size = {'width': None, 'height': None}
@@ -127,8 +130,8 @@ class IOS(Device):
         if not self._size['width'] or not self._size['height']:
             self.snapshot()
 
-        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,\
-        'physical_width': self._size['width'], 'physical_height': self._size['height']}
+        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
+                'physical_width': self._size['width'], 'physical_height': self._size['height']}
 
     def get_render_resolution(self):
         """
@@ -260,7 +263,8 @@ class IOS(Device):
 
     def start_app(self, package, activity=None):
         self.defaultSession = None
-        self.driver.session(package)
+        print("package:", package)
+        self.session.start_app_new(package)
 
     def stop_app(self, package):
         self.driver.session().close()
@@ -318,6 +322,7 @@ class IOS(Device):
 
     def _check_orientation_change(self):
         pass
+
 
 if __name__ == "__main__":
     start = time.time()
