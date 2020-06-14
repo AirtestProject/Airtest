@@ -12,11 +12,13 @@ from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, 
     SDK_VERISON_ANDROID7, SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
 from airtest.core.android.minicap import Minicap
-from airtest.core.android.minitouch import Minitouch
-from airtest.core.android.maxtouch import Maxtouch
+from airtest.core.android.touch_methods.minitouch import Minitouch
+from airtest.core.android.touch_methods.maxtouch import Maxtouch
 from airtest.core.android.javacap import Javacap
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
+from airtest.core.android.touch_methods.touch_proxy import TouchProxy, AdbTouchImplementation, \
+    MinitouchImplementation, MaxtouchImplementation
 
 LOGGING = get_logger(__name__)
 
@@ -57,6 +59,25 @@ class Android(Device):
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
+
+        self._touch_proxy = None
+
+    @property
+    def touch_proxy(self):
+        """
+        Perform touch operation according to self.touch_method
+        :return:
+        """
+        if self._touch_proxy and self.touch_method == self._touch_proxy.METHOD_NAME:
+            return self._touch_proxy
+        if self.touch_method == TOUCH_METHOD.MINITOUCH:
+            impl = MinitouchImplementation(self.minitouch, self._touch_point_by_orientation)
+        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
+            impl = MaxtouchImplementation(self.maxtouch, self._touch_point_by_orientation)
+        else:
+            impl = AdbTouchImplementation(self.adb)
+        self._touch_proxy = TouchProxy(impl)
+        return self._touch_proxy
 
     def get_default_device(self):
         """
@@ -354,14 +375,7 @@ class Android(Device):
             None
 
         """
-        if self.touch_method == TOUCH_METHOD.MINITOUCH:
-            pos = self._touch_point_by_orientation(pos)
-            self.minitouch.touch(pos, duration=duration)
-        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
-            pos = self._touch_point_by_orientation(pos)
-            self.maxtouch.touch(pos, duration=duration)
-        else:
-            self.adb.touch(pos)
+        self.touch_proxy.touch(pos, duration)
 
     def double_click(self, pos):
         self.touch(pos)
@@ -383,44 +397,58 @@ class Android(Device):
             None
 
         """
-        if self.touch_method == TOUCH_METHOD.MINITOUCH:
-            p1 = self._touch_point_by_orientation(p1)
-            p2 = self._touch_point_by_orientation(p2)
-            if fingers == 1:
-                self.minitouch.swipe(p1, p2, duration=duration, steps=steps)
-            elif fingers == 2:
-                self.minitouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
-            else:
-                raise Exception("param fingers should be 1 or 2")
-        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
-            p1 = self._touch_point_by_orientation(p1)
-            p2 = self._touch_point_by_orientation(p2)
-            if fingers == 1:
-                self.maxtouch.swipe(p1, p2, duration=duration, steps=steps)
-            elif fingers == 2:
-                self.maxtouch.two_finger_swipe(p1, p2, duration=duration, steps=steps)
-            else:
-                raise Exception("param fingers should be 1 or 2")
-        else:
-            duration *= 1000  # adb的swipe操作时间是以毫秒为单位的。
-            self.adb.swipe(p1, p2, duration=duration)
+        self.touch_proxy.swipe(p1, p2, duration=0.5, steps=5, fingers=1)
 
-    def pinch(self, *args, **kwargs):
+    def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
-        Perform pinch event on the device
+        Perform pinch event on the device, only for minitouch and maxtouch
 
         Args:
-            *args: optional arguments
-            **kwargs: optional arguments
+            center: the center point of the pinch operation
+            percent: pinch distance to half of screen, default is 0.5
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
+            in_or_out: pinch in or pinch out, default is 'in'
+
+        Returns:
+            None
+
+        Raises:
+            TypeError: An error occurred when center is not a list/tuple or None
+
+        """
+        self.touch_proxy.pinch(center=center, percent=percent, duration=duration, steps=steps, in_or_out=in_or_out)
+
+    def swipe_along(self, coordinates_list, duration=0.8, steps=5):
+        """
+        Perform swipe event across multiple points in sequence, only for minitouch and maxtouch
+
+        Args:
+            coordinates_list: list of coordinates: [(x1, y1), (x2, y2), (x3, y3)]
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
 
         Returns:
             None
 
         """
-        if self.touch_method == TOUCH_METHOD.MAXTOUCH:
-            return self.maxtouch.pinch(*args, **kwargs)
-        else:
-            return self.minitouch.pinch(*args, **kwargs)
+        self.touch_proxy.swipe_along(coordinates_list, duration=duration, steps=steps)
+
+    def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5, offset=(0, 50)):
+        """
+        Perform two finger swipe action, only for minitouch and maxtouch
+
+        Args:
+            tuple_from_xy: start point
+            tuple_to_xy: end point
+            duration: time interval for swipe duration, default is 0.8
+            steps: size of swipe step, default is 5
+            offset: coordinate offset of the second finger, default is (0, 50)
+
+        Returns:
+            None
+        """
+        self.touch_proxy.two_finger_swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, offset=offset)
 
     def logcat(self, *args, **kwargs):
         """
