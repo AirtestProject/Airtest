@@ -300,7 +300,7 @@ class BaseTouch(object):
         self.perform(swipe_events)
 
     @on_method_ready('install_and_setup')
-    def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5):
+    def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5, offset=(0, 50)):
         """
         Perform two finger swipe action
 
@@ -333,15 +333,20 @@ class BaseTouch(object):
             tuple_to_xy: end point
             duration: time interval for swipe duration, default is 0.8
             steps: size of swipe step, default is 5
+            offset: coordinate offset of the second finger, default is (0, 50)
 
         Returns:
             None
         """
         from_x, from_y = tuple_from_xy
         to_x, to_y = tuple_to_xy
-        shift_x = 30 if from_x + 30 > self.size_info['width'] else -30
+        # 根据偏移量计算第二个手指的坐标
+        from_x2, from_y2 = (min(max(0, from_x + offset[0]), self.size_info['width']),
+                            min(max(0, from_y + offset[1]), self.size_info['height']))
+        to_x2, to_y2 = (min(max(0, to_x + offset[0]), self.size_info['width']),
+                        min(max(0, to_y + offset[1]), self.size_info['height']))
         swipe_events = [DownEvent(tuple_from_xy, contact=0, pressure=self.default_pressure),
-                        DownEvent((from_x + shift_x, from_y), contact=1, pressure=self.default_pressure),
+                        DownEvent((from_x2, from_y2), contact=1, pressure=self.default_pressure),
                         ]
 
         interval = float(duration) / (steps + 1)
@@ -350,7 +355,7 @@ class BaseTouch(object):
                 SleepEvent(interval),
                 MoveEvent((from_x + ((to_x - from_x) * i / steps), from_y + (to_y - from_y) * i / steps),
                           contact=0, pressure=self.default_pressure),
-                MoveEvent((from_x + (to_x - from_x) * i / steps + shift_x, from_y + (to_y - from_y) * i / steps),
+                MoveEvent((from_x2 + (to_x2 - from_x2) * i / steps, from_y2 + (to_y2 - from_y2) * i / steps),
                           contact=1, pressure=self.default_pressure),
             ]
             swipe_events.extend(move_events)

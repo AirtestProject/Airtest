@@ -2,7 +2,7 @@
 import os
 
 from airtest.core.android.constant import MAXTOUCH_JAR
-from airtest.core.android.base_touch import BaseTouch
+from airtest.core.android.touch_methods.base_touch import BaseTouch
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
