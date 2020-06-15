@@ -23,7 +23,6 @@ else:
     from urlparse import urljoin
 
 
-
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
@@ -257,7 +256,6 @@ class IOS(Device):
 
     def start_app(self, package, activity=None):
         self.defaultSession = None
-        print("package:", package)
         self.session.start_app_new(package)
 
     def stop_app(self, package):
