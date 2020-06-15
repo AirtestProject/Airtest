@@ -397,7 +397,7 @@ class Android(Device):
             None
 
         """
-        self.touch_proxy.swipe(p1, p2, duration=0.5, steps=5, fingers=1)
+        self.touch_proxy.swipe(p1, p2, duration=duration, steps=steps, fingers=fingers)
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
