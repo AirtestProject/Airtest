@@ -11,7 +11,8 @@ class TouchProxy(object):
         if method:
             return method
         else:
-            raise NotImplemented
+            raise NotImplementedError("%s does not support %s method" %
+                                      (getattr(self.touch_method, "METHOD_NAME", ""), name))
 
 
 class AdbTouchImplementation(object):
