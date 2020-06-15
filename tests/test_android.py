@@ -5,7 +5,7 @@ import numpy
 import unittest
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
-from testconf import APK, PKG, try_remove
+from .testconf import APK, PKG, try_remove
 
 
 class TestAndroid(unittest.TestCase):
@@ -101,12 +101,12 @@ class TestAndroid(unittest.TestCase):
         self.android.text(u'你好')
 
     def test_touch(self):
-        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
             self.android.touch((100, 100))
 
     def test_swipe(self):
-        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
             self.android.swipe((100, 100), (300, 300))
             self.android.swipe((100, 100), (300, 300), fingers=1)
