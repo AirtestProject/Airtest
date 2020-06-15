@@ -23,11 +23,6 @@ else:
     from urlparse import urljoin
 
 
-# roatations of ios
-# from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-# from wda import WDAError
-
-
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
