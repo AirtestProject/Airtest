@@ -26,7 +26,7 @@ class AdbTouchImplementation(object):
         else:
             self.swipe(pos, pos, duration=duration)
 
-    def swipe(self, p1, p2, duration=0.5, *args):
+    def swipe(self, p1, p2, duration=0.5, *args, **kwargs):
         duration *= 1000
         self.base_touch.swipe(p1, p2, duration=duration)
 
@@ -71,5 +71,4 @@ class MaxtouchImplementation(MinitouchImplementation):
     METHOD_NAME = "MAXTOUCH"
 
     def __init__(self, maxtouch, ori_transformer):
-        super(MaxtouchImplementation, self).__init__(maxtouch)
-        self.ori_transformer = ori_transformer
+        super(MaxtouchImplementation, self).__init__(maxtouch, ori_transformer)
