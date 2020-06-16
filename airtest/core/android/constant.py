@@ -40,6 +40,7 @@ class TOUCH_METHOD(object):
     MINITOUCH = "MINITOUCH"
     MAXTOUCH = "MAXTOUCH"
     ADBTOUCH = "ADBTOUCH"
+    MAXTOUCH = "MAXTOUCH"
 
 
 class IME_METHOD(object):
