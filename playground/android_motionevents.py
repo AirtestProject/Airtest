@@ -1,5 +1,5 @@
 from airtest.core.api import *
-from airtest.core.android.minitouch import *
+from airtest.core.android.touch_methods.base_touch import *
 from airtest.core.android.rotation import XYTransformer
 
 
