@@ -28,8 +28,6 @@ logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
 # retry when saved session failed
-
-
 def retry_session(func):
     def wrapper(self, *args, **kwargs):
         try:
