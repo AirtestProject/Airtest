@@ -6,8 +6,8 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from wda import WDAError
+from airtest.core.ios.wda_fix_version import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from airtest.core.ios.wda_fix_version import WDAError
 
 LOGGING = get_logger(__name__)
 
