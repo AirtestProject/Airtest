@@ -23,7 +23,6 @@ else:
     from urlparse import urljoin
 
 
-
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
