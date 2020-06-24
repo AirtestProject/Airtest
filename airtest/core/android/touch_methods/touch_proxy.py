@@ -3,6 +3,8 @@ class TouchProxy(object):
     """
     Perform touch operation according to the specified method
     """
+    TOUCH_METHODS = []
+
     def __init__(self, touch_method):
         self.touch_method = touch_method
 
@@ -15,6 +17,12 @@ class TouchProxy(object):
                                       (getattr(self.touch_method, "METHOD_NAME", ""), name))
 
 
+def register_touch(cls):
+    TouchProxy.TOUCH_METHODS.append(cls.METHOD_NAME)
+    return cls
+
+
+@register_touch
 class AdbTouchImplementation(object):
     METHOD_NAME = "ADBTOUCH"
 
@@ -32,6 +40,7 @@ class AdbTouchImplementation(object):
         self.base_touch.swipe(p1, p2, duration=duration)
 
 
+@register_touch
 class MinitouchImplementation(AdbTouchImplementation):
     METHOD_NAME = "MINITOUCH"
 
@@ -68,6 +77,7 @@ class MinitouchImplementation(AdbTouchImplementation):
         self.base_touch.two_finger_swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, offset=offset)
 
 
+@register_touch
 class MaxtouchImplementation(MinitouchImplementation):
     METHOD_NAME = "MAXTOUCH"
 
