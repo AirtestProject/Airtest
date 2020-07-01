@@ -125,7 +125,7 @@ def setup_by_args(args):
         print("do not save log")
 
     # set snapshot quality
-    if hasattr(args, "compress"):
+    if args.compress:
         compress = args.compress
     else:
         compress = ST.SNAPSHOT_QUALITY
