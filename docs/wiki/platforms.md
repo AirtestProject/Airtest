@@ -204,6 +204,8 @@ Supported Platforms
 | 164  | OPPO R15      | 通过   | 高   | 输入法不可用，poco不可用 |
 | 165  | NOKIA X5	| 通过   | 高   |      |
 | 166  | duerOS 车机IVI     | 通过   | 高   |   需要勾选use adb orientation，否则屏幕显示不全
+| 167  | 小米 8     | 通过   | 高   |      |
+| 167  | 小米 9     | 通过   | 高   |      |
 
 ## Android Emulator
 
