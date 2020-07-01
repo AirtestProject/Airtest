@@ -15,7 +15,7 @@ from collections import namedtuple
 
 import requests
 import six
-from airtest.core.ios.xcui_element_type import ELEMENTS
+from airtest.core.ios.elements_type import ELEMENTS
 
 if six.PY3:
     from urllib.parse import urljoin as _urljoin
