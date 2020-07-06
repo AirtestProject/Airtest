@@ -5,7 +5,7 @@ import numpy
 import unittest
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
-from testconf import APK, PKG, try_remove
+from .testconf import APK, PKG, try_remove
 
 
 class TestAndroid(unittest.TestCase):
@@ -101,12 +101,12 @@ class TestAndroid(unittest.TestCase):
         self.android.text(u'你好')
 
     def test_touch(self):
-        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
             self.android.touch((100, 100))
 
     def test_swipe(self):
-        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
             self.android.swipe((100, 100), (300, 300))
             self.android.swipe((100, 100), (300, 300), fingers=1)
@@ -166,8 +166,34 @@ class TestAndroid(unittest.TestCase):
         self.android.unlock()
 
     def test_pinch(self):
-        self.android.pinch(in_or_out='in')
-        self.android.pinch(in_or_out='out')
+        for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.pinch(in_or_out='in')
+            self.android.pinch(in_or_out='out')
+        self.android.touch_method = TOUCH_METHOD.ADBTOUCH
+        with self.assertRaises(Exception):
+            self.android.pinch(in_or_out='in')
+
+    def test_swipe_along(self):
+        coordinates_list = [(100, 300), (300, 300), (100, 500), (300, 600)]
+        for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.swipe_along(coordinates_list)
+            self.android.swipe_along(coordinates_list, duration=3, steps=10)
+        self.android.touch_method = TOUCH_METHOD.ADBTOUCH
+        with self.assertRaises(Exception):
+            self.android.swipe_along(coordinates_list)
+
+    def test_two_finger_swipe(self):
+        for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.two_finger_swipe((100, 100), (200, 200))
+            self.android.two_finger_swipe((100, 100), (200, 200), duration=3, steps=10)
+            self.android.two_finger_swipe((100, 100), (200, 200), offset=(-20, 100))
+            self.android.two_finger_swipe((100, 100), (200, 200), offset=(-1000, 100))
+        self.android.touch_method = TOUCH_METHOD.ADBTOUCH
+        with self.assertRaises(Exception):
+            self.android.two_finger_swipe((100, 100), (200, 200))
 
 
 if __name__ == '__main__':

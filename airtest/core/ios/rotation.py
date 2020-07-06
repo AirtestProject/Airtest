@@ -6,8 +6,8 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from wda import WDAError
+from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from airtest.core.ios.wda_client import WDAError
 
 LOGGING = get_logger(__name__)
 
@@ -83,7 +83,8 @@ class RotationWatcher(object):
                     break
                 elif self.last_result == ori:
                     continue
-                LOGGING.info('update orientation %s->%s' % (self.last_result, ori))
+                LOGGING.info('update orientation %s->%s' %
+                             (self.last_result, ori))
                 self.last_result = ori
 
                 # exec cb functions
@@ -94,7 +95,8 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self.roundProcess = threading.Thread(target=_run, name="rotationwatcher")
+        self.roundProcess = threading.Thread(
+            target=_run, name="rotationwatcher")
         # self._t.daemon = True
         self.roundProcess.start()
 
@@ -135,14 +137,12 @@ class XYTransformer(object):
         # no need to do changing
         # ios touch point same way of image
 
-        return x, y
-
         if orientation == LANDSCAPE:
-            x, y = x, y
+            x, y = h-y, x
         elif orientation == LANDSCAPE_RIGHT:
-            x, y = x, y
+            x, y = y, w-x
         elif orientation == PORTRAIT_UPSIDEDOWN:
-            x, y = x, y
+            x, y = w-x, h-y
         elif orientation == PORTRAIT:
             x, y = x, y
         return x, y

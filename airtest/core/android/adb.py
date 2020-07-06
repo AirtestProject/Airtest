@@ -1062,7 +1062,13 @@ class ADB(object):
         screenOnRE = re.compile('mScreenOnFully=(true|false)')
         m = screenOnRE.search(self.shell('dumpsys window policy'))
         if m:
-            return (m.group(1) == 'true')
+            return m.group(1) == 'true'
+        else:
+            # MIUI11
+            screenOnRE = re.compile('screenState=(SCREEN_STATE_ON|SCREEN_STATE_OFF)')
+            m = screenOnRE.search(self.shell('dumpsys window policy'))
+            if m:
+                return m.group(1) == 'SCREEN_STATE_ON'
         raise AirtestError("Couldn't determine screen ON state")
 
     def is_locked(self):
@@ -1076,7 +1082,7 @@ class ADB(object):
             True or False whether the screen is locked or not
 
         """
-        lockScreenRE = re.compile('(?:mShowingLockscreen|isStatusBarKeyguard)=(true|false)')
+        lockScreenRE = re.compile('(?:mShowingLockscreen|isStatusBarKeyguard|showing)=(true|false)')
         m = lockScreenRE.search(self.shell('dumpsys window policy'))
         if not m:
             raise AirtestError("Couldn't determine screen lock state")
