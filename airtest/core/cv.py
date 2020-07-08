@@ -53,7 +53,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         been found in screenshot
 
     """
-    G.LOGGING.info("Try finding:\n%s", query)
+    G.LOGGING.info("Try finding: %s", query)
     start_time = time.time()
     while True:
         screen = G.DEVICE.snapshot(filename=None, quality=ST.SNAPSHOT_QUALITY)
