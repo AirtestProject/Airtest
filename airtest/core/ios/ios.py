@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-from airtest.core.ios.wda_fix_version import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
+from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
 from airtest.utils.logger import get_logger
-from airtest.core.ios.instruct_helper import InstructHelper
+from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
