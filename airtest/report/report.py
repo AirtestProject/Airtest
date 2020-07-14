@@ -18,8 +18,10 @@ from airtest.core.settings import Settings as ST
 from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
+from airtest.utils.logger import get_logger
 from six import PY3
 
+LOGGING = get_logger(__name__)
 LOGDIR = "log"
 LOGFILE = "log.txt"
 HTML_TPL = "log_template.html"
@@ -71,11 +73,11 @@ class LogToHtml(object):
         if not plugins:
             return
         for plugin_name in plugins:
-            print("try loading plugin: %s" % plugin_name)
+            LOGGING.debug("try loading plugin: %s" % plugin_name)
             try:
                 __import__(plugin_name)
             except:
-                traceback.print_exc()
+                LOGGING.error(traceback.format_exc())
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -106,7 +108,6 @@ class LogToHtml(object):
             else:
                 children_steps.insert(0, log)
 
-        # pprint(steps)
         translated_steps = [self._translate_step(s) for s in steps]
         return translated_steps
 
@@ -209,7 +210,7 @@ class LogToHtml(object):
                 img = Image.open(path)
                 compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
             except Exception:
-                traceback.print_exc()
+                LOGGING.error(traceback.format_exc())
             return new_path
         else:
             return None
@@ -343,7 +344,7 @@ class LogToHtml(object):
         if output_file:
             with io.open(output_file, 'w', encoding="utf-8") as f:
                 f.write(html)
-            print(output_file)
+            LOGGING.info(output_file)
 
         return html
 
@@ -353,8 +354,8 @@ class LogToHtml(object):
     def copy_tree(self, src, dst, ignore=None):
         try:
             shutil.copytree(src, dst, ignore=ignore)
-        except Exception as e:
-            print(e)
+        except:
+            LOGGING.error(traceback.format_exc())
 
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
@@ -386,11 +387,16 @@ class LogToHtml(object):
         return dirpath, logpath
 
     def get_relative_log(self, output_file):
+        """
+        Try to get the relative path of log.txt
+        :param output_file: output file: log.html
+        :return: ./log.txt or ""
+        """
         try:
             html_dir = os.path.dirname(output_file)
-            return os.path.relpath(os.path.join(self.log_root, 'log.txt') ,html_dir)
-        except Exception:
-            traceback.print_exc()
+            return os.path.relpath(os.path.join(self.log_root, 'log.txt'), html_dir)
+        except:
+            LOGGING.error(traceback.format_exc())
             return ""
 
     def get_console(self, output_file):
