@@ -478,8 +478,12 @@ class Session(object):
     def alert(self):
         return Alert(self)
 
-    def close(self):
-        return self.http.delete('/')
+    def close(self, package):
+        capabilities = {
+            'bundleId': package,
+        }
+        data = json.dumps(capabilities)
+        return self.http.post('/wda/apps/terminate', data=data)
 
     def __call__(self, *args, **kwargs):
         httpclient = self.http.new_client('')
