@@ -34,12 +34,13 @@ class Linux(Device):
         """
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename="tmp.png"):
+    def snapshot(self, filename="tmp.png", quality=None):
         """
         Take a screenshot and save it to `tmp.png` filename by default
 
         Args:
             filename: name of file where to store the screenshot
+            quality: ignored
 
         Returns:
             display the screenshot
