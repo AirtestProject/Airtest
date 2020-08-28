@@ -41,13 +41,24 @@ class AirtestLogger(object):
         except AttributeError:
             return repr(obj)
 
-    def log(self, tag, data, depth=None):
+    def log(self, tag, data, depth=None, timestamp=None):
         ''' Not thread safe '''
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
         if self.logfd:
-            log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.time(), 'data': data}, default=self._dumper)
+            # 如果timestamp为None，或不是float，就设为默认值time.time()
+            try:
+                timestamp = float(timestamp)
+            except (ValueError, TypeError):
+                timestamp = time.time()
+            try:
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': timestamp,
+                                       'data': data}, default=self._dumper)
+            except UnicodeDecodeError:
+                # PY2
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': timestamp,
+                                       'data': data}, default=self._dumper, ensure_ascii=False)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()
 

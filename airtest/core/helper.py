@@ -64,24 +64,30 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(arg, trace=""):
+def log(arg, trace="", timestamp=None):
     """
     Insert user log, will be displayed in Html report.
 
-    :param data: log message or Exception
+    :param arg: log message or Exception
     :param trace: log traceback if exists, use traceback.format_exc to get best format
+    :param timestamp: the timestamp of the log, default is time.time()
     :return: None
     """
     if G.LOGGER:
         if isinstance(arg, Exception):
+            if hasattr(arg, "__traceback__"):
+                # in PY3, arg.__traceback__ is traceback object
+                trace_msg = ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
+            else:
+                trace_msg = arg.message  # PY2
             G.LOGGER.log("info", {
                     "name": arg.__class__.__name__,
-                    "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
-                })
+                    "traceback": trace_msg,
+                }, timestamp=timestamp)
         elif isinstance(arg, six.string_types):
-            G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0)
+            G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0, timestamp=timestamp)
         else:
-            raise TypeError("arg must be Exception or string")
+            G.LOGGER.log("info", {"name": repr(arg), "traceback": trace}, 0, timestamp=timestamp)
 
 
 def logwrap(f):
