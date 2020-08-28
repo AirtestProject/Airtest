@@ -376,6 +376,11 @@ class Session(object):
             - duration (float): deactivate time, seconds
         """
         return self.http.post('/wda/deactivateApp', dict(duration=duration))
+    
+    def terminate(self, package):
+        """Terminate app 
+        """
+        return self.http.post('/wda/apps/terminate', dict(bundleId=package))
 
     def tap(self, x, y):
         return self.http.post('/wda/tap/0', dict(x=x, y=y))

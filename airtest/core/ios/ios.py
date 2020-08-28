@@ -260,6 +260,9 @@ class IOS(Device):
 
     def stop_app(self, package):
         self.driver.session().close()
+    
+    def terminate_app(self, package):
+        self.session.terminate(package)
 
     def get_ip_address(self):
         """

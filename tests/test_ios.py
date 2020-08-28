@@ -97,8 +97,12 @@ class TestIos(unittest.TestCase):
     def test_startapp(self):
         self.ios.start_app('com.apple.mobilesafari')
 
+    def test_terminateapp(self):
+        self.ios.terminate_app('com.apple.mobilesafari')
+
     def test_stopapp(self):
         self.ios.stop_app('com.apple.mobilesafari')
+    
 
 #    def test_is_locked(self):
 #        self.android.is_locked()
