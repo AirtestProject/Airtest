@@ -118,11 +118,11 @@ class LogToHtml(object):
         code = self._translate_code(step)
         desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
-        traceback = self._translate_traceback(step)
+        info = self._translate_info(step)
         assertion = self._translate_assertion(step)
 
         # set test failed if any traceback exists
-        if traceback:
+        if info[0]:
             self.test_result = False
 
         translated = {
@@ -131,7 +131,8 @@ class LogToHtml(object):
             "code": code,
             "screen": screen,
             "desc": desc,
-            "traceback": traceback,
+            "traceback": info[0],
+            "log": info[1],
             "assert": assertion,
         }
         return translated
@@ -220,9 +221,16 @@ class LogToHtml(object):
         name, ext = os.path.splitext(filename)
         return "%s_small%s" % (name, ext)
 
-    def _translate_traceback(self, step):
-        if "traceback" in step["data"]:
-            return step["data"]["traceback"]
+    def _translate_info(self, step):
+        trace_msg, log_msg = "", ""
+        if step["tag"] == "info":
+            if "traceback" in step["data"]:
+                # 若包含有traceback内容，将会认定步骤失败
+                trace_msg = step["data"]["traceback"]
+            if "log" in step["data"]:
+                # 普通文本log内容，仅显示
+                log_msg = step["data"]["log"]
+        return trace_msg, log_msg
 
     def _translate_code(self, step):
         if step["tag"] != "function":
@@ -454,7 +462,9 @@ class LogToHtml(object):
         data['info'] = info
         data['log'] = self.get_relative_log(output_file)
         data['console'] = self.get_console(output_file)
-        data['data'] = json.dumps(data)
+        # 如果带有<>符号，容易被highlight.js认为是特殊语法，有可能导致页面显示异常，尝试替换成不常用的{}
+        info = json.dumps(data).replace("<", "{").replace(">", "}")
+        data['data'] = info
         return data
 
     def report(self, template_name=HTML_TPL, output_file=None, record_list=None):
