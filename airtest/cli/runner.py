@@ -42,8 +42,17 @@ class AirtestCase(unittest.TestCase):
     def tearDown(self):
         if self.args.log and self.args.recording:
             for k, dev in enumerate(G.DEVICE_LIST):
+                # 录屏文件保存的命名规则：
+                # 如果未指定文件名，只传了--recording，就默认用recording_手机序列号.mp4来命名
+                # 如果指定了文件名--recording test.mp4，且超过一台手机，就命名为 手机序列号_test.mp4
+                # 否则直接用指定的文件名保存录屏，必须是mp4结尾
                 try:
-                    output = os.path.join(self.args.log, "recording_%d.mp4" % k)
+                    if isinstance(self.args.recording, six.string_types) and self.args.recording.endswith(".mp4"):
+                        basename = os.path.basename(self.args.recording)
+                        output_name = dev.serialno + "_" + basename if len(G.DEVICE_LIST) > 1 else basename
+                    else:
+                        output_name = "recording_{serialno}.mp4".format(serialno=dev.serialno)
+                    output = os.path.join(self.args.log, output_name)
                     dev.stop_recording(output)
                 except:
                     traceback.print_exc()
