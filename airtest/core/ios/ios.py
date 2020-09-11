@@ -259,7 +259,7 @@ class IOS(Device):
         self.session.start_app_new(package)
 
     def stop_app(self, package):
-        self.driver.session().close()
+        self.driver.session().close(package)
 
     def get_ip_address(self):
         """
