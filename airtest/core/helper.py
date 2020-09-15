@@ -36,8 +36,15 @@ class G(object):
             None
 
         """
-        cls.DEVICE = dev
-        cls.DEVICE_LIST.append(dev)
+        for index, instance in enumerate(cls.DEVICE_LIST):
+            if dev.uuid == instance.uuid:
+                cls.LOGGING.warn("Device:%s updated %s -> %s" % (dev.uuid, instance, dev))
+                cls.DEVICE_LIST[index] = dev
+                cls.DEVICE = dev
+                break
+        else:
+            cls.DEVICE = dev
+            cls.DEVICE_LIST.append(dev)
 
     @classmethod
     def register_custom_device(cls, device_cls):

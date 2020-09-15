@@ -31,13 +31,8 @@ def init_device(platform="Android", uuid=None, **kwargs):
     """
     cls = import_device_cls(platform)
     dev = cls(uuid, **kwargs)
-    for index, instance in enumerate(G.DEVICE_LIST):
-        if dev.uuid == instance.uuid:
-            G.LOGGING.warn("Device:%s updated %s -> %s" % (dev.uuid, instance, dev))
-            G.DEVICE_LIST[index] = dev
-            break
-    else:
-        G.add_device(dev)
+    # Add device instance in G and set as current device.
+    G.add_device(dev)
     return dev
 
 
