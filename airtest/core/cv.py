@@ -80,12 +80,13 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
 
 
 @logwrap
-def try_log_screen(screen=None):
+def try_log_screen(screen=None, quality=None):
     """
     Save screenshot to file
 
     Args:
         screen: screenshot to be saved
+        quality: The image quality, default is ST.SNAPSHOT_QUALITY
 
     Returns:
         None
@@ -93,11 +94,13 @@ def try_log_screen(screen=None):
     """
     if not ST.LOG_DIR:
         return
+    if not quality:
+        quality = ST.SNAPSHOT_QUALITY
     if screen is None:
-        screen = G.DEVICE.snapshot(quality=ST.SNAPSHOT_QUALITY)
+        screen = G.DEVICE.snapshot(quality=quality)
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
-    aircv.imwrite(filepath, screen, ST.SNAPSHOT_QUALITY)
+    aircv.imwrite(filepath, screen, quality)
     return {"screen": filename, "resolution": aircv.get_resolution(screen)}
 
 
