@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest\\.core\\.android\\.adb module"
 msgstr ""
 
 #: airtest.core.android.adb.ADB:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.android.adb.ADB:1 of
@@ -81,7 +81,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.uninstall_app
 #: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.builtin_adb_path:3 of
@@ -156,7 +156,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.touch
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
@@ -178,11 +178,11 @@ msgstr ""
 #: airtest.core.android.adb.ADB.path_app airtest.core.android.adb.ADB.shell
 #: airtest.core.android.adb.ADB.start_cmd airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.start_cmd:6 of
-msgid ":exc:`RuntimeError` -- if `device` is True and serialno is not specified"
+msgid "if `device` is True and serialno is not specified"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.start_cmd:8 of
@@ -203,17 +203,19 @@ msgstr ""
 msgid "encode/decode unicode of standard outputs (stdout, stderr)"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.cmd:7 of
-msgid ""
-":exc:`DeviceConnectionError` -- if any error occurs when connecting the "
-"device"
+#: airtest.core.android.adb.ADB.cmd:6 of
+msgid "timeout in seconds"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:8 of
-msgid ":exc:`AdbError` -- if any other adb error occurs"
+msgid "if any error occurs when connecting the device"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.cmd:10 of
+#: airtest.core.android.adb.ADB.cmd:9 of
+msgid "if any other adb error occurs"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.cmd:11 of
 msgid "command(s) standard output (stdout)"
 msgstr ""
 
@@ -252,7 +254,7 @@ msgid "Perform `adb get-state` and return the device status"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_status:3 of
-msgid ":exc:`AdbError` -- if status cannot be obtained from the device"
+msgid "if status cannot be obtained from the device"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_status:5 of
@@ -270,7 +272,7 @@ msgid "time interval in seconds to wait for device"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.wait_for_device:5 of
-msgid ":exc:`DeviceConnectionError` -- if device is not available after timeout"
+msgid "if device is not available after timeout"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.start_shell:1 of
@@ -303,9 +305,7 @@ msgid "a command to be run"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.shell:5 of
-msgid ""
-":exc:`AdbShellError` -- if command return value is non-zero or if any "
-"other `AdbError` occurred"
+msgid "if command return value is non-zero or if any other `AdbError` occurred"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.keyevent:1 of
@@ -383,7 +383,7 @@ msgstr ""
 
 #: airtest.core.android.adb.ADB.get_forwards
 #: airtest.core.android.adb.ADB.logcat of
-msgid "Yields"
+msgid "生成器"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_forwards:3 of
@@ -541,7 +541,7 @@ msgid "time interval for action, default 500"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.swipe:7 of
-msgid ":exc:`AirtestError` -- if SDK version is not supported"
+msgid "if SDK version is not supported"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.logcat:1 of
@@ -662,7 +662,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_top_activity:3 of
-msgid ":exc:`AirtestError` -- if top activity cannot be obtained"
+msgid "if top activity cannot be obtained"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_top_activity:5 of
@@ -670,7 +670,7 @@ msgid "(package_name, activity_name, pid)"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_top_activity of
-msgid "Return type"
+msgid "返回类型"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_keyboard_shown:1 of
@@ -690,7 +690,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_screenon:3 of
-msgid ":exc:`AirtestError` -- if screen state can't be detected"
+msgid "if screen state can't be detected"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_screenon:5 of
@@ -704,7 +704,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_locked:3 of
-msgid ":exc:`AirtestError` -- if lock screen can't be detected"
+msgid "if lock screen can't be detected"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_locked:5 of
@@ -776,11 +776,11 @@ msgid "Perform `adb shell pm path` command to print the path to the package"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.path_app:5 of
-msgid ":exc:`AdbShellError` -- if any adb error occurs"
+msgid "if any adb error occurs"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.path_app:6 of
-msgid ":exc:`AirtestError` -- if package is not found on the device"
+msgid "if package is not found on the device"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.path_app:8 of
@@ -794,7 +794,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.check_app:5 of
-msgid ":exc:`AirtestError` -- if package is not found"
+msgid "if package is not found"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.check_app:7 of
@@ -828,24 +828,24 @@ msgstr ""
 msgid "Perform `adb shell pm clear` command to clear all application data"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.get_ip_address:4 of
+#: airtest.core.android.adb.ADB.get_ip_address:1 of
 msgid "Perform several set of commands to obtain the IP address"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_gateway_address:3
-#: airtest.core.android.adb.ADB.get_ip_address:2 of
+#: airtest.core.android.adb.ADB.get_ip_address:3 of
 msgid "`adb shell netcfg | grep wlan0`"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.get_ip_address:3 of
+#: airtest.core.android.adb.ADB.get_ip_address:4 of
 msgid "`adb shell ifconfig`"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.get_ip_address:4 of
+#: airtest.core.android.adb.ADB.get_ip_address:5 of
 msgid "`adb getprop dhcp.wlan0.ipaddress`"
 msgstr ""
 
-#: airtest.core.android.adb.ADB.get_ip_address:6 of
+#: airtest.core.android.adb.ADB.get_ip_address:7 of
 msgid "None if no IP address has been found, otherwise return the IP address"
 msgstr ""
 
@@ -926,5 +926,65 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Does not work on Xiaomi 2S"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "raises"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":exc:`RuntimeError` -- if `device` is "
+#~ "True and serialno is not specified"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":exc:`DeviceConnectionError` -- if any error"
+#~ " occurs when connecting the device"
+#~ msgstr ""
+
+#~ msgid ":exc:`AdbError` -- if any other adb error occurs"
+#~ msgstr ""
+
+#~ msgid ":exc:`AdbError` -- if status cannot be obtained from the device"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":exc:`DeviceConnectionError` -- if device is"
+#~ " not available after timeout"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":exc:`AdbShellError` -- if command return "
+#~ "value is non-zero or if any "
+#~ "other `AdbError` occurred"
+#~ msgstr ""
+
+#~ msgid "Yields"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if SDK version is not supported"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if top activity cannot be obtained"
+#~ msgstr ""
+
+#~ msgid "Return type"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if screen state can't be detected"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if lock screen can't be detected"
+#~ msgstr ""
+
+#~ msgid ":exc:`AdbShellError` -- if any adb error occurs"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if package is not found on the device"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if package is not found"
 #~ msgstr ""
 

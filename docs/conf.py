@@ -49,6 +49,7 @@ if not sys.platform.startswith('win'):
             'win32gui',
             'win32ui',
             'pywinauto',
+            'pywintypes',
             'pywinauto.application',
             'pywinauto.win32functions',
             'pywinauto.win32structures',

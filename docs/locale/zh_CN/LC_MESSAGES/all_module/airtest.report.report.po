@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
@@ -42,6 +42,27 @@ msgstr ""
 
 #: airtest.report.report.LogToHtml.div_rect:1 of
 msgid "count rect for js use"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.get_relative_log:1 of
+msgid ""
+"Try to get the relative path of log.txt :param output_file: output file: "
+"log.html :return: ./log.txt or \"\""
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report_data:1 of
+msgid ""
+"Generate data for the report page :param output_file: The file name or "
+"full path of the output file, default HTML_FILE :param record_list: List "
+"of screen recording files :return:"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report:1 of
+msgid ""
+"Generate the report page, you can add custom data and overload it if "
+"needed :param template_name: default is HTML_TPL :param output_file: The "
+"file name or full path of the output file, default HTML_FILE :param "
+"record_list: List of screen recording files :return:"
 msgstr ""
 
 #~ msgid "server_call没有log assert 类似于exist"
@@ -75,5 +96,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "把对应函数(depth=1)的name显示成中文"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`object`"
 #~ msgstr ""
 
