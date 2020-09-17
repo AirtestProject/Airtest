@@ -71,15 +71,26 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(arg, trace="", timestamp=None, desc=""):
+def log(arg, timestamp=None, desc=""):
     """
     Insert user log, will be displayed in Html report.
 
-    :param arg: log message or Exception
-    :param trace: log traceback if exists, use traceback.format_exc to get best format
-    :param timestamp: the timestamp of the log, default is time.time()
-    :param desc: description of log, default is arg.class.__name__
-    :return: None
+    Args:
+        arg: log message or Exception object
+        timestamp: the timestamp of the log, default is time.time()
+        desc: description of log, default is arg.class.__name__
+
+    Returns:
+        None
+
+    Examples:
+        >>> log("hello world")
+        >>> log({"key": "value"}, timestamp=time.time(), desc="log dict")
+        >>> try:
+                1/0
+            except Exception as e:
+                log(e)
+
     """
     if G.LOGGER:
         if isinstance(arg, Exception):
@@ -95,9 +106,9 @@ def log(arg, trace="", timestamp=None, desc=""):
         elif isinstance(arg, six.string_types):
             # 普通文本log内容放在"log"里，如果有trace内容放在"traceback"里
             # 在报告中，假如"traceback"有内容，将会被识别为报错，这个步骤会被判定为不通过
-            G.LOGGER.log("info", {"name": desc or arg, "traceback": trace, "log": arg}, 0, timestamp=timestamp)
+            G.LOGGER.log("info", {"name": desc or arg, "traceback": None, "log": arg}, 0, timestamp=timestamp)
         else:
-            G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": trace, "log": repr(arg)}, 0,
+            G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": None, "log": repr(arg)}, 0,
                          timestamp=timestamp)
 
 

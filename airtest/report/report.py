@@ -223,10 +223,10 @@ class LogToHtml(object):
 
     def _translate_info(self, step):
         trace_msg, log_msg = "", ""
+        if "traceback" in step["data"]:
+            # 若包含有traceback内容，将会认定步骤失败
+            trace_msg = step["data"]["traceback"]
         if step["tag"] == "info":
-            if "traceback" in step["data"]:
-                # 若包含有traceback内容，将会认定步骤失败
-                trace_msg = step["data"]["traceback"]
             if "log" in step["data"]:
                 # 普通文本log内容，仅显示
                 log_msg = step["data"]["log"]

@@ -3,7 +3,7 @@ from airtest.core.api import *
 from airtest.core.helper import G
 from airtest.core.android.android import Android, CAP_METHOD
 from airtest.core.error import TargetNotFoundError, AdbShellError
-from testconf import APK, PKG, TPL, TPL2, DIR
+from .testconf import APK, PKG, TPL, TPL2, DIR
 import unittest
 
 
@@ -156,6 +156,14 @@ class TestMainOnAndroid(unittest.TestCase):
             install(APK)
         stop_app(PKG)
         start_app(PKG)
+
+    def test_log(self):
+        log("hello world")
+        log({"key": "value"}, timestamp=time.time(), desc="log dict")
+        try:
+            1 / 0
+        except Exception as e:
+            log(e)
 
 
 if __name__ == '__main__':

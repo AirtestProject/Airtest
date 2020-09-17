@@ -398,7 +398,8 @@ function StepPannel(data, root){
 
   this.getStepRightTrace = function(step){
     if(step.traceback || step.log){
-      return '<div class="bold">Logs:</div><div class="desc"><pre class="trace"><code class="python">%s</code></pre></div>'.format(step.traceback + step.log)
+      var logMessage = step.traceback || '' + step.log || '';
+      return '<div class="bold">Logs:</div><div class="desc"><pre class="trace"><code class="python">%s</code></pre></div>'.format(logMessage)
     } else{
       return ""
     }
