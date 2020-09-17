@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-30 11:17+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,10 @@ msgstr ""
 
 #: ../../all_module/airtest.core.linux.rst:2
 msgid "airtest.core.linux package"
+msgstr ""
+
+#: airtest.core.linux:1 of
+msgid "This package provide Windows Client Class."
 msgstr ""
 
 #: ../../all_module/airtest.core.linux.rst:10

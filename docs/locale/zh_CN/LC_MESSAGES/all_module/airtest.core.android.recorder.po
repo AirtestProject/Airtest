@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest\\.core\\.android\\.recorder module"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder:1 of
-msgid "Bases: :class:`airtest.core.android.yosemite.Yosemite`"
+msgid "基类：:class:`airtest.core.android.yosemite.Yosemite`"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder:1 of
@@ -36,7 +36,7 @@ msgstr ""
 #: airtest.core.android.recorder.Recorder.pull_last_recording_file
 #: airtest.core.android.recorder.Recorder.start_recording
 #: airtest.core.android.recorder.Recorder.stop_recording of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording:3 of
@@ -53,16 +53,16 @@ msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording
 #: airtest.core.android.recorder.Recorder.stop_recording of
-msgid "raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording:7 of
-msgid ":exc:`RuntimeError` -- if any error occurs while setup the recording"
+msgid "if any error occurs while setup the recording"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording
 #: airtest.core.android.recorder.Recorder.stop_recording of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.start_recording:9 of
@@ -83,7 +83,7 @@ msgid "True or False. Stop only, no pulling recorded file from device."
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.stop_recording:6 of
-msgid ":exc:`AirtestError` -- if recording was not started before"
+msgid "if recording was not started before"
 msgstr ""
 
 #: airtest.core.android.recorder.Recorder.stop_recording:8 of
@@ -109,5 +109,17 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "True or False"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`airtest.core.android.yosemite.Yosemite`"
+#~ msgstr ""
+
+#~ msgid "raises"
+#~ msgstr ""
+
+#~ msgid ":exc:`RuntimeError` -- if any error occurs while setup the recording"
+#~ msgstr ""
+
+#~ msgid ":exc:`AirtestError` -- if recording was not started before"
 #~ msgstr ""
 

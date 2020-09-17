@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-30 11:17+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,5 +19,156 @@ msgstr ""
 
 #: ../../all_module/airtest.core.linux.linux.rst:2
 msgid "airtest.core.linux.linux module"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux:1 of
+msgid "基类：:class:`airtest.core.device.Device`"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux:1 of
+msgid "Linux desktop."
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.shell:1 of
+msgid "Run shell command in subprocess"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent airtest.core.linux.linux.Linux.shell
+#: airtest.core.linux.linux.Linux.snapshot
+#: airtest.core.linux.linux.Linux.start_app
+#: airtest.core.linux.linux.Linux.stop_app airtest.core.linux.linux.Linux.text
+#: airtest.core.linux.linux.Linux.touch of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.shell:3 of
+msgid "command to be run"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.shell of
+msgid "引发"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.shell:5 of
+msgid "when command returns non-zero exit status"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.get_ip_address
+#: airtest.core.linux.linux.Linux.keyevent airtest.core.linux.linux.Linux.shell
+#: airtest.core.linux.linux.Linux.snapshot
+#: airtest.core.linux.linux.Linux.start_app
+#: airtest.core.linux.linux.Linux.stop_app airtest.core.linux.linux.Linux.swipe
+#: airtest.core.linux.linux.Linux.text airtest.core.linux.linux.Linux.touch of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.shell:7 of
+msgid "command output as a byte string"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.snapshot:1 of
+msgid "Take a screenshot and save it to `tmp.png` filename by default"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.snapshot:3 of
+msgid "name of file where to store the screenshot"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.snapshot:4 of
+msgid "ignored"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.snapshot:6 of
+msgid "display the screenshot"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:1 of
+msgid "Perform a key event"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:4
+#: airtest.core.linux.linux.Linux.touch:4 of
+msgid "引用"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:5 of
+msgid "https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:7 of
+msgid "key event"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:8
+#: airtest.core.linux.linux.Linux.text:4 airtest.core.linux.linux.Linux.touch:8
+#: of
+msgid "optional arguments"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.keyevent:10
+#: airtest.core.linux.linux.Linux.start_app:5
+#: airtest.core.linux.linux.Linux.stop_app:5
+#: airtest.core.linux.linux.Linux.swipe:7 airtest.core.linux.linux.Linux.text:6
+#: airtest.core.linux.linux.Linux.touch:10 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.text:1 of
+msgid "Input text"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.text:3 of
+msgid "text to input"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.touch:1 of
+msgid "Perform mouse click action"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.touch:5 of
+msgid "https://pywinauto.readthedocs.io/en/latest/code/pywinauto.mouse.html"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.touch:7 of
+msgid "coordinates where to click"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.swipe:1 of
+msgid ""
+"Perform swipe (mouse press and mouse release) :param p1: start point "
+":param p2: end point :param duration: time interval to perform the swipe "
+"action :param steps: size of the swipe step"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.start_app:1 of
+msgid "Start the application"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.start_app:3 of
+msgid "full path to the application"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.stop_app:1 of
+msgid "Stop the application"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.stop_app:3 of
+msgid "process ID of the application to be stopped"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.get_ip_address:1 of
+msgid "Return default external ip address of the linux os."
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.get_ip_address:3 of
+msgid "ip address"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.get_ip_address of
+msgid "返回类型"
+msgstr ""
+
+#: airtest.core.linux.linux.Linux.get_ip_address:4 of
+msgid ":py:obj:`str`"
 msgstr ""
 

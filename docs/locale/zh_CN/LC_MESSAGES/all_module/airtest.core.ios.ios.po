@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 16:57+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest\\.core\\.ios\\.ios module"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS:1 of
-msgid "Bases: :class:`airtest.core.device.Device`"
+msgid "基类：:class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS:1 of
@@ -51,7 +51,7 @@ msgstr ""
 
 #: airtest.core.ios.ios.IOS.get_ip_address
 #: airtest.core.ios.ios.IOS.get_render_resolution of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.get_render_resolution:3 of
@@ -59,7 +59,9 @@ msgid "offset_x, offset_y, offset_width and offset_height of the display"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.snapshot:1 of
-msgid "take snapshot filename: save screenshot to filename"
+msgid ""
+"take snapshot filename: save screenshot to filename quality: The image "
+"quality, integer in range [1, 99]"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.keyevent:1 of
@@ -110,5 +112,8 @@ msgstr ""
 #~ " \"app\":\"[host_path]/magicapp.app\"}}\"         "
 #~ "$DEVICE_URL/session "
 #~ "https://github.com/facebook/WebDriverAgent/wiki/Queries"
+#~ msgstr ""
+
+#~ msgid "Returns"
 #~ msgstr ""
 

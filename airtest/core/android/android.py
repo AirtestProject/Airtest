@@ -66,7 +66,9 @@ class Android(Device):
     def touch_proxy(self):
         """
         Perform touch operation according to self.touch_method
-        :return:
+
+        Returns:
+            TouchProxy
         """
         if self._touch_proxy and self.touch_method == self._touch_proxy.METHOD_NAME:
             return self._touch_proxy

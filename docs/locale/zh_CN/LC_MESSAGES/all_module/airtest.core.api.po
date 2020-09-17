@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-16 10:10+0800\n"
-"PO-Revision-Date: 2019-04-16 10:22+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"PO-Revision-Date: 2020-09-17 12:02+0800\n"
 "Last-Translator: \n"
+"Language: en_GB\n"
 "Language-Team: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 "X-Generator: Poedit 2.2.1\n"
-"Language: en_GB\n"
 
 #: ../../all_module/airtest.core.api.rst:2
 msgid "airtest\\.core\\.api module"
@@ -42,8 +42,8 @@ msgstr "初始化设备，并设置为当前设备。"
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
-msgid "Parameters"
-msgstr "参数"
+msgid "参数"
+msgstr ""
 
 #: airtest.core.api.init_device:3 of
 msgid "Android, IOS or Windows"
@@ -69,8 +69,8 @@ msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACA
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
-msgid "Returns"
-msgstr "返回值"
+msgid "返回"
+msgstr ""
 
 #: airtest.core.api.connect_device:4 airtest.core.api.init_device:6 of
 msgid "device instance"
@@ -123,8 +123,8 @@ msgstr "uuid或已初始化的设备列表中的编号，从0开始"
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
-msgid "Raises"
-msgstr "抛出异常"
+msgid "引发"
+msgstr ""
 
 #: airtest.core.api.set_current:4 of
 msgid "raised when device idx is not found"
@@ -132,7 +132,7 @@ msgstr "当查找不到设备时"
 
 #: airtest.core.api.assert_equal:7 airtest.core.api.assert_not_equal:7
 #: airtest.core.api.clear_app:4 airtest.core.api.home:3
-#: airtest.core.api.install:4 airtest.core.api.keyevent:5
+#: airtest.core.api.install:5 airtest.core.api.keyevent:5
 #: airtest.core.api.pinch:6 airtest.core.api.set_current:5
 #: airtest.core.api.sleep:4 airtest.core.api.start_app:5
 #: airtest.core.api.stop_app:4 airtest.core.api.text:5
@@ -153,7 +153,7 @@ msgstr ""
 msgid "platforms"
 msgstr "支持平台"
 
-#: airtest.core.api.set_current:6 airtest.core.api.snapshot:7 of
+#: airtest.core.api.set_current:6 airtest.core.api.snapshot:8 of
 msgid "Android, iOS, Windows"
 msgstr ""
 
@@ -177,6 +177,10 @@ msgstr "可设置脚本运行时的log保存路径，默认值为None则不保�
 msgid "project root dir for `using` api."
 msgstr "用于设置PROJECT_ROOT变量，方便 ``using`` 接口的调用"
 
+#: airtest.core.api.auto_setup:7 of
+msgid "The compression rate of the screenshot image, integer in range [1, 99], default is 10"
+msgstr "屏幕截图的压缩比率，在[1, 99]范围内的整数，默认是10"
+
 #: airtest.core.api.shell:1 of
 msgid "Start remote shell in the target device and execute the command"
 msgstr "在目标设备上运行远程shell指令"
@@ -189,7 +193,9 @@ msgstr "需要在设备上运行的指令，例如 ``ls /data/local/tmp``"
 msgid "the output of the shell cmd"
 msgstr "shell指令的输出内容"
 
-#: airtest.core.api.pinch:7 airtest.core.api.shell:5 of
+#: airtest.core.api.clear_app:5 airtest.core.api.install:6
+#: airtest.core.api.pinch:7 airtest.core.api.shell:5
+#: airtest.core.api.uninstall:5 airtest.core.api.wake:4 of
 msgid "Android"
 msgstr ""
 
@@ -205,10 +211,8 @@ msgstr "想要启动的应用包名package name，例如 ``com.netease.my``"
 msgid "the activity to start, default is None which means the main activity"
 msgstr "需要启动的activity，默认为None，意为main activity"
 
-#: airtest.core.api.clear_app:5 airtest.core.api.home:4
-#: airtest.core.api.install:5 airtest.core.api.start_app:6
-#: airtest.core.api.stop_app:5 airtest.core.api.uninstall:5
-#: airtest.core.api.wake:4 of
+#: airtest.core.api.home:4 airtest.core.api.start_app:6
+#: airtest.core.api.stop_app:5 of
 msgid "Android, iOS"
 msgstr ""
 
@@ -236,6 +240,12 @@ msgstr "安装应用到设备上"
 msgid "the path to file to be installed on target device"
 msgstr "需要被安装的应用路径"
 
+#: airtest.core.api.click:5 airtest.core.api.install:4
+#: airtest.core.api.keyevent:4 airtest.core.api.swipe:14
+#: airtest.core.api.touch:5 of
+msgid "platform specific `kwargs`, please refer to corresponding docs"
+msgstr "平台相关的参数 ``kwargs``，请参考对应的平台接口文档"
+
 #: airtest.core.api.uninstall:1 of
 msgid "Uninstall application on device"
 msgstr "卸载设备上的应用"
@@ -257,6 +267,10 @@ msgid "short description for screenshot, it will be recorded in the report"
 msgstr "截图文件的简短描述，将会被显示在报告页面中"
 
 #: airtest.core.api.snapshot:6 of
+msgid "The image quality, integer in range [1, 99], default is 10"
+msgstr "图片的质量，[1,99]的整数，默认是10"
+
+#: airtest.core.api.snapshot:7 of
 msgid "absolute path of the screenshot"
 msgstr "截图文件的绝对路径"
 
@@ -283,11 +297,6 @@ msgstr "点击位置，可以是一个Template图片实例，或是一个绝对�
 #: airtest.core.api.click:4 airtest.core.api.touch:4 of
 msgid "how many touches to be performed"
 msgstr "点击次数"
-
-#: airtest.core.api.click:5 airtest.core.api.keyevent:4
-#: airtest.core.api.swipe:14 airtest.core.api.touch:5 of
-msgid "platform specific `kwargs`, please refer to corresponding docs"
-msgstr "平台相关的参数 ``kwargs``，请参考对应的平台接口文档"
 
 #: airtest.core.api.click:6 airtest.core.api.touch:6 of
 msgid "finial position to be clicked"
@@ -491,13 +500,13 @@ msgstr "如果断言异常"
 #~ msgstr ""
 
 #~ msgid "Parameters"
-#~ msgstr ""
+#~ msgstr "参数"
 
 #~ msgid "Returns"
-#~ msgstr ""
+#~ msgstr "返回值"
 
 #~ msgid "Raises"
-#~ msgstr ""
+#~ msgstr "抛出异常"
 
 #~ msgid "Initialize device with uri and set the device as the current one."
 #~ msgstr ""
