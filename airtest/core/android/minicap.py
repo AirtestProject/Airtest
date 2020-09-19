@@ -94,7 +94,7 @@ class Minicap(object):
             None
 
         """
-        self.adb.raw_shell("rm /data/local/tmp/minicap*")
+        self.adb.raw_shell("rm -r /data/local/tmp/minicap*")
 
     def install(self):
         """
