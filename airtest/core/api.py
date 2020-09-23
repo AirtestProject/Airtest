@@ -453,7 +453,7 @@ def assert_exists(v, msg=""):
     :platforms: Android, Windows, iOS
     """
     try:
-        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT)
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT or v.threshold)
         return pos
     except TargetNotFoundError:
         raise AssertionError("%s does not exist in screen, message: %s" % (v, msg))
