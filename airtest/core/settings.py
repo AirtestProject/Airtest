@@ -12,7 +12,7 @@ class Settings(object):
     CVSTRATEGY = ["surf", "tpl", "brisk"]  # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
     KEYPOINT_MATCHING_PREDICTION = True
     THRESHOLD = 0.7  # [0, 1]
-    THRESHOLD_STRICT = 0.7  # [0, 1]
+    THRESHOLD_STRICT = None  # dedicated parameter for assert_exists
     OPDELAY = 0.1
     FIND_TIMEOUT = 20
     FIND_TIMEOUT_TMP = 3
