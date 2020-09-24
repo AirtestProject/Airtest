@@ -13,14 +13,12 @@ def cal_ccoeff_confidence(im_source, im_search):
     im_source, im_search = img_mat_rgb_2_gray(im_source), img_mat_rgb_2_gray(im_search)
     res = cv2.matchTemplate(im_source, im_search, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    confidence = max_val
-    return confidence
+
+    return max_val
 
 
 def cal_rgb_confidence(img_src_rgb, img_sch_rgb):
     """同大小彩图计算相似度."""
-    # BGR三通道心理学权重:
-    weight = (0.114, 0.587, 0.299)
     src_bgr, sch_bgr = cv2.split(img_src_rgb), cv2.split(img_sch_rgb)
 
     # 计算BGR三通道的confidence，存入bgr_confidence:
@@ -30,7 +28,4 @@ def cal_rgb_confidence(img_src_rgb, img_sch_rgb):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res_temp)
         bgr_confidence[i] = max_val
 
-    # 加权可信度
-    weighted_confidence = bgr_confidence[0] * weight[0] + bgr_confidence[1] * weight[1] + bgr_confidence[2] * weight[2]
-
-    return weighted_confidence
+    return min(bgr_confidence)
