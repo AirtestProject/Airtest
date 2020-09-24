@@ -113,13 +113,6 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compr
     if project_root:
         ST.PROJECT_ROOT = project_root
     if compress:
-        try:
-            compress = int(compress)
-        except ValueError:
-            compress = ST.SNAPSHOT_QUALITY
-        else:
-            if compress < 0 or compress >= 100:
-                compress = 10
         ST.SNAPSHOT_QUALITY = compress
 
 
