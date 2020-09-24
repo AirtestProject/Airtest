@@ -610,12 +610,13 @@ class Android(Device):
             display information
 
         """
-        try:
-            if self.ori_method == ORI_METHOD.MINICAP:
+        if self.ori_method == ORI_METHOD.MINICAP:
+            try:
                 return self.minicap.get_display_info()
-        except RuntimeError:
-            # Even if minicap execution fails, use adb instead
-            return self.adb.get_display_info()
+            except RuntimeError:
+                # Even if minicap execution fails, use adb instead
+                self.ori_method = ORI_METHOD.ADB
+                return self.adb.get_display_info()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
