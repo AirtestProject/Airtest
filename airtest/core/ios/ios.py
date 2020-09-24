@@ -155,11 +155,18 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, filename=None, strType=False, quality=10):
+    def snapshot(self, filename=None, strType=False, quality=10, max_size=None):
         """
         take snapshot
-        filename: save screenshot to filename
-        quality: The image quality, integer in range [1, 99]
+
+        Args:
+            filename: save screenshot to filename
+            quality: The image quality, integer in range [1, 99]
+            max_size: the maximum size of the picture, e.g 1200
+
+        Returns:
+            display the screenshot
+
         """
         data = None
 
@@ -201,7 +208,7 @@ class IOS(Device):
 
         # save as file if needed
         if filename:
-            aircv.imwrite(filename, screen, quality)
+            aircv.imwrite(filename, screen, quality, max_size=max_size)
 
         return screen
 

@@ -26,12 +26,12 @@ def imread(filename, flatten=False):
     return img
 
 
-def imwrite(filename, img, quality=10):
+def imwrite(filename, img, quality=10, max_size=None):
     """写出图片到本地路径，压缩"""
     if PY2:
         filename = filename.encode(sys.getfilesystemencoding())
     pil_img = cv2_2_pil(img)
-    compress_image(pil_img, filename, quality, 1200, 1200)
+    compress_image(pil_img, filename, quality, max_size=max_size)
 
 
 def show(img, title="show_img", test_flag=False):
