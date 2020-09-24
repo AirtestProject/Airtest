@@ -70,11 +70,19 @@ def cv2_2_pil(cv2_image):
     return pil_im
 
 
-def compress_image(pil_img, path, quality, max_width=300, max_height=300):
-    '''
-        生成缩略图
-    '''
-    pil_img.thumbnail((max_width, max_height), Image.ANTIALIAS)
+def compress_image(pil_img, path, quality, max_size=None):
+    """
+    Save the picture and compress
+
+    :param pil_img: PIL image
+    :param path: save path
+    :param quality: the image quality, integer in range [1, 99]
+    :param max_size: the maximum size of the picture, e.g 1200
+    :return:
+    """
+    if max_size:
+        # The picture will be saved in a size <= max_size*max_size
+        pil_img.thumbnail((max_size, max_size), Image.ANTIALIAS)
     quality = int(round(quality))
     if quality <= 0 or quality >= 100:
         raise Exception("SNAPSHOT_QUALITY (" + str(quality) + ") should be an integer in the range [1,99]")

@@ -240,7 +240,7 @@ class Android(Device):
         """
         return self.adb.uninstall_app(package)
 
-    def snapshot(self, filename=None, ensure_orientation=True, quality=10):
+    def snapshot(self, filename=None, ensure_orientation=True, quality=10, max_size=None):
         """
         Take the screenshot of the display. The output is send to stdout by default.
 
@@ -248,6 +248,7 @@ class Android(Device):
             filename: name of the file where to store the screenshot, default is None which is stdout
             ensure_orientation: True or False whether to keep the orientation same as display
             quality: The image quality, integer in range [1, 99]
+            max_size: the maximum size of the picture, e.g 1200
 
         Returns:
             screenshot output
@@ -283,7 +284,7 @@ class Android(Device):
             elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_ANDROID7:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
-            aircv.imwrite(filename, screen, quality)
+            aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
 
     def shell(self, *args, **kwargs):
