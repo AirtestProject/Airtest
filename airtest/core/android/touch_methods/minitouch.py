@@ -157,7 +157,6 @@ class Minitouch(BaseTouch):
 
         """
         width, height = self.size_info['width'], self.size_info['height']
-
-        nx = x * self.max_x / width
-        ny = y * self.max_y / height
+        nx = float(x) * self.max_x / width
+        ny = float(y) * self.max_y / height
         return "%.0f" % nx, "%.0f" % ny
