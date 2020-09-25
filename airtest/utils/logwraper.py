@@ -73,7 +73,7 @@ class AirtestLogger(object):
 
 def Logwrap(f, logger):
     @functools.wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, depth=None, **kwargs):
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
@@ -87,7 +87,7 @@ def Logwrap(f, logger):
         else:
             fndata.update({'ret': res, "end_time": time.time()})
         finally:
-            logger.log('function', fndata)
+            logger.log('function', fndata, depth=depth)
             logger.running_stack.pop()
         return res
     return wrapper

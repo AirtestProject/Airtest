@@ -142,7 +142,7 @@ class LogToHtml(object):
             return step["data"]["call_args"]["msg"]
 
     def _translate_screen(self, step, code):
-        if step['tag'] != "function":
+        if step['tag'] not in ["function", "info"] or not step.get("__children__"):
             return None
         screen = {
             "src": None,
