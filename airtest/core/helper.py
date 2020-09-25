@@ -71,7 +71,7 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(arg, timestamp=None, desc=""):
+def log(arg, timestamp=None, desc="", snapshot=False):
     """
     Insert user log, will be displayed in Html report.
 
@@ -79,12 +79,13 @@ def log(arg, timestamp=None, desc=""):
         arg: log message or Exception object
         timestamp: the timestamp of the log, default is time.time()
         desc: description of log, default is arg.class.__name__
+        snapshot: whether to take a screenshot, default is False
 
     Returns:
         None
 
     Examples:
-        >>> log("hello world")
+        >>> log("hello world", snapshot=True)
         >>> log({"key": "value"}, timestamp=time.time(), desc="log dict")
         >>> try:
                 1/0
@@ -92,7 +93,17 @@ def log(arg, timestamp=None, desc=""):
                 log(e)
 
     """
+    from airtest.core.cv import try_log_screen
     if G.LOGGER:
+        depth = 0
+        if snapshot:
+            try:
+                try_log_screen(depth=2)
+            except AttributeError:
+                # if G.DEVICE is None
+                pass
+            else:
+                depth = 1
         if isinstance(arg, Exception):
             if hasattr(arg, "__traceback__"):
                 # in PY3, arg.__traceback__ is traceback object
@@ -102,13 +113,13 @@ def log(arg, timestamp=None, desc=""):
             G.LOGGER.log("info", {
                     "name": desc or arg.__class__.__name__,
                     "traceback": trace_msg,
-                }, timestamp=timestamp)
+                }, depth=depth, timestamp=timestamp)
         elif isinstance(arg, six.string_types):
             # 普通文本log内容放在"log"里，如果有trace内容放在"traceback"里
             # 在报告中，假如"traceback"有内容，将会被识别为报错，这个步骤会被判定为不通过
-            G.LOGGER.log("info", {"name": desc or arg, "traceback": None, "log": arg}, 0, timestamp=timestamp)
+            G.LOGGER.log("info", {"name": desc or arg, "traceback": None, "log": arg}, depth=depth, timestamp=timestamp)
         else:
-            G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": None, "log": repr(arg)}, 0,
+            G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": None, "log": repr(arg)}, depth=depth,
                          timestamp=timestamp)
 
 

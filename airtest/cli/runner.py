@@ -69,7 +69,7 @@ class AirtestCase(unittest.TestCase):
         try:
             exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
         except Exception as err:
-            log(err, desc="Final Error")
+            log(err, desc="Final Error", snapshot=True)
             six.reraise(*sys.exc_info())
 
     @classmethod
