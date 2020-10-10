@@ -41,13 +41,24 @@ class AirtestLogger(object):
         except AttributeError:
             return repr(obj)
 
-    def log(self, tag, data, depth=None):
+    def log(self, tag, data, depth=None, timestamp=None):
         ''' Not thread safe '''
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
         if self.logfd:
-            log_data = json.dumps({'tag': tag, 'depth': depth, 'time': time.time(), 'data': data}, default=self._dumper)
+            # 如果timestamp为None，或不是float，就设为默认值time.time()
+            try:
+                timestamp = float(timestamp)
+            except (ValueError, TypeError):
+                timestamp = time.time()
+            try:
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': timestamp,
+                                       'data': data}, default=self._dumper)
+            except UnicodeDecodeError:
+                # PY2
+                log_data = json.dumps({'tag': tag, 'depth': depth, 'time': timestamp,
+                                       'data': data}, default=self._dumper, ensure_ascii=False)
             self.logfd.write(log_data + '\n')
             self.logfd.flush()
 
@@ -62,7 +73,7 @@ class AirtestLogger(object):
 
 def Logwrap(f, logger):
     @functools.wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, depth=None, **kwargs):
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
@@ -76,7 +87,7 @@ def Logwrap(f, logger):
         else:
             fndata.update({'ret': res, "end_time": time.time()})
         finally:
-            logger.log('function', fndata)
+            logger.log('function', fndata, depth=depth)
             logger.running_stack.pop()
         return res
     return wrapper

@@ -1,0 +1,81 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../all_module/airtest.core.android.touch_methods.maxtouch.rst:2
+msgid "airtest.core.android.touch\\_methods.maxtouch module"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch:1 of
+msgid "基类：:class:`airtest.core.android.touch_methods.base_touch.BaseTouch`"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.install:1 of
+msgid "Install maxtouch"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.install
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_client
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_server
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.uninstall of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.install:3
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_client:3
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.uninstall:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.uninstall:1 of
+msgid "Uninstall maxtouch"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_server:1 of
+msgid "Setup maxtouch server and adb forward"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_server:3 of
+msgid "server process"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_client:1 of
+msgid "Setup client"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:1 of
+msgid "Normalized coordinates (x, y)"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:3 of
+msgid "coordinate x"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:4 of
+msgid "coordinate y"
+msgstr ""
+
+#: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:6 of
+msgid "transformed coordinates (x, y)"
+msgstr ""
+

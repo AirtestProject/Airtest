@@ -66,7 +66,9 @@ class Android(Device):
     def touch_proxy(self):
         """
         Perform touch operation according to self.touch_method
-        :return:
+
+        Returns:
+            TouchProxy
         """
         if self._touch_proxy and self.touch_method == self._touch_proxy.METHOD_NAME:
             return self._touch_proxy
@@ -211,18 +213,19 @@ class Android(Device):
         """
         return self.adb.install_app(filepath, replace=replace, install_options=install_options)
 
-    def install_multiple_app(self, filepath, replace=False):
+    def install_multiple_app(self, filepath, replace=False, install_options=None):
         """
         Install multiple the application on the device
 
         Args:
             filepath: full path to the `apk` file to be installed on the device
             replace: True or False to replace the existing application
+            install_options: list of options, default is []
 
         Returns:
             output from installation process
         """
-        return self.adb.install_multiple_app(filepath, replace=replace)
+        return self.adb.install_multiple_app(filepath, replace=replace, install_options=install_options)
 
     def uninstall_app(self, package):
         """
@@ -237,7 +240,7 @@ class Android(Device):
         """
         return self.adb.uninstall_app(package)
 
-    def snapshot(self, filename=None, ensure_orientation=True, quality=10):
+    def snapshot(self, filename=None, ensure_orientation=True, quality=10, max_size=None):
         """
         Take the screenshot of the display. The output is send to stdout by default.
 
@@ -245,6 +248,7 @@ class Android(Device):
             filename: name of the file where to store the screenshot, default is None which is stdout
             ensure_orientation: True or False whether to keep the orientation same as display
             quality: The image quality, integer in range [1, 99]
+            max_size: the maximum size of the picture, e.g 1200
 
         Returns:
             screenshot output
@@ -280,7 +284,7 @@ class Android(Device):
             elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_ANDROID7:
                 screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
         if filename:
-            aircv.imwrite(filename, screen, quality)
+            aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
 
     def shell(self, *args, **kwargs):
@@ -607,10 +611,13 @@ class Android(Device):
 
         """
         if self.ori_method == ORI_METHOD.MINICAP:
-            display_info = self.minicap.get_display_info()
-        else:
-            display_info = self.adb.get_display_info()
-        return display_info
+            try:
+                return self.minicap.get_display_info()
+            except RuntimeError:
+                # Even if minicap execution fails, use adb instead
+                self.ori_method = ORI_METHOD.ADB
+                return self.adb.get_display_info()
+        return self.adb.get_display_info()
 
     def get_current_resolution(self):
         """

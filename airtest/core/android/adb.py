@@ -1264,7 +1264,7 @@ class ADB(object):
 
     def get_ip_address(self):
         """
-        Perform several set of commands to obtain the IP address
+        Perform several set of commands to obtain the IP address.
 
             * `adb shell netcfg | grep wlan0`
             * `adb shell ifconfig`
@@ -1276,6 +1276,26 @@ class ADB(object):
         """
 
         def get_ip_address_from_interface(interface):
+            """Get device ip from target network interface."""
+            # android >= 6.0: ip -f inet addr show {interface}
+            try:
+                res = self.shell('ip -f inet addr show {}'.format(interface))
+            except AdbShellError:
+                res = ''
+            matcher = re.search(r"inet (\d+\.){3}\d+", res)
+            if matcher:
+                return matcher.group().split(" ")[-1]
+
+            # android >= 6.0 backup method: ifconfig
+            try:
+                res = self.shell('ifconfig')
+            except AdbShellError:
+                res = ''
+            matcher = re.search(interface + r'.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
+            if matcher:
+                return matcher.group(1)
+
+            # android <= 6.0: netcfg
             try:
                 res = self.shell('netcfg')
             except AdbShellError:
@@ -1283,22 +1303,17 @@ class ADB(object):
             matcher = re.search(interface + r'.* ((\d+\.){3}\d+)/\d+', res)
             if matcher:
                 return matcher.group(1)
-            else:
-                try:
-                    res = self.shell('ifconfig')
-                except AdbShellError:
-                    res = ''
-                matcher = re.search(interface + r'.*?inet addr:((\d+\.){3}\d+)', res, re.DOTALL)
-                if matcher:
-                    return matcher.group(1)
-                else:
-                    try:
-                        res = self.shell('getprop dhcp.{}.ipaddress'.format(interface))
-                    except AdbShellError:
-                        res = ''
-                    matcher = IP_PATTERN.search(res)
-                    if matcher:
-                        return matcher.group(0)
+
+            # android <= 6.0 backup method: getprop dhcp.{}.ipaddress
+            try:
+                res = self.shell('getprop dhcp.{}.ipaddress'.format(interface))
+            except AdbShellError:
+                res = ''
+            matcher = IP_PATTERN.search(res)
+            if matcher:
+                return matcher.group(0)
+
+            # sorry, no more methods...
             return None
 
         interfaces = ('eth0', 'eth1', 'wlan0')
@@ -1306,11 +1321,12 @@ class ADB(object):
             ip = get_ip_address_from_interface(i)
             if ip and not ip.startswith('172.') and not ip.startswith('127.') and not ip.startswith('169.'):
                 return ip
+
         return None
 
     def get_gateway_address(self):
         """
-        Perform several set of commands to obtain the gateway address
+        Perform several set of commands to obtain the gateway address.
             * `adb getprop dhcp.wlan0.gateway`
             * `adb shell netcfg | grep wlan0`
 

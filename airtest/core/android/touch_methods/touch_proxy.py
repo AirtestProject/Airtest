@@ -76,6 +76,8 @@ class MinitouchImplementation(AdbTouchImplementation):
         tuple_to_xy = self.ori_transformer(tuple_to_xy)
         self.base_touch.two_finger_swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, offset=offset)
 
+    def perform(self, motion_events, interval=0.01):
+        self.base_touch.perform(motion_events, interval)
 
 @register_touch
 class MaxtouchImplementation(MinitouchImplementation):
@@ -83,3 +85,6 @@ class MaxtouchImplementation(MinitouchImplementation):
 
     def __init__(self, maxtouch, ori_transformer):
         super(MaxtouchImplementation, self).__init__(maxtouch, ori_transformer)
+
+    def perform(self, motion_events, interval=0.01):
+        self.base_touch.perform(motion_events, interval)

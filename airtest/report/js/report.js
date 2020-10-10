@@ -348,12 +348,12 @@ function StepPannel(data, root){
 
     argHtml =  argHtml || '<p class="desc">None</p>'
     argHtml = "<div class='fluid infos'>" + argHtml + "</div>"
-    argHtml += "<div class='fluid screens'>" + this.getStepRightScrren(step) + "</div>"
+    argHtml += "<div class='fluid screens'>" + this.getStepRightScreen(step) + "</div>"
     argHtml += "<div class='fluid traces'>" + this.getStepRightTrace(step) + "</div>"
     return "<div class='step-args'><div class='bold'>Args:</div>" + argHtml + "</div>"
   }
 
-  this.getStepRightScrren = function(step){
+  this.getStepRightScreen = function(step){
     if(step.screen && step.screen.src){
       var src = step.screen.src
       // 截屏
@@ -397,8 +397,9 @@ function StepPannel(data, root){
   }
 
   this.getStepRightTrace = function(step){
-    if(step.traceback){
-      return '<div class="desc"><pre class="trace"><code class="python">%s</code></pre></div>'.format(step.traceback)
+    if(step.traceback || step.log){
+      var logMessage = step.traceback || '' + step.log || '';
+      return '<div class="bold">Logs:</div><div class="desc"><pre class="trace"><code class="python">%s</code></pre></div>'.format(logMessage)
     } else{
       return ""
     }

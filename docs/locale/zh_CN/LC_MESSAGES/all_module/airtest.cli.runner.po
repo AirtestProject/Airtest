@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest\\.cli\\.runner module"
 msgstr ""
 
 #: airtest.cli.runner.AirtestCase:1 of
-msgid "Bases: :class:`unittest.case.TestCase`"
+msgid "基类：:class:`unittest.case.TestCase`"
 msgstr ""
 
 #: airtest.cli.runner.AirtestCase.setUpClass:1 of
@@ -42,4 +42,7 @@ msgstr ""
 #: airtest.cli.runner.AirtestCase.exec_other_script:1 of
 msgid "run other script in test script"
 msgstr ""
+
+#~ msgid "Bases: :class:`unittest.case.TestCase`"
+#~ msgstr ""
 

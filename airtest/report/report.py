@@ -18,8 +18,10 @@ from airtest.core.settings import Settings as ST
 from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
+from airtest.utils.logger import get_logger
 from six import PY3
 
+LOGGING = get_logger(__name__)
 LOGDIR = "log"
 LOGFILE = "log.txt"
 HTML_TPL = "log_template.html"
@@ -71,11 +73,11 @@ class LogToHtml(object):
         if not plugins:
             return
         for plugin_name in plugins:
-            print("try loading plugin: %s" % plugin_name)
+            LOGGING.debug("try loading plugin: %s" % plugin_name)
             try:
                 __import__(plugin_name)
             except:
-                traceback.print_exc()
+                LOGGING.error(traceback.format_exc())
 
     def _load(self):
         logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
@@ -106,7 +108,6 @@ class LogToHtml(object):
             else:
                 children_steps.insert(0, log)
 
-        # pprint(steps)
         translated_steps = [self._translate_step(s) for s in steps]
         return translated_steps
 
@@ -117,11 +118,11 @@ class LogToHtml(object):
         code = self._translate_code(step)
         desc = self._translate_desc(step, code)
         screen = self._translate_screen(step, code)
-        traceback = self._translate_traceback(step)
+        info = self._translate_info(step)
         assertion = self._translate_assertion(step)
 
         # set test failed if any traceback exists
-        if traceback:
+        if info[0]:
             self.test_result = False
 
         translated = {
@@ -130,7 +131,8 @@ class LogToHtml(object):
             "code": code,
             "screen": screen,
             "desc": desc,
-            "traceback": traceback,
+            "traceback": info[0],
+            "log": info[1],
             "assert": assertion,
         }
         return translated
@@ -140,7 +142,7 @@ class LogToHtml(object):
             return step["data"]["call_args"]["msg"]
 
     def _translate_screen(self, step, code):
-        if step['tag'] != "function":
+        if step['tag'] not in ["function", "info"] or not step.get("__children__"):
             return None
         screen = {
             "src": None,
@@ -209,7 +211,7 @@ class LogToHtml(object):
                 img = Image.open(path)
                 compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
             except Exception:
-                traceback.print_exc()
+                LOGGING.error(traceback.format_exc())
             return new_path
         else:
             return None
@@ -219,9 +221,16 @@ class LogToHtml(object):
         name, ext = os.path.splitext(filename)
         return "%s_small%s" % (name, ext)
 
-    def _translate_traceback(self, step):
+    def _translate_info(self, step):
+        trace_msg, log_msg = "", ""
         if "traceback" in step["data"]:
-            return step["data"]["traceback"]
+            # 若包含有traceback内容，将会认定步骤失败
+            trace_msg = step["data"]["traceback"]
+        if step["tag"] == "info":
+            if "log" in step["data"]:
+                # 普通文本log内容，仅显示
+                log_msg = step["data"]["log"]
+        return trace_msg, log_msg
 
     def _translate_code(self, step):
         if step["tag"] != "function":
@@ -343,7 +352,7 @@ class LogToHtml(object):
         if output_file:
             with io.open(output_file, 'w', encoding="utf-8") as f:
                 f.write(html)
-            print(output_file)
+            LOGGING.info(output_file)
 
         return html
 
@@ -353,8 +362,8 @@ class LogToHtml(object):
     def copy_tree(self, src, dst, ignore=None):
         try:
             shutil.copytree(src, dst, ignore=ignore)
-        except Exception as e:
-            print(e)
+        except:
+            LOGGING.error(traceback.format_exc())
 
     def _make_export_dir(self):
         """mkdir & copy /staticfiles/screenshots"""
@@ -386,11 +395,16 @@ class LogToHtml(object):
         return dirpath, logpath
 
     def get_relative_log(self, output_file):
+        """
+        Try to get the relative path of log.txt
+        :param output_file: output file: log.html
+        :return: ./log.txt or ""
+        """
         try:
             html_dir = os.path.dirname(output_file)
-            return os.path.relpath(os.path.join(self.log_root, 'log.txt') ,html_dir)
-        except Exception:
-            traceback.print_exc()
+            return os.path.relpath(os.path.join(self.log_root, 'log.txt'), html_dir)
+        except:
+            LOGGING.error(traceback.format_exc())
             return ""
 
     def get_console(self, output_file):
@@ -448,7 +462,9 @@ class LogToHtml(object):
         data['info'] = info
         data['log'] = self.get_relative_log(output_file)
         data['console'] = self.get_console(output_file)
-        data['data'] = json.dumps(data)
+        # 如果带有<>符号，容易被highlight.js认为是特殊语法，有可能导致页面显示异常，尝试替换成不常用的{}
+        info = json.dumps(data).replace("<", "{").replace(">", "}")
+        data['data'] = info
         return data
 
     def report(self, template_name=HTML_TPL, output_file=None, record_list=None):

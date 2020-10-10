@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Search for image template in the screen until timeout"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.cv.loop_find:3 of
@@ -56,17 +56,15 @@ msgid ""
 msgstr ""
 
 #: airtest.core.cv.loop_find of
-msgid "raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.cv.loop_find:9 of
-msgid ""
-":exc:`TargetNotFoundError` -- when image template is not found in "
-"screenshot"
+msgid "when image template is not found in screenshot"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.cv.loop_find:11 of
@@ -83,12 +81,16 @@ msgstr ""
 msgid "screenshot to be saved"
 msgstr ""
 
-#: airtest.core.cv.try_log_screen:5 of
+#: airtest.core.cv.try_log_screen:4 of
+msgid "The image quality, default is ST.SNAPSHOT_QUALITY"
+msgstr ""
+
+#: airtest.core.cv.try_log_screen:6 of
 msgid "None"
 msgstr ""
 
 #: airtest.core.cv.Predictor:1 airtest.core.cv.Template:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.cv.Template:1 of
@@ -148,5 +150,16 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "预测缩放后的点击位置点"
+#~ msgstr ""
+
+#~ msgid "raises"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":exc:`TargetNotFoundError` -- when image "
+#~ "template is not found in screenshot"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`object`"
 #~ msgstr ""
 

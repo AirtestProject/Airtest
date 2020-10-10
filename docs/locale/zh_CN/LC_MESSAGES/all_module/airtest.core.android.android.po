@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 17:37+0800\n"
-"PO-Revision-Date: 2019-10-09 17:48+0800\n"
+"POT-Creation-Date: 2020-09-17 11:47+0800\n"
+"PO-Revision-Date: 2020-09-17 12:00+0800\n"
 "Last-Translator: \n"
 "Language: zh\n"
 "Language-Team: \n"
@@ -24,16 +24,16 @@ msgid "airtest\\.core\\.android\\.android module"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
-msgid "Bases: :class:`airtest.core.device.Device`"
+msgid "基类：:class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
 msgid "Android Device Class"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_default_device:1 of
-msgid "Get local default device when no serialno"
-msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
+#: airtest.core.android.android.Android.touch_proxy:1 of
+msgid "Perform touch operation according to self.touch_method"
+msgstr "根据self.touch_method的类型，执行对应的触摸操作"
 
 #: airtest.core.android.android.Android.adjust_all_screen
 #: airtest.core.android.android.Android.check_app
@@ -66,13 +66,24 @@ msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
 #: airtest.core.android.android.Android.stop_app
 #: airtest.core.android.android.Android.stop_recording
 #: airtest.core.android.android.Android.swipe
+#: airtest.core.android.android.Android.swipe_along
 #: airtest.core.android.android.Android.text
 #: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.touch_proxy
+#: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app
 #: airtest.core.android.android.Android.unlock
 #: airtest.core.android.android.Android.wake of
-msgid "Returns"
+msgid "返回"
 msgstr ""
+
+#: airtest.core.android.android.Android.touch_proxy:3 of
+msgid "TouchProxy"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_default_device:1 of
+msgid "Get local default device when no serialno"
+msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
 
 #: airtest.core.android.android.Android.get_default_device:3 of
 msgid "local device serialno"
@@ -101,10 +112,12 @@ msgstr "返回packages列表"
 #: airtest.core.android.android.Android.stop_app
 #: airtest.core.android.android.Android.stop_recording
 #: airtest.core.android.android.Android.swipe
+#: airtest.core.android.android.Android.swipe_along
 #: airtest.core.android.android.Android.text
 #: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.android.Android.list_app:3 of
@@ -141,12 +154,14 @@ msgstr "检查package在设备中是否存在"
 msgid "True if package exists on the device"
 msgstr "如果存在，返回True"
 
-#: airtest.core.android.android.Android.check_app of
-msgid "raises"
+#: airtest.core.android.android.Android.check_app
+#: airtest.core.android.android.Android.pinch of
+msgid "引发"
 msgstr ""
 
 #: airtest.core.android.android.Android.check_app:7 of
-msgid ":exc:`AirtestError` -- raised if package is not found"
+#, fuzzy
+msgid "raised if package is not found"
 msgstr ":exc:`AirtestError` -- 如果不存在，抛出异常"
 
 #: airtest.core.android.android.Android.start_app:1 of
@@ -162,15 +177,17 @@ msgstr ""
 #: airtest.core.android.android.Android.clear_app:5
 #: airtest.core.android.android.Android.home:3
 #: airtest.core.android.android.Android.keyevent:6
-#: airtest.core.android.android.Android.pinch:6
+#: airtest.core.android.android.Android.pinch:9
 #: airtest.core.android.android.Android.shell:6
 #: airtest.core.android.android.Android.start_app:6
 #: airtest.core.android.android.Android.start_recording:6
 #: airtest.core.android.android.Android.stop_app:5
 #: airtest.core.android.android.Android.stop_recording:6
 #: airtest.core.android.android.Android.swipe:9
+#: airtest.core.android.android.Android.swipe_along:7
 #: airtest.core.android.android.Android.text:7
 #: airtest.core.android.android.Android.touch:6
+#: airtest.core.android.android.Android.two_finger_swipe:9
 #: airtest.core.android.android.Android.unlock:7
 #: airtest.core.android.android.Android.wake:3 of
 msgid "None"
@@ -206,12 +223,13 @@ msgstr "`apk` 文件在PC上的完整路径"
 msgid "True or False to replace the existing application"
 msgstr "如果应用已存在，是否替换"
 
-#: airtest.core.android.android.Android.install_app:5 of
+#: airtest.core.android.android.Android.install_app:5
+#: airtest.core.android.android.Android.install_multiple_app:5 of
 msgid "list of options, default is []"
 msgstr "install命令的额外选项，默认是[]"
 
 #: airtest.core.android.android.Android.install_app:7
-#: airtest.core.android.android.Android.install_multiple_app:6 of
+#: airtest.core.android.android.Android.install_multiple_app:7 of
 msgid "output from installation process"
 msgstr "安装进程的输出内容"
 
@@ -243,7 +261,11 @@ msgstr "保存截图的文件名，默认为None的话将会发送到stdout"
 msgid "True or False whether to keep the orientation same as display"
 msgstr "截图方向是否要与当前显示情况一致，默认为True"
 
-#: airtest.core.android.android.Android.snapshot:6 of
+#: airtest.core.android.android.Android.snapshot:5 of
+msgid "The image quality, integer in range [1, 99]"
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:7 of
 msgid "screenshot output"
 msgstr "截图输出"
 
@@ -267,8 +289,6 @@ msgstr ""
 #: airtest.core.android.android.Android.keyevent:4
 #: airtest.core.android.android.Android.logcat:3
 #: airtest.core.android.android.Android.logcat:4
-#: airtest.core.android.android.Android.pinch:3
-#: airtest.core.android.android.Android.pinch:4
 #: airtest.core.android.android.Android.start_recording:3
 #: airtest.core.android.android.Android.start_recording:4
 #: airtest.core.android.android.Android.stop_recording:3
@@ -316,11 +336,13 @@ msgstr "点击屏幕的时长"
 msgid "Perform swipe event on the device"
 msgstr "在设备上执行滑动操作"
 
-#: airtest.core.android.android.Android.swipe:3 of
+#: airtest.core.android.android.Android.swipe:3
+#: airtest.core.android.android.Android.two_finger_swipe:3 of
 msgid "start point"
 msgstr "开始坐标"
 
-#: airtest.core.android.android.Android.swipe:4 of
+#: airtest.core.android.android.Android.swipe:4
+#: airtest.core.android.android.Android.two_finger_swipe:4 of
 msgid "end point"
 msgstr "结束坐标"
 
@@ -337,8 +359,54 @@ msgid "the number of fingers. 1 or 2."
 msgstr "滑动的手指数量，1或者2，默认为1"
 
 #: airtest.core.android.android.Android.pinch:1 of
-msgid "Perform pinch event on the device"
-msgstr "在设备上执行pinch操作（放大缩小）"
+msgid "Perform pinch event on the device, only for minitouch and maxtouch"
+msgstr "在设备上执行pinch操作（放大缩小），仅适用于minitouch和maxtouch"
+
+#: airtest.core.android.android.Android.pinch:3 of
+msgid "the center point of the pinch operation"
+msgstr "pinch操作的中心点"
+
+#: airtest.core.android.android.Android.pinch:4 of
+msgid "pinch distance to half of screen, default is 0.5"
+msgstr "pinch操作捏合屏幕的距离，默认是0.5"
+
+#: airtest.core.android.android.Android.pinch:5
+#: airtest.core.android.android.Android.swipe_along:4
+#: airtest.core.android.android.Android.two_finger_swipe:5 of
+msgid "time interval for swipe duration, default is 0.8"
+msgstr "滑动过程中的时间间隔，默认是0.8"
+
+#: airtest.core.android.android.Android.pinch:6
+#: airtest.core.android.android.Android.swipe_along:5
+#: airtest.core.android.android.Android.two_finger_swipe:6 of
+msgid "size of swipe step, default is 5"
+msgstr "滑动过程中的步数，默认为5"
+
+#: airtest.core.android.android.Android.pinch:7 of
+msgid "pinch in or pinch out, default is 'in'"
+msgstr "向内捏合in或者向外捏合out，默认是'in'"
+
+#: airtest.core.android.android.Android.pinch:11 of
+msgid "An error occurred when center is not a list/tuple or None"
+msgstr "如果中心点不是一个list/tuple坐标，将会抛出TypeError异常"
+
+#: airtest.core.android.android.Android.swipe_along:1 of
+msgid ""
+"Perform swipe event across multiple points in sequence, only for minitouch "
+"and maxtouch"
+msgstr "执行一段连续的滑动操作，仅适用于minitouch和maxtouch"
+
+#: airtest.core.android.android.Android.swipe_along:3 of
+msgid "list of coordinates: [(x1, y1), (x2, y2), (x3, y3)]"
+msgstr "一个坐标的列表：[(x1, y1), (x2, y2), (x3, y3)]"
+
+#: airtest.core.android.android.Android.two_finger_swipe:1 of
+msgid "Perform two finger swipe action, only for minitouch and maxtouch"
+msgstr "执行两个手指一起滑动的操作，仅适用于minitouch和maxtouch"
+
+#: airtest.core.android.android.Android.two_finger_swipe:7 of
+msgid "coordinate offset of the second finger, default is (0, 50)"
+msgstr "第二个手指相对于第一个手指的偏移坐标，默认是(0, 50)"
 
 #: airtest.core.android.android.Android.logcat:1 of
 msgid "Perform `logcat`operations"
@@ -364,23 +432,23 @@ msgstr "是否对输出内容进行strip"
 msgid "property value(s)"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_ip_address:4 of
+#: airtest.core.android.android.Android.get_ip_address:1 of
 msgid "Perform several set of commands to obtain the IP address"
 msgstr "执行以下几种命令行来获取IP地址"
 
-#: airtest.core.android.android.Android.get_ip_address:2 of
+#: airtest.core.android.android.Android.get_ip_address:3 of
 msgid "`adb shell netcfg | grep wlan0`"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_ip_address:3 of
+#: airtest.core.android.android.Android.get_ip_address:4 of
 msgid "`adb shell ifconfig`"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_ip_address:4 of
+#: airtest.core.android.android.Android.get_ip_address:5 of
 msgid "`adb getprop dhcp.wlan0.ipaddress`"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_ip_address:6 of
+#: airtest.core.android.android.Android.get_ip_address:7 of
 msgid "None if no IP address has been found, otherwise return the IP address"
 msgstr "如果获取IP失败，返回None，否则返回IP地址"
 
@@ -405,7 +473,7 @@ msgstr "如果软键盘正在启用，返回True，否则False"
 #: airtest.core.android.android.Android.is_locked:4
 #: airtest.core.android.android.Android.is_screenon:4
 #: airtest.core.android.android.Android.unlock:4 of
-msgid "Notes"
+msgid "提示"
 msgstr ""
 
 #: airtest.core.android.android.Android.is_keyboard_shown:5

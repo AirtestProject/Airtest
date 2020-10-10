@@ -5,26 +5,25 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: airtest\n"
+"Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 16:45+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: 2019-10-09 16:48+0800\n"
 "Last-Translator: \n"
+"Language: zh_Hans_CN\n"
 "Language-Team: \n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=1; plural=0\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
-"X-Generator: Poedit 2.2.1\n"
-"Language: zh_CN\n"
 
 #: ../../all_module/airtest.core.win.win.rst:2
 msgid "airtest\\.core\\.win\\.win module"
 msgstr ""
 
 #: airtest.core.win.win.Windows:1 of
-msgid "Bases: :class:`airtest.core.device.Device`"
+msgid "基类：:class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.win.win.Windows:1 of
@@ -35,32 +34,45 @@ msgstr "Windows 客户端。"
 msgid "Connect to window and set it foreground"
 msgstr "连接到一个windows窗口并且把窗口置前"
 
-#: airtest.core.win.win.Windows.connect airtest.core.win.win.Windows.key_press airtest.core.win.win.Windows.key_release
-#: airtest.core.win.win.Windows.keyevent airtest.core.win.win.Windows.mouse_down airtest.core.win.win.Windows.mouse_move
-#: airtest.core.win.win.Windows.mouse_up airtest.core.win.win.Windows.move airtest.core.win.win.Windows.shell
-#: airtest.core.win.win.Windows.snapshot airtest.core.win.win.Windows.start_app airtest.core.win.win.Windows.stop_app
-#: airtest.core.win.win.Windows.swipe airtest.core.win.win.Windows.text airtest.core.win.win.Windows.touch of
-msgid "Parameters"
-msgstr "参数"
+#: airtest.core.win.win.Windows.connect airtest.core.win.win.Windows.key_press
+#: airtest.core.win.win.Windows.key_release
+#: airtest.core.win.win.Windows.keyevent
+#: airtest.core.win.win.Windows.mouse_down
+#: airtest.core.win.win.Windows.mouse_move
+#: airtest.core.win.win.Windows.mouse_up airtest.core.win.win.Windows.move
+#: airtest.core.win.win.Windows.shell airtest.core.win.win.Windows.snapshot
+#: airtest.core.win.win.Windows.start_app airtest.core.win.win.Windows.stop_app
+#: airtest.core.win.win.Windows.swipe airtest.core.win.win.Windows.text
+#: airtest.core.win.win.Windows.touch of
+msgid "参数"
+msgstr ""
 
-#: airtest.core.win.win.Windows.connect:3 airtest.core.win.win.Windows.keyevent:8 airtest.core.win.win.Windows.text:4
+#: airtest.core.win.win.Windows.connect:3
+#: airtest.core.win.win.Windows.keyevent:8 airtest.core.win.win.Windows.text:4
 #: airtest.core.win.win.Windows.touch:8 of
 msgid "optional arguments"
 msgstr ""
 
-#: airtest.core.win.win.Windows.connect airtest.core.win.win.Windows.get_ip_address airtest.core.win.win.Windows.get_pos
-#: airtest.core.win.win.Windows.get_rect airtest.core.win.win.Windows.get_title airtest.core.win.win.Windows.keyevent
-#: airtest.core.win.win.Windows.kill airtest.core.win.win.Windows.move airtest.core.win.win.Windows.set_foreground
-#: airtest.core.win.win.Windows.shell airtest.core.win.win.Windows.snapshot airtest.core.win.win.Windows.start_app
-#: airtest.core.win.win.Windows.stop_app airtest.core.win.win.Windows.swipe airtest.core.win.win.Windows.text
+#: airtest.core.win.win.Windows.connect
+#: airtest.core.win.win.Windows.get_ip_address
+#: airtest.core.win.win.Windows.get_pos airtest.core.win.win.Windows.get_rect
+#: airtest.core.win.win.Windows.get_title airtest.core.win.win.Windows.keyevent
+#: airtest.core.win.win.Windows.kill airtest.core.win.win.Windows.move
+#: airtest.core.win.win.Windows.set_foreground
+#: airtest.core.win.win.Windows.shell airtest.core.win.win.Windows.snapshot
+#: airtest.core.win.win.Windows.start_app airtest.core.win.win.Windows.stop_app
+#: airtest.core.win.win.Windows.swipe airtest.core.win.win.Windows.text
 #: airtest.core.win.win.Windows.touch of
-msgid "Returns"
-msgstr "返回"
+msgid "返回"
+msgstr ""
 
-#: airtest.core.win.win.Windows.connect:5 airtest.core.win.win.Windows.keyevent:10 airtest.core.win.win.Windows.kill:3
-#: airtest.core.win.win.Windows.move:5 airtest.core.win.win.Windows.set_foreground:3 airtest.core.win.win.Windows.start_app:6
-#: airtest.core.win.win.Windows.stop_app:5 airtest.core.win.win.Windows.swipe:8 airtest.core.win.win.Windows.text:6
-#: airtest.core.win.win.Windows.touch:10 of
+#: airtest.core.win.win.Windows.connect:5
+#: airtest.core.win.win.Windows.keyevent:10 airtest.core.win.win.Windows.kill:3
+#: airtest.core.win.win.Windows.move:5
+#: airtest.core.win.win.Windows.set_foreground:3
+#: airtest.core.win.win.Windows.start_app:6
+#: airtest.core.win.win.Windows.stop_app:5 airtest.core.win.win.Windows.swipe:8
+#: airtest.core.win.win.Windows.text:6 airtest.core.win.win.Windows.touch:10 of
 msgid "None"
 msgstr ""
 
@@ -73,11 +85,12 @@ msgid "command to be run"
 msgstr "需要运行的命令行"
 
 #: airtest.core.win.win.Windows.shell of
-msgid "raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.win.win.Windows.shell:5 of
-msgid ":exc:`subprocess.CalledProcessError` -- when command returns non-zero exit status"
+#, fuzzy
+msgid "when command returns non-zero exit status"
 msgstr ":exc:`subprocess.CalledProcessError` -- 当指令返回非零的状态码"
 
 #: airtest.core.win.win.Windows.shell:7 of
@@ -92,7 +105,11 @@ msgstr "截取一张图片并且保存到ST.LOG_DIR文件夹中"
 msgid "name of the file to give to the screenshot, {time}.jpg by default"
 msgstr "截图的文件名，默认为{time}.jpg"
 
-#: airtest.core.win.win.Windows.snapshot:5 of
+#: airtest.core.win.win.Windows.snapshot:4 of
+msgid "The image quality, integer in range [1, 99]"
+msgstr ""
+
+#: airtest.core.win.win.Windows.snapshot:6 of
 msgid "display the screenshot"
 msgstr "截图的内容"
 
@@ -100,9 +117,10 @@ msgstr "截图的内容"
 msgid "Perform a key event"
 msgstr "执行一个按键响应"
 
-#: airtest.core.win.win.Windows.keyevent:4 airtest.core.win.win.Windows.touch:4 of
-msgid "References"
-msgstr "参考"
+#: airtest.core.win.win.Windows.keyevent:4 airtest.core.win.win.Windows.touch:4
+#: of
+msgid "引用"
+msgstr ""
 
 #: airtest.core.win.win.Windows.keyevent:5 of
 msgid "https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html"
@@ -126,30 +144,40 @@ msgstr "模拟一个按下按键的事件。"
 
 #: airtest.core.win.win.Windows.key_press:3 of
 msgid ""
-"Sends a scancode to the computer to report which key has been pressed. Some games use DirectInput devices, and respond only to scancodes, "
-"not virtual key codes. You can simulate DirectInput key presses using this method, instead of the keyevent() method, which uses virtual key "
-"codes."
-msgstr ""
-"发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press()方法来模拟发送键"
-"盘扫描码，而不是上述发送虚拟键码的keyevent()方法。"
+"Sends a scancode to the computer to report which key has been pressed. "
+"Some games use DirectInput devices, and respond only to scancodes, not "
+"virtual key codes. You can simulate DirectInput key presses using this "
+"method, instead of the keyevent() method, which uses virtual key codes."
+msgstr "发送键盘扫描码至计算机来告知哪个按键被按下。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_press()方法来模拟发送键盘扫描码，而不是上述发送虚拟键码的keyevent()方法。"
 
 #: airtest.core.win.win.Windows.key_press:9 of
 msgid ""
-"A string indicating which key to be pressed. Available key options are: {'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', "
-"'=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', 'G', 'H', 'J', "
-"'K', 'L', ';', \"'\", '`', 'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', "
-"'CAPS_LOCK', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', "
-"'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12', "
-"'PRINT_SCREEN', 'PAUSE', 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP', 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', "
-"'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}."
+"A string indicating which key to be pressed. Available key options are: "
+"{'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', "
+"'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', "
+"'[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', "
+"';', \"'\", '`', 'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', "
+"'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK', 'F1', "
+"'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUM_LOCK', "
+"'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_-', "
+"'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', "
+"'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', "
+"'PAUSE', 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP', "
+"'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', 'INSERT', "
+"'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}."
 msgstr ""
-"一个字符串来表示哪个按键将被按下。可用的选择有：{'ESCAPE', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'BACKSPACE', 'TAB', "
-"'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', \"'\", '`', "
-"'LSHIFT', 'BACKSLASH', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', 'SPACE', 'CAPS_LOCK', 'F1', 'F2', 'F3', "
-"'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', "
-"'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12', 'PRINT_SCREEN', 'PAUSE', "
-"'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', 'HOME', 'UP', 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', 'INSERT', 'DELETE', "
-"'LWINDOWS', 'RWINDOWS', 'MENU'}."
+"一个字符串来表示哪个按键将被按下。可用的选择有：{'ESCAPE', '1', '2', '3', '4', '5', '6', '7', "
+"'8', '9', '0', '-', '=', 'BACKSPACE', 'TAB', 'Q', 'W', 'E', 'R', 'T', "
+"'Y', 'U', 'I', 'O', 'P', '[', ']', 'ENTER', 'LCTRL', 'A', 'S', 'D', 'F', "
+"'G', 'H', 'J', 'K', 'L', ';', \"'\", '`', 'LSHIFT', 'BACKSLASH', 'Z', "
+"'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'RSHIFT', '*', 'LALT', "
+"'SPACE', 'CAPS_LOCK', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', "
+"'F9', 'F10', 'NUM_LOCK', 'SCROLL_LOCK', 'NUMPAD_7', 'NUMPAD_8', "
+"'NUMPAD_9', 'NUMPAD_-', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_+', "
+"'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_0', 'NUMPAD_.', 'F11', 'F12',"
+" 'PRINT_SCREEN', 'PAUSE', 'NUMPAD_ENTER', 'RCTRL', 'NUMPAD_/', 'RALT', "
+"'HOME', 'UP', 'PAGE_UP', 'LEFT', 'RIGHT', 'END', 'DOWN', 'PAGE_DOWN', "
+"'INSERT', 'DELETE', 'LWINDOWS', 'RWINDOWS', 'MENU'}."
 
 #: airtest.core.win.win.Windows.key_release:1 of
 msgid "Simulates a key release event."
@@ -157,12 +185,12 @@ msgstr "模拟一个释放按键的事件。"
 
 #: airtest.core.win.win.Windows.key_release:3 of
 msgid ""
-"Sends a scancode to the computer to report which key has been released. Some games use DirectInput devices, and respond only to scancodes, "
-"not virtual key codes. You can simulate DirectInput key releases using this method. A call to the key_release() method usually follows a "
-"call to the key_press() method of the same key."
-msgstr ""
-"发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release()方法来模拟发送"
-"键盘扫描码。一般情况下key_release()方法与所释放按键的key_press()方法搭配使用。"
+"Sends a scancode to the computer to report which key has been released. "
+"Some games use DirectInput devices, and respond only to scancodes, not "
+"virtual key codes. You can simulate DirectInput key releases using this "
+"method. A call to the key_release() method usually follows a call to the "
+"key_press() method of the same key."
+msgstr "发送键盘扫描码至计算机来告知哪个按键被释放。一些游戏使用DirectInput设备，只响应键盘扫描码，而不是虚拟键码。可以用key_release()方法来模拟发送键盘扫描码。一般情况下key_release()方法与所释放按键的key_press()方法搭配使用。"
 
 #: airtest.core.win.win.Windows.key_release:9 of
 msgid "A string indicating which key to be released."
@@ -210,12 +238,15 @@ msgstr "已知的bug："
 
 #: airtest.core.win.win.Windows.mouse_move:4 of
 msgid ""
-"Due to a bug in the pywinauto module, users might experience             off-by-one errors when it comes to the exact coordinates "
-"of             the position on screen."
+"Due to a bug in the pywinauto module, users might experience             "
+"off-by-one errors when it comes to the exact coordinates of             "
+"the position on screen."
 msgstr "因为pywinauto库存在的bug，用户可能在使用此方法时遇到移动后位置与目标位置的x和y坐标有1个像素点偏差的情况。"
 
 #: airtest.core.win.win.Windows.mouse_move:6 of
-msgid "A tuple (x, y), where x and y are x and y coordinates of the screen to move the mouse to, respectively."
+msgid ""
+"A tuple (x, y), where x and y are x and y coordinates of the screen to "
+"move the mouse to, respectively."
 msgstr "一个(x, y)的tuple, 其中x和y分别表示目标位置在屏幕上的x和y坐标。"
 
 #: airtest.core.win.win.Windows.mouse_down:1 of
@@ -223,7 +254,9 @@ msgid "Simulates a `mousedown` event."
 msgstr "模拟一个按下鼠标按键的事件。"
 
 #: airtest.core.win.win.Windows.mouse_down:3 of
-msgid "A string indicating which mouse button to be pressed. Available mouse button options are: {'left', 'middle', 'right'}."
+msgid ""
+"A string indicating which mouse button to be pressed. Available mouse "
+"button options are: {'left', 'middle', 'right'}."
 msgstr "一个字符串来表示将按下哪个鼠标按键。有以下的鼠标按键选项：{'left', 'middle', 'right'}。"
 
 #: airtest.core.win.win.Windows.mouse_up:1 of
@@ -231,7 +264,9 @@ msgid "Simulates a `mouseup` event."
 msgstr "模拟一个释放鼠标按键的事件。"
 
 #: airtest.core.win.win.Windows.mouse_up:3 of
-msgid "A call to the mouse_up() method usually follows a call to the mouse_down() method of the same mouse button."
+msgid ""
+"A call to the mouse_up() method usually follows a call to the "
+"mouse_down() method of the same mouse button."
 msgstr "一般情况下mouse_up()方法与所释放鼠标按键的mouse_down()方法搭配使用。"
 
 #: airtest.core.win.win.Windows.mouse_up:6 of
@@ -247,7 +282,9 @@ msgid "full path to the application"
 msgstr "应用的完整路径"
 
 #: airtest.core.win.win.Windows.start_app:4 of
-msgid "reference: https://pywinauto.readthedocs.io/en/latest/code/pywinauto.application.html#pywinauto.application.Application.start"
+msgid ""
+"reference: "
+"https://pywinauto.readthedocs.io/en/latest/code/pywinauto.application.html#pywinauto.application.Application.start"
 msgstr ""
 
 #: airtest.core.win.win.Windows.stop_app:1 of
@@ -307,7 +344,7 @@ msgid "ip address"
 msgstr ""
 
 #: airtest.core.win.win.Windows.get_ip_address of
-msgid "Return type"
+msgid "返回类型"
 msgstr ""
 
 #: airtest.core.win.win.Windows.get_ip_address:4 of
@@ -316,3 +353,22 @@ msgstr ":py：obj：'str'"
 
 #~ msgid "known bug Due to a bug in the pywinauto module, users might experience"
 #~ msgstr "已知的bug：因为pywinauto库存在的bug，用户可能在使用此方法时"
+
+#~ msgid "Bases: :class:`airtest.core.device.Device`"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr "参数"
+
+#~ msgid "Returns"
+#~ msgstr "返回"
+
+#~ msgid "raises"
+#~ msgstr ""
+
+#~ msgid "References"
+#~ msgstr "参考"
+
+#~ msgid "Return type"
+#~ msgstr ""
+

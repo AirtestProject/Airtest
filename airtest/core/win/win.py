@@ -99,13 +99,14 @@ class Windows(Device):
         """
         return subprocess.check_output(cmd, shell=True)
 
-    def snapshot(self, filename=None, quality=10):
+    def snapshot(self, filename=None, quality=10, max_size=None):
         """
         Take a screenshot and save it in ST.LOG_DIR folder
 
         Args:
             filename: name of the file to give to the screenshot, {time}.jpg by default
             quality: The image quality, integer in range [1, 99]
+            max_size: the maximum size of the picture, e.g 1200
 
         Returns:
             display the screenshot
@@ -127,7 +128,7 @@ class Windows(Device):
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
             screen = aircv.crop_image(screen, rect)
         if filename:
-            aircv.imwrite(filename, screen, quality)
+            aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
 
     def keyevent(self, keyname, **kwargs):

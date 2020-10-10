@@ -36,8 +36,15 @@ class G(object):
             None
 
         """
-        cls.DEVICE = dev
-        cls.DEVICE_LIST.append(dev)
+        for index, instance in enumerate(cls.DEVICE_LIST):
+            if dev.uuid == instance.uuid:
+                cls.LOGGING.warn("Device:%s updated %s -> %s" % (dev.uuid, instance, dev))
+                cls.DEVICE_LIST[index] = dev
+                cls.DEVICE = dev
+                break
+        else:
+            cls.DEVICE = dev
+            cls.DEVICE_LIST.append(dev)
 
     @classmethod
     def register_custom_device(cls, device_cls):
@@ -64,24 +71,56 @@ def set_logdir(dirpath):
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
 
 
-def log(arg, trace=""):
+def log(arg, timestamp=None, desc="", snapshot=False):
     """
     Insert user log, will be displayed in Html report.
 
-    :param data: log message or Exception
-    :param trace: log traceback if exists, use traceback.format_exc to get best format
-    :return: None
+    Args:
+        arg: log message or Exception object
+        timestamp: the timestamp of the log, default is time.time()
+        desc: description of log, default is arg.class.__name__
+        snapshot: whether to take a screenshot, default is False
+
+    Returns:
+        None
+
+    Examples:
+        >>> log("hello world", snapshot=True)
+        >>> log({"key": "value"}, timestamp=time.time(), desc="log dict")
+        >>> try:
+                1/0
+            except Exception as e:
+                log(e)
+
     """
+    from airtest.core.cv import try_log_screen
     if G.LOGGER:
+        depth = 0
+        if snapshot:
+            try:
+                try_log_screen(depth=2)
+            except AttributeError:
+                # if G.DEVICE is None
+                pass
+            else:
+                depth = 1
         if isinstance(arg, Exception):
+            if hasattr(arg, "__traceback__"):
+                # in PY3, arg.__traceback__ is traceback object
+                trace_msg = ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
+            else:
+                trace_msg = arg.message  # PY2
             G.LOGGER.log("info", {
-                    "name": arg.__class__.__name__,
-                    "traceback": ''.join(traceback.format_exception(type(arg), arg, arg.__traceback__))
-                })
+                    "name": desc or arg.__class__.__name__,
+                    "traceback": trace_msg,
+                }, depth=depth, timestamp=timestamp)
         elif isinstance(arg, six.string_types):
-            G.LOGGER.log("info", {"name": arg, "traceback": trace}, 0)
+            # 普通文本log内容放在"log"里，如果有trace内容放在"traceback"里
+            # 在报告中，假如"traceback"有内容，将会被识别为报错，这个步骤会被判定为不通过
+            G.LOGGER.log("info", {"name": desc or arg, "traceback": None, "log": arg}, depth=depth, timestamp=timestamp)
         else:
-            raise TypeError("arg must be Exception or string")
+            G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": None, "log": repr(arg)}, depth=depth,
+                         timestamp=timestamp)
 
 
 def logwrap(f):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-09-17 11:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,7 +24,7 @@ msgstr ""
 #: airtest.core.ios.constant.CAP_METHOD:1
 #: airtest.core.ios.constant.IME_METHOD:1
 #: airtest.core.ios.constant.TOUCH_METHOD:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #~ msgid "Bases: :class:`object`"

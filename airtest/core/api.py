@@ -31,13 +31,8 @@ def init_device(platform="Android", uuid=None, **kwargs):
     """
     cls = import_device_cls(platform)
     dev = cls(uuid, **kwargs)
-    for index, instance in enumerate(G.DEVICE_LIST):
-        if dev.uuid == instance.uuid:
-            G.LOGGING.warn("Device:%s updated %s -> %s" % (dev.uuid, instance, dev))
-            G.DEVICE_LIST[index] = dev
-            break
-    else:
-        G.add_device(dev)
+    # Add device instance in G and set as current device.
+    G.add_device(dev)
     return dev
 
 
@@ -94,7 +89,7 @@ def set_current(idx):
     G.DEVICE = current_dev
 
 
-def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compress=0):
+def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compress=None):
     """
     Auto setup running env and try connect android device if not device connected.
 
@@ -102,6 +97,7 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compr
     :param devices: connect_device uri in list.
     :param logdir: log dir for script report, default is None for no log, set to `True` for <basedir>/log.
     :param project_root: project root dir for `using` api.
+    :param compress: The compression rate of the screenshot image, integer in range [1, 99], default is 10
     """
     if basedir:
         if os.path.isfile(basedir):
@@ -200,25 +196,30 @@ def uninstall(package):
 
 
 @logwrap
-def snapshot(filename=None, msg="", quality=ST.SNAPSHOT_QUALITY):
+def snapshot(filename=None, msg="", quality=None, max_size=None):
     """
     Take the screenshot of the target device and save it to the file.
 
     :param filename: name of the file where to save the screenshot. If the relative path is provided, the default
                      location is ``ST.LOG_DIR``
     :param msg: short description for screenshot, it will be recorded in the report
-    :param quality: The image quality, integer in range [1, 99]
+    :param quality: The image quality, integer in range [1, 99], default is 10
+    :param max_size: the maximum size of the picture, e.g 1200
     :return: absolute path of the screenshot
     :platforms: Android, iOS, Windows
     """
+    if not quality:
+        quality = ST.SNAPSHOT_QUALITY
+    if not max_size and ST.IMAGE_MAXSIZE:
+        max_size = ST.IMAGE_MAXSIZE
     if filename:
         if not os.path.isabs(filename):
             logdir = ST.LOG_DIR or "."
             filename = os.path.join(logdir, filename)
-        screen = G.DEVICE.snapshot(filename, quality=quality)
-        return try_log_screen(screen)
+        screen = G.DEVICE.snapshot(filename, quality=quality, max_size=max_size)
+        return try_log_screen(screen, quality=quality, max_size=max_size)
     else:
-        return try_log_screen()
+        return try_log_screen(quality=quality, max_size=max_size)
 
 
 @logwrap
@@ -448,7 +449,7 @@ def assert_exists(v, msg=""):
     :platforms: Android, Windows, iOS
     """
     try:
-        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT)
+        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT or v.threshold)
         return pos
     except TargetNotFoundError:
         raise AssertionError("%s does not exist in screen, message: %s" % (v, msg))
