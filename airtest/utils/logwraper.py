@@ -73,7 +73,9 @@ class AirtestLogger(object):
 
 def Logwrap(f, logger):
     @functools.wraps(f)
-    def wrapper(depth=None, *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        # py3 only: def wrapper(*args, depth=None, **kwargs):
+        depth = kwargs.pop('depth', None)  # For compatibility with py2
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
