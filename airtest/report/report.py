@@ -138,7 +138,7 @@ class LogToHtml(object):
         return translated
 
     def _translate_assertion(self, step):
-        if "assert" in step["data"]["name"] and "msg" in step["data"]["call_args"]:
+        if "assert_" in step["data"].get("name", "") and "msg" in step["data"].get("call_args", {}):
             return step["data"]["call_args"]["msg"]
 
     def _translate_screen(self, step, code):
