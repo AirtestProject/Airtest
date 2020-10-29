@@ -138,6 +138,9 @@ def setup_by_args(args):
     else:
         compress = ST.SNAPSHOT_QUALITY
 
+    if args.no_image:
+        ST.SAVE_IMAGE = False
+
     # guess project_root to be basedir of current .air path
     project_root = os.path.dirname(args.script) if not ST.PROJECT_ROOT else None
 

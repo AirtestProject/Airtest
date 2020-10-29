@@ -20,3 +20,4 @@ class Settings(object):
     SNAPSHOT_QUALITY = 10  # 1-100 https://pillow.readthedocs.io/en/5.1.x/handbook/image-file-formats.html#jpeg
     # Image compression size, e.g. 1200, means that the size of the screenshot does not exceed 1200*1200
     IMAGE_MAXSIZE = os.environ.get("IMAGE_MAXSIZE", None)
+    SAVE_IMAGE = True

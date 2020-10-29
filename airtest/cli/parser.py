@@ -30,6 +30,7 @@ def runner_parser(ap=None):
     ap.add_argument("--log", help="set log dir, default to be script dir", nargs="?", const=True)
     ap.add_argument("--compress", required=False, type=int, choices=range(1, 100), help="set snapshot quality, 1-99", default=10)
     ap.add_argument("--recording", help="record screen when running", nargs="?", const=True)
+    ap.add_argument("--no-image", help="Do not save screenshots", nargs="?", const=True)
     return ap
 
 

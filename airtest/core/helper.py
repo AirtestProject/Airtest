@@ -97,6 +97,9 @@ def log(arg, timestamp=None, desc="", snapshot=False):
     if G.LOGGER:
         depth = 0
         if snapshot:
+            # 如果指定了snapshot参数，强制保存一张图片
+            save_image = ST.SAVE_IMAGE
+            ST.SAVE_IMAGE = True
             try:
                 try_log_screen(depth=2)
             except AttributeError:
@@ -104,6 +107,8 @@ def log(arg, timestamp=None, desc="", snapshot=False):
                 pass
             else:
                 depth = 1
+            finally:
+                ST.SAVE_IMAGE = save_image
         if isinstance(arg, Exception):
             if hasattr(arg, "__traceback__"):
                 # in PY3, arg.__traceback__ is traceback object
