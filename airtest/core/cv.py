@@ -93,7 +93,7 @@ def try_log_screen(screen=None, quality=None, max_size=None):
         None
 
     """
-    if not ST.LOG_DIR:
+    if not ST.LOG_DIR or not ST.SAVE_IMAGE:
         return
     if not quality:
         quality = ST.SNAPSHOT_QUALITY
