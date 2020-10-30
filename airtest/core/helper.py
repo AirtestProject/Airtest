@@ -119,13 +119,16 @@ def log(arg, timestamp=None, desc="", snapshot=False):
                     "name": desc or arg.__class__.__name__,
                     "traceback": trace_msg,
                 }, depth=depth, timestamp=timestamp)
+            G.LOGGING.error(trace_msg)
         elif isinstance(arg, six.string_types):
             # 普通文本log内容放在"log"里，如果有trace内容放在"traceback"里
             # 在报告中，假如"traceback"有内容，将会被识别为报错，这个步骤会被判定为不通过
             G.LOGGER.log("info", {"name": desc or arg, "traceback": None, "log": arg}, depth=depth, timestamp=timestamp)
+            G.LOGGING.info(arg)
         else:
             G.LOGGER.log("info", {"name": desc or repr(arg), "traceback": None, "log": repr(arg)}, depth=depth,
                          timestamp=timestamp)
+            G.LOGGING.info(repr(arg))
 
 
 def logwrap(f):
