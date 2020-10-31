@@ -209,7 +209,7 @@ class LogToHtml(object):
         if not os.path.isfile(new_path):
             try:
                 img = Image.open(path)
-                compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
+                compress_image(img, new_path, ST.SNAPSHOT_QUALITY, max_size=300)
             except Exception:
                 LOGGING.error(traceback.format_exc())
             return new_path
