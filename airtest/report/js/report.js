@@ -320,33 +320,33 @@ function StepPannel(data, root){
     }
   }
 
-  this.getStepRightArgs = function(step){
+  this.getStepRightArgs = function(step) {
     // 操作的参数
-    try{
+    try {
       argHtml = ''
-      if(step.code){
-        for(var i=0; i < step.code.args.length; i++){
+      if (step.code) {
+        for (var i = 0; i < step.code.args.length; i++) {
           arg = step.code.args[i]
-          if(arg.image){
+          if (arg.image) {
             argHtml += ('<img class="crop_image desc" data-width="%s" data-height="%s" src="%s" title="%s">' +
-                    '<p class="desc">resolution: %s</p>')
-                    .format(arg.resolution[0], arg.resolution[1], arg.image, arg.image, arg.value.resolution)
-          }else{
+                '<p class="desc">resolution: %s</p>')
+                .format(arg.resolution[0], arg.resolution[1], arg.image, arg.image, arg.value.resolution)
+          } else {
             val = typeof arg.value == 'object' ? JSON.stringify(arg.value) : arg.value
-            argHtml += '<p class="desc">%s: %s</p>'.format(arg.key,val)
+            argHtml += '<p class="desc">%s: %s</p>'.format(arg.key, val)
           }
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     }
 
     // 相似度
-    if(step.screen && step.screen.confidence){
+    if (step.screen && step.screen.confidence) {
       argHtml += '<p class="desc"><span class="point glyphicon glyphicon-play"></span><span lang="en">Confidence: </span>%s</p>'.format(step.screen.confidence)
     }
 
-    argHtml =  argHtml || '<p class="desc">None</p>'
+    argHtml = argHtml || '<p class="desc">None</p>'
     argHtml = "<div class='fluid infos'>" + argHtml + "</div>"
     argHtml += "<div class='fluid screens'>" + this.getStepRightScreen(step) + "</div>"
     argHtml += "<div class='fluid traces'>" + this.getStepRightTrace(step) + "</div>"
@@ -357,7 +357,7 @@ function StepPannel(data, root){
     if(step.screen && step.screen.src){
       var src = step.screen.src
       // 截屏
-      var img = '<img class="screen" data-src="%s" src="%s" title="%s">'.format(src, src, src)
+      var img = '<img class="screen" data-src="%s" src="%s" title="%s" onerror="hideFancybox(this);">'.format(src, src, src)
 
       // 点击位置
       var targets = ''
@@ -781,6 +781,11 @@ function init_page(){
   $('.summary .info-sub.start').html(getFormatDate(data.run_start))
   $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
   $('.summary .info-value.duration').html(getFormatDuration(getDelta(data.run_end, data.run_start)))
+}
+
+function hideFancybox(img) {
+  // 图片加载失败的情况下，隐藏整个div
+  $(img).parent().hide();
 }
 
 $(function(){

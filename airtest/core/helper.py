@@ -172,3 +172,33 @@ def import_device_cls(platform):
 
 def delay_after_operation():
     time.sleep(ST.OPDELAY)
+
+
+def delete_log_screen(gt_time=float('-inf'), lt_time=float('inf')):
+    """
+    Delete screenshots in the log directory(ST.LOG_DIR), delete all by default
+
+    Args:
+        gt_time: delete pictures with creation time greater than gt_time
+        lt_time: delete pictures with creation time less than lt_time
+
+    Examples:
+        >>> delete_log_screen()  # delete all screenshots
+        >>> # delete screen.ctime < current time
+        >>> delete_log_screen(lt_time=time.time())
+        >>> # delete screen.ctime > timestamp
+        >>> delete_log_screen(gt_time=1604132541)
+
+    Returns:
+        None
+
+    """
+    for f in os.listdir(ST.LOG_DIR):
+        if f.endswith(".jpg"):
+            f_path = os.path.join(ST.LOG_DIR, f)
+            ctime = os.path.getctime(f_path)
+            if gt_time <= ctime <= lt_time:
+                try:
+                    os.remove(f_path)
+                except OSError:
+                    pass
