@@ -1027,7 +1027,7 @@ class ADB(object):
 
         """
         dat = self.shell('dumpsys activity top')
-        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        activityRE = re.compile(r'\s*ACTIVITY ([A-Za-z0-9_.$]+)/([A-Za-z0-9_.$]+) \w+ pid=(\d+)')
         # in Android8.0 or higher, the result may be more than one
         m = activityRE.findall(dat)
         if m:
