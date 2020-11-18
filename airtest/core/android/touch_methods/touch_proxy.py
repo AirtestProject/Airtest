@@ -9,7 +9,7 @@ class TouchProxy(object):
         self.touch_method = touch_method
 
     def __getattr__(self, name):
-        method = getattr(self.touch_method, name, None)
+        method = getattr(self.touch_method, name, getattr(self.touch_method.base_touch, name, None))
         if method:
             return method
         else:
@@ -78,6 +78,7 @@ class MinitouchImplementation(AdbTouchImplementation):
 
     def perform(self, motion_events, interval=0.01):
         self.base_touch.perform(motion_events, interval)
+
 
 @register_touch
 class MaxtouchImplementation(MinitouchImplementation):

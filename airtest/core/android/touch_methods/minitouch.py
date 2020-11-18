@@ -43,17 +43,16 @@ class Minitouch(BaseTouch):
         device_dir = os.path.dirname(self.path_in_android)
         path = os.path.join(STFLIB, abi, binfile).replace("\\", r"\\")
 
-        if self.adb.exists_file(self.path_in_android):
+        try:
+            exists_file = self.adb.file_size(self.path_in_android)
+        except:
+            pass
+        else:
             local_minitouch_size = int(os.path.getsize(path))
-            try:
-                file_size = self.adb.file_size(self.path_in_android)
-            except Exception:
-                self.uninstall()
-            else:
-                if local_minitouch_size == file_size:
-                    LOGGING.debug("install_minitouch skipped")
-                    return
-                self.uninstall()
+            if exists_file and exists_file == local_minitouch_size:
+                LOGGING.debug("install_minitouch skipped")
+                return
+            self.uninstall()
 
         self.adb.push(path, "%s/minitouch" % device_dir)
         self.adb.shell("chmod 755 %s/minitouch" % (device_dir))
