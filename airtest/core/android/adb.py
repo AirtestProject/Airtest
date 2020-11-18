@@ -797,9 +797,12 @@ class ADB(object):
 
         Returns:
             The file size
+
+        Raises:
+            AdbShellError if no such file
         """
-        out = self.shell(["stat", "-c", "%s", filepath])
-        file_size = int(out)
+        out = self.shell(["ls", "-l", filepath])
+        file_size = int(out.split()[3])
         return file_size
 
     def _cleanup_forwards(self):
