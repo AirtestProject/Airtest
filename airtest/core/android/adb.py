@@ -405,6 +405,7 @@ class ADB(object):
         return prop
 
     @property
+    @retries(max_tries=3)
     def sdk_version(self):
         """
         Get the SDK version from the device
