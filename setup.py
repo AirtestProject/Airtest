@@ -23,12 +23,13 @@ def get_version(rel_path):
 def parse_requirements(filename):
     """ load requirements from a pip requirements file. (replacing from pip.req import parse_requirements)"""
     lineiter = (line.strip() for line in open(filename))
-    return [line for line in lineiter if line and not line.startswith("#")]
-
-
-reqs = parse_requirements('requirements.txt')
-if sys.platform == "win32":
-    reqs.append('pywin32')
+    reqs = [line for line in lineiter if line and not line.startswith("#")]
+    if sys.platform == "win32":
+        reqs.append('pywin32')
+    if sys.version_info[:2] <= (3, 6):
+        reqs.remove("opencv-contrib-python")
+        reqs.append("opencv-contrib-python==3.2.0.7")
+    return reqs
 
 
 setup(
@@ -47,7 +48,7 @@ setup(
         'html_statics': ["airtest/report"]
     },
     include_package_data=True,
-    install_requires=reqs,
+    install_requires=parse_requirements('requirements.txt'),
     extras_require={
         'tests': [
             'nose',
@@ -69,5 +70,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 )
