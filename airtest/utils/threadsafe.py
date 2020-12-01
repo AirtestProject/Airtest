@@ -1,4 +1,5 @@
 import threading
+from functools import wraps
 
 
 class ThreadSafeIter:
@@ -30,6 +31,7 @@ def threadsafe_generator(f):
     """
     A decorator that takes a generator function and makes it thread-safe.
     """
+    @wraps(f)
     def g(*a, **kw):
         return ThreadSafeIter(f(*a, **kw))
     return g
