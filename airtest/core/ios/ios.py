@@ -2,26 +2,36 @@
 # -*- coding: utf-8 -*-
 
 
-from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
-from airtest.utils.logger import get_logger
-from airtest.core.ios.instruct_cmd import InstructHelper
-from airtest.core.ios.fake_minitouch import fakeMiniTouch
-from airtest.core.ios.rotation import XYTransformer, RotationWatcher
-from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
-from airtest.core.device import Device
-from airtest import aircv
+# from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
+# from airtest.utils.logger import get_logger
+# from airtest.core.ios.instruct_cmd import InstructHelper
+# from airtest.core.ios.fake_minitouch import fakeMiniTouch
+# from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+# from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+# from airtest.core.device import Device
+# from airtest import aircv
 import requests
 import six
 import time
 import json
 import base64
 import traceback
+import wda
 
 if six.PY3:
     from urllib.parse import urljoin
 else:
     from urlparse import urljoin
 
+from airtest import aircv
+from airtest.core.device import Device
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+from airtest.core.ios.fake_minitouch import fakeMiniTouch
+from airtest.utils.logger import get_logger
+
+from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from wda import WDAError
 
 logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
@@ -33,7 +43,7 @@ def retry_session(func):
             return func(self, *args, **kwargs)
         except WDAError as err:
             # 6 : Session does not exist
-            if err.status == 6:
+            if err.value.has_key('error'):
                 self._fetchNewSession()
                 return func(self, *args, **kwargs)
             else:
@@ -55,6 +65,7 @@ class IOS(Device):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
+        print("Using default ios devices")
         self.addr = addr or DEFAULT_ADDR
 
         # fit wda format, make url start with http://
@@ -69,8 +80,8 @@ class IOS(Device):
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        DEBUG = False
-        self.driver = Client(self.addr)
+        wda.DEBUG = False
+        self.driver = wda.Client(self.addr)
 
         # record device's width
         self._size = {'width': None, 'height': None}
@@ -85,7 +96,7 @@ class IOS(Device):
         self.minitouch = fakeMiniTouch(self)
 
         # helper of run process like iproxy
-        self.instruct_helper = InstructHelper()
+        # self.instruct_helper = InstructHelper()
 
     @property
     def uuid(self):
@@ -236,14 +247,22 @@ class IOS(Device):
         fx, fy = self._touch_point_by_orientation(fpos)
         tx, ty = self._touch_point_by_orientation(tpos)
 
-        self.session.swipe(fx * self._touch_factor, fy * self._touch_factor,
-                           tx * self._touch_factor, ty * self._touch_factor, duration)
+        fxp, fyp = fx * self._touch_factor, fy * self._touch_factor
+        txp, typ = tx * self._touch_factor, ty * self._touch_factor
+        fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
+        txp, typ = float('%.2f' % txp), float('%.2f' % typ)
+
+        self.session.swipe(fxp, fyp, txp, typ, duration)
+        print("Swipe: ",fxp, fyp, txp, typ, duration)
 
     def keyevent(self, keys):
         """just use as home event"""
         if keys not in ['HOME', 'home', 'Home']:
             raise NotImplementedError
-        self.home()
+        self.press('home')
+    
+    def press(self, keys):
+        self.session.press(keys)
 
     @retry_session
     def text(self, text, enter=True):
@@ -262,11 +281,13 @@ class IOS(Device):
         raise NotImplementedError
 
     def start_app(self, package, activity=None):
-        self.defaultSession = None
-        self.session.start_app_new(package)
+        self.driver.app_launch(bundle_id=package)
 
     def stop_app(self, package):
-        self.driver.session().close(package)
+        self.driver.app_stop(bundle_id=package)
+    
+    def app_state(self, package):
+        return self.driver.app_state(bundle_id=package)
 
     def get_ip_address(self):
         """
@@ -325,7 +346,7 @@ class IOS(Device):
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS("http://10.254.51.239:8100")
+    ios = IOS("http://10.251.100.86:20003")
 
     ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))

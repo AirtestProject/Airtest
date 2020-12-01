@@ -5,5 +5,5 @@ six
 mss==4.0.3
 numpy<=1.19.3
 opencv-contrib-python
-# facebook-wda==0.2.1
+facebook-wda==1.2.3
 pywinauto==0.6.3
