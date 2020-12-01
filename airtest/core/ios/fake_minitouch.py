@@ -23,6 +23,7 @@ class fakeMiniTouch(object):
         pass
 
     def operate(self, operate_arg):
+        # print(operate_arg)
         # TODO FIX IPHONT TOUCH
         # start down
         if operate_arg['type'] == 'down':
@@ -41,8 +42,9 @@ class fakeMiniTouch(object):
                 # TODO：设定滑动和点击的阈值，目前为10
                 if abs(self.recentPoint['x'] - self.lastDown['x']) > self.swipe_threshold \
                     or abs(self.recentPoint['y'] - self.lastDown['y']) > self.swipe_threshold:
-                        self.dev.swipe((self.lastDown['x'], self.lastDown['y']),
-                        (self.recentPoint['x'], self.recentPoint['y']))
+                        w, h = self.dev.window_size()
+                        self.dev.swipe((self.lastDown['x'] / (2 * w), self.lastDown['y'] / (2 * h)),
+                        (self.recentPoint['x'] / (2 * w), self.recentPoint['y'] / (2 * h)))
                 else:
                     self.dev.touch((self.lastDown['x'], self.lastDown['y']))
             else:

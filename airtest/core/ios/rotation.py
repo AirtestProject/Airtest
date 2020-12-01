@@ -6,8 +6,10 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from airtest.core.ios.wda_client import WDAError
+# from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+# from airtest.core.ios.wda_client import WDAError
+from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from wda import WDAError, WDAInvalidSessionIdError
 
 LOGGING = get_logger(__name__)
 
@@ -64,7 +66,8 @@ class RotationWatcher(object):
             try:
                 return self.session.orientation
             except WDAError as err:
-                if err.status == 6:
+                print(err)
+                if err.value.has_key('error'):
                     self.iosHandle._fetchNewSession()
                     self.session = self.iosHandle.session
                     return self.session.orientation
