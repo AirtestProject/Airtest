@@ -34,7 +34,15 @@ from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
 from wda import WDAError
 
 logger = get_logger(__name__)
+
 DEFAULT_ADDR = "http://localhost:8100/"
+
+ROTATION_MODE = {
+    0: PORTRAIT,
+    270: LANDSCAPE,
+    90: LANDSCAPE_RIGHT,
+    180: PORTRAIT_UPSIDEDOWN
+}
 
 # retry when saved session failed
 def retry_session(func):
@@ -118,7 +126,19 @@ class IOS(Device):
             namedtuple:
                 Size(wide , hight)
         """
-        return self.session.window_size()
+
+        window_size = self.session.window_size()
+        logger.info("window_size %s", window_size)
+        return window_size
+
+    # @property
+    # @retry_session
+    # def orientation(self):
+    #     """
+    #         return device oritantation status
+    #         in  LANDSACPE POR
+    #     """
+    #     return self.session.orientation
 
     @property
     @retry_session
@@ -127,7 +147,9 @@ class IOS(Device):
             return device oritantation status
             in  LANDSACPE POR
         """
-        return self.session.orientation
+        z = self.driver._session_http.get('rotation').value.get('z')
+        logger.info('rotation %s', z)
+        return ROTATION_MODE.get(z, PORTRAIT)
 
     @property
     def display_info(self):
@@ -150,7 +172,7 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [LANDSCAPE, LANDSCAPE_RIGHT]:
+        if self.display_info["orientation"] in ['LANDSCAPE', 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
             w, h = h, w
         return w, h
 
@@ -206,7 +228,7 @@ class IOS(Device):
         h, w = screen.shape[:2]
 
         # save last res for portrait
-        if self.orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
+        if self.orientation in [LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
             self._size['height'] = w
             self._size['width'] = h
         else:
@@ -226,10 +248,13 @@ class IOS(Device):
     @retry_session
     def touch(self, pos, duration=0.01):
         # trans pos of click
+        logger.info("touch postion at (%s, %s)", pos[0], pos[1])
         pos = self._touch_point_by_orientation(pos)
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
+
+        logger.info("touch postion at (%s, %s)", x, y)
         if duration >= 0.5:
             self.session.tap_hold(x, y, duration)
         else:
@@ -252,8 +277,8 @@ class IOS(Device):
         fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
         txp, typ = float('%.2f' % txp), float('%.2f' % typ)
 
+        logger.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
         self.session.swipe(fxp, fyp, txp, typ, duration)
-        print("Swipe: ",fxp, fyp, txp, typ, duration)
 
     def keyevent(self, keys):
         """just use as home event"""
@@ -320,20 +345,37 @@ class IOS(Device):
 
         """
         x, y = tuple_xy
+        try:
+            app_current_dict = self.app_current()
+            app_current_bundleId = app_current_dict.get('bundleId')
+            logger.info("app_current_bundleId %s", app_current_bundleId)
+        except Exception as err:
+            logger.error(err)
+            app_current_bundleId = 'example_bundleID'
+        if app_current_bundleId not in ['com.apple.springboard']:
+            return x, y
 
         # use correct w and h due to now orientation
         # _size 只对应竖直时候长宽
         now_orientation = self.orientation
 
-        if now_orientation in [PORTRAIT, PORTRAIT_UPSIDEDOWN]:
+        logger.info("current orientation for %s", now_orientation)
+        if now_orientation in ['PORTRAIT', 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN']:
             width, height = self._size['width'], self._size["height"]
         else:
             height, width = self._size['width'], self._size["height"]
 
+        logger.info("current save window_size for (%s, %s)", self._size['width'], self._size["height"])
+        logger.info("current window_size for (%s, %s)", height, width)
         # check if not get screensize when touching
         if not width or not height:
             # use snapshot to get current resuluton
             self.snapshot()
+            # use the new get screen size to reinitialize width and height
+            if now_orientation in ['PORTRAIT', 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN']:
+                width, height = self._size['width'], self._size["height"]
+            else:
+                height, width = self._size['width'], self._size["height"]
 
         x, y = XYTransformer.up_2_ori(
             (x, y),
@@ -383,6 +425,19 @@ class IOS(Device):
 
         """
         return self.driver.lock()
+
+    def app_current(self):
+        """
+        lock the device, lock screen 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.app_current()
 
     def alert_accept(self):
         """
