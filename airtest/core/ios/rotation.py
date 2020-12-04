@@ -13,6 +13,12 @@ from wda import WDAError, WDAInvalidSessionIdError
 
 LOGGING = get_logger(__name__)
 
+ROTATION_MODE = {
+    0: PORTRAIT,
+    270: LANDSCAPE,
+    90: LANDSCAPE_RIGHT,
+    180: PORTRAIT_UPSIDEDOWN
+}
 
 class RotationWatcher(object):
     """
@@ -64,13 +70,13 @@ class RotationWatcher(object):
 
         def _refresh_by_ow():
             try:
-                return self.session.orientation
+                return self.get_rotation()
             except WDAError as err:
                 print(err)
                 if err.value.has_key('error'):
                     self.iosHandle._fetchNewSession()
                     self.session = self.iosHandle.session
-                    return self.session.orientation
+                    return self.get_rotation()
                 else:
                     return self.last_result
             except ValueError as err:
@@ -115,6 +121,10 @@ class RotationWatcher(object):
         """方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback.append(ow_callback)
 
+    def get_rotation(self):
+        z = self.iosHandle.driver._session_http.get('rotation').value.get('z')
+        return ROTATION_MODE.get(z, PORTRAIT)
+
 
 class XYTransformer(object):
     """
@@ -142,9 +152,9 @@ class XYTransformer(object):
 
         if orientation == LANDSCAPE:
             x, y = h-y, x
-        elif orientation == LANDSCAPE_RIGHT:
+        elif orientation == 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT':
             x, y = y, w-x
-        elif orientation == PORTRAIT_UPSIDEDOWN:
+        elif orientation == 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN':
             x, y = w-x, h-y
         elif orientation == PORTRAIT:
             x, y = x, y
