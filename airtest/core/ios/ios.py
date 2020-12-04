@@ -287,6 +287,8 @@ class IOS(Device):
         self.driver.app_stop(bundle_id=package)
     
     def app_state(self, package):
+        # output {"value": 4, "sessionId": "xxxxxx"}
+        # different value means 1: die, 2: background, 4: running
         return self.driver.app_state(bundle_id=package)
 
     def get_ip_address(self):
@@ -343,6 +345,122 @@ class IOS(Device):
     def _check_orientation_change(self):
         pass
 
+    def is_locked(self):
+        """
+        Return True or False whether the device is locked or not
+
+        Notes:
+            Might not work on some devices
+
+        Returns:
+            True or False
+
+        """
+        return self.driver.locked()
+
+    def unlock(self):
+        """
+        Unlock the device, unlock screen, double press home 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.unlock()
+
+    def lock(self):
+        """
+        lock the device, lock screen 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.lock()
+
+    def alert_accept(self):
+        """
+        Alert accept-Actually do click first alert button
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.accept()
+
+    def alert_dismiss(self):
+        """
+        Alert dissmiss-Actually do click second alert button
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.dismiss()
+
+    def alert_wait(self, time_counter=2):
+        """
+        if alert apper in time_counter second it will return True,else return False (default 20.0)
+        time_counter default is 2 seconds
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.wait(time_counter)
+
+    def alert_buttons(self):
+        """
+        get alert buttons text. 
+        Notes:
+            Might not work on all devices
+
+        Returns:
+             # example return: ("设置", "好")
+
+        """
+        return self.driver.alert.buttons()
+    
+    def alert_exists(self):
+        """
+        get True for alert exists or False. 
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
+        return self.driver.alert.exists
+
+    def alert_click(self, buttons:list):
+        """
+        # when Arg type is list, click the first match, raise ValueError if no match
+        示例： ["设置", "信任", "安装"]
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.click(buttons)
 
 if __name__ == "__main__":
     start = time.time()
