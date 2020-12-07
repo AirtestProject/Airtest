@@ -315,6 +315,19 @@ class IOS(Device):
         # output {"value": 4, "sessionId": "xxxxxx"}
         # different value means 1: die, 2: background, 4: running
         return self.driver.app_state(bundle_id=package)
+    
+    def app_current(self):
+        """
+        lock the device, lock screen 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.app_current()
 
     def get_ip_address(self):
         """
@@ -426,19 +439,6 @@ class IOS(Device):
         """
         return self.driver.lock()
 
-    def app_current(self):
-        """
-        lock the device, lock screen 
-
-        Notes:
-            Might not work on all devices
-
-        Returns:
-            None
-
-        """
-        return self.driver.app_current()
-
     def alert_accept(self):
         """
         Alert accept-Actually do click first alert button
@@ -516,6 +516,19 @@ class IOS(Device):
 
         """
         return self.driver.alert.click(buttons)
+
+    def device_info(self):
+        return self.session.info
+
+    @property
+    def uuid(self):
+        devices_info = self.device_info()
+        try:
+            uuid = devices_info["uuid"]
+        except Exception as e:
+            uuid = None
+        return uuid
+
 
 if __name__ == "__main__":
     start = time.time()
