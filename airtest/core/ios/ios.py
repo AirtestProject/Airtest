@@ -128,7 +128,6 @@ class IOS(Device):
         """
 
         window_size = self.session.window_size()
-        logger.info("window_size %s", window_size)
         return window_size
 
     # @property
@@ -148,7 +147,6 @@ class IOS(Device):
             in  LANDSACPE POR
         """
         z = self.driver._session_http.get('rotation').value.get('z')
-        logger.info('rotation %s', z)
         return ROTATION_MODE.get(z, PORTRAIT)
 
     @property
@@ -248,13 +246,13 @@ class IOS(Device):
     @retry_session
     def touch(self, pos, duration=0.01):
         # trans pos of click
-        logger.info("touch postion at (%s, %s)", pos[0], pos[1])
+        logger.info("touch original-postion at (%s, %s)", pos[0], pos[1])
         pos = self._touch_point_by_orientation(pos)
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
 
-        logger.info("touch postion at (%s, %s)", x, y)
+        logger.info("touch last-postion at (%s, %s)", x, y)
         if duration >= 0.5:
             self.session.tap_hold(x, y, duration)
         else:
@@ -379,7 +377,6 @@ class IOS(Device):
             height, width = self._size['width'], self._size["height"]
 
         logger.info("current save window_size for (%s, %s)", self._size['width'], self._size["height"])
-        logger.info("current window_size for (%s, %s)", height, width)
         # check if not get screensize when touching
         if not width or not height:
             # use snapshot to get current resuluton
@@ -519,15 +516,6 @@ class IOS(Device):
 
     def device_info(self):
         return self.session.info
-
-    @property
-    def uuid(self):
-        devices_info = self.device_info()
-        try:
-            uuid = devices_info["uuid"]
-        except Exception as e:
-            uuid = None
-        return uuid
 
 
 if __name__ == "__main__":
