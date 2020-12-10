@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
-"PO-Revision-Date: 2020-09-17 12:02+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"PO-Revision-Date: 2020-12-09 19:29+0800\n"
 "Last-Translator: \n"
 "Language: en_GB\n"
 "Language-Team: \n"
@@ -35,9 +35,9 @@ msgstr "初始化设备，并设置为当前设备。"
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.auto_setup airtest.core.api.clear_app
 #: airtest.core.api.click airtest.core.api.connect_device
-#: airtest.core.api.exists airtest.core.api.find_all
-#: airtest.core.api.init_device airtest.core.api.install
-#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.double_click airtest.core.api.exists
+#: airtest.core.api.find_all airtest.core.api.init_device
+#: airtest.core.api.install airtest.core.api.keyevent airtest.core.api.pinch
 #: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
@@ -61,9 +61,9 @@ msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACA
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.clear_app airtest.core.api.click
 #: airtest.core.api.connect_device airtest.core.api.device
-#: airtest.core.api.exists airtest.core.api.find_all airtest.core.api.home
-#: airtest.core.api.init_device airtest.core.api.install
-#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.double_click airtest.core.api.exists
+#: airtest.core.api.find_all airtest.core.api.home airtest.core.api.init_device
+#: airtest.core.api.install airtest.core.api.keyevent airtest.core.api.pinch
 #: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
@@ -76,6 +76,22 @@ msgstr ""
 msgid "device instance"
 msgstr "device对象"
 
+#: airtest.core.api.assert_equal airtest.core.api.assert_exists
+#: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
+#: airtest.core.api.auto_setup airtest.core.api.clear_app
+#: airtest.core.api.click airtest.core.api.connect_device
+#: airtest.core.api.device airtest.core.api.double_click
+#: airtest.core.api.exists airtest.core.api.find_all airtest.core.api.home
+#: airtest.core.api.init_device airtest.core.api.install
+#: airtest.core.api.keyevent airtest.core.api.pinch
+#: airtest.core.api.set_current airtest.core.api.shell airtest.core.api.sleep
+#: airtest.core.api.snapshot airtest.core.api.start_app
+#: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
+#: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
+#: airtest.core.api.wake of
+msgid "Example"
+msgstr "示例"
+
 #: airtest.core.api.connect_device:1 of
 msgid "Initialize device with uri, and set as current device."
 msgstr "用URI字符串来初始化设备，并且设置为当前设备。"
@@ -83,26 +99,6 @@ msgstr "用URI字符串来初始化设备，并且设置为当前设备。"
 #: airtest.core.api.connect_device:3 of
 msgid "an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&param2=value2`"
 msgstr "一个用于初始化设备的URI字符串，例如 ``android://adbhost:adbport/serialno?param=value&param2=value2``"
-
-#: airtest.core.api.connect_device of
-msgid "Example"
-msgstr "示例"
-
-#: airtest.core.api.connect_device:6 of
-msgid "``android:///`` # local adb device using default params"
-msgstr "``android:///`` # 当前Android设备，使用默认参数连接"
-
-#: airtest.core.api.connect_device:7 of
-msgid "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # remote device using custom params"
-msgstr "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``  # 远程Android设备，并且使用了自定义参数"
-
-#: airtest.core.api.connect_device:8 of
-msgid "``windows:///`` # local Windows application"
-msgstr "``windows:///`` # 本地Windows桌面"
-
-#: airtest.core.api.connect_device:9 of
-msgid "``ios:///`` # iOS device"
-msgstr "``ios:///`` # iOS 设备"
 
 #: airtest.core.api.device:1 of
 msgid "Return the current active device."
@@ -153,7 +149,7 @@ msgstr ""
 msgid "platforms"
 msgstr "支持平台"
 
-#: airtest.core.api.set_current:6 airtest.core.api.snapshot:8 of
+#: airtest.core.api.set_current:6 airtest.core.api.snapshot:9 of
 msgid "Android, iOS, Windows"
 msgstr ""
 
@@ -170,7 +166,8 @@ msgid "connect_device uri in list."
 msgstr "一个内容为 ``connect_device uri`` 字符串的列表"
 
 #: airtest.core.api.auto_setup:5 of
-msgid "log dir for script report, default is None for no log, set to `True` for <basedir>/log."
+#, fuzzy
+msgid "log dir for script report, default is None for no log, set to ``True`` for ``<basedir>/log``."
 msgstr "可设置脚本运行时的log保存路径，默认值为None则不保存log，如果设置为True则自动保存在<basedir>/log目录中"
 
 #: airtest.core.api.auto_setup:6 of
@@ -271,14 +268,22 @@ msgid "The image quality, integer in range [1, 99], default is 10"
 msgstr "图片的质量，[1,99]的整数，默认是10"
 
 #: airtest.core.api.snapshot:7 of
+msgid "the maximum size of the picture, e.g 1200"
+msgstr "图片的最大尺寸，例如 1200"
+
+#: airtest.core.api.snapshot:8 of
 msgid "absolute path of the screenshot"
 msgstr "截图文件的绝对路径"
+
+#: airtest.core.api.snapshot:15 of
+msgid "The quality and size of the screenshot can be set::"
+msgstr "可以设置截图的画质和大小"
 
 #: airtest.core.api.wake:1 of
 msgid "Wake up and unlock the target device"
 msgstr "唤醒并解锁目标设备"
 
-#: airtest.core.api.wake:6 of
+#: airtest.core.api.wake:8 of
 msgid "Might not work on some models"
 msgstr "在部分品牌手机上可能无法生效"
 
@@ -290,26 +295,52 @@ msgstr "返回HOME界面。"
 msgid "Perform the touch action on the device screen"
 msgstr "在当前设备画面上进行一次点击"
 
-#: airtest.core.api.click:3 airtest.core.api.touch:3 of
-msgid "target to touch, either a Template instance or absolute coordinates (x, y)"
-msgstr "点击位置，可以是一个Template图片实例，或是一个绝对坐标 ``(x, y)``"
+#: airtest.core.api.click:3 airtest.core.api.double_click:3
+#: airtest.core.api.touch:3 of
+msgid "target to touch, either a ``Template`` instance or absolute coordinates (x, y)"
+msgstr "点击位置，可以是一个 ``Template`` 图片实例，或是一个绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.click:4 airtest.core.api.touch:4 of
 msgid "how many touches to be performed"
 msgstr "点击次数"
 
-#: airtest.core.api.click:6 airtest.core.api.touch:6 of
+#: airtest.core.api.click:6 airtest.core.api.double_click:4
+#: airtest.core.api.touch:6 of
 msgid "finial position to be clicked"
 msgstr "实际点击位置坐标 ``(x, y)``"
 
 #: airtest.core.api.assert_equal:8 airtest.core.api.assert_exists:7
 #: airtest.core.api.assert_not_equal:8 airtest.core.api.assert_not_exists:7
 #: airtest.core.api.click:7 airtest.core.api.exists:5
-#: airtest.core.api.find_all:5 airtest.core.api.keyevent:6
+#: airtest.core.api.find_all:8 airtest.core.api.keyevent:6
 #: airtest.core.api.sleep:5 airtest.core.api.swipe:17 airtest.core.api.text:6
 #: airtest.core.api.touch:7 airtest.core.api.wait:9 of
 msgid "Android, Windows, iOS"
 msgstr ""
+
+#: airtest.core.api.click:9 airtest.core.api.touch:9 of
+msgid "Click absolute coordinates::"
+msgstr "点击绝对坐标::"
+
+#: airtest.core.api.click:13 airtest.core.api.touch:13 of
+msgid "Click the center of the picture(Template object)::"
+msgstr "点击图片的中心位置::"
+
+#: airtest.core.api.click:17 airtest.core.api.touch:17 of
+msgid "Click 2 times::"
+msgstr "点击两次::"
+
+#: airtest.core.api.click:21 airtest.core.api.touch:21 of
+msgid "Under Android and Windows platforms, you can set the click duration::"
+msgstr "在Android和Windows下，可以设置点击持续时间::"
+
+#: airtest.core.api.click:25 airtest.core.api.touch:25 of
+msgid "Right click(Windows)::"
+msgstr "右键点击（Windows)::"
+
+#: airtest.core.api.double_click:1 of
+msgid "Perform double click"
+msgstr "双击"
 
 #: airtest.core.api.swipe:1 of
 msgid "Perform the swipe action on the device screen."
@@ -347,6 +378,10 @@ msgstr "当没有足够的参数来执行滑动时引发异常"
 msgid "Origin position and target position"
 msgstr "原点位置和目标位置"
 
+#: airtest.core.api.swipe:23 of
+msgid "Custom swiping duration and number of steps(Android and iOS)::"
+msgstr "自定义滑动持续时间和经过几步到达终点::"
+
 #: airtest.core.api.pinch:1 of
 msgid "Perform the pinch action on the device screen"
 msgstr "在设备屏幕上执行一个双指pinch捏合操作"
@@ -363,6 +398,14 @@ msgstr "pinch动作的中心位置，默认值为None则为屏幕中心点"
 msgid "percentage of the screen of pinch action, default is 0.5"
 msgstr "pinch动作的屏幕百分比，默认值为0.5"
 
+#: airtest.core.api.pinch:10 of
+msgid "Pinch in the center of the screen with two fingers::"
+msgstr "两指向屏幕中心点捏合::"
+
+#: airtest.core.api.pinch:14 of
+msgid "Take (100,100) as the center and slide out with two fingers::"
+msgstr "将(100, 100)作为中心点，向外扩张两指::"
+
 #: airtest.core.api.keyevent:1 of
 msgid "Perform key event on the device"
 msgstr "在设备上执行keyevent按键事件"
@@ -370,6 +413,46 @@ msgstr "在设备上执行keyevent按键事件"
 #: airtest.core.api.keyevent:3 of
 msgid "platform specific key name"
 msgstr "平台相关的按键名称"
+
+#: airtest.core.api.keyevent:9 of
+msgid "``Android``: it is equivalent to executing ``adb shell input keyevent KEYNAME`` ::"
+msgstr "``Android``: 相当于执行了 ``adb shell input keyevent KEYNAME`` ::"
+
+#: airtest.core.api.keyevent:20 of
+msgid "Module :py:mod:`airtest.core.android.adb.ADB.keyevent`"
+msgstr ""
+
+#: airtest.core.api.keyevent:20 of
+msgid "Equivalent to calling the ``android.adb.keyevent()``"
+msgstr "相当于调用 ``android.adb.keyevent()``"
+
+#: airtest.core.api.keyevent:22 of
+msgid "`Android Keyevent <https://developer.android.com/reference/android/view/KeyEvent#constants_1>`_"
+msgstr ""
+
+#: airtest.core.api.keyevent:23 of
+msgid "Documentation for more ``Android.KeyEvent``"
+msgstr "``Android.KeyEvent`` 的参考文档"
+
+#: airtest.core.api.keyevent:25 of
+msgid "``Windows``: Use ``pywinauto.keyboard`` module for key input::"
+msgstr "``Windows``: 使用 ``pywinauto.keyboard`` 进行按键点击::"
+
+#: airtest.core.api.keyevent:32 of
+msgid "Module :py:mod:`airtest.core.win.win.Windows.keyevent`"
+msgstr ""
+
+#: airtest.core.api.keyevent:34 of
+msgid "`pywinauto.keyboard <https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html>`_"
+msgstr ""
+
+#: airtest.core.api.keyevent:35 of
+msgid "Documentation for ``pywinauto.keyboard``"
+msgstr ""
+
+#: airtest.core.api.keyevent:37 of
+msgid "``iOS``: Only supports HOME key::"
+msgstr "``iOS``: 只支持HOME键::"
 
 #: airtest.core.api.text:1 of
 msgid "Input text on the target device. Text input widget must be active first."
@@ -382,6 +465,22 @@ msgstr "要输入的文本"
 #: airtest.core.api.text:4 of
 msgid "input `Enter` keyevent after text input, default is True"
 msgstr "是否在输入完毕后，执行一次 ``Enter`` ，默认是True"
+
+#: airtest.core.api.text:12 of
+msgid "On Android, sometimes you need to click the search button after typing::"
+msgstr "在Android上，有时你需要在输入完毕后点击搜索按钮::"
+
+#: airtest.core.api.text:18 of
+msgid "Module :py:mod:`airtest.core.android.ime.YosemiteIme.code`"
+msgstr ""
+
+#: airtest.core.api.text:20 of
+msgid "If you want to enter other keys on the keyboard, you can use the interface::"
+msgstr "如果希望输入其他按键，可以用这个接口::"
+
+#: airtest.core.api.text:25 of
+msgid "Ref: `Editor Action Code <http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html>`_"
+msgstr ""
 
 #: airtest.core.api.sleep:1 of
 msgid "Set the sleep interval. It will be recorded in the report"
@@ -419,6 +518,10 @@ msgstr "在超时后仍未找到目标则触发"
 msgid "coordinates of the matched target"
 msgstr "匹配目标的坐标"
 
+#: airtest.core.api.wait:16 of
+msgid "You can specify a callback function every time the search target fails::"
+msgstr "你可以在每次查找目标失败时，指定一个回调函数::"
+
 #: airtest.core.api.exists:1 of
 msgid "Check whether given target exists on device screen"
 msgstr "检查设备上是否存在给定目标"
@@ -432,6 +535,10 @@ msgstr "要检查的目标"
 msgid "False if target is not found, otherwise returns the coordinates of the target"
 msgstr "如果未找到目标，则返回False，否则返回目标的坐标"
 
+#: airtest.core.api.exists:11 of
+msgid "Since ``exists()`` will return the coordinates, we can directly click on this return value to reduce one image search::"
+msgstr "因为 ``exists()`` 会返回坐标，我们可以直接点击坐标来减少一次图像查找"
+
 #: airtest.core.api.find_all:1 of
 msgid "Find all occurrences of the target on the device screen and return their coordinates"
 msgstr "在设备屏幕上查找所有出现的目标并返回其坐标列表"
@@ -441,8 +548,8 @@ msgid "target to find"
 msgstr "寻找目标"
 
 #: airtest.core.api.find_all:4 of
-msgid "list of coordinates, [(x, y), (x1, y1), ...]"
-msgstr "坐标列表， [(x, y), (x1, y1), ...]"
+msgid "list of results, [{'result': (x, y), 'rectangle': ( (left_top, left_bottom, right_bottom, right_top) ), 'confidence': 0.9}, ...]"
+msgstr "结果列表， [{'result': (x, y), 'rectangle': ( (left_top, left_bottom, right_bottom, right_top) ), 'confidence': 0.9}, ...]"
 
 #: airtest.core.api.assert_exists:1 of
 msgid "Assert target exists on device screen"
@@ -506,7 +613,7 @@ msgstr "如果断言异常"
 #~ msgstr "返回值"
 
 #~ msgid "Raises"
-#~ msgstr "抛出异常"
+#~ msgstr ""
 
 #~ msgid "Initialize device with uri and set the device as the current one."
 #~ msgstr ""
@@ -540,4 +647,40 @@ msgstr "如果断言异常"
 #~ "no log, set to `True` for "
 #~ "<basedir>/log. :param project_root: project "
 #~ "root dir for `using` api."
+#~ msgstr ""
+
+#~ msgid "``android:///`` # local adb device using default params"
+#~ msgstr "``android:///`` # 当前Android设备，使用默认参数连接"
+
+#~ msgid ""
+#~ "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``"
+#~ "  # remote device using custom params"
+#~ msgstr ""
+#~ "``android://adbhost:adbport/1234566?cap_method=javacap&touch_method=adb``"
+#~ "  # 远程Android设备，并且使用了自定义参数"
+
+#~ msgid "``windows:///`` # local Windows application"
+#~ msgstr "``windows:///`` # 本地Windows桌面"
+
+#~ msgid "``ios:///`` # iOS device"
+#~ msgstr "``ios:///`` # iOS 设备"
+
+#~ msgid "list of coordinates, [(x, y), (x1, y1), ...]"
+#~ msgstr "坐标列表， [(x, y), (x1, y1), ...]"
+
+#~ msgid ""
+#~ "Custom swiping duration and number of"
+#~ " steps(Android and iOS):: >>> # "
+#~ "swiping lasts for 1 second, divided "
+#~ "into 6 steps >>> swipe((100, 100), "
+#~ "(200, 200), duration=1, steps=6)"
+#~ msgstr ""
+
+#~ msgid "Pinch in the center of the screen with two fingers:: >>> pinch()"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Take (100,100) as the center and "
+#~ "slide out with two fingers >>> "
+#~ "pinch('out', center=(100, 100))"
 #~ msgstr ""

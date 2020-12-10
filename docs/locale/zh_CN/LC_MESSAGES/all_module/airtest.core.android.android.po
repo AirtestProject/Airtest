@@ -5,19 +5,18 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: airtest\n"
+"Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:47+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: 2020-09-17 12:00+0800\n"
 "Last-Translator: \n"
 "Language: zh\n"
 "Language-Team: \n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=1; plural=0\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
-"X-Generator: Poedit 2.2.1\n"
 
 #: ../../all_module/airtest.core.android.android.rst:2
 msgid "airtest\\.core\\.android\\.android module"
@@ -265,7 +264,11 @@ msgstr "截图方向是否要与当前显示情况一致，默认为True"
 msgid "The image quality, integer in range [1, 99]"
 msgstr ""
 
-#: airtest.core.android.android.Android.snapshot:7 of
+#: airtest.core.android.android.Android.snapshot:6 of
+msgid "the maximum size of the picture, e.g 1200"
+msgstr ""
+
+#: airtest.core.android.android.Android.snapshot:8 of
 msgid "screenshot output"
 msgstr "截图输出"
 
@@ -392,8 +395,8 @@ msgstr "如果中心点不是一个list/tuple坐标，将会抛出TypeError异�
 
 #: airtest.core.android.android.Android.swipe_along:1 of
 msgid ""
-"Perform swipe event across multiple points in sequence, only for minitouch "
-"and maxtouch"
+"Perform swipe event across multiple points in sequence, only for "
+"minitouch and maxtouch"
 msgstr "执行一段连续的滑动操作，仅适用于minitouch和maxtouch"
 
 #: airtest.core.android.android.Android.swipe_along:3 of
@@ -547,3 +550,34 @@ msgstr "停止对设备画面的录制。录制出的文件将会放在设备中
 #: airtest.core.android.android.Android.adjust_all_screen:1 of
 msgid "Adjust the render resolution for all_screen device."
 msgstr "对全面屏设备进行渲染分辨率的调整。"
+
+#~ msgid "基类：:class:`airtest.core.device.Device`"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
+
+#~ msgid "提示"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`airtest.core.device.Device`"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Raises"
+#~ msgstr ""
+
+#~ msgid "Notes"
+#~ msgstr ""
+

@@ -55,3 +55,13 @@ swipe_event2.append(UpEvent(0))
 swipe_event2.append(UpEvent(1))
 
 dev.touch_proxy.perform(swipe_event2)
+
+# 5. Long press the app and drag it to the trash can to delete
+# 长按然后拖动删除app
+longpress_delete_event = [
+    DownEvent([908, 892]),
+    SleepEvent(2),
+    MoveEvent([165, 285]),  # target coordinates
+    UpEvent(0)]
+
+dev.touch_proxy.perform(longpress_delete_event)

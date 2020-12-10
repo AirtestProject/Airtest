@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-09 15:40+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,31 @@ msgid ""
 msgstr ""
 
 #: airtest.aircv.utils.compress_image:1 of
-msgid "生成缩略图"
+msgid "Save the picture and compress"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image of
+msgid "参数"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image:3 of
+msgid "PIL image"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image:4 of
+msgid "save path"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image:5 of
+msgid "the image quality, integer in range [1, 99]"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image:6 of
+msgid "the maximum size of the picture, e.g 1200"
+msgstr ""
+
+#: airtest.aircv.utils.compress_image of
+msgid "返回"
 msgstr ""
 
 #~ msgid "Format the result: 定义图像识别结果格式"
@@ -51,5 +75,14 @@ msgstr ""
 #~ " template match can figure the img"
 #~ " data. \"print(type(im_search[0][0])\")  can "
 #~ "check the pixel type."
+#~ msgstr ""
+
+#~ msgid "生成缩略图"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Returns"
 #~ msgstr ""
 
