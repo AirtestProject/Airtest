@@ -50,7 +50,7 @@ def connect_device(uri):
 
         >>> connect_device("Android:///")  # local adb device using default params
         >>> # local device with serial number SJE5T17B17 and custom params
-        >>> connect_device("Android://127.0.0.1:5037/SJE5T17B17?cap_method=javacap&touch_method=adb")
+        >>> connect_device("Android:///SJE5T17B17?cap_method=javacap&touch_method=adb")
         >>> # remote device using custom params Android://adbhost:adbport/serialno
         >>> connect_device("Android://127.0.0.1:5037/10.254.60.1:5555")
         >>> connect_device("Windows:///")  # connect to the desktop

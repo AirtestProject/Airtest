@@ -1,5 +1,5 @@
-airtest\.core\.settings module
-==============================
+airtest.core.settings module
+============================
 
 .. automodule:: airtest.core.settings
     :members:

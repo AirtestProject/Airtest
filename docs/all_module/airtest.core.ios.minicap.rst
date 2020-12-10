@@ -1,5 +1,5 @@
-airtest\.core\.ios\.minicap module
-==================================
+airtest.core.ios.minicap module
+===============================
 
 .. automodule:: airtest.core.ios.minicap
     :members:

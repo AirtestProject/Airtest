@@ -1,5 +1,5 @@
-airtest\.aircv\.error module
-============================
+airtest.aircv.error module
+==========================
 
 .. automodule:: airtest.aircv.error
     :members:

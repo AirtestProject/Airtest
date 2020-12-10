@@ -1,5 +1,5 @@
-airtest\.report package
-=======================
+airtest.report package
+======================
 
 .. automodule:: airtest.report
     :members:

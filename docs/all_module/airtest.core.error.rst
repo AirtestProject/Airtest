@@ -1,5 +1,5 @@
-airtest\.core\.error module
-===========================
+airtest.core.error module
+=========================
 
 .. automodule:: airtest.core.error
     :members:
