@@ -1,5 +1,5 @@
-airtest\.cli package
-====================
+airtest.cli package
+===================
 
 .. automodule:: airtest.cli
     :members:

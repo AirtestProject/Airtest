@@ -1,5 +1,5 @@
-airtest\.core\.device module
-============================
+airtest.core.device module
+==========================
 
 .. automodule:: airtest.core.device
     :members:

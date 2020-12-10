@@ -1,5 +1,5 @@
-airtest\.cli\.info module
-=========================
+airtest.cli.info module
+=======================
 
 .. automodule:: airtest.cli.info
     :members:

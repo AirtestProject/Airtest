@@ -1,5 +1,5 @@
-airtest\.core\.ios\.ios module
-==============================
+airtest.core.ios.ios module
+===========================
 
 .. automodule:: airtest.core.ios.ios
     :members:

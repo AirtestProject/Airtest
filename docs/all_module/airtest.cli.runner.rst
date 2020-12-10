@@ -1,5 +1,5 @@
-airtest\.cli\.runner module
-===========================
+airtest.cli.runner module
+=========================
 
 .. automodule:: airtest.cli.runner
     :members:

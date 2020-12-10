@@ -1,5 +1,5 @@
-airtest\.core\.android\.ime module
-==================================
+airtest.core.android.ime module
+===============================
 
 .. automodule:: airtest.core.android.ime
     :members:

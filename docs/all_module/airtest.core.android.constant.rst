@@ -1,5 +1,5 @@
-airtest\.core\.android\.constant module
-=======================================
+airtest.core.android.constant module
+====================================
 
 .. automodule:: airtest.core.android.constant
     :members:

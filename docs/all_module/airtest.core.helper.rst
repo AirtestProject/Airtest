@@ -1,5 +1,5 @@
-airtest\.core\.helper module
-============================
+airtest.core.helper module
+==========================
 
 .. automodule:: airtest.core.helper
     :members:

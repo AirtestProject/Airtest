@@ -67,6 +67,8 @@ class Android(Device):
         """
         Perform touch operation according to self.touch_method
 
+        Module: :py:mod:`airtest.core.android.touch_methods.touch_proxy.TouchProxy`
+
         Returns:
             TouchProxy
         """
@@ -95,6 +97,11 @@ class Android(Device):
 
     @property
     def uuid(self):
+        """
+        Serial number
+
+        :return:
+        """
         ult = [self.serialno]
         if self.display_id:
             ult.append(self.display_id)

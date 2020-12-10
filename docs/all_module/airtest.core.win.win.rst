@@ -1,5 +1,5 @@
-airtest\.core\.win\.win module
-==============================
+airtest.core.win.win module
+===========================
 
 .. automodule:: airtest.core.win.win
     :members:

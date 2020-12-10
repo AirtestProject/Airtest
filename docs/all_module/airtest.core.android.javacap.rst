@@ -1,5 +1,5 @@
-airtest\.core\.android\.javacap module
-======================================
+airtest.core.android.javacap module
+===================================
 
 .. automodule:: airtest.core.android.javacap
     :members:

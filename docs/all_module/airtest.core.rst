@@ -1,5 +1,5 @@
-airtest\.core package
-=====================
+airtest.core package
+====================
 
 .. automodule:: airtest.core
     :members:
@@ -13,6 +13,7 @@ Subpackages
 
     airtest.core.android
     airtest.core.ios
+    airtest.core.linux
     airtest.core.win
 
 Submodules
