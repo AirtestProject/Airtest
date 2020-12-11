@@ -251,9 +251,12 @@ longtouch_event = [
 dev.touch_proxy.perform(longtouch_event)
 ```
 
-
-
 更多示例，请参考[airtest/playground/android_motionevents.py](https://github.com/AirtestProject/Airtest/blob/master/playground/android_motionevents.py)。
+
+#### Debug tips
+
+你可以打开`手机设置-开发者选项-显示触摸位置`来调试模拟输入的操作，这样做能看到每次点击的位置。
+
 
 ### 在运行脚本过程中录屏
 

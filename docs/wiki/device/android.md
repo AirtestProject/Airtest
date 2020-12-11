@@ -251,11 +251,13 @@ longtouch_event = [
 dev.touch_proxy.perform(longtouch_event)
 ```
 
-
-
 More examples, please refer to the [airtest/playground/android_motionevents.py](https://github.com/AirtestProject/Airtest/blob/master/playground/android_motionevents.py).
 
-Record the screen while running the script 
+#### Debug tips
+
+You can switch on `settings-developer options-show input position` on your phone to debug simulated inputs.
+
+### Record the screen while running the script 
 
 Android phones support recording the screen while running the script. Add the `--recording` parameter to the command line of running the script:
 
