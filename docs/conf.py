@@ -41,11 +41,8 @@ from recommonmark.parser import CommonMarkParser
 
 import mock
 
-for mod_name in ['cv2', 'Xlib']:
-    sys.modules[mod_name] = mock.MagicMock()
-
-if not sys.platform.startswith('win'):
-    for mod_name in [
+mock_list = ['cv2', 'Xlib', 'numpy', 'mss',]
+win_mock_list = [
             'win32api',
             'win32con',
             'win32gui',
@@ -56,9 +53,9 @@ if not sys.platform.startswith('win'):
             'pywinauto.win32functions',
             'pywinauto.win32structures',
             'airtest.core.win.ctypesinput'
-            ]:
-
-        sys.modules[mod_name] = mock.MagicMock()
+            ]
+for mod_name in mock_list + win_mock_list:
+    sys.modules[mod_name] = mock.MagicMock()
 
 
 extensions = ['sphinx.ext.autodoc',
