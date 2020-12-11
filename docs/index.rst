@@ -106,10 +106,11 @@ as well as providing a API reference documentation.
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Wiki
 
    wiki/device/device.rst
+   wiki/code/code.rst
 
 
 

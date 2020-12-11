@@ -1,4 +1,4 @@
-Device
+Device Connection
 ============================
 
 .. toctree::
