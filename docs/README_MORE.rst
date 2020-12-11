@@ -41,6 +41,7 @@ Supported Platforms
 -  Egret
 -  WeChat
 
+`Read more <wiki/device/platforms.html>`_
 
 Installation
 ------------
@@ -246,7 +247,7 @@ Following examples demonstrate the basic usage of airtest framework running from
 
 
 run automated case
-..............
+..................
 .. code:: shell
 
     # run automated cases and scenarios on various devices

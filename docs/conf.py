@@ -41,6 +41,8 @@ from recommonmark.parser import CommonMarkParser
 
 import mock
 
+for mod_name in ['cv2', 'Xlib']:
+    sys.modules[mod_name] = mock.MagicMock()
 
 if not sys.platform.startswith('win'):
     for mod_name in [
