@@ -20,11 +20,8 @@
 
 Get started from [airtest homepage](http://airtest.netease.com/)
 
-#### [Supported Platforms](./docs/wiki/platforms.md)
+#### [Supported Platforms](./docs/wiki/device/platforms.md)
 
-| | | | | | | | |
-|-|-|-|-|-|-|-|-|
-[Android](http://airtest.netease.com/docs/en/1_quick_start/2_test_with_Android_device.html) |[Emulator](./docs/wiki/platforms.md#android-emulator) |[iOS](https://github.com/AirtestProject/iOS-Tagent)|[Windows](http://airtest.netease.com/docs/en/1_quick_start/4_get_started_with_Windows_test.html)|[Unity](http://airtest.netease.com/docs/en/1_quick_start/1_how_to_write_the_first_script_for_your_game.html)|Cocos2dx|Egret|[WeChat](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)| [web](http://airtest.netease.com/docs/en/1_quick_start/5_get_started_with_web_test.html)
 
 ## Installation
 
@@ -105,7 +102,7 @@ Try running provided example case: [``airtest/playground/test_blackjack.air``](.
 
 ## Contribution
 
-Pull requests are very welcome. [Help needed here](./docs/wiki/platforms.md#pull-request-guide)
+Pull requests are very welcome. 
 
 
 ## Thanks
