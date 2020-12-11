@@ -1,6 +1,6 @@
 # Common problems and code examples
 
-
+[中文版](code_example_zh.md)
 
 ## How to initialize the script
 
@@ -241,7 +241,7 @@ Delete poco (leave the input box blank):
 
 
 
-## log related
+## Log
 
 ### How to log into the report
 
@@ -367,7 +367,7 @@ h1 = LogToHtml(script_root=r'D:\test\1234.air', log_root=r"D:\test\1234.air\log"
 h1.report()
 ```
 
-## Screenshot related
+## Screenshot
 
 ### How to take a screenshot with script
 

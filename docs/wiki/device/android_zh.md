@@ -1,5 +1,7 @@
 # Android设备连接方法与常见问题
 
+[English version](android.md)
+
 ## Android手机连接
 
 若使用AirtestIDE进行手机连接，请参考[文档](https://airtest.doc.io.netease.com/IDEdocs/device_connection/1_android_phone_connection/)

@@ -1,5 +1,7 @@
 # Android device connection methods and FAQs
 
+[中文版](android_zh.md)
+
 ## Android phone connection
 
 If use AirtestIDE to mobile phone connection, please refer to the [documents](https://airtest.doc.io.netease.com/en/IDEdocs/device_connection/1_android_phone_connection/)

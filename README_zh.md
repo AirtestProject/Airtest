@@ -19,11 +19,7 @@
 [从官网开始上手吧](http://airtest.netease.com/)
 
 
-#### [跨平台支持](./docs/wiki/platforms.md)
-
-| | | | | | | |
-|-|-|-|-|-|-|-|
-Android|[iOS](https://github.com/AirtestProject/iOS-Tagent)|Windows|Unity|Cocos2dx|白鹭引擎|[微信小程序](http://airtest.netease.com/blog/tutorial/WechatSmallProgram/)|
+#### [跨平台支持](./docs/wiki/device/platforms.md)
 
 ## 安装
 
@@ -105,7 +101,7 @@ python -m airtest run "path to your air dir" --device Android:///
 
 ## 贡献代码
 
-欢迎大家fork和提pull requests。[这里需要大家的帮助](./docs/wiki/platforms.md#pull-request-guide)
+欢迎大家fork和提pull requests。
 
 
 ## 致谢
