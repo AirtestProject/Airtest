@@ -20,6 +20,7 @@ class RotationWatcher(object):
         self._t = None
         self.current_orientation = None
         reg_cleanup(self.teardown)
+        self.start()
 
     @on_method_ready('start')
     def get_ready(self):
