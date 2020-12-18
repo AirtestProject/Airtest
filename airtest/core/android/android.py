@@ -439,11 +439,13 @@ class Android(Device):
         return self.adb.get_top_activity()
 
     def get_top_activity_name_and_pid(self):
-        dat = self.adb.shell('dumpsys activity top')
+        dat = self.adb.shell('dumpsys activity top | grep ACTIVITY')
+        top_info_list = str(dat).strip().split('\n')
+        top_app_info_str = top_info_list[-1]
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(dat)
+        m = activityRE.search(top_app_info_str)
         if m:
-            return (m.group(1), m.group(2), m.group(3))
+            return m.group(1), m.group(2), m.group(3)
         else:
             warnings.warn("NO MATCH:" + dat)
             return None
