@@ -263,7 +263,6 @@ class Android(Device):
         """
         """default not write into file."""
         if self.cap_method == CAP_METHOD.MINICAP_STREAM:
-            self.rotation_watcher.get_ready()
             screen = self.minicap.get_frame_from_stream()
         elif self.cap_method == CAP_METHOD.MINICAP:
             screen = self.minicap.get_frame()
@@ -618,6 +617,7 @@ class Android(Device):
 
         """
         if self.ori_method == ORI_METHOD.MINICAP:
+            self.rotation_watcher.get_ready()
             try:
                 return self.minicap.get_display_info()
             except RuntimeError:
