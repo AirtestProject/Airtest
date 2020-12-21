@@ -507,30 +507,20 @@ class Android(Device):
         Get the top activity
 
         Returns:
-            package, activity and pid
+            (package, activity, pid)
 
         """
         return self.adb.get_top_activity()
-
-    def get_top_activity_name_and_pid(self):
-        dat = self.adb.shell('dumpsys activity top')
-        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
-        m = activityRE.search(dat)
-        if m:
-            return (m.group(1), m.group(2), m.group(3))
-        else:
-            warnings.warn("NO MATCH:" + dat)
-            return None
 
     def get_top_activity_name(self):
         """
         Get the top activity name
 
         Returns:
-            package, activity and pid
+            (package, activity, pid)
 
         """
-        tanp = self.get_top_activity_name_and_pid()
+        tanp = self.get_top_activity()
         if tanp:
             return tanp[0] + '/' + tanp[1]
         else:
