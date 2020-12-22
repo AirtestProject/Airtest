@@ -44,6 +44,12 @@ ROTATION_MODE = {
     180: PORTRAIT_UPSIDEDOWN
 }
 
+KEYS_EVENTS = {
+    'home': 'home',
+    'volumeup': 'volumeUp',
+    'volumedown': 'volumeDown'
+}
+
 # retry when saved session failed
 def retry_session(func):
     def wrapper(self, *args, **kwargs):
@@ -245,7 +251,7 @@ class IOS(Device):
 
     @retry_session
     def touch(self, pos, duration=0.01):
-        # trans pos of click
+        # trans pos of click, pos can be percentage or real coordinate
         logger.info("touch original-postion at (%s, %s)", pos[0], pos[1])
         pos = self._touch_point_by_orientation(pos)
 
@@ -266,7 +272,7 @@ class IOS(Device):
         self.session.double_tap(x, y)
 
     def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
-        # trans pos of swipe
+        # trans pos of swipe, pos is percentage 
         fx, fy = self._touch_point_by_orientation(fpos)
         tx, ty = self._touch_point_by_orientation(tpos)
 
@@ -280,11 +286,13 @@ class IOS(Device):
 
     def keyevent(self, keys):
         """just use as home event"""
-        if keys not in ['HOME', 'home', 'Home']:
+        keys = keys.lower()
+        if keys not in ['home',"volumeup", "volumedown"]:
             raise NotImplementedError
-        self.press('home')
+        self.press(KEYS_EVENTS.get(keys))
     
     def press(self, keys):
+        """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
         self.session.press(keys)
 
     @retry_session
@@ -316,13 +324,13 @@ class IOS(Device):
     
     def app_current(self):
         """
-        lock the device, lock screen 
+        get the app current 
 
         Notes:
             Might not work on all devices
 
         Returns:
-            None
+            current app state
 
         """
         return self.driver.app_current()
@@ -515,8 +523,42 @@ class IOS(Device):
         return self.driver.alert.click(buttons)
 
     def device_info(self):
+        """
+        get the device info. 
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            dict for device info
+
+        """
         return self.session.info
 
+    def home_interface(self):
+        """
+        get True for the device status is on home interface. 
+
+        Reason:
+            some devices can Horizontal screen on the home interface
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
+        try:
+            app_current_dict = self.app_current()
+            app_current_bundleId = app_current_dict.get('bundleId')
+            logger.info("app_current_bundleId %s", app_current_bundleId)
+        except Exception as err:
+            logger.error(err)
+            app_current_bundleId = 'example_bundleID'
+        if app_current_bundleId in ['com.apple.springboard']:
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     start = time.time()
