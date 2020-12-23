@@ -533,3 +533,7 @@ ST.PROJECT_ROOT = "/User/test/project"
 using("test1.air")
 from test1 import test
 ```
+
+## 如何在脚本运行过程中录制屏幕
+
+目前仅支持Android设备的录屏，请参见[在运行脚本过程中录屏](../device/android_zh.html#id13)
