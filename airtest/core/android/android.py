@@ -651,33 +651,60 @@ class Android(Device):
             x, y, w, h = y, x, h, w
         return x, y, w, h
 
-    def start_recording(self, *args, **kwargs):
+    def start_recording(self, max_time=1800, bit_rate_level=1, bit_rate=None):
         """
         Start recording the device display
 
         Args:
-            *args: optional arguments
-            **kwargs:  optional arguments
+            max_time: maximum screen recording time, default is 1800
+            bit_rate_level: bit_rate=resolution*level, 1 <= level <= 5, default is 1
+            bit_rate: the higher the bitrate, the clearer the video
 
         Returns:
             None
 
-        """
-        return self.recorder.start_recording(*args, **kwargs)
+        Examples:
 
-    def stop_recording(self, *args, **kwargs):
+            Record 30 seconds of video and export to the current directory test.mp4::
+
+            >>> from airtest.core.api import connect_device, sleep
+            >>> dev = connect_device("Android:///")
+            >>> # Record the screen with the lowest quality
+            >>> dev.start_recording(bit_rate_level=1)
+            >>> sleep(30)
+            >>> dev.stop_recording(output="test.mp4")
+
+            Or set max_time=30, the screen recording will stop automatically after 30 seconds::
+
+            >>> dev.start_recording(max_time=30, bit_rate_level=5)
+            >>> dev.stop_recording(output="test_30s.mp4")
+
+            The default value of `max_time` is 1800 seconds, so the maximum screen recording time is half an hour.
+            You can modify its value to obtain a longer screen recording::
+
+            >>> dev.start_recording(max_time=3600, bit_rate_level=5)
+            >>> dev.stop_recording(output="test_hour.mp4")
+
+        """
+        if not bit_rate:
+            if bit_rate_level > 5:
+                bit_rate_level = 5
+            bit_rate = self.display_info['width'] * self.display_info['height'] * bit_rate_level
+        return self.recorder.start_recording(max_time=max_time, bit_rate=bit_rate)
+
+    def stop_recording(self, output="screen.mp4", is_interrupted=False):
         """
         Stop recording the device display. Recoding file will be kept in the device.
 
         Args:
-            *args: optional arguments
-            **kwargs: optional arguments
+            output: default file is `screen.mp4`
+            is_interrupted: True or False. Stop only, no pulling recorded file from device.
 
         Returns:
             None
 
         """
-        return self.recorder.stop_recording(*args, **kwargs)
+        return self.recorder.stop_recording(output=output, is_interrupted=is_interrupted)
 
     def _register_rotation_watcher(self):
         """
