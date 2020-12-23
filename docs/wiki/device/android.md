@@ -273,6 +273,38 @@ After running, you can find the mp4 file recorded in the specified log directory
 - If the file name `--recording test.mp4` is specified and there is more than one phone, name it `serialnumber.mp4` 
 - If you specify the filename `--recording test.mp4` and have only one phone, call it `test.mp4` 
 - **Note that the file name passed in must end with mp4**
+- The default screen recording file is up to 1800 seconds. If you need to record for a longer time, you need to manually call the screen recording interface in the code
+
+If you call the screen recording interface in the code, you can control the clarity and duration of the screen recording. For the document, see [Android.start_recording](../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.start_recording).
+
+For example, to record a 30-second video with the lowest definition and export it to `test.mp4` in the current directory:
+
+```python
+from airtest.core.api import connect_device, sleep
+dev = connect_device("Android:///")
+# Record the screen with the lowest quality
+dev.start_recording(bit_rate_level=1)
+sleep(30)
+dev.stop_recording(output="test.mp4")
+```
+
+`bit_rate_level` is used to control the resolution of screen recording. The value range is 1-5. `bit_rate_level=5` has the highest resolution, but it will take up more hard disk space.
+
+Or set the parameter `max_time=30`, the screen recording will automatically stop after 30 seconds:
+
+```python
+dev = device()
+dev.start_recording(max_time=30, bit_rate_level=5)
+dev.stop_recording(output="test_30s.mp4")
+```
+
+The default value of `max_time` is 1800 seconds, so the maximum screen recording time is half an hour, you can modify its value to get a longer screen recording:
+
+```python
+dev = device()
+dev.start_recording(max_time=3600, bit_rate_level=5)
+dev.stop_recording(output="test_hour.mp4")
+```
 
 ## Refer to the tutorial and documentation for more 
 

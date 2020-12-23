@@ -1,4 +1,4 @@
-# Android设备连接方法与常见问题
+# Android设备连接方法与常见代码示例
 
 [English version](android.md)
 
@@ -163,7 +163,7 @@ set_current(0)
 shell("ls")
 ```
 
-## Android常见问题
+## Android常见问题与代码示例
 
 ### Android模拟器连接
 
@@ -274,6 +274,38 @@ airtest run "D:\test\Airtest_example.air"  --device android:/// --log logs/ --re
 - 如果指定了文件名`--recording test.mp4`，且超过一台手机，就命名为 `手机序列号_test.mp4`
 - 如果指定了文件名`--recording test.mp4`，且只有一台手机，就命名为 `test.mp4`
 - **注意传入的文件名必须以mp4作为结尾**
+- 默认录屏文件最长为1800秒，如果需要录制更长时间，需要手动在代码中调用录屏接口
+
+如果在代码中调用录屏接口，能够控制录屏时的清晰度和时长，文档参见[Android.start_recording](../../all_module/airtest.core.android.android.html#airtest.core.android.android.Android.start_recording)。
+
+例如，以最低清晰度录制一段30秒的视频，并导出到当前目录下的`test.mp4`：
+
+```python
+from airtest.core.api import connect_device, sleep
+dev = connect_device("Android:///")
+# Record the screen with the lowest quality
+dev.start_recording(bit_rate_level=1)
+sleep(30)
+dev.stop_recording(output="test.mp4")
+```
+
+`bit_rate_level`用于控制录屏的清晰度，取值范围是1-5，`bit_rate_level=5`清晰度最高，但是占用的硬盘空间也会更大。
+
+或者设置参数`max_time=30`，30秒后将自动停止录屏：
+
+```python
+dev = device()
+dev.start_recording(max_time=30, bit_rate_level=5)
+dev.stop_recording(output="test_30s.mp4")
+```
+
+`max_time`默认值为1800秒，所以录屏最大时长是半小时，可以修改它的值以获得更长时间的录屏：
+
+```python
+dev = device()
+dev.start_recording(max_time=3600, bit_rate_level=5)
+dev.stop_recording(output="test_hour.mp4")
+```
 
 ## 更多参考教程和文档
 

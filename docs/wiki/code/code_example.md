@@ -587,3 +587,8 @@ ST.PROJECT_ROOT = "/User/test/project"
 using("test1.air")
 from test1 import test
 ```
+
+
+## How to record screen during script running
+
+Currently only supports screen recording on Android devices, please refer to [Record the screen while running the script](../device/android.html#record-the-screen-while-running-the-script)
