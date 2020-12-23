@@ -19,14 +19,13 @@ class Recorder(Yosemite):
         self.recording_file = None
 
     @on_method_ready('install_or_upgrade')
-    def start_recording(self, max_time=1800, bit_rate=None, vertical=None):
+    def start_recording(self, max_time=1800, bit_rate=None):
         """
         Start screen recording
 
         Args:
-            max_time: maximum rate value, default is 1800
-            bit_rate: bit rate value, default is None
-            vertical: vertical parameters, default is None
+            max_time: maximum screen recording time, default is 1800
+            bit_rate: bit rate value, default is None(6000000)
 
         Raises:
             RuntimeError: if any error occurs while setup the recording
@@ -39,13 +38,11 @@ class Recorder(Yosemite):
             raise AirtestError("recording_proc has already started")
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
         max_time_param = "-Dduration=%d" % max_time if max_time else ""
+        # The higher the bitrate, the clearer the video, the default value is 6000000
         bit_rate_param = "-Dbitrate=%d" % bit_rate if bit_rate else ""
-        if vertical is None:
-            vertical_param = ""
-        else:
-            vertical_param = "-Dvertical=true" if vertical else "-Dvertical=false"
-        p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s %s /system/bin %s.Recorder --start-record' %
-                                 (pkg_path, max_time_param, bit_rate_param, vertical_param, YOSEMITE_PACKAGE))
+        # The video size is square, compatible with horizontal and vertical screens
+        p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s /system/bin %s.Recorder --start-record' %
+                                 (pkg_path, max_time_param, bit_rate_param, YOSEMITE_PACKAGE))
         nbsp = NonBlockingStreamReader(p.stdout)
         while True:
             line = nbsp.readline(timeout=5)
