@@ -1,6 +1,7 @@
 from airtest.core.cv import Template
 
 import os
+import shutil
 
 
 THISDIR = os.path.dirname(__file__)
@@ -15,4 +16,7 @@ TPL2 = Template(os.path.join(OWL, "tpl1499240472304.png"), record_pos=(0.0, -0.0
 
 def try_remove(filepath):
     if os.path.exists(filepath):
-        os.remove(filepath)
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+        else:
+            shutil.rmtree(filepath)
