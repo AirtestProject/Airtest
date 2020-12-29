@@ -1021,6 +1021,8 @@ class ADB(object):
 
         """
         dat = self.shell('dumpsys activity top')
+        # fix Regular can not match some activity name like this:
+        # org.acdd.android.compat.ActivityStub$ProMain$SingleTask$001
         activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/(.*) \w+ pid=(\d+)')
         # in Android8.0 or higher, the result may be more than one
         m = activityRE.findall(dat)
