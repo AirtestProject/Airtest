@@ -278,8 +278,12 @@ class IOS(Device):
 
         fxp, fyp = fx * self._touch_factor, fy * self._touch_factor
         txp, typ = tx * self._touch_factor, ty * self._touch_factor
-        fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
-        txp, typ = float('%.2f' % txp), float('%.2f' % typ)
+        if fxp >1 or fyp >1 or txp >1 or ty >1:
+            fxp, fyp = int(fxp), int(fyp)
+            txp, typ = int(txp), int(typ)
+        else:
+            fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
+            txp, typ = float('%.2f' % txp), float('%.2f' % typ)
 
         logger.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
         self.session.swipe(fxp, fyp, txp, typ, duration)
