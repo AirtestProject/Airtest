@@ -1,5 +1,5 @@
-airtest\.core\.android\.recorder module
-=======================================
+airtest.core.android.recorder module
+====================================
 
 .. automodule:: airtest.core.android.recorder
     :members:

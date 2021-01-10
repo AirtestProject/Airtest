@@ -1,5 +1,5 @@
-airtest\.core\.android\.rotation module
-=======================================
+airtest.core.android.rotation module
+====================================
 
 .. automodule:: airtest.core.android.rotation
     :members:

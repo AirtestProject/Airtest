@@ -1,5 +1,5 @@
-airtest\.aircv\.aircv module
-============================
+airtest.aircv.aircv module
+==========================
 
 .. automodule:: airtest.aircv.aircv
     :members:

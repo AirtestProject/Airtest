@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,8 +70,8 @@ msgstr ""
 #: airtest.core.android.adb.ADB.pm_uninstall airtest.core.android.adb.ADB.pull
 #: airtest.core.android.adb.ADB.push airtest.core.android.adb.ADB.raw_shell
 #: airtest.core.android.adb.ADB.remove_forward
-#: airtest.core.android.adb.ADB.sdk_version airtest.core.android.adb.ADB.shell
-#: airtest.core.android.adb.ADB.snapshot airtest.core.android.adb.ADB.start_app
+#: airtest.core.android.adb.ADB.shell airtest.core.android.adb.ADB.snapshot
+#: airtest.core.android.adb.ADB.start_app
 #: airtest.core.android.adb.ADB.start_app_timing
 #: airtest.core.android.adb.ADB.start_cmd
 #: airtest.core.android.adb.ADB.start_server
@@ -171,6 +171,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.check_app airtest.core.android.adb.ADB.cmd
+#: airtest.core.android.adb.ADB.file_size
 #: airtest.core.android.adb.ADB.get_status
 #: airtest.core.android.adb.ADB.get_top_activity
 #: airtest.core.android.adb.ADB.is_locked
@@ -332,14 +333,6 @@ msgstr ""
 
 #: airtest.core.android.adb.ADB.getprop:6 of
 msgid "propery value"
-msgstr ""
-
-#: airtest.core.android.adb.ADB.sdk_version:1 of
-msgid "Get the SDK version from the device"
-msgstr ""
-
-#: airtest.core.android.adb.ADB.sdk_version:3 of
-msgid "SDK version"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.push:1 of
@@ -829,7 +822,7 @@ msgid "Perform `adb shell pm clear` command to clear all application data"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_ip_address:1 of
-msgid "Perform several set of commands to obtain the IP address"
+msgid "Perform several set of commands to obtain the IP address."
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_gateway_address:3
@@ -850,7 +843,7 @@ msgid "None if no IP address has been found, otherwise return the IP address"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_gateway_address:3 of
-msgid "Perform several set of commands to obtain the gateway address"
+msgid "Perform several set of commands to obtain the gateway address."
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_gateway_address:2 of
@@ -986,5 +979,32 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ":exc:`AirtestError` -- if package is not found"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`object`"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
+
+#~ msgid "Get the SDK version from the device"
+#~ msgstr ""
+
+#~ msgid "SDK version"
+#~ msgstr ""
+
+#~ msgid "生成器"
+#~ msgstr ""
+
+#~ msgid "返回类型"
+#~ msgstr ""
+
+#~ msgid "Perform several set of commands to obtain the IP address"
+#~ msgstr ""
+
+#~ msgid "Perform several set of commands to obtain the gateway address"
+#~ msgstr ""
+
+#~ msgid "Raises"
 #~ msgstr ""
 

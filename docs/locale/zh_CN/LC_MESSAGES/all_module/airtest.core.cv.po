@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,11 @@ msgstr ""
 msgid "The image quality, default is ST.SNAPSHOT_QUALITY"
 msgstr ""
 
-#: airtest.core.cv.try_log_screen:6 of
+#: airtest.core.cv.try_log_screen:5 of
+msgid "the maximum size of the picture, e.g 1200"
+msgstr ""
+
+#: airtest.core.cv.try_log_screen:7 of
 msgid "None"
 msgstr ""
 
@@ -161,5 +165,14 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`object`"
+#~ msgstr ""
+
+#~ msgid "Raises"
 #~ msgstr ""
 

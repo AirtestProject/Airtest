@@ -1,10 +1,17 @@
-airtest\.core\.android package
-==============================
+airtest.core.android package
+============================
 
 .. automodule:: airtest.core.android
     :members:
     :undoc-members:
     :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    airtest.core.android.touch_methods
 
 Submodules
 ----------
@@ -17,7 +24,6 @@ Submodules
    airtest.core.android.ime
    airtest.core.android.javacap
    airtest.core.android.minicap
-   airtest.core.android.minitouch
    airtest.core.android.recorder
    airtest.core.android.rotation
    airtest.core.android.yosemite

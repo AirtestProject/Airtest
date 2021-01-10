@@ -405,6 +405,7 @@ class ADB(object):
         return prop
 
     @property
+    @retries(max_tries=3)
     def sdk_version(self):
         """
         Get the SDK version from the device
@@ -797,9 +798,12 @@ class ADB(object):
 
         Returns:
             The file size
+
+        Raises:
+            AdbShellError if no such file
         """
-        out = self.shell(["stat", "-c", "%s", filepath])
-        file_size = int(out)
+        out = self.shell(["ls", "-l", filepath])
+        file_size = int(out.split()[3])
         return file_size
 
     def _cleanup_forwards(self):
@@ -1027,7 +1031,7 @@ class ADB(object):
 
         """
         dat = self.shell('dumpsys activity top')
-        activityRE = re.compile('\s*ACTIVITY ([A-Za-z0-9_.]+)/([A-Za-z0-9_.]+) \w+ pid=(\d+)')
+        activityRE = re.compile(r'\s*ACTIVITY ([A-Za-z0-9_.$]+)/([A-Za-z0-9_.$]+) \w+ pid=(\d+)')
         # in Android8.0 or higher, the result may be more than one
         m = activityRE.findall(dat)
         if m:
@@ -1230,7 +1234,8 @@ class ADB(object):
         if not re.search(r"Status:\s*ok", out):
             raise AirtestError("Starting App: %s/%s Failed!" % (package, activity))
 
-        matcher = re.search(r"ThisTime:\s*(\d+)", out)
+        # matcher = re.search(r"TotalTime:\s*(\d+)", out)
+        matcher = re.search(r"TotalTime:\s*(\d+)", out)
         if matcher:
             return int(matcher.group(1))
         else:

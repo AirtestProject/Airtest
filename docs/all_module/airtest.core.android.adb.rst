@@ -1,5 +1,5 @@
-airtest\.core\.android\.adb module
-==================================
+airtest.core.android.adb module
+===============================
 
 .. automodule:: airtest.core.android.adb
     :members:

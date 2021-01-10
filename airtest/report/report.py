@@ -22,8 +22,8 @@ from airtest.utils.logger import get_logger
 from six import PY3
 
 LOGGING = get_logger(__name__)
-LOGDIR = "log"
-LOGFILE = "log.txt"
+DEFAULT_LOG_DIR = "log"
+DEFAULT_LOG_FILE = "log.txt"
 HTML_TPL = "log_template.html"
 HTML_FILE = "log.html"
 STATIC_DIR = os.path.dirname(__file__)
@@ -54,17 +54,19 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=LOGFILE, lang="en", plugins=None):
+    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=None, lang="en", plugins=None):
         self.log = []
         self.script_root = script_root
         self.script_name = script_name
-        self.log_root = log_root
+        if not self.script_name or os.path.isfile(self.script_root):
+            self.script_root, self.script_name = script_dir_name(self.script_root)
+        self.log_root = log_root or ST.LOG_DIR or os.path.join(".", DEFAULT_LOG_DIR)
         self.static_root = static_root or STATIC_DIR
         self.test_result = True
         self.run_start = None
         self.run_end = None
         self.export_dir = export_dir
-        self.logfile = os.path.join(log_root, logfile)
+        self.logfile = logfile or getattr(ST, "LOG_FILE", DEFAULT_LOG_FILE)
         self.lang = lang
         self.init_plugin_modules(plugins)
 
@@ -80,7 +82,9 @@ class LogToHtml(object):
                 LOGGING.error(traceback.format_exc())
 
     def _load(self):
-        logfile = self.logfile.encode(sys.getfilesystemencoding()) if not PY3 else self.logfile
+        logfile = os.path.join(self.log_root, self.logfile)
+        if not PY3:
+            logfile = logfile.encode(sys.getfilesystemencoding())
         with io.open(logfile, encoding="utf-8") as f:
             for line in f.readlines():
                 self.log.append(json.loads(line))
@@ -138,7 +142,7 @@ class LogToHtml(object):
         return translated
 
     def _translate_assertion(self, step):
-        if "assert" in step["data"]["name"] and "msg" in step["data"]["call_args"]:
+        if "assert_" in step["data"].get("name", "") and "msg" in step["data"].get("call_args", {}):
             return step["data"]["call_args"]["msg"]
 
     def _translate_screen(self, step, code):
@@ -163,7 +167,7 @@ class LogToHtml(object):
                 else:
                     continue
                 if self.export_dir:  # all relative path
-                    screen['_filepath'] = os.path.join(LOGDIR, src)
+                    screen['_filepath'] = os.path.join(DEFAULT_LOG_DIR, src)
                 else:
                     screen['_filepath'] = os.path.abspath(os.path.join(self.log_root, src))
                 screen['src'] = screen['_filepath']
@@ -209,7 +213,7 @@ class LogToHtml(object):
         if not os.path.isfile(new_path):
             try:
                 img = Image.open(path)
-                compress_image(img, new_path, ST.SNAPSHOT_QUALITY)
+                compress_image(img, new_path, ST.SNAPSHOT_QUALITY, max_size=300)
             except Exception:
                 LOGGING.error(traceback.format_exc())
             return new_path
@@ -382,7 +386,7 @@ class LogToHtml(object):
             return []
         self.copy_tree(self.script_root, dirpath, ignore=ignore_export_dir)
         # copy log
-        logpath = os.path.join(dirpath, LOGDIR)
+        logpath = os.path.join(dirpath, DEFAULT_LOG_DIR)
         if os.path.normpath(logpath) != os.path.normpath(self.log_root):
             if os.path.isdir(logpath):
                 shutil.rmtree(logpath, ignore_errors=True)
@@ -402,7 +406,11 @@ class LogToHtml(object):
         """
         try:
             html_dir = os.path.dirname(output_file)
-            return os.path.relpath(os.path.join(self.log_root, 'log.txt'), html_dir)
+            if self.export_dir:
+                # When exporting reports, the log directory will be named log/ (DEFAULT_LOG_DIR),
+                # so the relative path of log.txt is log/log.txt
+                return os.path.join(DEFAULT_LOG_DIR, os.path.basename(self.logfile))
+            return os.path.relpath(os.path.join(self.log_root, self.logfile), html_dir)
         except:
             LOGGING.error(traceback.format_exc())
             return ""
@@ -432,6 +440,7 @@ class LogToHtml(object):
     def report_data(self, output_file=None, record_list=None):
         """
         Generate data for the report page
+
         :param output_file: The file name or full path of the output file, default HTML_FILE
         :param record_list: List of screen recording files
         :return:
@@ -442,8 +451,11 @@ class LogToHtml(object):
         script_path = os.path.join(self.script_root, self.script_name)
         info = json.loads(get_script_info(script_path))
 
-        records = [os.path.join(LOGDIR, f) if self.export_dir
-                   else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
+        if record_list:
+            records = [os.path.join(DEFAULT_LOG_DIR, f) if self.export_dir
+                       else os.path.abspath(os.path.join(self.log_root, f)) for f in record_list]
+        else:
+            records = []
 
         if not self.static_root.endswith(os.path.sep):
             self.static_root = self.static_root.replace("\\", "/")
@@ -467,9 +479,10 @@ class LogToHtml(object):
         data['data'] = info
         return data
 
-    def report(self, template_name=HTML_TPL, output_file=None, record_list=None):
+    def report(self, template_name=HTML_TPL, output_file=HTML_FILE, record_list=None):
         """
         Generate the report page, you can add custom data and overload it if needed
+
         :param template_name: default is HTML_TPL
         :param output_file: The file name or full path of the output file, default HTML_FILE
         :param record_list: List of screen recording files
@@ -492,11 +505,11 @@ class LogToHtml(object):
         return self._render(template_name, output_file, **data)
 
 
-def simple_report(filepath, logpath=True, logfile=LOGFILE, output=HTML_FILE):
+def simple_report(filepath, logpath=True, logfile=None, output=HTML_FILE):
     path, name = script_dir_name(filepath)
     if logpath is True:
-        logpath = os.path.join(path, LOGDIR)
-    rpt = LogToHtml(path, logpath, logfile=logfile, script_name=name)
+        logpath = os.path.join(path, getattr(ST, "LOG_DIR", DEFAULT_LOG_DIR))
+    rpt = LogToHtml(path, logpath, logfile=logfile or getattr(ST, "LOG_FILE", DEFAULT_LOG_FILE), script_name=name)
     rpt.report(HTML_TPL, output_file=output)
 
 
@@ -517,7 +530,7 @@ def main(args):
     # script filepath
     path, name = script_dir_name(args.script)
     record_list = args.record or []
-    log_root = decode_path(args.log_root) or decode_path(os.path.join(path, LOGDIR))
+    log_root = decode_path(args.log_root) or decode_path(os.path.join(path, DEFAULT_LOG_DIR))
     static_root = args.static_root or STATIC_DIR
     static_root = decode_path(static_root)
     export = decode_path(args.export) if args.export else None

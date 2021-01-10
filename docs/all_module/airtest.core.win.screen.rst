@@ -1,5 +1,5 @@
-airtest\.core\.win\.screen module
-=================================
+airtest.core.win.screen module
+==============================
 
 .. automodule:: airtest.core.win.screen
     :members:

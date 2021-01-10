@@ -1,5 +1,5 @@
-airtest\.core\.cv module
-========================
+airtest.core.cv module
+======================
 
 .. automodule:: airtest.core.cv
     :members:

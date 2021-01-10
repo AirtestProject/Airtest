@@ -1,5 +1,5 @@
-airtest\.core\.win package
-==========================
+airtest.core.win package
+========================
 
 .. automodule:: airtest.core.win
     :members:
@@ -11,6 +11,7 @@ Submodules
 
 .. toctree::
 
+   airtest.core.win.ctypesinput
    airtest.core.win.screen
    airtest.core.win.win
 

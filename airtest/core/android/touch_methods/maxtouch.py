@@ -25,18 +25,16 @@ class Maxtouch(BaseTouch):
             None
 
         """
-
-        if self.adb.exists_file(self.path_in_android):
+        try:
+            exists_file = self.adb.file_size(self.path_in_android)
+        except:
+            pass
+        else:
             local_minitouch_size = int(os.path.getsize(MAXTOUCH_JAR))
-            try:
-                file_size = self.adb.file_size(self.path_in_android)
-            except Exception:
-                self.uninstall()
-            else:
-                if local_minitouch_size == file_size:
-                    LOGGING.debug("install maxpresent.jar skipped")
-                    return
-                self.uninstall()
+            if exists_file and exists_file == local_minitouch_size:
+                LOGGING.debug("install_minitouch skipped")
+                return
+            self.uninstall()
 
         self.adb.push(MAXTOUCH_JAR, self.path_in_android)
         self.adb.shell("chmod 755 %s" % self.path_in_android)

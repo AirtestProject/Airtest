@@ -4,6 +4,7 @@ from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import on_method_ready, reg_cleanup
 from airtest.core.android.yosemite import Yosemite
+from airtest.utils.threadsafe import threadsafe_generator
 import struct
 LOGGING = get_logger(__name__)
 
@@ -50,6 +51,7 @@ class Javacap(Yosemite):
         reg_cleanup(proc.kill)
         return proc, nbsp, localport
 
+    @threadsafe_generator
     def get_frames(self):
         """
         Get the screen frames

@@ -12,6 +12,7 @@ from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+from airtest.utils.threadsafe import threadsafe_generator
 
 
 LOGGING = get_logger(__name__)
@@ -254,6 +255,7 @@ class Minicap(object):
 
         return gen
 
+    @threadsafe_generator
     @on_method_ready('install_or_upgrade')
     def _get_stream(self, lazy=True):
         proc, nbsp, localport = self._setup_stream_server(lazy=lazy)

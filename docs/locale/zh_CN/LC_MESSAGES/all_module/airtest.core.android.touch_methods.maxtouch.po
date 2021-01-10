@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,4 +78,22 @@ msgstr ""
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:6 of
 msgid "transformed coordinates (x, y)"
 msgstr ""
+
+#~ msgid "基类：:class:`airtest.core.android.touch_methods.base_touch.BaseTouch`"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`airtest.core.android.touch_methods.base_touch.BaseTouch`"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
 

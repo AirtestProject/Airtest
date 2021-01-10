@@ -3,6 +3,7 @@ Pillow>=3.4.0
 requests>=2.11.1
 six
 mss==4.0.3
-opencv-contrib-python<=3.4.2.17
+numpy<=1.19.3
+opencv-contrib-python
 # facebook-wda==0.2.1
 pywinauto==0.6.3
