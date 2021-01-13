@@ -123,14 +123,20 @@ class TestAndroid(unittest.TestCase):
             if os.path.exists(filepath):
                 os.remove(filepath)
             self.android.start_recording(max_time=30, bit_rate=500000)
-            time.sleep(3)
+            time.sleep(10)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
-
-            # Record the screen with the lowest quality
+            time.sleep(2)
+            # Record the screen with the lower quality
             os.remove(filepath)
             self.android.start_recording(bit_rate_level=1)
-            time.sleep(3)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists("screen.mp4"))
+            os.remove(filepath)
+            time.sleep(2)
+            self.android.start_recording(bit_rate_level=0.5)
+            time.sleep(10)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
 
