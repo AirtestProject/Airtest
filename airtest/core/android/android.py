@@ -657,7 +657,7 @@ class Android(Device):
 
         Args:
             max_time: maximum screen recording time, default is 1800
-            bit_rate_level: bit_rate=resolution*level, 1 <= level <= 5, default is 1
+            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
             bit_rate: the higher the bitrate, the clearer the video
 
         Returns:
