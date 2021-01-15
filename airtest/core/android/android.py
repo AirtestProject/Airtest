@@ -19,6 +19,7 @@ from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
 from airtest.core.android.touch_methods.touch_proxy import TouchProxy, AdbTouchImplementation, \
     MinitouchImplementation, MaxtouchImplementation
+from airtest.core.error import AdbError, AdbShellError
 
 LOGGING = get_logger(__name__)
 
@@ -610,7 +611,7 @@ class Android(Device):
             self.rotation_watcher.get_ready()
             try:
                 return self.minicap.get_display_info()
-            except RuntimeError:
+            except (RuntimeError, AdbShellError, AdbError):
                 # Even if minicap execution fails, use adb instead
                 self.ori_method = ORI_METHOD.ADB
                 return self.adb.get_display_info()
