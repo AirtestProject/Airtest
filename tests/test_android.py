@@ -3,6 +3,7 @@ import os
 import time
 import numpy
 import unittest
+from threading import Thread
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
 from .testconf import APK, PKG, try_remove
@@ -77,6 +78,42 @@ class TestAndroid(unittest.TestCase):
             self.assertIsInstance(screen, numpy.ndarray)
             self.assertTrue(os.path.exists(filename))
             os.remove(filename)
+
+    def test_snapshot_thread(self):
+
+        def assert_exists_and_remove(filename):
+            self.assertTrue(os.path.exists(filename))
+            os.remove(filename)
+
+        class ScreenshotThread(Thread):
+            def __init__(self, dev, assert_true):
+                self.dev = dev
+                self._running = True
+                self.assert_true = assert_true
+                super(ScreenshotThread, self).__init__()
+                self.dev.snapshot("screen_thread.jpg")
+                assert_exists_and_remove("screen_thread.jpg")
+
+            def terminate(self):
+                self._running = False
+
+            def run(self):
+                while self._running:
+                    filename = "screen_thread.jpg"
+                    self.dev.snapshot(filename)
+                    assert_exists_and_remove(filename)
+                    time.sleep(2)
+
+        task = ScreenshotThread(self.android, self.assertTrue)
+        task.daemon = True
+        task.start()
+
+        for i in range(10):
+            self.android.snapshot("screen.jpg")
+            assert_exists_and_remove("screen.jpg")
+            time.sleep(2)
+
+        task.terminate()
 
     def test_shell(self):
         self.assertEqual(self.android.shell('echo nimei').strip(), 'nimei')
