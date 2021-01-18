@@ -7,7 +7,7 @@ import threading
 import six
 import socket
 from functools import wraps
-from airtest.core.android.constant import STFLIB, ORI_METHOD
+from airtest.core.android.constant import STFLIB
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
@@ -95,7 +95,11 @@ class Minicap(object):
             None
 
         """
-        self.adb.raw_shell("rm -r /data/local/tmp/minicap*")
+        try:
+            self.adb.raw_shell("rm -r /data/local/tmp/minicap*")
+        except Exception as e:
+            # AdbError: No such file or directory
+            LOGGING.warning(e)
 
     def install(self):
         """
