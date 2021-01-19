@@ -1,5 +1,5 @@
-airtest\.core\.api module
-=========================
+airtest.core.api module
+=======================
 
 .. automodule:: airtest.core.api
     :members:

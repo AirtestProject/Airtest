@@ -26,6 +26,12 @@ class AirtestLogger(object):
         if logfile:
             self.logfile = os.path.realpath(logfile)
             self.logfd = open(self.logfile, "w")
+        else:
+            # use G.LOGGER.set_logfile(None) to reset logfile
+            self.logfile = None
+            if self.logfd:
+                self.logfd.close()
+                self.logfd = None
 
     @staticmethod
     def _dumper(obj):

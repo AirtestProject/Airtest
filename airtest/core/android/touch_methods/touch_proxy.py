@@ -27,6 +27,10 @@ class AdbTouchImplementation(object):
     METHOD_NAME = "ADBTOUCH"
 
     def __init__(self, base_touch):
+        """
+
+        :param base_touch: :py:mod:`airtest.core.android.adb.ADB`
+        """
         self.base_touch = base_touch
 
     def touch(self, pos, duration=0.01):
@@ -45,6 +49,11 @@ class MinitouchImplementation(AdbTouchImplementation):
     METHOD_NAME = "MINITOUCH"
 
     def __init__(self, minitouch, ori_transformer):
+        """
+
+        :param minitouch: airtest.core.android.touch_methods.minitouch.Minitouch
+        :param ori_transformer: Android._touch_point_by_orientation()
+        """
         super(MinitouchImplementation, self).__init__(minitouch)
         self.ori_transformer = ori_transformer
 
@@ -85,6 +94,11 @@ class MaxtouchImplementation(MinitouchImplementation):
     METHOD_NAME = "MAXTOUCH"
 
     def __init__(self, maxtouch, ori_transformer):
+        """
+        test 123
+        :param maxtouch: airtest.core.android.touch_methods.maxtouch.Maxtouch
+        :param ori_transformer: Android._touch_point_by_orientation()
+        """
         super(MaxtouchImplementation, self).__init__(maxtouch, ori_transformer)
 
     def perform(self, motion_events, interval=0.01):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,8 @@ msgstr ""
 msgid "Add device instance in G and set as current device."
 msgstr ""
 
-#: airtest.core.helper.G.add_device:4 airtest.core.helper.log:10 of
+#: airtest.core.helper.G.add_device:4 airtest.core.helper.delete_log_screen:7
+#: airtest.core.helper.log:11 of
 msgid "实际案例"
 msgstr ""
 
@@ -41,8 +42,8 @@ msgstr ""
 msgid "G.add_device(Android())"
 msgstr ""
 
-#: airtest.core.helper.G.add_device airtest.core.helper.log
-#: airtest.core.helper.set_logdir of
+#: airtest.core.helper.G.add_device airtest.core.helper.delete_log_screen
+#: airtest.core.helper.log airtest.core.helper.set_logdir of
 msgid "参数"
 msgstr ""
 
@@ -50,11 +51,13 @@ msgstr ""
 msgid "device to init"
 msgstr ""
 
-#: airtest.core.helper.G.add_device airtest.core.helper.log of
+#: airtest.core.helper.G.add_device airtest.core.helper.delete_log_screen
+#: airtest.core.helper.log of
 msgid "返回"
 msgstr ""
 
-#: airtest.core.helper.G.add_device:9 airtest.core.helper.log:7 of
+#: airtest.core.helper.G.add_device:9 airtest.core.helper.delete_log_screen:14
+#: airtest.core.helper.log:8 of
 msgid "None"
 msgstr ""
 
@@ -86,8 +89,24 @@ msgstr ""
 msgid "description of log, default is arg.class.__name__"
 msgstr ""
 
+#: airtest.core.helper.log:6 of
+msgid "whether to take a screenshot, default is False"
+msgstr ""
+
 #: airtest.core.helper.import_device_cls:1 of
 msgid "lazy import device class"
+msgstr ""
+
+#: airtest.core.helper.delete_log_screen:1 of
+msgid "Delete screenshots in the log directory(ST.LOG_DIR), delete all by default"
+msgstr ""
+
+#: airtest.core.helper.delete_log_screen:3 of
+msgid "delete pictures with creation time greater than gt_time"
+msgstr ""
+
+#: airtest.core.helper.delete_log_screen:4 of
+msgid "delete pictures with creation time less than lt_time"
 msgstr ""
 
 #~ msgid "参数"
@@ -121,5 +140,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "log traceback if exists, use traceback.format_exc to get best format"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`object`"
+#~ msgstr ""
+
+#~ msgid "实际案例"
 #~ msgstr ""
 

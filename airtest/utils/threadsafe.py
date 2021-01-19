@@ -1,4 +1,5 @@
 import threading
+from functools import wraps
 
 
 class ThreadSafeIter:
@@ -9,15 +10,17 @@ class ThreadSafeIter:
     def __init__(self, it):
         self.it = it
         self.lock = threading.Lock()
-        if getattr(self.it, "__next__") is None:  # for py2
-            self.it.__next__ = self.it.next
+        if getattr(self.it, "__next__", None) is None:  # for py2
+            self._next = self.it.next
+        else:
+            self._next = self.it.__next__  # py3
 
     def __iter__(self):
         return self
 
     def __next__(self):
         with self.lock:
-            return self.it.__next__()
+            return self._next()
 
     def send(self, *args):
         with self.lock:
@@ -30,6 +33,7 @@ def threadsafe_generator(f):
     """
     A decorator that takes a generator function and makes it thread-safe.
     """
+    @wraps(f)
     def g(*a, **kw):
         return ThreadSafeIter(f(*a, **kw))
     return g

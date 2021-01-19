@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-09 19:11+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../wiki/device/code_example.md:1
+msgid "常见问题与代码示例"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:3
+msgid "如何连接手机"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:5
+msgid "pass"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:7
+msgid "创建纯.py脚本"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:10
+msgid "keyevent"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:12
+msgid "如何输入"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:14
+msgid "log、报告与截图"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:16
+msgid "显示log到报告"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:18
+msgid "如何设置log目录"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:20
+msgid "截图相关：截图精度控制、截图尺寸"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:22
+msgid "（未发布）如何控制是否截图、删除截图"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:25
+msgid "报告发给别人看"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:28
+msgid "如何去除log信息"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:30
+msgid "https://airtest.doc.io.netease.com/IDEdocs/faq/4_common%20problems/#1log"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:33
+msgid ""
+"DLL文件缺失  "
+"https://airtest.doc.io.netease.com/IDEdocs/faq/3_common%20problems"
+"/#1importerror-dll-load-failed"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:36
+msgid "如何局部截图"
+msgstr ""
+
+#: ../../wiki/device/code_example.md:38
+msgid "https://airtest.doc.io.netease.com/IDEdocs/faq/4_common%20problems/#8"
+msgstr ""
+

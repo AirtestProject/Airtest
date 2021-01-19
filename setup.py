@@ -1,6 +1,7 @@
 import os
 import sys
 import codecs
+import pkg_resources
 from setuptools import setup, find_packages
 
 
@@ -26,7 +27,9 @@ def parse_requirements(filename):
     reqs = [line for line in lineiter if line and not line.startswith("#")]
     if sys.platform == "win32":
         reqs.append('pywin32')
-    if sys.version_info[:2] <= (3, 6):
+    if sys.version_info[:2] <= (3, 6) and \
+            "opencv-contrib-python" not in [d.project_name for d in pkg_resources.working_set]:
+        # If py<=3.6 and opencv-contrib-python has not been installed, install version==3.2.0.7
         reqs.remove("opencv-contrib-python")
         reqs.append("opencv-contrib-python==3.2.0.7")
     return reqs

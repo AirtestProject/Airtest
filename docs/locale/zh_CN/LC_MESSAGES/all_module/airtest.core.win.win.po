@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:36+0800\n"
+"POT-Creation-Date: 2020-12-09 19:24+0800\n"
 "PO-Revision-Date: 2019-10-09 16:48+0800\n"
 "Last-Translator: \n"
 "Language: zh_Hans_CN\n"
@@ -109,7 +109,11 @@ msgstr "截图的文件名，默认为{time}.jpg"
 msgid "The image quality, integer in range [1, 99]"
 msgstr ""
 
-#: airtest.core.win.win.Windows.snapshot:6 of
+#: airtest.core.win.win.Windows.snapshot:5 of
+msgid "the maximum size of the picture, e.g 1200"
+msgstr ""
+
+#: airtest.core.win.win.Windows.snapshot:7 of
 msgid "display the screenshot"
 msgstr "截图的内容"
 
@@ -358,17 +362,38 @@ msgstr ":py：obj：'str'"
 #~ msgstr ""
 
 #~ msgid "Parameters"
-#~ msgstr "参数"
+#~ msgstr ""
 
 #~ msgid "Returns"
-#~ msgstr "返回"
+#~ msgstr ""
 
 #~ msgid "raises"
 #~ msgstr ""
 
 #~ msgid "References"
-#~ msgstr "参考"
+#~ msgstr ""
 
 #~ msgid "Return type"
+#~ msgstr ""
+
+#~ msgid "基类：:class:`airtest.core.device.Device`"
+#~ msgstr ""
+
+#~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "返回"
+#~ msgstr ""
+
+#~ msgid "引发"
+#~ msgstr ""
+
+#~ msgid "引用"
+#~ msgstr ""
+
+#~ msgid "返回类型"
+#~ msgstr ""
+
+#~ msgid "Raises"
 #~ msgstr ""
 

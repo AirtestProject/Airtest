@@ -1,5 +1,5 @@
-airtest\.aircv\.template module
-===============================
+airtest.aircv.template module
+=============================
 
 .. automodule:: airtest.aircv.template
     :members:

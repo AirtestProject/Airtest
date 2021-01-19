@@ -105,5 +105,14 @@ as well as providing a API reference documentation.
    all_module/modules
 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Wiki
+
+   wiki/device/device.rst
+   wiki/code/code.rst
+
+
+
 
 .. _Airtest Project Homepage: http://airtest.netease.com/
