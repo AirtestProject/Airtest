@@ -608,7 +608,13 @@ class Android(Device):
 
         """
         if self.ori_method == ORI_METHOD.MINICAP:
-            self.rotation_watcher.get_ready()
+            try:
+                self.rotation_watcher.get_ready()
+            except AdbShellError:
+                LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
+                self.ori_method = ORI_METHOD.ADB
+                return self.adb.get_display_info()
+
             try:
                 return self.minicap.get_display_info()
             except (RuntimeError, AdbShellError, AdbError):
