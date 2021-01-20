@@ -1,15 +1,5 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
-
-# from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
-# from airtest.utils.logger import get_logger
-# from airtest.core.ios.instruct_cmd import InstructHelper
-# from airtest.core.ios.fake_minitouch import fakeMiniTouch
-# from airtest.core.ios.rotation import XYTransformer, RotationWatcher
-# from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
-# from airtest.core.device import Device
-# from airtest import aircv
 import requests
 import six
 import time
@@ -33,7 +23,7 @@ from airtest.utils.logger import get_logger
 from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
 from wda import WDAError
 
-logger = get_logger(__name__)
+LOGGING = get_logger(__name__)
 
 DEFAULT_ADDR = "http://localhost:8100/"
 
@@ -79,7 +69,7 @@ class IOS(Device):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
-        print("Using default ios devices")
+        LOGGING.info("Using default ios devices")
         self.addr = addr or DEFAULT_ADDR
 
         # fit wda format, make url start with http://
@@ -252,13 +242,13 @@ class IOS(Device):
     @retry_session
     def touch(self, pos, duration=0.01):
         # trans pos of click, pos can be percentage or real coordinate
-        logger.info("touch original-postion at (%s, %s)", pos[0], pos[1])
+        LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
         pos = self._touch_point_by_orientation(pos)
 
         # scale touch postion
         x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
 
-        logger.info("touch last-postion at (%s, %s)", x, y)
+        LOGGING.info("touch last-postion at (%s, %s)", x, y)
         if duration >= 0.5:
             self.session.tap_hold(x, y, duration)
         else:
@@ -285,7 +275,7 @@ class IOS(Device):
             fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
             txp, typ = float('%.2f' % txp), float('%.2f' % typ)
 
-        logger.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
+        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
         self.session.swipe(fxp, fyp, txp, typ, duration)
 
     def keyevent(self, keys):
@@ -371,9 +361,9 @@ class IOS(Device):
         try:
             app_current_dict = self.app_current()
             app_current_bundleId = app_current_dict.get('bundleId')
-            logger.info("app_current_bundleId %s", app_current_bundleId)
+            LOGGING.info("app_current_bundleId %s", app_current_bundleId)
         except Exception as err:
-            logger.error(err)
+            LOGGING.error(err)
             app_current_bundleId = 'example_bundleID'
         if app_current_bundleId not in ['com.apple.springboard']:
             return x, y
@@ -382,13 +372,13 @@ class IOS(Device):
         # _size 只对应竖直时候长宽
         now_orientation = self.orientation
 
-        logger.info("current orientation for %s", now_orientation)
+        LOGGING.info("current orientation for %s", now_orientation)
         if now_orientation in ['PORTRAIT', 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN']:
             width, height = self._size['width'], self._size["height"]
         else:
             height, width = self._size['width'], self._size["height"]
 
-        logger.info("current save window_size for (%s, %s)", self._size['width'], self._size["height"])
+        LOGGING.info("current save window_size for (%s, %s)", self._size['width'], self._size["height"])
         # check if not get screensize when touching
         if not width or not height:
             # use snapshot to get current resuluton
@@ -555,9 +545,9 @@ class IOS(Device):
         try:
             app_current_dict = self.app_current()
             app_current_bundleId = app_current_dict.get('bundleId')
-            logger.info("app_current_bundleId %s", app_current_bundleId)
+            LOGGING.info("app_current_bundleId %s", app_current_bundleId)
         except Exception as err:
-            logger.error(err)
+            LOGGING.error(err)
             app_current_bundleId = 'example_bundleID'
         if app_current_bundleId in ['com.apple.springboard']:
             return True

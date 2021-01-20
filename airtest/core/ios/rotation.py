@@ -6,8 +6,6 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-# from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-# from airtest.core.ios.wda_client import WDAError
 from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
 from wda import WDAError, WDAInvalidSessionIdError
 
