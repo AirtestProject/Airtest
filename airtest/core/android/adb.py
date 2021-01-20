@@ -401,7 +401,15 @@ class ADB(object):
         """
         prop = self.raw_shell(['getprop', key])
         if strip:
-            prop = prop.rstrip('\r\n')
+            if "\r\r\n" in prop:
+                # Some mobile phones will output multiple lines of extra log
+                prop = prop.split("\r\r\n")
+                if len(prop) > 1:
+                    prop = prop[-2]
+                else:
+                    prop = prop[-1]
+            else:
+                prop = prop.strip("\r\n")
         return prop
 
     @property
@@ -572,8 +580,7 @@ class ADB(object):
         out = self.cmd(cmds)
 
         if re.search(r"Failure \[.*?\]", out):
-            print(out)
-            raise AirtestError("Installation Failure")
+            raise AdbShellError("Installation Failure", repr(out))
 
         return out
 
@@ -617,8 +624,7 @@ class ADB(object):
                 return self.install_app(filepath, replace)
 
         if re.search(r"Failure \[.*?\]", out):
-            print(out)
-            raise AirtestError("Installation Failure")
+            raise AdbShellError("Installation Failure", repr(out))
 
         return out
 
