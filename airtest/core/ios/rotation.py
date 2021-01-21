@@ -69,13 +69,14 @@ class RotationWatcher(object):
         def _refresh_by_ow():
             try:
                 return self.get_rotation()
-            except WDAError as err:
-                print(err)
-                if err.value.has_key('error'):
+            except Exception as err:
+                try:
                     self.iosHandle._fetchNewSession()
                     self.session = self.iosHandle.session
                     return self.get_rotation()
-                else:
+                except Exception as err:
+                    import traceback
+                    print(traceback.format_exc())
                     return self.last_result
             except ValueError as err:
                 import traceback
@@ -120,7 +121,7 @@ class RotationWatcher(object):
         self.ow_callback.append(ow_callback)
 
     def get_rotation(self):
-        z = self.iosHandle.driver._session_http.get('rotation').value.get('z')
+        z = self.session._session_http.get('rotation').value.get('z')
         return ROTATION_MODE.get(z, PORTRAIT)
 
 
