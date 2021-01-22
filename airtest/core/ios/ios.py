@@ -15,30 +15,18 @@ else:
 
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
 from airtest.utils.logger import get_logger
 
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+from wda import LANDSCAPE
 from wda import WDAError
 
 LOGGING = get_logger(__name__)
 
 DEFAULT_ADDR = "http://localhost:8100/"
 
-ROTATION_MODE = {
-    0: PORTRAIT,
-    270: LANDSCAPE,
-    90: LANDSCAPE_RIGHT,
-    180: PORTRAIT_UPSIDEDOWN
-}
-
-KEYS_EVENTS = {
-    'home': 'home',
-    'volumeup': 'volumeUp',
-    'volumedown': 'volumeDown'
-}
 
 # retry when saved session failed
 def retry_session(func):
@@ -99,9 +87,6 @@ class IOS(Device):
         # fake minitouch to simulate swipe
         self.minitouch = fakeMiniTouch(self)
 
-        # helper of run process like iproxy
-        # self.instruct_helper = InstructHelper()
-
     @property
     def uuid(self):
         return self.addr
@@ -126,15 +111,6 @@ class IOS(Device):
         window_size = self.session.window_size()
         return window_size
 
-    # @property
-    # @retry_session
-    # def orientation(self):
-    #     """
-    #         return device oritantation status
-    #         in  LANDSACPE POR
-    #     """
-    #     return self.session.orientation
-
     @property
     @retry_session
     def orientation(self):
@@ -143,7 +119,7 @@ class IOS(Device):
             in  LANDSACPE POR
         """
         z = self.driver._session_http.get('rotation').value.get('z')
-        return ROTATION_MODE.get(z, PORTRAIT)
+        return ROTATION_MODE(z).name
 
     @property
     def display_info(self):
@@ -166,7 +142,7 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in ['LANDSCAPE', 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
+        if self.display_info["orientation"] in [LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
             w, h = h, w
         return w, h
 
@@ -278,12 +254,14 @@ class IOS(Device):
         LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
         self.session.swipe(fxp, fyp, txp, typ, duration)
 
-    def keyevent(self, keys):
+    def keyevent(self, keyname, **kwargs):
         """just use as home event"""
-        keys = keys.lower()
-        if keys not in ['home',"volumeup", "volumedown"]:
-            raise NotImplementedError
-        self.press(KEYS_EVENTS.get(keys))
+        try:
+            keyname = KEY_EVENTS(keyname.lower()).name
+        except KeyError:
+            raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
+        else:
+            self.press(keyname)
     
     def press(self, keys):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""

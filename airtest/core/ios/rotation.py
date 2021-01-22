@@ -2,21 +2,13 @@
 import threading
 import traceback
 import time
-from airtest.core.error import AirtestError
+from airtest.core.ios.constant import ROTATION_MODE
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
-
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from wda import WDAError, WDAInvalidSessionIdError
+from wda import LANDSCAPE, PORTRAIT
 
 LOGGING = get_logger(__name__)
 
-ROTATION_MODE = {
-    0: PORTRAIT,
-    270: LANDSCAPE,
-    90: LANDSCAPE_RIGHT,
-    180: PORTRAIT_UPSIDEDOWN
-}
 
 class RotationWatcher(object):
     """
@@ -69,18 +61,17 @@ class RotationWatcher(object):
         def _refresh_by_ow():
             try:
                 return self.get_rotation()
-            except Exception as err:
+            except RuntimeError:
                 try:
+                    # Session does not exist Error
                     self.iosHandle._fetchNewSession()
                     self.session = self.iosHandle.session
                     return self.get_rotation()
                 except Exception as err:
-                    import traceback
-                    print(traceback.format_exc())
+                    LOGGING.error(err)
                     return self.last_result
-            except ValueError as err:
-                import traceback
-                print(traceback.format_exc())
+            except Exception as err:
+                LOGGING.error(err)
                 return self.last_result
 
         def _run():
@@ -122,7 +113,7 @@ class RotationWatcher(object):
 
     def get_rotation(self):
         z = self.session._session_http.get('rotation').value.get('z')
-        return ROTATION_MODE.get(z, PORTRAIT)
+        return ROTATION_MODE(z).name
 
 
 class XYTransformer(object):
