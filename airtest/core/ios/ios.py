@@ -7,12 +7,8 @@ import json
 import base64
 import traceback
 import wda
-
-if six.PY3:
-    from urllib.parse import urljoin
-else:
-    from urlparse import urljoin
-
+import inspect
+from functools import wraps
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS
@@ -28,21 +24,53 @@ LOGGING = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
 
-# retry when saved session failed
-def retry_session(func):
+def decorator_retry_session(func):
+    """
+    When the operation fails due to session failure, try to re-acquire the session,
+    retry at most 3 times
+    当因为session失效而操作失败时，尝试重新获取session，最多重试3次
+    """
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
         except WDAError as err:
             # 6 : Session does not exist
             if err.value.has_key('error'):
-                self._fetchNewSession()
+                # retry _fetch_new_session 3 times
+                tries = 3
+                while tries > 0:
+                    try:
+                        self._fetch_new_session()
+                    except WDAError:
+                        if tries == 1:
+                            raise
+                        tries -= 1
+                        continue
+                    else:
+                        break
                 return func(self, *args, **kwargs)
             else:
                 raise err
     return wrapper
 
 
+def decorator_retry_for_class(cls):
+    """
+    Add decorators to all methods in the class
+    为class里的所有method添加装饰器decorator_retry_session
+    """
+    for name, method in inspect.getmembers(cls):
+        # Ignore built-in methods and private methods named _xxx
+        # 忽略内置方法和下划线开头命名的私有方法 _xxx
+        if (not inspect.ismethod(method) and not inspect.isfunction(method)) \
+                or inspect.isbuiltin(method) or name.startswith("_"):
+            continue
+        setattr(cls, name, decorator_retry_session(method))
+    return cls
+
+
+@decorator_retry_for_class
 class IOS(Device):
     """ios client
 
@@ -97,10 +125,14 @@ class IOS(Device):
             self.defaultSession = self.driver.session()
         return self.defaultSession
 
-    def _fetchNewSession(self):
+    def _fetch_new_session(self):
+        """
+        Re-acquire a new session, will not automatically retry
+        重新获取新的session，不会自动重试
+        :return:
+        """
         self.defaultSession = self.driver.session()
 
-    @retry_session
     def window_size(self):
         """
             return window size
@@ -112,7 +144,6 @@ class IOS(Device):
         return window_size
 
     @property
-    @retry_session
     def orientation(self):
         """
             return device oritantation status
@@ -173,11 +204,8 @@ class IOS(Device):
         """
         data = None
 
-        if self.cap_method == CAP_METHOD.MINICAP:
-            raise NotImplementedError
-        elif self.cap_method == CAP_METHOD.MINICAP_STREAM:
-            raise NotImplementedError
-        elif self.cap_method == CAP_METHOD.WDACAP:
+        # 暂时只有一种截图方法, WDACAP
+        if self.cap_method == CAP_METHOD.WDACAP:
             data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
 
         # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
@@ -215,7 +243,6 @@ class IOS(Device):
 
         return screen
 
-    @retry_session
     def touch(self, pos, duration=0.01):
         # trans pos of click, pos can be percentage or real coordinate
         LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
@@ -267,7 +294,6 @@ class IOS(Device):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
         self.session.press(keys)
 
-    @retry_session
     def text(self, text, enter=True):
         """bug in wda for now"""
         if enter:
@@ -480,7 +506,7 @@ class IOS(Device):
         """
         return self.driver.alert.exists
 
-    def alert_click(self, buttons:list):
+    def alert_click(self, buttons):
         """
         # when Arg type is list, click the first match, raise ValueError if no match
         示例： ["设置", "信任", "安装"]
