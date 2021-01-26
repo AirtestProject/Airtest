@@ -69,12 +69,15 @@ class RotationWatcher(object):
         def _refresh_by_ow():
             try:
                 return self.get_rotation()
-            except WDAError as err:
-                print(err)
-                if err.value.has_key('error'):
-                    self.iosHandle._fetchNewSession()
+            except RuntimeError:
+                try:
+                    # Session does not exist Error
+                    self.iosHandle._fetch_new_session()
                     self.session = self.iosHandle.session
                     return self.get_rotation()
+                except Exception as err:
+                    import traceback
+                    print(traceback.format_exc())
                 else:
                     return self.last_result
             except ValueError as err:
