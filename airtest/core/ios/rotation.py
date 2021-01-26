@@ -64,7 +64,7 @@ class RotationWatcher(object):
             except RuntimeError:
                 try:
                     # Session does not exist Error
-                    self.iosHandle._fetchNewSession()
+                    self.iosHandle._fetch_new_session()
                     self.session = self.iosHandle.session
                     return self.get_rotation()
                 except Exception as err:

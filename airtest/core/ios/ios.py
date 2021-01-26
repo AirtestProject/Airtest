@@ -1,9 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import requests
-import six
+
 import time
-import json
 import base64
 import traceback
 import wda
@@ -16,8 +14,6 @@ from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.fake_minitouch import fakeMiniTouch
 from airtest.utils.logger import get_logger
 
-from wda import LANDSCAPE
-from wda import WDAError
 
 LOGGING = get_logger(__name__)
 
@@ -34,24 +30,19 @@ def decorator_retry_session(func):
     def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except WDAError as err:
-            # 6 : Session does not exist
-            if err.value.has_key('error'):
-                # retry _fetch_new_session 3 times
-                tries = 3
-                while tries > 0:
-                    try:
-                        self._fetch_new_session()
-                    except WDAError:
-                        if tries == 1:
-                            raise
-                        tries -= 1
-                        continue
-                    else:
-                        break
-                return func(self, *args, **kwargs)
-            else:
-                raise err
+        except (RuntimeError, wda.WDAError):
+            tries = 3
+            while tries > 0:
+                try:
+                    self._fetch_new_session()
+                except:
+                    if tries == 1:
+                        raise
+                    tries -= 1
+                    continue
+                else:
+                    break
+            return func(self, *args, **kwargs)
     return wrapper
 
 
@@ -114,6 +105,7 @@ class IOS(Device):
 
         # fake minitouch to simulate swipe
         self.minitouch = fakeMiniTouch(self)
+        self.alert_watch_and_click = self.driver.alert.watch_and_click
 
     @property
     def uuid(self):
@@ -173,12 +165,13 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
+        if self.display_info["orientation"] in [wda.LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
             w, h = h, w
         return w, h
 
     def home(self):
-        return self.driver.home()
+        # press("home") faster than home()
+        return self.driver.press("home")
 
     def _neo_wda_screenshot(self):
         """
@@ -226,7 +219,7 @@ class IOS(Device):
         h, w = screen.shape[:2]
 
         # save last res for portrait
-        if self.orientation in [LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
+        if self.orientation in [wda.LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
             self._size['height'] = w
             self._size['width'] = h
         else:
@@ -244,45 +237,64 @@ class IOS(Device):
         return screen
 
     def touch(self, pos, duration=0.01):
+        """
+
+        Args:
+            pos: coordinates (x, y), can be float(percent) or int
+            duration (optional): tap_hold duration
+
+        Returns: None
+
+        Examples:
+            >>> touch((100, 100))
+            >>> touch((0.5, 0.5), duration=1)
+
+        """
         # trans pos of click, pos can be percentage or real coordinate
         LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
-        pos = self._touch_point_by_orientation(pos)
-
-        # scale touch postion
-        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
+        x, y = self._transform_xy(pos)
 
         LOGGING.info("touch last-postion at (%s, %s)", x, y)
-        if duration >= 0.5:
-            self.session.tap_hold(x, y, duration)
-        else:
-            self.session.tap(x, y)
+        self.session.click(x, y, duration)
 
     def double_click(self, pos):
-        # trans pos of click
-        pos = self._touch_point_by_orientation(pos)
-
-        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
+        x, y = self._transform_xy(pos)
         self.session.double_tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
-        # trans pos of swipe, pos is percentage 
-        fx, fy = self._touch_point_by_orientation(fpos)
-        tx, ty = self._touch_point_by_orientation(tpos)
+    def swipe(self, fpos, tpos, duration=0, *args):
+        """
 
-        fxp, fyp = fx * self._touch_factor, fy * self._touch_factor
-        txp, typ = tx * self._touch_factor, ty * self._touch_factor
-        if fxp >1 or fyp >1 or txp >1 or ty >1:
-            fxp, fyp = int(fxp), int(fyp)
-            txp, typ = int(txp), int(typ)
-        else:
-            fxp, fyp = float('%.2f' % fxp), float('%.2f' % fyp)
-            txp, typ = float('%.2f' % txp), float('%.2f' % typ)
+        Args:
+            fpos: start point
+            tpos: end point
+            duration (float): start coordinate press duration (seconds), default is 0
 
-        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fxp, fyp, txp, typ, duration)
-        self.session.swipe(fxp, fyp, txp, typ, duration)
+        Returns:
+            None
+
+        Examples:
+            >>> swipe((1050, 1900), (150, 1900))
+            >>> swipe((0.2, 0.5), (0.8, 0.5))
+
+        """
+
+        fx, fy = self._transform_xy(fpos)
+        tx, ty = self._transform_xy(tpos)
+
+        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fx, fy, tx, ty, duration)
+        self.session.swipe(fx, fy, tx, ty, duration)
 
     def keyevent(self, keyname, **kwargs):
-        """just use as home event"""
+        """
+        Perform keyevent on the device
+
+        Args:
+            keyname: home/volumeUp/volumeDown
+            **kwargs:
+
+        Returns:
+
+        """
         try:
             keyname = KEY_EVENTS(keyname.lower()).name
         except KeyError:
@@ -295,7 +307,19 @@ class IOS(Device):
         self.session.press(keys)
 
     def text(self, text, enter=True):
-        """bug in wda for now"""
+        """
+        Input text on the device
+        Args:
+            text:  text to input
+            enter: True if you need to enter a newline at the end
+
+        Returns:
+            None
+
+        Examples:
+            >>> text("test")
+            >>> text("中文")
+        """
         if enter:
             text += '\n'
         self.session.send_keys(text)
@@ -309,13 +333,54 @@ class IOS(Device):
         """
         raise NotImplementedError
 
-    def start_app(self, package, activity=None):
+    def start_app(self, package, *args):
+        """
+
+        Args:
+            package: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Returns:
+            None
+
+        Examples:
+            >>> start_app('com.apple.mobilesafari')
+
+        """
         self.driver.app_launch(bundle_id=package)
 
     def stop_app(self, package):
+        """
+
+        Args:
+            package: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Returns:
+
+        """
         self.driver.app_stop(bundle_id=package)
     
     def app_state(self, package):
+        """
+
+        Args:
+            package:
+
+        Returns:
+            {
+                "value": 4,
+                "sessionId": "0363BDC5-4335-47ED-A54E-F7CCB65C6A65"
+            }
+            value 1(not running) 2(running in background) 3(running in foreground)? 4(running)
+
+        Examples:
+            >>> dev = device()
+            >>> start_app('com.apple.mobilesafari')
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 4
+            >>> home()
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 3
+            >>> stop_app('com.apple.mobilesafari')
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 1
+        """
         # output {"value": 4, "sessionId": "xxxxxx"}
         # different value means 1: die, 2: background, 4: running
         return self.driver.app_state(bundle_id=package)
@@ -328,7 +393,10 @@ class IOS(Device):
             Might not work on all devices
 
         Returns:
-            current app state
+            current app state dict, eg:
+            {"pid": 1281,
+             "name": "",
+             "bundleId": "com.netease.cloudmusic"}
 
         """
         return self.driver.app_current()
@@ -398,6 +466,15 @@ class IOS(Device):
             (width, height),
             now_orientation
         )
+        return x, y
+
+    def _transform_xy(self, pos):
+        x, y = self._touch_point_by_orientation(pos)
+
+        # scale touch postion
+        if not (x < 1 and y < 1):
+            x, y = int(x * self._touch_factor), int(y * self._touch_factor)
+
         return x, y
 
     def _check_orientation_change(self):
@@ -550,13 +627,13 @@ class IOS(Device):
             app_current_dict = self.app_current()
             app_current_bundleId = app_current_dict.get('bundleId')
             LOGGING.info("app_current_bundleId %s", app_current_bundleId)
-        except Exception as err:
-            LOGGING.error(err)
-            app_current_bundleId = 'example_bundleID'
-        if app_current_bundleId in ['com.apple.springboard']:
-            return True
-        else:
+        except:
             return False
+        else:
+            if app_current_bundleId in ['com.apple.springboard']:
+                return True
+        return False
+
 
 if __name__ == "__main__":
     start = time.time()
