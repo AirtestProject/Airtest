@@ -4,9 +4,9 @@ import re
 import sys
 from airtest.utils.compat import decode_path
 
+
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
 STATICPATH = os.path.join(THISPATH, "static")
-
 DEFAULT_ADB_SERVER = ('127.0.0.1', 8100)
 DEBUG = True
 MINICAPLIB = os.path.join(STATICPATH, "minicap")
