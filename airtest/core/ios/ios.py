@@ -11,7 +11,6 @@ from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
-from airtest.core.ios.fake_minitouch import fakeMiniTouch
 from airtest.utils.logger import get_logger
 
 
@@ -96,15 +95,16 @@ class IOS(Device):
 
         # record device's width
         self._size = {'width': None, 'height': None}
-        self._touch_factor = 0.5
+        self._current_orientation = None
+        self._touch_factor = None
         self._last_orientation = None
+        self._is_pad = None
         self.defaultSession = None
 
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
+        self._register_rotation_watcher()
 
-        # fake minitouch to simulate swipe
-        self.minitouch = fakeMiniTouch(self)
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
     @property
@@ -125,6 +125,32 @@ class IOS(Device):
         """
         self.defaultSession = self.driver.session()
 
+    @property
+    def is_pad(self):
+        """
+        Determine whether it is an ipad, if it is, in the case of horizontal screen + desktop,
+        the coordinates need to be switched to vertical screen coordinates to click correctly (WDA bug)
+        判断是否是ipad，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug）
+        Returns:
+
+        """
+        if self._is_pad is None:
+            info = self.driver.device_info()
+            self._is_pad = info["model"] == "iPad"
+        return self._is_pad
+
+    def _register_rotation_watcher(self):
+        """
+        Register callbacks for Android and minicap when rotation of screen has changed
+
+        callback is called in another thread, so be careful about thread-safety
+
+        Returns:
+            None
+
+        """
+        self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
+
     def window_size(self):
         """
             return window size
@@ -141,16 +167,31 @@ class IOS(Device):
             return device oritantation status
             in  LANDSACPE POR
         """
-        z = self.driver._session_http.get('rotation').value.get('z')
-        return ROTATION_MODE(z).name
+        if not self._current_orientation:
+            z = self.driver._session_http.get('rotation').value.get('z')
+            self._current_orientation = ROTATION_MODE(z).name
+        return self._current_orientation
 
     @property
     def display_info(self):
         if not self._size['width'] or not self._size['height']:
-            self.snapshot()
+            self._display_info()
 
         return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
                 'physical_width': self._size['width'], 'physical_height': self._size['height']}
+
+    def _display_info(self):
+        window_size = self.window_size()
+        scale = self.driver.scale
+        self._size['width'] = scale * window_size.width
+        self._size['height'] = scale * window_size.height
+        self._touch_factor = 1 / scale
+
+    @property
+    def touch_factor(self):
+        if not self._touch_factor:
+            self._display_info()
+        return self._touch_factor
 
     def get_render_resolution(self):
         """
@@ -165,7 +206,8 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [wda.LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
+        if self.display_info["orientation"] in [ROTATION_MODE.LANDSCAPE.name,
+                                                ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name]:
             w, h = h, w
         return w, h
 
@@ -215,20 +257,6 @@ class IOS(Device):
             # may be black/locked screen or other reason, print exc for debugging
             traceback.print_exc()
             return None
-
-        h, w = screen.shape[:2]
-
-        # save last res for portrait
-        if self.orientation in [wda.LANDSCAPE, 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT']:
-            self._size['height'] = w
-            self._size['width'] = h
-        else:
-            self._size['height'] = h
-            self._size['width'] = w
-
-        winw, winh = self.window_size()
-
-        self._touch_factor = float(winh) / float(h)
 
         # save as file if needed
         if filename:
@@ -430,42 +458,21 @@ class IOS(Device):
 
         """
         x, y = tuple_xy
-        try:
-            app_current_dict = self.app_current()
-            app_current_bundleId = app_current_dict.get('bundleId')
-            LOGGING.info("app_current_bundleId %s", app_current_bundleId)
-        except Exception as err:
-            LOGGING.error(err)
-            app_current_bundleId = 'example_bundleID'
-        if app_current_bundleId not in ['com.apple.springboard']:
-            return x, y
 
-        # use correct w and h due to now orientation
-        # _size 只对应竖直时候长宽
-        now_orientation = self.orientation
+        # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
+        if self.is_pad and self.orientation in [ROTATION_MODE.LANDSCAPE.name, ROTATION_MODE.LANDSCAPE_RIGHT.name]:
+            app_current_bundleid = self.app_current()["bundleId"]
+            if app_current_bundleid not in ['com.apple.springboard']:
+                return x, y
 
-        LOGGING.info("current orientation for %s", now_orientation)
-        if now_orientation in ['PORTRAIT', 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN']:
-            width, height = self._size['width'], self._size["height"]
-        else:
-            height, width = self._size['width'], self._size["height"]
-
-        LOGGING.info("current save window_size for (%s, %s)", self._size['width'], self._size["height"])
-        # check if not get screensize when touching
-        if not width or not height:
-            # use snapshot to get current resuluton
-            self.snapshot()
-            # use the new get screen size to reinitialize width and height
-            if now_orientation in ['PORTRAIT', 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN']:
-                width, height = self._size['width'], self._size["height"]
+            if not (x < 1 and y < 1):
+                x, y = XYTransformer.up_2_ori(
+                    (x, y),
+                    (self.display_info['width'], self.display_info["height"]),
+                    self.orientation
+                )
             else:
-                height, width = self._size['width'], self._size["height"]
-
-        x, y = XYTransformer.up_2_ori(
-            (x, y),
-            (width, height),
-            now_orientation
-        )
+                x, y = y, x
         return x, y
 
     def _transform_xy(self, pos):
@@ -473,7 +480,7 @@ class IOS(Device):
 
         # scale touch postion
         if not (x < 1 and y < 1):
-            x, y = int(x * self._touch_factor), int(y * self._touch_factor)
+            x, y = int(x * self.touch_factor), int(y * self.touch_factor)
 
         return x, y
 

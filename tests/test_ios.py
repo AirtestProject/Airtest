@@ -7,7 +7,7 @@ from airtest.core.ios.ios import IOS, wda
 from .testconf import try_remove
 
 text_flag = True # 控制是否运行text接口用例
-skip_alert_flag = True  # 控制是否测试alert相关接口用例
+skip_alert_flag = False  # 控制是否测试alert相关接口用例
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
 PKG_SAFARI = 'com.apple.mobilesafari'
 
@@ -87,7 +87,8 @@ class TestIos(unittest.TestCase):
     def test_touch(self):
         # 位置参数可为：相对于设备的百分比坐标或者实际的逻辑位置坐标
         print("test_touch")
-        self.ios.touch((478, 360), duration=1)
+        self.ios.touch((480, 350), duration=0.1)
+        time.sleep(2)
         self.ios.home()
         time.sleep(2)
         self.ios.touch((0.3, 0.3))
@@ -190,13 +191,25 @@ class TestIos(unittest.TestCase):
         print("test_get_alert_click")
         self.ios.alert_click(['设置', '允许', '好'])
 
+    @unittest.skipIf(skip_alert_flag, "demonstrating skipping get_alert_click")
+    def test_alert_watch_and_click(self):
+        with self.ios.alert_watch_and_click(['Cancel']):
+            time.sleep(5)
+
+        # default watch buttons are
+        # ["使用App时允许", "好", "稍后", "稍后提醒", "确定", "允许", "以后"]
+        with self.ios.alert_watch_and_click(interval=2.0):  # default check every 2.0s
+            time.sleep(5)
+
     def test_device_info(self):
         print("test_device_info")
         print(self.ios.device_info())
 
     def test_home_interface(self):
         print("test_home_interface")
-        print(self.ios.home_interface())
+        self.ios.home()
+        time.sleep(2)
+        self.assertTrue(self.ios.home_interface())
 
 
 

@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import sys
 from enum import Enum
 from airtest.utils.compat import decode_path
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
+
 
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
 STATICPATH = os.path.join(THISPATH, "static")
-
 DEFAULT_ADB_SERVER = ('127.0.0.1', 8100)
 DEBUG = True
 MINICAPLIB = os.path.join(STATICPATH, "minicap")
@@ -35,6 +33,10 @@ class ROTATION_MODE(Enum):
     LANDSCAPE = 270
     LANDSCAPE_RIGHT = 90
     PORTRAIT_UPSIDEDOWN = 180
+
+    UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT = 90
+    UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN = 0
+
 
     @classmethod
     def _missing_(cls, value):
