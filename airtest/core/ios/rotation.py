@@ -2,12 +2,10 @@
 import threading
 import traceback
 import time
-from airtest.core.error import AirtestError
+from airtest.core.ios.constant import ROTATION_MODE
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from airtest.core.ios.wda_client import WDAError
 
 LOGGING = get_logger(__name__)
 
@@ -62,17 +60,18 @@ class RotationWatcher(object):
 
         def _refresh_by_ow():
             try:
-                return self.session.orientation
-            except WDAError as err:
-                if err.status == 6:
-                    self.iosHandle._fetchNewSession()
+                return self.get_rotation()
+            except RuntimeError:
+                try:
+                    # Session does not exist Error
+                    self.iosHandle._fetch_new_session()
                     self.session = self.iosHandle.session
-                    return self.session.orientation
-                else:
+                    return self.get_rotation()
+                except Exception as err:
+                    LOGGING.error(err)
                     return self.last_result
-            except ValueError as err:
-                import traceback
-                print(traceback.format_exc())
+            except Exception as err:
+                LOGGING.error(err)
                 return self.last_result
 
         def _run():
@@ -112,6 +111,10 @@ class RotationWatcher(object):
         """方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback.append(ow_callback)
 
+    def get_rotation(self):
+        z = self.session._session_http.get('rotation').value.get('z')
+        return ROTATION_MODE(z).name
+
 
 class XYTransformer(object):
     """
@@ -137,13 +140,13 @@ class XYTransformer(object):
         # no need to do changing
         # ios touch point same way of image
 
-        if orientation == LANDSCAPE:
+        if orientation == ROTATION_MODE.LANDSCAPE.name:
             x, y = h-y, x
-        elif orientation == LANDSCAPE_RIGHT:
+        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name:
             x, y = y, w-x
-        elif orientation == PORTRAIT_UPSIDEDOWN:
+        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN.name:
             x, y = w-x, h-y
-        elif orientation == PORTRAIT:
+        elif orientation == ROTATION_MODE.PORTRAIT.name:
             x, y = x, y
         return x, y
 
