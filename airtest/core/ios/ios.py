@@ -9,7 +9,8 @@ import inspect
 from functools import wraps
 from airtest import aircv
 from airtest.core.device import Device
-from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
+    LANDSCAPE_PAD_RESOLUTION
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.utils.logger import get_logger
 
@@ -87,7 +88,6 @@ class IOS(Device):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
-        LOGGING.info("Using default ios devices")
         self.addr = addr or DEFAULT_ADDR
 
         # fit wda format, make url start with http://
@@ -151,7 +151,12 @@ class IOS(Device):
         """
         if self._is_pad is None:
             info = self.driver.device_info()
-            self._is_pad = info["model"] == "iPad"
+            if info["model"] == "iPad" or \
+                (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
+                # ipad与6P/7P/8P等设备，桌面横屏时的表现一样，都会变横屏
+                self._is_pad = True
+            else:
+                self._is_pad = False
         return self._is_pad
 
     def _register_rotation_watcher(self):
@@ -173,8 +178,7 @@ class IOS(Device):
                 Size(wide , hight)
         """
 
-        window_size = self.session.window_size()
-        return window_size
+        return self.session.window_size()
 
     # @property
     # @retry_session
@@ -207,8 +211,13 @@ class IOS(Device):
     def _display_info(self):
         window_size = self.window_size()
         scale = self.driver.scale
-        self._size['width'] = scale * window_size.width
-        self._size['height'] = scale * window_size.height
+        if self.orientation in [ROTATION_MODE.LANDSCAPE.name,
+                                         ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name]:
+            width, height = window_size.height, window_size.width
+        else:
+            width, height = window_size.width, window_size.height
+        self._size['width'] = scale * width
+        self._size['height'] = scale * height
         self._touch_factor = 1 / scale
 
     @property
@@ -489,14 +498,14 @@ class IOS(Device):
             if app_current_bundleid not in ['com.apple.springboard']:
                 return x, y
 
-            if not (x < 1 and y < 1):
-                x, y = XYTransformer.up_2_ori(
-                    (x, y),
-                    (self.display_info['width'], self.display_info["height"]),
-                    self.orientation
-                )
-            else:
-                x, y = y, x
+            if x < 1 and y < 1:
+                x = x * self.display_info["height"]
+                y = y * self.display_info["width"]
+            x, y = XYTransformer.up_2_ori(
+                (x, y),
+                (self.display_info['height'], self.display_info["width"]),  # 交换长和宽
+                self.orientation
+            )
         return x, y
 
     def _transform_xy(self, pos):

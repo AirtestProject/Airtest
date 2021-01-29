@@ -6,8 +6,6 @@ from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from wda import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from wda import WDAError, WDAInvalidSessionIdError
 
 LOGGING = get_logger(__name__)
 
@@ -151,13 +149,13 @@ class XYTransformer(object):
         # no need to do changing
         # ios touch point same way of image
 
-        if orientation == LANDSCAPE:
+        if orientation == ROTATION_MODE.LANDSCAPE.name:
             x, y = h-y, x
-        elif orientation == 'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT':
+        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name:
             x, y = y, w-x
-        elif orientation == 'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN':
+        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN.name:
             x, y = w-x, h-y
-        elif orientation == PORTRAIT:
+        elif orientation == ROTATION_MODE.PORTRAIT.name:
             x, y = x, y
         return x, y
 
