@@ -17,7 +17,6 @@ class RotationWatcher(object):
 
     def __init__(self, iosHandle):
         self.iosHandle = iosHandle
-        self.session = iosHandle.session
         self.ow_callback = []
         self.roundProcess = None
         self._stopEvent = threading.Event()
@@ -61,18 +60,16 @@ class RotationWatcher(object):
         def _refresh_by_ow():
             try:
                 return self.get_rotation()
-            except RuntimeError:
-                try:
-                    # Session does not exist Error
-                    self.iosHandle._fetch_new_session()
-                    self.session = self.iosHandle.session
-                    return self.get_rotation()
-                except Exception as err:
-                    LOGGING.error(err)
-                    return self.last_result
-            except Exception as err:
-                LOGGING.error(err)
-                return self.last_result
+            except Exception:
+                # 重试5次，如果还是失败就返回None，终止线程
+                for i in range(5):
+                    try:
+                        self.iosHandle._fetch_new_session()
+                        return self.get_rotation()
+                    except:
+                        time.sleep(2)
+                        continue
+                return None
 
         def _run():
             while not self._stopEvent.isSet():
@@ -112,8 +109,7 @@ class RotationWatcher(object):
         self.ow_callback.append(ow_callback)
 
     def get_rotation(self):
-        z = self.session._session_http.get('rotation').value.get('z')
-        return ROTATION_MODE(z).name
+        return self.iosHandle.driver.orientation
 
 
 class XYTransformer(object):

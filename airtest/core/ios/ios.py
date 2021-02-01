@@ -31,18 +31,14 @@ def decorator_retry_session(func):
         try:
             return func(self, *args, **kwargs)
         except (RuntimeError, wda.WDAError):
-            tries = 3
-            while tries > 0:
+            for i in range(3):
                 try:
                     self._fetch_new_session()
+                    return func(self, *args, **kwargs)
                 except:
-                    if tries == 1:
-                        raise
-                    tries -= 1
+                    time.sleep(0.5)
                     continue
-                else:
-                    break
-            return func(self, *args, **kwargs)
+            raise
     return wrapper
 
 
@@ -79,7 +75,8 @@ class IOS(Device):
         self.addr = addr or DEFAULT_ADDR
 
         # fit wda format, make url start with http://
-        if not self.addr.startswith("http://"):
+        # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
+        if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
         """here now use these supported cap touch and ime method"""
@@ -99,7 +96,6 @@ class IOS(Device):
         self._touch_factor = None
         self._last_orientation = None
         self._is_pad = None
-        self.defaultSession = None
 
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
@@ -111,19 +107,14 @@ class IOS(Device):
     def uuid(self):
         return self.addr
 
-    @property
-    def session(self):
-        if not self.defaultSession:
-            self.defaultSession = self.driver.session()
-        return self.defaultSession
-
     def _fetch_new_session(self):
         """
-        Re-acquire a new session, will not automatically retry
-        重新获取新的session，不会自动重试
+        Re-acquire a new session
+        重新获取新的session
         :return:
         """
-        self.defaultSession = self.driver.session()
+        # 根据facebook-wda的逻辑，直接设为None就会自动获取一个新的默认session
+        self.driver.session_id = None
 
     @property
     def is_pad(self):
@@ -163,7 +154,7 @@ class IOS(Device):
                 Size(wide , hight)
         """
 
-        return self.session.window_size()
+        return self.driver.window_size()
 
     @property
     def orientation(self):
@@ -172,8 +163,7 @@ class IOS(Device):
             in  LANDSACPE POR
         """
         if not self._current_orientation:
-            z = self.driver._session_http.get('rotation').value.get('z')
-            self._current_orientation = ROTATION_MODE(z).name
+            self._current_orientation = self.driver.orientation
         return self._current_orientation
 
     @property
@@ -292,11 +282,11 @@ class IOS(Device):
         x, y = self._transform_xy(pos)
 
         LOGGING.info("touch last-postion at (%s, %s)", x, y)
-        self.session.click(x, y, duration)
+        self.driver.click(x, y, duration)
 
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
-        self.session.double_tap(x, y)
+        self.driver.double_tap(x, y)
 
     def swipe(self, fpos, tpos, duration=0, *args):
         """
@@ -319,7 +309,7 @@ class IOS(Device):
         tx, ty = self._transform_xy(tpos)
 
         LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fx, fy, tx, ty, duration)
-        self.session.swipe(fx, fy, tx, ty, duration)
+        self.driver.swipe(fx, fy, tx, ty, duration)
 
     def keyevent(self, keyname, **kwargs):
         """
@@ -341,7 +331,7 @@ class IOS(Device):
     
     def press(self, keys):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
-        self.session.press(keys)
+        self.driver.press(keys)
 
     def text(self, text, enter=True):
         """
@@ -359,7 +349,7 @@ class IOS(Device):
         """
         if enter:
             text += '\n'
-        self.session.send_keys(text)
+        self.driver.send_keys(text)
 
     def install_app(self, uri, package):
         """
@@ -623,7 +613,7 @@ class IOS(Device):
             dict for device info
 
         """
-        return self.session.info
+        return self.driver.info
 
     def home_interface(self):
         """
