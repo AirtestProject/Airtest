@@ -2,7 +2,8 @@
 import threading
 import traceback
 import time
-from airtest.core.error import AirtestError
+import wda
+from airtest.core.ios.constant import ROTATION_MODE
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
@@ -75,6 +76,7 @@ class RotationWatcher(object):
                     except:
                         time.sleep(2)
                         continue
+                LOGGING.info("orientationWatcher has ended")
                 return None
 
         def _run():
@@ -115,7 +117,7 @@ class RotationWatcher(object):
         self.ow_callback.append(ow_callback)
 
     def get_rotation(self):
-        return self.iosHandle.driver.orientation
+        return self.iosHandle.get_orientation()
 
 
 class XYTransformer(object):
@@ -142,13 +144,13 @@ class XYTransformer(object):
         # no need to do changing
         # ios touch point same way of image
 
-        if orientation == ROTATION_MODE.LANDSCAPE.name:
+        if orientation == wda.LANDSCAPE:
             x, y = h-y, x
-        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name:
+        elif orientation == wda.LANDSCAPE_RIGHT:
             x, y = y, w-x
-        elif orientation == ROTATION_MODE.UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN.name:
+        elif orientation == wda.PORTRAIT_UPSIDEDOWN:
             x, y = w-x, h-y
-        elif orientation == ROTATION_MODE.PORTRAIT.name:
+        elif orientation == wda.PORTRAIT:
             x, y = x, y
         return x, y
 
