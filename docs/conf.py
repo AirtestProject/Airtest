@@ -41,7 +41,7 @@ from recommonmark.parser import CommonMarkParser
 
 import mock
 
-mock_list = ['cv2', 'Xlib', 'numpy', 'mss',]
+mock_list = ['cv2', 'Xlib', 'numpy', 'mss', 'wda']
 win_mock_list = [
             'win32api',
             'win32con',

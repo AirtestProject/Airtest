@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: 2020-09-17 12:00+0800\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -16,14 +16,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.core.android.android.rst:2
-msgid "airtest\\.core\\.android\\.android module"
+msgid "airtest.core.android.android module"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
-msgid "基类：:class:`airtest.core.device.Device`"
+msgid "Bases: :class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
@@ -33,6 +33,12 @@ msgstr ""
 #: airtest.core.android.android.Android.touch_proxy:1 of
 msgid "Perform touch operation according to self.touch_method"
 msgstr "根据self.touch_method的类型，执行对应的触摸操作"
+
+#: airtest.core.android.android.Android.touch_proxy:3 of
+msgid ""
+"Module: "
+":py:mod:`airtest.core.android.touch_methods.touch_proxy.TouchProxy`"
+msgstr ""
 
 #: airtest.core.android.android.Android.adjust_all_screen
 #: airtest.core.android.android.Android.check_app
@@ -72,11 +78,12 @@ msgstr "根据self.touch_method的类型，执行对应的触摸操作"
 #: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app
 #: airtest.core.android.android.Android.unlock
+#: airtest.core.android.android.Android.uuid
 #: airtest.core.android.android.Android.wake of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
-#: airtest.core.android.android.Android.touch_proxy:3 of
+#: airtest.core.android.android.Android.touch_proxy:5 of
 msgid "TouchProxy"
 msgstr ""
 
@@ -87,6 +94,10 @@ msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
 #: airtest.core.android.android.Android.get_default_device:3 of
 msgid "local device serialno"
 msgstr "本地设备序列号serialno"
+
+#: airtest.core.android.android.Android.uuid:1 of
+msgid "Serial number"
+msgstr ""
 
 #: airtest.core.android.android.Android.list_app:1 of
 msgid "Return list of packages"
@@ -116,7 +127,7 @@ msgstr "返回packages列表"
 #: airtest.core.android.android.Android.touch
 #: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.android.Android.list_app:3 of
@@ -155,12 +166,12 @@ msgstr "如果存在，返回True"
 
 #: airtest.core.android.android.Android.check_app
 #: airtest.core.android.android.Android.pinch of
-msgid "引发"
+msgid "raises"
 msgstr ""
 
 #: airtest.core.android.android.Android.check_app:7 of
 #, fuzzy
-msgid "raised if package is not found"
+msgid ":exc:`AirtestError` -- raised if package is not found"
 msgstr ":exc:`AirtestError` -- 如果不存在，抛出异常"
 
 #: airtest.core.android.android.Android.start_app:1 of
@@ -179,7 +190,7 @@ msgstr ""
 #: airtest.core.android.android.Android.pinch:9
 #: airtest.core.android.android.Android.shell:6
 #: airtest.core.android.android.Android.start_app:6
-#: airtest.core.android.android.Android.start_recording:6
+#: airtest.core.android.android.Android.start_recording:7
 #: airtest.core.android.android.Android.stop_app:5
 #: airtest.core.android.android.Android.stop_recording:6
 #: airtest.core.android.android.Android.swipe:9
@@ -291,11 +302,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.keyevent:4
 #: airtest.core.android.android.Android.logcat:3
-#: airtest.core.android.android.Android.logcat:4
-#: airtest.core.android.android.Android.start_recording:3
-#: airtest.core.android.android.Android.start_recording:4
-#: airtest.core.android.android.Android.stop_recording:3
-#: airtest.core.android.android.Android.stop_recording:4 of
+#: airtest.core.android.android.Android.logcat:4 of
 msgid "optional arguments"
 msgstr ""
 
@@ -390,7 +397,10 @@ msgid "pinch in or pinch out, default is 'in'"
 msgstr "向内捏合in或者向外捏合out，默认是'in'"
 
 #: airtest.core.android.android.Android.pinch:11 of
-msgid "An error occurred when center is not a list/tuple or None"
+#, fuzzy
+msgid ""
+":exc:`TypeError` -- An error occurred when center is not a list/tuple or "
+"None"
 msgstr "如果中心点不是一个list/tuple坐标，将会抛出TypeError异常"
 
 #: airtest.core.android.android.Android.swipe_along:1 of
@@ -461,7 +471,7 @@ msgstr ""
 
 #: airtest.core.android.android.Android.get_top_activity:3
 #: airtest.core.android.android.Android.get_top_activity_name:3 of
-msgid "package, activity and pid"
+msgid "(package, activity, pid)"
 msgstr ""
 
 #: airtest.core.android.android.Android.get_top_activity_name:1 of
@@ -476,7 +486,7 @@ msgstr "如果软键盘正在启用，返回True，否则False"
 #: airtest.core.android.android.Android.is_locked:4
 #: airtest.core.android.android.Android.is_screenon:4
 #: airtest.core.android.android.Android.unlock:4 of
-msgid "提示"
+msgid "Notes"
 msgstr ""
 
 #: airtest.core.android.android.Android.is_keyboard_shown:5
@@ -541,11 +551,52 @@ msgstr ""
 msgid "Start recording the device display"
 msgstr "开始对设备画面进行录制"
 
+#: airtest.core.android.android.Android.start_recording:3 of
+msgid "maximum screen recording time, default is 1800"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:4 of
+msgid "bit_rate=resolution*level, 1 <= level <= 5, default is 1"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:5 of
+msgid "the higher the bitrate, the clearer the video"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:10 of
+msgid "Examples"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:11 of
+msgid "Record 30 seconds of video and export to the current directory test.mp4::"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:20 of
+msgid ""
+"Or set max_time=30, the screen recording will stop automatically after 30"
+" seconds::"
+msgstr ""
+
+#: airtest.core.android.android.Android.start_recording:25 of
+msgid ""
+"The default value of `max_time` is 1800 seconds, so the maximum screen "
+"recording time is half an hour. You can modify its value to obtain a "
+"longer screen recording::"
+msgstr ""
+
 #: airtest.core.android.android.Android.stop_recording:1 of
 msgid ""
 "Stop recording the device display. Recoding file will be kept in the "
 "device."
 msgstr "停止对设备画面的录制。录制出的文件将会放在设备中。"
+
+#: airtest.core.android.android.Android.stop_recording:3 of
+msgid "default file is `screen.mp4`"
+msgstr ""
+
+#: airtest.core.android.android.Android.stop_recording:4 of
+msgid "True or False. Stop only, no pulling recorded file from device."
+msgstr ""
 
 #: airtest.core.android.android.Android.adjust_all_screen:1 of
 msgid "Adjust the render resolution for all_screen device."
@@ -579,5 +630,11 @@ msgstr "对全面屏设备进行渲染分辨率的调整。"
 #~ msgstr ""
 
 #~ msgid "Notes"
+#~ msgstr ""
+
+#~ msgid "airtest\\.core\\.android\\.android module"
+#~ msgstr ""
+
+#~ msgid "package, activity and pid"
 #~ msgstr ""
 

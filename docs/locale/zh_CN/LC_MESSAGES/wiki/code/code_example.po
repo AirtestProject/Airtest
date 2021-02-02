@@ -1,0 +1,598 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../wiki/code/code_example.md:1
+msgid "Common problems and code examples"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:3
+msgid "中文版"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:5
+msgid "How to initialize the script"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:7
+msgid "air script: auto_setup()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:9
+msgid ""
+"Automatically configure the interface of the running environment, you can"
+" configure the path where the current script is located, the device used,"
+" the storage path of the log content, the project root directory, and the"
+" screenshot compression accuracy:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:15
+msgid "Interface example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:26
+msgid "How to connect/use the device"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:28
+msgid "Please note: For more device related information, please refer to Document"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:32
+msgid "Connect the device: connect_device(URI)"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:34
+msgid ""
+"The interface to connect to the device requires the URI string used to "
+"initialize the device. Example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:52
+msgid "Connect the device: init_device()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:54
+msgid ""
+"To initialize the interface of the device, you need to pass in the device"
+" platform, the uuid and optional parameters of the device, where uuid is "
+"the serial number of Android, the window handle of Windows, or the uuid "
+"of iOS:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:60
+msgid "Example of interface usage:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:70
+msgid "Get the current device: device()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:72
+msgid ""
+"Return the device instance currently in use, the usage example is as "
+"follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:79
+msgid "Set the current device: set_current()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:81
+msgid ""
+"Set the current device used, which can be used to switch between multiple"
+" devices. Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:93
+msgid "How to perform coordinate click/coordinate sliding"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:95
+msgid "Coordinate click"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:97
+msgid ""
+"When you click on the device, you can pass in parameters such as the "
+"click location and the number of clicks. The optional parameters under "
+"different platforms are slightly different. Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:113
+msgid "Coordinate sliding"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:115
+msgid ""
+"For sliding operations on the device, there are two ways to pass "
+"parameters, one is to pass in the starting point and end of the sliding, "
+"and the other is to pass in the starting point and sliding direction "
+"vector. Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:130
+msgid "How to install/start/uninstall apps"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:132
+msgid "Start the application: start_app()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:134
+msgid ""
+"To start the target application on the device, you need to pass in the "
+"package name of the application, which supports Android and iOS "
+"platforms. Examples:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:140
+msgid "Terminate application operation: stop_app()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:142
+msgid ""
+"To terminate the operation of the target application on the device, the "
+"package name of the application needs to be passed in. It supports "
+"Android and iOS platforms. Examples:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:148
+msgid "Clear application data: clear_app()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:150
+msgid ""
+"To clean up the target application data on the device, the package name "
+"of the application needs to be passed in. Only supports the Android "
+"platform, example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:156
+msgid "Install the application: install()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:158
+msgid ""
+"To install the application on the device, you need to pass in the "
+"complete apk installation path, only supports the Android platform, "
+"example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:164
+msgid "Uninstall the application: uninstall()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:166
+msgid ""
+"To uninstall the application on the device, you need to pass in the "
+"package name of the uninstalled application. Only supports the Android "
+"platform, example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:174
+msgid "Key event: keyevent"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:176
+msgid "Android keyevent"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:178
+msgid ""
+"It is equivalent to executing adb shell input keyevent KEYNAME, an "
+"example is as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:188
+msgid "Windows keyevent"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:190
+msgid ""
+"Unlike Android, the Windows platform uses the pywinauto.keyboard module "
+"module for key input. Example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:199
+msgid "iOS keyevent"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:201
+msgid "Currently only supports HOME key:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:207
+msgid "How to enter text"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:209
+msgid ""
+"To enter text on the device, the text box needs to be activated (that is,"
+" click the text box first, and then use the text() interface to enter). "
+"Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:222
+msgid "How to delete text"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:224
+msgid "Delete a single character through the keyevent interface:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:231
+msgid "Simulate clearing the input box operation:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:238
+msgid "Delete poco (leave the input box blank):"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:240
+msgid "poco(\"xxx\").set_text(\"\")."
+msgstr ""
+
+#: ../../wiki/code/code_example.md:244
+msgid "Log"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:246
+msgid "How to log into the report"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:248
+msgid ""
+"The log() interface is convenient to insert some user-defined log "
+"information, which will be displayed in the Airtest report. In Airtest "
+"version 1.1.6, the log interface supports 4 parameters:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:250
+msgid "args, which can be a string, a non-string or a traceback object;"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:252
+msgid "timestamp, used to customize the timestamp of the current log;"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:254
+msgid "desc, used to customize the title of the log;"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:255
+msgid ""
+"snapshot, indicating whether it is necessary to take a screenshot of the "
+"current screen image and display it in the report:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:257 ../../wiki/code/code_example.md:327
+msgid "Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:277
+msgid "How to set the log save path"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:279
+msgid ""
+"Airtest provides some global settings, in which LOGFILE is used to "
+"customize the name of the txt file that records the log content; LOGDIR "
+"is used to customize the save path of the log content, examples are as "
+"follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:294
+msgid "How to filter unnecessary log information"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:296
+msgid ""
+"Add settings for log information level at the beginning of the script "
+"code:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:306
+msgid ""
+"After changing the level of output log information to [ERROR], only a "
+"small amount of initialization information is output during the entire "
+"script running process, which makes it easier to view error messages."
+msgstr ""
+
+#: ../../wiki/code/code_example.md:310
+msgid "Report"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:312
+msgid "Report generation: simple_report()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:314
+msgid "Simple interface for generating reports:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:320
+msgid "The 4 parameters that can be passed in represent:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:322
+msgid ""
+"filepath, the path of the script file, you can directly pass in the "
+"variable `file``"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:323
+msgid ""
+"logpath, the path where the log content is located, if it is True, it "
+"will default to the path where the current script is located to find the "
+"log content"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:324
+msgid "logfile, the file path of log.txt"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:325
+msgid "output, the path to the report, must end with .html"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:340
+msgid "Report generation: LogToHtml()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:342
+msgid "Base class of report:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:348
+msgid "The logtohtml class can pass in many parameters:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:350
+msgid "script_root, script path"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:351
+msgid "log_root, the path of the log file"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:352
+msgid "static_root, the server path where static resources are deployed"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:353
+msgid "export_dir, the storage path of the export report"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:354
+msgid "script_name, the script name"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:355
+msgid "logfile, the path of the log file log.txt"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:356
+msgid "lang, the language of the report (Chinese: zh; English: en)"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:357
+msgid "plugins, plug-ins, will be used if poco or airtest-selenium is used"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:359
+msgid ""
+"When using logtohtml to generate a test report, we generally first "
+"instantiate a logtohtml object, and then use this object to call the "
+"class method report() to generate the report. An example is as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:370
+msgid "Screenshot"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:372
+msgid "How to take a screenshot with script"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:374
+msgid ""
+"Take a screenshot of the target device and save it to a file. You can "
+"pass in the file name of the screenshot, a short description of the "
+"screenshot, the compression accuracy of the screenshot, and the maximum "
+"size of the screenshot. Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:380
+msgid "How to take a partial screenshot"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:382
+msgid ""
+"Partial screenshots or screenshots by coordinates are a frequently asked "
+"question. Airtest provides the crop_image(img, rect) method to help us "
+"achieve partial screenshots:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:401
+msgid "How to do partial image recognition"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:403
+msgid "Steps to find a partial picture:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:405
+msgid "Take a partial screenshot"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:406
+msgid "Define the target screenshot object to find"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:407
+msgid ""
+"Use the match_in method to find the specified screenshot object in the "
+"partial screenshot"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:430
+msgid "How to set the report screenshot accuracy"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:432
+msgid ""
+"SNAPSHOT_QUALITY is used to set the global screenshot compression "
+"accuracy, the default value is 10, and the value range is [1,100]. "
+"Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:441
+msgid "Define the compression accuracy of a single screenshot, example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:449
+msgid "How to set the maximum size of report screenshots"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:451
+msgid ""
+"In Airtest1.1.6, a new setting for specifying the maximum size of "
+"screenshots is added: ST.IMAGE_MAXSIZE. If it is set to 1200, the length "
+"and width of the last saved screenshot will not exceed 1200. Example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:465
+msgid "How to specify the path and name for saving screenshots"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:467
+msgid ""
+"Take a screenshot of the screen of the current device and save the "
+"screenshot in a custom path. This can be achieved in the following ways:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:475
+msgid "How to make assertions"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:477
+msgid "Assert the existence: assert_exists()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:479
+msgid ""
+"There is an assertion target on the device screen, you need to pass in 1 "
+"assertion target (screenshot) and the assertion step information "
+"displayed on the report, example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:486
+msgid "Assert that does not exist: assert_not_exists()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:488
+msgid ""
+"There is no assertion target on the device screen. Like assert_exists(), "
+"you need to pass in an assertion target (screenshot) and the assertion "
+"step information displayed on the report, for example:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:494
+msgid "Assert equal: assert_equal()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:496
+msgid ""
+"To assert that two values are equal, you need to pass in the values of "
+"the two assertions, and a short description of the assertion that will be"
+" recorded in the report:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:502
+msgid ""
+"It is often used to make an assertion together with the script that poco "
+"gets the attribute. Examples are as follows:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:510
+msgid "Assert that is not equal: assert_not_equal()"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:512
+msgid ""
+"Assert that two values are not equal, like assert_equal(), you need to "
+"pass in the values of 2 assertions, and a short description of the "
+"assertion that will be recorded in the report:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:522
+msgid "How to switch between absolute and relative coordinates"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:524
+msgid "Use code to switch between absolute coordinates and relative coordinates:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:546
+msgid ""
+"Determine whether the current screen is horizontal or vertical, and get "
+"the resolution of the current screen:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:557
+msgid "How to call other .air scripts"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:559
+msgid ""
+"If you want to call a public function encapsulated in another .air script"
+" in a .air script, you can do this:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:570
+msgid ""
+"If the paths of the sub-scripts that need to be referenced are all placed"
+" in a certain directory, you can set a default project root directory "
+"PROJECT_ROOT, so that when using the using interface, you can find other "
+"sub-scripts in the current root directory without filling in The full "
+"path makes it easier to call each other between scripts."
+msgstr ""
+
+#: ../../wiki/code/code_example.md:572
+msgid ""
+"For example, if we create a script named test1.air, the actual path is "
+"/User/test/project/test1.air:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:581
+msgid ""
+"Another main.air script in the same directory can refer to the test in it"
+" like this:"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:592
+msgid "How to record screen during script running"
+msgstr ""
+
+#: ../../wiki/code/code_example.md:594
+msgid ""
+"Currently only supports screen recording on Android devices, please refer"
+" to Record the screen while running the script"
+msgstr ""
+

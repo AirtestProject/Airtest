@@ -8,17 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.core.cv.rst:2
-msgid "airtest\\.core\\.cv module"
+msgid "airtest.core.cv module"
 msgstr ""
 
 #: airtest.core.cv:1 of
@@ -30,7 +30,7 @@ msgid "Search for image template in the screen until timeout"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.cv.loop_find:3 of
@@ -56,15 +56,17 @@ msgid ""
 msgstr ""
 
 #: airtest.core.cv.loop_find of
-msgid "引发"
+msgid "raises"
 msgstr ""
 
 #: airtest.core.cv.loop_find:9 of
-msgid "when image template is not found in screenshot"
+msgid ""
+":exc:`TargetNotFoundError` -- when image template is not found in "
+"screenshot"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.cv.loop_find:11 of
@@ -94,7 +96,7 @@ msgid "None"
 msgstr ""
 
 #: airtest.core.cv.Predictor:1 airtest.core.cv.Template:1 of
-msgid "基类：:class:`object`"
+msgid "Bases: :class:`object`"
 msgstr ""
 
 #: airtest.core.cv.Template:1 of
@@ -174,5 +176,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Raises"
+#~ msgstr ""
+
+#~ msgid "airtest\\.core\\.cv module"
+#~ msgstr ""
+
+#~ msgid "when image template is not found in screenshot"
 #~ msgstr ""
 

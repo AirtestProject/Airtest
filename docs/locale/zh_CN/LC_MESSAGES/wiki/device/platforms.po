@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../wiki/device/platforms.md:3
+msgid "Supported Platforms 各平台支持情况"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:6
+msgid "Overview"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:74
+msgid "Android"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:76
+msgid ""
+"Currently we are compatible with most Android phones (2.3 <= Android <= "
+"11) on the market, and a few special Android tablets and devices."
+msgstr ""
+
+#: ../../wiki/device/platforms.md:78
+msgid ""
+"If you encounter problems during the connection, please refer to the "
+"device settings of this document according to the different mobile phone "
+"manufacturers: Some manufacturer’s device special problems"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:79
+msgid ""
+"For MIUI 11 or above of Xiaomi mobile phone, please use "
+"cap_method=JAVACAP mode to connect to the phone"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:81
+msgid "目前我们兼容市面上绝大多数的Android手机（2.3 <= Android <= 11），和少数特殊Android平板和设备。"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:83
+msgid "如果在连接中遇到问题，请根据手机厂商的不同，查看此文档的设备设置：部分厂商设备特殊问题"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:84
+msgid "小米手机的MIUI 11 以上版本，请使用cap_method=JAVACAP模式连接手机"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:88
+msgid "Android Emulator 模拟器"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:90
+msgid ""
+"The following emulators have been verified, Android Emulator Connection "
+"Guidelines"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:92
+msgid "下列模拟器都经过验证，Android模拟器连接指引"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:94
+msgid "夜神 Nox"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:95
+msgid "网易Mumu"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:96
+msgid "逍遥 Memuplay"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:97
+msgid "iTools"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:98
+msgid "腾讯手游助手"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:99
+msgid "BlueStacks"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:100
+msgid "AVD"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:102
+msgid "附录：我们对常见模拟器版本的适配情况测试（2020.06，随着版本更新可能失效）"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:106
+msgid "iOS"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:108
+msgid "According to iOS-Tagent document, the current support situation:"
+msgstr ""
+
+#: ../../wiki/device/platforms.md:110
+msgid "以iOS-Tagent文档为准，目前的支持情况："
+msgstr ""
+
