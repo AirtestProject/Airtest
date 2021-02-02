@@ -2,7 +2,6 @@
 import os
 import re
 import wda
-from enum import Enum
 from airtest.utils.compat import decode_path
 
 
