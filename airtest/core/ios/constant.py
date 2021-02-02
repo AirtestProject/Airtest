@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import wda
 from enum import Enum
 from airtest.utils.compat import decode_path
 
@@ -35,23 +36,16 @@ class IME_METHOD(object):
     WDAIME = "WDAIME"
 
 
-class ROTATION_MODE(Enum):
-    PORTRAIT = 0
-    LANDSCAPE = 270
-    LANDSCAPE_RIGHT = 90
-    PORTRAIT_UPSIDEDOWN = 180
-
-    UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT = 90
-    UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN = 0
+ROTATION_MODE = {
+    0: wda.PORTRAIT,
+    270: wda.LANDSCAPE,
+    90: wda.LANDSCAPE_RIGHT,
+    180: wda.PORTRAIT_UPSIDEDOWN,
+}
 
 
-    @classmethod
-    def _missing_(cls, value):
-        # default is PORTRAIT
-        return ROTATION_MODE.PORTRAIT
-
-
-class KEY_EVENTS(Enum):
-    home = "home"
-    volumeUp = "volumeup"
-    volumeDown = "volumedown"
+KEY_EVENTS = {
+    "home": "home",
+    "volumeup": "volumeUp",
+    "volumedown": "volumedown"
+}
