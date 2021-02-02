@@ -19,18 +19,6 @@ LOGGING = get_logger(__name__)
 
 DEFAULT_ADDR = "http://localhost:8100/"
 
-ROTATION_MODE = {
-    0: PORTRAIT,
-    270: LANDSCAPE,
-    90: LANDSCAPE_RIGHT,
-    180: PORTRAIT_UPSIDEDOWN
-}
-
-KEYS_EVENTS = {
-    'home': 'home',
-    'volumeup': 'volumeUp',
-    'volumedown': 'volumeDown'
-}
 
 def decorator_retry_session(func):
     """
@@ -117,9 +105,6 @@ class IOS(Device):
 
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
-        # helper of run process like iproxy
-        # self.instruct_helper = InstructHelper()
-
     @property
     def uuid(self):
         return self.addr
@@ -173,15 +158,6 @@ class IOS(Device):
         """
 
         return self.driver.window_size()
-
-    # @property
-    # @retry_session
-    # def orientation(self):
-    #     """
-    #         return device oritantation status
-    #         in  LANDSACPE POR
-    #     """
-    #     return self.session.orientation
 
     @property
     def orientation(self):
@@ -362,7 +338,7 @@ class IOS(Device):
             raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
         else:
             self.press(keyname)
-
+    
     def press(self, keys):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
         self.driver.press(keys)

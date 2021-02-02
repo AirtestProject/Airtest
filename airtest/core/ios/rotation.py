@@ -10,12 +10,6 @@ from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
 
-ROTATION_MODE = {
-    0: PORTRAIT,
-    270: LANDSCAPE,
-    90: LANDSCAPE_RIGHT,
-    180: PORTRAIT_UPSIDEDOWN
-}
 
 class RotationWatcher(object):
     """
