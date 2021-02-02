@@ -46,5 +46,5 @@ ROTATION_MODE = {
 KEY_EVENTS = {
     "home": "home",
     "volumeup": "volumeUp",
-    "volumedown": "volumedown"
+    "volumedown": "volumeDown"
 }
