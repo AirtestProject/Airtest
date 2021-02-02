@@ -162,7 +162,11 @@ def import_device_cls(platform):
     elif platform == "windows":
         from airtest.core.win.win import Windows as cls
     elif platform == "ios":
-        from airtest.core.ios.ios import IOS as cls
+        try:
+            # only support py3
+            from airtest.core.ios import IOS as cls
+        except:
+            raise ImportError("The ios module of Airtest>1.1.7 only supports python3, if you want to use the ios module, please upgrade to python3 first")
     elif platform == "linux":
         from airtest.core.linux.linux import Linux as cls
     else:
