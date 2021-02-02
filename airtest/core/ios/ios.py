@@ -24,6 +24,7 @@ def decorator_retry_session(func):
     """
     When the operation fails due to session failure, try to re-acquire the session,
     retry at most 3 times
+
     当因为session失效而操作失败时，尝试重新获取session，最多重试3次
     """
     @wraps(func)
@@ -45,7 +46,8 @@ def decorator_retry_session(func):
 def decorator_retry_for_class(cls):
     """
     Add decorators to all methods in the class
-    为class里的所有method添加装饰器decorator_retry_session
+
+    为class里的所有method添加装饰器 ``decorator_retry_session``
     """
     for name, method in inspect.getmembers(cls):
         # Ignore built-in methods and private methods named _xxx
@@ -119,9 +121,10 @@ class IOS(Device):
     @property
     def is_pad(self):
         """
-        Determine whether it is an ipad, if it is, in the case of horizontal screen + desktop,
+        Determine whether it is an ipad(or 6P/7P/8P), if it is, in the case of horizontal screen + desktop,
         the coordinates need to be switched to vertical screen coordinates to click correctly (WDA bug)
-        判断是否是ipad，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug）
+
+        判断是否是ipad(或 6P/7P/8P)，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug）
         Returns:
 
         """
@@ -404,6 +407,7 @@ class IOS(Device):
                 "value": 4,
                 "sessionId": "0363BDC5-4335-47ED-A54E-F7CCB65C6A65"
             }
+
             value 1(not running) 2(running in background) 3(running in foreground)? 4(running)
 
         Examples:
