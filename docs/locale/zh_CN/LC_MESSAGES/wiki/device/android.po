@@ -8,16 +8,493 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:11+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../wiki/device/android.md:1
-msgid "test doc"
+msgid "Android device connection methods and FAQs"
 msgstr ""
+
+#: ../../wiki/device/android.md:3
+msgid "中文版"
+msgstr ""
+
+#: ../../wiki/device/android.md:5
+msgid "Android phone connection"
+msgstr ""
+
+#: ../../wiki/device/android.md:7
+msgid ""
+"If use AirtestIDE to mobile phone connection, please refer to the "
+"documents"
+msgstr ""
+
+#: ../../wiki/device/android.md:9
+msgid "If you're not going to use AirtestIDE, have a look at this statement:"
+msgstr ""
+
+#: ../../wiki/device/android.md:11
+msgid "Opens the developer options on the phone, and allows USB debugging"
+msgstr ""
+
+#: ../../wiki/device/android.md:12
+msgid ""
+"After using USB to connect the phone, you can see the device using adb "
+"devices command and refer to Use ADB to see if the phone is successfully "
+"connected"
+msgstr ""
+
+#: ../../wiki/device/android.md:13
+msgid ""
+"On the code and command line, connect the phone with the phone`s serial "
+"number, see Use the phone in your code"
+msgstr ""
+
+#: ../../wiki/device/android.md:16
+msgid "Use ADB to see if the phone is successfully connected"
+msgstr ""
+
+#: ../../wiki/device/android.md:18
+msgid ""
+"adb is the official Android command line tool for Google, which allows us"
+" to communicate with devices.(if you are interested, please refer to: "
+"adb.)"
+msgstr ""
+
+#: ../../wiki/device/android.md:20
+msgid ""
+"We have stored adb executables for each platform under "
+"airtest\\airtest\\core\\Android\\static\\adb directory, you can use it "
+"without downloading."
+msgstr ""
+
+#: ../../wiki/device/android.md:22
+msgid ""
+"Take Windows as an example, you can first use the terminal to enter the "
+"directory where adb.exe is located (in "
+"airtest\\airtest\\core\\Android\\static\\adb\\Windows, shift+right click "
+"to open the command line terminal), and then execute the command line of "
+"adb devices :"
+msgstr ""
+
+#: ../../wiki/device/android.md:33
+msgid ""
+"In MAC, you can visit airtest/core/android/static/adb/mac directory and "
+"run the ./adb devices, if the adb no executable permissions, can run "
+"chmod + x adb add executable permissions for it."
+msgstr ""
+
+#: ../../wiki/device/android.md:35
+msgid ""
+"In the above example, you can see that the 3 Android devices currently "
+"connected, whose state is device, are normally online"
+msgstr ""
+
+#: ../../wiki/device/android.md:36
+msgid ""
+"If the device status is UNAUTHORIZED, click OK in the ALLOW USB Debugging"
+" menu that pops up over the phone"
+msgstr ""
+
+#: ../../wiki/device/android.md:37
+msgid ""
+"If you can't see the device name, you may need to install the phone's "
+"official driver on your PC"
+msgstr ""
+
+#: ../../wiki/device/android.md:39
+msgid "If your phone has a connection problem"
+msgstr ""
+
+#: ../../wiki/device/android.md:41
+msgid ""
+"Due to different mobile phone manufacturers and the corresponding model, "
+"may encounter all sorts of problems in the process of connecting, please "
+"refer to the link common problems Android"
+msgstr ""
+
+#: ../../wiki/device/android.md:43
+msgid "Use the phone in your code"
+msgstr ""
+
+#: ../../wiki/device/android.md:45
+msgid ""
+"After confirming that the phone can be successfully connected, we can see"
+" the device serial number of the phone in the command line of adb devices"
+" :"
+msgstr ""
+
+#: ../../wiki/device/android.md:54
+msgid ""
+"The c2B1c2A7 above is the device serial number of the mobile phone. We "
+"define a mobile phone with the following format string:"
+msgstr ""
+
+#: ../../wiki/device/android.md:60
+msgid "Among them:"
+msgstr ""
+
+#: ../../wiki/device/android.md:62
+msgid ""
+"adbhost is the IP of the host where adb Server is located. By default, "
+"this is localhostor 127.0.0.1"
+msgstr ""
+
+#: ../../wiki/device/android.md:63
+msgid "adb port defaults to 5037"
+msgstr ""
+
+#: ../../wiki/device/android.md:64
+msgid ""
+"serialno is the serial number of the Android phone, such as c2B1c2a7 just"
+" now"
+msgstr ""
+
+#: ../../wiki/device/android.md:66
+msgid "Here are some examples:"
+msgstr ""
+
+#: ../../wiki/device/android.md:77
+msgid "Connect the phone according to the Android:/// string"
+msgstr ""
+
+#: ../../wiki/device/android.md:79
+msgid ""
+"When we run a script from the command line, we can use --device "
+"Android:/// to specify the Android device on which the script will run, "
+"for example:"
+msgstr ""
+
+#: ../../wiki/device/android.md:85
+msgid ""
+"In addition, we can use the connect_device interface when we want to "
+"connect the phone in our code:"
+msgstr ""
+
+#: ../../wiki/device/android.md:92
+msgid ""
+"These two methods only need to choose one of them, basically can meet our"
+" needs to connect devices."
+msgstr ""
+
+#: ../../wiki/device/android.md:95
+msgid "Some special parameters"
+msgstr ""
+
+#: ../../wiki/device/android.md:97
+msgid ""
+"Some special devices may appear black screen when connected, such as some"
+" emulators, we can add an extra parameter cap_method=JAVACAP to force the"
+" screen capture mode to be JAVACAP :"
+msgstr ""
+
+#: ../../wiki/device/android.md:104
+msgid ""
+"In addition, we have two other parameters, ori_method=ADBORI, which "
+"specifies the rotation mode of the device screen, and "
+"touch_method=ADBTOUCH, which specifies the click mode of the screen as "
+"ADB instruction."
+msgstr ""
+
+#: ../../wiki/device/android.md:106
+msgid ""
+"For the most part, we don't need to specify these parameters, and we only"
+" need to add additional parameters if some special Android devices (such "
+"as some special models of tablets) can`t connect with the default "
+"parameters:"
+msgstr ""
+
+#: ../../wiki/device/android.md:113
+msgid ""
+"Note: if any of the characters ^<>|&appear on the command line, they may "
+"need to be escaped to take effect."
+msgstr ""
+
+#: ../../wiki/device/android.md:115
+msgid ""
+"Therefore, if you need to write && in the connection string, you need to "
+"rewrite it as ^&^& in Windows, add a ^ symbol for escape, and add \\ for "
+"escape under MAC:"
+msgstr ""
+
+#: ../../wiki/device/android.md:123
+msgid "Android interface calls"
+msgstr ""
+
+#: ../../wiki/device/android.md:125
+msgid ""
+"All interfaces defined in airtest.core.api can be used on the Android "
+"platform and can be called directly in the script:"
+msgstr ""
+
+#: ../../wiki/device/android.md:136
+msgid "Can refer to airtest.core.api for the API list."
+msgstr ""
+
+#: ../../wiki/device/android.md:139
+msgid "Android device interface"
+msgstr ""
+
+#: ../../wiki/device/android.md:141
+msgid ""
+"In addition to the cross-platform interface provided in airtest.core.api,"
+" Android device objects have many built-in interfaces that can be "
+"called,We can airtest core. Android. Android module in this document "
+"refer to the android device object has a method, and then call something "
+"like this:"
+msgstr ""
+
+#: ../../wiki/device/android.md:149
+msgid "The ADB instruction call"
+msgstr ""
+
+#: ../../wiki/device/android.md:151
+msgid "Using the Android device interface, we can call adb directives like this:"
+msgstr ""
+
+#: ../../wiki/device/android.md:166
+msgid "Frequently asked Questions about Android"
+msgstr ""
+
+#: ../../wiki/device/android.md:168
+msgid "Android emulator connection"
+msgstr ""
+
+#: ../../wiki/device/android.md:170
+msgid ""
+"The simulator is connected in a similar way to the real machine. The "
+"following steps are required:"
+msgstr ""
+
+#: ../../wiki/device/android.md:172
+msgid ""
+"Open developer options on the emulator and check to allow USB debugging. "
+"Some emulators may need to find Settings - about the phone multiple times"
+" before opening the developer options"
+msgstr ""
+
+#: ../../wiki/device/android.md:173
+msgid ""
+"Use ADB to connect the corresponding port number, for example, enter adb "
+"connect 127.0.0.1:62001, where 7555 is the port number corresponding to "
+"the simulator, and each brand simulator is different"
+msgstr ""
+
+#: ../../wiki/device/android.md:174
+msgid ""
+"you can use the code "
+"Android://127.0.0.1:5037/127.0.0.1:62001?cap_method=JAVACAP connects to "
+"the corresponding emulator"
+msgstr ""
+
+#: ../../wiki/device/android.md:176
+msgid "Key points to note:"
+msgstr ""
+
+#: ../../wiki/device/android.md:178
+msgid ""
+"Most emulators cannot connect with default parameters and must specify "
+"cap_method=JAVACAP"
+msgstr ""
+
+#: ../../wiki/device/android.md:179
+msgid "each brand simulator port can be refer to Android emulator"
+msgstr ""
+
+#: ../../wiki/device/android.md:181
+msgid "Slide continuously"
+msgstr ""
+
+#: ../../wiki/device/android.md:183
+msgid "We provide some sliding interfaces to facilitate more complex operations:"
+msgstr ""
+
+#: ../../wiki/device/android.md:192
+msgid ""
+"Among them, swipe_along can continuously streak through a series of "
+"coordinate points, which is the most commonly used interface."
+msgstr ""
+
+#: ../../wiki/device/android.md:194
+msgid "Custom slide"
+msgstr ""
+
+#: ../../wiki/device/android.md:196
+msgid ""
+"In airtest.core.android.touch_methods.base_touch, defines four action "
+"events:"
+msgstr ""
+
+#: ../../wiki/device/android.md:198
+msgid "DownEvent(Coordinates, contact=0, pressure=50) click"
+msgstr ""
+
+#: ../../wiki/device/android.md:199
+msgid "UpEvent(contact=0) finger up"
+msgstr ""
+
+#: ../../wiki/device/android.md:200
+msgid "MoveEvent(coordinates, contact=0, pressure=50) slide to a coordinate"
+msgstr ""
+
+#: ../../wiki/device/android.md:201
+msgid "SleepEvent wait (seconds)"
+msgstr ""
+
+#: ../../wiki/device/android.md:203
+msgid ""
+"In the above four actions, the contact parameter defaults to 0, "
+"representing the first finger. If 1 is passed in, the action of the "
+"second finger can be defined, so that the complex operation of the "
+"double-finger can be achieved."
+msgstr ""
+
+#: ../../wiki/device/android.md:205
+msgid "pressure=50 defines the pressure when pressed and defaults to 50."
+msgstr ""
+
+#: ../../wiki/device/android.md:207
+msgid ""
+"The touch interface, for example, is actually made up of [DownEvent, "
+"SleepEvent, UpEvent] actions, which in theory can be combined to allow "
+"you to customize very complex click-and-slide operations."
+msgstr ""
+
+#: ../../wiki/device/android.md:210
+msgid "For example, here`s an example of a two-fingered tap on a screen:"
+msgstr ""
+
+#: ../../wiki/device/android.md:224
+msgid ""
+"In the example code above, press the first finger at the coordinates of "
+"(100, 100), press the second finger at (200, 200), and wait for a second "
+"before lifting each finger."
+msgstr ""
+
+#: ../../wiki/device/android.md:226
+msgid ""
+"Also, MoveEvent can be added to achieve more diversified operations, such"
+" as an ordinary swipe :"
+msgstr ""
+
+#: ../../wiki/device/android.md:240
+msgid ""
+"Based on this improvement, more complex operations can be achieved, such "
+"as long press 2 seconds - slide to a position:"
+msgstr ""
+
+#: ../../wiki/device/android.md:256
+msgid ""
+"More examples, please refer to the "
+"airtest/playground/android_motionevents.py."
+msgstr ""
+
+#: ../../wiki/device/android.md:258
+msgid "Debug tips"
+msgstr ""
+
+#: ../../wiki/device/android.md:260
+msgid ""
+"You can switch on settings-developer options-show input position on your "
+"phone to debug simulated inputs."
+msgstr ""
+
+#: ../../wiki/device/android.md:262
+msgid "Record the screen while running the script"
+msgstr ""
+
+#: ../../wiki/device/android.md:264
+msgid ""
+"Android phones support recording the screen while running the script. Add"
+" the --recording parameter to the command line of running the script:"
+msgstr ""
+
+#: ../../wiki/device/android.md:270
+msgid ""
+"After running, you can find the mp4 file recorded in the specified log "
+"directory."
+msgstr ""
+
+#: ../../wiki/device/android.md:272
+msgid ""
+"If only the --recording parameter has been passed, by default "
+"recording_serialnumber.mp4 will be used to name the recording screen file"
+msgstr ""
+
+#: ../../wiki/device/android.md:273
+msgid ""
+"If the file name --recording test.mp4 is specified and there is more than"
+" one phone, name it serialnumber.mp4"
+msgstr ""
+
+#: ../../wiki/device/android.md:274
+msgid ""
+"If you specify the filename --recording test.mp4 and have only one phone,"
+" call it test.mp4"
+msgstr ""
+
+#: ../../wiki/device/android.md:275
+msgid "Note that the file name passed in must end with mp4"
+msgstr ""
+
+#: ../../wiki/device/android.md:276
+msgid ""
+"The default screen recording file is up to 1800 seconds. If you need to "
+"record for a longer time, you need to manually call the screen recording "
+"interface in the code"
+msgstr ""
+
+#: ../../wiki/device/android.md:278
+msgid ""
+"If you call the screen recording interface in the code, you can control "
+"the clarity and duration of the screen recording. For the document, see "
+"Android.start_recording."
+msgstr ""
+
+#: ../../wiki/device/android.md:280
+msgid ""
+"For example, to record a 30-second video with the lowest definition and "
+"export it to test.mp4 in the current directory:"
+msgstr ""
+
+#: ../../wiki/device/android.md:291
+msgid ""
+"bit_rate_level is used to control the resolution of screen recording. The"
+" value range is 1-5. bit_rate_level=5 has the highest resolution, but it "
+"will take up more hard disk space."
+msgstr ""
+
+#: ../../wiki/device/android.md:293
+msgid ""
+"Or set the parameter max_time=30, the screen recording will automatically"
+" stop after 30 seconds:"
+msgstr ""
+
+#: ../../wiki/device/android.md:301
+msgid ""
+"The default value of max_time is 1800 seconds, so the maximum screen "
+"recording time is half an hour, you can modify its value to get a longer "
+"screen recording:"
+msgstr ""
+
+#: ../../wiki/device/android.md:309
+msgid "Refer to the tutorial and documentation for more"
+msgstr ""
+
+#: ../../wiki/device/android.md:311
+msgid "Automated Testing on Android Phones-part 1"
+msgstr ""
+
+#: ../../wiki/device/android.md:312
+msgid "Android connection FAQ"
+msgstr ""
+
+#~ msgid "test doc"
+#~ msgstr ""
 

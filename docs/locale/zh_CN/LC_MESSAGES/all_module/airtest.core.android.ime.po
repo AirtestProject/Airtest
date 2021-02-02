@@ -8,17 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.core.android.ime.rst:2
-msgid "airtest\\.core\\.android\\.ime module"
+msgid "airtest.core.android.ime module"
 msgstr ""
 
 #: airtest.core.android.ime.ensure_unicode:1 of
@@ -28,7 +28,7 @@ msgstr ""
 #: airtest.core.android.ime.YosemiteIme.code
 #: airtest.core.android.ime.YosemiteIme.text
 #: airtest.core.android.ime.ensure_unicode of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.ime.ensure_unicode:3 of
@@ -41,7 +41,7 @@ msgstr ""
 #: airtest.core.android.ime.YosemiteIme.start
 #: airtest.core.android.ime.YosemiteIme.text
 #: airtest.core.android.ime.ensure_unicode of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.ime.ensure_unicode:5 of
@@ -49,7 +49,7 @@ msgid "decoded valued"
 msgstr ""
 
 #: airtest.core.android.ime.CustomIme:1 of
-msgid "基类：:class:`object`"
+msgid "Bases: :class:`object`"
 msgstr ""
 
 #: airtest.core.android.ime.CustomIme:1 of
@@ -72,7 +72,7 @@ msgid "Disable input method"
 msgstr ""
 
 #: airtest.core.android.ime.YosemiteIme:1 of
-msgid "基类：:class:`airtest.core.android.ime.CustomIme`"
+msgid "Bases: :class:`airtest.core.android.ime.CustomIme`"
 msgstr ""
 
 #: airtest.core.android.ime.YosemiteIme:1 of
@@ -125,5 +125,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "基类：:class:`airtest.core.android.ime.CustomIme`"
+#~ msgstr ""
+
+#~ msgid "airtest\\.core\\.android\\.ime module"
 #~ msgstr ""
 

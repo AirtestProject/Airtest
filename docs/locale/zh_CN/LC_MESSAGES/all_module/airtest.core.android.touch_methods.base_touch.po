@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.core.android.touch_methods.base_touch.rst:2
 msgid "airtest.core.android.touch\\_methods.base\\_touch module"
@@ -23,7 +23,7 @@ msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch:1
 #: airtest.core.android.touch_methods.base_touch.MotionEvent:1 of
-msgid "基类：:class:`object`"
+msgid "Bases: :class:`object`"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch:1 of
@@ -51,7 +51,7 @@ msgstr ""
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.transform_xy
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.two_finger_swipe
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.uninstall of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.install:3
@@ -100,7 +100,7 @@ msgstr ""
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.touch
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.transform_xy
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.two_finger_swipe of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.safe_send:3 of
@@ -110,11 +110,11 @@ msgstr ""
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.operate
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.pinch
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.safe_send of
-msgid "引发"
+msgid "raises"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.safe_send:5 of
-msgid "when data cannot be sent"
+msgid ":exc:`Exception` -- when data cannot be sent"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.setup_client_backend:1
@@ -246,7 +246,9 @@ msgid "pinch in or pinch out, default is 'in'"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.pinch:38 of
-msgid "An error occurred when center is not a list/tuple or None"
+msgid ""
+":exc:`TypeError` -- An error occurred when center is not a list/tuple or "
+"None"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.operate:1 of
@@ -256,7 +258,7 @@ msgstr ""
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.operate:3 of
 msgid ""
 "action arguments, dictionary containing type and x, y coordinates, e.g.::"
-"      {     \"type\" : \"down\",     \"x\" : 10,     \"y\" : 10     }"
+"          {     \"type\" : \"down\",     \"x\" : 10,     \"y\" : 10     }"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.operate:4 of
@@ -264,7 +266,7 @@ msgid "action arguments, dictionary containing type and x, y coordinates, e.g.::
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.BaseTouch.operate:12 of
-msgid "is invalid arguments are provided"
+msgid ":exc:`RuntimeError` -- is invalid arguments are provided"
 msgstr ""
 
 #: airtest.core.android.touch_methods.base_touch.MotionEvent:1 of
@@ -275,7 +277,7 @@ msgstr ""
 #: airtest.core.android.touch_methods.base_touch.MoveEvent:1
 #: airtest.core.android.touch_methods.base_touch.SleepEvent:1
 #: airtest.core.android.touch_methods.base_touch.UpEvent:1 of
-msgid "基类：:class:`airtest.core.android.touch_methods.base_touch.MotionEvent`"
+msgid "Bases: :class:`airtest.core.android.touch_methods.base_touch.MotionEvent`"
 msgstr ""
 
 #~ msgid "基类：:class:`object`"
@@ -308,5 +310,21 @@ msgstr ""
 #~ msgid ""
 #~ "Bases: "
 #~ ":class:`airtest.core.android.touch_methods.base_touch.MotionEvent`"
+#~ msgstr ""
+
+#~ msgid "when data cannot be sent"
+#~ msgstr ""
+
+#~ msgid "An error occurred when center is not a list/tuple or None"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "action arguments, dictionary containing type"
+#~ " and x, y coordinates, e.g.::      {"
+#~ "     \"type\" : \"down\",     \"x\" : "
+#~ "10,     \"y\" : 10     }"
+#~ msgstr ""
+
+#~ msgid "is invalid arguments are provided"
 #~ msgstr ""
 
