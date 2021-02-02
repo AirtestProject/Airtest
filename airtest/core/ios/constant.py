@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import sys
+import wda
 from airtest.utils.compat import decode_path
 
 
@@ -33,3 +33,18 @@ class TOUCH_METHOD(object):
 
 class IME_METHOD(object):
     WDAIME = "WDAIME"
+
+
+ROTATION_MODE = {
+    0: wda.PORTRAIT,
+    270: wda.LANDSCAPE,
+    90: wda.LANDSCAPE_RIGHT,
+    180: wda.PORTRAIT_UPSIDEDOWN,
+}
+
+
+KEY_EVENTS = {
+    "home": "home",
+    "volumeup": "volumeUp",
+    "volumedown": "volumedown"
+}

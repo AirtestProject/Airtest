@@ -187,8 +187,16 @@ class IOS(Device):
             in  LANDSACPE POR
         """
         if not self._current_orientation:
-            self._current_orientation = self.driver.orientation
+            self._current_orientation = self.get_orientation()
         return self._current_orientation
+
+    def get_orientation(self):
+        # self.driver.orientation只能拿到LANDSCAPE，不能拿到左转/右转的确切方向
+        # 因此手动调用/rotation获取屏幕实际方向
+        rotation = self.driver._session_http.get('/rotation')
+        # rotation eg. AttrDict({'value': {'x': 0, 'y': 0, 'z': 90}, 'sessionId': 'xx', 'status': 0})
+        if rotation:
+            return ROTATION_MODE.get(rotation.value.z, wda.PORTRAIT)
 
     @property
     def display_info(self):
@@ -201,8 +209,8 @@ class IOS(Device):
     def _display_info(self):
         window_size = self.window_size()
         scale = self.driver.scale
-        if self.orientation in [ROTATION_MODE.LANDSCAPE.name,
-                                         ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name]:
+        self.rotation_watcher.get_ready()
+        if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
             width, height = window_size.height, window_size.width
         else:
             width, height = window_size.width, window_size.height
@@ -229,8 +237,7 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [ROTATION_MODE.LANDSCAPE.name,
-                                                ROTATION_MODE.UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT.name]:
+        if self.display_info["orientation"] in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
             w, h = h, w
         return w, h
 
@@ -347,7 +354,7 @@ class IOS(Device):
 
         """
         try:
-            keyname = KEY_EVENTS(keyname.lower()).name
+            keyname = KEY_EVENTS[keyname.lower()]
         except KeyError:
             raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
         else:
@@ -483,17 +490,21 @@ class IOS(Device):
         x, y = tuple_xy
 
         # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
-        if self.is_pad and self.orientation in [ROTATION_MODE.LANDSCAPE.name, ROTATION_MODE.LANDSCAPE_RIGHT.name]:
+        if self.is_pad and self.orientation != wda.PORTRAIT:
             app_current_bundleid = self.app_current()["bundleId"]
             if app_current_bundleid not in ['com.apple.springboard']:
                 return x, y
 
+            width = self.display_info["width"]
+            height = self.display_info["height"]
+            if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
+                width, height = height, width
             if x < 1 and y < 1:
-                x = x * self.display_info["height"]
-                y = y * self.display_info["width"]
+                x = x * width
+                y = y * height
             x, y = XYTransformer.up_2_ori(
                 (x, y),
-                (self.display_info['height'], self.display_info["width"]),  # 交换长和宽
+                (width, height),
                 self.orientation
             )
         return x, y
@@ -603,7 +614,8 @@ class IOS(Device):
     
     def alert_exists(self):
         """
-        get True for alert exists or False. 
+        get True for alert exists or False.
+
         Notes:
             Might not work on all devices
 
@@ -615,8 +627,9 @@ class IOS(Device):
 
     def alert_click(self, buttons):
         """
-        # when Arg type is list, click the first match, raise ValueError if no match
-        示例： ["设置", "信任", "安装"]
+        when Arg type is list, click the first match, raise ValueError if no match
+
+        eg. ["设置", "信任", "安装"]
 
         Notes:
             Might not work on all devices
@@ -629,13 +642,22 @@ class IOS(Device):
 
     def device_info(self):
         """
-        get the device info. 
-        Notes:
+        get the device info.
+
+        .. note::
             Might not work on all devices
 
         Returns:
-            dict for device info
-
+            dict for device info,
+            eg. AttrDict({
+                'timeZone': 'GMT+0800',
+                'currentLocale': 'zh_CN',
+                'model': 'iPhone',
+                'uuid': '90CD6AB7-11C7-4E52-B2D3-61FA31D791EC',
+                'userInterfaceIdiom': 0,
+                'userInterfaceStyle': 'light',
+                'name': 'iPhone',
+                'isSimulator': False})
         """
         return self.driver.info
 
