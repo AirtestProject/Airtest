@@ -187,18 +187,23 @@ class IOS(Device):
                 'window_width': self._size['window_width'], 'window_height': self._size['window_height']}
 
     def _display_info(self):
+        # function window_size() return UIKit size, While screenshot() image size is Native Resolution
         window_size = self.window_size()
-        scale = self.driver.scale
-        self.rotation_watcher.get_ready()
+        # when use screenshot, the image size is pixels size. eg(1080 x 1920)
+        snapshot = self.snapshot()
         if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
-            width, height = window_size.height, window_size.width
+            self._size['window_width'], self._size['window_height'] = window_size.height, window_size.width
+            width, height = snapshot.shape[:2]
         else:
-            width, height = window_size.width, window_size.height
-        self._size['width'] = scale * width
-        self._size['height'] = scale * height
-        self._size['window_width'] = width
-        self._size['window_height'] = height
-        self._touch_factor = 1 / scale
+            self._size['window_width'], self._size['window_height'] = window_size.width, window_size.height
+            height, width = snapshot.shape[:2]
+        self._size["width"] = width
+        self._size["height"] = height
+
+        # use session.scale can get UIKit scale factor
+        # so self._touch_factor = 1 / self.driver.scale, but the result is incorrect on some devices(6P/7P/8P)
+        self._touch_factor = float(self._size['window_height']) / float(height)
+        self.rotation_watcher.get_ready()
 
     @property
     def touch_factor(self):
