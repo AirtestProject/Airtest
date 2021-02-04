@@ -125,7 +125,7 @@ class XYTransformer(object):
 
         Args:
             tuple_xy: coordinates (x, y)
-            tuple_wh: screen width and height
+            tuple_wh: current screen width and height
             orientation: orientation
 
         Returns:
@@ -155,7 +155,7 @@ class XYTransformer(object):
 
         Args:
             tuple_xy: coordinates (x, y)
-            tuple_wh: screen width and height
+            tuple_wh: current screen width and height
             orientation: orientation
 
         Returns:
@@ -165,7 +165,13 @@ class XYTransformer(object):
         x, y = tuple_xy
         w, h = tuple_wh
 
-        # no need to do changing
-        # ios touch point same way of image
+        # Only in the ipad+home interface,
+        # the vertical screen coordinates need to be converted to display coordinates
+        if orientation == wda.LANDSCAPE:
+            x, y = y, h - x
+        elif orientation == wda.LANDSCAPE_RIGHT:
+            x, y = w - y, x
+        elif orientation == wda.PORTRAIT_UPSIDEDOWN:
+            x, y = w - x, h - y
 
         return x, y

@@ -183,7 +183,8 @@ class IOS(Device):
             self._display_info()
 
         return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
-                'physical_width': self._size['width'], 'physical_height': self._size['height']}
+                'physical_width': self._size['width'], 'physical_height': self._size['height'],
+                'window_width': self._size['window_width'], 'window_height': self._size['window_height']}
 
     def _display_info(self):
         window_size = self.window_size()
@@ -195,6 +196,8 @@ class IOS(Device):
             width, height = window_size.width, window_size.height
         self._size['width'] = scale * width
         self._size['height'] = scale * height
+        self._size['window_width'] = width
+        self._size['window_height'] = height
         self._touch_factor = 1 / scale
 
     @property
@@ -471,8 +474,7 @@ class IOS(Device):
 
         # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
         if self.is_pad and self.orientation != wda.PORTRAIT:
-            app_current_bundleid = self.app_current()["bundleId"]
-            if app_current_bundleid not in ['com.apple.springboard']:
+            if not self.home_interface():
                 return x, y
 
             width = self.display_info["width"]
