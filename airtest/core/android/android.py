@@ -611,7 +611,7 @@ class Android(Device):
             try:
                 self.rotation_watcher.get_ready()
             except AdbShellError:
-                LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
+                warnings.warn("RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
                 self.ori_method = ORI_METHOD.ADB
                 return self.adb.get_display_info()
 
