@@ -178,6 +178,7 @@ def start_app(package, activity=None):
     :platforms: Android, iOS
     :Example:
         >>> start_app("com.netease.cloudmusic")
+        >>> start_app("com.apple.mobilesafari")  # on iOS
     """
     G.DEVICE.start_app(package, activity)
 
@@ -502,9 +503,10 @@ def keyevent(keyname, **kwargs):
             `pywinauto.keyboard <https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html>`_
                 Documentation for ``pywinauto.keyboard``
 
-        * ``iOS``: Only supports HOME key::
+        * ``iOS``: Only supports home/volumeUp/volumeDown::
 
         >>> keyevent("HOME")
+        >>> keyevent("volumeUp")
 
     """
     G.DEVICE.keyevent(keyname, **kwargs)

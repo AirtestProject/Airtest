@@ -25,7 +25,7 @@ class Recorder(Yosemite):
 
         Args:
             max_time: maximum screen recording time, default is 1800
-            bit_rate: bit rate value, default is None(6000000)
+            bit_rate: bit rate value, 450000-8000000, default is None(6000000)
 
         Raises:
             RuntimeError: if any error occurs while setup the recording

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-03 11:59+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: 2019-01-30 14:17+0800\n"
 "Last-Translator: \n"
 "Language: zh_Hans_CN\n"
@@ -16,27 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
-
-#: ../../index.rst:75
-msgid "Quickstart"
-msgstr "快速开始"
-
-#: ../../index.rst:83
-msgid "Cross Platform API"
-msgstr "跨平台的API"
-
-#: ../../index.rst:91
-msgid "Platform Specific API"
-msgstr "平台相关的API"
-
-#: ../../index.rst:101
-msgid "Modules Content"
-msgstr "模块内容"
-
-#: ../../index.rst:108
-msgid "FAQ"
-msgstr ""
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../index.rst:45
 msgid "Welcome to Airtest documentation!"
@@ -65,4 +45,27 @@ msgid ""
 "The following documentation will guide you through main ideas of Airtest,"
 " as well as providing a API reference documentation."
 msgstr "以下文档会介绍Airtest的基本用法，以及提供API文档。"
+
+#: ../../index.rst:75
+msgid "Quickstart"
+msgstr "快速开始"
+
+#: ../../index.rst:83
+msgid "Cross Platform API"
+msgstr "跨平台的API"
+
+#: ../../index.rst:91
+msgid "Platform Specific API"
+msgstr "平台相关的API"
+
+#: ../../index.rst:101
+msgid "Modules Content"
+msgstr "模块内容"
+
+#: ../../index.rst:108
+msgid "Wiki"
+msgstr ""
+
+#~ msgid "FAQ"
+#~ msgstr ""
 

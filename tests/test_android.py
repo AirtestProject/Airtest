@@ -3,6 +3,7 @@ import os
 import time
 import numpy
 import unittest
+from threading import Thread
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
 from .testconf import APK, PKG, try_remove
@@ -78,6 +79,42 @@ class TestAndroid(unittest.TestCase):
             self.assertTrue(os.path.exists(filename))
             os.remove(filename)
 
+    def test_snapshot_thread(self):
+
+        def assert_exists_and_remove(filename):
+            self.assertTrue(os.path.exists(filename))
+            os.remove(filename)
+
+        class ScreenshotThread(Thread):
+            def __init__(self, dev, assert_true):
+                self.dev = dev
+                self._running = True
+                self.assert_true = assert_true
+                super(ScreenshotThread, self).__init__()
+                self.dev.snapshot("screen_thread.jpg")
+                assert_exists_and_remove("screen_thread.jpg")
+
+            def terminate(self):
+                self._running = False
+
+            def run(self):
+                while self._running:
+                    filename = "screen_thread.jpg"
+                    self.dev.snapshot(filename)
+                    assert_exists_and_remove(filename)
+                    time.sleep(2)
+
+        task = ScreenshotThread(self.android, self.assertTrue)
+        task.daemon = True
+        task.start()
+
+        for i in range(10):
+            self.android.snapshot("screen.jpg")
+            assert_exists_and_remove("screen.jpg")
+            time.sleep(2)
+
+        task.terminate()
+
     def test_shell(self):
         self.assertEqual(self.android.shell('echo nimei').strip(), 'nimei')
 
@@ -123,14 +160,20 @@ class TestAndroid(unittest.TestCase):
             if os.path.exists(filepath):
                 os.remove(filepath)
             self.android.start_recording(max_time=30, bit_rate=500000)
-            time.sleep(3)
+            time.sleep(10)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
-
-            # Record the screen with the lowest quality
+            time.sleep(2)
+            # Record the screen with the lower quality
             os.remove(filepath)
             self.android.start_recording(bit_rate_level=1)
-            time.sleep(3)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists("screen.mp4"))
+            os.remove(filepath)
+            time.sleep(2)
+            self.android.start_recording(bit_rate_level=0.5)
+            time.sleep(10)
             self.android.stop_recording()
             self.assertTrue(os.path.exists("screen.mp4"))
 

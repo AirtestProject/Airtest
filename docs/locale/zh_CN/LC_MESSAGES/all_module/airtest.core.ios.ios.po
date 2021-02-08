@@ -8,21 +8,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.core.ios.ios.rst:2
-msgid "airtest\\.core\\.ios\\.ios module"
+msgid "airtest.core.ios.ios module"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS:1 of
-msgid "基类：:class:`airtest.core.device.Device`"
+msgid "Bases: :class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS:1 of
@@ -52,7 +52,7 @@ msgstr ""
 #: airtest.core.ios.ios.IOS.get_ip_address
 #: airtest.core.ios.ios.IOS.get_render_resolution
 #: airtest.core.ios.ios.IOS.snapshot of
-msgid "返回"
+msgid "Returns"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.get_render_resolution:3 of
@@ -64,7 +64,7 @@ msgid "take snapshot"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.snapshot of
-msgid "参数"
+msgid "Parameters"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.snapshot:3 of
@@ -149,5 +149,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "airtest\\.core\\.ios\\.ios module"
+#~ msgstr ""
+
+#~ msgid "参数"
 #~ msgstr ""
 

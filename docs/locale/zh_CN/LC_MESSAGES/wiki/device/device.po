@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2018, Game-Netease
 # This file is distributed under the same license as the airtest package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
 #, fuzzy
 msgid ""
@@ -17,17 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: ../../all_module/airtest.core.ios.fake_minitouch.rst:2
-msgid "airtest.core.ios.fake\\_minitouch module"
+#: ../../wiki/device/device.rst:2
+msgid "Device Connection"
 msgstr ""
-
-#: airtest.core.ios.fake_minitouch.fakeMiniTouch:1 of
-msgid "Bases: :class:`object`"
-msgstr ""
-
-#~ msgid "Bases: :class:`object`"
-#~ msgstr ""
-
-#~ msgid "基类：:class:`object`"
-#~ msgstr ""
 

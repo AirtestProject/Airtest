@@ -162,7 +162,7 @@ def import_device_cls(platform):
     elif platform == "windows":
         from airtest.core.win.win import Windows as cls
     elif platform == "ios":
-        from airtest.core.ios.ios import IOS as cls
+        from airtest.core.ios import IOS as cls
     elif platform == "linux":
         from airtest.core.linux.linux import Linux as cls
     else:

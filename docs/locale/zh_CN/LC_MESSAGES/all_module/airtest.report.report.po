@@ -8,17 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 19:24+0800\n"
+"POT-Creation-Date: 2020-12-28 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: ../../all_module/airtest.report.report.rst:2
-msgid "airtest\\.report\\.report module"
+msgid "airtest.report.report module"
 msgstr ""
 
 #: airtest.report.report.timefmt:1 of
@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
-msgid "基类：:class:`object`"
+msgid "Bases: :class:`object`"
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
@@ -51,18 +51,37 @@ msgid ""
 msgstr ""
 
 #: airtest.report.report.LogToHtml.report_data:1 of
-msgid ""
-"Generate data for the report page :param output_file: The file name or "
-"full path of the output file, default HTML_FILE :param record_list: List "
-"of screen recording files :return:"
+msgid "Generate data for the report page"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report
+#: airtest.report.report.LogToHtml.report_data of
+msgid "Parameters"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report:4
+#: airtest.report.report.LogToHtml.report_data:3 of
+msgid "The file name or full path of the output file, default HTML_FILE"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report:5
+#: airtest.report.report.LogToHtml.report_data:4 of
+msgid "List of screen recording files"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report
+#: airtest.report.report.LogToHtml.report_data of
+msgid "Returns"
 msgstr ""
 
 #: airtest.report.report.LogToHtml.report:1 of
 msgid ""
 "Generate the report page, you can add custom data and overload it if "
-"needed :param template_name: default is HTML_TPL :param output_file: The "
-"file name or full path of the output file, default HTML_FILE :param "
-"record_list: List of screen recording files :return:"
+"needed"
+msgstr ""
+
+#: airtest.report.report.LogToHtml.report:3 of
+msgid "default is HTML_TPL"
 msgstr ""
 
 #~ msgid "server_call没有log assert 类似于exist"
@@ -102,5 +121,27 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "基类：:class:`object`"
+#~ msgstr ""
+
+#~ msgid "airtest\\.report\\.report module"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Generate data for the report page "
+#~ ":param output_file: The file name or "
+#~ "full path of the output file, "
+#~ "default HTML_FILE :param record_list: List "
+#~ "of screen recording files :return:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Generate the report page, you can "
+#~ "add custom data and overload it if"
+#~ " needed :param template_name: default is"
+#~ " HTML_TPL :param output_file: The file "
+#~ "name or full path of the output"
+#~ " file, default HTML_FILE :param "
+#~ "record_list: List of screen recording "
+#~ "files :return:"
 #~ msgstr ""
 

@@ -1,46 +1,65 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN, WDAError, DEBUG, Client
-from airtest.utils.logger import get_logger
-from airtest.core.ios.instruct_cmd import InstructHelper
-from airtest.core.ios.fake_minitouch import fakeMiniTouch
-from airtest.core.ios.rotation import XYTransformer, RotationWatcher
-from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD
-from airtest.core.device import Device
-from airtest import aircv
-import requests
-import six
 import time
-import json
 import base64
 import traceback
+import wda
+import inspect
+from functools import wraps
+from airtest import aircv
+from airtest.core.device import Device
+from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
+    LANDSCAPE_PAD_RESOLUTION
+from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+from airtest.utils.logger import get_logger
 
-if six.PY3:
-    from urllib.parse import urljoin
-else:
-    from urlparse import urljoin
 
+LOGGING = get_logger(__name__)
 
-logger = get_logger(__name__)
 DEFAULT_ADDR = "http://localhost:8100/"
 
-# retry when saved session failed
-def retry_session(func):
+
+def decorator_retry_session(func):
+    """
+    When the operation fails due to session failure, try to re-acquire the session,
+    retry at most 3 times
+
+    当因为session失效而操作失败时，尝试重新获取session，最多重试3次
+    """
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except WDAError as err:
-            # 6 : Session does not exist
-            if err.status == 6:
-                self._fetchNewSession()
-                return func(self, *args, **kwargs)
-            else:
-                raise err
+        except (RuntimeError, wda.WDAError):
+            for i in range(3):
+                try:
+                    self._fetch_new_session()
+                    return func(self, *args, **kwargs)
+                except:
+                    time.sleep(0.5)
+                    continue
+            raise
     return wrapper
 
 
+def decorator_retry_for_class(cls):
+    """
+    Add decorators to all methods in the class
+
+    为class里的所有method添加装饰器 ``decorator_retry_session``
+    """
+    for name, method in inspect.getmembers(cls):
+        # Ignore built-in methods and private methods named _xxx
+        # 忽略内置方法和下划线开头命名的私有方法 _xxx
+        if (not inspect.ismethod(method) and not inspect.isfunction(method)) \
+                or inspect.isbuiltin(method) or name.startswith("_"):
+            continue
+        setattr(cls, name, decorator_retry_session(method))
+    return cls
+
+
+@decorator_retry_for_class
 class IOS(Device):
     """ios client
 
@@ -58,7 +77,8 @@ class IOS(Device):
         self.addr = addr or DEFAULT_ADDR
 
         # fit wda format, make url start with http://
-        if not self.addr.startswith("http://"):
+        # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
+        if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
         """here now use these supported cap touch and ime method"""
@@ -69,62 +89,127 @@ class IOS(Device):
         # wda driver, use to home, start app
         # init wda session, updata when start app
         # use to click/swipe/close app/get wda size
-        DEBUG = False
-        self.driver = Client(self.addr)
+        wda.DEBUG = False
+        self.driver = wda.Client(self.addr)
 
         # record device's width
         self._size = {'width': None, 'height': None}
-        self._touch_factor = 0.5
+        self._current_orientation = None
+        self._touch_factor = None
         self._last_orientation = None
-        self.defaultSession = None
+        self._is_pad = None
 
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
+        self._register_rotation_watcher()
 
-        # fake minitouch to simulate swipe
-        self.minitouch = fakeMiniTouch(self)
-
-        # helper of run process like iproxy
-        self.instruct_helper = InstructHelper()
+        self.alert_watch_and_click = self.driver.alert.watch_and_click
 
     @property
     def uuid(self):
         return self.addr
 
+    def _fetch_new_session(self):
+        """
+        Re-acquire a new session
+        重新获取新的session
+        :return:
+        """
+        # 根据facebook-wda的逻辑，直接设为None就会自动获取一个新的默认session
+        self.driver.session_id = None
+
     @property
-    def session(self):
-        if not self.defaultSession:
-            self.defaultSession = self.driver.session()
-        return self.defaultSession
+    def is_pad(self):
+        """
+        Determine whether it is an ipad(or 6P/7P/8P), if it is, in the case of horizontal screen + desktop,
+        the coordinates need to be switched to vertical screen coordinates to click correctly (WDA bug)
 
-    def _fetchNewSession(self):
-        self.defaultSession = self.driver.session()
+        判断是否是ipad(或 6P/7P/8P)，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug）
+        Returns:
 
-    @retry_session
+        """
+        if self._is_pad is None:
+            info = self.driver.device_info()
+            if info["model"] == "iPad" or \
+                (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
+                # ipad与6P/7P/8P等设备，桌面横屏时的表现一样，都会变横屏
+                self._is_pad = True
+            else:
+                self._is_pad = False
+        return self._is_pad
+
+    def _register_rotation_watcher(self):
+        """
+        Register callbacks for Android and minicap when rotation of screen has changed
+
+        callback is called in another thread, so be careful about thread-safety
+
+        Returns:
+            None
+
+        """
+        self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
+
     def window_size(self):
         """
             return window size
             namedtuple:
                 Size(wide , hight)
         """
-        return self.session.window_size()
+
+        return self.driver.window_size()
 
     @property
-    @retry_session
     def orientation(self):
         """
             return device oritantation status
             in  LANDSACPE POR
         """
-        return self.session.orientation
+        if not self._current_orientation:
+            self._current_orientation = self.get_orientation()
+        return self._current_orientation
+
+    def get_orientation(self):
+        # self.driver.orientation只能拿到LANDSCAPE，不能拿到左转/右转的确切方向
+        # 因此手动调用/rotation获取屏幕实际方向
+        rotation = self.driver._session_http.get('/rotation')
+        # rotation eg. AttrDict({'value': {'x': 0, 'y': 0, 'z': 90}, 'sessionId': 'xx', 'status': 0})
+        if rotation:
+            return ROTATION_MODE.get(rotation.value.z, wda.PORTRAIT)
 
     @property
     def display_info(self):
         if not self._size['width'] or not self._size['height']:
-            self.snapshot()
+            self._display_info()
 
         return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
-                'physical_width': self._size['width'], 'physical_height': self._size['height']}
+                'physical_width': self._size['width'], 'physical_height': self._size['height'],
+                'window_width': self._size['window_width'], 'window_height': self._size['window_height']}
+
+    def _display_info(self):
+        # function window_size() return UIKit size, While screenshot() image size is Native Resolution
+        window_size = self.window_size()
+        # when use screenshot, the image size is pixels size. eg(1080 x 1920)
+        snapshot = self.snapshot()
+        if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
+            self._size['window_width'], self._size['window_height'] = window_size.height, window_size.width
+            width, height = snapshot.shape[:2]
+        else:
+            self._size['window_width'], self._size['window_height'] = window_size.width, window_size.height
+            height, width = snapshot.shape[:2]
+        self._size["width"] = width
+        self._size["height"] = height
+
+        # use session.scale can get UIKit scale factor
+        # so self._touch_factor = 1 / self.driver.scale, but the result is incorrect on some devices(6P/7P/8P)
+        self._touch_factor = float(self._size['window_height']) / float(height)
+        self.rotation_watcher.get_ready()
+
+    @property
+    def touch_factor(self):
+        if not self._touch_factor:
+            self._display_info()
+        return self._touch_factor
 
     def get_render_resolution(self):
         """
@@ -139,12 +224,13 @@ class IOS(Device):
 
     def get_current_resolution(self):
         w, h = self.display_info["width"], self.display_info["height"]
-        if self.display_info["orientation"] in [LANDSCAPE, LANDSCAPE_RIGHT]:
+        if self.display_info["orientation"] in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
             w, h = h, w
         return w, h
 
     def home(self):
-        return self.driver.home()
+        # press("home") faster than home()
+        return self.driver.press("home")
 
     def _neo_wda_screenshot(self):
         """
@@ -170,11 +256,8 @@ class IOS(Device):
         """
         data = None
 
-        if self.cap_method == CAP_METHOD.MINICAP:
-            raise NotImplementedError
-        elif self.cap_method == CAP_METHOD.MINICAP_STREAM:
-            raise NotImplementedError
-        elif self.cap_method == CAP_METHOD.WDACAP:
+        # 暂时只有一种截图方法, WDACAP
+        if self.cap_method == CAP_METHOD.WDACAP:
             data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
 
         # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
@@ -192,65 +275,99 @@ class IOS(Device):
             traceback.print_exc()
             return None
 
-        h, w = screen.shape[:2]
-
-        # save last res for portrait
-        if self.orientation in [LANDSCAPE, LANDSCAPE_RIGHT]:
-            self._size['height'] = w
-            self._size['width'] = h
-        else:
-            self._size['height'] = h
-            self._size['width'] = w
-
-        winw, winh = self.window_size()
-
-        self._touch_factor = float(winh) / float(h)
-
         # save as file if needed
         if filename:
             aircv.imwrite(filename, screen, quality, max_size=max_size)
 
         return screen
 
-    @retry_session
     def touch(self, pos, duration=0.01):
-        # trans pos of click
-        pos = self._touch_point_by_orientation(pos)
+        """
 
-        # scale touch postion
-        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-        if duration >= 0.5:
-            self.session.tap_hold(x, y, duration)
-        else:
-            self.session.tap(x, y)
+        Args:
+            pos: coordinates (x, y), can be float(percent) or int
+            duration (optional): tap_hold duration
+
+        Returns: None
+
+        Examples:
+            >>> touch((100, 100))
+            >>> touch((0.5, 0.5), duration=1)
+
+        """
+        # trans pos of click, pos can be percentage or real coordinate
+        LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
+        x, y = self._transform_xy(pos)
+
+        LOGGING.info("touch last-postion at (%s, %s)", x, y)
+        self.driver.click(x, y, duration)
 
     def double_click(self, pos):
-        # trans pos of click
-        pos = self._touch_point_by_orientation(pos)
+        x, y = self._transform_xy(pos)
+        self.driver.double_tap(x, y)
 
-        x, y = pos[0] * self._touch_factor, pos[1] * self._touch_factor
-        self.session.double_tap(x, y)
+    def swipe(self, fpos, tpos, duration=0, *args):
+        """
 
-    def swipe(self, fpos, tpos, duration=0.5, steps=5, fingers=1):
-        # trans pos of swipe
-        fx, fy = self._touch_point_by_orientation(fpos)
-        tx, ty = self._touch_point_by_orientation(tpos)
+        Args:
+            fpos: start point
+            tpos: end point
+            duration (float): start coordinate press duration (seconds), default is 0
 
-        self.session.swipe(fx * self._touch_factor, fy * self._touch_factor,
-                           tx * self._touch_factor, ty * self._touch_factor, duration)
+        Returns:
+            None
 
-    def keyevent(self, keys):
-        """just use as home event"""
-        if keys not in ['HOME', 'home', 'Home']:
-            raise NotImplementedError
-        self.home()
+        Examples:
+            >>> swipe((1050, 1900), (150, 1900))
+            >>> swipe((0.2, 0.5), (0.8, 0.5))
 
-    @retry_session
+        """
+
+        fx, fy = self._transform_xy(fpos)
+        tx, ty = self._transform_xy(tpos)
+
+        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fx, fy, tx, ty, duration)
+        self.driver.swipe(fx, fy, tx, ty, duration)
+
+    def keyevent(self, keyname, **kwargs):
+        """
+        Perform keyevent on the device
+
+        Args:
+            keyname: home/volumeUp/volumeDown
+            **kwargs:
+
+        Returns:
+
+        """
+        try:
+            keyname = KEY_EVENTS[keyname.lower()]
+        except KeyError:
+            raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
+        else:
+            self.press(keyname)
+    
+    def press(self, keys):
+        """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
+        self.driver.press(keys)
+
     def text(self, text, enter=True):
-        """bug in wda for now"""
+        """
+        Input text on the device
+        Args:
+            text:  text to input
+            enter: True if you need to enter a newline at the end
+
+        Returns:
+            None
+
+        Examples:
+            >>> text("test")
+            >>> text("中文")
+        """
         if enter:
             text += '\n'
-        self.session.send_keys(text)
+        self.driver.send_keys(text)
 
     def install_app(self, uri, package):
         """
@@ -261,12 +378,74 @@ class IOS(Device):
         """
         raise NotImplementedError
 
-    def start_app(self, package, activity=None):
-        self.defaultSession = None
-        self.session.start_app_new(package)
+    def start_app(self, package, *args):
+        """
+
+        Args:
+            package: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Returns:
+            None
+
+        Examples:
+            >>> start_app('com.apple.mobilesafari')
+
+        """
+        self.driver.app_launch(bundle_id=package)
 
     def stop_app(self, package):
-        self.driver.session().close(package)
+        """
+
+        Args:
+            package: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Returns:
+
+        """
+        self.driver.app_stop(bundle_id=package)
+    
+    def app_state(self, package):
+        """
+
+        Args:
+            package:
+
+        Returns:
+            {
+                "value": 4,
+                "sessionId": "0363BDC5-4335-47ED-A54E-F7CCB65C6A65"
+            }
+
+            value 1(not running) 2(running in background) 3(running in foreground)? 4(running)
+
+        Examples:
+            >>> dev = device()
+            >>> start_app('com.apple.mobilesafari')
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 4
+            >>> home()
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 3
+            >>> stop_app('com.apple.mobilesafari')
+            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 1
+        """
+        # output {"value": 4, "sessionId": "xxxxxx"}
+        # different value means 1: die, 2: background, 4: running
+        return self.driver.app_state(bundle_id=package)
+    
+    def app_current(self):
+        """
+        get the app current 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            current app state dict, eg:
+            {"pid": 1281,
+             "name": "",
+             "bundleId": "com.netease.cloudmusic"}
+
+        """
+        return self.driver.app_current()
 
     def get_ip_address(self):
         """
@@ -298,34 +477,206 @@ class IOS(Device):
         """
         x, y = tuple_xy
 
-        # use correct w and h due to now orientation
-        # _size 只对应竖直时候长宽
-        now_orientation = self.orientation
+        # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
+        if self.is_pad and self.orientation != wda.PORTRAIT:
+            if not self.home_interface():
+                return x, y
 
-        if now_orientation in [PORTRAIT, PORTRAIT_UPSIDEDOWN]:
-            width, height = self._size['width'], self._size["height"]
-        else:
-            height, width = self._size['width'], self._size["height"]
+            width = self.display_info["width"]
+            height = self.display_info["height"]
+            if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
+                width, height = height, width
+            if x < 1 and y < 1:
+                x = x * width
+                y = y * height
+            x, y = XYTransformer.up_2_ori(
+                (x, y),
+                (width, height),
+                self.orientation
+            )
+        return x, y
 
-        # check if not get screensize when touching
-        if not width or not height:
-            # use snapshot to get current resuluton
-            self.snapshot()
+    def _transform_xy(self, pos):
+        x, y = self._touch_point_by_orientation(pos)
 
-        x, y = XYTransformer.up_2_ori(
-            (x, y),
-            (width, height),
-            now_orientation
-        )
+        # scale touch postion
+        if not (x < 1 and y < 1):
+            x, y = int(x * self.touch_factor), int(y * self.touch_factor)
+
         return x, y
 
     def _check_orientation_change(self):
         pass
 
+    def is_locked(self):
+        """
+        Return True or False whether the device is locked or not
+
+        Notes:
+            Might not work on some devices
+
+        Returns:
+            True or False
+
+        """
+        return self.driver.locked()
+
+    def unlock(self):
+        """
+        Unlock the device, unlock screen, double press home 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.unlock()
+
+    def lock(self):
+        """
+        lock the device, lock screen 
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.lock()
+
+    def alert_accept(self):
+        """
+        Alert accept-Actually do click first alert button
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.accept()
+
+    def alert_dismiss(self):
+        """
+        Alert dissmiss-Actually do click second alert button
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.dismiss()
+
+    def alert_wait(self, time_counter=2):
+        """
+        if alert apper in time_counter second it will return True,else return False (default 20.0)
+        time_counter default is 2 seconds
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.wait(time_counter)
+
+    def alert_buttons(self):
+        """
+        get alert buttons text. 
+        Notes:
+            Might not work on all devices
+
+        Returns:
+             # example return: ("设置", "好")
+
+        """
+        return self.driver.alert.buttons()
+    
+    def alert_exists(self):
+        """
+        get True for alert exists or False.
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
+        return self.driver.alert.exists
+
+    def alert_click(self, buttons):
+        """
+        when Arg type is list, click the first match, raise ValueError if no match
+
+        eg. ["设置", "信任", "安装"]
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            None
+
+        """
+        return self.driver.alert.click(buttons)
+
+    def device_info(self):
+        """
+        get the device info.
+
+        .. note::
+            Might not work on all devices
+
+        Returns:
+            dict for device info,
+            eg. AttrDict({
+                'timeZone': 'GMT+0800',
+                'currentLocale': 'zh_CN',
+                'model': 'iPhone',
+                'uuid': '90CD6AB7-11C7-4E52-B2D3-61FA31D791EC',
+                'userInterfaceIdiom': 0,
+                'userInterfaceStyle': 'light',
+                'name': 'iPhone',
+                'isSimulator': False})
+        """
+        return self.driver.info
+
+    def home_interface(self):
+        """
+        get True for the device status is on home interface. 
+
+        Reason:
+            some devices can Horizontal screen on the home interface
+
+        Notes:
+            Might not work on all devices
+
+        Returns:
+            True or False
+
+        """
+        try:
+            app_current_dict = self.app_current()
+            app_current_bundleId = app_current_dict.get('bundleId')
+            LOGGING.info("app_current_bundleId %s", app_current_bundleId)
+        except:
+            return False
+        else:
+            if app_current_bundleId in ['com.apple.springboard']:
+                return True
+        return False
+
 
 if __name__ == "__main__":
     start = time.time()
-    ios = IOS("http://10.254.51.239:8100")
+    ios = IOS("http://10.251.100.86:20003")
 
     ios.snapshot()
     # ios.touch((242 * 2 + 10, 484 * 2 + 20))

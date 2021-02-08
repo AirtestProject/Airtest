@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import time
 import threading
 import traceback
 from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
 from airtest.utils.logger import get_logger
-from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE
+from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE, ORI_METHOD
 LOGGING = get_logger(__name__)
 
 
@@ -58,7 +59,13 @@ class RotationWatcher(object):
             initial orientation
 
         """
-        self._install_and_setup()
+        ori_method = ORI_METHOD.MINICAP
+        try:
+            self._install_and_setup()
+        except:
+            # install failed
+            LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
+            ori_method = ORI_METHOD.ADB
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
@@ -72,9 +79,19 @@ class RotationWatcher(object):
             ori = int(int(line) / 90)
             return ori
 
+        def _refresh_by_adb():
+            ori = self.adb.getDisplayOrientation()
+            return ori
+
         def _run():
             while True:
-                ori = _refresh_by_ow()
+                if ori_method == ORI_METHOD.ADB:
+                    ori = _refresh_by_adb()
+                    if self.current_orientation == ori:
+                        time.sleep(3)
+                        continue
+                else:
+                    ori = _refresh_by_ow()
                 if ori is None:
                     break
                 LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
@@ -88,7 +105,7 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self.current_orientation = _refresh_by_ow()
+        self.current_orientation = _refresh_by_ow() if ori_method != ORI_METHOD.ADB else _refresh_by_adb()
 
         self._t = threading.Thread(target=_run, name="rotationwatcher")
         # self._t.daemon = True

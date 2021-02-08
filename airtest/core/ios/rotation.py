@@ -2,12 +2,11 @@
 import threading
 import traceback
 import time
-from airtest.core.error import AirtestError
+import wda
+from airtest.core.ios.constant import ROTATION_MODE
 from airtest.utils.snippet import reg_cleanup, on_method_ready
 from airtest.utils.logger import get_logger
 
-from airtest.core.ios.wda_client import LANDSCAPE, PORTRAIT, LANDSCAPE_RIGHT, PORTRAIT_UPSIDEDOWN
-from airtest.core.ios.wda_client import WDAError
 
 LOGGING = get_logger(__name__)
 
@@ -19,7 +18,6 @@ class RotationWatcher(object):
 
     def __init__(self, iosHandle):
         self.iosHandle = iosHandle
-        self.session = iosHandle.session
         self.ow_callback = []
         self.roundProcess = None
         self._stopEvent = threading.Event()
@@ -62,18 +60,18 @@ class RotationWatcher(object):
 
         def _refresh_by_ow():
             try:
-                return self.session.orientation
-            except WDAError as err:
-                if err.status == 6:
-                    self.iosHandle._fetchNewSession()
-                    self.session = self.iosHandle.session
-                    return self.session.orientation
-                else:
-                    return self.last_result
-            except ValueError as err:
-                import traceback
-                print(traceback.format_exc())
-                return self.last_result
+                return self.get_rotation()
+            except Exception:
+                # 重试5次，如果还是失败就返回None，终止线程
+                for i in range(5):
+                    try:
+                        self.iosHandle._fetch_new_session()
+                        return self.get_rotation()
+                    except:
+                        time.sleep(2)
+                        continue
+                LOGGING.info("orientationWatcher has ended")
+                return None
 
         def _run():
             while not self._stopEvent.isSet():
@@ -112,6 +110,9 @@ class RotationWatcher(object):
         """方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None"""
         self.ow_callback.append(ow_callback)
 
+    def get_rotation(self):
+        return self.iosHandle.get_orientation()
+
 
 class XYTransformer(object):
     """
@@ -124,7 +125,7 @@ class XYTransformer(object):
 
         Args:
             tuple_xy: coordinates (x, y)
-            tuple_wh: screen width and height
+            tuple_wh: current screen width and height
             orientation: orientation
 
         Returns:
@@ -137,13 +138,13 @@ class XYTransformer(object):
         # no need to do changing
         # ios touch point same way of image
 
-        if orientation == LANDSCAPE:
+        if orientation == wda.LANDSCAPE:
             x, y = h-y, x
-        elif orientation == LANDSCAPE_RIGHT:
+        elif orientation == wda.LANDSCAPE_RIGHT:
             x, y = y, w-x
-        elif orientation == PORTRAIT_UPSIDEDOWN:
+        elif orientation == wda.PORTRAIT_UPSIDEDOWN:
             x, y = w-x, h-y
-        elif orientation == PORTRAIT:
+        elif orientation == wda.PORTRAIT:
             x, y = x, y
         return x, y
 
@@ -154,7 +155,7 @@ class XYTransformer(object):
 
         Args:
             tuple_xy: coordinates (x, y)
-            tuple_wh: screen width and height
+            tuple_wh: current screen width and height
             orientation: orientation
 
         Returns:
@@ -164,7 +165,13 @@ class XYTransformer(object):
         x, y = tuple_xy
         w, h = tuple_wh
 
-        # no need to do changing
-        # ios touch point same way of image
+        # Only in the ipad+home interface,
+        # the vertical screen coordinates need to be converted to display coordinates
+        if orientation == wda.LANDSCAPE:
+            x, y = y, h - x
+        elif orientation == wda.LANDSCAPE_RIGHT:
+            x, y = w - y, x
+        elif orientation == wda.PORTRAIT_UPSIDEDOWN:
+            x, y = w - x, h - y
 
         return x, y

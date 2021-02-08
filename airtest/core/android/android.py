@@ -19,6 +19,7 @@ from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
 from airtest.core.android.touch_methods.touch_proxy import TouchProxy, AdbTouchImplementation, \
     MinitouchImplementation, MaxtouchImplementation
+from airtest.core.error import AdbError, AdbShellError
 
 LOGGING = get_logger(__name__)
 
@@ -607,10 +608,16 @@ class Android(Device):
 
         """
         if self.ori_method == ORI_METHOD.MINICAP:
-            self.rotation_watcher.get_ready()
+            try:
+                self.rotation_watcher.get_ready()
+            except AdbShellError:
+                warnings.warn("RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
+                self.ori_method = ORI_METHOD.ADB
+                return self.adb.get_display_info()
+
             try:
                 return self.minicap.get_display_info()
-            except RuntimeError:
+            except (RuntimeError, AdbShellError, AdbError):
                 # Even if minicap execution fails, use adb instead
                 self.ori_method = ORI_METHOD.ADB
                 return self.adb.get_display_info()
@@ -657,7 +664,7 @@ class Android(Device):
 
         Args:
             max_time: maximum screen recording time, default is 1800
-            bit_rate_level: bit_rate=resolution*level, 1 <= level <= 5, default is 1
+            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
             bit_rate: the higher the bitrate, the clearer the video
 
         Returns:
