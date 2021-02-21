@@ -35,7 +35,7 @@ class Minicap(object):
     reference https://github.com/openstf/minicap
     """
 
-    VERSION = 6
+    VERSION = 5
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
