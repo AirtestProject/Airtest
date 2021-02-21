@@ -9,7 +9,7 @@ def init_logging():
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
         fmt='[%(asctime)s][%(levelname)s]<%(name)s> %(message)s',
-        datefmt='%I:%M:%S'
+        datefmt='%H:%M:%S'
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
