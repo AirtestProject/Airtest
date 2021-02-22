@@ -306,7 +306,7 @@ class IOS(Device):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0, *args):
+    def swipe(self, fpos, tpos, duration=0, *args, **kwargs):
         """
 
         Args:
