@@ -2,6 +2,7 @@
 import time
 import threading
 import traceback
+import warnings
 from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
 from airtest.utils.logger import get_logger
@@ -14,10 +15,11 @@ class RotationWatcher(object):
     RotationWatcher class
     """
 
-    def __init__(self, adb):
+    def __init__(self, adb, ori_method=ORI_METHOD.MINICAP):
         self.adb = adb
         self.ow_proc = None
         self.ow_callback = []
+        self.ori_method = ori_method
         self._t = None
         self.current_orientation = None
         reg_cleanup(self.teardown)
@@ -59,13 +61,18 @@ class RotationWatcher(object):
             initial orientation
 
         """
-        ori_method = ORI_METHOD.MINICAP
-        try:
-            self._install_and_setup()
-        except:
-            # install failed
-            LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
-            ori_method = ORI_METHOD.ADB
+        if self.ori_method == ORI_METHOD.MINICAP:
+            try:
+                self._install_and_setup()
+            except:
+                # install failed
+                LOGGING.error(traceback.format_exc())
+                LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
+                self.ori_method = ORI_METHOD.ADB
+
+        if self.ori_method != ORI_METHOD.MINICAP:
+            warnings.warn(
+                "Using ADB to get the phone screen orientation, please try to use ori_method = MINICAPORI, and install RotationWatcher.apk on the phone")
 
         def _refresh_by_ow():
             line = self.ow_proc.stdout.readline()
@@ -85,7 +92,7 @@ class RotationWatcher(object):
 
         def _run():
             while True:
-                if ori_method == ORI_METHOD.ADB:
+                if self.ori_method == ORI_METHOD.ADB:
                     ori = _refresh_by_adb()
                     if self.current_orientation == ori:
                         time.sleep(3)
@@ -105,7 +112,7 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self.current_orientation = _refresh_by_ow() if ori_method != ORI_METHOD.ADB else _refresh_by_adb()
+        self.current_orientation = _refresh_by_ow() if self.ori_method != ORI_METHOD.ADB else _refresh_by_adb()
 
         self._t = threading.Thread(target=_run, name="rotationwatcher")
         # self._t.daemon = True
