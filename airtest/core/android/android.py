@@ -51,7 +51,7 @@ class Android(Device):
         self._display_info = {}
         self._current_orientation = None
         # init components
-        self.rotation_watcher = RotationWatcher(self.adb)
+        self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
         self.javacap = Javacap(self.adb)
         self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info, input_event=self.input_event)
@@ -607,20 +607,19 @@ class Android(Device):
             display information
 
         """
-        if self.ori_method == ORI_METHOD.MINICAP:
-            try:
-                self.rotation_watcher.get_ready()
-            except AdbShellError:
-                warnings.warn("RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
-                self.ori_method = ORI_METHOD.ADB
-                return self.adb.get_display_info()
+        try:
+            self.rotation_watcher.get_ready()
+        except AdbShellError:
+            warnings.warn(
+                "RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
+            self.ori_method = ORI_METHOD.ADB
 
+        if self.ori_method == ORI_METHOD.MINICAP:
             try:
                 return self.minicap.get_display_info()
             except (RuntimeError, AdbShellError, AdbError):
                 # Even if minicap execution fails, use adb instead
                 self.ori_method = ORI_METHOD.ADB
-                return self.adb.get_display_info()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
