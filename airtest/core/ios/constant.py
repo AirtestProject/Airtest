@@ -6,10 +6,9 @@ from airtest.utils.compat import decode_path
 
 
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
-STATICPATH = os.path.join(THISPATH, "static")
+IPROXY_PATH = os.path.join(THISPATH, "iproxy", "iproxy.exe")
 DEFAULT_ADB_SERVER = ('127.0.0.1', 8100)
 DEBUG = True
-MINICAPLIB = os.path.join(STATICPATH, "minicap")
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
 # When some devices (6P/7P/8P) are in landscape mode, the desktop will also change to landscape mode,
