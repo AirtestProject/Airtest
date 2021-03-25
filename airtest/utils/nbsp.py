@@ -27,7 +27,7 @@ class NonBlockingStreamReader:
             '''
             while not kill_event.is_set():
                 line = stream.readline()
-                if line:
+                if line is not None:
                     queue.put(line)
                     if print_output:
                         # print only new line
