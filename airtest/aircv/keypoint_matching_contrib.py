@@ -117,8 +117,6 @@ class SURFMatching(KeypointMatching):
             try:
                 self.detector = cv2.xfeatures2d.SURF_create(self.HESSIAN_THRESHOLD, upright=self.UPRIGHT)
             except:
-                import traceback
-                traceback.print_exc()
                 raise NoModuleError("There is no %s module in your OpenCV environment, need contribmodule!" % self.METHOD_NAME)
         else:
             # OpenCV2.x

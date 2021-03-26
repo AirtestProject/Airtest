@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from airtest.utils.resolution import cocos_min_strategy
 import os
+import sys
 
 
 class Settings(object):
@@ -9,7 +10,10 @@ class Settings(object):
     LOG_DIR = None
     LOG_FILE = "log.txt"
     RESIZE_METHOD = staticmethod(cocos_min_strategy)
-    CVSTRATEGY = ["surf", "tpl", "brisk"]  # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
+    # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
+    CVSTRATEGY = ["surf", "tpl", "brisk"]
+    if sys.version_info[:2] > (3, 7):
+        CVSTRATEGY = ["kaze", "tpl", "brisk"]
     KEYPOINT_MATCHING_PREDICTION = True
     THRESHOLD = 0.7  # [0, 1]
     THRESHOLD_STRICT = None  # dedicated parameter for assert_exists
