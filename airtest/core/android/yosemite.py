@@ -36,8 +36,9 @@ class Yosemite(object):
         """
         apk_version = int(APK(apk_path).androidversion_code)
         installed_version = self.adb.get_package_version(package)
-        LOGGING.info("local version code is {}, installed version code is {}".format(apk_version, installed_version))
         if installed_version is None or apk_version > int(installed_version):
+            LOGGING.info(
+                "local version code is {}, installed version code is {}".format(apk_version, installed_version))
             try:
                 self.adb.install_app(apk_path, replace=True, install_options=["-t", "-g"])
             except:
