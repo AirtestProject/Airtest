@@ -46,7 +46,7 @@ class InstructHelper(object):
             return shutil.which("iproxy")
         if platform.system() == "Windows":
             return IPROXY_PATH
-        warnings.warn("Please install iproxy, run command: ")
+        warnings.warn("Please run the command to install iproxy for a better experience: brew install usbmuxd")
         return None
 
     @property
