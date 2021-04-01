@@ -324,10 +324,7 @@ class IOS(Device):
 
         """
         # trans pos of click, pos can be percentage or real coordinate
-        LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
         x, y = self._transform_xy(pos)
-
-        LOGGING.info("touch last-postion at (%s, %s)", x, y)
         self.driver.click(x, y, duration)
 
     def double_click(self, pos):
@@ -350,11 +347,8 @@ class IOS(Device):
             >>> swipe((0.2, 0.5), (0.8, 0.5))
 
         """
-
         fx, fy = self._transform_xy(fpos)
         tx, ty = self._transform_xy(tpos)
-
-        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fx, fy, tx, ty, duration)
         self.driver.swipe(fx, fy, tx, ty, duration)
 
     def keyevent(self, keyname, **kwargs):
