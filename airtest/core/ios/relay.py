@@ -6,9 +6,13 @@
 # 通过Python对iOS端口进行转发，可以参考网上的tcprelay代码，或是tidevice的relay.py（使用了tornado）
 import socketserver as SocketServer
 import select
-from optparse import OptionParser
 import sys
 import threading
+from optparse import OptionParser
+from airtest.utils.logger import get_logger
+
+
+LOGGING = get_logger(__name__)
 
 
 class SocketRelay(object):
@@ -57,14 +61,14 @@ class TCPRelay(SocketServer.BaseRequestHandler):
         dev = self.server.device
         dsock = dev.create_inner_connection(self.server.rport)._sock
         lsock = self.request
-        print("Connection established, relaying data")
+        LOGGING.info("Connection established, relaying data")
         try:
             fwd = SocketRelay(dsock, lsock, self.server.bufsize * 1024)
             fwd.handle()
         finally:
             dsock.close()
             lsock.close()
-        print("Connection closed")
+        LOGGING.info("Connection closed")
 
 
 class TCPServer(SocketServer.TCPServer):
@@ -115,7 +119,7 @@ if __name__ == '__main__':
     servers=[]
 
     for rport, lport in ports:
-        print("Forwarding local port %d to remote port %d"%(lport, rport))
+        LOGGING.info("Forwarding local port %d to remote port %d"%(lport, rport))
         server = serverclass((HOST, lport), TCPRelay)
         # 当前仅有一台iOS手机连接usb时
         dev_uuid = Usbmux().get_single_device_udid()
