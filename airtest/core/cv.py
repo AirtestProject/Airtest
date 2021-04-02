@@ -177,7 +177,7 @@ class Template(object):
         try:
             ret = func(*args, **kwargs).find_best_result()
         except aircv.NoModuleError as err:
-            G.LOGGING.debug("'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
+            G.LOGGING.warning("'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
             return None
         except aircv.BaseError as err:
             G.LOGGING.debug(repr(err))

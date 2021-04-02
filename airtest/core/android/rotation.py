@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 import time
 import threading
 import traceback
-from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
+from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.logger import get_logger
-from airtest.core.android.constant import ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE, ORI_METHOD
+from airtest.core.android.constant import ORI_METHOD, ROTATIONWATCHER_JAR
 LOGGING = get_logger(__name__)
 
 
@@ -14,42 +15,86 @@ class RotationWatcher(object):
     RotationWatcher class
     """
 
-    def __init__(self, adb):
+    def __init__(self, adb, ori_method=ORI_METHOD.MINICAP):
         self.adb = adb
         self.ow_proc = None
+        self.nbsp = None
         self.ow_callback = []
+        self.ori_method = ori_method
         self._t = None
+        self._t_kill_event = threading.Event()
         self.current_orientation = None
+        self.path_in_android = "/data/local/tmp/" + os.path.basename(ROTATIONWATCHER_JAR)
         reg_cleanup(self.teardown)
 
     @on_method_ready('start')
     def get_ready(self):
         pass
 
-    def _install_and_setup(self):
+    def install(self):
         """
-        Install and setup the RotationWatcher package
-
-        Raises:
-            RuntimeError: if any error occurs while installing the package
+        Install the RotationWatcher package
 
         Returns:
             None
 
         """
         try:
-            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
-        except AirtestError:
-            self.adb.install_app(ROTATIONWATCHER_APK, ROTATIONWATCHER_PACKAGE)
-            apk_path = self.adb.path_app(ROTATIONWATCHER_PACKAGE)
-        p = self.adb.start_shell('export CLASSPATH=%s;exec app_process /system/bin jp.co.cyberagent.stf.rotationwatcher.RotationWatcher' % apk_path)
-        if p.poll() is not None:
-            raise RuntimeError("orientationWatcher setup error")
-        self.ow_proc = p
+            exists_file = self.adb.file_size(self.path_in_android)
+        except:
+            pass
+        else:
+            local_minitouch_size = int(os.path.getsize(ROTATIONWATCHER_JAR))
+            if exists_file and exists_file == local_minitouch_size:
+                LOGGING.debug("install_rotationwatcher skipped")
+                return
+            self.uninstall()
 
-    def teardown(self):
+        self.adb.push(ROTATIONWATCHER_JAR, self.path_in_android)
+        self.adb.shell("chmod 755 %s" % self.path_in_android)
+        LOGGING.info("install rotationwacher finished")
+
+    def uninstall(self):
+        """
+        Uninstall the RotationWatcher package
+
+        Returns:
+            None
+
+        """
+        self.adb.raw_shell("rm %s" % self.path_in_android)
+
+    def setup_server(self):
+        """
+        Setup rotation wacher server
+
+        Returns:
+            server process
+
+        """
+        self.install()
         if self.ow_proc:
             self.ow_proc.kill()
+            self.ow_proc = None
+
+        p = self.adb.start_shell(
+            "app_process -Djava.class.path={0} /data/local/tmp com.example.rotationwatcher.Main".format(
+                self.path_in_android))
+        self.nbsp = NonBlockingStreamReader(p.stdout, name="rotation_server")
+
+        if p.poll() is not None:
+            # server setup error, may be already setup by others
+            # subprocess exit immediately
+            raise RuntimeError("rotation watcher server quit immediately")
+        self.ow_proc = p
+        return p
+
+    def teardown(self):
+        self._t_kill_event.set()
+        if self.ow_proc:
+            self.ow_proc.kill()
+        if self.nbsp:
+            self.nbsp.kill()
 
     def start(self):
         """
@@ -59,33 +104,39 @@ class RotationWatcher(object):
             initial orientation
 
         """
-        ori_method = ORI_METHOD.MINICAP
-        try:
-            self._install_and_setup()
-        except:
-            # install failed
-            LOGGING.error("RotationWatcher.apk update failed, please try to reinstall manually.")
-            ori_method = ORI_METHOD.ADB
+        if self.ori_method == ORI_METHOD.MINICAP:
+            try:
+                self.setup_server()
+            except:
+                # install or setup failed
+                LOGGING.error(traceback.format_exc())
+                LOGGING.error("RotationWatcher setup failed, use ADBORI instead.")
+                self.ori_method = ORI_METHOD.ADB
 
         def _refresh_by_ow():
-            line = self.ow_proc.stdout.readline()
-            if line == b"":
-                if LOGGING is not None:  # may be None atexit
-                    LOGGING.debug("orientationWatcher has ended")
-                else:
-                    print("orientationWatcher has ended")
-                return None
+            # 在产生旋转时，nbsp读取到的内容为b"90\r\n"，平时读到的是空数据None，进程结束时读到的是b""
+            line = self.nbsp.readline()
+            if line is not None:
+                if line == b"":
+                    self.teardown()
+                    if LOGGING is not None:  # may be None atexit
+                        LOGGING.debug("orientationWatcher has ended")
+                    else:
+                        print("orientationWatcher has ended")
+                    return None
 
-            ori = int(int(line) / 90)
-            return ori
+                ori = int(int(line) / 90)
+                return ori
+            # 每隔2秒读取一次
+            time.sleep(2)
 
         def _refresh_by_adb():
             ori = self.adb.getDisplayOrientation()
             return ori
 
-        def _run():
-            while True:
-                if ori_method == ORI_METHOD.ADB:
+        def _run(kill_event):
+            while not kill_event.is_set():
+                if self.ori_method == ORI_METHOD.ADB:
                     ori = _refresh_by_adb()
                     if self.current_orientation == ori:
                         time.sleep(3)
@@ -93,11 +144,12 @@ class RotationWatcher(object):
                 else:
                     ori = _refresh_by_ow()
                 if ori is None:
-                    break
+                    # 以前ori=None是进程结束，现在屏幕方向不变时会返回None
+                    continue
                 LOGGING.info('update orientation %s->%s' % (self.current_orientation, ori))
                 self.current_orientation = ori
                 if is_exiting():
-                    break
+                    self.teardown()
                 for cb in self.ow_callback:
                     try:
                         cb(ori)
@@ -105,10 +157,10 @@ class RotationWatcher(object):
                         LOGGING.error("cb: %s error" % cb)
                         traceback.print_exc()
 
-        self.current_orientation = _refresh_by_ow() if ori_method != ORI_METHOD.ADB else _refresh_by_adb()
+        self.current_orientation = _refresh_by_ow() if self.ori_method != ORI_METHOD.ADB else _refresh_by_adb()
 
-        self._t = threading.Thread(target=_run, name="rotationwatcher")
-        # self._t.daemon = True
+        self._t = threading.Thread(target=_run, args=(self._t_kill_event, ), name="rotationwatcher")
+        self._t.daemon = True
         self._t.start()
 
         return self.current_orientation

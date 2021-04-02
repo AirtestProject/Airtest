@@ -223,7 +223,7 @@ def install(filepath, **kwargs):
     :Example:
         >>> install(r"D:\\demo\\test.apk")
         >>> # adb install -r -t D:\\demo\\test.apk
-        >>> install(r"D:\\demo\\test.apk", ["-r", "-t"])
+        >>> install(r"D:\\demo\\test.apk", install_options=["-r", "-t"])
     """
     return G.DEVICE.install_app(filepath, **kwargs)
 

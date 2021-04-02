@@ -12,6 +12,7 @@ from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
     LANDSCAPE_PAD_RESOLUTION
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
+from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
 
 
@@ -98,7 +99,10 @@ class IOS(Device):
         self._touch_factor = None
         self._last_orientation = None
         self._is_pad = None
+        self._device_info = {}
 
+        info = self.device_info
+        self.instruct_helper = InstructHelper(info['uuid'])
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
         self._register_rotation_watcher()
@@ -129,7 +133,7 @@ class IOS(Device):
 
         """
         if self._is_pad is None:
-            info = self.driver.device_info()
+            info = self.device_info
             if info["model"] == "iPad" or \
                 (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
                 # ipad与6P/7P/8P等设备，桌面横屏时的表现一样，都会变横屏
@@ -137,6 +141,30 @@ class IOS(Device):
             else:
                 self._is_pad = False
         return self._is_pad
+
+    @property
+    def device_info(self):
+        """
+        get the device info.
+
+        .. note::
+            Might not work on all devices
+
+        Returns:
+            dict for device info,
+            eg. AttrDict({
+                'timeZone': 'GMT+0800',
+                'currentLocale': 'zh_CN',
+                'model': 'iPhone',
+                'uuid': '90CD6AB7-11C7-4E52-B2D3-61FA31D791EC',
+                'userInterfaceIdiom': 0,
+                'userInterfaceStyle': 'light',
+                'name': 'iPhone',
+                'isSimulator': False})
+        """
+        if not self._device_info:
+            self._device_info = self.driver.info
+        return self._device_info
 
     def _register_rotation_watcher(self):
         """
@@ -296,17 +324,14 @@ class IOS(Device):
 
         """
         # trans pos of click, pos can be percentage or real coordinate
-        LOGGING.info("touch original-postion at (%s, %s)", pos[0], pos[1])
         x, y = self._transform_xy(pos)
-
-        LOGGING.info("touch last-postion at (%s, %s)", x, y)
         self.driver.click(x, y, duration)
 
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0, *args):
+    def swipe(self, fpos, tpos, duration=0, *args, **kwargs):
         """
 
         Args:
@@ -322,11 +347,8 @@ class IOS(Device):
             >>> swipe((0.2, 0.5), (0.8, 0.5))
 
         """
-
         fx, fy = self._transform_xy(fpos)
         tx, ty = self._transform_xy(tpos)
-
-        LOGGING.info("swipe postion1 (%s, %s) to postion2 (%s, %s), for duration: %s", fx, fy, tx, ty, duration)
         self.driver.swipe(fx, fy, tx, ty, duration)
 
     def keyevent(self, keyname, **kwargs):
@@ -626,27 +648,6 @@ class IOS(Device):
 
         """
         return self.driver.alert.click(buttons)
-
-    def device_info(self):
-        """
-        get the device info.
-
-        .. note::
-            Might not work on all devices
-
-        Returns:
-            dict for device info,
-            eg. AttrDict({
-                'timeZone': 'GMT+0800',
-                'currentLocale': 'zh_CN',
-                'model': 'iPhone',
-                'uuid': '90CD6AB7-11C7-4E52-B2D3-61FA31D791EC',
-                'userInterfaceIdiom': 0,
-                'userInterfaceStyle': 'light',
-                'name': 'iPhone',
-                'isSimulator': False})
-        """
-        return self.driver.info
 
     def home_interface(self):
         """

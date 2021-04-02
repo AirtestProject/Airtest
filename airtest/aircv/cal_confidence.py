@@ -10,6 +10,9 @@ from .utils import img_mat_rgb_2_gray
 
 def cal_ccoeff_confidence(im_source, im_search):
     """求取两张图片的可信度，使用TM_CCOEFF_NORMED方法."""
+    # 扩展置信度计算区域
+    im_search = cv2.copyMakeBorder(im_search, 10,10,10,10,cv2.BORDER_REPLICATE)
+    
     im_source, im_search = img_mat_rgb_2_gray(im_source), img_mat_rgb_2_gray(im_search)
     res = cv2.matchTemplate(im_source, im_search, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
@@ -19,6 +22,11 @@ def cal_ccoeff_confidence(im_source, im_search):
 
 def cal_rgb_confidence(img_src_rgb, img_sch_rgb):
     """同大小彩图计算相似度."""
+    # 扩展置信度计算区域
+    img_sch_rgb = cv2.copyMakeBorder(img_sch_rgb, 10,10,10,10,cv2.BORDER_REPLICATE)
+    # 转HSV强化颜色的影响
+    img_src_rgb = cv2.cvtColor(img_src_rgb, cv2.COLOR_BGR2HSV)
+    img_sch_rgb = cv2.cvtColor(img_sch_rgb, cv2.COLOR_BGR2HSV)
     src_bgr, sch_bgr = cv2.split(img_src_rgb), cv2.split(img_sch_rgb)
 
     # 计算BGR三通道的confidence，存入bgr_confidence:

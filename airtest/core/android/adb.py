@@ -809,7 +809,7 @@ class ADB(object):
             AdbShellError if no such file
         """
         out = self.shell(["ls", "-l", filepath])
-        file_size = int(out.split()[3])
+        file_size = int(out.split()[4])
         return file_size
 
     def _cleanup_forwards(self):
