@@ -1507,27 +1507,28 @@ class ADB(object):
             info: device screen properties
 
         Returns:
-            None if adb command failed to run, otherwise return device screen properties
+            None if adb command failed to run, otherwise return device screen properties(portrait mode)
+            eg. (offset_x, offset_y, screen_width, screen_height)
 
         """
         output = self.shell("dumpsys window windows")
         windows = output.split("Window #")
-        offsetx, offsety, x, y = info['width'], info['height'], 0, 0
+        offsetx, offsety, width, height = 0, 0, info['width'], info['height']
         package = self._search_for_current_package(output)
         if package:
             for w in windows:
                 if "package=%s" % package in w:
                     arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
                     if len(arr) >= 1 and len(arr[0]) == 4:
-                        offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
+                        offsetx, offsety, width, height = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
                         if info["orientation"] in [1, 3]:
-                            offsetx, offsety, x, y = offsety, offsetx, y, x
-                        x, y = x - offsetx, y - offsety
+                            offsetx, offsety, width, height = offsety, offsetx, height, width
+                        width, height = width - offsetx, height - offsety
         return {
             "offset_x": offsetx,
             "offset_y": offsety,
-            "offset_width": x,
-            "offset_height": y
+            "offset_width": width,
+            "offset_height": height,
         }
 
     def _search_for_current_package(self, ret):
