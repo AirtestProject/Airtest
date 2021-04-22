@@ -22,6 +22,7 @@ class SocketRelay(object):
         self.atob = b""
         self.btoa = b""
         self.maxbuf = maxbuf
+
     def handle(self):
         while True:
             rlist = []
@@ -76,7 +77,8 @@ class TCPServer(SocketServer.TCPServer):
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, TCPServer):
-    pass
+    # 显式指定为True，否则脚本运行完毕时，因为连接没有断开，导致线程不会终止
+    daemon_threads = True
 
 
 if __name__ == '__main__':

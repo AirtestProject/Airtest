@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import subprocess
 import time
 import sys
@@ -10,12 +9,12 @@ import warnings
 import threading
 import wda
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup, on_method_ready, get_std_encoding
+from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
 from airtest.utils.compat import SUBPROCESS_FLAG
-from airtest.core.ios.constant import IPROXY_PATH
-from airtest.core.ios.relay import ThreadedTCPServer, TCPRelay, select, TCPServer
+from airtest.core.ios.constant import DEFAULT_IPROXY_PATH
+from airtest.core.ios.relay import ThreadedTCPServer, TCPRelay
 
 LOGGING = get_logger(__name__)
 
@@ -38,15 +37,19 @@ class InstructHelper(object):
 
     @staticmethod
     def builtin_iproxy_path():
-        # iOS的端口转发主要分为以下几种情况：
-        # 1. windows上使用iproxy.exe port1 port2 uid
-        # 2. mac上如果安装了iproxy，同理，如果没有安装则抛出warning
-        # 并且使用relay.py中的逻辑用python转发（效率慢）
+        # Port forwarding for iOS:
+        # 1. Windows/Mac: iproxy.exe/iproxy -u uid port1 port2
+        # 2. Ubuntu linux: apt-get install libusbmuxd-tools; iproxy port1 port2
+        # 3. Use python (low efficiency): python relay.py -t 5100:5100
         if shutil.which("iproxy"):
             return shutil.which("iproxy")
-        if platform.system() == "Windows":
-            return IPROXY_PATH
-        warnings.warn("Please run the command to install iproxy for a better experience: brew install usbmuxd")
+        system = platform.system()
+        iproxy_path = DEFAULT_IPROXY_PATH.get(system)
+        if iproxy_path:
+            if system == "Darwin":
+                make_file_executable(iproxy_path)
+            return iproxy_path
+        warnings.warn("Please install iproxy for a better experience(Ubuntu Linux): apt-get install libusbmuxd-tools")
         return None
 
     @property
@@ -96,8 +99,12 @@ class InstructHelper(object):
         if proxy_process:
             cmds = [proxy_process, "-u", self._udid, str(local_port), str(device_port)]
         else:
+            # Port forwarding using python
             self.do_proxy_usbmux(local_port, device_port)
+            return
 
+        # Port forwarding using iproxy
+        # e.g. cmds=['/usr/local/bin/iproxy', '-u', '00008020-001270842E88002E', '11565', '5001']
         proc = subprocess.Popen(
             cmds,
             stdin=subprocess.PIPE,
@@ -121,7 +128,6 @@ class InstructHelper(object):
         server.rport = rport
         server.device = self.usb_device
         server.bufsize = 128
-        alive = True
         self.server = server
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True
@@ -130,7 +136,5 @@ class InstructHelper(object):
 
 
 if __name__ == '__main__':
-    # ins = InstructHelper()
-    # ins.do_proxy(8100, 8100)
     ins = InstructHelper()
     ins.do_proxy_usbmux(5001, 5001)
