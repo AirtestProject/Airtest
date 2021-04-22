@@ -6,8 +6,10 @@ from airtest.utils.compat import decode_path
 
 
 THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
-IPROXY_PATH = os.path.join(THISPATH, "iproxy", "iproxy.exe")
-DEFAULT_ADB_SERVER = ('127.0.0.1', 8100)
+DEFAULT_IPROXY_PATH = {
+    "Windows": os.path.join(THISPATH, "iproxy", "windows", "iproxy.exe"),
+    "Darwin": os.path.join(THISPATH, "iproxy", "mac", "iproxy"),
+}
 DEBUG = True
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
