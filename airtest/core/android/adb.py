@@ -509,13 +509,14 @@ class ADB(object):
         return random.randint(11111, 20000)
 
     @retries(3)
-    def setup_forward(self, device_port):
+    def setup_forward(self, device_port, no_rebind=True):
         """
         Generate pseudo random local port and check if the port is available.
 
         Args:
             device_port: it can be string or the value of the `function(localport)`,
                          e.g. `"tcp:5001"` or `"localabstract:{}".format`
+            no_rebind: adb forward --no-rebind option
 
         Returns:
             local port and device port
@@ -524,7 +525,7 @@ class ADB(object):
         localport = self.get_available_forward_local()
         if callable(device_port):
             device_port = device_port(localport)
-        self.forward("tcp:%s" % localport, device_port)
+        self.forward("tcp:%s" % localport, device_port, no_rebind=no_rebind)
         return localport, device_port
 
     def remove_forward(self, local=None):
