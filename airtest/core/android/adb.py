@@ -20,7 +20,7 @@ from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeou
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
-from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
+from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd, make_file_executable
 
 LOGGING = get_logger(__name__)
 
@@ -67,6 +67,9 @@ class ADB(object):
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
+        if system == "Darwin":
+            # chmod +x adb
+            make_file_executable(adb_path)
         return adb_path
 
     def _set_cmd_options(self, server_addr=None):
