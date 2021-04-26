@@ -67,7 +67,7 @@ class ADB(object):
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
-        if system == "Darwin":
+        if system != "Windows":
             # chmod +x adb
             make_file_executable(adb_path)
         return adb_path
