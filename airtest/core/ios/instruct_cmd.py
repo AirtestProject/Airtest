@@ -63,12 +63,13 @@ class InstructHelper(object):
         if not self._device:
             # wda无法直接获取iOS的udid，因此先检查usb连接的手机udid列表
             for dev in wda.usbmux.Usbmux().device_list():
-                usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + dev['UDID'])
+                udid = dev.get('SerialNumber')
+                usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
                 # 对比wda.info获取到的uuid是否一致
                 try:
                     if usb_dev.info['uuid'] == self.uuid:
-                        self._device = wda.usbmux.Device(dev['UDID'])
-                        self._udid = dev['UDID']
+                        self._device = wda.usbmux.Device(udid)
+                        self._udid = udid
                 except:
                     return None
         return self._device
