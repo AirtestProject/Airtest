@@ -201,9 +201,9 @@ class IOS(Device):
         # self.driver.orientation只能拿到LANDSCAPE，不能拿到左转/右转的确切方向
         # 因此手动调用/rotation获取屏幕实际方向
         rotation = self.driver._session_http.get('/rotation')
-        # rotation eg. AttrDict({'value': {'x': 0, 'y': 0, 'z': 90}, 'sessionId': 'xx', 'status': 0})
+        # rotation dict eg. {'value': {'x': 0, 'y': 0, 'z': 90}, 'sessionId': 'xx', 'status': 0}
         if rotation:
-            return ROTATION_MODE.get(rotation.value.z, wda.PORTRAIT)
+            return ROTATION_MODE.get(rotation['value']['z'], wda.PORTRAIT)
 
     @property
     def display_info(self):
