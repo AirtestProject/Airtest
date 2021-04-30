@@ -32,6 +32,9 @@ def parse_requirements(filename):
         # If py<=3.6 and opencv-contrib-python has not been installed, install version==3.2.0.7
         reqs.remove("opencv-contrib-python")
         reqs.append("opencv-contrib-python==3.2.0.7")
+    if sys.version_info.major == 2:
+        # facebook-wda only supports py3
+        reqs.remove("facebook-wda>=1.3.3")
     return reqs
 
 
@@ -48,7 +51,8 @@ setup(
     packages=find_packages(exclude=['cover', 'playground', 'tests', 'dist']),
     package_data={
         'android_deps': ["*.apk", "airtest/core/android/static"],
-        'html_statics': ["airtest/report"]
+        'html_statics': ["airtest/report"],
+        'ios_deps': ["airtest/core/ios/iproxy"],
     },
     include_package_data=True,
     install_requires=parse_requirements('requirements.txt'),

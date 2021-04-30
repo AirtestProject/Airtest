@@ -20,7 +20,7 @@ from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeou
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
-from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd
+from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd, make_file_executable
 
 LOGGING = get_logger(__name__)
 
@@ -67,6 +67,9 @@ class ADB(object):
         # overwrite uiautomator adb
         if "ANDROID_HOME" in os.environ:
             del os.environ["ANDROID_HOME"]
+        if system != "Windows":
+            # chmod +x adb
+            make_file_executable(adb_path)
         return adb_path
 
     def _set_cmd_options(self, server_addr=None):
@@ -509,13 +512,14 @@ class ADB(object):
         return random.randint(11111, 20000)
 
     @retries(3)
-    def setup_forward(self, device_port):
+    def setup_forward(self, device_port, no_rebind=True):
         """
         Generate pseudo random local port and check if the port is available.
 
         Args:
             device_port: it can be string or the value of the `function(localport)`,
                          e.g. `"tcp:5001"` or `"localabstract:{}".format`
+            no_rebind: adb forward --no-rebind option
 
         Returns:
             local port and device port
@@ -524,7 +528,7 @@ class ADB(object):
         localport = self.get_available_forward_local()
         if callable(device_port):
             device_port = device_port(localport)
-        self.forward("tcp:%s" % localport, device_port)
+        self.forward("tcp:%s" % localport, device_port, no_rebind=no_rebind)
         return localport, device_port
 
     def remove_forward(self, local=None):
@@ -1507,27 +1511,28 @@ class ADB(object):
             info: device screen properties
 
         Returns:
-            None if adb command failed to run, otherwise return device screen properties
+            None if adb command failed to run, otherwise return device screen properties(portrait mode)
+            eg. (offset_x, offset_y, screen_width, screen_height)
 
         """
         output = self.shell("dumpsys window windows")
         windows = output.split("Window #")
-        offsetx, offsety, x, y = info['width'], info['height'], 0, 0
+        offsetx, offsety, width, height = 0, 0, info['width'], info['height']
         package = self._search_for_current_package(output)
         if package:
             for w in windows:
                 if "package=%s" % package in w:
                     arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
                     if len(arr) >= 1 and len(arr[0]) == 4:
-                        offsetx, offsety, x, y = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
+                        offsetx, offsety, width, height = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
                         if info["orientation"] in [1, 3]:
-                            offsetx, offsety, x, y = offsety, offsetx, y, x
-                        x, y = x - offsetx, y - offsety
+                            offsetx, offsety, width, height = offsety, offsetx, height, width
+                        width, height = width - offsetx, height - offsety
         return {
             "offset_x": offsetx,
             "offset_y": offsety,
-            "offset_width": x,
-            "offset_height": y
+            "offset_width": width,
+            "offset_height": height,
         }
 
     def _search_for_current_package(self, ret):
