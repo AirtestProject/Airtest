@@ -70,15 +70,16 @@ class SIFTMatching(KeypointMatching):
 
     def init_detector(self):
         """Init keypoint detector object."""
-        # BRIEF is a feature descriptor, recommand CenSurE as a fast detector:
         if check_cv_version_is_new():
-            # OpenCV3/4, sift is in contrib module, you need to compile it seperately.
             try:
-                self.detector = cv2.xfeatures2d.SIFT_create(edgeThreshold=10)
-            except:
-                import traceback
-                traceback.print_exc()
-                raise NoModuleError("There is no %s module in your OpenCV environment, need contribmodule!" % self.METHOD_NAME)
+                # opencv3 >= 3.4.12 or opencv4 >=4.5.0, sift is in main repository
+                self.detector = cv2.SIFT_create(edgeThreshold=10)
+            except AttributeError:
+                try:
+                    self.detector = cv2.xfeatures2d.SIFT_create(edgeThreshold=10)
+                except:
+                    raise NoModuleError(
+                        "There is no %s module in your OpenCV environment, need contrib module!" % self.METHOD_NAME)
         else:
             # OpenCV2.x
             self.detector = cv2.SIFT(edgeThreshold=10)
