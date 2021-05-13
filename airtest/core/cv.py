@@ -18,11 +18,13 @@ from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
 from airtest.aircv.template_matching import TemplateMatching
+from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching
 from airtest.aircv.keypoint_matching import KAZEMatching, BRISKMatching, AKAZEMatching, ORBMatching
 from airtest.aircv.keypoint_matching_contrib import SIFTMatching, SURFMatching, BRIEFMatching
 
 MATCHING_METHODS = {
     "tpl": TemplateMatching,
+    "mstpl": MultiScaleTemplateMatching,
     "kaze": KAZEMatching,
     "brisk": BRISKMatching,
     "akaze": AKAZEMatching,
@@ -115,9 +117,11 @@ class Template(object):
     record_pos: pos in screen when recording
     resolution: screen resolution when recording
     rgb: 识别结果是否使用rgb三通道进行校验.
+    scale_max: 多尺度模板匹配最大范围.
+    scale_step: 多尺度模板匹配搜索步长.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False, scale_max=800, scale_step=0.02):
         self.filename = filename
         self._filepath = None
         self.threshold = threshold or ST.THRESHOLD
@@ -125,6 +129,8 @@ class Template(object):
         self.record_pos = record_pos
         self.resolution = resolution
         self.rgb = rgb
+        self.scale_max = scale_max
+        self.scale_step = scale_step
 
     @property
     def filepath(self):
@@ -166,7 +172,11 @@ class Template(object):
             if func is None:
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
-                ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
+                if method=="mstpl":
+                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, resolution=self.resolution, 
+                                            scale_max=self.scale_max, scale_step=self.scale_step)
+                else:
+                    ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
                 break
         return ret
