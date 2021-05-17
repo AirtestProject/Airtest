@@ -39,7 +39,7 @@ class Javacap(Yosemite):
                 "--scale", "100", "--socket", "%s" % deviceport, "-lazy", "2>&1"]
         proc = self.adb.start_shell(cmds)
         # check proc output
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="javacap_sever")
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="javacap_sever", auto_kill=True)
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:

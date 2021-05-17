@@ -66,7 +66,7 @@ class Maxtouch(BaseTouch):
         deviceport = deviceport[len("localabstract:"):]
         p = self.adb.start_shell("app_process -Djava.class.path={0} /data/local/tmp com.netease.maxpresent.MaxPresent socket {1}".format(self.path_in_android, deviceport))
 
-        nbsp = NonBlockingStreamReader(p.stdout, name="airtouch_server")
+        nbsp = NonBlockingStreamReader(p.stdout, name="airtouch_server", auto_kill=True)
         line = nbsp.readline(timeout=5.0)
         if line is None:
             raise RuntimeError("airtouch setup timeout")

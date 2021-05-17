@@ -329,7 +329,7 @@ class Minicap(object):
                 "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
                 tuple([self.CMD, deviceport] + list(params) + [other_opt]),
             )
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server")
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server", auto_kill=True)
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
