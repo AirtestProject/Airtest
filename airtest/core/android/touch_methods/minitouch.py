@@ -86,7 +86,7 @@ class Minitouch(BaseTouch):
             p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' -d '{1}' 2>&1".format(deviceport,self.input_event))
         else:
             p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' 2>&1".format(deviceport))
-        nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
+        nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server", auto_kill=True)
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:

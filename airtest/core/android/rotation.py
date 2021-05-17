@@ -80,7 +80,7 @@ class RotationWatcher(object):
         p = self.adb.start_shell(
             "app_process -Djava.class.path={0} /data/local/tmp com.example.rotationwatcher.Main".format(
                 self.path_in_android))
-        self.nbsp = NonBlockingStreamReader(p.stdout, name="rotation_server")
+        self.nbsp = NonBlockingStreamReader(p.stdout, name="rotation_server", auto_kill=True)
 
         if p.poll() is not None:
             # server setup error, may be already setup by others
