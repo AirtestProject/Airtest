@@ -180,7 +180,8 @@ def start_app(package, activity=None):
         >>> start_app("com.netease.cloudmusic")
         >>> start_app("com.apple.mobilesafari")  # on iOS
     """
-    G.DEVICE.start_app(package, activity)
+    for dev in G.DEVICE_LIST:
+        dev.start_app(package, activity)
 
 
 @logwrap
