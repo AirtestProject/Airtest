@@ -210,7 +210,8 @@ def clear_app(package):
     :Example:
         >>> clear_app("com.netease.cloudmusic")
     """
-    G.DEVICE.clear_app(package)
+    for dev in G.DEVICE_LIST:
+        dev.clear_app(package)
 
 
 @logwrap
