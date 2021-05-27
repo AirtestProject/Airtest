@@ -173,7 +173,7 @@ class Template(object):
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
                 if method=="mstpl":
-                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, resolution=self.resolution, 
+                    ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb, resolution=self.resolution, 
                                             scale_max=self.scale_max, scale_step=self.scale_step)
                 else:
                     ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
