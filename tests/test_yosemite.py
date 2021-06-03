@@ -21,6 +21,10 @@ class TestJavacap(unittest.TestCase):
         frame = string_2_img(frame)
         self.assertIsInstance(frame, ndarray)
 
+    def test_snapshot(self):
+        img = self.javacap.snapshot()
+        self.assertIsInstance(img, ndarray)
+
     def test_teardown(self):
         self.javacap.get_frame_from_stream()
         self.javacap.teardown_stream()

@@ -13,6 +13,7 @@ from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 from airtest.utils.threadsafe import threadsafe_generator
+from airtest.core.android.cap_methods.base_cap import BaseCap
 
 
 LOGGING = get_logger(__name__)
@@ -29,7 +30,7 @@ def retry_when_socket_error(func):
     return wrapper
 
 
-class Minicap(object):
+class Minicap(BaseCap):
     """super fast android screenshot method from stf minicap.
 
     reference https://github.com/openstf/minicap
@@ -39,7 +40,7 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, ori_function=None, display_id=None):
+    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
@@ -47,12 +48,17 @@ class Minicap(object):
         self.adb = adb
         self.projection = projection
         self.display_id = display_id
-        self.ori_function = ori_function if callable(ori_function) else self.get_display_info
+        self.ori_function = self.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
         self._stream_rotation = None
         self._update_rotation_event = threading.Event()
+        if rotation_watcher:
+            # Minicap needs to be reconnected when switching between landscape and portrait
+            # minicap需要在横竖屏转换时，重新连接
+            rotation_watcher.reg_callback(lambda x: self.update_rotation(x * 90))
+        # TODO reg cleanup?
 
     @ready_method
     def install_or_upgrade(self):
