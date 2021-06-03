@@ -822,8 +822,6 @@ class Android(Device):
 
         """
         self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
-        # TODO
-        # self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
 
     def _touch_point_by_orientation(self, tuple_xy):
         """
