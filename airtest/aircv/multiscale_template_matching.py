@@ -38,7 +38,7 @@ class MultiScaleTemplateMatching(object):
     METHOD_NAME = "Template"
     MAX_RESULT_COUNT = 10
 
-    def __init__(self, im_search, im_source, threshold=0.8, rgb=True, resolution=(), scale_max=800, scale_step=0.05):
+    def __init__(self, im_search, im_source, threshold=0.8, rgb=True, resolution=(), scale_max=800, scale_step=0.01):
         super(MultiScaleTemplateMatching, self).__init__()
         self.im_source = im_source
         self.im_search = im_search
@@ -60,18 +60,18 @@ class MultiScaleTemplateMatching(object):
         # 第二步：计算模板匹配的结果矩阵res
         s_gray, i_gray = img_mat_rgb_2_gray(
             self.im_search), img_mat_rgb_2_gray(self.im_source)
-        if self.resolution == ():
+        r = self._get_ratio(
+            (self.im_source.shape[1], self.im_source.shape[0]), self.im_search)
+        max_val, max_loc, w, h, r = self.multi_scale_search(
+            i_gray, s_gray, ratio_min=r, ratio_max=r, step=self.scale_step, threshold=self.threshold)
+        confidence = self._get_confidence_from_matrix(
+            max_loc, max_val, w, h)
+        if confidence < self.threshold:
             max_val, max_loc, w, h, r = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=0.01, ratio_max=1.0, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
+                i_gray, s_gray, ratio_min=max(r-r*0.3, 0), ratio_max=min(r+r*0.3, 1), step=self.scale_step, threshold=self.threshold)
             confidence = self._get_confidence_from_matrix(
                 max_loc, max_val, w, h)
-        else:
-            r = self._get_ratio(self.resolution, self.im_search)
-            max_val, max_loc, w, h, r = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=r, ratio_max=r, step=0.01)
-            confidence = self._get_confidence_from_matrix(
-                max_loc, max_val, w, h)
-            if confidence < self.threshold or 1:
+            if confidence < self.threshold:
                 max_val, max_loc, w, h, r = self.multi_scale_search(
                     i_gray, s_gray, ratio_min=0.01, ratio_max=1.0, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
                 confidence = self._get_confidence_from_matrix(
@@ -90,8 +90,7 @@ class MultiScaleTemplateMatching(object):
         # 求取可信度:
         if self.rgb:
             # 如果有颜色校验,对目标区域进行BGR三通道校验:
-            img_crop = self.im_source[max_loc[1]
-                :max_loc[1] + h, max_loc[0]: max_loc[0] + w]
+            img_crop = self.im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
             confidence = cal_rgb_confidence(img_crop, self.im_search)
         else:
             confidence = max_val
@@ -127,12 +126,12 @@ class MultiScaleTemplateMatching(object):
         h, w = src.shape[0], src.shape[1]
         tr = sr = 1.0
         if th/h >= tw/w:
-            if th > ratio*h:
+            if ratio < 0.2:
                 tr = (h*ratio)/th
             else:
                 sr = (th/ratio)/h
         else:
-            if tw > ratio*w:
+            if ratio < 0.2:
                 tr = (w*ratio)/tw
             else:
                 sr = (tw/ratio)/w
@@ -169,9 +168,9 @@ class MultiScaleTemplateMatching(object):
                 if mmax_val < max_val:
                     mmax_val = max_val
                     max_info = (r, max_val, max_loc, w, h, tr, sr)
-                # if max_val >= threshold:
-                #     break
                 # print((r, max_val, max_loc, w, h, tr, sr))
+                if max_val >= threshold:
+                    break
             r += step
         r, max_val, max_loc, w, h, tr, sr = max_info
         max_loc, w, h = self._org_size(max_loc, w, h, tr, sr)
