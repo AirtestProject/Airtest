@@ -68,7 +68,7 @@ class TestAndroid(unittest.TestCase):
     def test_snapshot(self):
         self._install_test_app()
 
-        for i in (CAP_METHOD.ADBCAP, CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM, CAP_METHOD.JAVACAP):
+        for i in (CAP_METHOD.ADBCAP, CAP_METHOD.MINICAP, CAP_METHOD.JAVACAP):
             filename = "./screen.png"
             if os.path.exists(filename):
                 os.remove(filename)

@@ -4,12 +4,13 @@ from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.snippet import on_method_ready, reg_cleanup
 from airtest.core.android.yosemite import Yosemite
+from airtest.core.android.cap_methods.base_cap import BaseCap
 from airtest.utils.threadsafe import threadsafe_generator
 import struct
 LOGGING = get_logger(__name__)
 
 
-class Javacap(Yosemite):
+class Javacap(Yosemite, BaseCap):
     """
     This is another screencap class, it is slower in performance than minicap, but it provides the better compatibility
     """
@@ -18,7 +19,7 @@ class Javacap(Yosemite):
     SCREENCAP_SERVICE = "com.netease.nie.yosemite.Capture"
     RECVTIMEOUT = None
 
-    def __init__(self, adb):
+    def __init__(self, adb, *args, **kwargs):
         super(Javacap, self).__init__(adb)
         self.frame_gen = None
 
@@ -88,6 +89,7 @@ class Javacap(Yosemite):
         s.close()
         nbsp.kill()
         proc.kill()
+        proc.communicate()
         self.adb.remove_forward("tcp:%s" % localport)
 
     def get_frame_from_stream(self):
