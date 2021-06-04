@@ -52,7 +52,7 @@ class TestMinicap(TestMinicapBase):
         frame_vertical = self.minicap.get_frame_from_stream()
         frame_vertical = string_2_img(frame_vertical)
         self.dev.start_app(PKG)
-        time.sleep(1)
+        time.sleep(3)
         frame_horizontal = self.minicap.get_frame_from_stream()
         frame_horizontal = string_2_img(frame_horizontal)
 
@@ -78,8 +78,8 @@ class TestMinicap(TestMinicapBase):
 
         self.minicap.projection = projection
         screen_stream = self.minicap.get_frame_from_stream()
-        screen_stream = string_2_img(screen_stream)
-        self.assertEqual(screen.shape[0], default_height)
+        screen2 = string_2_img(screen_stream)
+        self.assertEqual(screen2.shape[0], default_height)
 
 
 class TestMinicapSetup(TestMinicapBase):

@@ -57,6 +57,20 @@ class TestScreenProxy(unittest.TestCase):
             screen = string_2_img(self.dev.screen_proxy.get_frame(projection=projection))
             self.assertEqual(screen.shape[0], default_height)
 
+    def test_custom_cap_method(self):
+        from airtest.core.android.cap_methods.base_cap import BaseCap
+
+        class TestCap(BaseCap):
+            def get_frame_from_stream(self):
+                return b"frame"
+
+        ScreenProxy.register_method("TESTCAP", TestCap)
+        # 默认优先初始化为自定义的TestCap
+        cap = ScreenProxy.auto_setup(self.dev.adb)
+        self.assertIsInstance(cap.screen_method, TestCap)
+
+        ScreenProxy.SCREEN_METHODS.pop("TESTCAP")
+
     @classmethod
     def tearDownClass(cls):
         cls.dev.rotation_watcher.teardown()
