@@ -45,7 +45,7 @@ class Minicap(BaseCap):
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
-        self.adb = adb
+        super(Minicap, self).__init__(adb=adb)
         self.projection = projection
         self.display_id = display_id
         self.ori_function = self.get_display_info
@@ -166,19 +166,15 @@ class Minicap(BaseCap):
         display_info = json.loads(display_info)
         display_info["orientation"] = display_info["rotation"] / 90
         # 针对调整过手机分辨率的情况
+        # adb shell dumpsys window displays | find "init="
         actual = self.adb.shell("dumpsys window displays")
-        arr = re.findall(r'cur=(\d+)x(\d+)', actual)
+        arr = re.findall(r'init=(\d+)x(\d+)', actual)
         if len(arr) > 0:
             display_info['physical_width'] = display_info['width']
             display_info['physical_height'] = display_info['height']
-            # 通过 adb shell dumpsys window displays | find "cur="
-            # 获取到的分辨率是实际分辨率，但是需要的是非实际的
-            if display_info["orientation"] in [1, 3]:
-                display_info['width'] = int(arr[0][1])
-                display_info['height'] = int(arr[0][0])
-            else:
-                display_info['width'] = int(arr[0][0])
-                display_info['height'] = int(arr[0][1])
+            # adb shell dumpsys window | grep -Eo 'init=[0-9]+x[0-9]+'  => init=width x height
+            display_info['width'] = int(arr[0][0])
+            display_info['height'] = int(arr[0][1])
         return display_info
 
     @on_method_ready('install_or_upgrade')
