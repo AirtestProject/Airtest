@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 from airtest.core.error import AdbError, ScreenError
+from airtest.core.android.cap_methods.base_cap import BaseCap
 from airtest.utils.logger import get_logger
 
 
@@ -78,8 +79,8 @@ class ScreenProxy(object):
         if default_method:
             if isinstance(default_method, str) and default_method.upper() in cls.SCREEN_METHODS:
                 screen = cls.SCREEN_METHODS[default_method.upper()](adb, *args, **kwargs)
-            elif isinstance(cap_method, BaseCap):
-                screen = cap_method
+            elif isinstance(default_method, BaseCap):
+                screen = default_method
             if cls.check_frame(screen):
                 return ScreenProxy(screen)
         # 从self.SCREEN_METHODS中，逆序取出可用的方法
