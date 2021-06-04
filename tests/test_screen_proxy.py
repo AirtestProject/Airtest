@@ -1,6 +1,7 @@
 # encoding=utf-8
 from airtest.core.android.android import Android
 from airtest.core.android.cap_methods.screen_proxy import ScreenProxy
+from airtest.core.android.cap_methods.minicap import Minicap
 from airtest.aircv.utils import string_2_img
 from numpy import ndarray
 import unittest
@@ -14,11 +15,22 @@ class TestScreenProxy(unittest.TestCase):
         cls.dev.rotation_watcher.get_ready()
 
     def test_setup(self):
+        # 测试默认的初始化
         screen_proxy = ScreenProxy.auto_setup(self.dev.adb,
                                               rotation_watcher=self.dev.rotation_watcher,
                                               display_id=self.dev.display_id)
         self.assertIsNotNone(screen_proxy)
         screen_proxy.teardown_stream()
+
+        # 测试指定默认类型初始化
+        default_screen = ScreenProxy.auto_setup(self.dev.adb,
+                                                default_method="MINICAP")
+        self.assertEqual(default_screen.cap_method, "MINICAP")
+        default_screen.teardown_stream()
+
+        minicap = Minicap(self.dev.adb)
+        default_screen2 = ScreenProxy.auto_setup(self.dev.adb, default_method=minicap)
+        self.assertEqual(default_screen2.cap_method, "MINICAP")
 
     def test_snapshot(self):
         for name, method in ScreenProxy.SCREEN_METHODS.items():
