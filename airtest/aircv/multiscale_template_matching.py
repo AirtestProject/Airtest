@@ -60,22 +60,17 @@ class MultiScaleTemplateMatching(object):
         # 第二步：计算模板匹配的结果矩阵res
         s_gray, i_gray = img_mat_rgb_2_gray(
             self.im_search), img_mat_rgb_2_gray(self.im_source)
-        r = self._get_ratio(
-            (self.im_source.shape[1], self.im_source.shape[0]), self.im_search)
+        r_min, r_max = self._get_ratio(
+            self.im_source, self.im_search, self.resolution)
         max_val, max_loc, w, h, r = self.multi_scale_search(
-            i_gray, s_gray, ratio_min=r, ratio_max=r, step=self.scale_step, threshold=self.threshold)
+            i_gray, s_gray, ratio_min=max(r_min, 0), ratio_max=min(r_max, 1), step=self.scale_step, threshold=self.threshold)
         confidence = self._get_confidence_from_matrix(
             max_loc, max_val, w, h)
         if confidence < self.threshold:
             max_val, max_loc, w, h, r = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=max(r-r*0.3, 0), ratio_max=min(r+r*0.3, 1), step=self.scale_step, threshold=self.threshold)
+                i_gray, s_gray, ratio_min=0.01, ratio_max=1.0, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
             confidence = self._get_confidence_from_matrix(
                 max_loc, max_val, w, h)
-            if confidence < self.threshold:
-                max_val, max_loc, w, h, r = self.multi_scale_search(
-                    i_gray, s_gray, ratio_min=0.01, ratio_max=1.0, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
-                confidence = self._get_confidence_from_matrix(
-                    max_loc, max_val, w, h)
 
         # 求取识别位置: 目标中心 + 目标区域:
         middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
@@ -114,10 +109,21 @@ class MultiScaleTemplateMatching(object):
 
         return middle_point, rectangle
 
-    def _get_ratio(self, resolution, templ):
-        w, h = resolution
+    def _get_ratio(self, src, templ, resolution):
+        """获取缩放比的上下限."""
+        H, W = src.shape[0], src.shape[1]
         th, tw = templ.shape[0], templ.shape[1]
-        return max(th/h, tw/w)
+        if resolution == ():
+            r_min = r_max = max(th/H, tw/W)
+            return r_min, r_max
+        else:
+            w, h = resolution
+            rmin = min(H/h, W/w) # 新旧模板比下限
+            rmax = max(H/h, W/w) # 新旧模板比上限
+            ratio = max(th/H, tw/W) # 小图大图比
+            r_min = ratio*rmin
+            r_max = ratio*rmax
+            return r_min, r_max 
 
     @staticmethod
     def _resize_by_ratio(src, templ, ratio=1.0):
