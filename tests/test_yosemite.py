@@ -31,6 +31,10 @@ class TestJavacap(unittest.TestCase):
         self.javacap.get_frame_from_stream()
         self.javacap.teardown_stream()
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.javacap.teardown_stream()
+
 
 class TestIme(unittest.TestCase):
 
