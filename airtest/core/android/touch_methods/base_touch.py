@@ -5,7 +5,7 @@ import six
 from six.moves import queue
 
 from airtest.utils.logger import get_logger
-from airtest.utils.snippet import (on_method_ready, ready_method, reg_cleanup)
+from airtest.utils.snippet import (on_method_ready, ready_method, reg_cleanup, kill_proc)
 
 LOGGING = get_logger(__name__)
 
@@ -15,7 +15,7 @@ class BaseTouch(object):
     A super class for Minitouch or Maxtouch
     """
 
-    def __init__(self, adb, backend=False, ori_function=None, input_event=None):
+    def __init__(self, adb, backend=False, ori_function=None, input_event=None, *args, **kwargs):
         self.adb = adb
         self.backend = backend
         self.server_proc = None
@@ -153,7 +153,7 @@ class BaseTouch(object):
         if self.client:
             self.client.close()
         if self.server_proc:
-            self.server_proc.kill()
+            kill_proc(self.server_proc)
 
     def transform_xy(self, x, y):
         """

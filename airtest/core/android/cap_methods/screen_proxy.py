@@ -20,7 +20,7 @@ class ScreenProxy(object):
     def __getattr__(self, name):
         if hasattr(self.screen_method, name):
             return getattr(self.screen_method, name, None)
-        elif name == "cap_method":
+        elif name == "method_name":
             return self.screen_method.__class__.__name__.upper()
         else:
             raise NotImplementedError("%s does not support \'%s\' method" %
@@ -72,7 +72,13 @@ class ScreenProxy(object):
             adb: :py:mod:`airtest.core.android.adb.ADB`
             default_method: String such as "MINICAP", or :py:mod:`airtest.core.android.cap_methods.minicap.Minicap` object
 
-        Returns:
+        Returns: ScreenProxy object
+
+        Examples:
+            >>> dev = Android()
+            >>> screen_proxy = ScreenProxy.auto_setup(dev.adb, rotation_watcher=dev.rotation_watcher)
+            >>> screen_proxy.get_frame_from_stream()
+            >>> screen_proxy.teardown_stream()
 
         """
         screen = None
