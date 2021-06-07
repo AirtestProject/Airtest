@@ -6,6 +6,8 @@ from numpy import ndarray
 from .testconf import PKG
 import time
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestMinicapBase(unittest.TestCase):

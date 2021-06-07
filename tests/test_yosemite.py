@@ -3,6 +3,8 @@ from airtest.core.android.android import ADB, Javacap, YosemiteIme
 from airtest.aircv.utils import string_2_img
 from numpy import ndarray
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestJavacap(unittest.TestCase):

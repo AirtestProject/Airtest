@@ -2,7 +2,7 @@
 from airtest.utils.logger import get_logger
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
-from airtest.utils.snippet import on_method_ready, reg_cleanup
+from airtest.utils.snippet import on_method_ready, reg_cleanup, kill_proc
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.android.cap_methods.base_cap import BaseCap
 from airtest.utils.threadsafe import threadsafe_generator
@@ -49,7 +49,7 @@ class Javacap(Yosemite, BaseCap):
                 break
             if b"Address already in use" in line:
                 raise RuntimeError("javacap server setup error: %s" % line)
-        reg_cleanup(proc.kill)
+        reg_cleanup(kill_proc, proc)
         return proc, nbsp, localport
 
     @threadsafe_generator
@@ -62,34 +62,32 @@ class Javacap(Yosemite, BaseCap):
 
         """
         proc, nbsp, localport = self._setup_stream_server()
-        s = SafeSocket()
-        s.connect((self.adb.host, localport))
-        t = s.recv(24)
-        # javacap header
-        LOGGING.debug(struct.unpack("<2B5I2B", t))
+        with SafeSocket() as s:
+            s.connect((self.adb.host, localport))
+            t = s.recv(24)
+            # javacap header
+            LOGGING.debug(struct.unpack("<2B5I2B", t))
 
-        stopping = False
-        while not stopping:
-            s.send(b"1")
-            # recv frame header, count frame_size
-            if self.RECVTIMEOUT is not None:
-                header = s.recv_with_timeout(4, self.RECVTIMEOUT)
-            else:
-                header = s.recv(4)
-            if header is None:
-                LOGGING.error("javacap header is None")
-                # recv timeout, if not frame updated, maybe screen locked
-                stopping = yield None
-            else:
-                frame_size = struct.unpack("<I", header)[0]
-                frame_data = s.recv(frame_size)
-                stopping = yield frame_data
+            stopping = False
+            while not stopping:
+                s.send(b"1")
+                # recv frame header, count frame_size
+                if self.RECVTIMEOUT is not None:
+                    header = s.recv_with_timeout(4, self.RECVTIMEOUT)
+                else:
+                    header = s.recv(4)
+                if header is None:
+                    LOGGING.error("javacap header is None")
+                    # recv timeout, if not frame updated, maybe screen locked
+                    stopping = yield None
+                else:
+                    frame_size = struct.unpack("<I", header)[0]
+                    frame_data = s.recv(frame_size)
+                    stopping = yield frame_data
 
-        LOGGING.debug("javacap stream ends")
-        s.close()
+            LOGGING.debug("javacap stream ends")
         nbsp.kill()
-        proc.kill()
-        proc.communicate()
+        kill_proc(proc)
         self.adb.remove_forward("tcp:%s" % localport)
 
     def get_frame_from_stream(self):
