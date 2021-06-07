@@ -5,6 +5,8 @@ from airtest.core.android.cap_methods.minicap import Minicap
 from airtest.aircv.utils import string_2_img
 from numpy import ndarray
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestScreenProxy(unittest.TestCase):
@@ -25,12 +27,12 @@ class TestScreenProxy(unittest.TestCase):
         # 测试指定默认类型初始化
         default_screen = ScreenProxy.auto_setup(self.dev.adb,
                                                 default_method="MINICAP")
-        self.assertEqual(default_screen.cap_method, "MINICAP")
+        self.assertEqual(default_screen.method_name, "MINICAP")
         default_screen.teardown_stream()
 
         minicap = Minicap(self.dev.adb)
         default_screen2 = ScreenProxy.auto_setup(self.dev.adb, default_method=minicap)
-        self.assertEqual(default_screen2.cap_method, "MINICAP")
+        self.assertEqual(default_screen2.method_name, "MINICAP")
 
     def test_snapshot(self):
         for name, method in ScreenProxy.SCREEN_METHODS.items():
@@ -70,6 +72,13 @@ class TestScreenProxy(unittest.TestCase):
             self.assertEqual(screen.shape[0], default_height)
 
     def test_custom_cap_method(self):
+        """
+        Test adding a custom screenshot method
+        测试添加一个自定义的截图方法
+
+        Returns:
+
+        """
         from airtest.core.android.cap_methods.base_cap import BaseCap
 
         class TestCap(BaseCap):

@@ -6,6 +6,7 @@ from airtest.core.android.touch_methods.base_touch import BaseTouch
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
+from airtest.utils.snippet import kill_proc
 
 LOGGING = get_logger(__name__)
 
@@ -32,7 +33,7 @@ class Maxtouch(BaseTouch):
         else:
             local_minitouch_size = int(os.path.getsize(MAXTOUCH_JAR))
             if exists_file and exists_file == local_minitouch_size:
-                LOGGING.debug("install_minitouch skipped")
+                LOGGING.debug("install_maxtouch skipped")
                 return
             self.uninstall()
 
@@ -69,11 +70,13 @@ class Maxtouch(BaseTouch):
         nbsp = NonBlockingStreamReader(p.stdout, name="airtouch_server", auto_kill=True)
         line = nbsp.readline(timeout=5.0)
         if line is None:
+            kill_proc(p)
             raise RuntimeError("airtouch setup timeout")
 
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
+            kill_proc(p)
             raise RuntimeError("airtouch server quit immediately")
         self.server_proc = p
         return p

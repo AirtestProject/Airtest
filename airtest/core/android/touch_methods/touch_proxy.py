@@ -1,14 +1,27 @@
+# encoding=utf-8
+import warnings
+from collections import OrderedDict
+from airtest.core.android.touch_methods.minitouch import Minitouch
+from airtest.core.android.touch_methods.maxtouch import Maxtouch
+from airtest.core.android.constant import TOUCH_METHOD
+from airtest.utils.logger import get_logger
+
+
+LOGGING = get_logger(__name__)
+
 
 class TouchProxy(object):
     """
     Perform touch operation according to the specified method
     """
-    TOUCH_METHODS = []
+    TOUCH_METHODS = OrderedDict()
 
     def __init__(self, touch_method):
         self.touch_method = touch_method
 
     def __getattr__(self, name):
+        if name == "method_name":
+            return self.touch_method.METHOD_NAME
         method = getattr(self.touch_method, name, getattr(self.touch_method.base_touch, name, None))
         if method:
             return method
@@ -16,15 +29,67 @@ class TouchProxy(object):
             raise NotImplementedError("%s does not support %s method" %
                                       (getattr(self.touch_method, "METHOD_NAME", ""), name))
 
+    @classmethod
+    def check_touch(cls, touch_impl):
+        try:
+            touch_impl.touch((0, 0))
+        except Exception as e:
+            LOGGING.error(e)
+            LOGGING.warning("%s setup up failed!" % touch_impl.METHOD_NAME)
+            return False
+        else:
+            return True
+
+    @classmethod
+    def auto_setup(cls, adb, default_method=None, ori_transformer=None, ori_function=None, input_event=None):
+        """
+
+        Args:
+            adb: :py:mod:`airtest.core.android.adb.ADB`
+            default_method: The default click method, such as "MINITOUCH"
+            ori_transformer: dev._touch_point_by_orientation
+            ori_function: dev.get_display_info
+            input_event: dev.input_event
+            *args:
+            **kwargs:
+
+        Returns: TouchProxy object
+
+        Examples:
+            >>> dev = Android()
+            >>> touch_proxy = TouchProxy.auto_setup(dev.adb, ori_transformer=dev._touch_point_by_orientation)
+            >>> touch_proxy.touch((100, 100))
+
+        """
+        if default_method and default_method in cls.TOUCH_METHODS:
+            touch_method = cls.TOUCH_METHODS[default_method].METHOD_CLASS(adb, ori_function=ori_function,
+                                                                          input_event=input_event)
+            impl = cls.TOUCH_METHODS[default_method](touch_method, ori_transformer)
+            if cls.check_touch(impl):
+                return TouchProxy(impl)
+        # cls.TOUCH_METHODS中不包含ADBTOUCH，因此即使指定了default_method=ADBTOUCH，也优先尝试初始化其他点击方法
+        for name, touch_impl in cls.TOUCH_METHODS.items():
+            if default_method == name:
+                continue
+            touch_method = touch_impl.METHOD_CLASS(adb, ori_function=ori_function, input_event=input_event)
+            impl = touch_impl(touch_method, ori_transformer)
+            if cls.check_touch(impl):
+                return TouchProxy(impl)
+
+        # If both minitouch and maxtouch fail to initialize, use adbtouch
+        # 如果minitouch和maxtouch都初始化失败，使用adbtouch
+        adb_touch = AdbTouchImplementation(adb)
+        warnings.warn("Currently using ADB touch, the efficiency may be very low.")
+        return TouchProxy(adb_touch)
+
 
 def register_touch(cls):
-    TouchProxy.TOUCH_METHODS.append(cls.METHOD_NAME)
+    TouchProxy.TOUCH_METHODS[cls.METHOD_NAME] = cls
     return cls
 
 
-@register_touch
 class AdbTouchImplementation(object):
-    METHOD_NAME = "ADBTOUCH"
+    METHOD_NAME = TOUCH_METHOD.ADBTOUCH
 
     def __init__(self, base_touch):
         """
@@ -46,12 +111,13 @@ class AdbTouchImplementation(object):
 
 @register_touch
 class MinitouchImplementation(AdbTouchImplementation):
-    METHOD_NAME = "MINITOUCH"
+    METHOD_NAME = TOUCH_METHOD.MINITOUCH
+    METHOD_CLASS = Minitouch
 
     def __init__(self, minitouch, ori_transformer):
         """
 
-        :param minitouch: airtest.core.android.touch_methods.minitouch.Minitouch
+        :param minitouch: :py:mod:`airtest.core.android.touch_methods.minitouch.Minitouch`
         :param ori_transformer: Android._touch_point_by_orientation()
         """
         super(MinitouchImplementation, self).__init__(minitouch)
@@ -91,12 +157,15 @@ class MinitouchImplementation(AdbTouchImplementation):
 
 @register_touch
 class MaxtouchImplementation(MinitouchImplementation):
-    METHOD_NAME = "MAXTOUCH"
+    METHOD_NAME = TOUCH_METHOD.MAXTOUCH
+    METHOD_CLASS = Maxtouch
 
     def __init__(self, maxtouch, ori_transformer):
         """
-        test 123
-        :param maxtouch: airtest.core.android.touch_methods.maxtouch.Maxtouch
+        New screen click scheme, support Android10
+        新的屏幕点击方案，支持Android10以上版本
+
+        :param maxtouch: :py:mod:`airtest.core.android.touch_methods.maxtouch.Maxtouch`
         :param ori_transformer: Android._touch_point_by_orientation()
         """
         super(MaxtouchImplementation, self).__init__(maxtouch, ori_transformer)

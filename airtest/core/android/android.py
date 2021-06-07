@@ -9,15 +9,18 @@ from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
     SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
-from airtest.core.android.touch_methods.minitouch import Minitouch
-from airtest.core.android.touch_methods.maxtouch import Maxtouch
+
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
-from airtest.core.android.touch_methods.touch_proxy import TouchProxy, AdbTouchImplementation, \
-    MinitouchImplementation, MaxtouchImplementation
-from airtest.core.error import AdbError, AdbShellError, ScreenError
-from airtest.core.android.cap_methods.base_cap import BaseCap
+from airtest.core.android.touch_methods.touch_proxy import TouchProxy
+from airtest.core.error import AdbError, AdbShellError
 from airtest.core.android.cap_methods.screen_proxy import ScreenProxy
+
+# Compatible with old code
+from airtest.core.android.cap_methods.minicap import Minicap  # noqa
+from airtest.core.android.cap_methods.javacap import Javacap  # noqa
+from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
+from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 
 class Android(Device):
@@ -33,7 +36,7 @@ class Android(Device):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
         self._cap_method = cap_method.upper()
-        self.touch_method = touch_method.upper()
+        self._touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
         self.ori_method = ori_method.upper()
         self.display_id = display_id
@@ -42,15 +45,12 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method == TOUCH_METHOD.MINITOUCH:
-            self.touch_method = TOUCH_METHOD.MAXTOUCH
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
+            self._touch_method = TOUCH_METHOD.MAXTOUCH
         self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info, input_event=self.input_event)
-        self.maxtouch = Maxtouch(self.adb, ori_function=self.get_display_info)
-
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
@@ -73,16 +73,31 @@ class Android(Device):
             >>> dev.touch_proxy.touch((100, 100))  # If the device uses minitouch, it is the same as dev.minitouch.touch
             >>> dev.touch_proxy.swipe_along([(0,0), (100, 100)])
         """
-        if self._touch_proxy and self.touch_method == self._touch_proxy.METHOD_NAME:
+        if self._touch_proxy:
             return self._touch_proxy
-        if self.touch_method == TOUCH_METHOD.MINITOUCH:
-            impl = MinitouchImplementation(self.minitouch, self._touch_point_by_orientation)
-        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
-            impl = MaxtouchImplementation(self.maxtouch, self._touch_point_by_orientation)
-        else:
-            impl = AdbTouchImplementation(self.adb)
-        self._touch_proxy = TouchProxy(impl)
+        self._touch_proxy = TouchProxy.auto_setup(self.adb,
+                                                  default_method=self._touch_method,
+                                                  ori_transformer=self._touch_point_by_orientation,
+                                                  ori_function=self.get_display_info,
+                                                  input_event=self.input_event)
         return self._touch_proxy
+
+    @property
+    def touch_method(self):
+        """
+        In order to be compatible with the previous `dev.touch_method`
+
+        为了兼容以前的`dev.touch_method`
+
+        Returns:
+            "MINITOUCH" or "MAXTOUCH"
+
+        Examples:
+            >>> dev = Android()
+            >>> print(dev.touch_method)  # "MINITOUCH"
+
+        """
+        return self.touch_proxy.method_name
 
     @property
     def cap_method(self):
@@ -99,7 +114,7 @@ class Android(Device):
             >>> print(dev.cap_method)  # "MINICAP"
 
         """
-        return self.screen_proxy.cap_method
+        return self.screen_proxy.method_name
 
     @cap_method.setter
     def cap_method(self, name):
@@ -859,3 +874,5 @@ class Android(Device):
 # Compatible with old code, such as device.minicap
 Android.minicap=property(lambda self: self.get_deprecated_var("minicap", "screen_proxy"))
 Android.javacap=property(lambda self: self.get_deprecated_var("javacap", "screen_proxy"))
+Android.minitouch=property(lambda self: self.get_deprecated_var("minitouch", "touch_proxy"))
+Android.maxtouch=property(lambda self: self.get_deprecated_var("maxtouch", "touch_proxy"))

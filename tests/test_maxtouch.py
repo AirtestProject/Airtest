@@ -1,6 +1,8 @@
 # encoding=utf-8
 from airtest.core.android.android import ADB, Maxtouch
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestMaxTouchBase(unittest.TestCase):

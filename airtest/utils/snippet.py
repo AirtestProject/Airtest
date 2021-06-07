@@ -64,6 +64,20 @@ def _cleanup():
         func(*args, **kwargs)
 
 
+def kill_proc(proc):
+    """
+    Kill the process and close _io.BufferedWriter to avoid `ResourceWarning: unclosed file <_io.BufferedWriter name=6>`
+
+    Args:
+        proc: subprocess.Popen()
+
+    Returns:
+
+    """
+    proc.kill()
+    proc.communicate()
+
+
 # atexit.register(_cleanup)
 
 _shutdown = threading._shutdown

@@ -73,4 +73,6 @@ class SafeSocket(object):
         return ret
 
     def close(self):
-        self.sock.close()
+        if not self.sock._closed:
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
