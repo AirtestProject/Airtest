@@ -11,7 +11,7 @@ from airtest.core.android.constant import STFLIB
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, kill_proc
 from airtest.utils.threadsafe import threadsafe_generator
 from airtest.core.android.cap_methods.base_cap import BaseCap
 
@@ -58,7 +58,6 @@ class Minicap(BaseCap):
             # Minicap needs to be reconnected when switching between landscape and portrait
             # minicap需要在横竖屏转换时，重新连接
             rotation_watcher.reg_callback(lambda x: self.update_rotation(x * 90))
-        # TODO reg cleanup?
 
     @ready_method
     def install_or_upgrade(self):
@@ -302,9 +301,8 @@ class Minicap(BaseCap):
         LOGGING.debug("minicap stream ends")
         s.close()
         nbsp.kill()
-        proc.kill()
+        kill_proc(proc)
         self.adb.remove_forward("tcp:%s" % localport)
-        self.adb.close_proc_pipe(proc)
 
     def _setup_stream_server(self, lazy=False):
         """
@@ -335,6 +333,7 @@ class Minicap(BaseCap):
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
+                kill_proc(proc)
                 raise RuntimeError("minicap server setup timeout")
             if b"Server start" in line:
                 break
@@ -342,9 +341,10 @@ class Minicap(BaseCap):
         if proc.poll() is not None:
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
+            kill_proc(proc)
             raise RuntimeError("minicap server quit immediately")
 
-        reg_cleanup(proc.kill)
+        reg_cleanup(kill_proc, proc)
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
