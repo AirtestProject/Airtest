@@ -63,7 +63,7 @@ class MultiScaleTemplateMatching(object):
         r = self._get_ratio(
             (self.im_source.shape[1], self.im_source.shape[0]), self.im_search)
         max_val, max_loc, w, h, r = self.multi_scale_search(
-            i_gray, s_gray, ratio_min=r, ratio_max=r, step=self.scale_step, threshold=self.threshold)
+            i_gray, s_gray, ratio_min=max(r_min, self.scale_step), ratio_max=min(r_max, 0.99), step=self.scale_step, threshold=self.threshold)
         confidence = self._get_confidence_from_matrix(
             max_loc, max_val, w, h)
         if confidence < self.threshold:
@@ -120,21 +120,23 @@ class MultiScaleTemplateMatching(object):
         return max(th/h, tw/w)
 
     @staticmethod
-    def _resize_by_ratio(src, templ, ratio=1.0):
+    def _resize_by_ratio(src, templ, ratio=1.0, max_tr_ratio=0.2):
         """根据模板相对屏幕的长边 按比例缩放屏幕"""
         th, tw = templ.shape[0], templ.shape[1]
         h, w = src.shape[0], src.shape[1]
         tr = sr = 1.0
         if th/h >= tw/w:
-            if ratio < 0.2:
+            if ratio <max_tr_ratio:
                 tr = (h*ratio)/th
             else:
-                sr = (th/ratio)/h
+                tr = (h*max_tr_ratio)/th
+                sr = (th*tr/ratio)/h
         else:
-            if ratio < 0.2:
+            if ratio < max_tr_ratio:
                 tr = (w*ratio)/tw
             else:
-                sr = (tw/ratio)/w
+                tr = (w*max_tr_ratio)/tw
+                sr = (tw*tr/ratio)/w
         if tr <= 1:
             templ = cv2.resize(templ, (max(int(tw*tr), 1), max(int(th*tr), 1)))
         if sr <= 1:
