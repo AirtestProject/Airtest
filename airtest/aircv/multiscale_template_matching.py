@@ -88,7 +88,7 @@ class MultiScaleTemplateMatching(object):
     def _get_confidence_from_matrix(self, max_loc, max_val, w, h):
         """根据结果矩阵求出confidence."""
         # 求取可信度:
-        if self.rgb:
+        if self.rgb and max_val >= self.threshold:
             # 如果有颜色校验,对目标区域进行BGR三通道校验:
             img_crop = self.im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
             confidence = cal_rgb_confidence(img_crop, self.im_search)
@@ -117,26 +117,42 @@ class MultiScaleTemplateMatching(object):
     def _get_ratio(self, resolution, templ):
         w, h = resolution
         th, tw = templ.shape[0], templ.shape[1]
-        return max(th/h, tw/w)
+        if resolution == ():
+            r_min = r_max = max(th/H, tw/W)
+            return r_min, r_max
+        else:
+            w, h = resolution
+            rmin = min(H/h, W/w)  # 新旧模板比下限
+            rmax = max(H/h, W/w)  # 新旧模板比上限
+            ratio = max(th/H, tw/W)  # 小图大图比
+            r_min = ratio*rmin
+            r_max = ratio*rmax
+            return r_min, r_max
 
     @staticmethod
-    def _resize_by_ratio(src, templ, ratio=1.0, max_tr_ratio=0.2):
+    def _resize_by_ratio(src, templ, ratio=1.0, max_tr_ratio=0.2, templ_min=10):
         """根据模板相对屏幕的长边 按比例缩放屏幕"""
         th, tw = templ.shape[0], templ.shape[1]
         h, w = src.shape[0], src.shape[1]
         tr = sr = 1.0
         if th/h >= tw/w:
-            if ratio <max_tr_ratio:
+            if ratio < max_tr_ratio:
                 tr = (h*ratio)/th
             else:
                 tr = (h*max_tr_ratio)/th
                 sr = (th*tr/ratio)/h
+                if min(th, tw)*tr <= templ_min:
+                    tr = (h*ratio)/th
+                    sr = 1.0
         else:
             if ratio < max_tr_ratio:
                 tr = (w*ratio)/tw
             else:
                 tr = (w*max_tr_ratio)/tw
                 sr = (tw*tr/ratio)/w
+                if min(th, tw)*tr <= templ_min:  # 最小边长校验
+                    tr = (w*ratio)/tw
+                    sr = 1.0
         if tr <= 1:
             templ = cv2.resize(templ, (max(int(tw*tr), 1), max(int(th*tr), 1)))
         if sr <= 1:
@@ -162,7 +178,7 @@ class MultiScaleTemplateMatching(object):
         r = ratio_min
         while r <= ratio_max:
             src, templ, tr, sr = self._resize_by_ratio(
-                org_src.copy(), org_templ.copy(), r)
+                org_src.copy(), org_templ.copy(), r, templ_min=templ_min)
             if min(templ.shape) > templ_min:
                 result = cv2.matchTemplate(src, templ, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -174,6 +190,8 @@ class MultiScaleTemplateMatching(object):
                 if max_val >= threshold:
                     break
             r += step
+        if max_info is None:
+            return 0, (0, 0), 0, 0, 0
         r, max_val, max_loc, w, h, tr, sr = max_info
         max_loc, w, h = self._org_size(max_loc, w, h, tr, sr)
         if gr < 1.0:
