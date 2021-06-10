@@ -721,19 +721,7 @@ class Android(Device):
             display information
 
         """
-        try:
-            self.rotation_watcher.get_ready()
-        except AdbShellError:
-            warnings.warn(
-                "RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
-            self.ori_method = ORI_METHOD.ADB
-
-        if self.ori_method != ORI_METHOD.ADB:
-            try:
-                return self.screen_proxy.get_display_info()
-            except (RuntimeError, AdbShellError, AdbError):
-                # Even if minicap execution fails, use adb instead
-                self.ori_method = ORI_METHOD.ADB
+        self.rotation_watcher.get_ready()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
