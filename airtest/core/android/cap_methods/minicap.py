@@ -14,6 +14,7 @@ from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, kill_proc
 from airtest.utils.threadsafe import threadsafe_generator
 from airtest.core.android.cap_methods.base_cap import BaseCap
+from airtest import aircv
 
 
 LOGGING = get_logger(__name__)
@@ -364,6 +365,29 @@ class Minicap(BaseCap):
         if self.frame_gen is None:
             self.frame_gen = self.get_stream()
         return six.next(self.frame_gen)
+
+    def snapshot(self, ensure_orientation=True, projection=None):
+        """
+
+        Args:
+            ensure_orientation: True or False whether to keep the orientation same as display
+            projection: the size of the desired projection, (width, height)
+
+        Returns:
+
+        """
+        if projection:
+            # minicap模式在单张截图时，可以传入projection参数来强制指定图片大小，如手机分辨率(width, height)
+            screen = self.get_frame(projection=projection)
+            try:
+                screen = aircv.utils.string_2_img(screen)
+            except Exception:
+                # may be black/locked screen or other reason, print exc for debugging
+                traceback.print_exc()
+                return None
+            return screen
+        else:
+            return super(Minicap, self).snapshot()
 
     def update_rotation(self, rotation):
         """

@@ -30,7 +30,7 @@ class BaseCap(object):
     def teardown_stream(self):
         pass
 
-    def snapshot(self, ensure_orientation=True):
+    def snapshot(self, ensure_orientation=True, *args, **kwargs):
         """
         Take a screenshot and convert it into a cv2 image object
 
