@@ -6,6 +6,7 @@ from airtest.utils.snippet import on_method_ready, reg_cleanup, kill_proc
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.android.cap_methods.base_cap import BaseCap
 from airtest.utils.threadsafe import threadsafe_generator
+from airtest.core.error import ScreenError
 import struct
 LOGGING = get_logger(__name__)
 
@@ -44,11 +45,11 @@ class Javacap(Yosemite, BaseCap):
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
-                raise RuntimeError("javacap server setup timeout")
+                raise ScreenError("javacap server setup timeout")
             if b"Capture server listening on" in line:
                 break
             if b"Address already in use" in line:
-                raise RuntimeError("javacap server setup error: %s" % line)
+                raise ScreenError("javacap server setup error: %s" % line)
         reg_cleanup(kill_proc, proc)
         return proc, nbsp, localport
 
@@ -64,7 +65,11 @@ class Javacap(Yosemite, BaseCap):
         proc, nbsp, localport = self._setup_stream_server()
         s = SafeSocket()
         s.connect((self.adb.host, localport))
-        t = s.recv(24)
+        try:
+            t = s.recv(24)
+        except Exception as e:
+            # 在部分手机上，可能连接可以成功建立，但是在开始获取数据时会报错
+            raise ScreenError(e)
         # javacap header
         LOGGING.debug(struct.unpack("<2B5I2B", t))
 
