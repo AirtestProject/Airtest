@@ -1,6 +1,8 @@
 # encoding=utf-8
 from airtest.core.android.android import ADB, Minitouch
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestMiniTouchBase(unittest.TestCase):

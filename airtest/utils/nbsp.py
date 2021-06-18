@@ -8,7 +8,7 @@ LOGGING = get_logger(__name__)
 
 class NonBlockingStreamReader:
 
-    def __init__(self, stream, raise_EOF=False, print_output=True, print_new_line=True, name=None):
+    def __init__(self, stream, raise_EOF=False, print_output=True, print_new_line=True, name=None, auto_kill=False):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
@@ -35,12 +35,13 @@ class NonBlockingStreamReader:
                             continue
                         self._lastline = line
                         LOGGING.debug("[%s]%s" % (self.name, repr(line.strip())))
+                    if auto_kill and line == b"":
+                        self.kill()
                 elif kill_event.is_set():
                     break
                 elif raise_EOF:
                     raise UnexpectedEndOfStream
                 else:
-                    # print("EndOfStream: %s" % self.name)
                     break
 
         self._kill_event = Event()

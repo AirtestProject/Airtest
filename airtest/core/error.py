@@ -84,7 +84,14 @@ class ICmdError(Exception):
         return "stdout[%s] stderr[%s]" %(self.stdout, self.stderr)
 
 
-class MinicapError(BaseError):
+class ScreenError(BaseError):
+    """
+    When the screen capture method(Minicap/Javacap/ScreenProxy) has something wrong
+    """
+    pass
+
+
+class MinicapError(ScreenError):
     """
         This is MinicapError BaseError
         When Minicap have something wrong

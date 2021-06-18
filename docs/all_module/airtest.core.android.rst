@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
 
     airtest.core.android.touch_methods
+    airtest.core.android.cap_methods
 
 Submodules
 ----------

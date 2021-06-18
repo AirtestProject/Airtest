@@ -80,7 +80,7 @@ class RotationWatcher(object):
         p = self.adb.start_shell(
             "app_process -Djava.class.path={0} /data/local/tmp com.example.rotationwatcher.Main".format(
                 self.path_in_android))
-        self.nbsp = NonBlockingStreamReader(p.stdout, name="rotation_server")
+        self.nbsp = NonBlockingStreamReader(p.stdout, name="rotation_server", auto_kill=True)
 
         if p.poll() is not None:
             # server setup error, may be already setup by others
@@ -93,6 +93,8 @@ class RotationWatcher(object):
         self._t_kill_event.set()
         if self.ow_proc:
             self.ow_proc.kill()
+            # close io.Buffer
+            self.ow_proc.communicate()
         if self.nbsp:
             self.nbsp.kill()
 
@@ -175,7 +177,8 @@ class RotationWatcher(object):
 
         """
         """方向变化的时候的回调函数，参数一定是ori，如果断掉了，ori传None"""
-        self.ow_callback.append(ow_callback)
+        if ow_callback not in self.ow_callback:
+            self.ow_callback.append(ow_callback)
 
 
 class XYTransformer(object):

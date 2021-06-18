@@ -10,7 +10,7 @@ from airtest.core.android.touch_methods.base_touch import BaseTouch
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import get_std_encoding
+from airtest.utils.snippet import get_std_encoding, kill_proc, reg_cleanup
 
 LOGGING = get_logger(__name__)
 
@@ -86,10 +86,12 @@ class Minitouch(BaseTouch):
             p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' -d '{1}' 2>&1".format(deviceport,self.input_event))
         else:
             p = self.adb.start_shell("/data/local/tmp/minitouch -n '{0}' 2>&1".format(deviceport))
-        nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server")
+        nbsp = NonBlockingStreamReader(p.stdout, name="minitouch_server", auto_kill=True)
         while True:
-            line = nbsp.readline(timeout=5.0)
+            line = nbsp.readline(timeout=3.0)
             if line is None:
+                kill_proc(p)
+                self.adb.close_proc_pipe(p)
                 raise RuntimeError("minitouch setup timeout")
 
             line = line.decode(get_std_encoding(sys.stdout))
@@ -106,9 +108,10 @@ class Minitouch(BaseTouch):
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
+            kill_proc(p)
             raise RuntimeError("minitouch server quit immediately")
         self.server_proc = p
-        # reg_cleanup(self.server_proc.kill)
+        reg_cleanup(kill_proc, self.server_proc)
         return p
 
     def setup_client(self):

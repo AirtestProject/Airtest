@@ -1,34 +1,33 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import re
 import time
 import warnings
 from copy import copy
 from airtest import aircv
-from airtest.utils.logger import get_logger
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD,\
-    SDK_VERISON_ANDROID7, SDK_VERISON_ANDROID10
+from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
+    SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
-from airtest.core.android.minicap import Minicap
-from airtest.core.android.touch_methods.minitouch import Minitouch
-from airtest.core.android.touch_methods.maxtouch import Maxtouch
-from airtest.core.android.javacap import Javacap
+
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
 from airtest.core.android.recorder import Recorder
-from airtest.core.android.touch_methods.touch_proxy import TouchProxy, AdbTouchImplementation, \
-    MinitouchImplementation, MaxtouchImplementation
+from airtest.core.android.touch_methods.touch_proxy import TouchProxy
 from airtest.core.error import AdbError, AdbShellError
+from airtest.core.android.cap_methods.screen_proxy import ScreenProxy
 
-LOGGING = get_logger(__name__)
+# Compatible with old code
+from airtest.core.android.cap_methods.minicap import Minicap  # noqa
+from airtest.core.android.cap_methods.javacap import Javacap  # noqa
+from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
+from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 
 class Android(Device):
     """Android Device Class"""
 
     def __init__(self, serialno=None, host=None,
-                 cap_method=CAP_METHOD.MINICAP_STREAM,
+                 cap_method=CAP_METHOD.MINICAP,
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
@@ -36,8 +35,8 @@ class Android(Device):
                  input_event=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
-        self.cap_method = cap_method.upper()
-        self.touch_method = touch_method.upper()
+        self._cap_method = cap_method.upper()
+        self._touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
         self.ori_method = ori_method.upper()
         self.display_id = display_id
@@ -46,22 +45,18 @@ class Android(Device):
         self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        if self.sdk_version >= SDK_VERISON_ANDROID10 and self.touch_method == TOUCH_METHOD.MINITOUCH:
-            self.touch_method = TOUCH_METHOD.MAXTOUCH
+        if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
+            self._touch_method = TOUCH_METHOD.MAXTOUCH
         self._display_info = {}
         self._current_orientation = None
         # init components
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
-        self.minicap = Minicap(self.adb, ori_function=self.get_display_info, display_id=self.display_id)
-        self.javacap = Javacap(self.adb)
-        self.minitouch = Minitouch(self.adb, ori_function=self.get_display_info, input_event=self.input_event)
-        self.maxtouch = Maxtouch(self.adb, ori_function=self.get_display_info)
-
         self.yosemite_ime = YosemiteIme(self.adb)
         self.recorder = Recorder(self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
+        self._screen_proxy = None
 
     @property
     def touch_proxy(self):
@@ -72,17 +67,162 @@ class Android(Device):
 
         Returns:
             TouchProxy
+
+        Examples:
+            >>> dev = Android()
+            >>> dev.touch_proxy.touch((100, 100))  # If the device uses minitouch, it is the same as dev.minitouch.touch
+            >>> dev.touch_proxy.swipe_along([(0,0), (100, 100)])
         """
-        if self._touch_proxy and self.touch_method == self._touch_proxy.METHOD_NAME:
+        if self._touch_proxy:
             return self._touch_proxy
-        if self.touch_method == TOUCH_METHOD.MINITOUCH:
-            impl = MinitouchImplementation(self.minitouch, self._touch_point_by_orientation)
-        elif self.touch_method == TOUCH_METHOD.MAXTOUCH:
-            impl = MaxtouchImplementation(self.maxtouch, self._touch_point_by_orientation)
-        else:
-            impl = AdbTouchImplementation(self.adb)
-        self._touch_proxy = TouchProxy(impl)
+        self._touch_proxy = TouchProxy.auto_setup(self.adb,
+                                                  default_method=self._touch_method,
+                                                  ori_transformer=self._touch_point_by_orientation,
+                                                  ori_function=self.get_display_info,
+                                                  input_event=self.input_event)
         return self._touch_proxy
+
+    @property
+    def touch_method(self):
+        """
+        In order to be compatible with the previous `dev.touch_method`
+
+        为了兼容以前的`dev.touch_method`
+
+        Returns:
+            "MINITOUCH" or "MAXTOUCH"
+
+        Examples:
+            >>> dev = Android()
+            >>> print(dev.touch_method)  # "MINITOUCH"
+
+        """
+        return self.touch_proxy.method_name
+
+    @property
+    def cap_method(self):
+        """
+        In order to be compatible with the previous `dev.cap_method`
+
+        为了兼容以前的`dev.cap_method`
+
+        Returns:
+            "MINICAP" or "JAVACAP"
+
+        Examples:
+            >>> dev = Android()
+            >>> print(dev.cap_method)  # "MINICAP"
+
+        """
+        return self.screen_proxy.method_name
+
+    @cap_method.setter
+    def cap_method(self, name):
+        """
+        Specify the screen capture method for the device, but this is not recommended
+        为设备指定屏幕截图方案，但不建议这样做
+
+        Just to be compatible with some old codes
+        仅为了兼容一些旧的代码
+
+        Args:
+            name: "MINICAP" or Minicap() object
+
+        Returns:
+            None
+
+        Examples:
+            >>> dev = Android()
+            >>> dev.cap_method = "MINICAP"
+
+        """
+        warnings.warn("No need to manually specify cap_method, airtest will automatically specify a suitable screenshot method, when airtest>=1.1.2")
+        self.screen_proxy = name
+
+    @property
+    def screen_proxy(self):
+        """
+        Similar to touch_proxy, it returns a proxy that can automatically initialize an available screenshot method, such as Minicap
+
+        Afterwards, you only need to call ``self.screen_proxy.get_frame()`` to get the screenshot
+
+        类似touch_proxy，返回一个代理，能够自动初始化一个可用的屏幕截图方法，例如Minicap
+
+        后续只需要调用 ``self.screen_proxy.get_frame()``即可获取到屏幕截图
+
+        Returns: ScreenProxy(Minicap())
+
+        Examples:
+            >>> dev = Android()
+            >>> img = dev.screen_proxy.get_frame_from_stream()  # dev.minicap.get_frame_from_stream() is deprecated
+
+        """
+        if self._screen_proxy:
+            return self._screen_proxy
+        self._screen_proxy = ScreenProxy.auto_setup(self.adb, default_method=self._cap_method,
+                                                    rotation_watcher=self.rotation_watcher,
+                                                    display_id=self.display_id)
+        return self._screen_proxy
+
+    @screen_proxy.setter
+    def screen_proxy(self, cap_method):
+        """
+        Specify a screenshot method, if the method fails to initialize, try to use other methods instead
+
+        指定一个截图方法，如果该方法初始化失败，则尝试使用其他方法代替
+
+        Args:
+            cap_method: "MINICAP" or :py:mod:`airtest.core.android.cap_methods.minicap.Minicap` object
+
+        Returns:
+            ScreenProxy object
+
+        Raises:
+            ScreenError when the connection fails
+
+        Examples:
+            >>> dev = Android()
+            >>> dev.screen_proxy = "MINICAP"
+
+            >>> from airtest.core.android.cap_methods.minicap import Minicap
+            >>> minicap = Minicap(dev.adb, rotation_watcher=dev.rotation_watcher)
+            >>> dev.screen_proxy = minicap
+
+        """
+        if self._screen_proxy:
+            self._screen_proxy.teardown_stream()
+        self._screen_proxy = ScreenProxy.auto_setup(self.adb, default_method=cap_method)
+
+    def get_deprecated_var(self, old_name, new_name):
+        """
+        Get deprecated class variables
+
+        When the airtest version number>=1.1.2, the call device.minicap/device.javacap is removed, and relevant compatibility is made here, and DeprecationWarning is printed
+
+        airtest版本号>=1.1.2时，去掉了device.minicap/device.javacap这样的调用，在此做了相关的兼容，并打印DeprecationWarning
+
+        Usage:  Android.minicap=property(lambda self: self.get_deprecated_var("minicap", "screen_proxy"))
+
+        Args:
+            old_name: "minicap"
+            new_name: "screen_proxy"
+
+        Returns:
+            New implementation of deprecated object, e.g self.minicap -> self.screen_proxy
+
+            dev.minicap.get_frame_from_stream()  ->  dev.screen_proxy.get_frame_from_stream()
+
+        Examples:
+
+            >>> dev = Android()
+            >>> isinstance(dev.minicap, ScreenProxy)  # True
+            >>> dev.minicap.get_frame_from_stream()  # --> dev.screen_proxy.get_frame_from_stream()
+
+        """
+        warnings.simplefilter("always")
+        warnings.warn("{old_name} is deprecated, use {new_name} instead".format(old_name=old_name, new_name=new_name),
+                      DeprecationWarning)
+        return getattr(self, new_name)
 
     def get_default_device(self):
         """
@@ -262,34 +402,8 @@ class Android(Device):
             screenshot output
 
         """
-        """default not write into file."""
-        if self.cap_method == CAP_METHOD.MINICAP_STREAM:
-            screen = self.minicap.get_frame_from_stream()
-        elif self.cap_method == CAP_METHOD.MINICAP:
-            screen = self.minicap.get_frame()
-        elif self.cap_method == CAP_METHOD.JAVACAP:
-            screen = self.javacap.get_frame_from_stream()
-        else:
-            screen = self.adb.snapshot()
-        # output cv2 object
-        try:
-            screen = aircv.utils.string_2_img(screen)
-        except Exception:
-            # may be black/locked screen or other reason, print exc for debugging
-            import traceback
-            traceback.print_exc()
-            return None
-
-        # ensure the orientation is right
-        if ensure_orientation and self.display_info["orientation"]:
-            # minicap screenshots are different for various sdk_version
-            if self.cap_method in (CAP_METHOD.MINICAP, CAP_METHOD.MINICAP_STREAM) and self.sdk_version <= 16:
-                h, w = screen.shape[:2]  # cvshape是高度在前面!!!!
-                if w < h:  # 当前是横屏，但是图片是竖的，则旋转，针对sdk<=16的机器
-                    screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
-            # adb 截图总是要根据orientation旋转，但是SDK版本大于等于25(Android7.1以后)无需额外旋转
-            elif self.cap_method == CAP_METHOD.ADBCAP and self.sdk_version <= SDK_VERISON_ANDROID7:
-                screen = aircv.rotate(screen, self.display_info["orientation"] * 90, clockwise=False)
+        # default not write into file.
+        screen = self.screen_proxy.snapshot(ensure_orientation=ensure_orientation)
         if filename:
             aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
@@ -607,19 +721,7 @@ class Android(Device):
             display information
 
         """
-        try:
-            self.rotation_watcher.get_ready()
-        except AdbShellError:
-            warnings.warn(
-                "RotationWatcher.apk install failed, please try to reinstall manually(airtest/core/android/static/apks/RotationWatcher.apk).")
-            self.ori_method = ORI_METHOD.ADB
-
-        if self.ori_method == ORI_METHOD.MINICAP:
-            try:
-                return self.minicap.get_display_info()
-            except (RuntimeError, AdbShellError, AdbError):
-                # Even if minicap execution fails, use adb instead
-                self.ori_method = ORI_METHOD.ADB
+        self.rotation_watcher.get_ready()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
@@ -723,7 +825,6 @@ class Android(Device):
 
         """
         self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
-        self.rotation_watcher.reg_callback(lambda x: self.minicap.update_rotation(x * 90))
 
     def _touch_point_by_orientation(self, tuple_xy):
         """
@@ -757,3 +858,9 @@ class Android(Device):
         if ret:
             info.update(ret)
             self._display_info = info
+
+# Compatible with old code, such as device.minicap
+Android.minicap=property(lambda self: self.get_deprecated_var("minicap", "screen_proxy"))
+Android.javacap=property(lambda self: self.get_deprecated_var("javacap", "screen_proxy"))
+Android.minitouch=property(lambda self: self.get_deprecated_var("minitouch", "touch_proxy"))
+Android.maxtouch=property(lambda self: self.get_deprecated_var("maxtouch", "touch_proxy"))

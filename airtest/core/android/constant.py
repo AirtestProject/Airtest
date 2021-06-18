@@ -32,7 +32,6 @@ IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 
 class CAP_METHOD(object):
     MINICAP = "MINICAP"
-    MINICAP_STREAM = "MINICAP_STREAM"
     ADBCAP = "ADBCAP"
     JAVACAP = "JAVACAP"
 

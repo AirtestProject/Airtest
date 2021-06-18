@@ -3,6 +3,8 @@ from airtest.core.android.android import ADB, Javacap, YosemiteIme
 from airtest.aircv.utils import string_2_img
 from numpy import ndarray
 import unittest
+import warnings
+warnings.simplefilter("always")
 
 
 class TestJavacap(unittest.TestCase):
@@ -21,9 +23,17 @@ class TestJavacap(unittest.TestCase):
         frame = string_2_img(frame)
         self.assertIsInstance(frame, ndarray)
 
+    def test_snapshot(self):
+        img = self.javacap.snapshot()
+        self.assertIsInstance(img, ndarray)
+
     def test_teardown(self):
         self.javacap.get_frame_from_stream()
         self.javacap.teardown_stream()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.javacap.teardown_stream()
 
 
 class TestIme(unittest.TestCase):

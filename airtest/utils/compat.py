@@ -32,7 +32,7 @@ else:
 
 def script_dir_name(script_path):
     """get script dir for old & new cli api compatibility"""
-    script_path = decode_path(script_path)
+    script_path = os.path.normpath(decode_path(script_path))
     if script_path.endswith(EXT):
         path = script_path
         name = os.path.basename(script_path).replace(EXT, ".py")

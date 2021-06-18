@@ -11,6 +11,18 @@ class SafeSocket(object):
             self.sock = sock
         self.buf = b""
 
+    def __enter__(self):
+        try:
+            return self.sock.__enter__()
+        except AttributeError:
+            return self.sock
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            return self.sock.__exit__(exc_type, exc_val, exc_tb)
+        except AttributeError:
+            self.sock.close()
+
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
     # https://www.python.org/dev/peps/pep-3113/
     def connect(self, tuple_hp):
@@ -61,4 +73,6 @@ class SafeSocket(object):
         return ret
 
     def close(self):
-        self.sock.close()
+        if not self.sock._closed:
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()

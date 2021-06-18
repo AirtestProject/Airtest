@@ -11,8 +11,10 @@ from airtest.core.android.constant import STFLIB
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.safesocket import SafeSocket
-from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
+from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, kill_proc
 from airtest.utils.threadsafe import threadsafe_generator
+from airtest.core.android.cap_methods.base_cap import BaseCap
+from airtest import aircv
 
 
 LOGGING = get_logger(__name__)
@@ -29,7 +31,7 @@ def retry_when_socket_error(func):
     return wrapper
 
 
-class Minicap(object):
+class Minicap(BaseCap):
     """super fast android screenshot method from stf minicap.
 
     reference https://github.com/openstf/minicap
@@ -39,20 +41,24 @@ class Minicap(object):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, ori_function=None, display_id=None):
+    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
         """
-        self.adb = adb
+        super(Minicap, self).__init__(adb=adb)
         self.projection = projection
         self.display_id = display_id
-        self.ori_function = ori_function if callable(ori_function) else self.get_display_info
+        self.ori_function = self.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
         self._stream_rotation = None
         self._update_rotation_event = threading.Event()
+        if rotation_watcher:
+            # Minicap needs to be reconnected when switching between landscape and portrait
+            # minicap需要在横竖屏转换时，重新连接
+            rotation_watcher.reg_callback(lambda x: self.update_rotation(x * 90))
 
     @ready_method
     def install_or_upgrade(self):
@@ -160,19 +166,15 @@ class Minicap(object):
         display_info = json.loads(display_info)
         display_info["orientation"] = display_info["rotation"] / 90
         # 针对调整过手机分辨率的情况
+        # adb shell dumpsys window displays | find "init="
         actual = self.adb.shell("dumpsys window displays")
-        arr = re.findall(r'cur=(\d+)x(\d+)', actual)
+        arr = re.findall(r'init=(\d+)x(\d+)', actual)
         if len(arr) > 0:
             display_info['physical_width'] = display_info['width']
             display_info['physical_height'] = display_info['height']
-            # 通过 adb shell dumpsys window displays | find "cur="
-            # 获取到的分辨率是实际分辨率，但是需要的是非实际的
-            if display_info["orientation"] in [1, 3]:
-                display_info['width'] = int(arr[0][1])
-                display_info['height'] = int(arr[0][0])
-            else:
-                display_info['width'] = int(arr[0][0])
-                display_info['height'] = int(arr[0][1])
+            # adb shell dumpsys window | grep -Eo 'init=[0-9]+x[0-9]+'  => init=width x height
+            display_info['width'] = int(arr[0][0])
+            display_info['height'] = int(arr[0][1])
         return display_info
 
     @on_method_ready('install_or_upgrade')
@@ -300,9 +302,8 @@ class Minicap(object):
         LOGGING.debug("minicap stream ends")
         s.close()
         nbsp.kill()
-        proc.kill()
+        kill_proc(proc)
         self.adb.remove_forward("tcp:%s" % localport)
-        self.adb.close_proc_pipe(proc)
 
     def _setup_stream_server(self, lazy=False):
         """
@@ -329,10 +330,11 @@ class Minicap(object):
                 "%s -n '%s' -P %dx%d@%dx%d/%d %s 2>&1" %
                 tuple([self.CMD, deviceport] + list(params) + [other_opt]),
             )
-        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server")
+        nbsp = NonBlockingStreamReader(proc.stdout, print_output=True, name="minicap_server", auto_kill=True)
         while True:
             line = nbsp.readline(timeout=5.0)
             if line is None:
+                kill_proc(proc)
                 raise RuntimeError("minicap server setup timeout")
             if b"Server start" in line:
                 break
@@ -340,9 +342,10 @@ class Minicap(object):
         if proc.poll() is not None:
             # minicap server setup error, may be already setup by others
             # subprocess exit immediately
+            kill_proc(proc)
             raise RuntimeError("minicap server quit immediately")
 
-        reg_cleanup(proc.kill)
+        reg_cleanup(kill_proc, proc)
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
@@ -362,6 +365,29 @@ class Minicap(object):
         if self.frame_gen is None:
             self.frame_gen = self.get_stream()
         return six.next(self.frame_gen)
+
+    def snapshot(self, ensure_orientation=True, projection=None):
+        """
+
+        Args:
+            ensure_orientation: True or False whether to keep the orientation same as display
+            projection: the size of the desired projection, (width, height)
+
+        Returns:
+
+        """
+        if projection:
+            # minicap模式在单张截图时，可以传入projection参数来强制指定图片大小，如手机分辨率(width, height)
+            screen = self.get_frame(projection=projection)
+            try:
+                screen = aircv.utils.string_2_img(screen)
+            except Exception:
+                # may be black/locked screen or other reason, print exc for debugging
+                traceback.print_exc()
+                return None
+            return screen
+        else:
+            return super(Minicap, self).snapshot()
 
     def update_rotation(self, rotation):
         """

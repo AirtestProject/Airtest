@@ -824,9 +824,7 @@ class ADB(object):
             None
         """
         for local in self._forward_local_using:
-            self.start_cmd(["forward", "--remove", local])
-
-        self._forward_local_using = []
+            self.remove_forward(local)
 
     @property
     def line_breaker(self):
@@ -869,6 +867,15 @@ class ADB(object):
 
         Returns:
             device screen properties
+            e.g {
+                'width': 1440,
+                'height': 2960,
+                'density': 4.0,
+                'orientation': 3,
+                'rotation': 270,
+                'max_x': 4095,
+                'max_y': 4095
+            }
 
         """
         display_info = self.getPhysicalDisplayInfo()
