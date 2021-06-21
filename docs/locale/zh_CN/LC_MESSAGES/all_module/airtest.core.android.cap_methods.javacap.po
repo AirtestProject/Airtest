@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../all_module/airtest.core.android.cap_methods.javacap.rst:2
+msgid "airtest.core.android.cap\\_methods.javacap module"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap:1 of
+msgid ""
+"基类：:class:`airtest.core.android.yosemite.Yosemite`, "
+":class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap:1 of
+msgid ""
+"This is another screencap class, it is slower in performance than "
+"minicap, but it provides the better compatibility"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frames:1 of
+msgid "Get the screen frames"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frame_from_stream
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frames
+#: airtest.core.android.cap_methods.javacap.Javacap.teardown_stream of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frames:3
+#: airtest.core.android.cap_methods.javacap.Javacap.teardown_stream:3 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frame_from_stream:1 of
+msgid "Get frame from the stream"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.get_frame_from_stream:3 of
+msgid "frame"
+msgstr ""
+
+#: airtest.core.android.cap_methods.javacap.Javacap.teardown_stream:1 of
+msgid "End stream"
+msgstr ""
+
+#~ msgid ""
+#~ "Bases: :class:`airtest.core.android.yosemite.Yosemite`, "
+#~ ":class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+

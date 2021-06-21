@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,8 +21,26 @@ msgstr ""
 msgid "airtest.core.ios.ios module"
 msgstr ""
 
+#: airtest.core.ios.ios.decorator_retry_session:1 of
+msgid ""
+"When the operation fails due to session failure, try to re-acquire the "
+"session, retry at most 3 times"
+msgstr ""
+
+#: airtest.core.ios.ios.decorator_retry_session:4 of
+msgid "当因为session失效而操作失败时，尝试重新获取session，最多重试3次"
+msgstr ""
+
+#: airtest.core.ios.ios.decorator_retry_for_class:1 of
+msgid "Add decorators to all methods in the class"
+msgstr ""
+
+#: airtest.core.ios.ios.decorator_retry_for_class:3 of
+msgid "为class里的所有method添加装饰器 ``decorator_retry_session``"
+msgstr ""
+
 #: airtest.core.ios.ios.IOS:1 of
-msgid "Bases: :class:`airtest.core.device.Device`"
+msgid "基类：:class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS:1 of
@@ -45,14 +63,80 @@ msgstr ""
 msgid "``iproxy $port 8100 $udid``"
 msgstr ""
 
-#: airtest.core.ios.ios.IOS.get_render_resolution:1 of
-msgid "Return render resolution after rotation"
+#: airtest.core.ios.ios.IOS.is_pad:1 of
+msgid ""
+"Determine whether it is an ipad(or 6P/7P/8P), if it is, in the case of "
+"horizontal screen + desktop, the coordinates need to be switched to "
+"vertical screen coordinates to click correctly (WDA bug)"
 msgstr ""
 
-#: airtest.core.ios.ios.IOS.get_ip_address
+#: airtest.core.ios.ios.IOS.is_pad:4 of
+msgid "判断是否是ipad(或 6P/7P/8P)，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug） Returns:"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.device_info:1 of
+msgid "get the device info."
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_accept:5
+#: airtest.core.ios.ios.IOS.alert_buttons:4
+#: airtest.core.ios.ios.IOS.alert_click:7
+#: airtest.core.ios.ios.IOS.alert_dismiss:5
+#: airtest.core.ios.ios.IOS.alert_exists:5
+#: airtest.core.ios.ios.IOS.alert_wait:6 airtest.core.ios.ios.IOS.app_current:5
+#: airtest.core.ios.ios.IOS.device_info:4
+#: airtest.core.ios.ios.IOS.home_interface:8 airtest.core.ios.ios.IOS.lock:5
+#: airtest.core.ios.ios.IOS.unlock:5 of
+msgid "Might not work on all devices"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_accept airtest.core.ios.ios.IOS.alert_buttons
+#: airtest.core.ios.ios.IOS.alert_click airtest.core.ios.ios.IOS.alert_dismiss
+#: airtest.core.ios.ios.IOS.alert_exists airtest.core.ios.ios.IOS.alert_wait
+#: airtest.core.ios.ios.IOS.app_current airtest.core.ios.ios.IOS.app_state
+#: airtest.core.ios.ios.IOS.device_info airtest.core.ios.ios.IOS.get_ip_address
 #: airtest.core.ios.ios.IOS.get_render_resolution
-#: airtest.core.ios.ios.IOS.snapshot of
-msgid "Returns"
+#: airtest.core.ios.ios.IOS.home_interface airtest.core.ios.ios.IOS.is_locked
+#: airtest.core.ios.ios.IOS.lock airtest.core.ios.ios.IOS.snapshot
+#: airtest.core.ios.ios.IOS.start_app airtest.core.ios.ios.IOS.swipe
+#: airtest.core.ios.ios.IOS.text airtest.core.ios.ios.IOS.unlock of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.device_info:6 of
+msgid ""
+"dict for device info, eg. AttrDict({     'timeZone': 'GMT+0800',     "
+"'currentLocale': 'zh_CN',     'model': 'iPhone',     'uuid': "
+"'90CD6AB7-11C7-4E52-B2D3-61FA31D791EC',     'userInterfaceIdiom': 0,     "
+"'userInterfaceStyle': 'light',     'name': 'iPhone',     'isSimulator': "
+"False})"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.device_info:6 of
+msgid "dict for device info, eg. AttrDict({"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.device_info:8 of
+msgid ""
+"'timeZone': 'GMT+0800', 'currentLocale': 'zh_CN', 'model': 'iPhone', "
+"'uuid': '90CD6AB7-11C7-4E52-B2D3-61FA31D791EC', 'userInterfaceIdiom': 0, "
+"'userInterfaceStyle': 'light', 'name': 'iPhone', 'isSimulator': False})"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.window_size:1 of
+msgid "return window size namedtuple:"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.window_size:3 of
+msgid "Size(wide , hight)"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.orientation:1 of
+msgid "return device oritantation status in  LANDSACPE POR"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.get_render_resolution:1 of
+msgid "Return render resolution after rotation"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.get_render_resolution:3 of
@@ -63,8 +147,11 @@ msgstr ""
 msgid "take snapshot"
 msgstr ""
 
-#: airtest.core.ios.ios.IOS.snapshot of
-msgid "Parameters"
+#: airtest.core.ios.ios.IOS.app_state airtest.core.ios.ios.IOS.keyevent
+#: airtest.core.ios.ios.IOS.snapshot airtest.core.ios.ios.IOS.start_app
+#: airtest.core.ios.ios.IOS.stop_app airtest.core.ios.ios.IOS.swipe
+#: airtest.core.ios.ios.IOS.touch of
+msgid "参数"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.snapshot:3 of
@@ -83,8 +170,65 @@ msgstr ""
 msgid "display the screenshot"
 msgstr ""
 
+#: airtest.core.ios.ios.IOS.touch:1 of
+msgid "coordinates (x, y), can be float(percent) or int"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.touch:2 of
+msgid "tap_hold duration"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.touch:5 of
+msgid "Returns: None"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:13 airtest.core.ios.ios.IOS.start_app:6
+#: airtest.core.ios.ios.IOS.swipe:9 airtest.core.ios.ios.IOS.text:8
+#: airtest.core.ios.ios.IOS.touch:8 of
+msgid "实际案例"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.swipe:1 of
+msgid "start point"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.swipe:2 of
+msgid "end point"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.swipe:3 of
+msgid "start coordinate press duration (seconds), default is 0"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_accept:7
+#: airtest.core.ios.ios.IOS.alert_click:9
+#: airtest.core.ios.ios.IOS.alert_dismiss:7
+#: airtest.core.ios.ios.IOS.alert_wait:8 airtest.core.ios.ios.IOS.lock:7
+#: airtest.core.ios.ios.IOS.start_app:3 airtest.core.ios.ios.IOS.swipe:6
+#: airtest.core.ios.ios.IOS.text:5 airtest.core.ios.ios.IOS.unlock:7 of
+msgid "None"
+msgstr ""
+
 #: airtest.core.ios.ios.IOS.keyevent:1 of
-msgid "just use as home event"
+msgid "Perform keyevent on the device"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.keyevent:3 of
+msgid "home/volumeUp/volumeDown"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.keyevent:6 airtest.core.ios.ios.IOS.stop_app:3 of
+msgid "Returns:"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.press:1 of
+msgid "some keys in [\"home\", \"volumeUp\", \"volumeDown\"] can be pressed"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.text:1 of
+msgid ""
+"Input text on the device :param text: text to input :param enter: True if"
+" you need to enter a newline at the end"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.install_app:1 of
@@ -93,6 +237,69 @@ msgid ""
 "\"{\"desiredCapabilities\":{\"bundleId\":\"com.apple.mobilesafari\", "
 "\"app\":\"[host_path]/magicapp.app\"}}\"         $DEVICE_URL/session "
 "https://github.com/facebook/WebDriverAgent/wiki/Queries"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.start_app:1 airtest.core.ios.ios.IOS.stop_app:1 of
+msgid "the app bundle id, e.g ``com.apple.mobilesafari``"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:3 of
+msgid ""
+"{     \"value\": 4,     \"sessionId\": \"0363BDC5-4335-47ED-A54E-"
+"F7CCB65C6A65\" }  value 1(not running) 2(running in background) 3(running"
+" in foreground)? 4(running)"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:6 of
+msgid "{"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:6 of
+msgid "\"value\": 4, \"sessionId\": \"0363BDC5-4335-47ED-A54E-F7CCB65C6A65\""
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:8 of
+msgid "}"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_state:10 of
+msgid ""
+"value 1(not running) 2(running in background) 3(running in foreground)? "
+"4(running)"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_current:1 of
+msgid "get the app current"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_accept:4
+#: airtest.core.ios.ios.IOS.alert_click:6
+#: airtest.core.ios.ios.IOS.alert_dismiss:4
+#: airtest.core.ios.ios.IOS.alert_exists:4
+#: airtest.core.ios.ios.IOS.alert_wait:5 airtest.core.ios.ios.IOS.app_current:4
+#: airtest.core.ios.ios.IOS.home_interface:7
+#: airtest.core.ios.ios.IOS.is_locked:4 airtest.core.ios.ios.IOS.lock:4
+#: airtest.core.ios.ios.IOS.unlock:4 of
+msgid "Notes"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_current:7 of
+msgid ""
+"{\"pid\": 1281,  \"name\": \"\",  \"bundleId\": "
+"\"com.netease.cloudmusic\"}"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_current:10 of
+msgid "{\"pid\": 1281,"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.app_current:10 of
+msgid "\"name\": \"\", \"bundleId\": \"com.netease.cloudmusic\"}"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_buttons airtest.core.ios.ios.IOS.app_current
+#: of
+msgid "返回类型"
 msgstr ""
 
 #: airtest.core.ios.ios.IOS.get_ip_address:1 of
@@ -105,6 +312,74 @@ msgstr ""
 
 #: airtest.core.ios.ios.IOS.device_status:1 of
 msgid "show status return by webDriverAgent Return dicts of infos"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.is_locked:1 of
+msgid "Return True or False whether the device is locked or not"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.is_locked:5 of
+msgid "Might not work on some devices"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_exists:7
+#: airtest.core.ios.ios.IOS.home_interface:10
+#: airtest.core.ios.ios.IOS.is_locked:7 of
+msgid "True or False"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.unlock:1 of
+msgid "Unlock the device, unlock screen, double press home"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.lock:1 of
+msgid "lock the device, lock screen"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_accept:1 of
+msgid "Alert accept-Actually do click first alert button"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_dismiss:1 of
+msgid "Alert dissmiss-Actually do click second alert button"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_wait:1 of
+msgid ""
+"if alert apper in time_counter second it will return True,else return "
+"False (default 20.0) time_counter default is 2 seconds"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_buttons:1 of
+msgid "get alert buttons text. .. rubric:: Notes"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_buttons:6 of
+msgid "(\"设置\", \"好\")"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_exists:1 of
+msgid "get True for alert exists or False."
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_click:1 of
+msgid "when Arg type is list, click the first match, raise ValueError if no match"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.alert_click:3 of
+msgid "eg. [\"设置\", \"信任\", \"安装\"]"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.home_interface:1 of
+msgid "get True for the device status is on home interface."
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.home_interface:4 of
+msgid "Reason:"
+msgstr ""
+
+#: airtest.core.ios.ios.IOS.home_interface:4 of
+msgid "some devices can Horizontal screen on the home interface"
 msgstr ""
 
 #~ msgid "Bases: :class:`airtest.core.device.Device`"
@@ -155,5 +430,14 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "参数"
+#~ msgstr ""
+
+#~ msgid "just use as home event"
+#~ msgstr ""
+
+#~ msgid "Examples"
+#~ msgstr ""
+
+#~ msgid "Return type"
 #~ msgstr ""
 

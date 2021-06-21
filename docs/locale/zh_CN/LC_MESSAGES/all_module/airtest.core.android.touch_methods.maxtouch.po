@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest.core.android.touch\\_methods.maxtouch module"
 msgstr ""
 
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch:1 of
-msgid "Bases: :class:`airtest.core.android.touch_methods.base_touch.BaseTouch`"
+msgid "基类：:class:`airtest.core.android.touch_methods.base_touch.BaseTouch`"
 msgstr ""
 
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.install:1 of
@@ -34,7 +34,7 @@ msgstr ""
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.setup_server
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.uninstall of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.install:3
@@ -64,7 +64,7 @@ msgid "Normalized coordinates (x, y)"
 msgstr ""
 
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.touch_methods.maxtouch.Maxtouch.transform_xy:3 of

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,7 @@ msgid "Save the picture and compress"
 msgstr ""
 
 #: airtest.aircv.utils.compress_image of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.aircv.utils.compress_image:3 of
@@ -64,7 +64,7 @@ msgid "the maximum size of the picture, e.g 1200"
 msgstr ""
 
 #: airtest.aircv.utils.compress_image of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #~ msgid "Format the result: 定义图像识别结果格式"

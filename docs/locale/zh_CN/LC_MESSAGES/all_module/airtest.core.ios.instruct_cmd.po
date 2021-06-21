@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,23 +22,24 @@ msgid "airtest.core.ios.instruct\\_cmd module"
 msgstr ""
 
 #: airtest.core.ios.instruct_cmd.InstructHelper:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.ios.instruct_cmd.InstructHelper:1 of
 msgid "ForwardHelper class or help run other Instruction"
 msgstr ""
 
+#: airtest.core.ios.instruct_cmd.InstructHelper.usb_device:1 of
+msgid ""
+"Whether the current iOS uses the local USB interface, if so, return the "
+"wda.usbmux.Device object 当前iOS是否使用了本地USB接口，如果是，返回wda.usbmux.Device对象 "
+"Returns: wda.usbmux.Device or None"
+msgstr ""
+
 #: airtest.core.ios.instruct_cmd.InstructHelper.do_proxy:1 of
-msgid "Start do proxy of ios device and self device"
-msgstr ""
-
-#: airtest.core.ios.instruct_cmd.InstructHelper.do_proxy of
-msgid "Returns"
-msgstr ""
-
-#: airtest.core.ios.instruct_cmd.InstructHelper.do_proxy:3 of
-msgid "None"
+msgid ""
+"Start do proxy of ios device and self device "
+"目前只支持本地USB连接的手机进行端口转发，远程手机暂时不支持 :returns: None"
 msgstr ""
 
 #~ msgid "基类：:class:`object`"
@@ -51,5 +52,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Start do proxy of ios device and self device"
+#~ msgstr ""
+
+#~ msgid "None"
 #~ msgstr ""
 
