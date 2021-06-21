@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Define all BaseError Classes used in aircv."
 msgstr ""
 
 #: airtest.aircv.error.BaseError:1 of
-msgid "Bases: :class:`Exception`"
+msgid "基类：:class:`Exception`"
 msgstr ""
 
 #: airtest.aircv.error.BaseError:1 of
@@ -45,7 +45,7 @@ msgstr ""
 #: airtest.aircv.error.NoSiftMatchPointError:1
 #: airtest.aircv.error.SiftResultCheckError:1
 #: airtest.aircv.error.TemplateInputError:1 of
-msgid "Bases: :class:`airtest.aircv.error.BaseError`"
+msgid "基类：:class:`airtest.aircv.error.BaseError`"
 msgstr ""
 
 #: airtest.aircv.error.FileNotExistError:1 of

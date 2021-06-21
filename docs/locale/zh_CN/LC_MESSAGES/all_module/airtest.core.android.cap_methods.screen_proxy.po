@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../all_module/airtest.core.android.cap_methods.screen_proxy.rst:2
+msgid "airtest.core.android.cap\\_methods.screen\\_proxy module"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy:1 of
+msgid "基类：:class:`object`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy:1 of
+msgid "Perform screen operation according to the specified method"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.check_frame:1 of
+msgid "Test whether a frame of image can be obtained correctly"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.check_frame:3 of
+msgid "测试能否正确获取一帧图像"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.check_frame of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.check_frame:5 of
+msgid ":py:mod:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.check_frame:7 of
+msgid "Returns:"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:1 of
+msgid ""
+"In order of priority, try to initialize all registered screenshot "
+"methods, select an available method to return"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:4 of
+msgid "按优先顺序，尝试初始化注册过的所有屏幕截图方法，选择一个可用方法返回"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:6 of
+msgid "Custom method 自定义方法 > MINICAP > JAVACAP > ADBCAP"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:8 of
+msgid ":py:mod:`airtest.core.android.adb.ADB`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:9 of
+msgid ""
+"String such as \"MINICAP\", or "
+":py:mod:`airtest.core.android.cap_methods.minicap.Minicap` object"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:11 of
+msgid "Returns: ScreenProxy object"
+msgstr ""
+
+#: airtest.core.android.cap_methods.screen_proxy.ScreenProxy.auto_setup:14 of
+msgid "实际案例"
+msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Examples"
+#~ msgstr ""
+

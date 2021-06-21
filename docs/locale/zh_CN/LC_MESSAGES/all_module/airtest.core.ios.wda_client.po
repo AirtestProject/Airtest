@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:12+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,378 +19,6 @@ msgstr ""
 
 #: ../../all_module/airtest.core.ios.wda_client.rst:2
 msgid "airtest.core.ios.wda\\_client module"
-msgstr ""
-
-#: airtest.core.ios.wda_client.convert:1 of
-msgid "Convert dict to namedtuple"
-msgstr ""
-
-#: airtest.core.ios.wda_client.urljoin:1 of
-msgid ""
-"The default urlparse.urljoin behavior look strange Standard "
-"urlparse.urljoin('http://a.com/foo', '/bar') Expect: http://a.com/foo/bar"
-" Actually: http://a.com/bar"
-msgstr ""
-
-#: airtest.core.ios.wda_client.urljoin:6 of
-msgid "This function fix that."
-msgstr ""
-
-#: airtest.core.ios.wda_client.httpdo:1 of
-msgid "Do HTTP Request"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Alert:1 airtest.core.ios.wda_client.Client:1
-#: airtest.core.ios.wda_client.Element:1
-#: airtest.core.ios.wda_client.HTTPClient:1 airtest.core.ios.wda_client.Rect:1
-#: airtest.core.ios.wda_client.Selector:1 airtest.core.ios.wda_client.Session:1
-#: of
-msgid "Bases: :class:`object`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.WDAElementNotDisappearError:1
-#: airtest.core.ios.wda_client.WDAElementNotFoundError:1
-#: airtest.core.ios.wda_client.WDAError:1 of
-msgid "Bases: :class:`Exception`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.home:1 of
-msgid "Press home button"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.healthcheck:1 of
-msgid "Hit healthcheck"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Alert.click
-#: airtest.core.ios.wda_client.Client.screenshot
-#: airtest.core.ios.wda_client.Client.session
-#: airtest.core.ios.wda_client.Client.source
-#: airtest.core.ios.wda_client.Element.pinch
-#: airtest.core.ios.wda_client.Element.scroll
-#: airtest.core.ios.wda_client.Element.tap_hold
-#: airtest.core.ios.wda_client.Selector.click_exists
-#: airtest.core.ios.wda_client.Selector.get
-#: airtest.core.ios.wda_client.Selector.wait_gone
-#: airtest.core.ios.wda_client.Session.set_alert_callback
-#: airtest.core.ios.wda_client.Session.swipe
-#: airtest.core.ios.wda_client.Session.tap_hold of
-msgid "Parameters"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.source:1 of
-msgid "only 'xml' and 'json' source types are supported"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.source:3 of
-msgid "when set to true, format is always 'json'"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:1 of
-msgid "the app bundle id"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:3 of
-msgid "['-u', 'https://www.google.com/ncr']"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:5 of
-msgid "{\"KEY\": \"VAL\"}"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:8 of
-msgid "WDA Return json like"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:20
-#: airtest.core.ios.wda_client.Client.session:34 of
-msgid "{"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:17 of
-msgid "\"value\": {"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:12 of
-msgid ""
-"\"sessionId\": \"69E6FDBA-8D59-4349-B7DE-A9CA41A97814\", "
-"\"capabilities\": {"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:14 of
-msgid ""
-"\"device\": \"iphone\", \"browserName\": \"部落冲突\", \"sdkVersion\": "
-"\"9.3.2\", \"CFBundleIdentifier\": \"com.supercell.magic\""
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:18
-#: airtest.core.ios.wda_client.Client.session:22
-#: airtest.core.ios.wda_client.Client.session:36 of
-msgid "}"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:19 of
-msgid "}, \"sessionId\": \"69E6FDBA-8D59-4349-B7DE-A9CA41A97814\", \"status\": 0"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:24 of
-msgid "To create a new session, send json data like"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:33 of
-msgid "\"desiredCapabilities\": {"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:28 of
-msgid ""
-"\"bundleId\": \"your-bundle-id\", \"app\": \"your-app-path\" "
-"\"shouldUseCompactResponses\": (bool), "
-"\"shouldUseTestManagerForVisibilityDetection\": (bool), "
-"\"maxTypingFrequency\": (integer), \"arguments\": (list(str)), "
-"\"environment\": (dict: str->str)"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.session:35 of
-msgid "},"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot:1 of
-msgid "Screenshot with PNG format"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot:3 of
-msgid "optional, save file name"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot
-#: airtest.core.ios.wda_client.Selector.click_exists
-#: airtest.core.ios.wda_client.Selector.find_elements
-#: airtest.core.ios.wda_client.Selector.get
-#: airtest.core.ios.wda_client.Selector.wait_gone
-#: airtest.core.ios.wda_client.Session.window_size of
-msgid "Returns"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot:6 of
-msgid "png raw data"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot
-#: airtest.core.ios.wda_client.Element.scroll
-#: airtest.core.ios.wda_client.Selector.get
-#: airtest.core.ios.wda_client.Selector.wait
-#: airtest.core.ios.wda_client.Selector.wait_gone
-#: airtest.core.ios.wda_client.Session.open_url of
-msgid "raises"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Client.screenshot:8
-#: airtest.core.ios.wda_client.Session.open_url:6 of
-msgid ":exc:`WDAError`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.bundle_id:1 of
-msgid "the session matched bundle id"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.set_alert_callback:1 of
-msgid "called when alert popup"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.set_alert_callback:4 of
-msgid "Example of callback:"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.set_alert_callback:6 of
-msgid "def callback(session):"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.set_alert_callback:7 of
-msgid "session.alert.accept()"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.open_url:1 of
-msgid ""
-"TODO: Never successed using before. "
-"https://github.com/facebook/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBSessionCommands.m#L43"
-" :param url: url :type url: str"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.deactivate:1 of
-msgid ""
-"Put app into background and than put it back :param - duration: "
-"deactivate time, seconds :type - duration: float"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.tap_hold:1
-#: airtest.core.ios.wda_client.Session.tap_hold:1 of
-msgid "Tap and hold for a moment"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.tap_hold:3 of
-msgid "position"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.tap_hold:3
-#: airtest.core.ios.wda_client.Session.tap_hold:5 of
-msgid "seconds of hold time"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.tap_hold:8 of
-msgid ""
-"[[FBRoute POST:@\"/wda/touchAndHold\"] respondWithTarget:self "
-"action:@selector(handleTouchAndHoldCoordinate:)],"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.swipe:1 of
-msgid "start coordinate press duration (seconds)"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.swipe:4 of
-msgid ""
-"[[FBRoute POST:@\"/wda/dragfromtoforduration\"] respondWithTarget:self "
-"action:@selector(handleDragCoordinate:)],"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.orientation:1 of
-msgid "Return string One of <PORTRAIT | LANDSCAPE>"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.window_size:1 of
-msgid "eg     Size(width=320, height=568)"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.window_size:3 of
-msgid "eg"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.window_size:4 of
-msgid "Size(width=320, height=568)"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.click_exists
-#: airtest.core.ios.wda_client.Selector.find_elements
-#: airtest.core.ios.wda_client.Selector.get
-#: airtest.core.ios.wda_client.Selector.wait_gone
-#: airtest.core.ios.wda_client.Session.window_size of
-msgid "Return type"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.send_keys:1 of
-msgid "send keys, yet I know not, todo function"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Session.keyboard_dismiss:1 of
-msgid "Not working for now"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Alert.click:1 of
-msgid "the name of the button"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.find_elements:1 of
-msgid "all the elements"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.get:1 of
-msgid "timeout for query element, unit seconds Default 10s"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.get:4 of
-msgid "whether to raise error if element not found"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.get:7 of
-msgid "UI Element"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.get:10 of
-msgid "WDAElementNotFoundError if raise_error is True else None"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.set_timeout:1 of
-msgid "Set element wait timeout"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.click_exists:1 of
-msgid "Wait element and perform click"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.click_exists:3 of
-msgid "timeout for wait"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.click_exists:6 of
-msgid "if successfully clicked"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait:1 of
-msgid ""
-"alias of get :param timeout: timeout seconds :type timeout: float :param "
-"raise_error: default true, whether to raise error if element not found "
-":type raise_error: bool"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait:7 of
-msgid ":exc:`WDAElementNotFoundError`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait_gone:1 of
-msgid "default timeout"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait_gone:3 of
-msgid "return bool or raise error"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait_gone:6 of
-msgid "works when raise_error is False"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Selector.wait_gone:9 of
-msgid ":exc:`WDAElementNotDisappearError`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.click:1 of
-msgid "Alias of tap"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.tap_hold:6 of
-msgid ""
-"[[FBRoute POST:@\"/wda/element/:uuid/touchAndHold\"] "
-"respondWithTarget:self action:@selector(handleTouchAndHold:)],"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.scroll:1 of
-msgid "one of \"visible\", \"up\", \"down\", \"left\", \"right\""
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.scroll:3 of
-msgid "swipe distance, only works when direction is not \"visible\""
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.scroll:6 of
-msgid ":exc:`ValueError`"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.scroll:8 of
-msgid "distance=1.0 means, element (width or height) multiply 1.0"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.pinch:1 of
-msgid "scale must > 0"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.pinch:3 of
-msgid "velocity must be less than zero when scale is less than 1"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.pinch:7 of
-msgid "Example"
-msgstr ""
-
-#: airtest.core.ios.wda_client.Element.pinch:8 of
-msgid "pinchIn  -> scale:0.5, velocity: -1 pinchOut -> scale:2.0, velocity: 1"
 msgstr ""
 
 #~ msgid "基类：:class:`object`"
@@ -433,5 +61,254 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Example"
+#~ msgstr ""
+
+#~ msgid "Convert dict to namedtuple"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The default urlparse.urljoin behavior look "
+#~ "strange Standard urlparse.urljoin('http://a.com/foo', "
+#~ "'/bar') Expect: http://a.com/foo/bar Actually: "
+#~ "http://a.com/bar"
+#~ msgstr ""
+
+#~ msgid "This function fix that."
+#~ msgstr ""
+
+#~ msgid "Do HTTP Request"
+#~ msgstr ""
+
+#~ msgid "Press home button"
+#~ msgstr ""
+
+#~ msgid "Hit healthcheck"
+#~ msgstr ""
+
+#~ msgid "only 'xml' and 'json' source types are supported"
+#~ msgstr ""
+
+#~ msgid "when set to true, format is always 'json'"
+#~ msgstr ""
+
+#~ msgid "the app bundle id"
+#~ msgstr ""
+
+#~ msgid "['-u', 'https://www.google.com/ncr']"
+#~ msgstr ""
+
+#~ msgid "{\"KEY\": \"VAL\"}"
+#~ msgstr ""
+
+#~ msgid "WDA Return json like"
+#~ msgstr ""
+
+#~ msgid "{"
+#~ msgstr ""
+
+#~ msgid "\"value\": {"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\"sessionId\": \"69E6FDBA-8D59-4349-B7DE-"
+#~ "A9CA41A97814\", \"capabilities\": {"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\"device\": \"iphone\", \"browserName\": \"部落冲突\","
+#~ " \"sdkVersion\": \"9.3.2\", \"CFBundleIdentifier\": "
+#~ "\"com.supercell.magic\""
+#~ msgstr ""
+
+#~ msgid "}"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "}, \"sessionId\": \"69E6FDBA-8D59-4349-B7DE-"
+#~ "A9CA41A97814\", \"status\": 0"
+#~ msgstr ""
+
+#~ msgid "To create a new session, send json data like"
+#~ msgstr ""
+
+#~ msgid "\"desiredCapabilities\": {"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\"bundleId\": \"your-bundle-id\", \"app\": "
+#~ "\"your-app-path\" \"shouldUseCompactResponses\": "
+#~ "(bool), \"shouldUseTestManagerForVisibilityDetection\": "
+#~ "(bool), \"maxTypingFrequency\": (integer), "
+#~ "\"arguments\": (list(str)), \"environment\": (dict:"
+#~ " str->str)"
+#~ msgstr ""
+
+#~ msgid "},"
+#~ msgstr ""
+
+#~ msgid "Screenshot with PNG format"
+#~ msgstr ""
+
+#~ msgid "optional, save file name"
+#~ msgstr ""
+
+#~ msgid "png raw data"
+#~ msgstr ""
+
+#~ msgid "raises"
+#~ msgstr ""
+
+#~ msgid ":exc:`WDAError`"
+#~ msgstr ""
+
+#~ msgid "the session matched bundle id"
+#~ msgstr ""
+
+#~ msgid "called when alert popup"
+#~ msgstr ""
+
+#~ msgid "Example of callback:"
+#~ msgstr ""
+
+#~ msgid "def callback(session):"
+#~ msgstr ""
+
+#~ msgid "session.alert.accept()"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "TODO: Never successed using before. "
+#~ "https://github.com/facebook/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBSessionCommands.m#L43"
+#~ " :param url: url :type url: str"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Put app into background and than "
+#~ "put it back :param - duration: "
+#~ "deactivate time, seconds :type - "
+#~ "duration: float"
+#~ msgstr ""
+
+#~ msgid "Tap and hold for a moment"
+#~ msgstr ""
+
+#~ msgid "position"
+#~ msgstr ""
+
+#~ msgid "seconds of hold time"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[[FBRoute POST:@\"/wda/touchAndHold\"] "
+#~ "respondWithTarget:self "
+#~ "action:@selector(handleTouchAndHoldCoordinate:)],"
+#~ msgstr ""
+
+#~ msgid "start coordinate press duration (seconds)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[[FBRoute POST:@\"/wda/dragfromtoforduration\"] "
+#~ "respondWithTarget:self action:@selector(handleDragCoordinate:)],"
+#~ msgstr ""
+
+#~ msgid "Return string One of <PORTRAIT | LANDSCAPE>"
+#~ msgstr ""
+
+#~ msgid "eg     Size(width=320, height=568)"
+#~ msgstr ""
+
+#~ msgid "eg"
+#~ msgstr ""
+
+#~ msgid "Size(width=320, height=568)"
+#~ msgstr ""
+
+#~ msgid "send keys, yet I know not, todo function"
+#~ msgstr ""
+
+#~ msgid "Not working for now"
+#~ msgstr ""
+
+#~ msgid "the name of the button"
+#~ msgstr ""
+
+#~ msgid "all the elements"
+#~ msgstr ""
+
+#~ msgid "timeout for query element, unit seconds Default 10s"
+#~ msgstr ""
+
+#~ msgid "whether to raise error if element not found"
+#~ msgstr ""
+
+#~ msgid "UI Element"
+#~ msgstr ""
+
+#~ msgid "WDAElementNotFoundError if raise_error is True else None"
+#~ msgstr ""
+
+#~ msgid "Set element wait timeout"
+#~ msgstr ""
+
+#~ msgid "Wait element and perform click"
+#~ msgstr ""
+
+#~ msgid "timeout for wait"
+#~ msgstr ""
+
+#~ msgid "if successfully clicked"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "alias of get :param timeout: timeout "
+#~ "seconds :type timeout: float :param "
+#~ "raise_error: default true, whether to "
+#~ "raise error if element not found "
+#~ ":type raise_error: bool"
+#~ msgstr ""
+
+#~ msgid ":exc:`WDAElementNotFoundError`"
+#~ msgstr ""
+
+#~ msgid "default timeout"
+#~ msgstr ""
+
+#~ msgid "return bool or raise error"
+#~ msgstr ""
+
+#~ msgid "works when raise_error is False"
+#~ msgstr ""
+
+#~ msgid ":exc:`WDAElementNotDisappearError`"
+#~ msgstr ""
+
+#~ msgid "Alias of tap"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[[FBRoute POST:@\"/wda/element/:uuid/touchAndHold\"] "
+#~ "respondWithTarget:self action:@selector(handleTouchAndHold:)],"
+#~ msgstr ""
+
+#~ msgid "one of \"visible\", \"up\", \"down\", \"left\", \"right\""
+#~ msgstr ""
+
+#~ msgid "swipe distance, only works when direction is not \"visible\""
+#~ msgstr ""
+
+#~ msgid ":exc:`ValueError`"
+#~ msgstr ""
+
+#~ msgid "distance=1.0 means, element (width or height) multiply 1.0"
+#~ msgstr ""
+
+#~ msgid "scale must > 0"
+#~ msgstr ""
+
+#~ msgid "velocity must be less than zero when scale is less than 1"
+#~ msgstr ""
+
+#~ msgid "pinchIn  -> scale:0.5, velocity: -1 pinchOut -> scale:2.0, velocity: 1"
 #~ msgstr ""
 

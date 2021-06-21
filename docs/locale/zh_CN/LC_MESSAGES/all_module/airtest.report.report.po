@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.report.report.LogToHtml:1 of
@@ -56,7 +56,7 @@ msgstr ""
 
 #: airtest.report.report.LogToHtml.report
 #: airtest.report.report.LogToHtml.report_data of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.report.report.LogToHtml.report:4
@@ -71,7 +71,7 @@ msgstr ""
 
 #: airtest.report.report.LogToHtml.report
 #: airtest.report.report.LogToHtml.report_data of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.report.report.LogToHtml.report:1 of
@@ -143,5 +143,11 @@ msgstr ""
 #~ " file, default HTML_FILE :param "
 #~ "record_list: List of screen recording "
 #~ "files :return:"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+
+#~ msgid "Returns"
 #~ msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: 2020-12-09 19:29+0800\n"
 "Last-Translator: \n"
 "Language: en_GB\n"
@@ -41,7 +41,7 @@ msgstr "初始化设备，并设置为当前设备。"
 #: airtest.core.api.snapshot airtest.core.api.start_app
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.api.init_device:3 of
@@ -72,7 +72,7 @@ msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACA
 #: airtest.core.api.stop_app airtest.core.api.swipe airtest.core.api.text
 #: airtest.core.api.touch airtest.core.api.uninstall airtest.core.api.wait
 #: airtest.core.api.wake of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.api.connect_device:4 airtest.core.api.init_device:6 of
@@ -126,7 +126,7 @@ msgstr "uuid或已初始化的设备列表中的编号，从0开始"
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
 #: airtest.core.api.assert_not_equal airtest.core.api.assert_not_exists
 #: airtest.core.api.set_current airtest.core.api.swipe airtest.core.api.wait of
-msgid "Raises"
+msgid "引发"
 msgstr ""
 
 #: airtest.core.api.set_current:4 of
@@ -484,8 +484,8 @@ msgid "Documentation for ``pywinauto.keyboard``"
 msgstr ""
 
 #: airtest.core.api.keyevent:37 of
-msgid "``iOS``: Only supports HOME key::"
-msgstr "``iOS``: 只支持HOME键::"
+msgid "``iOS``: Only supports home/volumeUp/volumeDown::"
+msgstr ""
 
 #: airtest.core.api.text:1 of
 msgid "Input text on the target device. Text input widget must be active first."
@@ -656,10 +656,10 @@ msgstr "如果断言异常"
 #~ msgstr ""
 
 #~ msgid "Parameters"
-#~ msgstr "参数"
+#~ msgstr ""
 
 #~ msgid "Returns"
-#~ msgstr "返回值"
+#~ msgstr ""
 
 #~ msgid "Raises"
 #~ msgstr ""
@@ -736,4 +736,7 @@ msgstr "如果断言异常"
 
 #~ msgid "airtest\\.core\\.api module"
 #~ msgstr ""
+
+#~ msgid "``iOS``: Only supports HOME key::"
+#~ msgstr "``iOS``: 只支持HOME键::"
 

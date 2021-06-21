@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest.core.android.adb module"
 msgstr ""
 
 #: airtest.core.android.adb.ADB:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.android.adb.ADB:1 of
@@ -81,7 +81,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.uninstall_app
 #: airtest.core.android.adb.ADB.unlock airtest.core.android.adb.ADB.version
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.builtin_adb_path:3 of
@@ -156,7 +156,7 @@ msgstr ""
 #: airtest.core.android.adb.ADB.stop_app airtest.core.android.adb.ADB.swipe
 #: airtest.core.android.adb.ADB.touch
 #: airtest.core.android.adb.ADB.wait_for_device of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.cmd:3 airtest.core.android.adb.ADB.start_cmd:3
@@ -609,7 +609,6 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.adb.ADB.display_info:6
-#: airtest.core.android.adb.ADB.get_display_info:3
 #: airtest.core.android.adb.ADB.get_display_of_all_screen:3 of
 msgid "device screen properties"
 msgstr ""
@@ -618,6 +617,27 @@ msgstr ""
 msgid ""
 "Get information about device physical display (orientation, rotation and "
 "max values for x and y coordinates)"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_info:3 of
+msgid ""
+"device screen properties e.g {     'width': 1440,     'height': 2960,"
+"     'density': 4.0,     'orientation': 3,     'rotation': 270,     "
+"'max_x': 4095,     'max_y': 4095 }"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_info:3 of
+msgid "device screen properties e.g {"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_info:5 of
+msgid ""
+"'width': 1440, 'height': 2960, 'density': 4.0, 'orientation': 3, "
+"'rotation': 270, 'max_x': 4095, 'max_y': 4095"
+msgstr ""
+
+#: airtest.core.android.adb.ADB.get_display_info:12 of
+msgid "}"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.getMaxXY:1 of
@@ -671,7 +691,7 @@ msgid "(package_name, activity_name, pid)"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.get_top_activity of
-msgid "Return type"
+msgid "返回类型"
 msgstr ""
 
 #: airtest.core.android.adb.ADB.is_keyboard_shown:1 of
@@ -883,7 +903,8 @@ msgstr ""
 #: airtest.core.android.adb.ADB.get_display_of_all_screen:5 of
 msgid ""
 "None if adb command failed to run, otherwise return device screen "
-"properties"
+"properties(portrait mode) eg. (offset_x, offset_y, screen_width, "
+"screen_height)"
 msgstr ""
 
 #~ msgid "返回"
@@ -1056,5 +1077,10 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "if package is not found"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "None if adb command failed to run,"
+#~ " otherwise return device screen properties"
 #~ msgstr ""
 

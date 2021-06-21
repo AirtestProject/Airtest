@@ -1,0 +1,165 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../all_module/airtest.core.android.cap_methods.minicap.rst:2
+msgid "airtest.core.android.cap\\_methods.minicap module"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap:1 of
+msgid "基类：:class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap:1 of
+msgid "super fast android screenshot method from stf minicap."
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap:3 of
+msgid "reference https://github.com/openstf/minicap"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.install_or_upgrade:1 of
+msgid "Install or upgrade minicap"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_display_info
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame_from_stream
+#: airtest.core.android.cap_methods.minicap.Minicap.install
+#: airtest.core.android.cap_methods.minicap.Minicap.install_or_upgrade
+#: airtest.core.android.cap_methods.minicap.Minicap.teardown_stream
+#: airtest.core.android.cap_methods.minicap.Minicap.uninstall
+#: airtest.core.android.cap_methods.minicap.Minicap.update_rotation of
+msgid "返回"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.install:5
+#: airtest.core.android.cap_methods.minicap.Minicap.install_or_upgrade:3
+#: airtest.core.android.cap_methods.minicap.Minicap.teardown_stream:3
+#: airtest.core.android.cap_methods.minicap.Minicap.uninstall:3
+#: airtest.core.android.cap_methods.minicap.Minicap.update_rotation:5 of
+msgid "None"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.uninstall:1 of
+msgid "Uninstall minicap"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.install:1 of
+msgid "Install minicap"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.install:3 of
+msgid "Reference: https://github.com/openstf/minicap/blob/master/run.sh"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_display_info:1 of
+msgid "Get display info by minicap"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_display_info:3 of
+msgid ""
+"It might segfault, the preferred way is to get the information from adb "
+"commands"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_display_info:5 of
+msgid "display information"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:4 of
+msgid "Get the single frame from minicap -s, this method slower than `get_frames`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:2 of
+msgid "1. shell cmd 1. remove log info 1."
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:10 of
+msgid "Args:"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:10 of
+msgid ""
+"projection: screenshot projection, default is None which means using "
+"self.projection"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:12
+#: airtest.core.android.cap_methods.minicap.Minicap.get_stream:7
+#: airtest.core.android.cap_methods.minicap.Minicap.snapshot:4 of
+msgid "Returns:"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame:13 of
+msgid "jpg data"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_stream:1 of
+msgid ""
+"Get stream, it uses `adb forward`and socket communication. Use minicap "
+"``lazy``mode (provided by gzmaruijie) for long connections - returns one "
+"latest frame from the server"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_stream
+#: airtest.core.android.cap_methods.minicap.Minicap.snapshot
+#: airtest.core.android.cap_methods.minicap.Minicap.update_rotation of
+msgid "参数"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_stream:5 of
+msgid "True or False"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame_from_stream:1 of
+msgid "Get one frame from minicap stream"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.get_frame_from_stream:3 of
+msgid "frame"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.snapshot:1 of
+msgid "True or False whether to keep the orientation same as display"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.snapshot:2 of
+msgid "the size of the desired projection, (width, height)"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.update_rotation:1 of
+msgid "Update rotation and reset the backend stream generator"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.update_rotation:3 of
+msgid "rotation input"
+msgstr ""
+
+#: airtest.core.android.cap_methods.minicap.Minicap.teardown_stream:1 of
+msgid "End the stream"
+msgstr ""
+
+#~ msgid "Bases: :class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+#~ msgstr ""
+
+#~ msgid "Returns"
+#~ msgstr ""
+
+#~ msgid "Parameters"
+#~ msgstr ""
+

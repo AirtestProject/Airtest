@@ -6,6 +6,8 @@ airtest.core.android package
     :undoc-members:
     :show-inheritance:
 
+For the interface provided for the Android platform, please refer to: `airtest.core.android.Android class <airtest.core.android.android.html>`_
+
 Subpackages
 -----------
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Search for image template in the screen until timeout"
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.cv.loop_find:3 of
@@ -66,7 +66,7 @@ msgid ""
 msgstr ""
 
 #: airtest.core.cv.loop_find airtest.core.cv.try_log_screen of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.cv.loop_find:11 of
@@ -96,7 +96,7 @@ msgid "None"
 msgstr ""
 
 #: airtest.core.cv.Predictor:1 airtest.core.cv.Template:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.cv.Template:1 of
@@ -104,7 +104,8 @@ msgid ""
 "picture as touch/swipe/wait/exists target and extra info for cv match "
 "filename: pic filename target_pos: ret which pos in the pic record_pos: "
 "pos in screen when recording resolution: screen resolution when recording"
-" rgb: 识别结果是否使用rgb三通道进行校验."
+" rgb: 识别结果是否使用rgb三通道进行校验. scale_max: 多尺度模板匹配最大范围. scale_step: "
+"多尺度模板匹配搜索步长."
 msgstr ""
 
 #: airtest.core.cv.Predictor:1 of
@@ -182,5 +183,15 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "when image template is not found in screenshot"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "picture as touch/swipe/wait/exists target and"
+#~ " extra info for cv match filename:"
+#~ " pic filename target_pos: ret which "
+#~ "pos in the pic record_pos: pos in"
+#~ " screen when recording resolution: screen"
+#~ " resolution when recording rgb: "
+#~ "识别结果是否使用rgb三通道进行校验."
 #~ msgstr ""
 

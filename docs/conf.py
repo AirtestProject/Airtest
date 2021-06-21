@@ -57,6 +57,8 @@ win_mock_list = [
 for mod_name in mock_list + win_mock_list:
     sys.modules[mod_name] = mock.MagicMock()
 
+sys.modules["cv2"].__version__ = "3.2.0.7"
+
 
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.doctest',

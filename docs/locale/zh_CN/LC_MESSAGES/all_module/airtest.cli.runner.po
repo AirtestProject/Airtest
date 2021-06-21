@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "airtest.cli.runner module"
 msgstr ""
 
 #: airtest.cli.runner.AirtestCase:1 of
-msgid "Bases: :class:`unittest.case.TestCase`"
+msgid "基类：:class:`unittest.case.TestCase`"
 msgstr ""
 
 #: airtest.cli.runner.AirtestCase.setUpClass:1 of

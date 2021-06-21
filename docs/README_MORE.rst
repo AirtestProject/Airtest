@@ -221,6 +221,37 @@ Following APIs are fully supported:
 
 More APIs are available, some of which may be platform specific, please see `API reference`_ for more information.
 
+When using these general APIs, Airtest will automatically call the corresponding operations according to the current platform, such as the following code example:
+
+.. code:: python
+
+    from airtest.core.api import *  # import the general APIs such as touch/swipe/...
+
+    connect_device("Android:///")
+    touch((100, 100))
+
+    connect_device("Windows:///")
+    touch((100, 100))
+
+
+Airtest also provides some platform-specific APIs for each platform, which can be queried in the module API of each platform:
+
+- general APIs: `API reference`_
+- Android: `airtest.core.android.Android class`_
+- Windows: `airtest.core.win.Windows class`_
+- iOS: `airtest.core.ios.IOS class`_
+
+
+.. code:: python
+
+    >>> from airtest.core.api import *
+    >>> connect_device("Android:///")
+    >>> dev = device()  # get current device, which is an Android object
+    >>> print(type(dev))
+    <class 'airtest.core.android.android.Android'>
+    >>> dev.get_top_activity()  # use Android ADB to get the top activity
+    ('com.google.android.apps.nexuslauncher', '.NexusLauncherActivity', '2720')
+
 
 Make Assertion
 ...............
@@ -332,7 +363,10 @@ You can write some common used function in one ``.air`` script and import it fro
 .. _iOS-Tagent: https://github.com/AirtestProject/iOS-Tagent
 .. _make assertions: http://airtest.readthedocs.io/en/latest/README_MORE.html#make-assertion
 .. _Airtest Python API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
-.. _API reference: http://airtest.readthedocs.io/en/latest/index.html#main-api
+.. _API reference: http://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html
 .. _API code: ./airtest/core/api.py
 .. _connect_device: https://airtest.readthedocs.io/en/latest/all_module/airtest.core.api.html#airtest.core.api.connect_device
 .. _AirLab: https://airlab.163.com
+.. _airtest.core.android.Android class: ./all_module/airtest.core.android.android.html
+.. _airtest.core.win.Windows class: ./all_module/airtest.core.win.win.html#airtest.core.win.win.Windows
+.. _airtest.core.ios.IOS class: ./all_module/airtest.core.ios.ios.html#airtest.core.ios.ios.IOS

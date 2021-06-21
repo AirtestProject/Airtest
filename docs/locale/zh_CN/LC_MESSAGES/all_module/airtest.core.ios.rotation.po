@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgstr ""
 
 #: airtest.core.ios.rotation.RotationWatcher:1
 #: airtest.core.ios.rotation.XYTransformer:1 of
-msgid "Bases: :class:`object`"
+msgid "基类：:class:`object`"
 msgstr ""
 
 #: airtest.core.ios.rotation.RotationWatcher:1 of
@@ -37,7 +37,7 @@ msgstr ""
 #: airtest.core.ios.rotation.RotationWatcher.start
 #: airtest.core.ios.rotation.XYTransformer.ori_2_up
 #: airtest.core.ios.rotation.XYTransformer.up_2_ori of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.ios.rotation.RotationWatcher.start:3 of
@@ -47,7 +47,7 @@ msgstr ""
 #: airtest.core.ios.rotation.RotationWatcher.reg_callback
 #: airtest.core.ios.rotation.XYTransformer.ori_2_up
 #: airtest.core.ios.rotation.XYTransformer.up_2_ori of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
 
 #: airtest.core.ios.rotation.RotationWatcher.reg_callback:3 of
@@ -69,7 +69,7 @@ msgstr ""
 
 #: airtest.core.ios.rotation.XYTransformer.ori_2_up:4
 #: airtest.core.ios.rotation.XYTransformer.up_2_ori:4 of
-msgid "screen width and height"
+msgid "current screen width and height"
 msgstr ""
 
 #: airtest.core.ios.rotation.XYTransformer.ori_2_up:5
