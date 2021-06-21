@@ -6,6 +6,8 @@ airtest.core.ios package
     :undoc-members:
     :show-inheritance:
 
+For the interface provided for the iOS platform, please refer to: `airtest.core.ios.IOS class <airtest.core.ios.ios.html#airtest.core.ios.ios.IOS>`_
+
 Submodules
 ----------
 

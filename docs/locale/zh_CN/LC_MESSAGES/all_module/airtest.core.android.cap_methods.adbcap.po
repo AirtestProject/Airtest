@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../all_module/airtest.core.android.cap_methods.adbcap.rst:2
+msgid "airtest.core.android.cap\\_methods.adbcap module"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap:1 of
+msgid "基类：:class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.get_frame_from_stream:1 of
+msgid "Get a frame of the current screen from the mobile screen stream"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.get_frame_from_stream:3 of
+msgid "从手机画面流中，获取一张当前屏幕截图"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.get_frame_from_stream:5 of
+msgid "Returns: frame_data"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.snapshot:1 of
+msgid "Take a screenshot and convert it into a cv2 image object"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.snapshot:3 of
+msgid "获取一张屏幕截图，并转化成cv2的图像对象"
+msgstr ""
+
+#: airtest.core.android.cap_methods.adbcap.AdbCap.snapshot:5 of
+msgid "Returns: numpy.ndarray"
+msgstr ""
+
+#~ msgid "Bases: :class:`airtest.core.android.cap_methods.base_cap.BaseCap`"
+#~ msgstr ""
+

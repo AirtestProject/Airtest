@@ -1,0 +1,60 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018, Game-Netease
+# This file is distributed under the same license as the airtest package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: airtest \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../all_module/airtest.aircv.multiscale_template_matching.rst:2
+msgid "airtest.aircv.multiscale\\_template\\_matching module"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:1
+#: airtest.aircv.multiscale_template_matching.MultiScaleTemplateMatching:1 of
+msgid "多尺度模板匹配."
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:8 of
+msgid "对用户提供的调节参数:"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:4 of
+msgid "threshod: 筛选阈值，默认为0.8"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:5 of
+msgid "rgb: 彩色三通道,进行彩色权识别."
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:6 of
+msgid "scale_max: 多尺度模板匹配最大范围，增大可适应更小UI"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching:7 of
+msgid "scale_step: 多尺度模板匹配搜索比例步长，减小可适应更小UI"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching.MultiScaleTemplateMatching:1 of
+msgid "基类：:class:`object`"
+msgstr ""
+
+#: airtest.aircv.multiscale_template_matching.MultiScaleTemplateMatching.multi_scale_search:1
+#: of
+msgid "多尺度模板匹配"
+msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+

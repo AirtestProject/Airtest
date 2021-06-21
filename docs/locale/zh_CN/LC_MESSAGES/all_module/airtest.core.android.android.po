@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  airtest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:38+0800\n"
 "PO-Revision-Date: 2020-09-17 12:00+0800\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -23,7 +23,7 @@ msgid "airtest.core.android.android module"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
-msgid "Bases: :class:`airtest.core.device.Device`"
+msgid "基类：:class:`airtest.core.device.Device`"
 msgstr ""
 
 #: airtest.core.android.android.Android:1 of
@@ -41,11 +41,13 @@ msgid ""
 msgstr ""
 
 #: airtest.core.android.android.Android.adjust_all_screen
+#: airtest.core.android.android.Android.cap_method
 #: airtest.core.android.android.Android.check_app
 #: airtest.core.android.android.Android.clear_app
 #: airtest.core.android.android.Android.display_info
 #: airtest.core.android.android.Android.get_current_resolution
 #: airtest.core.android.android.Android.get_default_device
+#: airtest.core.android.android.Android.get_deprecated_var
 #: airtest.core.android.android.Android.get_display_info
 #: airtest.core.android.android.Android.get_ip_address
 #: airtest.core.android.android.Android.get_render_resolution
@@ -74,37 +76,101 @@ msgstr ""
 #: airtest.core.android.android.Android.swipe_along
 #: airtest.core.android.android.Android.text
 #: airtest.core.android.android.Android.touch
+#: airtest.core.android.android.Android.touch_method
 #: airtest.core.android.android.Android.touch_proxy
 #: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app
 #: airtest.core.android.android.Android.unlock
 #: airtest.core.android.android.Android.uuid
 #: airtest.core.android.android.Android.wake of
-msgid "Returns"
+msgid "返回"
 msgstr ""
 
 #: airtest.core.android.android.Android.touch_proxy:5 of
 msgid "TouchProxy"
 msgstr ""
 
-#: airtest.core.android.android.Android.get_default_device:1 of
-msgid "Get local default device when no serialno"
-msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
-
-#: airtest.core.android.android.Android.get_default_device:3 of
-msgid "local device serialno"
-msgstr "本地设备序列号serialno"
-
-#: airtest.core.android.android.Android.uuid:1 of
-msgid "Serial number"
+#: airtest.core.android.android.Android.cap_method:8
+#: airtest.core.android.android.Android.get_deprecated_var:17
+#: airtest.core.android.android.Android.screen_proxy:12
+#: airtest.core.android.android.Android.start_recording:10
+#: airtest.core.android.android.Android.touch_method:8
+#: airtest.core.android.android.Android.touch_proxy:8 of
+msgid "实际案例"
 msgstr ""
 
-#: airtest.core.android.android.Android.list_app:1 of
-msgid "Return list of packages"
-msgstr "返回packages列表"
+#: airtest.core.android.android.Android.touch_method:1 of
+msgid "In order to be compatible with the previous `dev.touch_method`"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch_method:3 of
+msgid "为了兼容以前的`dev.touch_method`"
+msgstr ""
+
+#: airtest.core.android.android.Android.touch_method:5 of
+msgid "\"MINITOUCH\" or \"MAXTOUCH\""
+msgstr ""
+
+#: airtest.core.android.android.Android.cap_method:1 of
+msgid "In order to be compatible with the previous `dev.cap_method`"
+msgstr ""
+
+#: airtest.core.android.android.Android.cap_method:3 of
+msgid "为了兼容以前的`dev.cap_method`"
+msgstr ""
+
+#: airtest.core.android.android.Android.cap_method:5 of
+msgid "\"MINICAP\" or \"JAVACAP\""
+msgstr ""
+
+#: airtest.core.android.android.Android.screen_proxy:1 of
+msgid ""
+"Similar to touch_proxy, it returns a proxy that can automatically "
+"initialize an available screenshot method, such as Minicap"
+msgstr ""
+
+#: airtest.core.android.android.Android.screen_proxy:3 of
+msgid ""
+"Afterwards, you only need to call ``self.screen_proxy.get_frame()`` to "
+"get the screenshot"
+msgstr ""
+
+#: airtest.core.android.android.Android.screen_proxy:5 of
+msgid "类似touch_proxy，返回一个代理，能够自动初始化一个可用的屏幕截图方法，例如Minicap"
+msgstr ""
+
+#: airtest.core.android.android.Android.screen_proxy:7 of
+msgid "后续只需要调用 ``self.screen_proxy.get_frame()``即可获取到屏幕截图"
+msgstr ""
+
+#: airtest.core.android.android.Android.screen_proxy:9 of
+msgid "Returns: ScreenProxy(Minicap())"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:1 of
+msgid "Get deprecated class variables"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:3 of
+msgid ""
+"When the airtest version number>=1.1.2, the call "
+"device.minicap/device.javacap is removed, and relevant compatibility is "
+"made here, and DeprecationWarning is printed"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:5 of
+msgid "airtest版本号>=1.1.2时，去掉了device.minicap/device.javacap这样的调用，在此做了相关的兼容，并打印DeprecationWarning"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:7 of
+msgid ""
+"Usage:  Android.minicap=property(lambda self: "
+"self.get_deprecated_var(\"minicap\", \"screen_proxy\"))"
+msgstr ""
 
 #: airtest.core.android.android.Android.check_app
 #: airtest.core.android.android.Android.clear_app
+#: airtest.core.android.android.Android.get_deprecated_var
 #: airtest.core.android.android.Android.get_render_resolution
 #: airtest.core.android.android.Android.getprop
 #: airtest.core.android.android.Android.install_app
@@ -127,8 +193,51 @@ msgstr "返回packages列表"
 #: airtest.core.android.android.Android.touch
 #: airtest.core.android.android.Android.two_finger_swipe
 #: airtest.core.android.android.Android.uninstall_app of
-msgid "Parameters"
+msgid "参数"
 msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:9 of
+msgid "\"minicap\""
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:10 of
+msgid "\"screen_proxy\""
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:12 of
+msgid ""
+"New implementation of deprecated object, e.g self.minicap -> "
+"self.screen_proxy  dev.minicap.get_frame_from_stream()  ->  "
+"dev.screen_proxy.get_frame_from_stream()"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:12 of
+msgid ""
+"New implementation of deprecated object, e.g self.minicap -> "
+"self.screen_proxy"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_deprecated_var:14 of
+msgid ""
+"dev.minicap.get_frame_from_stream()  ->  "
+"dev.screen_proxy.get_frame_from_stream()"
+msgstr ""
+
+#: airtest.core.android.android.Android.get_default_device:1 of
+msgid "Get local default device when no serialno"
+msgstr "获取本地默认连接的设备，当没有传入设备序列号时"
+
+#: airtest.core.android.android.Android.get_default_device:3 of
+msgid "local device serialno"
+msgstr "本地设备序列号serialno"
+
+#: airtest.core.android.android.Android.uuid:1 of
+msgid "Serial number"
+msgstr ""
+
+#: airtest.core.android.android.Android.list_app:1 of
+msgid "Return list of packages"
+msgstr "返回packages列表"
 
 #: airtest.core.android.android.Android.list_app:3 of
 msgid "if True, only third party applications are listed"
@@ -556,15 +665,11 @@ msgid "maximum screen recording time, default is 1800"
 msgstr ""
 
 #: airtest.core.android.android.Android.start_recording:4 of
-msgid "bit_rate=resolution*level, 1 <= level <= 5, default is 1"
+msgid "bit_rate=resolution*level, 0 < level <= 5, default is 1"
 msgstr ""
 
 #: airtest.core.android.android.Android.start_recording:5 of
 msgid "the higher the bitrate, the clearer the video"
-msgstr ""
-
-#: airtest.core.android.android.Android.start_recording:10 of
-msgid "Examples"
 msgstr ""
 
 #: airtest.core.android.android.Android.start_recording:11 of
@@ -636,5 +741,11 @@ msgstr "对全面屏设备进行渲染分辨率的调整。"
 #~ msgstr ""
 
 #~ msgid "package, activity and pid"
+#~ msgstr ""
+
+#~ msgid "bit_rate=resolution*level, 1 <= level <= 5, default is 1"
+#~ msgstr ""
+
+#~ msgid "Examples"
 #~ msgstr ""
 

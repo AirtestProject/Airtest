@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: airtest \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-28 21:00+0800\n"
+"POT-Creation-Date: 2021-06-21 14:12+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,43 +19,6 @@ msgstr ""
 
 #: ../../all_module/airtest.core.android.javacap.rst:2
 msgid "airtest.core.android.javacap module"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap:1 of
-msgid "Bases: :class:`airtest.core.android.yosemite.Yosemite`"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap:1 of
-msgid ""
-"This is another screencap class, it is slower in performance than "
-"minicap, but it provides the better compatibility"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.get_frames:1 of
-msgid "Get the screen frames"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.get_frame_from_stream
-#: airtest.core.android.javacap.Javacap.get_frames
-#: airtest.core.android.javacap.Javacap.teardown_stream of
-msgid "Returns"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.get_frames:3
-#: airtest.core.android.javacap.Javacap.teardown_stream:3 of
-msgid "None"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.get_frame_from_stream:1 of
-msgid "Get frame from the stream"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.get_frame_from_stream:3 of
-msgid "frame"
-msgstr ""
-
-#: airtest.core.android.javacap.Javacap.teardown_stream:1 of
-msgid "End stream"
 msgstr ""
 
 #~ msgid "返回"
@@ -71,5 +34,27 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "airtest\\.core\\.android\\.javacap module"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This is another screencap class, it "
+#~ "is slower in performance than minicap,"
+#~ " but it provides the better "
+#~ "compatibility"
+#~ msgstr ""
+
+#~ msgid "Get the screen frames"
+#~ msgstr ""
+
+#~ msgid "None"
+#~ msgstr ""
+
+#~ msgid "Get frame from the stream"
+#~ msgstr ""
+
+#~ msgid "frame"
+#~ msgstr ""
+
+#~ msgid "End stream"
 #~ msgstr ""
 
