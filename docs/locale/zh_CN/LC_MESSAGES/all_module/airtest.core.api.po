@@ -5,18 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version:  airtest\n"
+"Project-Id-Version: airtest\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-06-21 14:38+0800\n"
-"PO-Revision-Date: 2020-12-09 19:29+0800\n"
+"PO-Revision-Date: 2021-06-21 15:59+0800\n"
 "Last-Translator: \n"
 "Language: en_GB\n"
 "Language-Team: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: ../../all_module/airtest.core.api.rst:2
 msgid "airtest.core.api module"
@@ -49,15 +50,11 @@ msgid "Android, IOS or Windows"
 msgstr ""
 
 #: airtest.core.api.init_device:4 of
-msgid ""
-"uuid for target device, e.g. serialno for Android, handle for Windows, "
-"uuid for iOS"
+msgid "uuid for target device, e.g. serialno for Android, handle for Windows, uuid for iOS"
 msgstr "目标设备的uuid，例如Android的序列号，Windows的窗口句柄，或iOS的uuid"
 
 #: airtest.core.api.init_device:5 of
-msgid ""
-"Optional platform specific keyword args, e.g. `cap_method=JAVACAP` for "
-"Android"
+msgid "Optional platform specific keyword args, e.g. `cap_method=JAVACAP` for Android"
 msgstr "可选的平台相关的参数，例如Android下的 ``cap_method=JAVACAP``参数"
 
 #: airtest.core.api.assert_equal airtest.core.api.assert_exists
@@ -100,12 +97,8 @@ msgid "Initialize device with uri, and set as current device."
 msgstr "用URI字符串来初始化设备，并且设置为当前设备。"
 
 #: airtest.core.api.connect_device:3 of
-msgid ""
-"an URI where to connect to device, e.g. "
-"`android://adbhost:adbport/serialno?param=value&param2=value2`"
-msgstr ""
-"一个用于初始化设备的URI字符串，例如 "
-"``android://adbhost:adbport/serialno?param=value&param2=value2``"
+msgid "an URI where to connect to device, e.g. `android://adbhost:adbport/serialno?param=value&param2=value2`"
+msgstr "一个用于初始化设备的URI字符串，例如 ``android://adbhost:adbport/serialno?param=value&param2=value2``"
 
 #: airtest.core.api.device:1 of
 msgid "Return the current active device."
@@ -161,9 +154,7 @@ msgid "Android, iOS, Windows"
 msgstr ""
 
 #: airtest.core.api.auto_setup:1 of
-msgid ""
-"Auto setup running env and try connect android device if not device "
-"connected."
+msgid "Auto setup running env and try connect android device if not device connected."
 msgstr "自动配置运行环境，如果当前没有连接设备的话，就默认尝试连接Android设备。"
 
 #: airtest.core.api.auto_setup:3 of
@@ -175,20 +166,15 @@ msgid "connect_device uri in list."
 msgstr "一个内容为 ``connect_device uri`` 字符串的列表"
 
 #: airtest.core.api.auto_setup:5 of
-#, fuzzy
-msgid ""
-"log dir for script report, default is None for no log, set to ``True`` "
-"for ``<basedir>/log``."
-msgstr "可设置脚本运行时的log保存路径，默认值为None则不保存log，如果设置为True则自动保存在<basedir>/log目录中"
+msgid "log dir for script report, default is None for no log, set to ``True`` for ``<basedir>/log``."
+msgstr "可设置脚本运行时的log保存路径，默认值为None则不保存log，如果设置为True则自动保存在<basedir>/log目录中。"
 
 #: airtest.core.api.auto_setup:6 of
 msgid "project root dir for `using` api."
 msgstr "用于设置PROJECT_ROOT变量，方便 ``using`` 接口的调用"
 
 #: airtest.core.api.auto_setup:7 of
-msgid ""
-"The compression rate of the screenshot image, integer in range [1, 99], "
-"default is 10"
+msgid "The compression rate of the screenshot image, integer in range [1, 99], default is 10"
 msgstr "屏幕截图的压缩比率，在[1, 99]范围内的整数，默认是10"
 
 #: airtest.core.api.shell:1 of
@@ -269,9 +255,7 @@ msgid "Take the screenshot of the target device and save it to the file."
 msgstr "对目标设备进行一次截图，并且保存到文件中。"
 
 #: airtest.core.api.snapshot:3 of
-msgid ""
-"name of the file where to save the screenshot. If the relative path is "
-"provided, the default location is ``ST.LOG_DIR``"
+msgid "name of the file where to save the screenshot. If the relative path is provided, the default location is ``ST.LOG_DIR``"
 msgstr "保存截图的文件名，默认保存路径为 ``ST.LOG_DIR``中"
 
 #: airtest.core.api.snapshot:5 of
@@ -312,9 +296,7 @@ msgstr "在当前设备画面上进行一次点击"
 
 #: airtest.core.api.click:3 airtest.core.api.double_click:3
 #: airtest.core.api.touch:3 of
-msgid ""
-"target to touch, either a ``Template`` instance or absolute coordinates "
-"(x, y)"
+msgid "target to touch, either a ``Template`` instance or absolute coordinates (x, y)"
 msgstr "点击位置，可以是一个 ``Template`` 图片实例，或是一个绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.click:4 airtest.core.api.touch:4 of
@@ -372,33 +354,23 @@ msgid "``swipe(v1, v2=Template(...))``   # swipe from v1 to v2"
 msgstr "``swipe(v1, v2=Template(...))``   # 从 v1 滑动到 v2"
 
 #: airtest.core.api.swipe:5 of
-msgid ""
-"``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along "
-"the vector."
+msgid "``swipe(v1, vector=(x, y))``      # swipe starts at v1 and moves along the vector."
 msgstr "``swipe(v1, vector=(x, y))``      # 从 v1 开始滑动，沿着vector方向。"
 
 #: airtest.core.api.swipe:8 of
-msgid ""
-"the start point of swipe, either a Template instance or absolute "
-"coordinates (x, y)"
+msgid "the start point of swipe, either a Template instance or absolute coordinates (x, y)"
 msgstr "滑动的起点，可以是一个Template图片实例，或是绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.swipe:10 of
-msgid ""
-"the end point of swipe, either a Template instance or absolute "
-"coordinates (x, y)"
+msgid "the end point of swipe, either a Template instance or absolute coordinates (x, y)"
 msgstr "滑动的终点，可以是一个Template图片实例，或是绝对坐标 ``(x, y)``"
 
 #: airtest.core.api.swipe:12 of
-msgid ""
-"a vector coordinates of swipe action, either absolute coordinates (x, y) "
-"or percentage of screen e.g.(0.5, 0.5)"
+msgid "a vector coordinates of swipe action, either absolute coordinates (x, y) or percentage of screen e.g.(0.5, 0.5)"
 msgstr "滑动动作的矢量坐标，可以是绝对坐标 ``(x,y)`` 或是屏幕百分比，例如 ``(0.5, 0.5)``"
 
 #: airtest.core.api.swipe:15 of
-msgid ""
-"general exception when not enough parameters to perform swap action have "
-"been provided"
+msgid "general exception when not enough parameters to perform swap action have been provided"
 msgstr "当没有足够的参数来执行滑动时引发异常"
 
 #: airtest.core.api.swipe:16 of
@@ -442,9 +414,7 @@ msgid "platform specific key name"
 msgstr "平台相关的按键名称"
 
 #: airtest.core.api.keyevent:9 of
-msgid ""
-"``Android``: it is equivalent to executing ``adb shell input keyevent "
-"KEYNAME`` ::"
+msgid "``Android``: it is equivalent to executing ``adb shell input keyevent KEYNAME`` ::"
 msgstr "``Android``: 相当于执行了 ``adb shell input keyevent KEYNAME`` ::"
 
 #: airtest.core.api.keyevent:20 of
@@ -456,9 +426,7 @@ msgid "Equivalent to calling the ``android.adb.keyevent()``"
 msgstr "相当于调用 ``android.adb.keyevent()``"
 
 #: airtest.core.api.keyevent:22 of
-msgid ""
-"`Android Keyevent "
-"<https://developer.android.com/reference/android/view/KeyEvent#constants_1>`_"
+msgid "`Android Keyevent <https://developer.android.com/reference/android/view/KeyEvent#constants_1>`_"
 msgstr ""
 
 #: airtest.core.api.keyevent:23 of
@@ -474,9 +442,7 @@ msgid "Module :py:mod:`airtest.core.win.win.Windows.keyevent`"
 msgstr ""
 
 #: airtest.core.api.keyevent:34 of
-msgid ""
-"`pywinauto.keyboard "
-"<https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html>`_"
+msgid "`pywinauto.keyboard <https://pywinauto.readthedocs.io/en/latest/code/pywinauto.keyboard.html>`_"
 msgstr ""
 
 #: airtest.core.api.keyevent:35 of
@@ -508,15 +474,11 @@ msgid "Module :py:mod:`airtest.core.android.ime.YosemiteIme.code`"
 msgstr ""
 
 #: airtest.core.api.text:20 of
-msgid ""
-"If you want to enter other keys on the keyboard, you can use the "
-"interface::"
+msgid "If you want to enter other keys on the keyboard, you can use the interface::"
 msgstr "如果希望输入其他按键，可以用这个接口::"
 
 #: airtest.core.api.text:25 of
-msgid ""
-"Ref: `Editor Action Code "
-"<http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html>`_"
+msgid "Ref: `Editor Action Code <http://developer.android.com/reference/android/view/inputmethod/EditorInfo.html>`_"
 msgstr ""
 
 #: airtest.core.api.sleep:1 of
@@ -536,9 +498,7 @@ msgid "target object to wait for, Template instance"
 msgstr "要等待出现的目标Template实例"
 
 #: airtest.core.api.wait:4 of
-msgid ""
-"time interval to wait for the match, default is None which is "
-"``ST.FIND_TIMEOUT``"
+msgid "time interval to wait for the match, default is None which is ``ST.FIND_TIMEOUT``"
 msgstr "等待匹配的最大超时时长，默认为None即默认取 ``ST.FIND_TIMEOUT`` 的值"
 
 #: airtest.core.api.wait:5 of
@@ -571,21 +531,15 @@ msgid "target to be checked"
 msgstr "要检查的目标"
 
 #: airtest.core.api.exists:4 of
-msgid ""
-"False if target is not found, otherwise returns the coordinates of the "
-"target"
+msgid "False if target is not found, otherwise returns the coordinates of the target"
 msgstr "如果未找到目标，则返回False，否则返回目标的坐标"
 
 #: airtest.core.api.exists:11 of
-msgid ""
-"Since ``exists()`` will return the coordinates, we can directly click on "
-"this return value to reduce one image search::"
+msgid "Since ``exists()`` will return the coordinates, we can directly click on this return value to reduce one image search::"
 msgstr "因为 ``exists()`` 会返回坐标，我们可以直接点击坐标来减少一次图像查找"
 
 #: airtest.core.api.find_all:1 of
-msgid ""
-"Find all occurrences of the target on the device screen and return their "
-"coordinates"
+msgid "Find all occurrences of the target on the device screen and return their coordinates"
 msgstr "在设备屏幕上查找所有出现的目标并返回其坐标列表"
 
 #: airtest.core.api.find_all:3 of
@@ -593,12 +547,8 @@ msgid "target to find"
 msgstr "寻找目标"
 
 #: airtest.core.api.find_all:4 of
-msgid ""
-"list of results, [{'result': (x, y), 'rectangle': ( (left_top, "
-"left_bottom, right_bottom, right_top) ), 'confidence': 0.9}, ...]"
-msgstr ""
-"结果列表， [{'result': (x, y), 'rectangle': ( (left_top, left_bottom, "
-"right_bottom, right_top) ), 'confidence': 0.9}, ...]"
+msgid "list of results, [{'result': (x, y), 'rectangle': ( (left_top, left_bottom, right_bottom, right_top) ), 'confidence': 0.9}, ...]"
+msgstr "结果列表， [{'result': (x, y), 'rectangle': ( (left_top, left_bottom, right_bottom, right_top) ), 'confidence': 0.9}, ...]"
 
 #: airtest.core.api.assert_exists:1 of
 msgid "Assert target exists on device screen"
@@ -739,4 +689,3 @@ msgstr "如果断言异常"
 
 #~ msgid "``iOS``: Only supports HOME key::"
 #~ msgstr "``iOS``: 只支持HOME键::"
-
