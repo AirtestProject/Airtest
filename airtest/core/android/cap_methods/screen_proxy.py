@@ -91,7 +91,7 @@ class ScreenProxy(object):
                 screen = cls.SCREEN_METHODS[default_method.upper()](adb, *args, **kwargs)
             elif isinstance(default_method, BaseCap):
                 screen = default_method
-            if cls.check_frame(screen):
+            if screen and cls.check_frame(screen):
                 return ScreenProxy(screen)
         # 从self.SCREEN_METHODS中，逆序取出可用的方法
         for name, screen_class in reversed(cls.SCREEN_METHODS.items()):
