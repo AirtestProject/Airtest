@@ -9,6 +9,8 @@
     3. scale_max: 多尺度模板匹配最大范围，增大可适应更小UI
     4. scale_step: 多尺度模板匹配搜索比例步长，减小可适应更小UI
 """
+from __future__ import division
+from __future__ import print_function
 
 import cv2
 import time
