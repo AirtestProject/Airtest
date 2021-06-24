@@ -17,7 +17,7 @@ import time
 
 from airtest.utils.logger import get_logger
 from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
-from .cal_confidence import cal_rgb_confidence
+from .cal_confidence import cal_rgb_confidence, cal_ccoeff_confidence
 
 LOGGING = get_logger(__name__)
 
@@ -64,15 +64,14 @@ class MultiScaleTemplateMatching(object):
             self.im_search), img_mat_rgb_2_gray(self.im_source)
         r_min, r_max = self._get_ratio(
             self.im_source, self.im_search, self.resolution)
-        max_val, max_loc, w, h, r = self.multi_scale_search(
-            i_gray, s_gray, ratio_min=max(r_min, self.scale_step), ratio_max=min(r_max, 0.99), step=self.scale_step, threshold=self.threshold)
-        confidence = self._get_confidence_from_matrix(
-            max_loc, max_val, w, h)
+        confidence, max_loc, w, h, r = self.multi_scale_search(
+            i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, threshold=self.threshold)
         if confidence < self.threshold:
-            max_val, max_loc, w, h, r = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=0.01, ratio_max=1.0, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
-            confidence = self._get_confidence_from_matrix(
-                max_loc, max_val, w, h)
+            threshold_strict = max(self.threshold, 0.85)
+            res = self.multi_scale_search(
+                i_gray, s_gray, ratio_min=0.01, ratio_max=0.99, src_max=self.scale_max, step=self.scale_step, threshold=threshold_strict)
+            if res[0] > threshold_strict:
+                confidence, max_loc, w, h, r = res
 
         # 求取识别位置: 目标中心 + 目标区域:
         middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
@@ -82,15 +81,18 @@ class MultiScaleTemplateMatching(object):
 
         return best_match if confidence >= self.threshold else None
 
-    def _get_confidence_from_matrix(self, max_loc, max_val, w, h):
+    def _get_confidence_from_matrix(self, max_loc, w, h):
         """根据结果矩阵求出confidence."""
-        # 求取可信度:
-        if self.rgb and max_val >= self.threshold:
+        sch_h, sch_w = self.im_search.shape[0], self.im_search.shape[1]
+        if self.rgb:
             # 如果有颜色校验,对目标区域进行BGR三通道校验:
             img_crop = self.im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
-            confidence = cal_rgb_confidence(img_crop, self.im_search)
+            confidence = cal_rgb_confidence(
+                cv2.resize(img_crop, (sch_w, sch_h)), self.im_search)
         else:
-            confidence = max_val
+            img_crop = self.im_source[max_loc[1]:max_loc[1] + h, max_loc[0]: max_loc[0] + w]
+            confidence = cal_ccoeff_confidence(
+                cv2.resize(img_crop, (sch_w, sch_h)), self.im_search)
 
         return confidence
 
@@ -125,7 +127,7 @@ class MultiScaleTemplateMatching(object):
             ratio = max(th/H, tw/W)  # 小图大图比
             r_min = ratio*rmin
             r_max = ratio*rmax
-            return r_min, r_max
+            return max(r_min, self.scale_step), min(r_max, 0.99)
 
     @staticmethod
     def _resize_by_ratio(src, templ, ratio=1.0, max_tr_ratio=0.2, templ_min=10):
@@ -158,10 +160,10 @@ class MultiScaleTemplateMatching(object):
         return src, templ, tr, sr
 
     @staticmethod
-    def _org_size(max_loc, w, h, tr, sr):
+    def _org_size(max_loc, w, h, tr, sr, gr):
         """获取原始比例的框"""
-        max_loc = (int(max_loc[0]/sr), int(max_loc[1]/sr))
-        w, h = int(w/sr), int(h/sr)
+        max_loc = (int((max_loc[0]/sr)/gr), int((max_loc[1]/sr)/gr))
+        w, h = int((w/sr)/gr), int((h/sr)/gr)
         return max_loc, w, h
 
     def multi_scale_search(self, org_src, org_templ, templ_min=10, src_max=800, ratio_min=0.01, ratio_max=1.0, step=0.01, threshold=0.9):
@@ -186,13 +188,14 @@ class MultiScaleTemplateMatching(object):
                     max_info = (r, max_val, max_loc, w, h, tr, sr)
                 # print((r, max_val, max_loc, w, h, tr, sr))
                 if max_val >= threshold:
-                    break
+                    omax_loc, ow, oh = self._org_size(max_loc, w, h, tr, sr, gr)
+                    confidence = self._get_confidence_from_matrix(omax_loc, ow, oh)
+                    if confidence >= threshold:
+                        return confidence, omax_loc, ow, oh, r
             r += step
         if max_info is None:
             return 0, (0, 0), 0, 0, 0
-        r, max_val, max_loc, w, h, tr, sr = max_info
-        max_loc, w, h = self._org_size(max_loc, w, h, tr, sr)
-        if gr < 1.0:
-            max_loc, w, h = (
-                int(max_loc[0]/gr), int(max_loc[1]/gr)), int(w/gr), int(h/gr)
-        return max_val, max_loc, w, h, r
+        max_r, max_val, max_loc, w, h, tr, sr = max_info
+        omax_loc, ow, oh = self._org_size(max_loc, w, h, tr, sr, gr)
+        confidence = self._get_confidence_from_matrix(omax_loc, ow, oh)
+        return confidence, omax_loc, ow, oh, max_r
