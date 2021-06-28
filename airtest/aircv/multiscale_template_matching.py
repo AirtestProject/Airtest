@@ -67,7 +67,7 @@ class MultiScaleTemplateMatching(object):
         confidence, max_loc, w, h, r = self.multi_scale_search(
             i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, threshold=self.threshold)
         if confidence < self.threshold:
-            threshold_strict = max(self.threshold, 0.85)
+            threshold_strict = max(self.threshold, 0.9) # 非推荐比例采用严格模式
             res = self.multi_scale_search(
                 i_gray, s_gray, ratio_min=0.01, ratio_max=0.99, src_max=self.scale_max, step=self.scale_step, threshold=threshold_strict)
             if res[0] > threshold_strict:
