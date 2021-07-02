@@ -92,7 +92,7 @@ def try_log_screen(screen=None, quality=None, max_size=None):
         max_size: the maximum size of the picture, e.g 1200
 
     Returns:
-        None
+        {"screen": filename, "resolution": aircv.get_resolution(screen)}
 
     """
     if not ST.LOG_DIR or not ST.SAVE_IMAGE:
@@ -105,8 +105,10 @@ def try_log_screen(screen=None, quality=None, max_size=None):
         screen = G.DEVICE.snapshot(quality=quality)
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
-    aircv.imwrite(filepath, screen, quality, max_size=max_size)
-    return {"screen": filename, "resolution": aircv.get_resolution(screen)}
+    if screen is not None:
+        aircv.imwrite(filepath, screen, quality, max_size=max_size)
+        return {"screen": filename, "resolution": aircv.get_resolution(screen)}
+    return None
 
 
 class Template(object):

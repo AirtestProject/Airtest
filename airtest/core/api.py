@@ -252,7 +252,7 @@ def snapshot(filename=None, msg="", quality=None, max_size=None):
     :param msg: short description for screenshot, it will be recorded in the report
     :param quality: The image quality, integer in range [1, 99], default is 10
     :param max_size: the maximum size of the picture, e.g 1200
-    :return: {"screen": filename, "resolution": resolution of the screen}
+    :return: {"screen": filename, "resolution": resolution of the screen} or None
     :platforms: Android, iOS, Windows
     :Example:
         >>> snapshot(msg="index")

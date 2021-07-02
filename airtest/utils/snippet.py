@@ -75,7 +75,10 @@ def kill_proc(proc):
 
     """
     proc.kill()
-    proc.communicate()
+    # https://bugs.python.org/issue35182
+    # 部分低版本的python中，重复关闭io流可能会导致异常报错，因此需要额外加入判断closed
+    if proc.stdout and not proc.stdout.closed:
+        proc.communicate()
 
 
 # atexit.register(_cleanup)
