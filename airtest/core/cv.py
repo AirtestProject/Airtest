@@ -18,13 +18,14 @@ from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
 from airtest.aircv.template_matching import TemplateMatching
-from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching
+from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching,MultiScaleTemplateMatchingPre
 from airtest.aircv.keypoint_matching import KAZEMatching, BRISKMatching, AKAZEMatching, ORBMatching
 from airtest.aircv.keypoint_matching_contrib import SIFTMatching, SURFMatching, BRIEFMatching
 
 MATCHING_METHODS = {
     "tpl": TemplateMatching,
-    "mstpl": MultiScaleTemplateMatching,
+    "mstpl": MultiScaleTemplateMatchingPre,
+    "gmstpl": MultiScaleTemplateMatching,
     "kaze": KAZEMatching,
     "brisk": BRISKMatching,
     "akaze": AKAZEMatching,
@@ -174,9 +175,9 @@ class Template(object):
             if func is None:
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
-                if method=="mstpl":
-                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, resolution=self.resolution, 
-                                            scale_max=self.scale_max, scale_step=self.scale_step)
+                if method in ["mstpl", "gmstpl"]:
+                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, record_pos=self.record_pos, 
+                                            resolution=self.resolution, scale_max=self.scale_max, scale_step=self.scale_step)
                 else:
                     ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
