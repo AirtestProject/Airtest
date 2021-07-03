@@ -12,7 +12,7 @@ class Settings(object):
     LOG_FILE = "log.txt"
     RESIZE_METHOD = staticmethod(cocos_min_strategy)
     # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
-    CVSTRATEGY = ["mstpl", "gmstpl", "surf", "brisk"]
+    CVSTRATEGY = ["mstpl", "surf", "brisk"]
     if LooseVersion(cv2.__version__) > LooseVersion('3.4.2'):
         CVSTRATEGY = ["mstpl", "sift", "brisk"]
     KEYPOINT_MATCHING_PREDICTION = True
