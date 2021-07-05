@@ -10,21 +10,10 @@ import numpy as np
 from airtest.utils.logger import get_logger
 
 from .error import *  # noqa
-from .utils import generate_result, check_image_valid
+from .utils import generate_result, check_image_valid, print_run_time
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
 
 LOGGING = get_logger(__name__)
-
-
-def print_run_time(func):
-
-    def wrapper(self, *args, **kwargs):
-        start_time = time.time()
-        ret = func(self, *args, **kwargs)
-        LOGGING.debug("%s() run time is %.2f s." % (func.__name__, time.time() - start_time))
-        return ret
-
-    return wrapper
 
 
 class KeypointMatching(object):

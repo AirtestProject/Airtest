@@ -12,21 +12,10 @@ import cv2
 import time
 
 from airtest.utils.logger import get_logger
-from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray
+from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray, print_run_time
 from .cal_confidence import cal_rgb_confidence
 
 LOGGING = get_logger(__name__)
-
-
-def print_run_time(func):
-
-    def wrapper(self, *args, **kwargs):
-        start_time = time.time()
-        ret = func(self, *args, **kwargs)
-        LOGGING.debug("%s() run time is %.2f s." % (func.__name__, time.time() - start_time))
-        return ret
-
-    return wrapper
 
 
 class TemplateMatching(object):

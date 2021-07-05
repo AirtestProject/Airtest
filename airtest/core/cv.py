@@ -166,8 +166,8 @@ class Template(object):
     @logwrap
     def _cv_match(self, screen):
         # in case image file not exist in current directory:
-        image = self._imread()
-        image = self._resize_image(image, screen, ST.RESIZE_METHOD)
+        ori_image = self._imread()
+        image = self._resize_image(ori_image, screen, ST.RESIZE_METHOD)
         ret = None
         for method in ST.CVSTRATEGY:
             # get function definition and execute:
@@ -176,7 +176,7 @@ class Template(object):
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
                 if method in ["mstpl", "gmstpl"]:
-                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, record_pos=self.record_pos, 
+                    ret = self._try_match(func, ori_image, screen, threshold=self.threshold, rgb=self.rgb, record_pos=self.record_pos,
                                             resolution=self.resolution, scale_max=self.scale_max, scale_step=self.scale_step)
                 else:
                     ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
