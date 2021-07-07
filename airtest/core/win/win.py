@@ -118,10 +118,12 @@ class Windows(Device):
             screen = screenshot(filename)
             if self.app:
                 rect = self.get_rect()
+                rect = self._fix_image_rect(rect)
                 screen = aircv.crop_image(screen, [rect.left, rect.top, rect.right, rect.bottom])
         if not screen.any():
             if self.app:
                 rect = self.get_rect()
+                rect = self._fix_image_rect(rect)
                 screen = aircv.crop_image(screenshot(filename), [rect.left, rect.top, rect.right, rect.bottom])
         if self._focus_rect != (0, 0, 0, 0):
             height, width = screen.shape[:2]
@@ -130,6 +132,16 @@ class Windows(Device):
         if filename:
             aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
+
+
+    def _fix_image_rect(self, rect):
+        """Fix rect in image."""
+        # 将rect 转换为左上角为(0,0), 与图片坐标对齐
+        rect.left = rect.left - self.monitor["left"]
+        rect.right = rect.right - self.monitor["left"]
+        rect.top = rect.top - self.monitor["top"]
+        rect.bottom = rect.bottom - self.monitor["top"]
+        return rect
 
     def keyevent(self, keyname, **kwargs):
         """
