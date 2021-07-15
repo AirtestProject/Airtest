@@ -32,7 +32,7 @@ class TouchProxy(object):
     @classmethod
     def check_touch(cls, touch_impl):
         try:
-            touch_impl.touch((0, 0))
+            touch_impl.base_touch.install_and_setup()
         except Exception as e:
             LOGGING.error(e)
             LOGGING.warning("%s setup up failed!" % touch_impl.METHOD_NAME)
