@@ -150,7 +150,7 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
     """基于截图预设条件的多尺度模板匹配."""
 
     METHOD_NAME = "MSTemplatePre"
-    DEVIATION = 250
+    DEVIATION = 150
 
     @print_run_time
     def find_best_result(self):

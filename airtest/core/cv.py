@@ -124,7 +124,7 @@ class Template(object):
     scale_step: 多尺度模板匹配搜索步长.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False, scale_max=800, scale_step=0.02):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False, scale_max=800, scale_step=0.005):
         self.filename = filename
         self._filepath = None
         self.threshold = threshold or ST.THRESHOLD
