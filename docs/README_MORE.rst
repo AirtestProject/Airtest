@@ -302,6 +302,10 @@ run automated case
       --log [LOG]           set log dir, default to be script dir
       --recording [RECORDING]
                           record screen when running
+      --compress
+                          set snapshot quality, 1-99
+      --no-image [NO_IMAGE]
+                          Do not save screenshots
 
 
 generate html report
