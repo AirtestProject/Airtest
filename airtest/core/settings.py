@@ -14,7 +14,7 @@ class Settings(object):
     # keypoint matching: kaze/brisk/akaze/orb, contrib: sift/surf/brief
     CVSTRATEGY = ["mstpl", "tpl", "surf", "brisk"]
     if LooseVersion(cv2.__version__) > LooseVersion('3.4.2'):
-        CVSTRATEGY = ["mstpl", "sift", "brisk"]
+        CVSTRATEGY = ["mstpl", "tpl", "sift", "brisk"]
     KEYPOINT_MATCHING_PREDICTION = True
     THRESHOLD = 0.7  # [0, 1]
     THRESHOLD_STRICT = None  # dedicated parameter for assert_exists
