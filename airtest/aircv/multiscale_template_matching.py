@@ -16,6 +16,7 @@ import cv2
 import time
 
 from airtest.utils.logger import get_logger
+from airtest.aircv.error import TemplateInputError
 from airtest import aircv
 from .utils import generate_result, check_source_larger_than_search, img_mat_rgb_2_gray, print_run_time
 from .cal_confidence import cal_rgb_confidence, cal_ccoeff_confidence
@@ -158,11 +159,13 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
         if self.resolution!=():
             # 第一步：校验图像输入
             check_source_larger_than_search(self.im_source, self.im_search)
-
+            if self.resolution[0]<self.im_search.shape[1] or self.resolution[1]<self.im_search.shape[0]:
+                raise TemplateInputError("error: resolution is too small.")
             # 第二步：计算模板匹配的结果矩阵res
             if not self.record_pos is None:
                 area, self.resolution = self._get_area_scope(self.im_source, self.im_search, self.record_pos, self.resolution)
                 self.im_source = aircv.crop_image(self.im_source, area)
+                check_source_larger_than_search(self.im_source, self.im_search)
             r_min, r_max = self._get_ratio_scope(
                 self.im_source, self.im_search, self.resolution)
             s_gray, i_gray = img_mat_rgb_2_gray(self.im_search), img_mat_rgb_2_gray(self.im_source)
