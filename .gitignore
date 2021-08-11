@@ -48,6 +48,7 @@ cover/
 .idea/
 .DS_Store
 env/
+venv/
 screencapture.bmp
 log.html
 log.gif
