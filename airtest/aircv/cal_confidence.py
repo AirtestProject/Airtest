@@ -31,6 +31,9 @@ def cal_rgb_confidence(img_src_rgb, img_sch_rgb):
 
     # 计算BGR三通道的confidence，存入bgr_confidence:
     bgr_confidence = [0, 0, 0]
+    # 加入取值范围干扰，防止算法过于放大微小差异
+    src_bgr[0][0,0] = sch_bgr[0][0,0] = 0
+    src_bgr[0][0,1] = sch_bgr[0][0,1] = 255
     for i in range(3):
         res_temp = cv2.matchTemplate(src_bgr[i], sch_bgr[i], cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res_temp)

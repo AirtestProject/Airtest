@@ -91,7 +91,6 @@ class Minitouch(BaseTouch):
             line = nbsp.readline(timeout=3.0)
             if line is None:
                 kill_proc(p)
-                self.adb.close_proc_pipe(p)
                 raise RuntimeError("minitouch setup timeout")
 
             line = line.decode(get_std_encoding(sys.stdout))

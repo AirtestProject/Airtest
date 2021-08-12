@@ -252,7 +252,7 @@ def snapshot(filename=None, msg="", quality=None, max_size=None):
     :param msg: short description for screenshot, it will be recorded in the report
     :param quality: The image quality, integer in range [1, 99], default is 10
     :param max_size: the maximum size of the picture, e.g 1200
-    :return: absolute path of the screenshot
+    :return: {"screen": filename, "resolution": resolution of the screen} or None
     :platforms: Android, iOS, Windows
     :Example:
         >>> snapshot(msg="index")
@@ -324,7 +324,7 @@ def touch(v, times=1, **kwargs):
     :param v: target to touch, either a ``Template`` instance or absolute coordinates (x, y)
     :param times: how many touches to be performed
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
-    :return: finial position to be clicked
+    :return: finial position to be clicked, e.g. (100, 100)
     :platforms: Android, Windows, iOS
     :Example:
         Click absolute coordinates::

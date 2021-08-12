@@ -2,10 +2,28 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import time
 import numpy as np
 from PIL import Image
 
+from airtest.utils.logger import get_logger
 from .error import TemplateInputError
+
+LOGGING = get_logger(__name__)
+
+
+def print_run_time(func):
+
+    def wrapper(self, *args, **kwargs):
+        start_time = time.time()
+        ret = func(self, *args, **kwargs)
+        t = time.time() - start_time
+        LOGGING.debug("%s() run time is %.2f s." % (func.__name__, t))
+        if ret and isinstance(ret, dict):
+            ret["time"] = t
+        return ret
+
+    return wrapper
 
 
 def generate_result(middle_point, pypts, confi):

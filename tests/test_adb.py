@@ -152,6 +152,16 @@ class TestADBWithDevice(unittest.TestCase):
         self.adb.remove_forward(local='tcp:6100')
         self.assertEqual(len(list(self.adb.get_forwards())), 0)
 
+    def test_cleanup_forwards(self):
+        """
+        Test that all forward ports have been removed
+        测试所有forward的端口号都被remove了
+        """
+        for port in ['tcp:10010', 'tcp:10020', 'tcp:10030']:
+            self.adb.forward(port, port)
+        self.adb._cleanup_forwards()
+        self.assertEqual(len(list(self.adb.get_forwards())), 0)
+
     def test_logcat(self):
         line_cnt = 0
         for line in self.adb.logcat():

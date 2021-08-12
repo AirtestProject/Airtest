@@ -461,6 +461,9 @@ class LogToHtml(object):
             self.static_root = self.static_root.replace("\\", "/")
             self.static_root += "/"
 
+        if not output_file:
+            output_file = HTML_FILE
+
         data = {}
         data['steps'] = steps
         data['name'] = self.script_root

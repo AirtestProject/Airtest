@@ -8,7 +8,7 @@ import platform
 import warnings
 import subprocess
 import threading
-
+from copy import copy
 from six import PY3, text_type, binary_type, raise_from
 from six.moves import reduce
 
@@ -823,7 +823,10 @@ class ADB(object):
         Returns:
             None
         """
-        for local in self._forward_local_using:
+        # remove forward成功后，会改变self._forward_local_using的内容，因此需要copy一遍
+        # After remove_forward() is successful, self._forward_local_using will be changed, so it needs to be copied
+        forward_local_list = copy(self._forward_local_using)
+        for local in forward_local_list:
             self.remove_forward(local)
 
     @property

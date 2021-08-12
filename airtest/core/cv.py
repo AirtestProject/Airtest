@@ -18,13 +18,14 @@ from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
 from airtest.aircv.template_matching import TemplateMatching
-from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching
+from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching,MultiScaleTemplateMatchingPre
 from airtest.aircv.keypoint_matching import KAZEMatching, BRISKMatching, AKAZEMatching, ORBMatching
 from airtest.aircv.keypoint_matching_contrib import SIFTMatching, SURFMatching, BRIEFMatching
 
 MATCHING_METHODS = {
     "tpl": TemplateMatching,
-    "mstpl": MultiScaleTemplateMatching,
+    "mstpl": MultiScaleTemplateMatchingPre,
+    "gmstpl": MultiScaleTemplateMatching,
     "kaze": KAZEMatching,
     "brisk": BRISKMatching,
     "akaze": AKAZEMatching,
@@ -92,7 +93,7 @@ def try_log_screen(screen=None, quality=None, max_size=None):
         max_size: the maximum size of the picture, e.g 1200
 
     Returns:
-        None
+        {"screen": filename, "resolution": aircv.get_resolution(screen)}
 
     """
     if not ST.LOG_DIR or not ST.SAVE_IMAGE:
@@ -105,8 +106,10 @@ def try_log_screen(screen=None, quality=None, max_size=None):
         screen = G.DEVICE.snapshot(quality=quality)
     filename = "%(time)d.jpg" % {'time': time.time() * 1000}
     filepath = os.path.join(ST.LOG_DIR, filename)
-    aircv.imwrite(filepath, screen, quality, max_size=max_size)
-    return {"screen": filename, "resolution": aircv.get_resolution(screen)}
+    if screen is not None:
+        aircv.imwrite(filepath, screen, quality, max_size=max_size)
+        return {"screen": filename, "resolution": aircv.get_resolution(screen)}
+    return None
 
 
 class Template(object):
@@ -121,7 +124,7 @@ class Template(object):
     scale_step: 多尺度模板匹配搜索步长.
     """
 
-    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False, scale_max=800, scale_step=0.02):
+    def __init__(self, filename, threshold=None, target_pos=TargetPos.MID, record_pos=None, resolution=(), rgb=False, scale_max=800, scale_step=0.005):
         self.filename = filename
         self._filepath = None
         self.threshold = threshold or ST.THRESHOLD
@@ -163,8 +166,8 @@ class Template(object):
     @logwrap
     def _cv_match(self, screen):
         # in case image file not exist in current directory:
-        image = self._imread()
-        image = self._resize_image(image, screen, ST.RESIZE_METHOD)
+        ori_image = self._imread()
+        image = self._resize_image(ori_image, screen, ST.RESIZE_METHOD)
         ret = None
         for method in ST.CVSTRATEGY:
             # get function definition and execute:
@@ -172,9 +175,9 @@ class Template(object):
             if func is None:
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
             else:
-                if method=="mstpl":
-                    ret = self._try_match(func, self._imread(), screen, threshold=self.threshold, rgb=self.rgb, resolution=self.resolution, 
-                                            scale_max=self.scale_max, scale_step=self.scale_step)
+                if method in ["mstpl", "gmstpl"]:
+                    ret = self._try_match(func, ori_image, screen, threshold=self.threshold, rgb=self.rgb, record_pos=self.record_pos,
+                                            resolution=self.resolution, scale_max=self.scale_max, scale_step=self.scale_step)
                 else:
                     ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
