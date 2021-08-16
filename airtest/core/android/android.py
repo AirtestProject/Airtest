@@ -78,7 +78,7 @@ class Android(Device):
         self._touch_proxy = TouchProxy.auto_setup(self.adb,
                                                   default_method=self._touch_method,
                                                   ori_transformer=self._touch_point_by_orientation,
-                                                  ori_function=self.get_display_info,
+                                                  size_info=self.display_info,
                                                   input_event=self.input_event)
         return self._touch_proxy
 
@@ -722,6 +722,8 @@ class Android(Device):
 
         """
         self.rotation_watcher.get_ready()
+        if self._screen_proxy:
+            return self.screen_proxy.get_display_info()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):

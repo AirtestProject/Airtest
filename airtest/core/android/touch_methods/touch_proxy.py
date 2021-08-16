@@ -41,14 +41,14 @@ class TouchProxy(object):
             return True
 
     @classmethod
-    def auto_setup(cls, adb, default_method=None, ori_transformer=None, ori_function=None, input_event=None):
+    def auto_setup(cls, adb, default_method=None, ori_transformer=None, size_info=None, input_event=None):
         """
 
         Args:
             adb: :py:mod:`airtest.core.android.adb.ADB`
             default_method: The default click method, such as "MINITOUCH"
             ori_transformer: dev._touch_point_by_orientation
-            ori_function: dev.get_display_info
+            size_info: the result of dev.get_display_info()
             input_event: dev.input_event
             *args:
             **kwargs:
@@ -62,7 +62,7 @@ class TouchProxy(object):
 
         """
         if default_method and default_method in cls.TOUCH_METHODS:
-            touch_method = cls.TOUCH_METHODS[default_method].METHOD_CLASS(adb, ori_function=ori_function,
+            touch_method = cls.TOUCH_METHODS[default_method].METHOD_CLASS(adb, size_info=size_info,
                                                                           input_event=input_event)
             impl = cls.TOUCH_METHODS[default_method](touch_method, ori_transformer)
             if cls.check_touch(impl):
@@ -71,7 +71,7 @@ class TouchProxy(object):
         for name, touch_impl in cls.TOUCH_METHODS.items():
             if default_method == name:
                 continue
-            touch_method = touch_impl.METHOD_CLASS(adb, ori_function=ori_function, input_event=input_event)
+            touch_method = touch_impl.METHOD_CLASS(adb, size_info=size_info, input_event=input_event)
             impl = touch_impl(touch_method, ori_transformer)
             if cls.check_touch(impl):
                 return TouchProxy(impl)
