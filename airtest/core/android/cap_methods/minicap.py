@@ -175,8 +175,8 @@ class Minicap(BaseCap):
             display_info['physical_height'] = display_info['height']
             # 强制设定宽度width为更小的数字、height为更大的数字，避免因为各手机厂商返回结果的顺序不同导致问题
             # Set the width to a smaller number and the height to a larger number
-            display_info['width'] = int(min(arr[0]))
-            display_info['height'] = int(max(arr[0]))
+            display_info['width'] = min(list(map(int, arr[0])))
+            display_info['height'] = max(list(map(int, arr[0])))
         return display_info
 
     @on_method_ready('install_or_upgrade')
