@@ -15,7 +15,7 @@ class BaseTouch(object):
     A super class for Minitouch or Maxtouch
     """
 
-    def __init__(self, adb, backend=False, ori_function=None, input_event=None, *args, **kwargs):
+    def __init__(self, adb, backend=False, size_info=None, input_event=None, *args, **kwargs):
         self.adb = adb
         self.backend = backend
         self.server_proc = None
@@ -23,7 +23,7 @@ class BaseTouch(object):
         self.size_info = None
         self.input_event = input_event
         self.handle = None
-        self.ori_function = ori_function if callable(ori_function) else self.adb.getPhysicalDisplayInfo
+        self.size_info = size_info or self.adb.get_display_info()
         self.default_pressure = 50
         self.path_in_android = ""
         reg_cleanup(self.teardown)
@@ -38,7 +38,6 @@ class BaseTouch(object):
 
         """
         self.install()
-        self.size_info = self.ori_function()
         self.setup_server()
         if self.backend:
             self.setup_client_backend()
