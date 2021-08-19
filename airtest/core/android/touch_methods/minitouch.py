@@ -17,8 +17,8 @@ LOGGING = get_logger(__name__)
 
 class Minitouch(BaseTouch):
 
-    def __init__(self, adb, backend=False, ori_function=None, input_event=None):
-        super(Minitouch, self).__init__(adb, backend, ori_function, input_event)
+    def __init__(self, adb, backend=False, size_info=None, input_event=None):
+        super(Minitouch, self).__init__(adb, backend, size_info, input_event)
         self.default_pressure = 50
         self.path_in_android = "/data/local/tmp/minitouch"
         self.max_x, self.max_y = None, None

@@ -46,6 +46,7 @@ htmlcov/
 cover/
 
 .idea/
+.vscode/
 .DS_Store
 env/
 screencapture.bmp

@@ -656,9 +656,17 @@ class ADB(object):
         print(out)
 
         if not replace:
-            self.shell(['pm', 'install', device_path])
+            install_cmd = ['pm', 'install', device_path]
         else:
-            self.shell(['pm', 'install', '-r', device_path])
+            install_cmd = ['pm', 'install', '-r', device_path]
+
+        try:
+            self.shell(install_cmd)
+        except:
+            raise
+        finally:
+            # delete apk file
+            self.shell("rm " + device_path)
 
     def uninstall_app(self, package):
         """
@@ -882,6 +890,7 @@ class ADB(object):
 
         """
         display_info = self.getPhysicalDisplayInfo()
+        display_info = self.update_cur_display(display_info)
         orientation = self.getDisplayOrientation()
         max_x, max_y = self.getMaxXY()
         display_info.update({
@@ -1038,6 +1047,32 @@ class ADB(object):
         # We couldn't obtain the orientation
         warnings.warn("Could not obtain the orientation, return 0")
         return 0
+
+    def update_cur_display(self, display_info):
+        """
+        Some phones support resolution modification, try to get the modified resolution from dumpsys
+        adb shell dumpsys window displays | find "cur="
+
+        Args:
+            display_info: the return of self.getPhysicalDisplayInfo()
+
+        Returns:
+            display_info
+
+        """
+        # adb shell dumpsys window displays | find "init="
+        # 上面的命令行在dumpsys window里查找init=widthxheight，得到的结果是物理分辨率，且部分型号手机不止一个结果
+        # 如果改为读取 cur=widthxheight 的数据，得到的是修改过分辨率手机的结果（例如三星S8）
+        actual = self.shell("dumpsys window displays")
+        arr = re.findall(r'cur=(\d+)x(\d+)', actual)
+        if len(arr) > 0:
+            # 强制设定宽度width为更小的数字、height为更大的数字，避免因为各手机厂商返回结果的顺序不同导致问题
+            # Set the width to a smaller number and the height to a larger number
+            width, height = min(list(map(int, arr[0]))), max(list(map(int, arr[0])))
+            display_info['physical_width'] = display_info['width']
+            display_info['physical_height'] = display_info['height']
+            display_info['width'], display_info['height'] = width, height
+        return display_info
 
     def get_top_activity(self):
         """

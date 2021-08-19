@@ -165,18 +165,7 @@ class Minicap(BaseCap):
         display_info = match.group(0) if match else display_info
         display_info = json.loads(display_info)
         display_info["orientation"] = display_info["rotation"] / 90
-        # adb shell dumpsys window displays | find "init="
-        # 在dumpsys window里找init=widthxheight，得到的结果是物理分辨率，且部分型号手机不止一个结果
-        # 如果改为读取 cur=widthxheight 的数据，得到的是修改过分辨率手机的结果（例如三星S8）
-        actual = self.adb.shell("dumpsys window displays")
-        arr = re.findall(r'cur=(\d+)x(\d+)', actual)
-        if len(arr) > 0:
-            display_info['physical_width'] = display_info['width']
-            display_info['physical_height'] = display_info['height']
-            # 强制设定宽度width为更小的数字、height为更大的数字，避免因为各手机厂商返回结果的顺序不同导致问题
-            # Set the width to a smaller number and the height to a larger number
-            display_info['width'] = int(min(arr[0]))
-            display_info['height'] = int(max(arr[0]))
+        display_info = self.adb.update_cur_display(display_info)
         return display_info
 
     @on_method_ready('install_or_upgrade')

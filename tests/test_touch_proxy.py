@@ -15,14 +15,14 @@ class TestTouchProxy(unittest.TestCase):
     def test_auto_setup(self):
         touch_proxy = TouchProxy.auto_setup(self.dev.adb,
                                             ori_transformer=self.dev._touch_point_by_orientation,
-                                            ori_function=None,
+                                            size_info=None,
                                             input_event=None)
         touch_proxy.touch((100, 100))
 
         touch_proxy = TouchProxy.auto_setup(self.dev.adb,
                                             default_method="MINITOUCH",
                                             ori_transformer=self.dev._touch_point_by_orientation,
-                                            ori_function=self.dev.get_display_info,
+                                            size_info=self.dev.display_info,
                                             input_event=self.dev.input_event)
         touch_proxy.touch((100, 100))
 
