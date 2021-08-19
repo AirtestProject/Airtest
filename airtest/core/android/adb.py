@@ -656,9 +656,17 @@ class ADB(object):
         print(out)
 
         if not replace:
-            self.shell(['pm', 'install', device_path])
+            install_cmd = ['pm', 'install', device_path]
         else:
-            self.shell(['pm', 'install', '-r', device_path])
+            install_cmd = ['pm', 'install', '-r', device_path]
+
+        try:
+            self.shell(install_cmd)
+        except:
+            raise
+        finally:
+            # delete apk file
+            self.shell("rm " + device_path)
 
     def uninstall_app(self, package):
         """

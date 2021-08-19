@@ -178,6 +178,11 @@ class TestADBWithDevice(unittest.TestCase):
         self.adb.pm_install(APK)
         self.assertIn(PKG, self.adb.list_app())
 
+        # 安装完毕后，验证apk文件是否已删除
+        tmpdir = "/data/local/tmp"
+        tmp_files = self.adb.shell("ls " + tmpdir)
+        self.assertNotIn(os.path.basename(APK), tmp_files, "The apk file in /data/local/tmp is not deleted!")
+
         self.adb.pm_uninstall(PKG)
         self.assertNotIn(PKG, self.adb.list_app())
 
