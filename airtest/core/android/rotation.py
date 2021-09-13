@@ -129,8 +129,8 @@ class RotationWatcher(object):
 
                 ori = int(int(line) / 90)
                 return ori
-            # 每隔2秒读取一次
-            time.sleep(2)
+            # 每隔1秒读取一次
+            time.sleep(1)
 
         def _refresh_by_adb():
             ori = self.adb.getDisplayOrientation()

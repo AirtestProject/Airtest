@@ -146,29 +146,6 @@ class Minicap(BaseCap):
         LOGGING.info("minicap installation finished")
 
     @on_method_ready('install_or_upgrade')
-    def get_display_info(self):
-        """
-        Get display info by minicap
-
-        Warnings:
-            It might segfault, the preferred way is to get the information from adb commands
-
-        Returns:
-            display information
-
-        """
-        if self.display_id:
-            display_info = self.adb.shell("{0} -d {1} -i".format(self.CMD, self.display_id))
-        else:
-            display_info = self.adb.shell("%s -i" % self.CMD)
-        match = re.compile(r'({.*})', re.DOTALL).search(display_info)
-        display_info = match.group(0) if match else display_info
-        display_info = json.loads(display_info)
-        display_info["orientation"] = display_info["rotation"] / 90
-        display_info = self.adb.update_cur_display(display_info)
-        return display_info
-
-    @on_method_ready('install_or_upgrade')
     def get_frame(self, projection=None):
         """
         Get the single frame from minicap -s, this method slower than `get_frames`
