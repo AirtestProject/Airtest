@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import os
 import re
-import json
+import traceback
 import struct
 import threading
 import six
@@ -41,7 +41,7 @@ class Minicap(BaseCap):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None):
+    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None, ori_function=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
@@ -49,7 +49,7 @@ class Minicap(BaseCap):
         super(Minicap, self).__init__(adb=adb)
         self.projection = projection
         self.display_id = display_id
-        self.ori_function = self.get_display_info
+        self.ori_function = ori_function or self.adb.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
