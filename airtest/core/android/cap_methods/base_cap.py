@@ -47,6 +47,3 @@ class BaseCap(object):
             traceback.print_exc()
             return None
         return screen
-
-    def get_display_info(self):
-        return self.adb.get_display_info()
