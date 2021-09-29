@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import os
 import re
-import json
+import traceback
 import struct
 import threading
 import six
@@ -41,7 +41,7 @@ class Minicap(BaseCap):
     RECVTIMEOUT = None
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
-    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None):
+    def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None, ori_function=None):
         """
         :param adb: adb instance of android device
         :param projection: projection, default is None. If `None`, physical display size is used
@@ -49,7 +49,7 @@ class Minicap(BaseCap):
         super(Minicap, self).__init__(adb=adb)
         self.projection = projection
         self.display_id = display_id
-        self.ori_function = self.get_display_info
+        self.ori_function = ori_function or self.adb.get_display_info
         self.frame_gen = None
         self.stream_lock = threading.Lock()
         self.quirk_flag = 0
@@ -144,29 +144,6 @@ class Minicap(BaseCap):
         self.adb.push(path, "%s/minicap.so" % device_dir)
         self.adb.shell("chmod 755 %s/minicap.so" % device_dir)
         LOGGING.info("minicap installation finished")
-
-    @on_method_ready('install_or_upgrade')
-    def get_display_info(self):
-        """
-        Get display info by minicap
-
-        Warnings:
-            It might segfault, the preferred way is to get the information from adb commands
-
-        Returns:
-            display information
-
-        """
-        if self.display_id:
-            display_info = self.adb.shell("{0} -d {1} -i".format(self.CMD, self.display_id))
-        else:
-            display_info = self.adb.shell("%s -i" % self.CMD)
-        match = re.compile(r'({.*})', re.DOTALL).search(display_info)
-        display_info = match.group(0) if match else display_info
-        display_info = json.loads(display_info)
-        display_info["orientation"] = display_info["rotation"] / 90
-        display_info = self.adb.update_cur_display(display_info)
-        return display_info
 
     @on_method_ready('install_or_upgrade')
     def get_frame(self, projection=None):

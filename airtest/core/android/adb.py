@@ -835,7 +835,11 @@ class ADB(object):
         # After remove_forward() is successful, self._forward_local_using will be changed, so it needs to be copied
         forward_local_list = copy(self._forward_local_using)
         for local in forward_local_list:
-            self.remove_forward(local)
+            try:
+                self.remove_forward(local)
+            except DeviceConnectionError:
+                # 如果手机已经被拔出，可以忽略
+                pass
 
     @property
     def line_breaker(self):
@@ -890,7 +894,6 @@ class ADB(object):
 
         """
         display_info = self.getPhysicalDisplayInfo()
-        display_info = self.update_cur_display(display_info)
         orientation = self.getDisplayOrientation()
         max_x, max_y = self.getMaxXY()
         display_info.update({
@@ -954,11 +957,18 @@ class ADB(object):
             physical display info for dimension and density
 
         """
+        # use adb shell wm size
+        displayInfo = {}
+        wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.raw_shell('wm size'))
+        if wm_size:
+            displayInfo = dict((k, int(v)) for k, v in wm_size.groupdict().items())
+            displayInfo['density'] = self._getDisplayDensity(strip=True)
+            return displayInfo
+
         phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
         out = self.raw_shell('dumpsys display')
         m = phyDispRE.search(out)
         if m:
-            displayInfo = {}
             for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
             for prop in ['density']:
@@ -975,11 +985,10 @@ class ADB(object):
         if not m:
             m = dispWHRE.search(out, 0)
         if m:
-            displayInfo = {}
             for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
             for prop in ['density']:
-                d = self._getDisplayDensity(None, strip=True)
+                d = self._getDisplayDensity(strip=True)
                 if d:
                     displayInfo[prop] = d
                 else:
@@ -991,21 +1000,19 @@ class ADB(object):
         phyDispRE = re.compile('Physical size: (?P<width>\d+)x(?P<height>\d+).*Physical density: (?P<density>\d+)', re.S)
         m = phyDispRE.search(self.raw_shell('wm size; wm density'))
         if m:
-            displayInfo = {}
             for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
             for prop in ['density']:
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
-        return {}
+        return displayInfo
 
-    def _getDisplayDensity(self, key, strip=True):
+    def _getDisplayDensity(self, strip=True):
         """
         Get display density
 
         Args:
-            key:
             strip: strip the output
 
         Returns:
@@ -1052,6 +1059,20 @@ class ADB(object):
         """
         Some phones support resolution modification, try to get the modified resolution from dumpsys
         adb shell dumpsys window displays | find "cur="
+
+        本方法虽然可以更好地获取到部分修改过分辨率的手机信息
+        但是会因为cur=(\d+)x(\d+)的数值在不同设备上width和height的顺序可能不同，导致横竖屏识别出现问题
+        airtest不再使用本方法作为通用的屏幕尺寸获取方法，但依然可用于部分设备获取当前被修改过的分辨率
+
+        Examples:
+
+            >>> # 部分三星和华为设备，若分辨率没有指定为最高，可能会导致点击偏移，可以用这个方式强制修改：
+            >>> # For some Samsung and Huawei devices, if the resolution is not specified as the highest,
+            >>> # it may cause click offset, which can be modified in this way:
+            >>> dev = device()
+            >>> info = dev.display_info
+            >>> info2 = dev.adb.update_cur_display(info)
+            >>> dev.display_info.update(info2)
 
         Args:
             display_info: the return of self.getPhysicalDisplayInfo()

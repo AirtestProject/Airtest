@@ -20,7 +20,8 @@ class TestScreenProxy(unittest.TestCase):
         # 测试默认的初始化
         screen_proxy = ScreenProxy.auto_setup(self.dev.adb,
                                               rotation_watcher=self.dev.rotation_watcher,
-                                              display_id=self.dev.display_id)
+                                              display_id=self.dev.display_id,
+                                              ori_function=lambda: self.dev.display_info)
         self.assertIsNotNone(screen_proxy)
         screen_proxy.teardown_stream()
 

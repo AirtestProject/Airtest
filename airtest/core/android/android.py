@@ -161,7 +161,8 @@ class Android(Device):
             return self._screen_proxy
         self._screen_proxy = ScreenProxy.auto_setup(self.adb, default_method=self._cap_method,
                                                     rotation_watcher=self.rotation_watcher,
-                                                    display_id=self.display_id)
+                                                    display_id=self.display_id,
+                                                    ori_function=lambda: self.display_info)
         return self._screen_proxy
 
     @screen_proxy.setter
@@ -722,8 +723,6 @@ class Android(Device):
 
         """
         self.rotation_watcher.get_ready()
-        if self._screen_proxy:
-            return self.screen_proxy.get_display_info()
         return self.adb.get_display_info()
 
     def get_current_resolution(self):
