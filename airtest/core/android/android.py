@@ -633,7 +633,7 @@ class Android(Device):
         Get the top activity name
 
         Returns:
-            (package, activity, pid)
+            package/activity
 
         """
         tanp = self.get_top_activity()
