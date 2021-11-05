@@ -26,3 +26,5 @@ class Settings(object):
     # Image compression size, e.g. 1200, means that the size of the screenshot does not exceed 1200*1200
     IMAGE_MAXSIZE = os.environ.get("IMAGE_MAXSIZE", None)
     SAVE_IMAGE = True
+    #WIN_SNAPSHOT_MODE can be 'auto','derict','cutout' 
+    WIN_SNAPSHOT_MODE='auto'

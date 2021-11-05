@@ -15,6 +15,7 @@ from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics
 
 from airtest.core.win.ctypesinput import key_press, key_release
 from airtest.core.win.screen import screenshot
+from airtest.core.settings import Settings as ST
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -112,7 +113,7 @@ class Windows(Device):
             display the screenshot
 
         """
-        if self.handle:
+        if self.handle and ST.WIN_SNAPSHOT_MODE!='cutout':
             screen = screenshot(filename, self.handle)
         else:
             screen = screenshot(filename)
