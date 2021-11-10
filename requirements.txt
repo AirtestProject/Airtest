@@ -2,7 +2,7 @@ Jinja2>=2.8
 Pillow>=3.4.0
 requests>=2.11.1
 six
-mss==4.0.3
+mss==6.1.0
 numpy<=1.19.3
 opencv-contrib-python
 facebook-wda>=1.3.3
