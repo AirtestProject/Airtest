@@ -1343,6 +1343,23 @@ class ADB(object):
         """
         self.shell(['pm', 'clear', package])
 
+    def text(self, content):
+        """
+        Use adb shell input for text input
+
+        Args:
+            content: text to input
+
+        Returns:
+            None
+        """
+        if content.isalpha():
+            self.shell(["input", "text", content])
+        else:
+            # 如果同时包含了字母+数字，用input text整句输入可能会导致乱序
+            for i in content:
+                self.shell(["input", "keyevent", "KEYCODE_" + i.upper()])
+
     def get_ip_address(self):
         """
         Perform several set of commands to obtain the IP address.

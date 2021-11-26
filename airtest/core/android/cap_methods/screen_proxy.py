@@ -53,8 +53,8 @@ class ScreenProxy(object):
             cap_method.get_frame()
         except (AdbError, ScreenError) as e:
             if isinstance(e, AdbError):
-                LOGGING.error(e.stdout.decode("utf-8"))
-                LOGGING.error(e.stderr.decode("utf-8"))
+                LOGGING.error(repr(e.stdout))
+                LOGGING.error(repr(e.stderr))
             else:
                 LOGGING.error(e)
             LOGGING.error("%s setup up failed!" % cap_method.__class__.__name__)
