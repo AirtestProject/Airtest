@@ -276,9 +276,9 @@ def _target_error_check(w_h_range):
 
 def _cal_sift_confidence(im_search, resize_img, rgb=False):
     if rgb:
-        confidence = cal_rgb_confidence(im_search, resize_img)
+        confidence = cal_rgb_confidence(resize_img, im_search)
     else:
-        confidence = cal_ccoeff_confidence(im_search, resize_img)
+        confidence = cal_ccoeff_confidence(resize_img, im_search)
     # sift的confidence要放水
     confidence = (1 + confidence) / 2
     return confidence
