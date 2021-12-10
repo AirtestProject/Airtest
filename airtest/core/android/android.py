@@ -445,11 +445,17 @@ class Android(Device):
             None
 
         """
-        self.home()
-        self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
-        self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
-        time.sleep(0.5)
-        self.home()
+        # 先尝试连续发送224和82解锁屏幕，如果解锁失败，再试用yosemite解锁
+        self.adb.keyevent("KEYCODE_WAKEUP")
+        if self.adb.is_locked():
+            self.adb.keyevent("KEYCODE_MENU")
+            time.sleep(0.5)
+        if self.adb.is_locked():
+            self.home()
+            self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
+            self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
+            time.sleep(0.5)
+            self.home()
 
     def home(self):
         """
@@ -477,14 +483,19 @@ class Android(Device):
         search = False if "search" not in kwargs else kwargs["search"]
 
         if self.ime_method == IME_METHOD.YOSEMITEIME:
-            self.yosemite_ime.text(text)
+            try:
+                self.yosemite_ime.text(text)
+            except AdbError:
+                # 部分手机如oppo/vivo等，在没有安装/启用yosemite输入法时无法使用，改用adb shell input text输入
+                self.adb.text(text)
         else:
-            self.adb.shell(["input", "text", text])
+            self.adb.text(text)
 
         if search:
-            self.yosemite_ime.code("3")
-            return
-
+            try:
+                self.yosemite_ime.code("3")
+            except AdbError:
+                self.adb.shell(["input", "keyevent", "84"])
         # 游戏输入时，输入有效内容后点击Enter确认，如不需要，enter置为False即可。
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
@@ -633,7 +644,7 @@ class Android(Device):
         Get the top activity name
 
         Returns:
-            (package, activity, pid)
+            package/activity
 
         """
         tanp = self.get_top_activity()

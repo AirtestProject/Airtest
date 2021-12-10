@@ -126,6 +126,8 @@ class MultiScaleTemplateMatching(object):
             src, templ, tr, sr = self._resize_by_ratio(
                 org_src.copy(), org_templ.copy(), r, src_max=src_max)
             if min(templ.shape) > templ_min:
+                src[0,0] = templ[0,0] = 0
+                src[0,1] = templ[0,1] = 255
                 result = cv2.matchTemplate(src, templ, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                 h, w = templ.shape

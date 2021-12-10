@@ -6,6 +6,7 @@ from airtest.core.android.constant import YOSEMITE_PACKAGE
 from airtest.core.error import AirtestError
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
+from airtest.utils.retry import retries
 from airtest.utils.snippet import on_method_ready
 LOGGING = get_logger(__name__)
 
@@ -19,6 +20,7 @@ class Recorder(Yosemite):
         self.recording_file = None
 
     @on_method_ready('install_or_upgrade')
+    @retries(max_tries=2)
     def start_recording(self, max_time=1800, bit_rate=None):
         """
         Start screen recording
@@ -50,6 +52,10 @@ class Recorder(Yosemite):
                 raise RuntimeError("start recording error")
             if six.PY3:
                 line = line.decode("utf-8")
+            # 如果上次录屏被强制中断，可能会导致无法开始下一次录屏，额外发一个停止录屏指令
+            if re.search("Record has already started", line):
+                self.stop_recording(is_interrupted=True)
+                continue
             m = re.match("start result: Record start success! File path:(.*\.mp4)", line.strip())
             if m:
                 output = m.group(1)

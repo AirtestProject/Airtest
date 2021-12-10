@@ -107,9 +107,9 @@ class KeypointMatching(object):
     def _cal_confidence(self, resize_img):
         """计算confidence."""
         if self.rgb:
-            confidence = cal_rgb_confidence(self.im_search, resize_img)
+            confidence = cal_rgb_confidence(resize_img, self.im_search)
         else:
-            confidence = cal_ccoeff_confidence(self.im_search, resize_img)
+            confidence = cal_ccoeff_confidence(resize_img, self.im_search)
         # confidence修正
         confidence = (1 + confidence) / 2
         return confidence
