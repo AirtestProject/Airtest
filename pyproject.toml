@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "airtest"
-version = "1.2.3"
+version = "1.2.3.1"
 description = ""
 authors = ["王明 <trevor0@zto.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = ">=3.7 < 4"
 pywinauto = {version="^0.6.8",markers = "sys_platform == 'win32'"}
 opencv-contrib-python = ""
 facebook-wda = "^1.4.3"
@@ -14,7 +14,7 @@ Pillow =">=3.4.0"
 requests=">=2.11.1"
 six=""
 mss ="==4.0.3"
-numpy= "<=1.19.3"
+numpy= ">=1.19.3"
 [tool.poetry.dev-dependencies]
 
 
