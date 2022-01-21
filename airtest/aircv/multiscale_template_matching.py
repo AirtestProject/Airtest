@@ -117,11 +117,13 @@ class MultiScaleTemplateMatching(object):
         w, h = int((w/sr)), int((h/sr))
         return max_loc, w, h
 
-    def multi_scale_search(self, org_src, org_templ, templ_min=10, src_max=800, ratio_min=0.01, ratio_max=0.99, step=0.01, threshold=0.8):
+    def multi_scale_search(self, org_src, org_templ, templ_min=10, src_max=800, ratio_min=0.01, 
+                            ratio_max=0.99, step=0.01, threshold=0.8, time_out=3.0):
         """多尺度模板匹配"""
         mmax_val = 0
         max_info = None
         r = ratio_min
+        t = time.time()
         while r <= ratio_max:
             src, templ, tr, sr = self._resize_by_ratio(
                 org_src.copy(), org_templ.copy(), r, src_max=src_max)
@@ -135,7 +137,8 @@ class MultiScaleTemplateMatching(object):
                     mmax_val = max_val
                     max_info = (r, max_val, max_loc, w, h, tr, sr)
                 # print((r, max_val, max_loc, w, h, tr, sr))
-                if max_val >= threshold:
+                time_cost = time.time() - t
+                if time_cost>time_out and max_val >= threshold:
                     omax_loc, ow, oh = self._org_size(max_loc, w, h, tr, sr)
                     confidence = self._get_confidence_from_matrix(omax_loc, ow, oh)
                     if confidence >= threshold:
@@ -172,7 +175,8 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
                 self.im_source, self.im_search, self.resolution)
             s_gray, i_gray = img_mat_rgb_2_gray(self.im_search), img_mat_rgb_2_gray(self.im_source)
             confidence, max_loc, w, h, _ = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, threshold=self.threshold)
+                    i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, 
+                    threshold=self.threshold, time_out=1.0)
             if not self.record_pos is None:
                 max_loc = (max_loc[0] + area[0], max_loc[1] + area[1])
             
