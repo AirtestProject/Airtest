@@ -74,7 +74,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP, mjpeg_port=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
@@ -82,6 +82,7 @@ class IOS(Device):
 
         # fit wda format, make url start with http://
         # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
+        # with mjpeg_port: http://localhost:8100/?mjpeg_port=9100
         if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
@@ -299,7 +300,12 @@ class IOS(Device):
         data = None
 
         if self.cap_method == CAP_METHOD.MJPEG:
-            data = self.mjpegcap.get_frame_from_stream()
+            try:
+                data = self.mjpegcap.get_frame_from_stream()
+            except ConnectionRefusedError:
+                # 如果未提供端口号、默认端口也无法连接，改回使用WDACAP模式
+                self.cap_method = CAP_METHOD.WDACAP
+                data = self._neo_wda_screenshot()
         elif self.cap_method == CAP_METHOD.WDACAP:
             data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
 

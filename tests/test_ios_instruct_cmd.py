@@ -2,10 +2,7 @@
 import os
 import time
 import unittest
-import socket
-from airtest.core.ios.ios import IOS, CAP_METHOD
-from airtest.core.ios.instruct_cmd import InstructHelper
-from airtest import aircv
+from airtest.core.ios.ios import IOS
 from .testconf import is_port_open
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
 

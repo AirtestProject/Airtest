@@ -48,7 +48,7 @@ class MJpegcap(object):
 
     def __init__(self, instruct_helper=None, ip='localhost', port=None, ori_function=None):
         self.instruct_helper = instruct_helper
-        self.port = port or DEFAULT_MJPEG_PORT
+        self.port = int(port or DEFAULT_MJPEG_PORT)
         self.ip = ip
         # 如果指定了port，说明已经将wda的9100端口映射到了新端口，无需本地重复映射
         self.port_forwarding = True if self.port == DEFAULT_MJPEG_PORT and ip in ('localhost', '127.0.0.1') else False
