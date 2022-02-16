@@ -2,6 +2,7 @@ from airtest.core.cv import Template
 
 import os
 import shutil
+import socket
 
 
 THISDIR = os.path.dirname(__file__)
@@ -20,3 +21,16 @@ def try_remove(filepath):
             os.remove(filepath)
         else:
             shutil.rmtree(filepath)
+
+
+def is_port_open(ip, port):
+    """
+    测试端口是否可用
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, int(port)))
+        s.shutdown(socket.SHUT_RDWR)
+        return True
+    except:
+        return False

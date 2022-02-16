@@ -8,6 +8,7 @@ import platform
 import warnings
 import threading
 import wda
+from copy import copy
 from airtest.core.error import AirtestError
 from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding
 from airtest.utils.logger import get_logger
@@ -32,7 +33,8 @@ class InstructHelper(object):
         # 下面_udid这个是真正的手机序列号，检测到是USB设备，才会记录这个字段
         self._udid = None
         self._device = None
-        self.cleanup_handler = []
+        # 记录曾经使用过的端口号和关闭端口用的方法，方便后续释放端口, _port_using_func[port] = kill_func
+        self._port_using_func = {}
         reg_cleanup(self.tear_down)
 
     @staticmethod
@@ -75,18 +77,39 @@ class InstructHelper(object):
         return self._device
 
     def tear_down(self):
-        for func in self.cleanup_handler:
-            func()
-        self.cleanup_handler = []
+        # 退出时的清理操作，目前暂时只有清理端口
+        using_ports = copy(list(self._port_using_func.keys()))
+        for port in using_ports:
+            try:
+                self._port_using_func[port]()
+            except:
+                continue
+            else:
+                self._port_using_func.pop(port)
 
     # this function auto gen local port
     @retries(3)
     def setup_proxy(self, device_port):
+        """
+        Map a port number on an iOS device to a random port number on the machine
+        映射iOS设备上某个端口号到本机的随机端口号
+
+        Args:
+            device_port: The port number to be mapped on the ios device
+
+        Returns:
+
+        """
         local_port = random.randint(11111, 20000)
         self.do_proxy(local_port, device_port)
         return local_port, device_port
 
-    def do_proxy(self, local_port, device_port):
+    def remove_proxy(self, local_port):
+        if local_port in self._port_using_func:
+            kill_func = self._port_using_func.pop(local_port)
+            kill_func()
+
+    def do_proxy(self, port, device_port):
         """
         Start do proxy of ios device and self device
         目前只支持本地USB连接的手机进行端口转发，远程手机暂时不支持
@@ -98,10 +121,10 @@ class InstructHelper(object):
             raise AirtestError("Currently only supports port forwarding for locally connected iOS devices")
         proxy_process = self.builtin_iproxy_path() or shutil.which("tidevice")
         if proxy_process:
-            cmds = [proxy_process, "-u", self._udid, str(local_port), str(device_port)]
+            cmds = [proxy_process, "-u", self._udid, str(port), str(device_port)]
         else:
             # Port forwarding using python
-            self.do_proxy_usbmux(local_port, device_port)
+            self.do_proxy_usbmux(port, device_port)
             return
 
         # Port forwarding using iproxy
@@ -122,9 +145,20 @@ class InstructHelper(object):
             stderr = stderr.decode(get_std_encoding(sys.stderr))
             raise AirtestError((stdout, stderr))
 
-        self.cleanup_handler.append(proc.kill)
+        self._port_using_func[port] = proc.kill
 
     def do_proxy_usbmux(self, lport, rport):
+        """
+        Mapping ports of local USB devices using python multithreading
+        使用python多线程对本地USB设备的端口进行映射（当前仅使用USB连接一台iOS时才可用）
+
+        Args:
+            lport: local port
+            rport: remote port
+
+        Returns:
+
+        """
         server = ThreadedTCPServer(("localhost", lport), TCPRelay)
         server.rport = rport
         server.device = self.usb_device
@@ -133,7 +167,7 @@ class InstructHelper(object):
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True
         self.server_thread.start()
-        self.cleanup_handler.append(self.server.shutdown)
+        self._port_using_func[lport] = self.server.shutdown
 
 
 if __name__ == '__main__':

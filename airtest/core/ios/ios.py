@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 import time
 import base64
 import traceback
@@ -10,11 +11,11 @@ from functools import wraps
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
-    LANDSCAPE_PAD_RESOLUTION
+    LANDSCAPE_PAD_RESOLUTION, IP_PATTERN
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
-
+from airtest.core.ios.mjpeg_cap import MJpegcap
 
 LOGGING = get_logger(__name__)
 
@@ -28,6 +29,7 @@ def decorator_retry_session(func):
 
     当因为session失效而操作失败时，尝试重新获取session，最多重试3次
     """
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
@@ -41,6 +43,7 @@ def decorator_retry_session(func):
                     time.sleep(0.5)
                     continue
             raise
+
     return wrapper
 
 
@@ -71,7 +74,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP, mjpeg_port=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
@@ -83,7 +86,7 @@ class IOS(Device):
             self.addr = "http://" + addr
 
         """here now use these supported cap touch and ime method"""
-        self.cap_method = CAP_METHOD.WDACAP
+        self.cap_method = cap_method
         self.touch_method = TOUCH_METHOD.WDATOUCH
         self.ime_method = IME_METHOD.WDAIME
 
@@ -103,11 +106,22 @@ class IOS(Device):
 
         info = self.device_info
         self.instruct_helper = InstructHelper(info['uuid'])
+        self.mjpegcap = MJpegcap(self.instruct_helper, ori_function=lambda: self.display_info,
+                                 ip=self.ip, port=mjpeg_port)
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
         self._register_rotation_watcher()
 
         self.alert_watch_and_click = self.driver.alert.watch_and_click
+
+    @property
+    def ip(self):
+        match = re.search(IP_PATTERN, self.addr)
+        if match:
+            ip = match.group(0)
+        else:
+            ip = 'localhost'
+        return ip
 
     @property
     def uuid(self):
@@ -135,7 +149,7 @@ class IOS(Device):
         if self._is_pad is None:
             info = self.device_info
             if info["model"] == "iPad" or \
-                (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
+                    (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
                 # ipad与6P/7P/8P等设备，桌面横屏时的表现一样，都会变横屏
                 self._is_pad = True
             else:
@@ -284,8 +298,9 @@ class IOS(Device):
         """
         data = None
 
-        # 暂时只有一种截图方法, WDACAP
-        if self.cap_method == CAP_METHOD.WDACAP:
+        if self.cap_method == CAP_METHOD.MJPEG:
+            data = self.mjpegcap.get_frame_from_stream()
+        elif self.cap_method == CAP_METHOD.WDACAP:
             data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
 
         # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
@@ -368,7 +383,7 @@ class IOS(Device):
             raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
         else:
             self.press(keyname)
-    
+
     def press(self, keys):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
         self.driver.press(keys)
@@ -425,7 +440,7 @@ class IOS(Device):
 
         """
         self.driver.app_stop(bundle_id=package)
-    
+
     def app_state(self, package):
         """
 
@@ -452,7 +467,7 @@ class IOS(Device):
         # output {"value": 4, "sessionId": "xxxxxx"}
         # different value means 1: die, 2: background, 4: running
         return self.driver.app_state(bundle_id=package)
-    
+
     def app_current(self):
         """
         get the app current 
@@ -620,7 +635,7 @@ class IOS(Device):
 
         """
         return self.driver.alert.buttons()
-    
+
     def alert_exists(self):
         """
         get True for alert exists or False.
