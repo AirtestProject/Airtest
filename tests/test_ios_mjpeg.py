@@ -30,6 +30,7 @@ class TestIosMjpeg(unittest.TestCase):
             time.sleep(2)
 
     def test_snapshot(self):
+        # 测试截图，可以手动将设备横屏后再运行确认截图的方向是否正确
         screen = self.mjpeg_server.snapshot(ensure_orientation=True)
         aircv.show(screen)
 
