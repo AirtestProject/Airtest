@@ -233,7 +233,7 @@ class IOS(Device):
         # function window_size() return UIKit size, While screenshot() image size is Native Resolution
         window_size = self.window_size()
         # when use screenshot, the image size is pixels size. eg(1080 x 1920)
-        snapshot = self.snapshot()
+        snapshot = self.snapshot(cap_method=CAP_METHOD.WDACAP)
         if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
             self._size['window_width'], self._size['window_height'] = window_size.height, window_size.width
             width, height = snapshot.shape[:2]
@@ -284,7 +284,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, filename=None, strType=False, quality=10, max_size=None):
+    def snapshot(self, filename=None, quality=10, max_size=None, cap_method=None):
         """
         take snapshot
 
@@ -292,43 +292,38 @@ class IOS(Device):
             filename: save screenshot to filename
             quality: The image quality, integer in range [1, 99]
             max_size: the maximum size of the picture, e.g 1200
+            cap_method: The default is self.cap_method, but it needs to be specified as WDACAP when getting display_info
 
         Returns:
-            display the screenshot
 
         """
-        data = None
-
-        if self.cap_method == CAP_METHOD.MJPEG:
+        cap_method = cap_method or self.cap_method
+        screen = None
+        if cap_method == CAP_METHOD.MJPEG:
+            screen = self.mjpegcap.snapshot()
+        if screen is None:
+            data = self._neo_wda_screenshot()
+            # output cv2 object
             try:
-                data = self.mjpegcap.get_frame_from_stream()
-            except ConnectionRefusedError:
-                # 如果未提供端口号、默认端口也无法连接，改回使用WDACAP模式
-                self.cap_method = CAP_METHOD.WDACAP
-                data = self._neo_wda_screenshot()
-        elif self.cap_method == CAP_METHOD.WDACAP:
-            data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
-
-        # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
-        if strType:
-            if filename:
-                with open(filename, 'wb') as f:
-                    f.write(data)
-            return data
-
-        # output cv2 object
-        try:
-            screen = aircv.utils.string_2_img(data)
-        except:
-            # may be black/locked screen or other reason, print exc for debugging
-            traceback.print_exc()
-            return None
+                screen = aircv.utils.string_2_img(data)
+            except:
+                # may be black/locked screen or other reason, print exc for debugging
+                traceback.print_exc()
+                return None
 
         # save as file if needed
         if filename:
             aircv.imwrite(filename, screen, quality, max_size=max_size)
 
         return screen
+
+    def get_frame_from_stream(self):
+        if self.cap_method == CAP_METHOD.MJPEG:
+            try:
+                return self.mjpegcap.get_frame_from_stream()
+            except ConnectionRefusedError:
+                self.cap_method = CAP_METHOD.WDACAP
+        return self._neo_wda_screenshot()
 
     def touch(self, pos, duration=0.01):
         """

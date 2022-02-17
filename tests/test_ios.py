@@ -3,7 +3,8 @@ import os
 import time
 import unittest
 import numpy
-from airtest.core.ios.ios import IOS, wda
+from airtest.core.ios.ios import IOS, wda, CAP_METHOD
+from airtest import aircv
 from .testconf import try_remove
 
 text_flag = True # 控制是否运行text接口用例
@@ -16,7 +17,7 @@ class TestIos(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ios = IOS(addr=DEFAULT_ADDR)
+        cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
 
     @classmethod
     def tearDownClass(cls):
@@ -47,7 +48,11 @@ class TestIos(unittest.TestCase):
         screen = self.ios.snapshot(filename=filename)
         self.assertIsInstance(screen, numpy.ndarray)
         self.assertTrue(os.path.exists(filename))
-        # os.remove(filename)
+
+    def test_get_frames(self):
+        frame = self.ios.get_frame_from_stream()
+        frame = aircv.utils.string_2_img(frame)
+        self.assertIsInstance(frame, numpy.ndarray)
 
     def test_keyevent_home(self):
         print("test_keyevent_home")
