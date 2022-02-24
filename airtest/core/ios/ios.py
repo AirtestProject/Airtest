@@ -300,7 +300,10 @@ class IOS(Device):
         cap_method = cap_method or self.cap_method
         screen = None
         if cap_method == CAP_METHOD.MJPEG:
-            screen = self.mjpegcap.snapshot()
+            try:
+                screen = self.mjpegcap.snapshot()
+            except ConnectionRefusedError:
+                pass
         if screen is None:
             data = self._neo_wda_screenshot()
             # output cv2 object
