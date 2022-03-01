@@ -3,11 +3,26 @@ import threading
 import time
 import six
 from six.moves import queue
+from functools import wraps
 
 from airtest.utils.logger import get_logger
 from airtest.utils.snippet import (on_method_ready, ready_method, reg_cleanup, kill_proc)
 
 LOGGING = get_logger(__name__)
+
+
+def retry_when_connection_error(func):
+    @wraps(func)
+    def wrapper(inst, *args, **kwargs):
+        try:
+            return func(inst, *args, **kwargs)
+        except ConnectionAbortedError:
+            # maxtouch有可能会断开，断开时重新初始化一次
+            inst.teardown()
+            inst.install_and_setup()
+            # 由于断开通常是不规范指令导致，因此本次运行结果可以丢弃
+            # return func(inst, *args, **kwargs)
+    return wrapper
 
 
 class BaseTouch(object):
@@ -75,6 +90,7 @@ class BaseTouch(object):
         """
         raise NotImplemented
 
+    @retry_when_connection_error
     def safe_send(self, data):
         """
         Send data to client
@@ -91,11 +107,8 @@ class BaseTouch(object):
         """
         if isinstance(data, six.text_type):
             data = data.encode('utf-8')
-        try:
-            self.client.send(data)
-        except Exception as err:
-            # raise MinitouchError(err)
-            raise err
+        # 如果连接异常，会抛出ConnectionAbortedError，并自动重试一次
+        self.client.send(data)
 
     def _backend_worker(self):
         """
