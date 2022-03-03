@@ -7,7 +7,7 @@ from airtest.core.error import AirtestError
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
-from airtest.utils.snippet import on_method_ready
+from airtest.utils.snippet import on_method_ready, kill_proc, reg_cleanup
 LOGGING = get_logger(__name__)
 
 
@@ -45,10 +45,14 @@ class Recorder(Yosemite):
         # The video size is square, compatible with horizontal and vertical screens
         p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s /system/bin %s.Recorder --start-record' %
                                  (pkg_path, max_time_param, bit_rate_param, YOSEMITE_PACKAGE))
-        nbsp = NonBlockingStreamReader(p.stdout)
+        nbsp = NonBlockingStreamReader(p.stdout, name="start_recording_" + str(id(self)))
+        # 进程p必须要保留到stop_recording执行时、或是退出前才进行清理，否则会导致录屏进程提前终止
+        reg_cleanup(kill_proc, p)
         while True:
             line = nbsp.readline(timeout=5)
             if line is None:
+                nbsp.kill()
+                kill_proc(p)
                 raise RuntimeError("start recording error")
             if six.PY3:
                 line = line.decode("utf-8")
@@ -61,6 +65,7 @@ class Recorder(Yosemite):
                 output = m.group(1)
                 self.recording_proc = p
                 self.recording_file = output
+                nbsp.kill()
                 return True
 
     @on_method_ready('install_or_upgrade')
@@ -82,8 +87,11 @@ class Recorder(Yosemite):
         pkg_path = self.adb.path_app(YOSEMITE_PACKAGE)
         p = self.adb.start_shell('CLASSPATH=%s exec app_process /system/bin %s.Recorder --stop-record' % (pkg_path, YOSEMITE_PACKAGE))
         p.wait()
-        self.recording_proc = None
+        if self.recording_proc:
+            kill_proc(self.recording_proc)
+            self.recording_proc = None
         if is_interrupted:
+            kill_proc(p)
             return
         for line in p.stdout.readlines():
             if line is None:
@@ -94,10 +102,11 @@ class Recorder(Yosemite):
             if m:
                 self.recording_file = m.group(1)
                 self.adb.pull(self.recording_file, output)
+                kill_proc(p)
                 return True
+        kill_proc(p)
         raise AirtestError("start_recording first")
 
-    @on_method_ready('install_or_upgrade')
     def pull_last_recording_file(self, output='screen.mp4'):
         """
         Pull the latest recording file from device. Error raises if no recording files on device.
@@ -106,5 +115,5 @@ class Recorder(Yosemite):
             output: default file is `screen.mp4`
 
         """
-        recording_file = 'mnt/sdcard/test.mp4'
+        recording_file = self.recording_file or 'mnt/sdcard/test.mp4'
         self.adb.pull(recording_file, output)

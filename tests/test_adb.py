@@ -6,6 +6,8 @@ import os
 import unittest
 import subprocess
 from six import text_type
+import warnings
+warnings.simplefilter("always")
 
 
 class TestADBWithoutDevice(unittest.TestCase):
