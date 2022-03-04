@@ -505,8 +505,26 @@ class Windows(Device):
     def get_ip_address(self):
         """
         Return default external ip address of the windows os.
-
+        获取网卡名-IP地址信息，并选出合适的IP.
         Returns:
              :py:obj:`str`: ip address
         """
-        return socket.gethostbyname(socket.gethostname())
+        netcard_addr_info = {}
+        # 获取网卡名-IP地址信息
+        info = psutil.net_if_addrs()
+        for netcard_name, value in info.items():
+            # 每个网卡都筛选出非回环地址
+            for item in value:
+                if item[0] == 2 and item[1] != "127.0.0.1":
+                    netcard_addr_info.update({netcard_name: item[1]})
+
+        # 删选出来对应的IP地址
+        if not netcard_addr_info:
+            # 没有拿到任何有效的IP地址，返回回环地址..
+            return "127.0.0.1"
+        if "" and "" in netcard_addr_info.keys():
+            # 包含有优先网卡名，则返回该网卡名对应的IP地址
+            return netcard_addr_info[""]
+        else:
+            # 没有优先网卡名的IP地址，随机返回一个网卡IP地址
+            return list(netcard_addr_info.values())[0]
