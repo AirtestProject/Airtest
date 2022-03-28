@@ -103,6 +103,7 @@ class IOS(Device):
         self._touch_factor = None
         self._last_orientation = None
         self._is_pad = None
+        self._using_ios_tagent = None
         self._device_info = {}
 
         info = self.device_info
@@ -117,6 +118,17 @@ class IOS(Device):
 
     @property
     def ip(self):
+        """
+        Returns the IP address of the host connected to the iOS phone
+        It is not the IP address of the iOS phone.
+        If you want to get the IP address of the phone, you can access the interface `get_ip_address`
+
+        For example: when the device is connected via http://localhost:8100, return localhost
+        If it is a remote device http://192.168.xx.xx:8100, it returns the IP address of 192.168.xx.xx
+
+        Returns:
+
+        """
         match = re.search(IP_PATTERN, self.addr)
         if match:
             ip = match.group(0)
@@ -127,6 +139,25 @@ class IOS(Device):
     @property
     def uuid(self):
         return self.addr
+
+    @property
+    def using_ios_tagent(self):
+        """
+        当前基础版本：appium/WebDriverAgent 4.1.4
+        基于上述版本，2022.3.30之后发布的iOS-Tagent版本，在/status接口中新增了一个Version参数，如果能检查到本参数，说明使用了新版本ios-Tagent
+        该版本基于Appium版的WDA做了一些改动，可以更快地进行点击和滑动，并优化了部分UI树的获取逻辑
+        但是所有的坐标都为竖屏坐标，需要airtest自行根据方向做转换
+        同时，大于4.1.4版本的appium/WebDriverAgent不再需要针对ipad进行特殊的横屏坐标处理了
+        Returns:
+
+        """
+        if self._using_ios_tagent is None:
+            status = self.driver.status()
+            if 'Version' in status:
+                self._using_ios_tagent = True
+            else:
+                self._using_ios_tagent = False
+        return self._using_ios_tagent
 
     def _fetch_new_session(self):
         """
@@ -197,10 +228,14 @@ class IOS(Device):
         """
             return window size
             namedtuple:
-                Size(wide , hight)
+                Size(width , height)
         """
-
-        return self.driver.window_size()
+        try:
+            return self.driver.window_size()
+        except wda.exceptions.WDAStaleElementReferenceError:
+            print("iOS connection failed, please try pressing the home button to return to the desktop and try again.")
+            print("iOS连接失败，请尝试按home键回到桌面后再重试")
+            raise
 
     @property
     def orientation(self):
@@ -211,6 +246,20 @@ class IOS(Device):
         if not self._current_orientation:
             self._current_orientation = self.get_orientation()
         return self._current_orientation
+
+    @orientation.setter
+    def orientation(self, value):
+        """
+
+        Args:
+            value(string): LANDSCAPE | PORTRAIT | UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT |
+                    UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN
+
+        Returns:
+
+        """
+        # 可以对屏幕进行旋转，但是可能会导致问题
+        self.driver.orientation = value
 
     def get_orientation(self):
         # self.driver.orientation只能拿到LANDSCAPE，不能拿到左转/右转的确切方向
@@ -225,9 +274,8 @@ class IOS(Device):
         if not self._size['width'] or not self._size['height']:
             self._display_info()
 
-        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
-                'physical_width': self._size['width'], 'physical_height': self._size['height'],
-                'window_width': self._size['window_width'], 'window_height': self._size['window_height']}
+        self._size['orientation'] = self.orientation
+        return self._size
 
     def _display_info(self):
         # function window_size() return UIKit size, While screenshot() image size is Native Resolution
@@ -247,6 +295,10 @@ class IOS(Device):
         # so self._touch_factor = 1 / self.driver.scale, but the result is incorrect on some devices(6P/7P/8P)
         self._touch_factor = float(self._size['window_height']) / float(height)
         self.rotation_watcher.get_ready()
+
+        # 当前版本: wda 4.1.4 获取到的/window/size，在ipad+桌面横屏下拿到的是 height * height，需要修正
+        if self.is_pad and self.home_interface():
+            self._size['window_width'] = int(width * self._touch_factor)
 
     @property
     def touch_factor(self):
@@ -518,11 +570,10 @@ class IOS(Device):
         """
         x, y = tuple_xy
 
-        # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
-        if self.is_pad and self.orientation != wda.PORTRAIT:
-            if not self.home_interface():
-                return x, y
-
+        # 1. 如果使用了2022.03.30之后发布的iOS-Tagent版本，则必须要进行竖屏坐标转换
+        # 2. 如果使用了appium/WebDriverAgent>=4.1.4版本，直接使用原坐标即可，无需转换
+        # 3. 如果使用了appium/WebDriverAgent<4.1.4版本，或低版本的iOS-Tagent，并且ipad下横屏点击异常，请改用airtest<=1.2.4
+        if self.using_ios_tagent:
             width = self.display_info["width"]
             height = self.display_info["height"]
             if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
