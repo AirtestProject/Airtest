@@ -30,6 +30,7 @@ class TestIos(unittest.TestCase):
     def test_wda(self):
         print("test_wda")
         self.assertIsInstance(self.ios.driver, wda.Client)
+        print(self.ios.driver.session())
 
     def test_display_info(self):
         print("test_display_info")
@@ -38,6 +39,21 @@ class TestIos(unittest.TestCase):
         self.assertIsInstance(device_infos["height"], int)
         self.assertIsInstance(device_infos["orientation"], str)
         print(device_infos)
+
+    def test_window_size(self):
+        print("test window size")
+        window_size = self.ios.window_size()
+        print(window_size)
+        self.assertIsInstance(window_size.height, int)
+        self.assertIsInstance(window_size.width, int)
+        # 以下用例可能会因为wda更新而失败，到时候需要去掉 ios._display_info里的ipad横屏下的额外处理
+        if self.ios.is_pad and self.ios.home_interface():
+            self.assertEqual(window_size.width, window_size.height)
+
+    def test_using_ios_tagent(self):
+        status = self.ios.driver.status()
+        print(self.ios.using_ios_tagent)
+        self.assertEqual('Version' in status, self.ios.using_ios_tagent)
 
     def test_snapshot(self):
         print("test_snapshot")
@@ -105,6 +121,8 @@ class TestIos(unittest.TestCase):
         time.sleep(2)
         # 左往右滑
         self.ios.swipe((0.2, 0.5), (0.8, 0.5))
+        # 上往下滑，按住0.5秒后往下滑动
+        self.ios.swipe((0.5, 0.1), (0.5, 0.5), duration=0.5)
 
     def test_lock(self):
         print("test_lock")
@@ -164,7 +182,9 @@ class TestIos(unittest.TestCase):
 
     def test_device_status(self):
         print("test_get_device_status")
-        self.assertIsInstance(self.ios.device_status(), dict)
+        status = self.ios.device_status()
+        print(status)
+        self.assertIsInstance(status, dict)
 
     @unittest.skipIf(skip_alert_flag, "demonstrating skipping get_alert_exists")
     def test_alert_exists(self):
