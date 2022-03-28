@@ -47,7 +47,8 @@ class TestIos(unittest.TestCase):
         self.assertIsInstance(window_size.height, int)
         self.assertIsInstance(window_size.width, int)
         # 以下用例可能会因为wda更新而失败，到时候需要去掉 ios._display_info里的ipad横屏下的额外处理
-        if self.ios.is_pad and self.ios.home_interface():
+        # 当ipad 在横屏+桌面的情况下，获取到的window_size的值为 height*height，没有width的值
+        if self.ios.is_pad and self.client.orientation != 'PORTRAIT' and self.ios.home_interface():
             self.assertEqual(window_size.width, window_size.height)
 
     def test_using_ios_tagent(self):
