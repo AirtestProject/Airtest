@@ -349,22 +349,14 @@ class IOS(Device):
         Returns:
 
         """
-        cap_method = cap_method or self.cap_method
-        screen = None
-        if cap_method == CAP_METHOD.MJPEG:
-            try:
-                screen = self.mjpegcap.snapshot()
-            except ConnectionRefusedError:
-                pass
-        if screen is None:
-            data = self._neo_wda_screenshot()
-            # output cv2 object
-            try:
-                screen = aircv.utils.string_2_img(data)
-            except:
-                # may be black/locked screen or other reason, print exc for debugging
-                traceback.print_exc()
-                return None
+        data = self._neo_wda_screenshot()
+        # output cv2 object
+        try:
+            screen = aircv.utils.string_2_img(data)
+        except:
+            # may be black/locked screen or other reason, print exc for debugging
+            traceback.print_exc()
+            return None
 
         # save as file if needed
         if filename:
