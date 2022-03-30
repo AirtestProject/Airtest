@@ -5,6 +5,8 @@ import unittest
 from airtest.core.ios.ios import IOS, CAP_METHOD
 from airtest import aircv
 from .testconf import try_remove, is_port_open
+import warnings
+warnings.simplefilter("always")
 
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
 DEFAULT_PORT = 9100
@@ -19,6 +21,7 @@ class TestIosMjpeg(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         try_remove('screen.png')
+        cls.mjpeg_server.teardown_stream()
 
     def test_get_frame(self):
         for i in range(5):
@@ -31,8 +34,34 @@ class TestIosMjpeg(unittest.TestCase):
 
     def test_snapshot(self):
         # 测试截图，可以手动将设备横屏后再运行确认截图的方向是否正确
-        screen = self.mjpeg_server.snapshot(ensure_orientation=True)
-        aircv.show(screen)
+        # mjpeg直接截图，可能图像不是最新的
+        for i in range(3):
+            screen = self.mjpeg_server.snapshot(ensure_orientation=True)
+            aircv.show(screen)
+            time.sleep(2)
+
+    def test_frame_resume(self):
+        """
+        用于测试当连接建立一段时间后，暂停接受数据，然后恢复数据的效果
+        Returns:
+
+        """
+        import cv2
+        for i in range(20):
+            data = self.mjpeg_server.get_frame_from_stream()
+            img = aircv.utils.string_2_img(data)
+            cv2.imshow("test", img)
+            c = cv2.waitKey(10)
+            time.sleep(0.05)
+        time.sleep(10)
+        for i in range(200):
+            data = self.mjpeg_server.get_frame_from_stream()
+            img = aircv.utils.string_2_img(data)
+            cv2.imshow("test", img)
+            c = cv2.waitKey(10)
+            time.sleep(0.05)
+        cv2.destroyAllWindows()
+
 
     def test_teardown_stream(self):
         self.mjpeg_server.get_frame()

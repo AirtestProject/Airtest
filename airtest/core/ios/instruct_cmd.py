@@ -9,8 +9,9 @@ import warnings
 import threading
 import wda
 from copy import copy
+from functools import partial
 from airtest.core.error import AirtestError
-from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding
+from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding, kill_proc
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
 from airtest.utils.compat import SUBPROCESS_FLAG
@@ -81,11 +82,10 @@ class InstructHelper(object):
         using_ports = copy(list(self._port_using_func.keys()))
         for port in using_ports:
             try:
-                self._port_using_func[port]()
+                kill_func = self._port_using_func.pop(port)
+                kill_func()
             except:
                 continue
-            else:
-                self._port_using_func.pop(port)
 
     # this function auto gen local port
     @retries(3)
@@ -145,7 +145,7 @@ class InstructHelper(object):
             stderr = stderr.decode(get_std_encoding(sys.stderr))
             raise AirtestError((stdout, stderr))
 
-        self._port_using_func[port] = proc.kill
+        self._port_using_func[port] = partial(kill_proc, proc)
 
     def do_proxy_usbmux(self, lport, rport):
         """

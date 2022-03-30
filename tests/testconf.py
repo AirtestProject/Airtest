@@ -34,3 +34,5 @@ def is_port_open(ip, port):
         return True
     except:
         return False
+    finally:
+        s.close()

@@ -281,7 +281,7 @@ class IOS(Device):
         # function window_size() return UIKit size, While screenshot() image size is Native Resolution
         window_size = self.window_size()
         # when use screenshot, the image size is pixels size. eg(1080 x 1920)
-        snapshot = self.snapshot(cap_method=CAP_METHOD.WDACAP)
+        snapshot = self.snapshot()
         if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
             self._size['window_width'], self._size['window_height'] = window_size.height, window_size.width
             width, height = snapshot.shape[:2]
@@ -336,7 +336,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, filename=None, quality=10, max_size=None, cap_method=None):
+    def snapshot(self, filename=None, quality=10, max_size=None):
         """
         take snapshot
 
@@ -344,7 +344,6 @@ class IOS(Device):
             filename: save screenshot to filename
             quality: The image quality, integer in range [1, 99]
             max_size: the maximum size of the picture, e.g 1200
-            cap_method: The default is self.cap_method, but it needs to be specified as WDACAP when getting display_info
 
         Returns:
 

@@ -5,6 +5,8 @@ import unittest
 from airtest.core.ios.ios import IOS
 from .testconf import is_port_open
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
+import warnings
+warnings.simplefilter("always")
 
 
 class TestInstructCmd(unittest.TestCase):
@@ -46,6 +48,11 @@ class TestInstructCmd(unittest.TestCase):
         self.ihelper.do_proxy(9101, 9100)
         time.sleep(5)
         self.assertTrue(is_port_open('localhost', 9101))
+
+    def test_do_proxy2(self):
+        self.ihelper.do_proxy(9101, 9100)
+        time.sleep(3)
+        self.ihelper.remove_proxy(9101)
 
     def test_tear_down(self):
         port, _ = self.ihelper.setup_proxy(9100)

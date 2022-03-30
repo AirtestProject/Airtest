@@ -6,42 +6,42 @@ from airtest import aircv
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method
 from airtest.core.ios.constant import ROTATION_MODE, DEFAULT_MJPEG_PORT
 from airtest.utils.logger import get_logger
+from airtest.utils.safesocket import SafeSocket
 
 
 LOGGING = get_logger(__name__)
 
 
-class SocketBuffer:
+class SocketBuffer(SafeSocket):
     def __init__(self, sock: socket.socket):
-        self._sock = sock
-        self._buf = bytearray()
+        super(SocketBuffer, self).__init__(sock)
 
     def _drain(self):
-        _data = self._sock.recv(1024)
-        if _data is None:
+        _data = self.sock.recv(1024)
+        if _data is None or _data == b"":
             raise IOError("socket closed")
-        self._buf.extend(_data)
+        self.buf += _data
         return len(_data)
 
     def read_until(self, delimeter: bytes) -> bytes:
         """ return without delimeter """
         while True:
-            index = self._buf.find(delimeter)
+            index = self.buf.find(delimeter)
             if index != -1:
-                _return = self._buf[:index]
-                self._buf = self._buf[index + len(delimeter):]
+                _return = self.buf[:index]
+                self.buf = self.buf[index + len(delimeter):]
                 return _return
             self._drain()
 
     def read_bytes(self, length: int) -> bytes:
-        while length > len(self._buf):
+        while length > len(self.buf):
             self._drain()
 
-        _return, self._buf = self._buf[:length], self._buf[length:]
+        _return, self.buf = self.buf[:length], self.buf[length:]
         return _return
 
     def write(self, data: bytes):
-        return self._sock.sendall(data)
+        return self.sock.sendall(data)
 
 
 class MJpegcap(object):
@@ -72,7 +72,13 @@ class MJpegcap(object):
     @on_method_ready('setup_stream_server')
     def get_frame_from_stream(self):
         while True:
-            line = self.buf.read_until(b'\r\n')
+            try:
+                line = self.buf.read_until(b'\r\n')
+            except IOError:
+                LOGGING.debug("mjpegsock is interrupted, try to reconnect...")
+                self.buf.close()
+                self.init_sock()
+                continue
             if line.startswith(b"Content-Length"):
                 length = int(line.decode('utf-8').split(": ")[1])
                 break
@@ -91,6 +97,7 @@ class MJpegcap(object):
         Take a screenshot and convert it into a cv2 image object
 
         获取一张屏幕截图，并转化成cv2的图像对象
+        !!! 注意，该方法拿到的截图可能不是队列中最新的，除非一直在消费队列中的图像，否则可能会是过往图像内容，请谨慎使用
 
         Args:
             ensure_orientation: True or False whether to keep the orientation same as display
@@ -117,6 +124,7 @@ class MJpegcap(object):
     def teardown_stream(self):
         if self.port_forwarding:
             self.instruct_helper.remove_proxy(self.port)
+            self.buf.close()
             self.port = None
 
 
