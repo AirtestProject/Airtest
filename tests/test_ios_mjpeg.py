@@ -62,6 +62,10 @@ class TestIosMjpeg(unittest.TestCase):
             time.sleep(0.05)
         cv2.destroyAllWindows()
 
+    def test_get_blank_screen(self):
+        img_string = self.mjpeg_server.get_blank_screen()
+        img = aircv.utils.string_2_img(img_string)
+        aircv.show(img)
 
     def test_teardown_stream(self):
         self.mjpeg_server.get_frame()

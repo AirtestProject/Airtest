@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+import numpy
 import socket
 import traceback
 from airtest import aircv
@@ -53,6 +54,9 @@ class MJpegcap(object):
         # 如果指定了port，说明已经将wda的9100端口映射到了新端口，无需本地重复映射
         self.port_forwarding = True if self.port == DEFAULT_MJPEG_PORT and ip in ('localhost', '127.0.0.1') else False
         self.ori_function = ori_function
+        self.sock = None
+        self.buf = None
+        self._is_running = False
 
     @ready_method
     def setup_stream_server(self):
@@ -62,31 +66,41 @@ class MJpegcap(object):
         reg_cleanup(self.teardown_stream)
 
     def init_sock(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.ip, self.port))
-        self.buf = SocketBuffer(self.sock)
-        self.buf.write(b"GET / HTTP/1.0\r\nHost: localhost\r\n\r\n")
-        self.buf.read_until(b'\r\n\r\n')
-        LOGGING.info("mjpegsock is ready")
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((self.ip, self.port))
+            self.buf = SocketBuffer(self.sock)
+            self.buf.write(b"GET / HTTP/1.0\r\nHost: localhost\r\n\r\n")
+            self.buf.read_until(b'\r\n\r\n')
+            self._is_running = True
+            LOGGING.info("mjpegsock is ready")
+        except ConnectionResetError:
+            # 断开tidevice或是拔线，会导致这个异常，直接退出即可
+            LOGGING.error("mjpegsock connection error")
+            raise
 
     @on_method_ready('setup_stream_server')
     def get_frame_from_stream(self):
-        while True:
-            try:
+        if self._is_running is False:
+            self.init_sock()
+        try:
+            while True:
                 line = self.buf.read_until(b'\r\n')
-            except IOError:
-                LOGGING.debug("mjpegsock is interrupted, try to reconnect...")
-                self.buf.close()
-                self.init_sock()
-                continue
-            if line.startswith(b"Content-Length"):
-                length = int(line.decode('utf-8').split(": ")[1])
-                break
-        while True:
-            if self.buf.read_until(b'\r\n') == b'':
-                break
-        imdata = self.buf.read_bytes(length)
-        return imdata
+                if line.startswith(b"Content-Length"):
+                    length = int(line.decode('utf-8').split(": ")[1])
+                    break
+            while True:
+                if self.buf.read_until(b'\r\n') == b'':
+                    break
+            imdata = self.buf.read_bytes(length)
+            return imdata
+        except IOError:
+            # 如果暂停获取mjpegsock的数据一段时间，可能会导致它断开，这里将self.buf关闭并临时返回黑屏图像
+            # 等待下一次需要获取屏幕时，再进行重连
+            LOGGING.debug("mjpegsock is closed")
+            self._is_running = False
+            self.buf.close()
+            return self.get_blank_screen()
 
     def get_frame(self):
         # 获得单张屏幕截图
@@ -121,11 +135,29 @@ class MJpegcap(object):
 
         return screen
 
+    def get_blank_screen(self):
+        """
+        生成一个黑屏图像，在连接失效时代替屏幕画面返回
+        Returns:
+
+        """
+        if self.ori_function:
+            display_info = self.ori_function()
+            width, height = display_info['width'], display_info['height']
+            if display_info["orientation"] in [90, 270]:
+                width, height = height, width
+        else:
+            width, height = 1080, 1920
+        img = numpy.zeros((width, height, 3)).astype('uint8')
+        img_string = aircv.utils.img_2_string(img)
+        return img_string
+
     def teardown_stream(self):
         if self.port_forwarding:
             self.instruct_helper.remove_proxy(self.port)
+        if self.buf:
             self.buf.close()
-            self.port = None
+        self.port = None
 
 
 if __name__ == "__main__":
