@@ -7,7 +7,6 @@ from mss import mss
 from functools import wraps
 import pywintypes  # noqa
 import win32api
-import psutil
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
@@ -506,7 +505,7 @@ class Windows(Device):
     def get_ip_address(self):
         """
         Return default external ip address of the windows os.
-        获取网卡名-IP地址信息，并选出合适的IP.
+
         Returns:
              :py:obj:`str`: ip address
         """
