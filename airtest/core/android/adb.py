@@ -821,7 +821,11 @@ class ADB(object):
             AdbShellError if no such file
         """
         out = self.shell(["ls", "-l", filepath])
-        file_size = int(out.split()[4])
+        try:
+            file_size = int(out.split()[4])
+        except ValueError:
+            # 安卓6.0.1系统得到的结果是[3]为文件大小
+            file_size = int(out.split()[3])
         return file_size
 
     def _cleanup_forwards(self):
