@@ -1417,7 +1417,7 @@ class ADB(object):
         interfaces = ('eth0', 'eth1', 'wlan0')
         for i in interfaces:
             ip = get_ip_address_from_interface(i)
-            if ip and not ip.startswith('172.') and not ip.startswith('127.') and not ip.startswith('169.'):
+            if ip and not ip.startswith('127.') and not ip.startswith('169.'):
                 return ip
 
         return None
