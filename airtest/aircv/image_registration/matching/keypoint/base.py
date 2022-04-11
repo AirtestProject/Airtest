@@ -8,6 +8,9 @@ from airtest.aircv.image_registration.matching import MatchTemplate
 from airtest.aircv.image_registration.utils import generate_result, get_keypoint_from_matches, keypoint_origin_angle
 from airtest.aircv.error import NoEnoughPointsError, PerspectiveTransformError, HomographyError, MatchResultError
 
+from airtest.utils.logger import get_logger
+LOGGING = get_logger(__name__)
+
 
 class BaseKeypoint(object):
     FILTER_RATIO = 1
@@ -35,7 +38,7 @@ class BaseKeypoint(object):
     def create_detector(self, **kwargs):
         raise NotImplementedError
 
-    def find_best_result(self, im_source, im_search, threshold=None, rgb=None):
+    def _find_best_result(self, im_source, im_search, threshold=None, rgb=None):
         """
         通过特征点匹配,在im_source中找到最符合im_search的范围
 
@@ -66,7 +69,28 @@ class BaseKeypoint(object):
 
         if not rect or confidence < threshold:
             return None
-        return generate_result(rect=rect, confi=confidence)
+
+        best_match = generate_result(rect=rect, confi=confidence)
+        LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
+        return best_match
+
+    def find_best_result(self, im_source, im_search, threshold=None, rgb=None):
+        """
+        通过特征点匹配,在im_source中找到最符合im_search的范围
+
+        Args:
+            im_source: 待匹配图像
+            im_search: 图片模板
+            threshold: 识别阈值(0~1)
+            rgb: 是否使用rgb通道进行校验
+
+        Returns:
+
+        """
+        ret = self.find_all_result(im_source=im_source, im_search=im_search, threshold=threshold, rgb=rgb, max_count=1)
+        if ret:
+            return ret[0]
+        return None
 
     def find_all_result(self, im_source, im_search, threshold=None, rgb=None, max_count=10, max_iter_counts=20, distance_threshold=150):
         """

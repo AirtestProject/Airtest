@@ -11,6 +11,9 @@ from airtest.aircv.error import MatchResultError, NoModuleError
 from airtest.aircv.image_registration.utils import generate_result
 from typing import Union
 
+from airtest.utils.logger import get_logger
+LOGGING = get_logger(__name__)
+
 
 class MatchTemplate(object):
     METHOD_NAME = 'tpl'
@@ -64,7 +67,9 @@ class MatchTemplate(object):
             return None
         x, y = max_loc
         rect = Rect(x=x, y=y, width=w, height=h)
-        return generate_result(rect, confidence)
+        best_match = generate_result(rect, confidence)
+        LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
+        return best_match
 
     def find_all_results(self, im_source: Image, im_search: Image, threshold=None, rgb=None, max_count=10):
         """
@@ -100,7 +105,7 @@ class MatchTemplate(object):
 
             if (confidence < (threshold or self.threshold)) or len(results) >= max_count:
                 break
-            results.append(rect)
+            results.append(generate_result(rect, confidence))
             result.rectangle(rect=Rect(int(max_loc[0] - w / 2), int(max_loc[1] - h / 2), w, h), color=(0, 0, 0), thickness=-1)
 
         return results if results else None
