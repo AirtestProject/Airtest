@@ -7,6 +7,7 @@ from baseImage import Image, Rect, Point
 from airtest.aircv.image_registration.matching import MatchTemplate
 from airtest.aircv.image_registration.utils import generate_result, get_keypoint_from_matches, keypoint_origin_angle
 from airtest.aircv.error import NoEnoughPointsError, PerspectiveTransformError, HomographyError, MatchResultError
+from airtest.aircv.utils import print_run_time
 
 from airtest.utils.logger import get_logger
 LOGGING = get_logger(__name__)
@@ -74,6 +75,7 @@ class BaseKeypoint(object):
         LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
         return best_match
 
+    @print_run_time
     def find_best_result(self, im_source, im_search, threshold=None, rgb=None):
         """
         通过特征点匹配,在im_source中找到最符合im_search的范围

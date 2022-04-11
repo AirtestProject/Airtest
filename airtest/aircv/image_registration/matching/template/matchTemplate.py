@@ -9,7 +9,9 @@ from baseImage.constant import Place
 
 from airtest.aircv.error import MatchResultError, NoModuleError
 from airtest.aircv.image_registration.utils import generate_result
+from airtest.aircv.utils import print_run_time
 from typing import Union
+
 
 from airtest.utils.logger import get_logger
 LOGGING = get_logger(__name__)
@@ -34,6 +36,7 @@ class MatchTemplate(object):
         self.rgb = rgb
         self.matcher = cv2.matchTemplate
 
+    @print_run_time
     def find_best_result(self, im_source, im_search, threshold=None, rgb=None):
         """
         模板匹配, 返回匹配度最高且大于阈值的范围
@@ -71,6 +74,7 @@ class MatchTemplate(object):
         LOGGING.debug("[%s] threshold=%s, result=%s" % (self.METHOD_NAME, self.threshold, best_match))
         return best_match
 
+    @print_run_time
     def find_all_results(self, im_source: Image, im_search: Image, threshold=None, rgb=None, max_count=10):
         """
         模板匹配, 返回匹配度大于阈值的范围, 且最大数量不超过max_count

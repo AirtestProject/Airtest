@@ -32,6 +32,8 @@ MATCHING_METHODS = {
 
 for methods_name, func in MATCHING_METHODS.items():
     method = False
+    if methods_name in ['mstpl', 'gmstpl']:
+        continue
     try:
         method = func(threshold=ST.THRESHOLD)
     except NoModuleError as err:
@@ -104,10 +106,31 @@ class Template(object):
             elif not func:
                 continue
             else:
-                ret = self._try_match(func, im_search=image, im_source=screen, threshold=self.threshold, rgb=self.rgb)
+                if method in ["mstpl", "gmstpl"]:
+                    ret = self._mstpl_try_match(func, ori_image, screen, threshold=self.threshold, rgb=self.rgb,
+                                          record_pos=self.record_pos,
+                                          resolution=self.resolution, scale_max=self.scale_max,
+                                          scale_step=self.scale_step)
+                else:
+                    ret = self._try_match(func, im_search=image, im_source=screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
                 break
         return ret
+
+    @staticmethod
+    def _mstpl_try_match(func, *args, **kwargs):
+        G.LOGGING.debug("try match with %s" % func.__name__)
+        try:
+            ret = func(*args, **kwargs).find_best_result()
+        except aircv.NoModuleError as err:
+            G.LOGGING.warning(
+                "'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
+            return None
+        except aircv.BaseError as err:
+            G.LOGGING.debug(repr(err))
+            return None
+        else:
+            return ret
 
     @staticmethod
     def _try_match(func, *args, **kwargs):
