@@ -821,7 +821,11 @@ class ADB(object):
             AdbShellError if no such file
         """
         out = self.shell(["ls", "-l", filepath])
-        file_size = int(out.split()[4])
+        try:
+            file_size = int(out.split()[4])
+        except ValueError:
+            # 安卓6.0.1系统得到的结果是[3]为文件大小
+            file_size = int(out.split()[3])
         return file_size
 
     def _cleanup_forwards(self):
@@ -959,11 +963,15 @@ class ADB(object):
         """
         # use adb shell wm size
         displayInfo = {}
-        wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.raw_shell('wm size'))
-        if wm_size:
-            displayInfo = dict((k, int(v)) for k, v in wm_size.groupdict().items())
-            displayInfo['density'] = self._getDisplayDensity(strip=True)
-            return displayInfo
+        try:
+            wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.raw_shell('wm size'))
+        except AdbError as e:
+            print(e)
+        else:
+            if wm_size:
+                displayInfo = dict((k, int(v)) for k, v in wm_size.groupdict().items())
+                displayInfo['density'] = self._getDisplayDensity(strip=True)
+                return displayInfo
 
         phyDispRE = re.compile('.*PhysicalDisplayInfo{(?P<width>\d+) x (?P<height>\d+), .*, density (?P<density>[\d.]+).*')
         out = self.raw_shell('dumpsys display')

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 import time
 import base64
 import traceback
@@ -10,11 +11,11 @@ from functools import wraps
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
-    LANDSCAPE_PAD_RESOLUTION
+    LANDSCAPE_PAD_RESOLUTION, IP_PATTERN
 from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
-
+from airtest.core.ios.mjpeg_cap import MJpegcap
 
 LOGGING = get_logger(__name__)
 
@@ -28,6 +29,7 @@ def decorator_retry_session(func):
 
     当因为session失效而操作失败时，尝试重新获取session，最多重试3次
     """
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
@@ -41,6 +43,7 @@ def decorator_retry_session(func):
                     time.sleep(0.5)
                     continue
             raise
+
     return wrapper
 
 
@@ -71,7 +74,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
@@ -79,11 +82,12 @@ class IOS(Device):
 
         # fit wda format, make url start with http://
         # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
+        # with mjpeg_port: http://localhost:8100/?mjpeg_port=9100
         if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
         """here now use these supported cap touch and ime method"""
-        self.cap_method = CAP_METHOD.WDACAP
+        self.cap_method = cap_method
         self.touch_method = TOUCH_METHOD.WDATOUCH
         self.ime_method = IME_METHOD.WDAIME
 
@@ -99,10 +103,13 @@ class IOS(Device):
         self._touch_factor = None
         self._last_orientation = None
         self._is_pad = None
+        self._using_ios_tagent = None
         self._device_info = {}
 
         info = self.device_info
         self.instruct_helper = InstructHelper(info['uuid'])
+        self.mjpegcap = MJpegcap(self.instruct_helper, ori_function=lambda: self.display_info,
+                                 ip=self.ip, port=mjpeg_port)
         # start up RotationWatcher with default session
         self.rotation_watcher = RotationWatcher(self)
         self._register_rotation_watcher()
@@ -110,8 +117,47 @@ class IOS(Device):
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
     @property
+    def ip(self):
+        """
+        Returns the IP address of the host connected to the iOS phone
+        It is not the IP address of the iOS phone.
+        If you want to get the IP address of the phone, you can access the interface `get_ip_address`
+
+        For example: when the device is connected via http://localhost:8100, return localhost
+        If it is a remote device http://192.168.xx.xx:8100, it returns the IP address of 192.168.xx.xx
+
+        Returns:
+
+        """
+        match = re.search(IP_PATTERN, self.addr)
+        if match:
+            ip = match.group(0)
+        else:
+            ip = 'localhost'
+        return ip
+
+    @property
     def uuid(self):
         return self.addr
+
+    @property
+    def using_ios_tagent(self):
+        """
+        当前基础版本：appium/WebDriverAgent 4.1.4
+        基于上述版本，2022.3.30之后发布的iOS-Tagent版本，在/status接口中新增了一个Version参数，如果能检查到本参数，说明使用了新版本ios-Tagent
+        该版本基于Appium版的WDA做了一些改动，可以更快地进行点击和滑动，并优化了部分UI树的获取逻辑
+        但是所有的坐标都为竖屏坐标，需要airtest自行根据方向做转换
+        同时，大于4.1.4版本的appium/WebDriverAgent不再需要针对ipad进行特殊的横屏坐标处理了
+        Returns:
+
+        """
+        if self._using_ios_tagent is None:
+            status = self.driver.status()
+            if 'Version' in status:
+                self._using_ios_tagent = True
+            else:
+                self._using_ios_tagent = False
+        return self._using_ios_tagent
 
     def _fetch_new_session(self):
         """
@@ -135,7 +181,7 @@ class IOS(Device):
         if self._is_pad is None:
             info = self.device_info
             if info["model"] == "iPad" or \
-                (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
+                    (self.display_info["width"], self.display_info["height"]) in LANDSCAPE_PAD_RESOLUTION:
                 # ipad与6P/7P/8P等设备，桌面横屏时的表现一样，都会变横屏
                 self._is_pad = True
             else:
@@ -182,10 +228,14 @@ class IOS(Device):
         """
             return window size
             namedtuple:
-                Size(wide , hight)
+                Size(width , height)
         """
-
-        return self.driver.window_size()
+        try:
+            return self.driver.window_size()
+        except wda.exceptions.WDAStaleElementReferenceError:
+            print("iOS connection failed, please try pressing the home button to return to the desktop and try again.")
+            print("iOS连接失败，请尝试按home键回到桌面后再重试")
+            raise
 
     @property
     def orientation(self):
@@ -196,6 +246,20 @@ class IOS(Device):
         if not self._current_orientation:
             self._current_orientation = self.get_orientation()
         return self._current_orientation
+
+    @orientation.setter
+    def orientation(self, value):
+        """
+
+        Args:
+            value(string): LANDSCAPE | PORTRAIT | UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT |
+                    UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN
+
+        Returns:
+
+        """
+        # 可以对屏幕进行旋转，但是可能会导致问题
+        self.driver.orientation = value
 
     def get_orientation(self):
         # self.driver.orientation只能拿到LANDSCAPE，不能拿到左转/右转的确切方向
@@ -210,9 +274,8 @@ class IOS(Device):
         if not self._size['width'] or not self._size['height']:
             self._display_info()
 
-        return {'width': self._size['width'], 'height': self._size['height'], 'orientation': self.orientation,
-                'physical_width': self._size['width'], 'physical_height': self._size['height'],
-                'window_width': self._size['window_width'], 'window_height': self._size['window_height']}
+        self._size['orientation'] = self.orientation
+        return self._size
 
     def _display_info(self):
         # function window_size() return UIKit size, While screenshot() image size is Native Resolution
@@ -232,6 +295,10 @@ class IOS(Device):
         # so self._touch_factor = 1 / self.driver.scale, but the result is incorrect on some devices(6P/7P/8P)
         self._touch_factor = float(self._size['window_height']) / float(height)
         self.rotation_watcher.get_ready()
+
+        # 当前版本: wda 4.1.4 获取到的/window/size，在ipad+桌面横屏下拿到的是 height * height，需要修正
+        if self.is_pad and self.home_interface():
+            self._size['window_width'] = int(width * self._touch_factor)
 
     @property
     def touch_factor(self):
@@ -269,7 +336,7 @@ class IOS(Device):
         raw_value = base64.b64decode(value)
         return raw_value
 
-    def snapshot(self, filename=None, strType=False, quality=10, max_size=None):
+    def snapshot(self, filename=None, quality=10, max_size=None):
         """
         take snapshot
 
@@ -279,22 +346,9 @@ class IOS(Device):
             max_size: the maximum size of the picture, e.g 1200
 
         Returns:
-            display the screenshot
 
         """
-        data = None
-
-        # 暂时只有一种截图方法, WDACAP
-        if self.cap_method == CAP_METHOD.WDACAP:
-            data = self._neo_wda_screenshot()  # wda 截图不用考虑朝向
-
-        # 实时刷新手机画面，直接返回base64格式，旋转问题交给IDE处理
-        if strType:
-            if filename:
-                with open(filename, 'wb') as f:
-                    f.write(data)
-            return data
-
+        data = self._neo_wda_screenshot()
         # output cv2 object
         try:
             screen = aircv.utils.string_2_img(data)
@@ -308,6 +362,14 @@ class IOS(Device):
             aircv.imwrite(filename, screen, quality, max_size=max_size)
 
         return screen
+
+    def get_frame_from_stream(self):
+        if self.cap_method == CAP_METHOD.MJPEG:
+            try:
+                return self.mjpegcap.get_frame_from_stream()
+            except ConnectionRefusedError:
+                self.cap_method = CAP_METHOD.WDACAP
+        return self._neo_wda_screenshot()
 
     def touch(self, pos, duration=0.01):
         """
@@ -368,7 +430,7 @@ class IOS(Device):
             raise ValueError("Invalid name: %s, should be one of ('home', 'volumeUp', 'volumeDown')" % keyname)
         else:
             self.press(keyname)
-    
+
     def press(self, keys):
         """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
         self.driver.press(keys)
@@ -425,7 +487,7 @@ class IOS(Device):
 
         """
         self.driver.app_stop(bundle_id=package)
-    
+
     def app_state(self, package):
         """
 
@@ -452,7 +514,7 @@ class IOS(Device):
         # output {"value": 4, "sessionId": "xxxxxx"}
         # different value means 1: die, 2: background, 4: running
         return self.driver.app_state(bundle_id=package)
-    
+
     def app_current(self):
         """
         get the app current 
@@ -499,11 +561,10 @@ class IOS(Device):
         """
         x, y = tuple_xy
 
-        # 部分设备如ipad，在横屏+桌面的情况下，点击坐标依然需要按照竖屏坐标额外做一次旋转处理
-        if self.is_pad and self.orientation != wda.PORTRAIT:
-            if not self.home_interface():
-                return x, y
-
+        # 1. 如果使用了2022.03.30之后发布的iOS-Tagent版本，则必须要进行竖屏坐标转换
+        # 2. 如果使用了appium/WebDriverAgent>=4.1.4版本，直接使用原坐标即可，无需转换
+        # 3. 如果使用了appium/WebDriverAgent<4.1.4版本，或低版本的iOS-Tagent，并且ipad下横屏点击异常，请改用airtest<=1.2.4
+        if self.using_ios_tagent:
             width = self.display_info["width"]
             height = self.display_info["height"]
             if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
@@ -620,7 +681,7 @@ class IOS(Device):
 
         """
         return self.driver.alert.buttons()
-    
+
     def alert_exists(self):
         """
         get True for alert exists or False.

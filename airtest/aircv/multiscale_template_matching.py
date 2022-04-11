@@ -28,8 +28,7 @@ class MultiScaleTemplateMatching(object):
 
     METHOD_NAME = "MSTemplate"
 
-    def __init__(self, im_search, im_source, threshold=0.8, rgb=True, record_pos=None, resolution=(), scale_max=800,
-                 scale_step=0.005):
+    def __init__(self, im_search, im_source, threshold=0.8, rgb=True, record_pos=None, resolution=(), scale_max=800, scale_step=0.005):
         self.im_source = im_source
         self.im_search = im_search
         self.threshold = threshold
@@ -52,8 +51,7 @@ class MultiScaleTemplateMatching(object):
         s_gray, i_gray = img_mat_rgb_2_gray(
             self.im_search), img_mat_rgb_2_gray(self.im_source)
         confidence, max_loc, w, h, _ = self.multi_scale_search(
-            i_gray, s_gray, ratio_min=0.01, ratio_max=0.99, src_max=self.scale_max, step=self.scale_step,
-            threshold=self.threshold)
+            i_gray, s_gray, ratio_min=0.01, ratio_max=0.99, src_max=self.scale_max, step=self.scale_step, threshold=self.threshold)
 
         # 求取识别位置: 目标中心 + 目标区域:
         middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
@@ -85,7 +83,7 @@ class MultiScaleTemplateMatching(object):
         x_middle, y_middle = int(x_min + w / 2), int(y_min + h / 2)
         # 左下(min,max)->右下(max,max)->右上(max,min)
         left_bottom_pos, right_bottom_pos = (
-                                                x_min, y_min + h), (x_min + w, y_min + h)
+            x_min, y_min + h), (x_min + w, y_min + h)
         right_top_pos = (x_min + w, y_min)
         # 点击位置:
         middle_point = (x_middle, y_middle)
@@ -99,37 +97,38 @@ class MultiScaleTemplateMatching(object):
     def _resize_by_ratio(src, templ, ratio=1.0, templ_min=10, src_max=800):
         """根据模板相对屏幕的长边 按比例缩放屏幕"""
         # 截屏最大尺寸限制
-        sr = min(src_max / max(src.shape), 1.0)
-        src = cv2.resize(src, (int(src.shape[1] * sr), int(src.shape[0] * sr)))
+        sr = min(src_max/max(src.shape),1.0)
+        src = cv2.resize(src, (int(src.shape[1]*sr), int(src.shape[0]*sr)))
         # 截图尺寸缩放
         h, w = src.shape[0], src.shape[1]
         th, tw = templ.shape[0], templ.shape[1]
-        if th / h >= tw / w:
-            tr = (h * ratio) / th
+        if th/h >= tw/w:
+            tr = (h*ratio)/th
         else:
-            tr = (w * ratio) / tw
-        templ = cv2.resize(templ, (max(int(tw * tr), 1), max(int(th * tr), 1)))
+            tr = (w*ratio)/tw
+        templ = cv2.resize(templ, (max(int(tw*tr), 1), max(int(th*tr), 1)))
         return src, templ, tr, sr
 
     @staticmethod
     def _org_size(max_loc, w, h, tr, sr):
         """获取原始比例的框"""
-        max_loc = (int((max_loc[0] / sr)), int((max_loc[1] / sr)))
-        w, h = int((w / sr)), int((h / sr))
+        max_loc = (int((max_loc[0]/sr)), int((max_loc[1]/sr)))
+        w, h = int((w/sr)), int((h/sr))
         return max_loc, w, h
 
-    def multi_scale_search(self, org_src, org_templ, templ_min=10, src_max=800, ratio_min=0.01, ratio_max=0.99,
-                           step=0.01, threshold=0.8):
+    def multi_scale_search(self, org_src, org_templ, templ_min=10, src_max=800, ratio_min=0.01, 
+                            ratio_max=0.99, step=0.01, threshold=0.8, time_out=3.0):
         """多尺度模板匹配"""
         mmax_val = 0
         max_info = None
         r = ratio_min
+        t = time.time()
         while r <= ratio_max:
             src, templ, tr, sr = self._resize_by_ratio(
                 org_src.copy(), org_templ.copy(), r, src_max=src_max)
             if min(templ.shape) > templ_min:
-                src[0, 0] = templ[0, 0] = 0
-                src[0, 1] = templ[0, 1] = 255
+                src[0,0] = templ[0,0] = 0
+                src[0,1] = templ[0,1] = 255
                 result = cv2.matchTemplate(src, templ, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                 h, w = templ.shape
@@ -137,7 +136,8 @@ class MultiScaleTemplateMatching(object):
                     mmax_val = max_val
                     max_info = (r, max_val, max_loc, w, h, tr, sr)
                 # print((r, max_val, max_loc, w, h, tr, sr))
-                if max_val >= threshold:
+                time_cost = time.time() - t
+                if time_cost>time_out and max_val >= threshold:
                     omax_loc, ow, oh = self._org_size(max_loc, w, h, tr, sr)
                     confidence = self._get_confidence_from_matrix(omax_loc, ow, oh)
                     if confidence >= threshold:
@@ -160,30 +160,30 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
     @print_run_time
     def find_best_result(self):
         """函数功能：找到最优结果."""
-        if self.resolution != ():
+        if self.resolution!=():
             # 第一步：校验图像输入
             check_source_larger_than_search(self.im_source, self.im_search)
-            if self.resolution[0] < self.im_search.shape[1] or self.resolution[1] < self.im_search.shape[0]:
+            if self.resolution[0]<self.im_search.shape[1] or self.resolution[1]<self.im_search.shape[0]:
                 raise TemplateInputError("error: resolution is too small.")
             # 第二步：计算模板匹配的结果矩阵res
             if not self.record_pos is None:
-                area, self.resolution = self._get_area_scope(self.im_source, self.im_search, self.record_pos,
-                                                             self.resolution)
+                area, self.resolution = self._get_area_scope(self.im_source, self.im_search, self.record_pos, self.resolution)
                 self.im_source = aircv.crop_image(self.im_source, area)
                 check_source_larger_than_search(self.im_source, self.im_search)
             r_min, r_max = self._get_ratio_scope(
                 self.im_source, self.im_search, self.resolution)
             s_gray, i_gray = img_mat_rgb_2_gray(self.im_search), img_mat_rgb_2_gray(self.im_source)
             confidence, max_loc, w, h, _ = self.multi_scale_search(
-                i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, threshold=self.threshold)
+                    i_gray, s_gray, ratio_min=r_min, ratio_max=r_max, step=self.scale_step, 
+                    threshold=self.threshold, time_out=1.0)
             if not self.record_pos is None:
                 max_loc = (max_loc[0] + area[0], max_loc[1] + area[1])
-
+            
             # 求取识别位置: 目标中心 + 目标区域:
             middle_point, rectangle = self._get_target_rectangle(max_loc, w, h)
             best_match = generate_result(middle_point, rectangle, confidence)
             LOGGING.debug("[%s] threshold=%s, result=%s" %
-                          (self.METHOD_NAME, self.threshold, best_match))
+                        (self.METHOD_NAME, self.threshold, best_match))
 
             return best_match if confidence >= self.threshold else None
         else:
@@ -194,11 +194,11 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
         H, W = src.shape[0], src.shape[1]
         th, tw = templ.shape[0], templ.shape[1]
         w, h = resolution
-        rmin = min(H / h, W / w)  # 新旧模板比下限
-        rmax = max(H / h, W / w)  # 新旧模板比上限
-        ratio = max(th / H, tw / W)  # 小图大图比
-        r_min = ratio * rmin
-        r_max = ratio * rmax
+        rmin = min(H/h, W/w)  # 新旧模板比下限
+        rmax = max(H/h, W/w)  # 新旧模板比上限
+        ratio = max(th/H, tw/W)  # 小图大图比
+        r_min = ratio*rmin
+        r_max = ratio*rmax
         return max(r_min, self.scale_step), min(r_max, 0.99)
 
     def get_predict_point(self, record_pos, screen_resolution):
@@ -220,7 +220,7 @@ class MultiScaleTemplateMatchingPre(MultiScaleTemplateMatching):
         area = (
             max(x - predict_x_radius, 0),
             max(y - predict_y_radius, 0),
-            min(x + predict_x_radius, W),
+            min(x + predict_x_radius, W),   
             min(y + predict_y_radius, H),
-        )
-        return area, (w * (area[3] - area[1]) / W, h * (area[2] - area[0]) / H)
+            )
+        return area, (w*(area[3]-area[1])/W, h*(area[2]-area[0])/H)

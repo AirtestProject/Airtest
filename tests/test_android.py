@@ -7,6 +7,8 @@ from threading import Thread
 from airtest.core.android.android import Android, ADB, Minicap, Minitouch, IME_METHOD, CAP_METHOD, TOUCH_METHOD
 from airtest.core.error import AirtestError
 from .testconf import APK, PKG, try_remove
+import warnings
+warnings.simplefilter("always")
 
 
 class TestAndroid(unittest.TestCase):
@@ -153,50 +155,6 @@ class TestAndroid(unittest.TestCase):
         self.android.touch_method = TOUCH_METHOD.MINITOUCH
         with self.assertRaises(Exception):
             self.android.swipe((100, 100), (300, 300), fingers=3)
-
-    def test_recording(self):
-        if self.android.sdk_version >= 19:
-            filepath = "screen.mp4"
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            self.android.start_recording(max_time=30, bit_rate=500000)
-            time.sleep(10)
-            self.android.stop_recording()
-            self.assertTrue(os.path.exists("screen.mp4"))
-            time.sleep(2)
-            # Record the screen with the lower quality
-            os.remove(filepath)
-            self.android.start_recording(bit_rate_level=1)
-            time.sleep(10)
-            self.android.stop_recording()
-            self.assertTrue(os.path.exists("screen.mp4"))
-            os.remove(filepath)
-            time.sleep(2)
-            self.android.start_recording(bit_rate_level=0.5)
-            time.sleep(10)
-            self.android.stop_recording()
-            self.assertTrue(os.path.exists("screen.mp4"))
-
-    def test_start_recording_error(self):
-        if self.android.sdk_version >= 19:
-            with self.assertRaises(AirtestError):
-                self.android.start_recording(max_time=30)
-                time.sleep(3)
-                self.android.start_recording(max_time=30)
-            self.android.stop_recording()
-
-    def test_stop_recording_error(self):
-        with self.assertRaises(AirtestError):
-            self.android.stop_recording()
-
-    def test_interrupt_recording(self):
-        filepath = "screen.mp4"
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        self.android.start_recording(max_time=30)
-        time.sleep(3)
-        self.android.stop_recording(is_interrupted=True)
-        self.assertFalse(os.path.exists(filepath))
 
     def test_get_top_activity(self):
         self._install_test_app()
