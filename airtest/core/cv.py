@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """"Airtest图像识别专用."""
 
 import os
 import sys
-import time
 import types
 from six import PY3
 from copy import deepcopy
@@ -14,102 +12,31 @@ from airtest import aircv
 from airtest.aircv import cv2
 from airtest.core.helper import G, logwrap
 from airtest.core.settings import Settings as ST  # noqa
-from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
+from airtest.core.error import InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
-from airtest.aircv.template_matching import TemplateMatching
-from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching,MultiScaleTemplateMatchingPre
-from airtest.aircv.keypoint_matching import KAZEMatching, BRISKMatching, AKAZEMatching, ORBMatching
-from airtest.aircv.keypoint_matching_contrib import SIFTMatching, SURFMatching, BRIEFMatching
+from airtest.aircv import MatchTemplate, SIFT, SURF, ORB, AKAZE
+from airtest.aircv.multiscale_template_matching import MultiScaleTemplateMatching, MultiScaleTemplateMatchingPre
+from airtest.aircv.error import NoModuleError
+
 
 MATCHING_METHODS = {
-    "tpl": TemplateMatching,
+    'tpl': MatchTemplate,
+    'sift': SIFT,
+    'surf': SURF,
+    'orb': ORB,
+    'akaze': AKAZE,
     "mstpl": MultiScaleTemplateMatchingPre,
     "gmstpl": MultiScaleTemplateMatching,
-    "kaze": KAZEMatching,
-    "brisk": BRISKMatching,
-    "akaze": AKAZEMatching,
-    "orb": ORBMatching,
-    "sift": SIFTMatching,
-    "surf": SURFMatching,
-    "brief": BRIEFMatching,
 }
 
-
-@logwrap
-def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None):
-    """
-    Search for image template in the screen until timeout
-
-    Args:
-        query: image template to be found in screenshot
-        timeout: time interval how long to look for the image template
-        threshold: default is None
-        interval: sleep interval before next attempt to find the image template
-        intervalfunc: function that is executed after unsuccessful attempt to find the image template
-
-    Raises:
-        TargetNotFoundError: when image template is not found in screenshot
-
-    Returns:
-        TargetNotFoundError if image template not found, otherwise returns the position where the image template has
-        been found in screenshot
-
-    """
-    G.LOGGING.info("Try finding: %s", query)
-    start_time = time.time()
-    while True:
-        screen = G.DEVICE.snapshot(filename=None, quality=ST.SNAPSHOT_QUALITY)
-
-        if screen is None:
-            G.LOGGING.warning("Screen is None, may be locked")
-        else:
-            if threshold:
-                query.threshold = threshold
-            match_pos = query.match_in(screen)
-            if match_pos:
-                try_log_screen(screen)
-                return match_pos
-
-        if intervalfunc is not None:
-            intervalfunc()
-
-        # 超时则raise，未超时则进行下次循环:
-        if (time.time() - start_time) > timeout:
-            try_log_screen(screen)
-            raise TargetNotFoundError('Picture %s not found in screen' % query)
-        else:
-            time.sleep(interval)
-
-
-@logwrap
-def try_log_screen(screen=None, quality=None, max_size=None):
-    """
-    Save screenshot to file
-
-    Args:
-        screen: screenshot to be saved
-        quality: The image quality, default is ST.SNAPSHOT_QUALITY
-        max_size: the maximum size of the picture, e.g 1200
-
-    Returns:
-        {"screen": filename, "resolution": aircv.get_resolution(screen)}
-
-    """
-    if not ST.LOG_DIR or not ST.SAVE_IMAGE:
-        return
-    if not quality:
-        quality = ST.SNAPSHOT_QUALITY
-    if not max_size:
-        max_size = ST.IMAGE_MAXSIZE
-    if screen is None:
-        screen = G.DEVICE.snapshot(quality=quality)
-    filename = "%(time)d.jpg" % {'time': time.time() * 1000}
-    filepath = os.path.join(ST.LOG_DIR, filename)
-    if screen is not None:
-        aircv.imwrite(filepath, screen, quality, max_size=max_size)
-        return {"screen": filename, "resolution": aircv.get_resolution(screen)}
-    return None
+for methods_name, func in MATCHING_METHODS.items():
+    method = False
+    try:
+        method = func(threshold=ST.THRESHOLD)
+    except NoModuleError as err:
+        G.LOGGING.warning("{} is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.".format(func.METHOD_NAME))
+    MATCHING_METHODS[methods_name] = method
 
 
 class Template(object):
@@ -174,24 +101,30 @@ class Template(object):
             func = MATCHING_METHODS.get(method, None)
             if func is None:
                 raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
+            elif not func:
+                continue
             else:
-                if method in ["mstpl", "gmstpl"]:
-                    ret = self._try_match(func, ori_image, screen, threshold=self.threshold, rgb=self.rgb, record_pos=self.record_pos,
-                                            resolution=self.resolution, scale_max=self.scale_max, scale_step=self.scale_step)
-                else:
-                    ret = self._try_match(func, image, screen, threshold=self.threshold, rgb=self.rgb)
+                ret = self._try_match(func, im_search=image, im_source=screen, threshold=self.threshold, rgb=self.rgb)
             if ret:
                 break
         return ret
 
     @staticmethod
     def _try_match(func, *args, **kwargs):
-        G.LOGGING.debug("try match with %s" % func.__name__)
+        G.LOGGING.debug("try match with %s" % func.METHOD_NAME)
         try:
-            ret = func(*args, **kwargs).find_best_result()
-        except aircv.NoModuleError as err:
-            G.LOGGING.warning("'surf'/'sift'/'brief' is in opencv-contrib module. You can use 'tpl'/'kaze'/'brisk'/'akaze'/'orb' in CVSTRATEGY, or reinstall opencv with the contrib module.")
+            ret = func.find_best_result(*args, **kwargs)
+        except aircv.BaseError as err:
+            G.LOGGING.debug(repr(err))
             return None
+        else:
+            return ret
+
+    @staticmethod
+    def _try_match_all(func, *args, **kwargs):
+        G.LOGGING.debug("try match with %s" % func.METHOD_NAME)
+        try:
+            ret = func.find_all_result(*args, **kwargs)
         except aircv.BaseError as err:
             G.LOGGING.debug(repr(err))
             return None
@@ -202,28 +135,18 @@ class Template(object):
         return aircv.imread(self.filepath)
 
     def _find_all_template(self, image, screen):
-        return TemplateMatching(image, screen, threshold=self.threshold, rgb=self.rgb).find_all_results()
-
-    def _find_keypoint_result_in_predict_area(self, func, image, screen):
-        if not self.record_pos:
-            return None
-        # calc predict area in screen
-        image_wh, screen_resolution = aircv.get_resolution(image), aircv.get_resolution(screen)
-        xmin, ymin, xmax, ymax = Predictor.get_predict_area(self.record_pos, image_wh, self.resolution, screen_resolution)
-        # crop predict image from screen
-        predict_area = aircv.crop_image(screen, (xmin, ymin, xmax, ymax))
-        if not predict_area.any():
-            return None
-        # keypoint matching in predicted area:
-        ret_in_area = func(image, predict_area, threshold=self.threshold, rgb=self.rgb)
-        # calc cv ret if found
-        if not ret_in_area:
-            return None
-        ret = deepcopy(ret_in_area)
-        if "rectangle" in ret:
-            for idx, item in enumerate(ret["rectangle"]):
-                ret["rectangle"][idx] = (item[0] + xmin, item[1] + ymin)
-        ret["result"] = (ret_in_area["result"][0] + xmin, ret_in_area["result"][1] + ymin)
+        ret = None
+        for method in ST.CVSTRATEGY:
+            # get function definition and execute:
+            func = MATCHING_METHODS.get(method, None)
+            if func is None:
+                raise InvalidMatchingMethodError("Undefined method in CVSTRATEGY: '%s', try 'kaze'/'brisk'/'akaze'/'orb'/'surf'/'sift'/'brief' instead." % method)
+            elif not func:
+                continue
+            else:
+                ret = self._try_match_all(func, im_search=image, im_source=screen, threshold=self.threshold, rgb=self.rgb)
+            if ret:
+                break
         return ret
 
     def _resize_image(self, image, screen, resize_method):
