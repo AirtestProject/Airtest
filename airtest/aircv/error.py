@@ -51,3 +51,15 @@ class NoMatchPointError(BaseError):
 
 class MatchResultCheckError(BaseError):
     """Exception raised for errors 0 keypoint found in the input images."""
+
+
+class MatchResultError(BaseError):
+    """ An error occurred while result out of screen"""
+
+
+class PerspectiveTransformError(BaseError):
+    """ An error occurred while perspectiveTransform """
+
+
+class NoEnoughPointsError(BaseError):
+    """ detect not enough feature points in input images"""
