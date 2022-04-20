@@ -101,8 +101,8 @@ class Recorder(Yosemite):
             m = re.match("stop result: Stop ok! File path:(.*\.mp4)", line.strip())
             if m:
                 self.recording_file = m.group(1)
-                self.adb.pull(self.recording_file, output)
                 kill_proc(p)
+                self.adb.pull(self.recording_file, output)
                 return True
         kill_proc(p)
         raise AirtestError("start_recording first")
