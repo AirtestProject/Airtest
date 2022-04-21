@@ -306,6 +306,32 @@ class IOS(Device):
             self._display_info()
         return self._touch_factor
 
+    @touch_factor.setter
+    def touch_factor(self, factor):
+        """
+        touch_factor is used to convert click coordinates: mobile phone real coordinates = touch_factor * screen coordinates
+        In general, no manual settings are required
+
+        touch_factor用于换算点击坐标：手机真实坐标 = touch_factor * 屏幕坐标
+        默认计算方式是： self.display_info['window_height'] / self.display_info['height']
+        但在部分特殊型号手机上可能不准确，例如iOS14.4的7P，默认值为 1/3，但部分7P点击位置不准确，可自行设置为：self.touch_factor = 1 / 3.03
+        （一般情况下，无需手动设置！）
+
+        Examples:
+            >>> device = connect_device("iOS:///")
+            >>> device.touch((100, 100))  # wrong position
+            >>> print(device.touch_factor)
+            0.333333
+            >>> device.touch_factor = 1 / 3.3
+            >>> device.touch((100, 100))
+        Args:
+            factor: real_pos / pixel_pos, e.g: 1/self.driver.scale
+
+        Returns:
+
+        """
+        self._touch_factor = float(factor)
+
     def get_render_resolution(self):
         """
         Return render resolution after rotation

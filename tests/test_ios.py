@@ -229,13 +229,28 @@ class TestIos(unittest.TestCase):
 
     def test_device_info(self):
         print("test_device_info")
-        print(self.ios.device_info())
+        print(self.ios.device_info)
 
     def test_home_interface(self):
         print("test_home_interface")
         self.ios.home()
         time.sleep(2)
         self.assertTrue(self.ios.home_interface())
+
+    def test_touch_factor(self):
+        """
+        在部分特殊型号的设备上，可能默认的touch_factor不能正确点击对应的位置，因此需要修正
+        Returns:
+
+        """
+        print("test touch factor")
+        print("ios.driver.scale:", self.ios.driver.scale)
+        print("display_info:", self.ios.display_info)
+        print("default touch_factor:", self.ios.touch_factor)
+        self.ios.touch((500, 500))
+        self.ios.touch_factor = 1/3.3
+        self.ios.touch((500, 500))
+
 
 
 
