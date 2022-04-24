@@ -32,7 +32,8 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.adb, ADB)
 
     def test_display_info(self):
-        self.assertIs(self.android.display_info, self.android.adb.display_info)
+        self.assertIsInstance(self.android.adb.display_info, dict)
+        print(self.android.display_info)
         self.assertIn("width", self.android.display_info)
         self.assertIn("height", self.android.display_info)
         self.assertIn("orientation", self.android.display_info)
