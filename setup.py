@@ -35,6 +35,8 @@ def parse_requirements(filename):
     if sys.version_info.major == 2:
         # facebook-wda only supports py3
         reqs.remove("facebook-wda>=1.3.3")
+        reqs.remove("mss==6.1.0")
+        reqs.append("mss==4.0.3")
     return reqs
 
 

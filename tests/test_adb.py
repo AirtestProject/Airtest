@@ -6,6 +6,8 @@ import os
 import unittest
 import subprocess
 from six import text_type
+import warnings
+warnings.simplefilter("always")
 
 
 class TestADBWithoutDevice(unittest.TestCase):
@@ -110,6 +112,9 @@ class TestADBWithDevice(unittest.TestCase):
 
     def test_exists_file(self):
         self.assertTrue(self.adb.exists_file("/"))
+
+    def test_file_size(self):
+        self.assertIsInstance(self.adb.file_size("/data/local/tmp/minicap"), int)
 
     def test_push(self):
         tmpdir = "/data/local/tmp"

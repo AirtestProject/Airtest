@@ -3,7 +3,8 @@ import os
 import time
 import unittest
 import numpy
-from airtest.core.ios.ios import IOS, wda
+from airtest.core.ios.ios import IOS, wda, CAP_METHOD
+from airtest import aircv
 from .testconf import try_remove
 
 text_flag = True # 控制是否运行text接口用例
@@ -16,7 +17,7 @@ class TestIos(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ios = IOS(addr=DEFAULT_ADDR)
+        cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
 
     @classmethod
     def tearDownClass(cls):
@@ -29,6 +30,7 @@ class TestIos(unittest.TestCase):
     def test_wda(self):
         print("test_wda")
         self.assertIsInstance(self.ios.driver, wda.Client)
+        print(self.ios.driver.session())
 
     def test_display_info(self):
         print("test_display_info")
@@ -37,6 +39,22 @@ class TestIos(unittest.TestCase):
         self.assertIsInstance(device_infos["height"], int)
         self.assertIsInstance(device_infos["orientation"], str)
         print(device_infos)
+
+    def test_window_size(self):
+        print("test window size")
+        window_size = self.ios.window_size()
+        print(window_size)
+        self.assertIsInstance(window_size.height, int)
+        self.assertIsInstance(window_size.width, int)
+        # 以下用例可能会因为wda更新而失败，到时候需要去掉 ios._display_info里的ipad横屏下的额外处理
+        # 当ipad 在横屏+桌面的情况下，获取到的window_size的值为 height*height，没有width的值
+        if self.ios.is_pad and self.client.orientation != 'PORTRAIT' and self.ios.home_interface():
+            self.assertEqual(window_size.width, window_size.height)
+
+    def test_using_ios_tagent(self):
+        status = self.ios.driver.status()
+        print(self.ios.using_ios_tagent)
+        self.assertEqual('Version' in status, self.ios.using_ios_tagent)
 
     def test_snapshot(self):
         print("test_snapshot")
@@ -47,7 +65,11 @@ class TestIos(unittest.TestCase):
         screen = self.ios.snapshot(filename=filename)
         self.assertIsInstance(screen, numpy.ndarray)
         self.assertTrue(os.path.exists(filename))
-        # os.remove(filename)
+
+    def test_get_frames(self):
+        frame = self.ios.get_frame_from_stream()
+        frame = aircv.utils.string_2_img(frame)
+        self.assertIsInstance(frame, numpy.ndarray)
 
     def test_keyevent_home(self):
         print("test_keyevent_home")
@@ -100,6 +122,8 @@ class TestIos(unittest.TestCase):
         time.sleep(2)
         # 左往右滑
         self.ios.swipe((0.2, 0.5), (0.8, 0.5))
+        # 上往下滑，按住0.5秒后往下滑动
+        self.ios.swipe((0.5, 0.1), (0.5, 0.5), duration=0.5)
 
     def test_lock(self):
         print("test_lock")
@@ -159,7 +183,9 @@ class TestIos(unittest.TestCase):
 
     def test_device_status(self):
         print("test_get_device_status")
-        self.assertIsInstance(self.ios.device_status(), dict)
+        status = self.ios.device_status()
+        print(status)
+        self.assertIsInstance(status, dict)
 
     @unittest.skipIf(skip_alert_flag, "demonstrating skipping get_alert_exists")
     def test_alert_exists(self):
@@ -203,13 +229,28 @@ class TestIos(unittest.TestCase):
 
     def test_device_info(self):
         print("test_device_info")
-        print(self.ios.device_info())
+        print(self.ios.device_info)
 
     def test_home_interface(self):
         print("test_home_interface")
         self.ios.home()
         time.sleep(2)
         self.assertTrue(self.ios.home_interface())
+
+    def test_touch_factor(self):
+        """
+        在部分特殊型号的设备上，可能默认的touch_factor不能正确点击对应的位置，因此需要修正
+        Returns:
+
+        """
+        print("test touch factor")
+        print("ios.driver.scale:", self.ios.driver.scale)
+        print("display_info:", self.ios.display_info)
+        print("default touch_factor:", self.ios.touch_factor)
+        self.ios.touch((500, 500))
+        self.ios.touch_factor = 1/3.3
+        self.ios.touch((500, 500))
+
 
 
 

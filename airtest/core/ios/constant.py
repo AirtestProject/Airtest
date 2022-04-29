@@ -24,7 +24,11 @@ LANDSCAPE_PAD_RESOLUTION = [(1242, 2208)]
 class CAP_METHOD(object):
     MINICAP = "MINICAP"
     WDACAP = "WDACAP"
+    MJPEG = "MJPEG"
 
+
+# wda default mjpeg server port number
+DEFAULT_MJPEG_PORT = 9100
 
 # now touch and ime only support wda
 class TOUCH_METHOD(object):

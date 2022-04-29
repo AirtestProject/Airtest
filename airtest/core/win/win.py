@@ -509,4 +509,5 @@ class Windows(Device):
         Returns:
              :py:obj:`str`: ip address
         """
-        return socket.gethostbyname(socket.gethostname())
+        hostname = socket.getfqdn()
+        return socket.gethostbyname_ex(hostname)[2][0]
