@@ -457,6 +457,7 @@ h2.empty-report{
 }
 .fluid.infos{
   min-width: 300px;
+  word-break: break-all;
 }
 .step-right .fluid.screens, .step-right .fluid.traces{
   width: 100%;
