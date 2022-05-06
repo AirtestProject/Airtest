@@ -12,7 +12,7 @@ import jinja2
 import traceback
 from copy import deepcopy
 from datetime import datetime
-from jinja2 import Markup, escape
+from markupsafe import Markup, escape
 try:
     from jinja2 import evalcontextfilter as pass_eval_context  # jinja2<3.1
 except:
