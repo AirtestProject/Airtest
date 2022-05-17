@@ -6,6 +6,7 @@
 import cv2
 import time
 import numpy as np
+from distutils.version import LooseVersion
 
 from airtest.utils.logger import get_logger
 
@@ -13,8 +14,10 @@ from .error import *  # noqa
 from .utils import (generate_result, check_image_valid, print_run_time, get_keypoint_from_matches, rectangle_transform,
                     keypoint_distance, get_middle_point)
 from .cal_confidence import cal_ccoeff_confidence, cal_rgb_confidence
-
 LOGGING = get_logger(__name__)
+CVRANSAC = (cv2.RANSAC, 5.0)
+if LooseVersion(cv2.__version__) > LooseVersion('4.5.0'):
+    CVRANSAC = (cv2.USAC_MAGSAC, 4.0, None, 2000, 0.99)
 
 
 class KeypointMatching(object):
@@ -387,7 +390,7 @@ class KeypointMatching(object):
     def _find_homography(sch_pts, src_pts):
         """多组特征点对时，求取单向性矩阵."""
         try:
-            M, mask = cv2.findHomography(sch_pts, src_pts, cv2.RANSAC, 5.0)
+            M, mask = cv2.findHomography(sch_pts, src_pts, *CVRANSAC)
         except Exception:
             import traceback
             traceback.print_exc()
