@@ -964,9 +964,9 @@ class ADB(object):
         # use adb shell wm size
         displayInfo = {}
         try:
-            wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.raw_shell('wm size'))
-        except AdbError as e:
-            print(e)
+            wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.cmd('shell wm size', timeout=5))
+        except (AdbError, RuntimeError) as e:
+            LOGGING.error(e)
         else:
             if wm_size:
                 displayInfo = dict((k, int(v)) for k, v in wm_size.groupdict().items())
