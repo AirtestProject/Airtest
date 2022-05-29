@@ -391,9 +391,9 @@ class KeypointMatching(object):
         """多组特征点对时，求取单向性矩阵."""
         try:
             M, mask = cv2.findHomography(sch_pts, src_pts, *CVRANSAC)
-        except Exception:
-            import traceback
-            traceback.print_exc()
+        except cv2.error:
+            # import traceback
+            # traceback.print_exc()
             raise HomographyError("OpenCV error in _find_homography()...")
         else:
             if mask is None:
