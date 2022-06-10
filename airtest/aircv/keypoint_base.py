@@ -211,7 +211,7 @@ class KeypointMatching(object):
                 if src_distance == sch_distance:
                     scale = 1
                 else:
-                    return None, None
+                    return None, None, None
         elif len(good) == 3:
             def _area(point_list):
                 p1_2 = keypoint_distance(point_list[0], point_list[1])
@@ -231,7 +231,7 @@ class KeypointMatching(object):
                 if sch_area == src_area:
                     scale = 1
                 else:
-                    return None, None
+                    return None, None, None
 
         h, w = self.im_search.shape[:-1]
         _h, _w = h * scale, w * scale
