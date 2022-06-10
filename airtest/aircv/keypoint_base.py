@@ -201,7 +201,7 @@ class KeypointMatching(object):
 
         scale = 0
         if len(good) == 1:
-            scale = src_point[0].size / sch_point.size[0]
+            scale = src_point[0].size / sch_point[0].size
         elif len(good) == 2:
             sch_distance = keypoint_distance(sch_point[0], sch_point[1])
             src_distance = keypoint_distance(src_point[0], src_point[1])
