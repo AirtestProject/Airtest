@@ -13,7 +13,10 @@ from airtest.core.settings import Settings as ST
 from airtest.utils.compat import script_log_dir
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
+import win32gui
+from airtest.utils.logger import get_logger
 
+LOGGING = get_logger(__name__)
 
 """
 Device Setup APIs
@@ -68,6 +71,35 @@ def connect_device(uri):
         params["host"] = host.split(":")
     dev = init_device(platform, uuid, **params)
     return dev
+
+
+def connect_windows_device(classname, name, timeout=30, interval=1):
+    """
+    Return window handle by window name to connect to Windows client
+    Toggle window handles to set the wait time
+    The find window handle tool is recommended
+    :param classname:The window class name
+    :param name:The window name
+    :param timeout:
+    :param interval
+    :return:
+
+          >>>connect_windows_device(classname=None, name="网易有道词典")
+          >>>click(Template(r"./pic/tpl1606730579419.png", target_pos=5))
+    """
+    LOGGING.info('Connecting the specified window handle......')
+    total_time = timeout
+    while timeout > 0:
+        handles = win32gui.FindWindow(classname, name)
+        # Returns a handle value of 0 when no window is found
+        if handles == 0:
+            time.sleep(interval)
+            timeout -= interval
+            LOGGING.info(f'Try to connect to the window handle{total_time - timeout}......')
+        else:
+            LOGGING.info(f'The specified window handle was successfully connected---{handles}')
+            auto_setup(__file__, logdir=True, devices=[f"Windows:///{handles}"])
+            break
 
 
 def device():
@@ -359,6 +391,7 @@ def touch(v, times=1, **kwargs):
         time.sleep(0.05)
     delay_after_operation()
     return pos
+
 
 click = touch  # click is alias of touch
 
