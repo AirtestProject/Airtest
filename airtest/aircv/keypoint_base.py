@@ -119,9 +119,9 @@ class KeypointMatching(object):
                      for match in matches]
         sort_list = [v for v in sort_list if v is not np.nan]
 
-        first_good_point: cv2.DMatch = sorted(sort_list, key=lambda x: x.distance)[0]
-        first_good_point_train: cv2.KeyPoint = kp_src[first_good_point.trainIdx]
-        first_good_point_query: cv2.KeyPoint = kp_sch[first_good_point.queryIdx]
+        first_good_point = sorted(sort_list, key=lambda x: x.distance)[0]
+        first_good_point_train = kp_src[first_good_point.trainIdx]
+        first_good_point_query = kp_sch[first_good_point.queryIdx]
         first_good_point_angle = first_good_point_train.angle - first_good_point_query.angle
 
         def get_points_origin_angle(point_x, point_y, offset):
@@ -182,12 +182,14 @@ class KeypointMatching(object):
         len_good = len(good)
         confidence, rect, target_img = 0, None, None
 
-        if len_good == 0:
-            pass
-        if len_good < 4:
-            target_img, pypts, w_h_range = self._handle_less_four_good_point(kp_sch=kp_sch, kp_src=kp_src, good=good,
-                                                                             angle=angle)
-        else:  # len > 4
+        if len_good == 1:
+            target_img, pypts, w_h_range = self._handle_one_good_point(kp_src=kp_src, kp_sch=kp_sch, good=good,
+                                                                       angle=angle)
+        elif len_good == 2:
+            target_img, pypts, w_h_range = self._handle_two_good_points(kp_src=kp_src, kp_sch=kp_sch, good=good)
+        elif len_good == 3:
+            target_img, pypts, w_h_range = self._handle_three_good_points(kp_src=kp_src, kp_sch=kp_sch, good=good)
+        else:
             target_img, pypts, w_h_range = self._handle_many_good_points(kp_sch=kp_sch, kp_src=kp_src, good=good)
 
         if target_img is not None and target_img.any():
@@ -195,44 +197,11 @@ class KeypointMatching(object):
 
         return pypts, w_h_range, confidence
 
-    def _handle_less_four_good_point(self, kp_src, kp_sch, good, angle):
-        sch_point = get_keypoint_from_matches(kp=kp_sch, matches=good, mode='query')
-        src_point = get_keypoint_from_matches(kp=kp_src, matches=good, mode='train')
+    def _handle_one_good_point(self, kp_src, kp_sch, good, angle):
+        sch_point = get_keypoint_from_matches(kp=kp_sch, matches=good, mode='query')[0]
+        src_point = get_keypoint_from_matches(kp=kp_src, matches=good, mode='train')[0]
 
-        scale = 0
-        if len(good) == 1:
-            scale = src_point[0].size / sch_point[0].size
-        elif len(good) == 2:
-            sch_distance = keypoint_distance(sch_point[0], sch_point[1])
-            src_distance = keypoint_distance(src_point[0], src_point[1])
-            try:
-                scale = src_distance / sch_distance  # 计算缩放大小
-            except ZeroDivisionError:
-                if src_distance == sch_distance:
-                    scale = 1
-                else:
-                    return None, None, None
-        elif len(good) == 3:
-            def _area(point_list):
-                p1_2 = keypoint_distance(point_list[0], point_list[1])
-                p1_3 = keypoint_distance(point_list[0], point_list[2])
-                p2_3 = keypoint_distance(point_list[1], point_list[2])
-
-                s = (p1_2 + p1_3 + p2_3) / 2
-                area = (s * (s - p1_2) * (s - p1_3) * (s - p2_3)) ** 0.5
-                return area
-
-            sch_area = _area(sch_point)
-            src_area = _area(src_point)
-
-            try:
-                scale = src_area / sch_area  # 计算缩放大小
-            except ZeroDivisionError:
-                if sch_area == src_area:
-                    scale = 1
-                else:
-                    return None, None, None
-
+        scale = src_point[0].size / sch_point[0].size
         h, w = self.im_search.shape[:-1]
         _h, _w = h * scale, w * scale
         src = np.float32(rectangle_transform(point=sch_point[0].pt, size=(h, w), mapping_point=src_point[0].pt,
@@ -241,6 +210,78 @@ class KeypointMatching(object):
         output = self._perspective_transform(src=src, dst=dst)
         pypts, w_h_range = self._get_perspective_area_rect(src=src)
         return output, pypts, w_h_range
+
+    def _handle_two_good_points(self, kp_sch, kp_src, good):
+        """处理两对特征点的情况."""
+        pts_sch1 = int(kp_sch[good[0].queryIdx].pt[0]), int(kp_sch[good[0].queryIdx].pt[1])
+        pts_sch2 = int(kp_sch[good[1].queryIdx].pt[0]), int(kp_sch[good[1].queryIdx].pt[1])
+        pts_src1 = int(kp_src[good[0].trainIdx].pt[0]), int(kp_src[good[0].trainIdx].pt[1])
+        pts_src2 = int(kp_src[good[1].trainIdx].pt[0]), int(kp_src[good[1].trainIdx].pt[1])
+
+        result = self._get_origin_result_with_two_points(pts_sch1, pts_sch2, pts_src1, pts_src2)
+        if result:
+            middle_point, pypts, w_h_range = result
+            x_min, x_max, y_min, y_max, _, __ = w_h_range
+            target_img = self.im_source[y_min:y_max, x_min:x_max]
+            return target_img, pypts, w_h_range
+        else:
+            return None, None, None
+
+    def _handle_three_good_points(self, kp_sch, kp_src, good):
+        """处理三对特征点的情况."""
+        # 拿出sch和src的两个点(点1)和(点2点3的中点)，
+        # 然后根据两个点原则进行后处理(注意ke_sch和kp_src以及queryIdx和trainIdx):
+        pts_sch1 = int(kp_sch[good[0].queryIdx].pt[0]), int(kp_sch[good[0].queryIdx].pt[1])
+        pts_sch2 = int((kp_sch[good[1].queryIdx].pt[0] + kp_sch[good[2].queryIdx].pt[0]) / 2), int(
+            (kp_sch[good[1].queryIdx].pt[1] + kp_sch[good[2].queryIdx].pt[1]) / 2)
+        pts_src1 = int(kp_src[good[0].trainIdx].pt[0]), int(kp_src[good[0].trainIdx].pt[1])
+        pts_src2 = int((kp_src[good[1].trainIdx].pt[0] + kp_src[good[2].trainIdx].pt[0]) / 2), int(
+            (kp_src[good[1].trainIdx].pt[1] + kp_src[good[2].trainIdx].pt[1]) / 2)
+
+        result = self._get_origin_result_with_two_points(pts_sch1, pts_sch2, pts_src1, pts_src2)
+        if result:
+            middle_point, pypts, w_h_range = result
+            x_min, x_max, y_min, y_max, _, __ = w_h_range
+            target_img = self.im_source[y_min:y_max, x_min:x_max]
+            return target_img, pypts, w_h_range
+        else:
+            return None, None, None
+
+    def _get_origin_result_with_two_points(self, pts_sch1, pts_sch2, pts_src1, pts_src2):
+        """返回两对有效匹配特征点情形下的识别结果."""
+        # 先算出中心点(在self.im_source中的坐标)：
+        middle_point = [int((pts_src1[0] + pts_src2[0]) / 2), int((pts_src1[1] + pts_src2[1]) / 2)]
+        pypts = []
+        # 如果特征点同x轴或同y轴(无论src还是sch中)，均不能计算出目标矩形区域来，此时返回值同good=1情形
+        if pts_sch1[0] == pts_sch2[0] or pts_sch1[1] == pts_sch2[1] or pts_src1[0] == pts_src2[0] or pts_src1[1] == \
+                pts_src2[1]:
+            return None
+        # 计算x,y轴的缩放比例：x_scale、y_scale，从middle点扩张出目标区域:(注意整数计算要转成浮点数结果!)
+        h, w = self.im_search.shape[:2]
+        h_s, w_s = self.im_source.shape[:2]
+        x_scale = abs(1.0 * (pts_src2[0] - pts_src1[0]) / (pts_sch2[0] - pts_sch1[0]))
+        y_scale = abs(1.0 * (pts_src2[1] - pts_src1[1]) / (pts_sch2[1] - pts_sch1[1]))
+        # 得到scale后需要对middle_point进行校正，并非特征点中点，而是映射矩阵的中点。
+        sch_middle_point = int((pts_sch1[0] + pts_sch2[0]) / 2), int((pts_sch1[1] + pts_sch2[1]) / 2)
+        middle_point[0] = middle_point[0] - int((sch_middle_point[0] - w / 2) * x_scale)
+        middle_point[1] = middle_point[1] - int((sch_middle_point[1] - h / 2) * y_scale)
+        middle_point[0] = max(middle_point[0], 0)  # 超出左边界取0  (图像左上角坐标为0,0)
+        middle_point[0] = min(middle_point[0], w_s - 1)  # 超出右边界取w_s-1
+        middle_point[1] = max(middle_point[1], 0)  # 超出上边界取0
+        middle_point[1] = min(middle_point[1], h_s - 1)  # 超出下边界取h_s-1
+
+        # 计算出来rectangle角点的顺序：左上角->左下角->右下角->右上角， 注意：暂不考虑图片转动
+        # 超出左边界取0, 超出右边界取w_s-1, 超出下边界取0, 超出上边界取h_s-1
+        x_min, x_max = int(max(middle_point[0] - (w * x_scale) / 2, 0)), int(
+            min(middle_point[0] + (w * x_scale) / 2, w_s - 1))
+        y_min, y_max = int(max(middle_point[1] - (h * y_scale) / 2, 0)), int(
+            min(middle_point[1] + (h * y_scale) / 2, h_s - 1))
+        # 目标矩形的角点按左上、左下、右下、右上的点序：(x_min,y_min)(x_min,y_max)(x_max,y_max)(x_max,y_min)
+        pts = np.float32([[x_min, y_min], [x_min, y_max], [x_max, y_max], [x_max, y_min]]).reshape(-1, 1, 2)
+        for npt in pts.astype(int).tolist():
+            pypts.append(tuple(npt[0]))
+
+        return middle_point, pypts, [x_min, x_max, y_min, y_max, w, h]
 
     def _handle_many_good_points(self, kp_src, kp_sch, good):
         """
@@ -261,24 +302,15 @@ class KeypointMatching(object):
         M, mask = self._find_homography(sch_pts, img_pts)
         # 计算四个角矩阵变换后的坐标，也就是在大图中的目标区域的顶点坐标:
         h, w = self.im_search.shape[:-1]
-        h_s, w_s = self.im_source.shape[:-1]
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         try:
             dst: np.ndarray = cv2.perspectiveTransform(pts, M)
-            # img = im_source.clone().data
-            # img2 = cv2.polylines(img, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-            # Image(img).imshow('dst')
             pypts = [tuple(npt[0]) for npt in dst.tolist()]
             src = np.array([pypts[0], pypts[3], pypts[1], pypts[2]], dtype=np.float32)
             dst = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
             output = self._perspective_transform(src=src, dst=dst)
         except cv2.error as err:
             raise PerspectiveTransformError(err)
-
-        # img = im_source.clone()
-        # cv2.polylines(img, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-        # Image(img).imshow()
-        # cv2.waitKey(0)
 
         pypts, w_h_range = self._get_perspective_area_rect(src=src)
         return output, pypts, w_h_range
