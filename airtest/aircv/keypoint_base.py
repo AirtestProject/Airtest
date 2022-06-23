@@ -72,6 +72,9 @@ class KeypointMatching(object):
                                                                              kp_sch=kp_sch,
                                                                              kp_sch_point=kp_sch_point,
                                                                              kp_src_matches_point=kp_src_matches_point)
+            # img = cv2.drawMatches(self.im_search, kp_sch, self.im_source, kp_src, filtered_good_point,
+            #                    None, matchesThickness=2)
+            # cv2.imshow('match', img)
             if first_point.distance > distance_threshold:
                 break
             pypts, w_h_range, confidence = None, None, 0
@@ -79,7 +82,7 @@ class KeypointMatching(object):
             try:
                 pypts, w_h_range, confidence = self.extract_good_points(kp_src=kp_src, kp_sch=kp_sch,
                                                                         good=filtered_good_point, angle=angle)
-            except PerspectiveTransformError:
+            except (PerspectiveTransformError, cv2.error):
                 pass
             finally:
                 if w_h_range and confidence >= self.threshold:
@@ -194,12 +197,13 @@ class KeypointMatching(object):
 
         if target_img is not None and target_img.any():
             confidence = self._cal_confidence(target_img)
-
+            # cv2.imshow('target', target_img)
+            # cv2.waitKey(0)
         return pypts, w_h_range, confidence
 
     def _handle_one_good_point(self, kp_src, kp_sch, good, angle):
-        sch_point = get_keypoint_from_matches(kp=kp_sch, matches=good, mode='query')[0]
-        src_point = get_keypoint_from_matches(kp=kp_src, matches=good, mode='train')[0]
+        sch_point = get_keypoint_from_matches(kp=kp_sch, matches=good, mode='query')
+        src_point = get_keypoint_from_matches(kp=kp_src, matches=good, mode='train')
 
         scale = src_point[0].size / sch_point[0].size
         h, w = self.im_search.shape[:-1]
