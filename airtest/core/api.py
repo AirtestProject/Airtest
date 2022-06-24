@@ -83,7 +83,7 @@ def connect_windows_device(classname, name, timeout=30, interval=1):
     :param interval
     :return:
 
-          >>>connect_windows_device(classname=None, name="网易有道词典")
+          >>>connect_windows_device(classname="YodaoMainWndClass", name="网易有道词典")
           >>>click(Template(r"./pic/tpl1606730579419.png", target_pos=5))
     """
     LOGGING.info('Connecting the specified window handle......')
