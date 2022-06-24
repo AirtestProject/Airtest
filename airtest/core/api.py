@@ -4,9 +4,8 @@ This module contains the Airtest Core APIs.
 """
 import os
 import time
-
+import win32con
 from six.moves.urllib.parse import parse_qsl, urlparse
-
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.settings import Settings as ST
@@ -99,6 +98,7 @@ def connect_windows_device(classname, name, timeout=30, interval=1):
         else:
             LOGGING.info(f'The specified window handle was successfully connected---{handles}')
             auto_setup(__file__, logdir=True, devices=[f"Windows:///{handles}"])
+            win32gui.ShowWindow(handles,  win32con.SW_SHOWNORMAL)
             break
 
 
