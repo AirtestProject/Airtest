@@ -627,7 +627,7 @@ def wait(v, timeout=None, interval=0.5, intervalfunc=None):
 
 
 @logwrap
-def exists(v):
+def exists(v, timeout=ST.FIND_TIMEOUT_TMP):
     """
     Check whether given target exists on device screen
 
@@ -647,7 +647,7 @@ def exists(v):
 
     """
     try:
-        pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
+        pos = loop_find(v, timeout=timeout)
     except TargetNotFoundError:
         return False
     else:
