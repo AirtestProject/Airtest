@@ -77,7 +77,7 @@ class ADB(object):
         Set communication parameters (host and port) between adb server and adb client
 
         Args:
-            server_addr: adb server address, default is 127.0.0.1:5037
+            server_addr: adb server address, default is ["127.0.0.1", 5037]
 
         Returns:
             None
@@ -433,6 +433,10 @@ class ADB(object):
         """
         Perform `adb push` command
 
+        Note:
+            filenames with spaces in them may not work as expected.
+            注意：文件名中如果带有空格，可能会导致推送后的文件名不正确。
+
         Args:
             local: local file to be copied to the device
             remote: destination on the device where the file will be copied
@@ -441,6 +445,12 @@ class ADB(object):
             None
 
         """
+        local = decode_path(local)  # 兼容py2
+        # 如果文件路径包含中文，可能会导致adb push后的文件名不正确，因此强制指定目标路径的文件名
+        if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
+            filename = os.path.basename(local)
+            # 如果文件名中带有空格，本应用引号包裹，但是adb push可能会提示无权限
+            remote = '%s/%s' % (remote, filename)
         self.cmd(["push", local, remote], ensure_unicode=False)
 
     def pull(self, remote, local):
@@ -632,36 +642,55 @@ class ADB(object):
 
         return out
 
-    def pm_install(self, filepath, replace=False):
+    def pm_install(self, filepath, replace=False, install_options=None):
         """
         Perform `adb push` and `adb install` commands
 
         Note:
             This is more reliable and recommended way of installing `.apk` files
+            Do not use filenames with spaces
+            请勿使用带空格的文件名！
 
         Args:
             filepath: full path to file to be installed on the device
             replace: force to replace existing application, default is False
+            install_options:  list of options
+                e.g.["-t",  # allow test packages
+                    "-l",  # forward lock application,
+                    "-s",  # install application on sdcard,
+                    "-d",  # allow version code downgrade (debuggable packages only)
+                    "-g",  # grant all runtime permissions
+                ]
 
         Returns:
             None
 
         """
+        if isinstance(filepath, str):
+            filepath = decode_path(filepath)
+        if not os.path.isfile(filepath):
+            raise RuntimeError("file: %s does not exists" % (repr(filepath)))
+
+        if not install_options or type(install_options) != list:
+            install_options = []
+        if replace:
+            install_options.append("-r")
+
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
-        # if the apk file path contains spaces, the path must be escaped
-        device_path = '\"%s/%s\"' % (device_dir, filename)
-
-        out = self.cmd(["push", filepath, device_dir])
-        print(out)
-
-        if not replace:
-            install_cmd = ['pm', 'install', device_path]
-        else:
-            install_cmd = ['pm', 'install', '-r', device_path]
+        # Note: Do not use filenames with spaces
+        device_path = '%s/%s' % (device_dir, filename)
 
         try:
-            self.shell(install_cmd)
+            self.push(filepath, device_path)
+        except AdbError as err:
+            # no space left on device
+            # 错误原因：空间不足，或者推送失败、路径错误等
+            raise err
+
+        try:
+            cmds = ["pm", "install", ] + install_options + [device_path]
+            self.shell(cmds)
         except:
             raise
         finally:
