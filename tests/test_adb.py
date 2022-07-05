@@ -180,7 +180,7 @@ class TestADBWithDevice(unittest.TestCase):
         if PKG in self.adb.list_app():
             self.adb.pm_uninstall(PKG)
 
-        self.adb.pm_install(APK)
+        self.adb.pm_install(APK, install_options=["-r", "-g"])
         self.assertIn(PKG, self.adb.list_app())
 
         # 安装完毕后，验证apk文件是否已删除
