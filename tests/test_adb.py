@@ -120,7 +120,9 @@ class TestADBWithDevice(unittest.TestCase):
         tmpdir = "/data/local/tmp"
         imgname = os.path.basename(IMG)
         tmpimgpath = tmpdir + "/" + imgname
-        self.adb.push(IMG, tmpdir)
+        # push新增返回值为目标文件路径
+        des_file = self.adb.push(IMG, tmpdir)
+        self.assertIsNotNone(des_file)
         self.assertTrue(self.adb.exists_file(tmpimgpath))
 
     def test_pull(self):
