@@ -442,16 +442,18 @@ class ADB(object):
             remote: destination on the device where the file will be copied
 
         Returns:
-            None
+            remote file path
 
         """
         local = decode_path(local)  # 兼容py2
         # 如果文件路径包含中文，可能会导致adb push后的文件名不正确，因此强制指定目标路径的文件名
         if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
             filename = os.path.basename(local)
-            # 如果文件名中带有空格，本应用引号包裹，但是adb push可能会提示无权限
+            # 把文件名中的空格、括号等符号，添加转义符，以便adb push后的文件名正确
+            filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
             remote = '%s/%s' % (remote, filename)
         self.cmd(["push", local, remote], ensure_unicode=False)
+        return remote
 
     def pull(self, remote, local):
         """
@@ -678,11 +680,10 @@ class ADB(object):
 
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
-        # Note: Do not use filenames with spaces
-        device_path = '%s/%s' % (device_dir, filename)
 
         try:
-            self.push(filepath, device_path)
+            # if the apk file path contains spaces, the path must be escaped
+            device_path = '\"%s\"' % self.push(filepath, device_dir)
         except AdbError as err:
             # no space left on device
             # 错误原因：空间不足，或者推送失败、路径错误等
