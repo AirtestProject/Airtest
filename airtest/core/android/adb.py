@@ -9,7 +9,7 @@ import warnings
 import subprocess
 import threading
 from copy import copy
-from six import PY3, text_type, binary_type, raise_from
+from six import PY3, PY34, text_type, binary_type, raise_from
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
@@ -465,6 +465,12 @@ class ADB(object):
         Returns:
             None
         """
+        local = decode_path(local)  # 兼容py2
+        if PY34:
+            # windows下，路径不能为根目录，且假如路径使用了/，也不能包含/g等符号在路径里（除非换成\）
+            # 如果是PY3.4以上可以用Path强制转换成\
+            from pathlib import Path
+            local = Path(local).as_posix()
         self.cmd(["pull", remote, local], ensure_unicode=False)
 
     def forward(self, local, remote, no_rebind=True):
