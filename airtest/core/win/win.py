@@ -56,7 +56,7 @@ class Windows(Device):
 
     def _init_connect(self, handle, kwargs):
         if handle:
-            self.connect(handle=handle)
+            self.connect(handle=handle, **kwargs)
         elif kwargs:
             self.connect(**kwargs)
 
@@ -81,7 +81,8 @@ class Windows(Device):
                     kwargs[k] = int(kwargs[k])
             self.app = self._app.connect(**kwargs)
             self._top_window = self.app.top_window().wrapper_object()
-        self.set_foreground()
+        if kwargs.get("foreground", True) in (True, "True", "true"):
+            self.set_foreground()
 
     def shell(self, cmd):
         """
