@@ -55,6 +55,7 @@ def connect_device(uri):
         >>> connect_device("Android://127.0.0.1:5037/10.254.60.1:5555")
         >>> connect_device("Windows:///")  # connect to the desktop
         >>> connect_device("Windows:///123456")  # Connect to the window with handle 123456
+        >>> connect_device("Windows:///123456?foreground=False")  # Connect to the window without setting it foreground
         >>> connect_device("iOS:///127.0.0.1:8100")  # iOS device
         >>> connect_device("iOS:///http://localhost:8100/?mjpeg_port=9100")  # iOS with mjpeg port
 

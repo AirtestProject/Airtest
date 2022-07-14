@@ -30,7 +30,8 @@ class WindowsInIDE(Windows):
         self.app = self._app.connect(**kwargs)
         try:
             self._top_window = self.app.top_window().wrapper_object()
-            self.set_foreground()
+            if kwargs.get("foreground", True) in (True, "True", "true"):
+                self.set_foreground()
         except RuntimeError:
             self._top_window = None
 
