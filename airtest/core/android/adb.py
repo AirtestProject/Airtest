@@ -1654,6 +1654,7 @@ class ADB(object):
 
         Args:
             info: device screen properties
+            package: package name, default to the package of top activity
 
         Returns:
             None if adb command failed to run, otherwise return device screen properties(portrait mode)
