@@ -862,6 +862,9 @@ class Android(Device):
         """
         Adjust the render resolution for all_screen device.
 
+        Args:
+            package: package name, default to the package of top activity
+
         Return:
             None
 
