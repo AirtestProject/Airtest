@@ -702,7 +702,7 @@ class ADB(object):
             raise
         finally:
             # delete apk file
-            self.shell("rm " + device_path)
+            self.cmd(["shell", "rm", device_path], timeout=30)
 
     def uninstall_app(self, package):
         """
