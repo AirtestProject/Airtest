@@ -17,6 +17,7 @@ class Maxtouch(BaseTouch):
         super(Maxtouch, self).__init__(adb, backend, size_info, input_event)
         self.default_pressure = 0.5
         self.path_in_android = "/data/local/tmp/maxpresent.jar"
+        self.localport = None
 
     def install(self):
         """
@@ -109,3 +110,9 @@ class Maxtouch(BaseTouch):
         """
         width, height = self.size_info['width'], self.size_info['height']
         return x / width, y / height
+
+    def teardown(self):
+        super(Maxtouch, self).teardown()
+        if self.localport:
+            self.adb.remove_forward("tcp:{}".format(self.localport))
+            self.localport = None

@@ -871,6 +871,23 @@ class Android(Device):
             info.update(ret)
             self._display_info = info
 
+    def disconnect(self):
+        """
+        Disconnect the device
+
+        1. stop minicap/javacap
+        2. stop minitouch/maxtouch
+        3. stop rotation_watcher
+
+        Returns:
+            None
+
+        """
+        self.screen_proxy.teardown_stream()
+        self.touch_proxy.teardown()
+        self.rotation_watcher.teardown()
+
+
 # Compatible with old code, such as device.minicap
 Android.minicap=property(lambda self: self.get_deprecated_var("minicap", "screen_proxy"))
 Android.javacap=property(lambda self: self.get_deprecated_var("javacap", "screen_proxy"))

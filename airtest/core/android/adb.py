@@ -564,7 +564,12 @@ class ADB(object):
             cmds = ["forward", "--remove", local]
         else:
             cmds = ["forward", "--remove-all"]
-        self.cmd(cmds)
+        try:
+            self.cmd(cmds)
+        except AdbError as e:
+            # 忽略重复断开端口的报错
+            if "not found" in e.stdout:
+                pass
         # unregister for cleanup
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)

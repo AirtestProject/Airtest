@@ -22,6 +22,7 @@ class Minitouch(BaseTouch):
         self.default_pressure = 50
         self.path_in_android = "/data/local/tmp/minitouch"
         self.max_x, self.max_y = None, None
+        self.localport = None
 
     def install(self):
         """
@@ -103,7 +104,6 @@ class Minitouch(BaseTouch):
             else:
                 self.max_x = 32768
                 self.max_y = 32768
-        # nbsp.kill() # 保留，不杀了，后面还会继续读取并pirnt
         if p.poll() is not None:
             # server setup error, may be already setup by others
             # subprocess exit immediately
@@ -161,3 +161,9 @@ class Minitouch(BaseTouch):
         nx = float(x) * self.max_x / width
         ny = float(y) * self.max_y / height
         return "%.0f" % nx, "%.0f" % ny
+
+    def teardown(self):
+        super(Minitouch, self).teardown()
+        if self.localport:
+            self.adb.remove_forward("tcp:{}".format(self.localport))
+            self.localport = None
