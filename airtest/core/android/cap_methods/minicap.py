@@ -6,7 +6,7 @@ import struct
 import threading
 import six
 import socket
-from functools import wraps
+from functools import wraps, partial
 from airtest.core.android.constant import STFLIB
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
@@ -38,7 +38,7 @@ class Minicap(BaseCap):
     """
 
     VERSION = 5
-    RECVTIMEOUT = None
+    RECVTIMEOUT = 3  # default value is None, but the version above 1.2.7 is changed to 3s
     CMD = "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap"
 
     def __init__(self, adb, projection=None, rotation_watcher=None, display_id=None, ori_function=None):
@@ -59,6 +59,9 @@ class Minicap(BaseCap):
             # Minicap needs to be reconnected when switching between landscape and portrait
             # minicap需要在横竖屏转换时，重新连接
             rotation_watcher.reg_callback(lambda x: self.update_rotation(x * 90))
+        self.cleanup_func = []
+        # 默认的清理操作，在退出时断开连接
+        reg_cleanup(self.teardown_stream)
 
     @ready_method
     def install_or_upgrade(self):
@@ -248,6 +251,10 @@ class Minicap(BaseCap):
             stopping = True
         else:
             stopping = False
+        self.cleanup_func.append(s.close)
+        self.cleanup_func.append(nbsp.kill)
+        self.cleanup_func.append(partial(kill_proc, proc))
+        self.cleanup_func.append(partial(self.adb.remove_forward, "tcp:%s" % localport))
         yield stopping
 
         while not stopping:
@@ -255,6 +262,8 @@ class Minicap(BaseCap):
                 s.send(b"1")
             # recv frame header, count frame_size
             if self.RECVTIMEOUT is not None:
+                # 部分手机在横竖屏切换时，可能会卡在这里一直等待recv数据，导致旧的minicap进程未完全结束
+                # 这可能会使新的minicap拿到的画面只有一半，另外一半黑屏，因此1.2.7以上版本强制设置超时时间为3s
                 header = s.recv_with_timeout(4, self.RECVTIMEOUT)
             else:
                 header = s.recv(4)
@@ -264,14 +273,16 @@ class Minicap(BaseCap):
                 stopping = yield None
             else:
                 frame_size = struct.unpack("<I", header)[0]
-                frame_data = s.recv(frame_size)
+                if self.RECVTIMEOUT is not None:
+                    frame_data = s.recv_with_timeout(frame_size, self.RECVTIMEOUT)
+                else:
+                    frame_data = s.recv(frame_size)
                 stopping = yield frame_data
 
         LOGGING.debug("minicap stream ends")
-        s.close()
-        nbsp.kill()
-        kill_proc(proc)
-        self.adb.remove_forward("tcp:%s" % localport)
+        # 这里只调用_cleanup()，清理掉本次连接创建的进程即可
+        # 不直接调用teardown_stream()，因为在屏幕旋转时可能会多次重建连接，self.frame_gen可能会卡住
+        self._cleanup()
 
     def _setup_stream_server(self, lazy=False):
         """
@@ -313,7 +324,6 @@ class Minicap(BaseCap):
             kill_proc(proc)
             raise RuntimeError("minicap server quit immediately")
 
-        reg_cleanup(kill_proc, proc)
         self._stream_rotation = int(display_info["rotation"])
         return proc, nbsp, localport
 
@@ -371,6 +381,19 @@ class Minicap(BaseCap):
         LOGGING.debug("update_rotation: %s" % rotation)
         self._update_rotation_event.set()
 
+    def _cleanup(self):
+        """
+        Cleanup minicap process and stream reader
+
+        主动将minicap建立的各个连接关闭
+        与snippet.py中的CLEANUP_CALLS功能相同，但是允许主动调用，避免异常退出时有遗漏进程没清理干净
+        Returns:
+
+        """
+        for func in self.cleanup_func:
+            func()
+        self.cleanup_func = []
+
     def teardown_stream(self):
         """
         End the stream
@@ -379,6 +402,8 @@ class Minicap(BaseCap):
             None
 
         """
+        # 主动清理一次之前建立的连接
+        self._cleanup()
         if not self.frame_gen:
             return
         try:
@@ -389,5 +414,3 @@ class Minicap(BaseCap):
         else:
             LOGGING.warn("%s tear down failed" % self.frame_gen)
         self.frame_gen = None
-
-

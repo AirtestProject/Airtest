@@ -97,6 +97,8 @@ class RotationWatcher(object):
             self.ow_proc.communicate()
         if self.nbsp:
             self.nbsp.kill()
+        self.ow_callback = []
+        setattr(self, "_start_ready", None)
 
     def start(self):
         """

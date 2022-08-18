@@ -6,6 +6,8 @@ import numpy
 from airtest.core.ios.ios import IOS, wda, CAP_METHOD
 from airtest import aircv
 from .testconf import try_remove
+import warnings
+warnings.simplefilter("always")
 
 text_flag = True # 控制是否运行text接口用例
 skip_alert_flag = False  # 控制是否测试alert相关接口用例
@@ -251,7 +253,12 @@ class TestIos(unittest.TestCase):
         self.ios.touch_factor = 1/3.3
         self.ios.touch((500, 500))
 
-
+    def test_disconnect(self):
+        print("test_disconnect")
+        self.ios.cap_method = CAP_METHOD.MJPEG
+        self.ios.get_frame_from_stream()
+        self.ios.disconnect()
+        self.assertEqual(len(self.ios.instruct_helper._port_using_func.keys()), 0)
 
 
 if __name__ == '__main__':
