@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from functools import partial
 from airtest.utils.logger import get_logger
 from airtest.utils.safesocket import SafeSocket
 from airtest.utils.nbsp import NonBlockingStreamReader
@@ -23,6 +24,7 @@ class Javacap(Yosemite, BaseCap):
     def __init__(self, adb, *args, **kwargs):
         super(Javacap, self).__init__(adb)
         self.frame_gen = None
+        self.cleanup_func = []
 
     @on_method_ready('install_or_upgrade')
     def _setup_stream_server(self):
@@ -74,7 +76,12 @@ class Javacap(Yosemite, BaseCap):
         LOGGING.debug(struct.unpack("<2B5I2B", t))
 
         stopping = False
-        reg_cleanup(s.close)
+        # reg_cleanup(s.close)
+        self.cleanup_func.append(s.close)
+        self.cleanup_func.append(nbsp.kill)
+        self.cleanup_func.append(partial(kill_proc, proc))
+        self.cleanup_func.append(partial(self.adb.remove_forward, "tcp:%s" % localport))
+
         while not stopping:
             s.send(b"1")
             # recv frame header, count frame_size
@@ -92,10 +99,7 @@ class Javacap(Yosemite, BaseCap):
                 stopping = yield frame_data
 
         LOGGING.debug("javacap stream ends")
-        s.close()
-        nbsp.kill()
-        kill_proc(proc)
-        self.adb.remove_forward("tcp:%s" % localport)
+        self._cleanup()
 
     def get_frame_from_stream(self):
         """
@@ -109,6 +113,18 @@ class Javacap(Yosemite, BaseCap):
             self.frame_gen = self.get_frames()
         return self.frame_gen.send(None)
 
+    def _cleanup(self):
+        """
+        Cleanup javacap process and stream reader
+
+        和minicap类似
+        Returns:
+
+        """
+        for func in self.cleanup_func:
+            func()
+        self.cleanup_func = []
+
     def teardown_stream(self):
         """
         End stream
@@ -117,6 +133,8 @@ class Javacap(Yosemite, BaseCap):
             None
 
         """
+        self._cleanup()
+
         if not self.frame_gen:
             return
         try:
