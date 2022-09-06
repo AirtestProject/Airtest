@@ -80,10 +80,41 @@ class AirtestLogger(object):
 def Logwrap(f, logger):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
+        """
+        The decorator @logwrap can record the function call information in the airtest log and display it in the report.
+        装饰器@logwrap，能够在airtest的log中记录函数的调用信息，显示在报告中
+
+        The following parameters can be appended to the function parameter definition for additional effect:
+        在函数参数定义中可以附加以下参数，以获得更多效果：
+
+        snapshot: snapshot: If True, a snapshot can be attached to the report. 如果为True，可以附加一张截图到报告中
+        depth: the depth order of the current log in the log. 指定log中当前log的深度顺序
+
+        Examples:
+
+            @logwrap
+            def func1():
+                pass
+
+            @logwrap
+            def func1(snapshot=True):
+                pass
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+
+        """
+        from airtest.core.cv import try_log_screen
         # py3 only: def wrapper(*args, depth=None, **kwargs):
         depth = kwargs.pop('depth', None)  # For compatibility with py2
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
+        # 从函数参数中取出snapshot参数，因此snapshot参数不能用于函数本身
+        snapshot = m.pop('snapshot', False)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
         logger.running_stack.append(fndata)
         try:
@@ -95,6 +126,14 @@ def Logwrap(f, logger):
         else:
             fndata.update({'ret': res, "end_time": time.time()})
         finally:
+            if snapshot is True:
+                # 如果指定了snapshot参数，保存一张图片
+                # 会受到ST.SAVE_IMAGE的影响，如果ST.SAVE_IMAGE为False，不会保存图片
+                try:
+                    try_log_screen(depth=len(logger.running_stack) + 1)
+                except AttributeError:
+                    # if G.DEVICE is None
+                    pass
             logger.log('function', fndata, depth=depth)
             logger.running_stack.pop()
         return res

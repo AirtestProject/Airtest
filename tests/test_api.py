@@ -126,31 +126,6 @@ class TestMainOnAndroid(unittest.TestCase):
         self.assertIsInstance(pos, (tuple, list))
         self.assertFalse(exists(TPL2))
 
-    def test_assert_exists(self):
-        self._start_apk_main_scene()
-        assert_exists(TPL)
-        with self.assertRaises(AssertionError):
-            assert_exists(TPL2)
-
-    def test_assert_not_exists(self):
-        self._start_apk_main_scene()
-        assert_not_exists(TPL2)
-
-        with self.assertRaises(AssertionError):
-            assert_not_exists(TPL)
-
-    def test_assert_equal(self):
-        with self.assertRaises(AssertionError):
-            assert_equal(1, 2)
-
-        assert_equal(1, 1)
-
-    def test_assert_not_equal(self):
-        with self.assertRaises(AssertionError):
-            assert_not_equal(1, 1)
-
-        assert_not_equal(1, 2)
-
     def _start_apk_main_scene(self):
         if PKG not in self.dev.list_app():
             install(APK)

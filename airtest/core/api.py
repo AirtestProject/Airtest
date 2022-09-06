@@ -13,6 +13,12 @@ from airtest.core.settings import Settings as ST
 from airtest.utils.compat import script_log_dir
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
+# Assertions
+from airtest.core.assertions import (assert_exists, assert_not_exists, assert_equal, assert_not_equal,
+                                        assert_true, assert_false, assert_is, assert_is_not,
+                                        assert_is_none, assert_is_not_none, assert_in, assert_not_in,
+                                        assert_is_instance, assert_not_is_instance
+                                     )
 
 
 """
@@ -644,86 +650,5 @@ def find_all(v):
 
 
 """
-Assertions
+Assertions: see airtest/core/assertions.py
 """
-
-
-@logwrap
-def assert_exists(v, msg=""):
-    """
-    Assert target exists on device screen
-
-    :param v: target to be checked
-    :param msg: short description of assertion, it will be recorded in the report
-    :raise AssertionError: if assertion fails
-    :return: coordinates of the target
-    :platforms: Android, Windows, iOS
-    :Example:
-
-        >>> assert_exists(Template(r"tpl1607324047907.png"), "assert exists")
-
-    """
-    try:
-        pos = loop_find(v, timeout=ST.FIND_TIMEOUT, threshold=ST.THRESHOLD_STRICT or v.threshold)
-        return pos
-    except TargetNotFoundError:
-        raise AssertionError("%s does not exist in screen, message: %s" % (v, msg))
-
-
-@logwrap
-def assert_not_exists(v, msg=""):
-    """
-    Assert target does not exist on device screen
-
-    :param v: target to be checked
-    :param msg: short description of assertion, it will be recorded in the report
-    :raise AssertionError: if assertion fails
-    :return: None.
-    :platforms: Android, Windows, iOS
-    :Example:
-
-        >>> assert_not_exists(Template(r"tpl1607324047907.png"), "assert not exists")
-    """
-    try:
-        pos = loop_find(v, timeout=ST.FIND_TIMEOUT_TMP)
-        raise AssertionError("%s exists unexpectedly at pos: %s, message: %s" % (v, pos, msg))
-    except TargetNotFoundError:
-        pass
-
-
-@logwrap
-def assert_equal(first, second, msg=""):
-    """
-    Assert two values are equal
-
-    :param first: first value
-    :param second: second value
-    :param msg: short description of assertion, it will be recorded in the report
-    :raise AssertionError: if assertion fails
-    :return: None
-    :platforms: Android, Windows, iOS
-    :Example:
-
-        >>> assert_equal(1, 1, msg="assert 1==1")
-    """
-    if first != second:
-        raise AssertionError("%s and %s are not equal, message: %s" % (first, second, msg))
-
-
-@logwrap
-def assert_not_equal(first, second, msg=""):
-    """
-    Assert two values are not equal
-
-    :param first: first value
-    :param second: second value
-    :param msg: short description of assertion, it will be recorded in the report
-    :raise AssertionError: if assertion
-    :return: None
-    :platforms: Android, Windows, iOS
-    :Example:
-
-        >>> assert_not_equal(1, 2, msg="assert 1!=2")
-    """
-    if first == second:
-        raise AssertionError("%s and %s are equal, message: %s" % (first, second, msg))
