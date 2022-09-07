@@ -18,6 +18,7 @@ try:
 except:
     from jinja2 import pass_eval_context  # jinja2>=3.1
 from airtest.aircv import imread, get_resolution
+from airtest.aircv.error import FileNotExistError
 from airtest.core.settings import Settings as ST
 from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
@@ -265,11 +266,19 @@ class LogToHtml(object):
                 else:
                     image_path = os.path.abspath(value['_filepath'] or value['filename'])
                 arg["image"] = image_path
-                if not value['_filepath'] and not os.path.exists(value['filename']):
-                    crop_img = imread(os.path.join(self.script_root, value['filename']))
+                try:
+                    if not value['_filepath'] and not os.path.exists(value['filename']):
+                        crop_img = imread(os.path.join(self.script_root, value['filename']))
+                    else:
+                        crop_img = imread(value['_filepath'] or value['filename'])
+                except FileNotExistError:
+                    # 在某些情况下会报图片不存在的错误（偶现），但不应该影响主流程
+                    if os.path.exists(image_path):
+                        arg["resolution"] = get_resolution(imread(image_path))
+                    else:
+                        arg["resolution"] = (0, 0)
                 else:
-                    crop_img = imread(value['_filepath'] or value['filename'])
-                arg["resolution"] = get_resolution(crop_img)
+                    arg["resolution"] = get_resolution(crop_img)
         return code
 
     @staticmethod
