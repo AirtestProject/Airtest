@@ -424,7 +424,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 
     """
     if isinstance(v1, Template):
-        pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
+        try:
+            pos1 = loop_find(v1, timeout=ST.FIND_TIMEOUT)
+        except TargetNotFoundError:
+            # 如果由图1滑向图2，图1找不到，会导致图2的文件路径未被初始化，可能在报告中不能正确显示
+            if v2 and isinstance(v2, Template):
+                v2.filepath
+            raise
     else:
         try_log_screen()
         pos1 = v1
