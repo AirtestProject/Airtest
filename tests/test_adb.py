@@ -3,6 +3,7 @@ from airtest.core.android.adb import ADB, AdbError, AdbShellError, DeviceConnect
 from .testconf import IMG, APK, PKG, try_remove
 from types import GeneratorType
 import os
+import shutil
 import unittest
 import subprocess
 from six import text_type
@@ -117,24 +118,51 @@ class TestADBWithDevice(unittest.TestCase):
         self.assertIsInstance(self.adb.file_size("/data/local/tmp/minicap"), int)
 
     def test_push(self):
+
+        def test_push_file(file_path, des_path):
+            # push新增返回值为目标文件路径
+            tmpdir = os.path.dirname(des_path)
+            des_file = self.adb.push(file_path, tmpdir)
+            print(des_file)
+            self.assertIsNotNone(des_file)
+            self.assertTrue(self.adb.exists_file(des_file))
+            self.adb.shell("rm " + des_file)
+
         tmpdir = "/data/local/tmp"
         imgname = os.path.basename(IMG)
         tmpimgpath = tmpdir + "/" + imgname
-        # push新增返回值为目标文件路径
-        des_file = self.adb.push(IMG, tmpdir)
-        self.assertIsNotNone(des_file)
-        self.assertTrue(self.adb.exists_file(tmpimgpath))
+        test_push_file(IMG, tmpimgpath)
+
+        # 测试空格+特殊字符+中文
+        test_space_img = os.path.join(os.path.dirname(IMG), "space " + imgname)
+        shutil.copy(IMG, test_space_img)
+        test_push_file(test_space_img, tmpdir + "/" + os.path.basename(test_space_img))
+        try_remove(test_space_img)
+
+        test_img = os.path.join(os.path.dirname(IMG), imgname + "中文 (1)")
+        shutil.copy(IMG, test_img)
+        test_push_file(test_img, tmpdir + "/" + os.path.basename(test_img))
+        try_remove(test_img)
 
     def test_pull(self):
         tmpdir = "/data/local/tmp"
         imgname = os.path.basename(IMG)
         tmpimgpath = tmpdir + "/" + imgname
-        self.adb.push(IMG, tmpdir)
+        dest_file = self.adb.push(IMG, tmpdir)
 
         try_remove(imgname)
         self.adb.pull(tmpimgpath, ".")
         self.assertTrue(os.path.exists(imgname))
         try_remove(imgname)
+
+        # 测试空格+特殊字符+中文
+        test_file_path = "test pull/g18/test中文 (1).png"
+        os.makedirs(os.path.dirname(test_file_path))
+        self.adb.pull(tmpimgpath, test_file_path)
+        self.assertTrue(os.path.exists(test_file_path))
+        try_remove("test pull")
+
+        self.adb.shell("rm " + dest_file)
 
     def test_get_forwards(self):
         self.adb.remove_forward()
@@ -192,6 +220,21 @@ class TestADBWithDevice(unittest.TestCase):
 
         self.adb.pm_uninstall(PKG)
         self.assertNotIn(PKG, self.adb.list_app())
+
+        # 测试中文名+特殊字符的apk安装
+        test_apk_name = "中文 (1).apk"
+        shutil.copy(APK, test_apk_name)
+        self.adb.pm_install(test_apk_name, install_options=["-r", "-g"])
+        self.assertIn(PKG, self.adb.list_app())
+
+        # 安装完毕后，验证apk文件是否已删除
+        tmpdir = "/data/local/tmp"
+        tmp_files = self.adb.shell("ls " + tmpdir)
+        self.assertNotIn(os.path.basename(APK), tmp_files, "The apk file in /data/local/tmp is not deleted!")
+
+        self.adb.pm_uninstall(PKG)
+        self.assertNotIn(PKG, self.adb.list_app())
+        try_remove(test_apk_name)
 
     def test_ip(self):
         ip = self.adb.get_ip_address()

@@ -434,15 +434,27 @@ class ADB(object):
         Perform `adb push` command
 
         Note:
-            filenames with spaces in them may not work as expected.
-            注意：文件名中如果带有空格，可能会导致推送后的文件名不正确。
+            Note: If there is a space (or special symbol) in the file name, it will be forced to add escape characters,
+            and the new file name will be added with quotation marks and returned as the return value
+
+            注意：文件名中如果带有空格（或特殊符号），将会被强制增加转义符，并将新的文件名添加引号，作为返回值返回
 
         Args:
             local: local file to be copied to the device
             remote: destination on the device where the file will be copied
 
         Returns:
-            remote file path
+            The file path saved in the phone may be enclosed in quotation marks, eg. '"test\ file.txt"'
+
+        Examples:
+
+            >>> adb = device().adb
+            >>> adb.push("test.txt", "/data/local/tmp")
+
+            >>> new_name = adb.push("test space.txt", "/data/local/tmp")  # test the space in file name
+            >>> print(new_name)
+            "/data/local/tmp/test\ space.txt"
+            >>> adb.shell("rm " + new_name)
 
         """
         local = decode_path(local)  # 兼容py2
@@ -453,7 +465,7 @@ class ADB(object):
             filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
             remote = '%s/%s' % (remote, filename)
         self.cmd(["push", local, remote], ensure_unicode=False)
-        return remote
+        return '\"%s\"' % remote
 
     def pull(self, remote, local):
         """
@@ -694,7 +706,7 @@ class ADB(object):
 
         try:
             # if the apk file path contains spaces, the path must be escaped
-            device_path = '\"%s\"' % self.push(filepath, device_dir)
+            device_path = self.push(filepath, device_dir)
         except AdbError as err:
             # no space left on device
             # 错误原因：空间不足，或者推送失败、路径错误等
