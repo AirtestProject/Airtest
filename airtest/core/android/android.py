@@ -750,19 +750,20 @@ class Android(Device):
             w, h = h, w
         return w, h
 
-    def get_render_resolution(self, refresh=False):
+    def get_render_resolution(self, refresh=False, package=None):
         """
         Return render resolution after rotation
 
         Args:
             refresh: whether to force refresh render resolution
+            package: package name, default to the package of top activity
 
         Returns:
             offset_x, offset_y, offset_width and offset_height of the display
 
         """
         if refresh or 'offset_x' not in self._display_info:
-            self.adjust_all_screen()
+            self.adjust_all_screen(package)
         x, y, w, h = self._display_info.get('offset_x', 0), \
             self._display_info.get('offset_y', 0), \
             self._display_info.get('offset_width', 0), \
@@ -857,16 +858,19 @@ class Android(Device):
         )
         return x, y
 
-    def adjust_all_screen(self):
+    def adjust_all_screen(self, package=None):
         """
         Adjust the render resolution for all_screen device.
+
+        Args:
+            package: package name, default to the package of top activity
 
         Return:
             None
 
         """
         info = self.display_info
-        ret = self.adb.get_display_of_all_screen(info)
+        ret = self.adb.get_display_of_all_screen(info, package)
         if ret:
             info.update(ret)
             self._display_info = info

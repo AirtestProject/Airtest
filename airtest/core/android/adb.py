@@ -1647,12 +1647,13 @@ class ADB(object):
                 ret[k] = v
         return ret
 
-    def get_display_of_all_screen(self, info):
+    def get_display_of_all_screen(self, info, package=None):
         """
         Perform `adb shell dumpsys window windows` commands to get window display of application.
 
         Args:
             info: device screen properties
+            package: package name, default to the package of top activity
 
         Returns:
             None if adb command failed to run, otherwise return device screen properties(portrait mode)
@@ -1662,7 +1663,7 @@ class ADB(object):
         output = self.shell("dumpsys window windows")
         windows = output.split("Window #")
         offsetx, offsety, width, height = 0, 0, info['width'], info['height']
-        package = self._search_for_current_package(output)
+        package = self._search_for_current_package(output) if package is None else package
         if package:
             for w in windows:
                 if "package=%s" % package in w:
