@@ -1059,7 +1059,7 @@ class ADB(object):
 
         # gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density
         phyDispRE = re.compile('Physical size: (?P<width>\d+)x(?P<height>\d+).*Physical density: (?P<density>\d+)', re.S)
-        m = phyDispRE.search(self.raw_shell('wm size; wm density'))
+        m = phyDispRE.search(self.cmd('shell wm size; wm density', timeout=3))
         if m:
             for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
@@ -1067,7 +1067,8 @@ class ADB(object):
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
-        return displayInfo
+        if not displayInfo:
+            raise DeviceConnectionError("Getting device screen information timed out")
 
     def _getDisplayDensity(self, strip=True):
         """
