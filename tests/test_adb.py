@@ -248,6 +248,10 @@ class TestADBWithDevice(unittest.TestCase):
         if gateway:
             self.assertEqual(len(gateway.split('.')), 4)
 
+    def test_text(self):
+        self.adb.text("Hello World")
+        self.adb.text("test123")
+
 
 if __name__ == '__main__':
     unittest.main()
