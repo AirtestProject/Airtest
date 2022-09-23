@@ -113,7 +113,8 @@ def Logwrap(f, logger):
         depth = kwargs.pop('depth', None)  # For compatibility with py2
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
-        # 从函数参数中取出snapshot参数，因此snapshot参数不能用于函数本身
+        # The snapshot parameter is popped from the function parameter,
+        # so the function cannot use the parameter name snapshot later
         snapshot = m.pop('snapshot', False)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
         logger.running_stack.append(fndata)
@@ -125,10 +126,10 @@ def Logwrap(f, logger):
             raise
         else:
             fndata.update({'ret': res, "end_time": time.time()})
+            return res
         finally:
             if snapshot is True:
-                # 如果指定了snapshot参数，保存一张图片
-                # 会受到ST.SAVE_IMAGE的影响，如果ST.SAVE_IMAGE为False，不会保存图片
+                # If snapshot=True, save an image unless ST.SAVE_IMAGE=False
                 try:
                     try_log_screen(depth=len(logger.running_stack) + 1)
                 except AttributeError:
@@ -136,5 +137,4 @@ def Logwrap(f, logger):
                     pass
             logger.log('function', fndata, depth=depth)
             logger.running_stack.pop()
-        return res
     return wrapper
