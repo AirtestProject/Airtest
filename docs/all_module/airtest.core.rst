@@ -22,6 +22,7 @@ Submodules
 .. toctree::
 
    airtest.core.api
+   airtest.core.assertions
    airtest.core.cv
    airtest.core.device
    airtest.core.error
