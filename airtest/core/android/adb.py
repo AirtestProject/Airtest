@@ -1417,13 +1417,21 @@ class ADB(object):
 
         Returns:
             None
+
+        Examples:
+            >>> dev = connect_device("Android:///")
+            >>> dev.text("Hello World")
+            >>> dev.text("test123")
         """
         if content.isalpha():
             self.shell(["input", "text", content])
         else:
-            # 如果同时包含了字母+数字，用input text整句输入可能会导致乱序
+            # If it contains letters and numbers, input with `adb shell input text` may result in the wrong order
             for i in content:
-                self.shell(["input", "keyevent", "KEYCODE_" + i.upper()])
+                if i == " ":
+                    self.keyevent("KEYCODE_SPACE")
+                else:
+                    self.shell(["input", "text", i])
 
     def get_ip_address(self):
         """
