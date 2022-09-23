@@ -14,7 +14,7 @@ from airtest.utils.compat import script_log_dir
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
 # Assertions
-from airtest.core.assertions import (assert_exists, assert_not_exists, assert_equal, assert_not_equal,
+from airtest.core.assertions import (assert_exists, assert_not_exists, assert_equal, assert_not_equal,  # noqa
                                         assert_true, assert_false, assert_is, assert_is_not,
                                         assert_is_none, assert_is_not_none, assert_in, assert_not_in,
                                         assert_is_instance, assert_not_is_instance

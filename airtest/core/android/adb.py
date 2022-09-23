@@ -461,7 +461,7 @@ class ADB(object):
         if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
             # If remote is a folder, add the filename and escape
             filename = os.path.basename(local)
-            # 把文件名中的空格、括号等符号，添加转义符，以便adb push后的文件名正确
+            # Add escape characters for spaces, parentheses, etc. in filenames
             filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
             remote = '%s/%s' % (remote, filename)
         self.cmd(["push", local, remote], ensure_unicode=False)
@@ -677,8 +677,6 @@ class ADB(object):
 
         Note:
             This is more reliable and recommended way of installing `.apk` files
-            Do not use filenames with spaces
-            请勿使用带空格的文件名！
 
         Args:
             filepath: full path to file to be installed on the device

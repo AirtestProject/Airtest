@@ -60,7 +60,7 @@ class Minicap(BaseCap):
             # minicap需要在横竖屏转换时，重新连接
             rotation_watcher.reg_callback(lambda x: self.update_rotation(x * 90))
         self.cleanup_func = []
-        # 默认的清理操作，在退出时断开连接
+        # Force cleanup on exit
         reg_cleanup(self.teardown_stream)
 
     @ready_method
@@ -262,8 +262,9 @@ class Minicap(BaseCap):
                 s.send(b"1")
             # recv frame header, count frame_size
             if self.RECVTIMEOUT is not None:
-                # 部分手机在横竖屏切换时，可能会卡在这里一直等待recv数据，导致旧的minicap进程未完全结束
-                # 这可能会使新的minicap拿到的画面只有一半，另外一半黑屏，因此1.2.7以上版本强制设置超时时间为3s
+                # Some mobile phones may keep waiting for data when switching between horizontal and vertical screens,
+                # and the connection is not closed, resulting in a black screen
+                # Set the timeout to 3s(airtest>=1.2.7)
                 header = s.recv_with_timeout(4, self.RECVTIMEOUT)
             else:
                 header = s.recv(4)
@@ -280,8 +281,8 @@ class Minicap(BaseCap):
                 stopping = yield frame_data
 
         LOGGING.debug("minicap stream ends")
-        # 这里只调用_cleanup()，清理掉本次连接创建的进程即可
-        # 不直接调用teardown_stream()，因为在屏幕旋转时可能会多次重建连接，self.frame_gen可能会卡住
+        # teardown stream() cannot be called directly because the connection may be rebuilt multiple times
+        # while the screen is rotated, and self.frame_gen gets stuck
         self._cleanup()
 
     def _setup_stream_server(self, lazy=False):
@@ -387,6 +388,7 @@ class Minicap(BaseCap):
 
         主动将minicap建立的各个连接关闭
         与snippet.py中的CLEANUP_CALLS功能相同，但是允许主动调用，避免异常退出时有遗漏进程没清理干净
+
         Returns:
 
         """
@@ -402,7 +404,7 @@ class Minicap(BaseCap):
             None
 
         """
-        # 主动清理一次之前建立的连接
+        # clean up established connections
         self._cleanup()
         if not self.frame_gen:
             return
