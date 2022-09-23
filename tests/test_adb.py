@@ -120,15 +120,15 @@ class TestADBWithDevice(unittest.TestCase):
     def test_push(self):
 
         def test_push_file(file_path, des_path):
-            # push新增返回值为目标文件路径
-            tmpdir = os.path.dirname(des_path)
-            des_file = self.adb.push(file_path, tmpdir)
+            des_file = self.adb.push(file_path, des_path)
             print(des_file)
             self.assertIsNotNone(des_file)
             self.assertTrue(self.adb.exists_file(des_file))
             self.adb.shell("rm " + des_file)
 
         tmpdir = "/data/local/tmp"
+        test_push_file(IMG, tmpdir)
+
         imgname = os.path.basename(IMG)
         tmpimgpath = tmpdir + "/" + imgname
         test_push_file(IMG, tmpimgpath)
@@ -136,11 +136,13 @@ class TestADBWithDevice(unittest.TestCase):
         # 测试空格+特殊字符+中文
         test_space_img = os.path.join(os.path.dirname(IMG), "space " + imgname)
         shutil.copy(IMG, test_space_img)
+        test_push_file(test_space_img, tmpdir)
         test_push_file(test_space_img, tmpdir + "/" + os.path.basename(test_space_img))
         try_remove(test_space_img)
 
         test_img = os.path.join(os.path.dirname(IMG), imgname + "中文 (1)")
         shutil.copy(IMG, test_img)
+        test_push_file(test_img, tmpdir)
         test_push_file(test_img, tmpdir + "/" + os.path.basename(test_img))
         try_remove(test_img)
 

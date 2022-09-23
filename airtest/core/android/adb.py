@@ -434,7 +434,7 @@ class ADB(object):
         Perform `adb push` command
 
         Note:
-            Note: If there is a space (or special symbol) in the file name, it will be forced to add escape characters,
+            If there is a space (or special symbol) in the file name, it will be forced to add escape characters,
             and the new file name will be added with quotation marks and returned as the return value
 
             注意：文件名中如果带有空格（或特殊符号），将会被强制增加转义符，并将新的文件名添加引号，作为返回值返回
@@ -457,9 +457,9 @@ class ADB(object):
             >>> adb.shell("rm " + new_name)
 
         """
-        local = decode_path(local)  # 兼容py2
-        # 如果文件路径包含中文，可能会导致adb push后的文件名不正确，因此强制指定目标路径的文件名
+        local = decode_path(local)  # py2
         if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
+            # If remote is a folder, add the filename and escape
             filename = os.path.basename(local)
             # 把文件名中的空格、括号等符号，添加转义符，以便adb push后的文件名正确
             filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
@@ -470,17 +470,21 @@ class ADB(object):
     def pull(self, remote, local):
         """
         Perform `adb pull` command
+
         Args:
             remote: remote file to be downloaded from the device
             local: local destination where the file will be downloaded from the device
 
+        Note:
+            If <=PY34, the path in Windows cannot be the root directory, and cannot contain symbols such as /g in the path
+            注意：如果低于PY34,windows中路径不能为根目录，并且不能包含/g等符号在路径里
+
         Returns:
             None
         """
-        local = decode_path(local)  # 兼容py2
+        local = decode_path(local)  # py2
         if PY34:
-            # windows下，路径不能为根目录，且假如路径使用了/，也不能包含/g等符号在路径里（除非换成\）
-            # 如果是PY3.4以上可以用Path强制转换成\
+            # If it is PY3.4 or above, use Path to force / convert to \
             from pathlib import Path
             local = Path(local).as_posix()
         self.cmd(["pull", remote, local], ensure_unicode=False)
@@ -579,7 +583,7 @@ class ADB(object):
         try:
             self.cmd(cmds)
         except AdbError as e:
-            # 忽略重复断开端口的报错
+            # ignore if already removed
             if "not found" in e.stdout:
                 pass
         # unregister for cleanup
@@ -708,8 +712,7 @@ class ADB(object):
             # if the apk file path contains spaces, the path must be escaped
             device_path = self.push(filepath, device_dir)
         except AdbError as err:
-            # no space left on device
-            # 错误原因：空间不足，或者推送失败、路径错误等
+            # Error: no space left on device
             raise err
 
         try:
@@ -895,7 +898,7 @@ class ADB(object):
             try:
                 self.remove_forward(local)
             except DeviceConnectionError:
-                # 如果手机已经被拔出，可以忽略
+                # if device is offline, ignore
                 pass
 
     @property
