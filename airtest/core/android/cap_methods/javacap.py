@@ -70,7 +70,8 @@ class Javacap(Yosemite, BaseCap):
         try:
             t = s.recv(24)
         except Exception as e:
-            # 在部分手机上，可能连接可以成功建立，但是在开始获取数据时会报错
+            # On some phones, the connection can be established successfully,
+            # but an error is reported when starting to fetch data
             raise ScreenError(e)
         # javacap header
         LOGGING.debug(struct.unpack("<2B5I2B", t))
@@ -117,7 +118,6 @@ class Javacap(Yosemite, BaseCap):
         """
         Cleanup javacap process and stream reader
 
-        和minicap类似
         Returns:
 
         """
