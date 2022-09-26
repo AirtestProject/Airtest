@@ -113,27 +113,55 @@ class Windows(Device):
             display the screenshot
 
         """
+        # return self.snapshot_new(filename, quality, max_size)
         if self.handle:
             screen = screenshot(filename, self.handle)
+            print(f"have handle screen:{screen}")
         else:
             screen = screenshot(filename)
+            print(f"no handle screen:{screen}")
             if self.app:
                 rect = self.get_rect()
+                print(f"1.rect:{rect}")
                 rect = self._fix_image_rect(rect)
+                print(f"1.fix_image_rect:{rect}")
                 screen = aircv.crop_image(screen, [rect.left, rect.top, rect.right, rect.bottom])
         if not screen.any():
+            # any()是或操作，all()是与操作
             if self.app:
                 rect = self.get_rect()
+                print(f"2.rect:{rect}")
                 rect = self._fix_image_rect(rect)
+                print(f"2.fix_image_rect:{rect}")
                 screen = aircv.crop_image(screenshot(filename), [rect.left, rect.top, rect.right, rect.bottom])
+        else:
+            print("computer is lock or black")
         if self._focus_rect != (0, 0, 0, 0):
             height, width = screen.shape[:2]
+            print(f"height:{height}, width:{width}")
             rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
+            print(f"3.rect:{rect}")
             screen = aircv.crop_image(screen, rect)
         if filename:
             aircv.imwrite(filename, screen, quality, max_size=max_size)
         return screen
 
+    def snapshot_new(self, filename=None, quality=10, max_size=None):
+        import mss
+        import numpy
+        if self.app:
+            rect = self.get_rect()
+            rect = self._fix_image_rect(rect)
+            monitor = {"top": rect.top, "left": rect.left, "width": rect.right - rect.left,
+                       "height": rect.bottom - rect.top, "monitor": 1}
+        else:
+            monitor = self.screen.monitors[-1]
+        with mss.mss() as sct:
+            sct_img = sct.grab(monitor)
+            screen = numpy.array(sct_img)
+            if filename:
+                aircv.imwrite(filename, screen, quality, max_size=max_size)
+            return screen
 
     def _fix_image_rect(self, rect):
         """Fix rect in image."""
