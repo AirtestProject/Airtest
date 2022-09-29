@@ -7,6 +7,7 @@ import numpy
 import mss
 from functools import wraps
 import win32api
+import pywintypes  # noqa
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
