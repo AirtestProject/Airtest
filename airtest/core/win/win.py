@@ -362,7 +362,7 @@ class Windows(Device):
             coords = self._action_pos(win32api.GetCursorPos())
             self.mouse.release(button=button, coords=coords)
 
-    def start_app(self, path, **kwargs):
+    def start_app(self, path, *args, **kwargs):
         """
         Start the application
 

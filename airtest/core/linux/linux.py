@@ -142,7 +142,7 @@ class Linux(Device):
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y))
 
-    def start_app(self, path):
+    def start_app(self, path, *args, **kwargs):
         """
         Start the application
 
