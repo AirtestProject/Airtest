@@ -3,7 +3,7 @@ import os
 import time
 import threading
 import traceback
-from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready
+from airtest.utils.snippet import reg_cleanup, is_exiting, on_method_ready, kill_proc
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.logger import get_logger
 from airtest.core.android.constant import ORI_METHOD, ROTATIONWATCHER_JAR
@@ -92,9 +92,7 @@ class RotationWatcher(object):
     def teardown(self):
         self._t_kill_event.set()
         if self.ow_proc:
-            self.ow_proc.kill()
-            # close io.Buffer
-            self.ow_proc.communicate()
+            kill_proc(self.ow_proc)
         if self.nbsp:
             self.nbsp.kill()
         self.ow_callback = []
