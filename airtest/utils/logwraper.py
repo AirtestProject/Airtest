@@ -80,10 +80,42 @@ class AirtestLogger(object):
 def Logwrap(f, logger):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
+        """
+        The decorator @logwrap can record the function call information in the airtest log and display it in the report.
+        装饰器@logwrap，能够在airtest的log中记录函数的调用信息，显示在报告中
+
+        The following parameters can be appended to the function parameter definition for additional effect:
+        在函数参数定义中可以附加以下参数，以获得更多效果：
+
+        snapshot: snapshot: If True, a snapshot can be attached to the report. 如果为True，可以附加一张截图到报告中
+        depth: the depth order of the current log in the log. 指定log中当前log的深度顺序
+
+        Examples:
+
+            @logwrap
+            def func1():
+                pass
+
+            @logwrap
+            def func1(snapshot=True):
+                pass
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+
+        """
+        from airtest.core.cv import try_log_screen
         # py3 only: def wrapper(*args, depth=None, **kwargs):
         depth = kwargs.pop('depth', None)  # For compatibility with py2
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
+        # The snapshot parameter is popped from the function parameter,
+        # so the function cannot use the parameter name snapshot later
+        snapshot = m.pop('snapshot', False)
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
         logger.running_stack.append(fndata)
         try:
@@ -94,8 +126,15 @@ def Logwrap(f, logger):
             raise
         else:
             fndata.update({'ret': res, "end_time": time.time()})
+            return res
         finally:
+            if snapshot is True:
+                # If snapshot=True, save an image unless ST.SAVE_IMAGE=False
+                try:
+                    try_log_screen(depth=len(logger.running_stack) + 1)
+                except AttributeError:
+                    # if G.DEVICE is None
+                    pass
             logger.log('function', fndata, depth=depth)
             logger.running_stack.pop()
-        return res
     return wrapper

@@ -34,10 +34,6 @@ class TestMinicapBase(unittest.TestCase):
 
 class TestMinicap(TestMinicapBase):
 
-    def test_get_display_info(self):
-        info = self.minicap.get_display_info()
-        self.assertIsInstance(info, dict)
-
     def test_get_frame(self):
         frame = self.minicap.get_frame()
         frame = string_2_img(frame)

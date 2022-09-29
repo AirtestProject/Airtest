@@ -47,6 +47,7 @@ class RotationWatcher(object):
         # if has roataion watcher stop it
         if self.roundProcess:
             self._stopEvent.set()
+        self.ow_callback = []
 
     def start(self):
         """

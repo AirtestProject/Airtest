@@ -262,9 +262,11 @@ Airtest provide some assert functions, including:
 - assert_not_exists
 - assert_equal
 - assert_not_equal
+- ...
 
 When assertion fails, it will raise ``AssertsionError``. And you will see all assertions in the html report.
 
+All assert statements can be found here: `airtest.core.assertions`_
 
 Running ``.air`` from CLI
 -----------------------------------
@@ -374,3 +376,4 @@ You can write some common used function in one ``.air`` script and import it fro
 .. _airtest.core.android.Android class: ./all_module/airtest.core.android.android.html
 .. _airtest.core.win.Windows class: ./all_module/airtest.core.win.win.html#airtest.core.win.win.Windows
 .. _airtest.core.ios.IOS class: ./all_module/airtest.core.ios.ios.html#airtest.core.ios.ios.IOS
+.. _airtest.core.assertions: ./all_module/airtest.core.assertions.html

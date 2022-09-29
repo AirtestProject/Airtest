@@ -761,6 +761,18 @@ class IOS(Device):
                 return True
         return False
 
+    def disconnect(self):
+        """
+        discconect mjpeg and rotation_watcher
+
+        Returns: None
+
+        """
+        if self.cap_method == CAP_METHOD.MJPEG:
+            self.mjpegcap.teardown_stream()
+        if self.rotation_watcher:
+            self.rotation_watcher.teardown()
+
 
 if __name__ == "__main__":
     start = time.time()

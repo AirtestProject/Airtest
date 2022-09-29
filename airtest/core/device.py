@@ -73,3 +73,6 @@ class Device(with_metaclass(MetaDevice, object)):
     def _raise_not_implemented_error(self):
         platform = self.__class__.__name__
         raise NotImplementedError("Method not implemented on %s" % platform)
+
+    def disconnect(self):
+        pass

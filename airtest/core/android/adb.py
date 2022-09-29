@@ -9,7 +9,7 @@ import warnings
 import subprocess
 import threading
 from copy import copy
-from six import PY3, text_type, binary_type, raise_from
+from six import PY3, text_type, binary_type
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
@@ -77,7 +77,7 @@ class ADB(object):
         Set communication parameters (host and port) between adb server and adb client
 
         Args:
-            server_addr: adb server address, default is 127.0.0.1:5037
+            server_addr: adb server address, default is ["127.0.0.1", 5037]
 
         Returns:
             None
@@ -433,26 +433,60 @@ class ADB(object):
         """
         Perform `adb push` command
 
+        Note:
+            If there is a space (or special symbol) in the file name, it will be forced to add escape characters,
+            and the new file name will be added with quotation marks and returned as the return value
+
+            注意：文件名中如果带有空格（或特殊符号），将会被强制增加转义符，并将新的文件名添加引号，作为返回值返回
+
         Args:
             local: local file to be copied to the device
             remote: destination on the device where the file will be copied
 
         Returns:
-            None
+            The file path saved in the phone may be enclosed in quotation marks, eg. '"test\ file.txt"'
+
+        Examples:
+
+            >>> adb = device().adb
+            >>> adb.push("test.txt", "/data/local/tmp")
+
+            >>> new_name = adb.push("test space.txt", "/data/local/tmp")  # test the space in file name
+            >>> print(new_name)
+            "/data/local/tmp/test\ space.txt"
+            >>> adb.shell("rm " + new_name)
 
         """
+        local = decode_path(local)  # py2
+        if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
+            # If remote is a folder, add the filename and escape
+            filename = os.path.basename(local)
+            # Add escape characters for spaces, parentheses, etc. in filenames
+            filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
+            remote = '%s/%s' % (remote, filename)
         self.cmd(["push", local, remote], ensure_unicode=False)
+        return '\"%s\"' % remote
 
     def pull(self, remote, local):
         """
         Perform `adb pull` command
+
         Args:
             remote: remote file to be downloaded from the device
             local: local destination where the file will be downloaded from the device
 
+        Note:
+            If <=PY3, the path in Windows cannot be the root directory, and cannot contain symbols such as /g in the path
+            注意：如果低于PY3,windows中路径不能为根目录，并且不能包含/g等符号在路径里
+
         Returns:
             None
         """
+        local = decode_path(local)  # py2
+        if PY3:
+            # If python3, use Path to force / convert to \
+            from pathlib import Path
+            local = Path(local).as_posix()
         self.cmd(["pull", remote, local], ensure_unicode=False)
 
     def forward(self, local, remote, no_rebind=True):
@@ -546,7 +580,12 @@ class ADB(object):
             cmds = ["forward", "--remove", local]
         else:
             cmds = ["forward", "--remove-all"]
-        self.cmd(cmds)
+        try:
+            self.cmd(cmds)
+        except AdbError as e:
+            # ignore if already removed
+            if "not found" in e.stdout:
+                pass
         # unregister for cleanup
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
@@ -632,7 +671,7 @@ class ADB(object):
 
         return out
 
-    def pm_install(self, filepath, replace=False):
+    def pm_install(self, filepath, replace=False, install_options=None):
         """
         Perform `adb push` and `adb install` commands
 
@@ -642,31 +681,46 @@ class ADB(object):
         Args:
             filepath: full path to file to be installed on the device
             replace: force to replace existing application, default is False
+            install_options:  list of options
+                e.g.["-t",  # allow test packages
+                    "-l",  # forward lock application,
+                    "-s",  # install application on sdcard,
+                    "-d",  # allow version code downgrade (debuggable packages only)
+                    "-g",  # grant all runtime permissions
+                ]
 
         Returns:
             None
 
         """
+        if isinstance(filepath, str):
+            filepath = decode_path(filepath)
+        if not os.path.isfile(filepath):
+            raise RuntimeError("file: %s does not exists" % (repr(filepath)))
+
+        if not install_options or type(install_options) != list:
+            install_options = []
+        if replace:
+            install_options.append("-r")
+
         filename = os.path.basename(filepath)
         device_dir = "/data/local/tmp"
-        # if the apk file path contains spaces, the path must be escaped
-        device_path = '\"%s/%s\"' % (device_dir, filename)
-
-        out = self.cmd(["push", filepath, device_dir])
-        print(out)
-
-        if not replace:
-            install_cmd = ['pm', 'install', device_path]
-        else:
-            install_cmd = ['pm', 'install', '-r', device_path]
 
         try:
-            self.shell(install_cmd)
+            # if the apk file path contains spaces, the path must be escaped
+            device_path = self.push(filepath, device_dir)
+        except AdbError as err:
+            # Error: no space left on device
+            raise err
+
+        try:
+            cmds = ["pm", "install", ] + install_options + [device_path]
+            self.shell(cmds)
         except:
             raise
         finally:
             # delete apk file
-            self.shell("rm " + device_path)
+            self.cmd(["shell", "rm", device_path], timeout=30)
 
     def uninstall_app(self, package):
         """
@@ -842,7 +896,7 @@ class ADB(object):
             try:
                 self.remove_forward(local)
             except DeviceConnectionError:
-                # 如果手机已经被拔出，可以忽略
+                # if device is offline, ignore
                 pass
 
     @property
@@ -964,9 +1018,9 @@ class ADB(object):
         # use adb shell wm size
         displayInfo = {}
         try:
-            wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.raw_shell('wm size'))
-        except AdbError as e:
-            print(e)
+            wm_size = re.search(r'(?P<width>\d+)x(?P<height>\d+)\s*$', self.cmd('shell wm size', timeout=5))
+        except (AdbError, RuntimeError) as e:
+            LOGGING.error(e)
         else:
             if wm_size:
                 displayInfo = dict((k, int(v)) for k, v in wm_size.groupdict().items())
@@ -1006,7 +1060,7 @@ class ADB(object):
 
         # gets C{mPhysicalDisplayInfo} values from dumpsys. This is a method to obtain display dimensions and density
         phyDispRE = re.compile('Physical size: (?P<width>\d+)x(?P<height>\d+).*Physical density: (?P<density>\d+)', re.S)
-        m = phyDispRE.search(self.raw_shell('wm size; wm density'))
+        m = phyDispRE.search(self.cmd('shell wm size; wm density', timeout=3))
         if m:
             for prop in ['width', 'height']:
                 displayInfo[prop] = int(m.group(prop))
@@ -1014,7 +1068,8 @@ class ADB(object):
                 displayInfo[prop] = float(m.group(prop))
             return displayInfo
 
-        return displayInfo
+        if not displayInfo:
+            raise DeviceConnectionError("Getting device screen information timed out")
 
     def _getDisplayDensity(self, strip=True):
         """
@@ -1360,13 +1415,21 @@ class ADB(object):
 
         Returns:
             None
+
+        Examples:
+            >>> dev = connect_device("Android:///")
+            >>> dev.text("Hello World")
+            >>> dev.text("test123")
         """
         if content.isalpha():
             self.shell(["input", "text", content])
         else:
-            # 如果同时包含了字母+数字，用input text整句输入可能会导致乱序
+            # If it contains letters and numbers, input with `adb shell input text` may result in the wrong order
             for i in content:
-                self.shell(["input", "keyevent", "KEYCODE_" + i.upper()])
+                if i == " ":
+                    self.keyevent("KEYCODE_SPACE")
+                else:
+                    self.shell(["input", "text", i])
 
     def get_ip_address(self):
         """
@@ -1594,12 +1657,13 @@ class ADB(object):
                 ret[k] = v
         return ret
 
-    def get_display_of_all_screen(self, info):
+    def get_display_of_all_screen(self, info, package=None):
         """
         Perform `adb shell dumpsys window windows` commands to get window display of application.
 
         Args:
             info: device screen properties
+            package: package name, default to the package of top activity
 
         Returns:
             None if adb command failed to run, otherwise return device screen properties(portrait mode)
@@ -1609,7 +1673,7 @@ class ADB(object):
         output = self.shell("dumpsys window windows")
         windows = output.split("Window #")
         offsetx, offsety, width, height = 0, 0, info['width'], info['height']
-        package = self._search_for_current_package(output)
+        package = self._search_for_current_package(output) if package is None else package
         if package:
             for w in windows:
                 if "package=%s" % package in w:

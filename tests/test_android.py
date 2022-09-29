@@ -32,7 +32,8 @@ class TestAndroid(unittest.TestCase):
         self.assertIsInstance(self.android.adb, ADB)
 
     def test_display_info(self):
-        self.assertIs(self.android.display_info, self.android.adb.display_info)
+        self.assertIsInstance(self.android.adb.display_info, dict)
+        print(self.android.display_info)
         self.assertIn("width", self.android.display_info)
         self.assertIn("height", self.android.display_info)
         self.assertIn("orientation", self.android.display_info)
@@ -202,6 +203,16 @@ class TestAndroid(unittest.TestCase):
         self.android.touch_method = TOUCH_METHOD.ADBTOUCH
         with self.assertRaises(Exception):
             self.android.two_finger_swipe((100, 100), (200, 200))
+
+    def test_disconnect(self):
+        self.android.snapshot()
+        self.android.touch((100, 100))
+        self.android.disconnect()
+        # 检查是否将所有forward的端口都断开了
+        self.assertEqual(len(self.android.adb._forward_local_using), 0)
+        # 断开后，如果再次连接也仍然可以正常使用，并且要正确地在退出时进行清理（检查log中没有warning）
+        self.android.snapshot()
+        self.assertEqual(len(self.android.adb._forward_local_using), 1)
 
 
 if __name__ == '__main__':
