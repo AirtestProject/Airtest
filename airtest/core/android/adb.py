@@ -483,7 +483,7 @@ class ADB(object):
             None
         """
         local = decode_path(local)  # py2
-        if PY34:
+        if PY3:
             # If it is PY3.4 or above, use Path to force / convert to \
             from pathlib import Path
             local = Path(local).as_posix()
