@@ -3,18 +3,17 @@
 import time
 import socket
 import subprocess
-from mss import mss
+import numpy
+import mss
 from functools import wraps
-import pywintypes  # noqa
 import win32api
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
-from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics
+from pywinauto.win32functions import SetForegroundWindow
 
 from airtest.core.win.ctypesinput import key_press, key_release
-from airtest.core.win.screen import screenshot
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -46,7 +45,7 @@ class Windows(Device):
         self.keyboard = keyboard
         self._init_connect(handle, kwargs)
 
-        self.screen = mss()
+        self.screen = mss.mss()
         self.monitor = self.screen.monitors[0]  # 双屏的时候，self.monitor为整个双屏
         self.main_monitor = self.screen.monitors[1]  # 双屏的时候，self.main_monitor为主屏
 
@@ -113,8 +112,6 @@ class Windows(Device):
             display the screenshot
 
         """
-        import mss
-        import numpy
         if self.app:
             rect = self.get_rect()
             rect = self._fix_image_rect(rect)
