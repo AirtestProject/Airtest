@@ -9,7 +9,7 @@ import warnings
 import subprocess
 import threading
 from copy import copy
-from six import PY3, PY34, text_type, binary_type, raise_from
+from six import PY3, text_type, binary_type
 from six.moves import reduce
 
 from airtest.core.android.constant import (DEFAULT_ADB_PATH, IP_PATTERN,
@@ -476,15 +476,15 @@ class ADB(object):
             local: local destination where the file will be downloaded from the device
 
         Note:
-            If <=PY34, the path in Windows cannot be the root directory, and cannot contain symbols such as /g in the path
-            注意：如果低于PY34,windows中路径不能为根目录，并且不能包含/g等符号在路径里
+            If <=PY3, the path in Windows cannot be the root directory, and cannot contain symbols such as /g in the path
+            注意：如果低于PY3,windows中路径不能为根目录，并且不能包含/g等符号在路径里
 
         Returns:
             None
         """
         local = decode_path(local)  # py2
         if PY3:
-            # If it is PY3.4 or above, use Path to force / convert to \
+            # If python3, use Path to force / convert to \
             from pathlib import Path
             local = Path(local).as_posix()
         self.cmd(["pull", remote, local], ensure_unicode=False)
