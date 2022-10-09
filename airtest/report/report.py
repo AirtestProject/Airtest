@@ -130,8 +130,8 @@ class LogToHtml(object):
         info = self._translate_info(step)
         assertion = self._translate_assertion(step)
 
-        # set test failed if any traceback exists
-        if info[0]:
+        # set test failed if trace is not caught
+        if info[0] and name and name == 'Final Error':
             self.test_result = False
 
         translated = {
