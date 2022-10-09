@@ -121,7 +121,7 @@ class Windows(Device):
             monitor = self.screen.monitors[0]
         with mss.mss() as sct:
             sct_img = sct.grab(monitor)
-            screen = numpy.array(sct_img)
+            screen = aircv.utils.pil_2_cv2(sct_img)
             if filename:
                 aircv.imwrite(filename, screen, quality, max_size=max_size)
             return screen
