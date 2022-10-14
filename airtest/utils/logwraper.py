@@ -113,6 +113,8 @@ def Logwrap(f, logger):
         depth = kwargs.pop('depth', None)  # For compatibility with py2
         start = time.time()
         m = inspect.getcallargs(f, *args, **kwargs)
+        if m.get('cls'):
+            m['cls'] = m['cls'].__name__
         # The snapshot parameter is popped from the function parameter,
         # so the function cannot use the parameter name snapshot later
         snapshot = m.pop('snapshot', False)
