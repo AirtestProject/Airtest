@@ -44,7 +44,9 @@ class AirtestLogger(object):
             except AttributeError:
                 pass
             return d
-        except AttributeError:
+        except (AttributeError, TypeError):
+            # use d = obj.__dict__.copy() to avoid TypeError: can't pickle mappingproxy objects
+            # but repr(obj) is simpler in the report
             return repr(obj)
 
     def log(self, tag, data, depth=None, timestamp=None):
