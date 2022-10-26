@@ -8,6 +8,7 @@ import mss
 from functools import wraps
 import win32api
 import pywintypes  # noqa
+import shutil
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
@@ -17,6 +18,7 @@ from pywinauto.win32functions import SetForegroundWindow
 from airtest.core.win.ctypesinput import key_press, key_release
 
 from airtest import aircv
+from airtest.aircv.screen_recorder import ScreenRecorder
 from airtest.core.device import Device
 
 
@@ -503,3 +505,57 @@ class Windows(Device):
         """
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
+
+    def start_recording(self, max_time=1800, output="screen.mp4", mode="ffmpeg",fps=7):
+        """
+        Start recording the device display
+
+        Args:
+            max_time: maximum screen recording time, default is 1800
+            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
+            bit_rate: the higher the bitrate, the clearer the video
+
+        Returns:
+            None
+
+        Examples:
+
+            Record 30 seconds of video and export to the current directory test.mp4::
+
+            >>> from airtest.core.api import connect_device, sleep
+            >>> dev = connect_device("Windows:///")
+            >>> # Record the screen with the lowest quality
+            >>> dev.start_recording(bit_rate_level=1)
+            >>> sleep(30)
+            >>> dev.stop_recording(output="test.mp4")
+
+            Or set max_time=30, the screen recording will stop automatically after 30 seconds::
+
+            >>> dev.start_recording(max_time=30, bit_rate_level=5)
+            >>> dev.stop_recording(output="test_30s.mp4")
+
+        """
+        if not hasattr(self, 'recorder'):
+            def get_frame():
+                frame = self.snapshot()
+                return frame
+            self.recorder= ScreenRecorder(output, get_frame, mode=mode,fps=fps)
+        stop_time = time.time() + max_time
+        self.recorder.set_stop_time(stop_time)
+        self.recorder.start()
+        return None
+
+    def stop_recording(self, is_interrupted=False):
+        """
+        Stop recording the device display. Recoding file will be kept in the device.
+
+        Args:
+            output: default file is `screen.mp4`
+            is_interrupted: True or False. Stop only, no pulling recorded file from device.
+
+        Returns:
+            None
+
+        """
+        self.recorder.stop()
+        return None
