@@ -8,7 +8,6 @@ import mss
 from functools import wraps
 import win32api
 import pywintypes  # noqa
-import shutil
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
@@ -20,7 +19,9 @@ from airtest.core.win.ctypesinput import key_press, key_release
 from airtest import aircv
 from airtest.aircv.screen_recorder import ScreenRecorder
 from airtest.core.device import Device
+from airtest.utils.logger import get_logger
 
+LOGGING = get_logger(__name__)
 
 def require_app(func):
     @wraps(func)
@@ -506,14 +507,18 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output="screen.mp4", mode="ffmpeg",fps=7):
+    def start_recording(self, max_time=1800, output="screen.mp4", fps=10, 
+                        record_mode="two_thread", write_mode="ffmpeg", snapshot_sleep=0.001):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
-            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
-            bit_rate: the higher the bitrate, the clearer the video
+            output: ouput file path
+            record_mode: the mode collect screen, choose in ['one_thread', 'two_thread']
+            write_mode: the backend write video, choose in ["cv2", "ffmpeg"]
+            fps: frames per second will record
+            snapshot_sleep: sleep time for each snapshot in 'two_thread' mode
 
         Returns:
             None
@@ -525,37 +530,32 @@ class Windows(Device):
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Windows:///")
             >>> # Record the screen with the lowest quality
-            >>> dev.start_recording(bit_rate_level=1)
+            >>> dev.start_recording()
             >>> sleep(30)
             >>> dev.stop_recording(output="test.mp4")
-
-            Or set max_time=30, the screen recording will stop automatically after 30 seconds::
-
-            >>> dev.start_recording(max_time=30, bit_rate_level=5)
-            >>> dev.stop_recording(output="test_30s.mp4")
+        Note:
+            1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
+            2 If recording still working after app crash, it will continuing write last frame before the crash. 
 
         """
+        LOGGING.info("start recording screen to {}, don't close or resize the app window".format(output))
         if not hasattr(self, 'recorder'):
             def get_frame():
                 frame = self.snapshot()
                 return frame
-            self.recorder= ScreenRecorder(output, get_frame, mode=mode,fps=fps)
+            self.recorder = ScreenRecorder(
+                output, get_frame, mode=write_mode, 
+                fps=fps, snapshot_sleep=snapshot_sleep)
         stop_time = time.time() + max_time
         self.recorder.set_stop_time(stop_time)
-        self.recorder.start()
+        self.recorder.start(mode=record_mode)
         return None
 
-    def stop_recording(self, is_interrupted=False):
+    def stop_recording(self,):
         """
         Stop recording the device display. Recoding file will be kept in the device.
 
-        Args:
-            output: default file is `screen.mp4`
-            is_interrupted: True or False. Stop only, no pulling recorded file from device.
-
-        Returns:
-            None
-
         """
+        LOGGING.info("stopping recording")
         self.recorder.stop()
         return None
