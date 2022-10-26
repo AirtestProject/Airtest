@@ -68,18 +68,18 @@ class ScreenRecorder:
             return True
         return False
 
-    def start(self):
-        t_stream = threading.Thread(target=self.get_frame_loop)
-        t_stream.setDaemon(True)
-        t_stream.start()
-        t_write = threading.Thread(target=self.write_frame_loop)
-        t_write.setDaemon(True)
-        t_write.start()
-
-    def start1(self):
-        t_stream = threading.Thread(target=self.get_write_frame_loop)
-        t_stream.setDaemon(True)
-        t_stream.start()
+    def start(self, mode="two_thread"):
+        if mode == "one_thread":
+            t_stream = threading.Thread(target=self.get_write_frame_loop)
+            t_stream.setDaemon(True)
+            t_stream.start()
+        else:
+            t_stream = threading.Thread(target=self.get_frame_loop)
+            t_stream.setDaemon(True)
+            t_stream.start()
+            t_write = threading.Thread(target=self.write_frame_loop)
+            t_write.setDaemon(True)
+            t_write.start()        
 
     def stop(self):
         self.stop_flag = True
@@ -94,7 +94,7 @@ class ScreenRecorder:
                     break
             self.stop_flag = True
         except Exception as e:
-            print("录像出错", e)
+            print("record thread error", e)
             self.stop_flag = True
             raise
 
@@ -114,11 +114,12 @@ class ScreenRecorder:
             self.writer.close()
             self.stop_flag = True
         except Exception as e:
-            print("录像出错", e)
+            print("write thread error", e)
             self.stop_flag = True
             raise
 
     def get_write_frame_loop(self):
+        # 同时截图并写入视频
         try:
             duration = 1.0/self.writer.fps
             last_time = time.time()
@@ -128,7 +129,6 @@ class ScreenRecorder:
                 if now_time - last_time >= duration:
                     if now_time - last_time < duration+0.01:
                         self.tmp_frame = self.get_frame_func()
-                        # print("采集时间间隔",now_time-last_time)
                     self.writer.write(self.tmp_frame)
                     last_time += duration
                 if self.is_stop():
@@ -137,6 +137,6 @@ class ScreenRecorder:
             self.stop_flag = True
             self.writer.close()
         except Exception as e:
-            print("录像出错", e)
+            print("record and write thread error", e)
             self.stop_flag = True
             raise
