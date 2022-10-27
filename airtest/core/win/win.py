@@ -8,6 +8,7 @@ import mss
 from functools import wraps
 import win32api
 import pywintypes  # noqa
+import os
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
@@ -19,6 +20,7 @@ from airtest.core.win.ctypesinput import key_press, key_release
 from airtest import aircv
 from airtest.aircv.screen_recorder import ScreenRecorder
 from airtest.core.device import Device
+from airtest.core.settings import Settings as ST
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -507,7 +509,7 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output="screen.mp4", fps=10, 
+    def start_recording(self, max_time=1800, output=None, fps=10, 
                         record_mode="two_thread", write_mode="ffmpeg", snapshot_sleep=0.001):
         """
         Start recording the device display
@@ -515,13 +517,17 @@ class Windows(Device):
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            record_mode: the mode collect screen, choose in ['one_thread', 'two_thread']
-            write_mode: the backend write video, choose in ["cv2", "ffmpeg"]
+            record_mode: the mode collect screen, choose in ['two_thread', 'one_thread']
+                twothread: record and write in diiferent threads.
+                onethread: record and write in one thread.
+            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+                ffmpeg: ffmpeg-python backend, higher compression rate.
+                cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
-            snapshot_sleep: sleep time for each snapshot in 'two_thread' mode
+            snapshot_sleep: sleep time for each snapshot in 'two_thread' mode.
 
         Returns:
-            None
+            save_path: path of video file
 
         Examples:
 
@@ -529,27 +535,43 @@ class Windows(Device):
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Windows:///")
-            >>> # Record the screen with the lowest quality
-            >>> dev.start_recording()
+            >>> save_path = dev.start_recording(output="test.mp4")
             >>> sleep(30)
-            >>> dev.stop_recording(output="test.mp4")
+            >>> dev.stop_recording()
+            >>> print(save_path)
         Note:
             1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
             2 If recording still working after app crash, it will continuing write last frame before the crash. 
 
         """
-        LOGGING.info("start recording screen to {}, don't close or resize the app window".format(output))
-        if not hasattr(self, 'recorder'):
-            def get_frame():
-                frame = self.snapshot()
-                return frame
-            self.recorder = ScreenRecorder(
-                output, get_frame, mode=write_mode, 
-                fps=fps, snapshot_sleep=snapshot_sleep)
+        if hasattr(self, 'recorder'):
+            if self.recorder.is_running:
+                LOGGING.warning("recording is already running, please don't call again")
+                return None
+        
+        logdir = "./"
+        if not ST.LOG_DIR is None:
+            logdir = ST.LOG_DIR
+        if output is None:
+            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+        else:
+            if os.path.isabs(output):
+                save_path = output
+            else:
+                save_path = os.path.join(logdir, output)
+
+        def get_frame():
+            frame = self.snapshot()
+            return frame
+        self.recorder = ScreenRecorder(
+            save_path, get_frame, mode=write_mode, 
+            fps=fps, snapshot_sleep=snapshot_sleep)
+        self.recorder.start(mode=record_mode)
+
         stop_time = time.time() + max_time
         self.recorder.set_stop_time(stop_time)
-        self.recorder.start(mode=record_mode)
-        return None
+        LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
+        return save_path
 
     def stop_recording(self,):
         """
