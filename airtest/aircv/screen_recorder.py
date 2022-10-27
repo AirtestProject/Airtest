@@ -55,20 +55,29 @@ class ScreenRecorder:
         self.snapshot_sleep = snapshot_sleep
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
         self.writer = VidWriter(outfile, width, height, mode, fps)
-        self.stop_flag = False
-        self.stop_time = 0
+        self._is_running = False
+        self._stop_flag = False
+        self._stop_time = 0
 
-    def set_stop_time(self, stop_time):
-        self.stop_time = stop_time
+    @property
+    def is_running(self):
+        return self._is_running
+
+    def set_stop_time(self, _stop_time):
+        self._stop_time = _stop_time
 
     def is_stop(self):
-        if self.stop_flag:
+        if self._stop_flag:
             return True
-        if self.stop_time > 0 and time.time() >= self.stop_time:
+        if self._stop_time > 0 and time.time() >= self._stop_time:
             return True
         return False
 
     def start(self, mode="two_thread"):
+        if self._is_running:
+            print("recording is already running, please don't call again")
+            return False
+        self._is_running = True
         if mode == "one_thread":
             t_stream = threading.Thread(target=self.get_write_frame_loop)
             t_stream.setDaemon(True)
@@ -80,9 +89,11 @@ class ScreenRecorder:
             t_write = threading.Thread(target=self.write_frame_loop)
             t_write.setDaemon(True)
             t_write.start()        
+        return True
 
     def stop(self):
-        self.stop_flag = True
+        self._is_running = False
+        self._stop_flag = True
 
     def get_frame_loop(self):
         # 单独一个线程持续截图
@@ -92,10 +103,10 @@ class ScreenRecorder:
                 time.sleep(self.snapshot_sleep)
                 if self.is_stop():
                     break
-            self.stop_flag = True
+            self._stop_flag = True
         except Exception as e:
             print("record thread error", e)
-            self.stop_flag = True
+            self._stop_flag = True
             raise
 
     def write_frame_loop(self):
@@ -103,7 +114,7 @@ class ScreenRecorder:
         try:
             duration = 1.0/self.writer.fps
             last_time = time.time()
-            self.stop_flag = False
+            self._stop_flag = False
             while True:
                 if time.time()-last_time >= duration:
                     self.writer.write(self.tmp_frame)
@@ -112,10 +123,10 @@ class ScreenRecorder:
                     break
                 time.sleep(0.0001)
             self.writer.close()
-            self.stop_flag = True
+            self._stop_flag = True
         except Exception as e:
             print("write thread error", e)
-            self.stop_flag = True
+            self._stop_flag = True
             raise
 
     def get_write_frame_loop(self):
@@ -123,7 +134,7 @@ class ScreenRecorder:
         try:
             duration = 1.0/self.writer.fps
             last_time = time.time()
-            self.stop_flag = False
+            self._stop_flag = False
             while True:
                 now_time = time.time()
                 if now_time - last_time >= duration:
@@ -134,9 +145,9 @@ class ScreenRecorder:
                 if self.is_stop():
                     break
                 time.sleep(0.0001)
-            self.stop_flag = True
+            self._stop_flag = True
             self.writer.close()
         except Exception as e:
             print("record and write thread error", e)
-            self.stop_flag = True
+            self._stop_flag = True
             raise
