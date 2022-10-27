@@ -11,7 +11,7 @@ class VidWriter:
         self.fps = fps
         self.vid_size = max(width, height)
         if self.vid_size % 32 != 0:
-            self.vid_size = self.vid_size - self.vid_size % 32+32
+            self.vid_size = self.vid_size - (self.vid_size % 32) + 32
         self.cache_frame = np.zeros(
             (self.vid_size, self.vid_size, 3), dtype=np.uint8)
         width, height = self.vid_size, self.vid_size
@@ -19,9 +19,9 @@ class VidWriter:
             self.process = (
                 ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt='rgb24',
-                       s='{}x{}'.format(width, height), framerate=fps)
+                       s='{}x{}'.format(width, height), framerate=self.fps)
                 .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25,
-                        preset="veryfast", framerate=fps)
+                        preset="veryfast", framerate=self.fps)
                 .global_args("-loglevel", "error")
                 .overwrite_output()
                 .run_async(pipe_stdin=True)
@@ -29,13 +29,13 @@ class VidWriter:
             self.writer = self.process.stdin
         elif self.mode == "cv2":
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            self.writer = cv2.VideoWriter(outfile, fourcc, 5, (width, height))
+            self.writer = cv2.VideoWriter(outfile, fourcc, self.fps, (width, height))
 
     def write(self, frame):
         assert len(frame.shape) == 3
         if self.mode == "ffmpeg":
-            frame = frame[..., ::-1].astype(np.uint8)
-        self.cache_frame[:frame.shape[0], :frame.shape[1], :] = frame
+            frame = frame[..., ::-1]
+        self.cache_frame[:frame.shape[0], :frame.shape[1], :] = frame.astype(np.uint8)
         self.writer.write(self.cache_frame)
 
     def close(self):
@@ -48,7 +48,7 @@ class VidWriter:
 
 
 class ScreenRecorder:
-    def __init__(self, outfile, get_frame_func, mode='ffmpeg', fps=7,
+    def __init__(self, outfile, get_frame_func, mode='ffmpeg', fps=10,
                  snapshot_sleep=0.001):
         self.get_frame_func = get_frame_func
         self.tmp_frame = self.get_frame_func()
@@ -86,21 +86,23 @@ class ScreenRecorder:
             return False
         self._is_running = True
         if mode == "one_thread":
-            t_stream = threading.Thread(target=self.get_write_frame_loop)
-            t_stream.setDaemon(True)
-            t_stream.start()
+            self.t_stream = threading.Thread(target=self.get_write_frame_loop)
+            self.t_stream.setDaemon(True)
+            self.t_stream.start()
         else:
-            t_stream = threading.Thread(target=self.get_frame_loop)
-            t_stream.setDaemon(True)
-            t_stream.start()
-            t_write = threading.Thread(target=self.write_frame_loop)
-            t_write.setDaemon(True)
-            t_write.start()        
+            self.t_stream = threading.Thread(target=self.get_frame_loop)
+            self.t_stream.setDaemon(True)
+            self.t_stream.start()
+            self.t_write = threading.Thread(target=self.write_frame_loop)
+            self.t_write.setDaemon(True)
+            self.t_write.start()        
         return True
 
     def stop(self):
         self._is_running = False
         self._stop_flag = True
+        self.t_write.join()
+        self.t_stream.join()
 
     def get_frame_loop(self):
         # 单独一个线程持续截图
