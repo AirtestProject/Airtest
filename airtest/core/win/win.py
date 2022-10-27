@@ -545,7 +545,7 @@ class Windows(Device):
 
         """
         if hasattr(self, 'recorder'):
-            if self.recorder.is_running:
+            if self.recorder.is_running():
                 LOGGING.warning("recording is already running, please don't call again")
                 return None
         
@@ -566,10 +566,8 @@ class Windows(Device):
         self.recorder = ScreenRecorder(
             save_path, get_frame, mode=write_mode, 
             fps=fps, snapshot_sleep=snapshot_sleep)
+        self.recorder.stop_time = max_time
         self.recorder.start(mode=record_mode)
-
-        stop_time = time.time() + max_time
-        self.recorder.set_stop_time(stop_time)
         LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
         return save_path
 

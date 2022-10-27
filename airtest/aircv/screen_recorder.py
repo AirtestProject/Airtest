@@ -59,12 +59,19 @@ class ScreenRecorder:
         self._stop_flag = False
         self._stop_time = 0
 
-    @property
     def is_running(self):
         return self._is_running
-
-    def set_stop_time(self, _stop_time):
-        self._stop_time = _stop_time
+    
+    @property
+    def stop_time(self):
+        return self._stop_time
+    
+    @stop_time.setter
+    def stop_time(self, max_time):
+        if isinstance(max_time, int) and max_time > 0:
+            self._stop_time = time.time() + max_time
+        else:
+            print("failed to set stop time")
 
     def is_stop(self):
         if self._stop_flag:
