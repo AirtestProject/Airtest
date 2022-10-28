@@ -63,14 +63,15 @@ def check_system():
 def get_platform_http_zip():
     """Return the download link for the current platform"""
     check_system()
-    return PLATFORM_ZIP_FILES[sys.platform]
-
-def get_backup_platform_http_zip():
-    """Return the download link for the current platform"""
-    check_system()
-    BACKUP_SIT = "https://airtestproject.s3.netease.com"
-    return BACKUP_SIT + BACKUP_PLATFORM_ZIP_FILES[sys.platform]
-
+    try:
+        r = requests.get(PLATFORM_ZIP_FILES[sys.platform], timeout=10)
+        r.raise_for_status()
+        return PLATFORM_ZIP_FILES[sys.platform]
+    except:
+        print("Warning, main url download fail, try backup url.")
+        BACKUP_SIT = "https://airtestproject.s3.netease.com"
+        return BACKUP_SIT + BACKUP_PLATFORM_ZIP_FILES[sys.platform]
+    
 def get_platform_dir():
     """Either get the executable or raise an error"""
     check_system()
@@ -81,7 +82,7 @@ def download_file(url, local_path):
     """Downloads a file to the give path."""
     # NOTE the stream=True parameter below
     print(f"Downloading {url} -> {local_path}")
-    with requests.get(url, stream=True, timeout=10) as req:
+    with requests.get(url, stream=True) as req:
         req.raise_for_status()
         with open(local_path, "wb") as file_d:
             for chunk in req.iter_content(chunk_size=8192 * 16):
@@ -113,23 +114,18 @@ def get_or_fetch_platform_executables_else_raise(fix_permissions=True):
 
 def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
     """Either get the executable or raise an error, internal api"""
-    print("\n===========ffmpeg is missing, fetching it now.=============\n")
     exe_dir = get_platform_dir()
     installed_crumb = os.path.join(exe_dir, "installed.crumb")
     if not os.path.exists(installed_crumb):
+        print("\n===========ffmpeg is missing, fetching it now.=============\n")
         # All zip files store their platform executables in a folder
         # like "win32" or "darwin" or "linux" inside the executable. So root
         # the install one level up from that same directory.
         install_dir = os.path.dirname(exe_dir)
         os.makedirs(exe_dir, exist_ok=True)
         local_zip = exe_dir + ".zip"
-        try:
-            url = get_platform_http_zip()
-            download_file(url, local_zip)
-        except requests.exceptions.RequestException:
-            print("Warning, main url download fail, try backup url.")
-            url = get_backup_platform_http_zip()
-            download_file(url, local_zip)
+        url = get_platform_http_zip()
+        download_file(url, local_zip)
         print(f"Extracting {local_zip} -> {install_dir}")
         with zipfile.ZipFile(local_zip, mode="r") as zipf:
             zipf.extractall(install_dir)
@@ -139,6 +135,7 @@ def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
             print(f"{__file__}: Error could not remove {local_zip} because of {err}")
         with open(installed_crumb, "wt") as filed:  # pylint: disable=W1514
             filed.write(f"installed from {url} on {datetime.now().__str__()}")
+        print("=============================================================\n")
     ffmpeg_exe = os.path.join(exe_dir, "ffmpeg")
     ffprobe_exe = os.path.join(exe_dir, "ffprobe")
     if sys.platform == "win32":
@@ -156,7 +153,6 @@ def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
             os.chmod(exe, exe_bits | read_bits)
             assert os.access(exe, os.X_OK), f"Could not execute {exe}"
             assert os.access(exe, os.R_OK), f"Could not get read bits of {exe}"
-    print("=============================================================\n\n")
     return ffmpeg_exe, ffprobe_exe
 
 
