@@ -16,6 +16,8 @@ class VidWriter:
             (self.vid_size, self.vid_size, 3), dtype=np.uint8)
         width, height = self.vid_size, self.vid_size
         if self.mode == "ffmpeg":
+            from airtest.core.ffmpeg import ffmpeg_setter
+            ffmpeg_setter.add_paths()
             self.process = (
                 ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt='rgb24',
