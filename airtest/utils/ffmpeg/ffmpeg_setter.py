@@ -44,9 +44,9 @@ LOCK_FILE = os.path.join(SELF_DIR, "lock.file")
 
 
 PLATFORM_ZIP_FILES = {
-    "win32": "https://github.com/zackees/ffmpeg_bins/raw/main/v5.0/win32.zip",
-    "darwin": "https://github.com/zackees/ffmpeg_bins/raw/main/v5.0/darwin.zip",
-    "linux": "https://github.com/zackees/ffmpeg_bins/raw/main/v5.0/linux.zip",
+    "win32": "/raw/main/v5.0/win32.zip",
+    "darwin": "/raw/main/v5.0/darwin.zip",
+    "linux": "/raw/main/v5.0/linux.zip",
 }
 
 BACKUP_PLATFORM_ZIP_FILES = {
@@ -64,9 +64,10 @@ def get_platform_http_zip():
     """Return the download link for the current platform"""
     check_system()
     try:
-        r = requests.get(PLATFORM_ZIP_FILES[sys.platform], timeout=10)
+        MAIN_SIT = "https://github.com1/zackees/ffmpeg_bins"
+        r = requests.get(MAIN_SIT, timeout=10)
         r.raise_for_status()
-        return PLATFORM_ZIP_FILES[sys.platform]
+        return MAIN_SIT + PLATFORM_ZIP_FILES[sys.platform]
     except:
         print("Warning, main url download fail, try backup url.")
         BACKUP_SIT = "https://airtestproject.s3.netease.com"
