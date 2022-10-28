@@ -1,4 +1,28 @@
 """
+MIT License
+
+Copyright (c) 2021 zackees
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+    refer to: https://github.com/zackees/static_ffmpeg
+
     Entry point for running the ffmpeg executable.
 """
 
@@ -25,18 +49,27 @@ PLATFORM_ZIP_FILES = {
     "linux": "https://github.com/zackees/ffmpeg_bins/raw/main/v5.0/linux.zip",
 }
 
+BACKUP_PLATFORM_ZIP_FILES = {
+    "win32": "/downloads/ffmpeg_bins/v5.0/win32.zip",
+    "darwin": "/downloads/ffmpeg_bins/v5.0/darwin.zip",
+    "linux": "/downloads/ffmpeg_bins/v5.0/linux.zip",
+}
 
 def check_system():
     """Friendly error if there's a problem with the system configuration."""
     if sys.platform not in PLATFORM_ZIP_FILES:
         raise OSError(f"Please implement static_ffmpeg for {sys.platform}")
 
-
 def get_platform_http_zip():
     """Return the download link for the current platform"""
     check_system()
     return PLATFORM_ZIP_FILES[sys.platform]
 
+def get_backup_platform_http_zip():
+    """Return the download link for the current platform"""
+    check_system()
+    BACKUP_SIT = "https://airtestproject.s3.netease.com"
+    return BACKUP_SIT + BACKUP_PLATFORM_ZIP_FILES[sys.platform]
 
 def get_platform_dir():
     """Either get the executable or raise an error"""
@@ -55,9 +88,9 @@ def download_file(url, local_path):
                 # If you have chunk encoded response uncomment if
                 # and set chunk_size parameter to None.
                 # if chunk:
-                sys.stdout.write(".")
+                # sys.stdout.write(".")
                 file_d.write(chunk)
-            sys.stdout.write(f"\nDownload of {url} -> {local_path} completed.\n")
+        print(f"Download of {url} -> {local_path} completed.")
     return local_path
 
 
@@ -80,6 +113,7 @@ def get_or_fetch_platform_executables_else_raise(fix_permissions=True):
 
 def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
     """Either get the executable or raise an error, internal api"""
+    print("\n===========ffmpeg is missing, fetching it now.=============\n")
     exe_dir = get_platform_dir()
     installed_crumb = os.path.join(exe_dir, "installed.crumb")
     if not os.path.exists(installed_crumb):
@@ -88,9 +122,14 @@ def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
         # the install one level up from that same directory.
         install_dir = os.path.dirname(exe_dir)
         os.makedirs(exe_dir, exist_ok=True)
-        url = get_platform_http_zip()
         local_zip = exe_dir + ".zip"
-        download_file(url, local_zip)
+        try:
+            url = get_platform_http_zip()
+            download_file(url, local_zip)
+        except requests.exceptions.RequestException:
+            print("Warning, main url download fail, try backup url.")
+            url = get_backup_platform_http_zip()
+            download_file(url, local_zip)
         print(f"Extracting {local_zip} -> {install_dir}")
         with zipfile.ZipFile(local_zip, mode="r") as zipf:
             zipf.extractall(install_dir)
@@ -117,6 +156,7 @@ def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
             os.chmod(exe, exe_bits | read_bits)
             assert os.access(exe, os.X_OK), f"Could not execute {exe}"
             assert os.access(exe, os.R_OK), f"Could not get read bits of {exe}"
+    print("=============================================================\n\n")
     return ffmpeg_exe, ffprobe_exe
 
 
