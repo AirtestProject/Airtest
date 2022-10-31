@@ -1,3 +1,7 @@
+# coding=utf-8
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 import cv2
 import ffmpeg
 import threading
@@ -10,11 +14,13 @@ class VidWriter:
         self.mode = mode
         self.fps = fps
         self.vid_size = max(width, height)
-        if self.vid_size % 32 != 0:
-            self.vid_size = self.vid_size - (self.vid_size % 32) + 32
-        self.cache_frame = np.zeros(
-            (self.vid_size, self.vid_size, 3), dtype=np.uint8)
         width, height = self.vid_size, self.vid_size
+        if width % 32 != 0:
+            width = width - (width % 32) + 32
+        if height % 32 != 0:
+            height = width - (height % 32) + 32
+        self.cache_frame = np.zeros(
+            (height, width, 3), dtype=np.uint8)
         if self.mode == "ffmpeg":
             from airtest.utils.ffmpeg import ffmpeg_setter
             ffmpeg_setter.add_paths()
