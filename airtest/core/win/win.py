@@ -510,7 +510,8 @@ class Windows(Device):
         return socket.gethostbyname_ex(hostname)[2][0]
 
     def start_recording(self, max_time=1800, output=None, fps=10, 
-                        record_mode="two_thread", write_mode="ffmpeg", snapshot_sleep=0.001):
+                        record_mode="two_thread", write_mode="ffmpeg", 
+                        snapshot_sleep=0.001, orientation=0):
         """
         Start recording the device display
 
@@ -525,6 +526,7 @@ class Windows(Device):
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot in 'two_thread' mode.
+            orientation: 1: portrait, 2: landscape, 0: rotation.
 
         Returns:
             save_path: path of video file
@@ -564,8 +566,8 @@ class Windows(Device):
             frame = self.snapshot()
             return frame
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=write_mode, 
-            fps=fps, snapshot_sleep=snapshot_sleep)
+            save_path, get_frame, mode=write_mode, fps=fps, 
+            snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start(mode=record_mode)
         LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))

@@ -2,6 +2,7 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
+
 import cv2
 import ffmpeg
 import threading
@@ -10,17 +11,26 @@ import numpy as np
 
 
 class VidWriter:
-    def __init__(self, outfile, width, height, mode='ffmpeg', fps=10):
+    def __init__(self, outfile, width, height, mode='ffmpeg', fps=10, orientation=0):
         self.mode = mode
         self.fps = fps
-        self.vid_size = max(width, height)
-        width, height = self.vid_size, self.vid_size
-        if width % 32 != 0:
-            width = width - (width % 32) + 32
-        if height % 32 != 0:
-            height = width - (height % 32) + 32
-        self.cache_frame = np.zeros(
-            (height, width, 3), dtype=np.uint8)
+
+        # 三种横竖屏录屏模式 1 竖屏 2 横屏 3 方形居中
+        self.orienation = orientation
+        if orientation == 1:
+            self.height = max(width, height)
+            self.width = min(width, height)
+        elif orientation == 2:
+            self.width = max(width, height)
+            self.height = min(width, height)
+        else:
+            self.width = self.height = max(width, height)
+
+        # 满足视频宽高条件
+        self.height = height = self.height - (self.height % 32) + 32
+        self.width = width = self.width - (self.width % 32) + 32
+        self.cache_frame = np.zeros((height, width, 3), dtype=np.uint8)
+
         if self.mode == "ffmpeg":
             from airtest.utils.ffmpeg import ffmpeg_setter
             ffmpeg_setter.add_paths()
@@ -37,14 +47,25 @@ class VidWriter:
             self.writer = self.process.stdin
         elif self.mode == "cv2":
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            self.writer = cv2.VideoWriter(outfile, fourcc, self.fps, (width, height))
+            self.writer = cv2.VideoWriter(
+                outfile, fourcc, self.fps, (width, height))
 
     def write(self, frame):
         assert len(frame.shape) == 3
         if self.mode == "ffmpeg":
             frame = frame[..., ::-1]
-        self.cache_frame[:frame.shape[0], :frame.shape[1], :] = frame.astype(np.uint8)
+        if self.orienation == 1 and frame.shape[1] > frame.shape[0]:
+            frame = np.rot90(frame, 3)
+        if self.orienation == 2 and frame.shape[1] < frame.shape[0]:
+            frame = np.rot90(frame)
+        h_st = max(self.cache_frame.shape[0]//2 - frame.shape[0]//2, 0)
+        w_st = max(self.cache_frame.shape[1]//2 - frame.shape[1]//2, 0)
+        h_ed = min(h_st+frame.shape[0], self.cache_frame.shape[0])
+        w_ed = min(w_st+frame.shape[1], self.cache_frame.shape[1])
+        self.cache_frame[h_st:h_ed, w_st:w_ed, :] = frame[:(
+            h_ed-h_st), :(w_ed-w_st)].astype(np.uint8)
         self.writer.write(self.cache_frame)
+        self.cache_frame[:] = 0
 
     def close(self):
         if self.mode == "ffmpeg":
@@ -57,23 +78,25 @@ class VidWriter:
 
 class ScreenRecorder:
     def __init__(self, outfile, get_frame_func, mode='ffmpeg', fps=10,
-                 snapshot_sleep=0.001):
+                 snapshot_sleep=0.001, orientation=0):
         self.get_frame_func = get_frame_func
         self.tmp_frame = self.get_frame_func()
         self.snapshot_sleep = snapshot_sleep
+
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
-        self.writer = VidWriter(outfile, width, height, mode, fps)
+        self.writer = VidWriter(outfile, width, height, mode, fps, orientation)
+
         self._is_running = False
         self._stop_flag = False
         self._stop_time = 0
 
     def is_running(self):
         return self._is_running
-    
+
     @property
     def stop_time(self):
         return self._stop_time
-    
+
     @stop_time.setter
     def stop_time(self, max_time):
         if isinstance(max_time, int) and max_time > 0:
@@ -103,7 +126,7 @@ class ScreenRecorder:
             self.t_stream.start()
             self.t_write = threading.Thread(target=self.write_frame_loop)
             self.t_write.setDaemon(True)
-            self.t_write.start()        
+            self.t_write.start()
         return True
 
     def stop(self):
