@@ -50,7 +50,7 @@ class VidWriter:
             self.writer = cv2.VideoWriter(
                 outfile, fourcc, self.fps, (width, height))
 
-    def write(self, frame):
+    def process_frame(self, frame):
         assert len(frame.shape) == 3
         if self.mode == "ffmpeg":
             frame = frame[..., ::-1]
@@ -62,10 +62,12 @@ class VidWriter:
         w_st = max(self.cache_frame.shape[1]//2 - frame.shape[1]//2, 0)
         h_ed = min(h_st+frame.shape[0], self.cache_frame.shape[0])
         w_ed = min(w_st+frame.shape[1], self.cache_frame.shape[1])
-        self.cache_frame[h_st:h_ed, w_st:w_ed, :] = frame[:(
-            h_ed-h_st), :(w_ed-w_st)].astype(np.uint8)
-        self.writer.write(self.cache_frame)
         self.cache_frame[:] = 0
+        self.cache_frame[h_st:h_ed, w_st:w_ed, :] = frame[:(h_ed-h_st), :(w_ed-w_st)]
+        return self.cache_frame.copy()
+
+    def write(self, frame):
+        self.writer.write(frame.astype(np.uint8))
 
     def close(self):
         if self.mode == "ffmpeg":
@@ -85,6 +87,7 @@ class ScreenRecorder:
 
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
         self.writer = VidWriter(outfile, width, height, mode, fps, orientation)
+        self.tmp_frame = self.writer.process_frame(self.tmp_frame)
 
         self._is_running = False
         self._stop_flag = False
@@ -139,7 +142,8 @@ class ScreenRecorder:
         # 单独一个线程持续截图
         try:
             while True:
-                self.tmp_frame = self.get_frame_func()
+                tmp_frame = self.get_frame_func()
+                self.tmp_frame = self.writer.process_frame(tmp_frame)
                 time.sleep(self.snapshot_sleep)
                 if self.is_stop():
                     break
@@ -157,8 +161,8 @@ class ScreenRecorder:
             self._stop_flag = False
             while True:
                 if time.time()-last_time >= duration:
+                    last_time += duration
                     self.writer.write(self.tmp_frame)
-                    last_time = time.time()
                 if self.is_stop():
                     break
                 time.sleep(0.0001)
@@ -178,10 +182,11 @@ class ScreenRecorder:
             while True:
                 now_time = time.time()
                 if now_time - last_time >= duration:
+                    last_time += duration
                     if now_time - last_time < duration+0.01:
                         self.tmp_frame = self.get_frame_func()
+                        self.tmp_frame= self.writer.process_frame(self.tmp_frame)
                     self.writer.write(self.tmp_frame)
-                    last_time += duration
                 if self.is_stop():
                     break
                 time.sleep(0.0001)
