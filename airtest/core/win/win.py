@@ -546,6 +546,13 @@ class Windows(Device):
             2 If recording still working after app crash, it will continuing write last frame before the crash. 
 
         """
+        if fps > 10 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
+            if fps > 10:
+                fps = 10
+            if fps < 1:
+                fps = 1
+
         if hasattr(self, 'recorder'):
             if self.recorder.is_running():
                 LOGGING.warning("recording is already running, please don't call again")
