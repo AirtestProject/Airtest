@@ -8,7 +8,7 @@ import ffmpeg
 import threading
 import time
 import numpy as np
-
+import subprocess
 
 class VidWriter:
     def __init__(self, outfile, width, height, mode='ffmpeg', fps=10, orientation=0):
@@ -32,12 +32,16 @@ class VidWriter:
         self.cache_frame = np.zeros((height, width, 3), dtype=np.uint8)
 
         if self.mode == "ffmpeg":
-            from airtest.utils.ffmpeg import ffmpeg_setter
-            ffmpeg_setter.add_paths()
+            try:
+                subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
+            except FileNotFoundError:
+                print("ffmpeg not found in current environment, will use ffmpeg_setter instead")
+                from airtest.utils.ffmpeg import ffmpeg_setter
+                ffmpeg_setter.add_paths()
             self.process = (
                 ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt='rgb24',
-                       s='{}x{}'.format(width, height), framerate=self.fps)
+                    s='{}x{}'.format(width, height), framerate=self.fps)
                 .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25,
                         preset="veryfast", framerate=self.fps)
                 .global_args("-loglevel", "error")
