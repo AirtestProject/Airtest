@@ -35,9 +35,14 @@ class VidWriter:
             try:
                 subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
             except FileNotFoundError:
-                print("ffmpeg not found in current environment, will use ffmpeg_setter instead")
                 from airtest.utils.ffmpeg import ffmpeg_setter
-                ffmpeg_setter.add_paths()
+                try:
+                    ffmpeg_setter.add_paths()
+                except Exception as e:
+                    print(e)
+                    print("Error: setting ffmpeg path failed, please install ffmpeg by yourself")
+                    exit(1)
+
             self.process = (
                 ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt='rgb24',

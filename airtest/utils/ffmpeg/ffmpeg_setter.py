@@ -127,7 +127,10 @@ def _get_or_fetch_platform_executables_else_raise_no_lock(fix_permissions=True):
         # like "win32" or "darwin" or "linux" inside the executable. So root
         # the install one level up from that same directory.
         install_dir = os.path.dirname(exe_dir)
-        os.makedirs(exe_dir)#, exist_ok=True)
+        try:
+            os.makedirs(exe_dir)#, exist_ok=True)
+        except:
+            pass
         local_zip = exe_dir + ".zip"
         url = get_platform_http_zip()
         download_file(url, local_zip)
