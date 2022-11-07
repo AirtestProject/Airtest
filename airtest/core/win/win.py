@@ -509,8 +509,7 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output=None, fps=10, 
-                        record_mode="two_thread", write_mode="ffmpeg", 
+    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="ffmpeg", 
                         snapshot_sleep=0.001, orientation=0):
         """
         Start recording the device display
@@ -518,14 +517,11 @@ class Windows(Device):
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            record_mode: the mode collect screen, choose in ['two_thread', 'one_thread']
-                twothread: record and write in diiferent threads.
-                onethread: record and write in one thread.
             write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
                 ffmpeg: ffmpeg-python backend, higher compression rate.
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
-            snapshot_sleep: sleep time for each snapshot in 'two_thread' mode.
+            snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation.
 
         Returns:
@@ -541,6 +537,7 @@ class Windows(Device):
             >>> sleep(30)
             >>> dev.stop_recording()
             >>> print(save_path)
+
         Note:
             1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
             2 If recording still working after app crash, it will continuing write last frame before the crash. 
@@ -576,7 +573,7 @@ class Windows(Device):
             save_path, get_frame, mode=write_mode, fps=fps, 
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
-        self.recorder.start(mode=record_mode)
+        self.recorder.start()
         LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
         return save_path
 
