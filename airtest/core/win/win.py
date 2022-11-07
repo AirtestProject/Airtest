@@ -3,22 +3,27 @@
 import time
 import socket
 import subprocess
-from mss import mss
+import numpy
+import mss
 from functools import wraps
-import pywintypes  # noqa
 import win32api
+import pywintypes  # noqa
+import os
 
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
-from pywinauto.win32functions import SetForegroundWindow, GetSystemMetrics
+from pywinauto.win32functions import SetForegroundWindow
 
 from airtest.core.win.ctypesinput import key_press, key_release
-from airtest.core.win.screen import screenshot
 
 from airtest import aircv
+from airtest.aircv.screen_recorder import ScreenRecorder
 from airtest.core.device import Device
+from airtest.core.settings import Settings as ST
+from airtest.utils.logger import get_logger
 
+LOGGING = get_logger(__name__)
 
 def require_app(func):
     @wraps(func)
@@ -46,7 +51,7 @@ class Windows(Device):
         self.keyboard = keyboard
         self._init_connect(handle, kwargs)
 
-        self.screen = mss()
+        self.screen = mss.mss()
         self.monitor = self.screen.monitors[0]  # 双屏的时候，self.monitor为整个双屏
         self.main_monitor = self.screen.monitors[1]  # 双屏的时候，self.main_monitor为主屏
 
@@ -113,32 +118,23 @@ class Windows(Device):
             display the screenshot
 
         """
-        if self.handle:
-            screen = screenshot(filename, self.handle)
+        if self.app:
+            rect = self.get_rect()
+            rect = self._fix_image_rect(rect)
+            monitor = {"top": rect.top, "left": rect.left, "width": rect.right - rect.left - abs(self.monitor["left"]),
+                       "height": rect.bottom - rect.top, "monitor": 1}
         else:
-            screen = screenshot(filename)
-            if self.app:
-                rect = self.get_rect()
-                rect = self._fix_image_rect(rect)
-                screen = aircv.crop_image(screen, [rect.left, rect.top, rect.right, rect.bottom])
-        if not screen.any():
-            if self.app:
-                rect = self.get_rect()
-                rect = self._fix_image_rect(rect)
-                screen = aircv.crop_image(screenshot(filename), [rect.left, rect.top, rect.right, rect.bottom])
-        if self._focus_rect != (0, 0, 0, 0):
-            height, width = screen.shape[:2]
-            rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
-            screen = aircv.crop_image(screen, rect)
-        if filename:
-            aircv.imwrite(filename, screen, quality, max_size=max_size)
-        return screen
-
+            monitor = self.screen.monitors[0]
+        with mss.mss() as sct:
+            sct_img = sct.grab(monitor)
+            screen = numpy.array(sct_img, dtype=numpy.uint8)[...,:3]
+            if filename:
+                aircv.imwrite(filename, screen, quality, max_size=max_size)
+            return screen
 
     def _fix_image_rect(self, rect):
         """Fix rect in image."""
-        # 将rect 转换为左上角为(0,0), 与图片坐标对齐
-        rect.left = rect.left - self.monitor["left"]
+        # 将rect 转换为左上角为(0,0), 与图片坐标对齐，另外left不用重新计算
         rect.right = rect.right - self.monitor["left"]
         rect.top = rect.top - self.monitor["top"]
         rect.bottom = rect.bottom - self.monitor["top"]
@@ -411,7 +407,7 @@ class Windows(Device):
         if self.app and self._top_window:
             return self._top_window.rectangle()
         else:
-            return RECT(right=GetSystemMetrics(0), bottom=GetSystemMetrics(1))
+            return RECT(right=win32api.GetSystemMetrics(0), bottom=win32api.GetSystemMetrics(1))
 
     @require_app
     def get_title(self):
@@ -512,3 +508,80 @@ class Windows(Device):
         """
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
+
+    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="ffmpeg", 
+                        snapshot_sleep=0.001, orientation=0):
+        """
+        Start recording the device display
+
+        Args:
+            max_time: maximum screen recording time, default is 1800
+            output: ouput file path
+            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+                ffmpeg: ffmpeg-python backend, higher compression rate.
+                cv2: cv2.VideoWriter backend, more stable.
+            fps: frames per second will record
+            snapshot_sleep: sleep time for each snapshot.
+            orientation: 1: portrait, 2: landscape, 0: rotation.
+
+        Returns:
+            save_path: path of video file
+
+        Examples:
+
+            Record 30 seconds of video and export to the current directory test.mp4::
+
+            >>> from airtest.core.api import connect_device, sleep
+            >>> dev = connect_device("Windows:///")
+            >>> save_path = dev.start_recording(output="test.mp4")
+            >>> sleep(30)
+            >>> dev.stop_recording()
+            >>> print(save_path)
+
+        Note:
+            1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
+            2 If recording still working after app crash, it will continuing write last frame before the crash. 
+
+        """
+        if fps > 10 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
+            if fps > 10:
+                fps = 10
+            if fps < 1:
+                fps = 1
+
+        if hasattr(self, 'recorder'):
+            if self.recorder.is_running():
+                LOGGING.warning("recording is already running, please don't call again")
+                return None
+        
+        logdir = "./"
+        if not ST.LOG_DIR is None:
+            logdir = ST.LOG_DIR
+        if output is None:
+            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+        else:
+            if os.path.isabs(output):
+                save_path = output
+            else:
+                save_path = os.path.join(logdir, output)
+
+        def get_frame():
+            frame = self.snapshot()
+            return frame
+        self.recorder = ScreenRecorder(
+            save_path, get_frame, mode=write_mode, fps=fps, 
+            snapshot_sleep=snapshot_sleep, orientation=orientation)
+        self.recorder.stop_time = max_time
+        self.recorder.start()
+        LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
+        return save_path
+
+    def stop_recording(self,):
+        """
+        Stop recording the device display. Recoding file will be kept in the device.
+
+        """
+        LOGGING.info("stopping recording")
+        self.recorder.stop()
+        return None

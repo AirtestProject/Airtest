@@ -7,3 +7,5 @@ numpy
 opencv-contrib-python
 facebook-wda>=1.3.3
 pywinauto==0.6.3
+filelock
+ffmpeg-python
