@@ -122,22 +122,17 @@ class ScreenRecorder:
             return True
         return False
 
-    def start(self, mode="two_thread"):
+    def start(self):
         if self._is_running:
             print("recording is already running, please don't call again")
             return False
         self._is_running = True
-        if mode == "one_thread":
-            self.t_stream = threading.Thread(target=self.get_write_frame_loop)
-            self.t_stream.setDaemon(True)
-            self.t_stream.start()
-        else:
-            self.t_stream = threading.Thread(target=self.get_frame_loop)
-            self.t_stream.setDaemon(True)
-            self.t_stream.start()
-            self.t_write = threading.Thread(target=self.write_frame_loop)
-            self.t_write.setDaemon(True)
-            self.t_write.start()
+        self.t_stream = threading.Thread(target=self.get_frame_loop)
+        self.t_stream.setDaemon(True)
+        self.t_stream.start()
+        self.t_write = threading.Thread(target=self.write_frame_loop)
+        self.t_write.setDaemon(True)
+        self.t_write.start()
         return True
 
     def stop(self):
@@ -178,29 +173,5 @@ class ScreenRecorder:
             self._stop_flag = True
         except Exception as e:
             print("write thread error", e)
-            self._stop_flag = True
-            raise
-
-    def get_write_frame_loop(self):
-        # 同时截图并写入视频
-        try:
-            duration = 1.0/self.writer.fps
-            last_time = time.time()
-            self._stop_flag = False
-            while True:
-                now_time = time.time()
-                if now_time - last_time >= duration:
-                    last_time += duration
-                    if now_time - last_time < duration+0.01:
-                        self.tmp_frame = self.get_frame_func()
-                        self.tmp_frame= self.writer.process_frame(self.tmp_frame)
-                    self.writer.write(self.tmp_frame)
-                if self.is_stop():
-                    break
-                time.sleep(0.0001)
-            self._stop_flag = True
-            self.writer.close()
-        except Exception as e:
-            print("record and write thread error", e)
             self._stop_flag = True
             raise
