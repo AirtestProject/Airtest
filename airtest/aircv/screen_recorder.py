@@ -39,9 +39,8 @@ class VidWriter:
                 try:
                     ffmpeg_setter.add_paths()
                 except Exception as e:
-                    print(e)
-                    print("Error: setting ffmpeg path failed, please install ffmpeg by yourself")
-                    exit(1)
+                    print("Error: setting ffmpeg path failed, please download it at https://ffmpeg.org/download.html then add ffmpeg path to PATH")
+                    raise
 
             self.process = (
                 ffmpeg
