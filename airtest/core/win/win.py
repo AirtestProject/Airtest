@@ -566,11 +566,8 @@ class Windows(Device):
             else:
                 save_path = os.path.join(logdir, output)
 
-        def get_frame():
-            frame = self.snapshot()
-            return frame
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=write_mode, fps=fps, 
+            save_path, self.snapshot, mode=write_mode, fps=fps, 
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()
