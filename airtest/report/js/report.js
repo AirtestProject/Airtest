@@ -781,11 +781,25 @@ function init_page(){
   $('.summary .info-sub.start').html(getFormatDate(data.run_start))
   $('.summary .info-sub.time').html(getFormatTime(data.run_start) + '-' + getFormatTime(data.run_end))
   $('.summary .info-value.duration').html(getFormatDuration(getDelta(data.run_end, data.run_start)))
+  setImgAffix()
 }
 
 function hideFancybox(img) {
   // 图片加载失败的情况下，隐藏整个div
   $(img).parent().hide();
+}
+
+function setImgAffix(){
+  // 获取页面加载时快览与页面顶端的距离
+  var stickyHeaderTop = $('.gallery .content').offset().top;
+  // 在快览滑动到顶端时将其设置为固钉，添加页面滚动的监听事件
+  $(window).scroll(function(){
+          if($(window).scrollTop() > stickyHeaderTop) {
+                  $('.gallery .content').css({position: 'fixed', top: '0px'});  
+          } else {
+                  $('.gallery .content').css({position: 'relative', top: '0px'});
+          }
+  });
 }
 
 $(function(){

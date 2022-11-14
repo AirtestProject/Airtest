@@ -204,6 +204,11 @@ h2.empty-report{
   white-space: nowrap;
   background: #121c34;
   padding-top: 20px;
+  z-index: 99;
+}
+.gallery .placeholder {
+  height: 130px;
+  background-color: #121c34;
 }
 .gallery .thumbnail {
   display: inline-block;
