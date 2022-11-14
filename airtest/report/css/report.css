@@ -204,6 +204,10 @@ h2.empty-report{
   white-space: nowrap;
   background: #121c34;
   padding-top: 20px;
+  z-index: 3;
+}
+.gallery .placeholder {
+  background-color: #121c34;
 }
 .gallery .thumbnail {
   display: inline-block;
@@ -637,7 +641,7 @@ pre.trace {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.2);
-  z-index: 2;
+  z-index: 4;
   display: none;
 }
 .mask .content {
