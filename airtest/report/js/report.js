@@ -804,7 +804,9 @@ function setImgAffix(){
   })
     // 计算需要占位的高度
     var placeHolderHeight= $('.gallery .placeholder').height()
+    var placeHolderWidth = $('.gallery .content').width()
     $('.gallery .placeholder').css({minHeight: placeHolderHeight})
+    $('.gallery .content').css({maxWidth: placeHolderWidth})
   }, 500)
 }
 
