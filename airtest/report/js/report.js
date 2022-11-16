@@ -790,16 +790,22 @@ function hideFancybox(img) {
 }
 
 function setImgAffix(){
+  // 延迟触发，等待其他元素渲染完成再去获取，否则获取的值有误
+  setTimeout(() => {
   // 获取页面加载时快览与页面顶端的距离
-  var stickyHeaderTop = $('.gallery .content').offset().top;
+  var stickyHeaderTop = $('.gallery .content').offset().top
   // 在快览滑动到顶端时将其设置为固钉，添加页面滚动的监听事件
   $(window).scroll(function(){
-          if($(window).scrollTop() > stickyHeaderTop) {
-                  $('.gallery .content').css({position: 'fixed', top: '0px'});  
-          } else {
-                  $('.gallery .content').css({position: 'relative', top: '0px'});
-          }
-  });
+    if($(window).scrollTop() > stickyHeaderTop) {
+            $('.gallery .content').css({position: 'fixed', top: '0px'})
+    } else {
+            $('.gallery .content').css({position: 'relative', top: '0px'})
+    }
+  })
+    // 计算需要占位的高度
+    var placeHolderHeight= $('.gallery .placeholder').height()
+    $('.gallery .placeholder').css({minHeight: placeHolderHeight})
+  }, 500)
 }
 
 $(function(){
