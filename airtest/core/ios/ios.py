@@ -843,7 +843,7 @@ class IOS(Device):
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()
-        LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
+        LOGGING.info("start recording screen to {}".format(save_path))
         return save_path
 
     def stop_recording(self,):
