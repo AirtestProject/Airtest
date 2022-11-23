@@ -4,7 +4,7 @@ requests>=2.11.1
 six
 mss==6.1.0
 numpy
-opencv-contrib-python
+opencv-contrib-python>=4.6.0
 facebook-wda>=1.3.3
 pywinauto==0.6.3
 filelock
