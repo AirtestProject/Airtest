@@ -27,12 +27,11 @@ def parse_requirements(filename):
     reqs = [line for line in lineiter if line and not line.startswith("#")]
     if sys.platform == "win32":
         reqs.append('pywin32')
-    if sys.version_info[:2] <= (3, 6) and \
-            "opencv-contrib-python" not in [d.project_name for d in pkg_resources.working_set]:
-        # If py<=3.6 and opencv-contrib-python has not been installed, install version==3.2.0.7
-        reqs.remove("opencv-contrib-python")
-        reqs.append("opencv-contrib-python==3.2.0.7")
     if sys.version_info.major == 2:
+        if "opencv-contrib-python" not in [d.project_name for d in pkg_resources.working_set]:
+            # If py<=2 and opencv-contrib-python has not been installed, install version==3.2.0.7
+            reqs.remove("opencv-contrib-python>=4.6.0")
+            reqs.append("opencv-contrib-python==3.2.0.7")
         # facebook-wda only supports py3
         reqs.remove("facebook-wda>=1.3.3")
         reqs.remove("mss==6.1.0")
@@ -74,12 +73,6 @@ setup(
     """,
     classifiers=[
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language:: Python:: 3'
     ],
 )
