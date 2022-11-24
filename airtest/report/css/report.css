@@ -568,6 +568,7 @@ pre.trace {
   position: fixed;
   bottom: 0;
   right: 0;
+  z-index: 4;
 }
 .row.gif-wrap .menu{
   display: block;
