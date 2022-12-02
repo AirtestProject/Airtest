@@ -30,7 +30,7 @@ def parse_requirements(filename):
     if sys.version_info.major == 2:
         if "opencv-contrib-python" not in [d.project_name for d in pkg_resources.working_set]:
             # If py<=2 and opencv-contrib-python has not been installed, install version==3.2.0.7
-            reqs.remove("opencv-contrib-python>=4.6.0")
+            reqs.remove("opencv-contrib-python>=4.4.0.46")
             reqs.append("opencv-contrib-python==3.2.0.7")
         # facebook-wda only supports py3
         reqs.remove("facebook-wda>=1.3.3")
