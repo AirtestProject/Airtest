@@ -63,6 +63,10 @@ class Android(Device):
         self._touch_proxy = None
         self._screen_proxy = None
 
+        # recorder
+        self.recorder = None
+        self.recorder_save_path = None
+
     @property
     def touch_proxy(self):
         """
@@ -789,7 +793,7 @@ class Android(Device):
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
-            orientation: 1: portrait, 2: landscape, 0: rotation.
+            orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
 
         Returns:
             save_path: path of video file
@@ -805,15 +809,21 @@ class Android(Device):
             >>> dev.stop_recording()
             >>> print(save_path)
 
-        Note:
-            1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
-            2 If recording still working after app crash, it will continuing write last frame before the crash. 
+            >>> # the screen is portrait
+            >>> portrait_mp4 = dev.start_recording(output="portrait.mp4", orientation=1)  # or orientation="portrait"
+            >>> sleep(30)
+            >>> dev.stop_recording()
+
+            >>> # the screen is landscape
+            >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
         """
-        if not bit_rate_level is None:
+        if bit_rate_level is not None:
             LOGGING.warning("`bit_rate_level` is deprecated and will be removed in future")
-        if not bit_rate is None:
+            warnings.warn("`bit_rate_level` is deprecated and will be removed in future", DeprecationWarning)
+        if bit_rate is not None:
             LOGGING.warning("`bit_rate` is deprecated and will be removed in future")
+            warnings.warn("`bit_rate` is deprecated and will be removed in future", DeprecationWarning)
 
         if fps > 10 or fps < 1:
             LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
@@ -822,16 +832,15 @@ class Android(Device):
             if fps < 1:
                 fps = 1
 
-        if hasattr(self, 'recorder'):
-            if self.recorder.is_running():
-                LOGGING.warning("recording is already running, please don't call again")
-                return None
+        if self.recorder and self.recorder.is_running():
+            LOGGING.warning("recording is already running, please don't call again")
+            return None
         
         logdir = "./"
-        if not ST.LOG_DIR is None:
+        if ST.LOG_DIR is not None:
             logdir = ST.LOG_DIR
         if output is None:
-            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
             if os.path.isabs(output):
                 save_path = output
@@ -857,9 +866,9 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
-        if not output is None:
+        if output is not None:
             LOGGING.warning("`output` is deprecated")
-        if not is_interrupted is None:
+        if is_interrupted is not None:
             LOGGING.warning("`is_interrupted` is deprecated")
 
         LOGGING.info("stopping recording")

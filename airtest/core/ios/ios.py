@@ -119,6 +119,9 @@ class IOS(Device):
 
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
+        # recorder
+        self.recorder = None
+
     @property
     def ip(self):
         """
@@ -789,7 +792,7 @@ class IOS(Device):
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
-            orientation: 1: portrait, 2: landscape, 0: rotation.
+            orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
 
         Returns:
             save_path: path of video file
@@ -805,9 +808,13 @@ class IOS(Device):
             >>> dev.stop_recording()
             >>> print(save_path)
 
-        Note:
-            1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
-            2 If recording still working after app crash, it will continuing write last frame before the crash. 
+            >>> # the screen is portrait
+            >>> portrait_mp4 = dev.start_recording(output="portrait.mp4", orientation=1)  # or orientation="portrait"
+            >>> sleep(30)
+            >>> dev.stop_recording()
+
+            >>> # the screen is landscape
+            >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
         """
         if fps > 10 or fps < 1:
@@ -817,16 +824,15 @@ class IOS(Device):
             if fps < 1:
                 fps = 1
 
-        if hasattr(self, 'recorder'):
-            if self.recorder.is_running():
-                LOGGING.warning("recording is already running, please don't call again")
-                return None
+        if self.recorder and self.recorder.is_running():
+            LOGGING.warning("recording is already running, please don't call again")
+            return None
         
         logdir = "./"
-        if not ST.LOG_DIR is None:
+        if ST.LOG_DIR is not None:
             logdir = ST.LOG_DIR
         if output is None:
-            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
             if os.path.isabs(output):
                 save_path = output

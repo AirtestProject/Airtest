@@ -10,17 +10,25 @@ import time
 import numpy as np
 import subprocess
 
+
+RECORDER_ORI = {
+    "PORTRAIT": 1,
+    "LANDSCAPE": 2,
+    "ROTATION": 0,  # The screen is centered in a square
+}
+
+
 class VidWriter:
     def __init__(self, outfile, width, height, mode='ffmpeg', fps=10, orientation=0):
         self.mode = mode
         self.fps = fps
 
-        # 三种横竖屏录屏模式 1 竖屏 2 横屏 3 方形居中
-        self.orienation = orientation
-        if orientation == 1:
+        # 三种横竖屏录屏模式 1 竖屏 2 横屏 0 方形居中
+        self.orientation = RECORDER_ORI.get(str(orientation).upper(), orientation)
+        if self.orientation == 1:
             self.height = max(width, height)
             self.width = min(width, height)
-        elif orientation == 2:
+        elif self.orientation == 2:
             self.width = max(width, height)
             self.height = min(width, height)
         else:
@@ -62,9 +70,9 @@ class VidWriter:
         assert len(frame.shape) == 3
         if self.mode == "ffmpeg":
             frame = frame[..., ::-1]
-        if self.orienation == 1 and frame.shape[1] > frame.shape[0]:
+        if self.orientation == 1 and frame.shape[1] > frame.shape[0]:
             frame = np.rot90(frame, 3)
-        if self.orienation == 2 and frame.shape[1] < frame.shape[0]:
+        if self.orientation == 2 and frame.shape[1] < frame.shape[0]:
             frame = np.rot90(frame)
         h_st = max(self.cache_frame.shape[0]//2 - frame.shape[0]//2, 0)
         w_st = max(self.cache_frame.shape[1]//2 - frame.shape[1]//2, 0)
