@@ -6,6 +6,7 @@ import numpy
 from airtest.core.ios.ios import IOS, wda, CAP_METHOD
 from airtest import aircv
 from .testconf import try_remove
+import cv2
 import warnings
 warnings.simplefilter("always")
 
@@ -24,6 +25,8 @@ class TestIos(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         try_remove('screen.png')
+        try_remove('test_10s.mp4')
+        try_remove('test_cv_10s.mp4')
 
     def test_session(self):
         print("test_session")
@@ -259,6 +262,34 @@ class TestIos(unittest.TestCase):
         self.ios.get_frame_from_stream()
         self.ios.disconnect()
         self.assertEqual(len(self.ios.instruct_helper._port_using_func.keys()), 0)
+    
+    def test_record(self):
+        self.ios.start_recording(output="test_10s.mp4")
+        time.sleep(10+4)
+        self.ios.stop_recording()
+        time.sleep(2)
+        self.assertEqual(os.path.exists("test_10s.mp4"), True)
+        duration = 0
+        cap = cv2.VideoCapture("test_10s.mp4")
+        if cap.isOpened():
+            rate = cap.get(5)
+            frame_num = cap.get(7)
+            duration = frame_num/rate
+        self.assertEqual(duration >= 10, True)
+        
+        #test other params
+        self.ios.start_recording(output="test_cv_10s.mp4", write_mode="cv2")
+        time.sleep(10+4)
+        self.ios.stop_recording()
+        time.sleep(2)
+        self.assertEqual(os.path.exists("test_cv_10s.mp4"), True)
+        duration = 0
+        cap = cv2.VideoCapture("test_cv_10s.mp4")
+        if cap.isOpened():
+            rate = cap.get(5)
+            frame_num = cap.get(7)
+            duration = frame_num/rate
+        self.assertEqual(duration >= 10, True)
 
 
 if __name__ == '__main__':
