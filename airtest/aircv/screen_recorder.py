@@ -71,9 +71,9 @@ class VidWriter:
         if self.mode == "ffmpeg":
             frame = frame[..., ::-1]
         if self.orientation == 1 and frame.shape[1] > frame.shape[0]:
-            frame = np.rot90(frame, 3)
-        if self.orientation == 2 and frame.shape[1] < frame.shape[0]:
-            frame = np.rot90(frame)
+            frame = cv2.resize(frame, (self.width, int(self.width*self.width/self.height)))
+        elif self.orientation == 2 and frame.shape[1] < frame.shape[0]:
+            frame = cv2.resize(frame, (int(self.height*self.height/self.width), self.height))
         h_st = max(self.cache_frame.shape[0]//2 - frame.shape[0]//2, 0)
         w_st = max(self.cache_frame.shape[1]//2 - frame.shape[1]//2, 0)
         h_ed = min(h_st+frame.shape[0], self.cache_frame.shape[0])
