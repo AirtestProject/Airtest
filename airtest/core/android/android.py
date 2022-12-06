@@ -866,19 +866,20 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
+        if self.recorder is None:
+            LOGGING.warning("start_recording first")
+            return False
         if output is not None:
             LOGGING.warning("`output` is deprecated")
         if is_interrupted is not None:
             LOGGING.warning("`is_interrupted` is deprecated")
 
         LOGGING.info("stopping recording")
-        self.recorder.stop()
-        
         if output and not is_interrupted:
             import shutil
             shutil.move(self.recorder_save_path, output)
             LOGGING.info("save video to {}".format(output))
-        return None
+        return True
 
     def _register_rotation_watcher(self):
         """
