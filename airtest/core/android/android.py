@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 import os
+import shutil
 import warnings
 from copy import copy
 from airtest import aircv
@@ -875,8 +876,10 @@ class Android(Device):
             LOGGING.warning("`is_interrupted` is deprecated")
 
         LOGGING.info("stopping recording")
+        self.recorder.stop()
+        self.recorder = None
+
         if output and not is_interrupted:
-            import shutil
             shutil.move(self.recorder_save_path, output)
             LOGGING.info("save video to {}".format(output))
         return True
