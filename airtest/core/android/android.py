@@ -13,6 +13,7 @@ from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, 
 from airtest.core.android.adb import ADB
 
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
+from airtest.core.android.recorder import Recorder
 from airtest.core.android.touch_methods.touch_proxy import TouchProxy
 from airtest.core.error import AdbError, AdbShellError
 from airtest.core.android.cap_methods.screen_proxy import ScreenProxy
@@ -59,6 +60,7 @@ class Android(Device):
         # init components
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.yosemite_ime = YosemiteIme(self.adb)
+        self.yosemite_recorder = Recorder(self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
@@ -462,6 +464,7 @@ class Android(Device):
             time.sleep(0.5)
         if self.adb.is_locked():
             self.home()
+            self.yosemite_recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
             self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
             time.sleep(0.5)
             self.home()
@@ -790,11 +793,14 @@ class Android(Device):
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
             write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+                yosemite: yosemite backend, higher quality.
                 ffmpeg: ffmpeg-python backend, higher compression rate.
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
+            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
+            bit_rate: the higher the bitrate, the clearer the video
 
         Returns:
             save_path: path of video file
@@ -819,24 +825,6 @@ class Android(Device):
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
         """
-        if bit_rate_level is not None:
-            LOGGING.warning("`bit_rate_level` is deprecated and will be removed in future")
-            warnings.warn("`bit_rate_level` is deprecated and will be removed in future", DeprecationWarning)
-        if bit_rate is not None:
-            LOGGING.warning("`bit_rate` is deprecated and will be removed in future")
-            warnings.warn("`bit_rate` is deprecated and will be removed in future", DeprecationWarning)
-
-        if fps > 10 or fps < 1:
-            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
-            if fps > 10:
-                fps = 10
-            if fps < 1:
-                fps = 1
-
-        if self.recorder and self.recorder.is_running():
-            LOGGING.warning("recording is already running, please don't call again")
-            return None
-        
         logdir = "./"
         if ST.LOG_DIR is not None:
             logdir = ST.LOG_DIR
@@ -848,6 +836,36 @@ class Android(Device):
             else:
                 save_path = os.path.join(logdir, output)
         self.recorder_save_path = save_path
+        
+        if write_mode=="yosemite":
+            if self.yosemite_recorder.recording_proc!= None:
+                LOGGING.warning("recording is already running, please don't call again")
+                return None
+            if not bit_rate:
+                if not bit_rate_level:
+                    bit_rate_level = 1
+                if bit_rate_level > 5:
+                    bit_rate_level = 5
+                bit_rate = self.display_info['width'] * self.display_info['height'] * bit_rate_level
+            if orientation==0:
+                bool_is_vertical = "off"
+            elif orientation==1:
+                bool_is_vertical = "true"
+            elif orientation==2:
+                bool_is_vertical = "false"
+            self.yosemite_recorder.start_recording(max_time=max_time, bit_rate=bit_rate, bool_is_vertical=bool_is_vertical)
+            return save_path
+
+        if fps > 10 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
+            if fps > 10:
+                fps = 10
+            if fps < 1:
+                fps = 1
+
+        if self.recorder and self.recorder.is_running():
+            LOGGING.warning("recording is already running, please don't call again")
+            return None
         
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
@@ -867,14 +885,16 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
+        if self.yosemite_recorder.recording_proc!= None:
+            if output is None:
+                output = self.recorder_save_path
+            print(output)
+            return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
+        
         if self.recorder is None:
             LOGGING.warning("start_recording first")
             return False
-        if output is not None:
-            LOGGING.warning("`output` is deprecated")
-        if is_interrupted is not None:
-            LOGGING.warning("`is_interrupted` is deprecated")
-
+        
         LOGGING.info("stopping recording")
         self.recorder.stop()
         self.recorder = None
