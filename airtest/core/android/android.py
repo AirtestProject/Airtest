@@ -837,23 +837,28 @@ class Android(Device):
                 save_path = os.path.join(logdir, output)
         self.recorder_save_path = save_path
         
-        if write_mode=="yosemite":
-            if self.yosemite_recorder.recording_proc!= None:
-                LOGGING.warning("recording is already running, please don't call again")
+        if write_mode == "yosemite":
+            if self.yosemite_recorder.recording_proc != None:
+                LOGGING.warning(
+                    "recording is already running, please don't call again")
                 return None
             if not bit_rate:
                 if not bit_rate_level:
                     bit_rate_level = 1
                 if bit_rate_level > 5:
                     bit_rate_level = 5
-                bit_rate = self.display_info['width'] * self.display_info['height'] * bit_rate_level
-            if orientation==0:
-                bool_is_vertical = "off"
-            elif orientation==1:
+                bit_rate = self.display_info['width'] * \
+                    self.display_info['height'] * bit_rate_level
+
+            if orientation == 1:
                 bool_is_vertical = "true"
-            elif orientation==2:
+            elif orientation == 2:
                 bool_is_vertical = "false"
-            self.yosemite_recorder.start_recording(max_time=max_time, bit_rate=bit_rate, bool_is_vertical=bool_is_vertical)
+            else:
+                bool_is_vertical = "off"
+
+            self.yosemite_recorder.start_recording(
+                max_time=max_time, bit_rate=bit_rate, bool_is_vertical=bool_is_vertical)
             return save_path
 
         if fps > 10 or fps < 1:
@@ -885,12 +890,11 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
-        if self.yosemite_recorder.recording_proc!= None:
+        if self.yosemite_recorder.recording_proc != None:
             if output is None:
                 output = self.recorder_save_path
-            print(output)
             return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
-        
+
         if self.recorder is None:
             LOGGING.warning("start_recording first")
             return False
