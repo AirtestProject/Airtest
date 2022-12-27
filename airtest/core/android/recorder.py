@@ -21,7 +21,7 @@ class Recorder(Yosemite):
 
     @on_method_ready('install_or_upgrade')
     @retries(max_tries=2)
-    def start_recording(self, max_time=1800, bit_rate=None):
+    def start_recording(self, max_time=1800, bit_rate=None, bool_is_vertical="off"):
         """
         Start screen recording
 
@@ -42,9 +42,10 @@ class Recorder(Yosemite):
         max_time_param = "-Dduration=%d" % max_time if max_time else ""
         # The higher the bitrate, the clearer the video, the default value is 6000000
         bit_rate_param = "-Dbitrate=%d" % bit_rate if bit_rate else ""
+        bool_is_vertical_param = "-Dvertical=%s" % bool_is_vertical
         # The video size is square, compatible with horizontal and vertical screens
-        p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s /system/bin %s.Recorder --start-record' %
-                                 (pkg_path, max_time_param, bit_rate_param, YOSEMITE_PACKAGE))
+        p = self.adb.start_shell('CLASSPATH=%s exec app_process %s %s %s /system/bin %s.Recorder --start-record' %
+                                 (pkg_path, max_time_param, bit_rate_param, bool_is_vertical_param, YOSEMITE_PACKAGE))
         nbsp = NonBlockingStreamReader(p.stdout, name="start_recording_" + str(id(self)))
         # 进程p必须要保留到stop_recording执行时、或是退出前才进行清理，否则会导致录屏进程提前终止
         reg_cleanup(kill_proc, p)
