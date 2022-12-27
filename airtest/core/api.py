@@ -65,6 +65,8 @@ def connect_device(uri):
         >>> connect_device("Windows:///123456?foreground=False")  # Connect to the window without setting it foreground
         >>> connect_device("iOS:///127.0.0.1:8100")  # iOS device
         >>> connect_device("iOS:///http://localhost:8100/?mjpeg_port=9100")  # iOS with mjpeg port
+        >>> connect_device("iOS:///http://localhost:8100/?mjpeg_port=9100&&udid=00008020-001270842E88002E")  # iOS with mjpeg port and udid
+        >>> connect_device("iOS:///http://localhost:8100/?mjpeg_port=9100&&uuid=00008020-001270842E88002E")  # udid/uuid/serialno are all ok
 
     """
     d = urlparse(uri)
