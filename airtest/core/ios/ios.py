@@ -77,7 +77,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
@@ -122,8 +122,8 @@ class IOS(Device):
         # recorder
         self.recorder = None
 
-        # ios udid
-        self._udid = udid
+        # Since uuid and udid are very similar, both names are allowed
+        self._udid = udid or uuid
 
     @property
     def ip(self):
