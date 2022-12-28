@@ -23,6 +23,7 @@ function StepPannel(data, root){
   this.order = 'acc' // or dec
   this.duration = 'acc' // or dec
   this.status = 'acc' // or dec
+  this.thumbnail_step_list = []
 
   this.init = function(){
     // 初始化
@@ -121,6 +122,33 @@ function StepPannel(data, root){
     $("#show-console").click(function(){
       $('#console').fadeIn(300)
     })
+    document.body.onkeydown= (e)=>{  
+      e=window.event||e;
+      switch(e.keyCode){  
+        case 37:
+          //左键
+          this.jumpToPreThumbNail()
+          break;
+        case 38:
+          //向上键
+          //禁用触发页面滚动
+          e.preventDefault();
+          this.jumpToPreThumbNail()
+          break;
+        case 39:
+          //右键
+          this.jumpToNextThumbNail()
+          break;
+        case 40:
+          //向下键
+          //禁用触发页面滚动
+          e.preventDefault();
+          this.jumpToNextThumbNail()
+          break;
+        default:
+          break;
+      }  
+    } 
   }
 
   this.sortSteps = function(attr, rev){
@@ -188,6 +216,13 @@ function StepPannel(data, root){
       step.duration = getFormatDuration(step.duration_ms)
       step.index =  i
       step.status =  step.traceback ? 'fail' : 'success'
+      this.thumbnail_step_list = this.original_steps.map(function(step){
+        if(step.screen && step.screen.thumbnail) {
+          return step.index
+        }})
+        this.thumbnail_step_list = this.thumbnail_step_list.filter((val)=>{
+          return val != null
+      })
     }
   }
 
@@ -219,6 +254,34 @@ function StepPannel(data, root){
     this.setPagenation()
     this.setStepRight(step)
     $('.steps .filter').removeClass('active')
+  }
+
+  this.jumpToNextThumbNail = function() {
+    this.jumpToThumbNail('next')
+  }
+
+  this.jumpToPreThumbNail = function() {
+    this.jumpToThumbNail('pre')
+  }
+
+  this.jumpToThumbNail = function(op) {
+    let cur_thumbnail_step_index = this.thumbnail_step_list.findIndex((val)=>{
+      return val == this.currentStep
+    })
+    let nxt_thumbnail_step_index = 0
+    
+    if(op == 'next'){
+      if(cur_thumbnail_step_index < this.thumbnail_step_list.length - 1){
+        nxt_thumbnail_step_index = this.thumbnail_step_list[cur_thumbnail_step_index + 1]
+      }
+    }else if(op == 'pre'){
+      if(cur_thumbnail_step_index > 0){
+        nxt_thumbnail_step_index = this.thumbnail_step_list[cur_thumbnail_step_index - 1]
+      }
+    }
+    this.currentStep = nxt_thumbnail_step_index
+    this.currentPage = Math.ceil(this.currentStep / this.pagesize)
+    this.setSteps(this.currentStep)
   }
 
   this.showMagnifyPic = function(fragment) {

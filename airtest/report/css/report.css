@@ -20,7 +20,7 @@ body{
   padding-left: 100px;
   margin-bottom: 220px;
   min-width: 960px;
-  min-height: calc(100% - 222px);
+  min-height: calc(100%);
   position: relative;
 }
 #back_multi .back {
@@ -193,6 +193,7 @@ h2.empty-report{
 }
 
 .gallery{
+  min-height: 18vh;
   margin-bottom: 30px;
 }
 .gallery .info-title{
