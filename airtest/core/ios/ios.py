@@ -124,7 +124,7 @@ class IOS(Device):
         self.recorder = None
 
         # Since uuid and udid are very similar, both names are allowed
-        self._udid = udid or uuid
+        self._udid = udid or uuid or serialno
 
     @property
     def ip(self):
