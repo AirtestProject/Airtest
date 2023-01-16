@@ -784,7 +784,7 @@ class Android(Device):
             x, y, w, h = y, x, h, w
         return x, y, w, h
 
-    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="ffmpeg", 
+    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="yosemite",
                         snapshot_sleep=0.001, orientation=0, bit_rate_level=None, bit_rate=None):
         """
         Start recording the device display
