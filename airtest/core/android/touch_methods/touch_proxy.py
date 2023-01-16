@@ -61,6 +61,7 @@ class TouchProxy(object):
             >>> touch_proxy.touch((100, 100))
 
         """
+        print(111111111111111111111111111, default_method)
         if default_method and default_method in cls.TOUCH_METHODS:
             touch_method = cls.TOUCH_METHODS[default_method].METHOD_CLASS(adb, size_info=size_info,
                                                                           input_event=input_event)
@@ -68,6 +69,9 @@ class TouchProxy(object):
             if cls.check_touch(impl):
                 return TouchProxy(impl)
         # cls.TOUCH_METHODS中不包含ADBTOUCH，因此即使指定了default_method=ADBTOUCH，也优先尝试初始化其他点击方法
+        if default_method and default_method == "ADBTOUCH":
+            adb_touch = AdbTouchImplementation(adb)
+            return TouchProxy(adb_touch)
         for name, touch_impl in cls.TOUCH_METHODS.items():
             if default_method == name:
                 continue
