@@ -3,6 +3,7 @@ import warnings
 from collections import OrderedDict
 from airtest.core.android.touch_methods.minitouch import Minitouch
 from airtest.core.android.touch_methods.maxtouch import Maxtouch
+from airtest.core.android.touch_methods.base_touch import BaseTouch
 from airtest.core.android.constant import TOUCH_METHOD
 from airtest.utils.logger import get_logger
 
@@ -61,24 +62,19 @@ class TouchProxy(object):
             >>> touch_proxy.touch((100, 100))
 
         """
-        print(111111111111111111111111111, default_method)
         if default_method and default_method in cls.TOUCH_METHODS:
             touch_method = cls.TOUCH_METHODS[default_method].METHOD_CLASS(adb, size_info=size_info,
                                                                           input_event=input_event)
             impl = cls.TOUCH_METHODS[default_method](touch_method, ori_transformer)
             if cls.check_touch(impl):
                 return TouchProxy(impl)
-        # cls.TOUCH_METHODS中不包含ADBTOUCH，因此即使指定了default_method=ADBTOUCH，也优先尝试初始化其他点击方法
-        if default_method and default_method == "ADBTOUCH":
-            adb_touch = AdbTouchImplementation(adb)
-            return TouchProxy(adb_touch)
-        for name, touch_impl in cls.TOUCH_METHODS.items():
-            if default_method == name:
-                continue
-            touch_method = touch_impl.METHOD_CLASS(adb, size_info=size_info, input_event=input_event)
-            impl = touch_impl(touch_method, ori_transformer)
-            if cls.check_touch(impl):
-                return TouchProxy(impl)
+
+        if not default_method:
+            for name, touch_impl in cls.TOUCH_METHODS.items():
+                touch_method = touch_impl.METHOD_CLASS(adb, size_info=size_info, input_event=input_event)
+                impl = touch_impl(touch_method, ori_transformer)
+                if cls.check_touch(impl):
+                    return TouchProxy(impl)
 
         # If both minitouch and maxtouch fail to initialize, use adbtouch
         # 如果minitouch和maxtouch都初始化失败，使用adbtouch
@@ -111,6 +107,9 @@ class AdbTouchImplementation(object):
     def swipe(self, p1, p2, duration=0.5, *args, **kwargs):
         duration *= 1000
         self.base_touch.swipe(p1, p2, duration=duration)
+
+    def teardown(self):
+        pass
 
 
 @register_touch
