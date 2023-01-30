@@ -15,7 +15,7 @@ from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, ki
 from airtest.utils.threadsafe import threadsafe_generator
 from airtest.core.android.cap_methods.base_cap import BaseCap
 from airtest import aircv
-
+from airtest.core.error import ScreenError
 
 LOGGING = get_logger(__name__)
 
@@ -176,7 +176,10 @@ class Minicap(BaseCap):
             )
         jpg_data = raw_data.split(b"for JPG encoder" + self.adb.line_breaker)[-1]
         jpg_data = jpg_data.replace(self.adb.line_breaker, b"\n")
-        return jpg_data
+        if jpg_data.startswith(b"\xff\xd8") and jpg_data.endswith(b"\xff\xd9"):
+            return jpg_data
+        else:
+            raise ScreenError("invalid jpg format")
 
     def _get_params(self, projection=None):
         """
