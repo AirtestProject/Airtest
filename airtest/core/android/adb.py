@@ -219,7 +219,7 @@ class ADB(object):
             list od adb devices
 
         """
-        patten = re.compile(r'^[\w\d.:-]+\t[\w]+$')
+        patten = re.compile(r'[\w\d.:-]+\t[\w]+$')
         device_list = []
         # self.start_server()
         output = self.cmd("devices", device=False)
