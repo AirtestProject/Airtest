@@ -7,6 +7,7 @@ import base64
 import traceback
 import wda
 import inspect
+import os
 from functools import wraps
 from airtest import aircv
 from airtest.core.device import Device
@@ -16,6 +17,8 @@ from airtest.core.ios.rotation import XYTransformer, RotationWatcher
 from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
 from airtest.core.ios.mjpeg_cap import MJpegcap
+from airtest.core.settings import Settings as ST
+from airtest.aircv.screen_recorder import ScreenRecorder
 
 LOGGING = get_logger(__name__)
 
@@ -74,7 +77,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None, serialno=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
@@ -83,6 +86,7 @@ class IOS(Device):
         # fit wda format, make url start with http://
         # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
         # with mjpeg_port: http://localhost:8100/?mjpeg_port=9100
+        # with udid(udid/uuid/serialno are all ok): http://localhost:8100/?mjpeg_port=9100&&udid=00008020-001270842E88002E
         if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
@@ -116,6 +120,12 @@ class IOS(Device):
 
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
+        # recorder
+        self.recorder = None
+
+        # Since uuid and udid are very similar, both names are allowed
+        self._udid = udid or uuid or serialno
+
     @property
     def ip(self):
         """
@@ -138,7 +148,7 @@ class IOS(Device):
 
     @property
     def uuid(self):
-        return self.addr
+        return self._udid or self.addr
 
     @property
     def using_ios_tagent(self):
@@ -772,6 +782,88 @@ class IOS(Device):
             self.mjpegcap.teardown_stream()
         if self.rotation_watcher:
             self.rotation_watcher.teardown()
+    
+    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="ffmpeg", 
+                        snapshot_sleep=0.001, orientation=0):
+        """
+        Start recording the device display
+
+        Args:
+            max_time: maximum screen recording time, default is 1800
+            output: ouput file path
+            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+                ffmpeg: ffmpeg-python backend, higher compression rate.
+                cv2: cv2.VideoWriter backend, more stable.
+            fps: frames per second will record
+            snapshot_sleep: sleep time for each snapshot.
+            orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
+
+        Returns:
+            save_path: path of video file
+
+        Examples:
+
+            Record 30 seconds of video and export to the current directory test.mp4::
+
+            >>> from airtest.core.api import connect_device, sleep
+            >>> dev = connect_device("IOS:///")
+            >>> save_path = dev.start_recording(output="test.mp4")
+            >>> sleep(30)
+            >>> dev.stop_recording()
+            >>> print(save_path)
+
+            >>> # the screen is portrait
+            >>> portrait_mp4 = dev.start_recording(output="portrait.mp4", orientation=1)  # or orientation="portrait"
+            >>> sleep(30)
+            >>> dev.stop_recording()
+
+            >>> # the screen is landscape
+            >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
+
+        """
+        if fps > 10 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
+            if fps > 10:
+                fps = 10
+            if fps < 1:
+                fps = 1
+
+        if self.recorder and self.recorder.is_running():
+            LOGGING.warning("recording is already running, please don't call again")
+            return None
+        
+        logdir = "./"
+        if ST.LOG_DIR is not None:
+            logdir = ST.LOG_DIR
+        if output is None:
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
+        else:
+            if os.path.isabs(output):
+                save_path = output
+            else:
+                save_path = os.path.join(logdir, output)
+
+        def get_frame():
+            data = self.get_frame_from_stream()
+            frame = aircv.utils.string_2_img(data)
+            return frame
+
+        self.recorder = ScreenRecorder(
+            save_path, get_frame, mode=write_mode, fps=fps, 
+            snapshot_sleep=snapshot_sleep, orientation=orientation)
+        self.recorder.stop_time = max_time
+        self.recorder.start()
+        LOGGING.info("start recording screen to {}".format(save_path))
+        return save_path
+
+    def stop_recording(self,):
+        """
+        Stop recording the device display. Recoding file will be kept in the device.
+
+        """
+        LOGGING.info("stopping recording")
+        self.recorder.stop()
+        return None
 
 
 if __name__ == "__main__":

@@ -118,6 +118,9 @@ class LogToHtml(object):
                 children_steps.insert(0, log)
 
         translated_steps = [self._translate_step(s) for s in steps]
+        if len(translated_steps) > 0 and translated_steps[-1].get("traceback"):
+            # Final Error
+            self.test_result = False
         return translated_steps
 
     def _translate_step(self, step):
@@ -129,10 +132,6 @@ class LogToHtml(object):
         screen = self._translate_screen(step, code)
         info = self._translate_info(step)
         assertion = self._translate_assertion(step)
-
-        # set test failed if any traceback exists
-        if info[0]:
-            self.test_result = False
 
         translated = {
             "title": title,

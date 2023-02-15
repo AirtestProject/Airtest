@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import time
+import os
+import shutil
 import warnings
 from copy import copy
 from airtest import aircv
@@ -21,6 +23,12 @@ from airtest.core.android.cap_methods.minicap import Minicap  # noqa
 from airtest.core.android.cap_methods.javacap import Javacap  # noqa
 from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
 from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
+
+from airtest.core.settings import Settings as ST
+from airtest.aircv.screen_recorder import ScreenRecorder
+from airtest.utils.logger import get_logger
+
+LOGGING = get_logger(__name__)
 
 
 class Android(Device):
@@ -52,11 +60,15 @@ class Android(Device):
         # init components
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.yosemite_ime = YosemiteIme(self.adb)
-        self.recorder = Recorder(self.adb)
+        self.yosemite_recorder = Recorder(self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
         self._screen_proxy = None
+
+        # recorder
+        self.recorder = None
+        self.recorder_save_path = None
 
     @property
     def touch_proxy(self):
@@ -452,7 +464,7 @@ class Android(Device):
             time.sleep(0.5)
         if self.adb.is_locked():
             self.home()
-            self.recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
+            self.yosemite_recorder.install_or_upgrade()  # 暂时Yosemite只用了ime
             self.adb.shell(['am', 'start', '-a', 'com.netease.nie.yosemite.ACTION_IDENTIFY'])
             time.sleep(0.5)
             self.home()
@@ -772,17 +784,26 @@ class Android(Device):
             x, y, w, h = y, x, h, w
         return x, y, w, h
 
-    def start_recording(self, max_time=1800, bit_rate_level=1, bit_rate=None):
+    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="yosemite",
+                        snapshot_sleep=0.001, orientation=0, bit_rate_level=None, bit_rate=None):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
+            output: ouput file path
+            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+                yosemite: yosemite backend, higher quality.
+                ffmpeg: ffmpeg-python backend, higher compression rate.
+                cv2: cv2.VideoWriter backend, more stable.
+            fps: frames per second will record
+            snapshot_sleep: sleep time for each snapshot.
+            orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
             bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
             bit_rate: the higher the bitrate, the clearer the video
 
         Returns:
-            None
+            save_path: path of video file
 
         Examples:
 
@@ -790,42 +811,102 @@ class Android(Device):
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Android:///")
-            >>> # Record the screen with the lowest quality
-            >>> dev.start_recording(bit_rate_level=1)
+            >>> save_path = dev.start_recording(output="test.mp4")
             >>> sleep(30)
-            >>> dev.stop_recording(output="test.mp4")
+            >>> dev.stop_recording()
+            >>> print(save_path)
 
-            Or set max_time=30, the screen recording will stop automatically after 30 seconds::
+            >>> # the screen is portrait
+            >>> portrait_mp4 = dev.start_recording(output="portrait.mp4", orientation=1)  # or orientation="portrait"
+            >>> sleep(30)
+            >>> dev.stop_recording()
 
-            >>> dev.start_recording(max_time=30, bit_rate_level=5)
-            >>> dev.stop_recording(output="test_30s.mp4")
-
-            The default value of `max_time` is 1800 seconds, so the maximum screen recording time is half an hour.
-            You can modify its value to obtain a longer screen recording::
-
-            >>> dev.start_recording(max_time=3600, bit_rate_level=5)
-            >>> dev.stop_recording(output="test_hour.mp4")
+            >>> # the screen is landscape
+            >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
         """
-        if not bit_rate:
-            if bit_rate_level > 5:
-                bit_rate_level = 5
-            bit_rate = self.display_info['width'] * self.display_info['height'] * bit_rate_level
-        return self.recorder.start_recording(max_time=max_time, bit_rate=bit_rate)
+        logdir = "./"
+        if ST.LOG_DIR is not None:
+            logdir = ST.LOG_DIR
+        if output is None:
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
+        else:
+            if os.path.isabs(output):
+                save_path = output
+            else:
+                save_path = os.path.join(logdir, output)
+        self.recorder_save_path = save_path
+        
+        if write_mode == "yosemite":
+            if self.yosemite_recorder.recording_proc != None:
+                LOGGING.warning(
+                    "recording is already running, please don't call again")
+                return None
+            if not bit_rate:
+                if not bit_rate_level:
+                    bit_rate_level = 1
+                if bit_rate_level > 5:
+                    bit_rate_level = 5
+                bit_rate = self.display_info['width'] * \
+                    self.display_info['height'] * bit_rate_level
 
-    def stop_recording(self, output="screen.mp4", is_interrupted=False):
+            if orientation == 1:
+                bool_is_vertical = "true"
+            elif orientation == 2:
+                bool_is_vertical = "false"
+            else:
+                bool_is_vertical = "off"
+
+            self.yosemite_recorder.start_recording(
+                max_time=max_time, bit_rate=bit_rate, bool_is_vertical=bool_is_vertical)
+            return save_path
+
+        if fps > 10 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
+            if fps > 10:
+                fps = 10
+            if fps < 1:
+                fps = 1
+
+        if self.recorder and self.recorder.is_running():
+            LOGGING.warning("recording is already running, please don't call again")
+            return None
+        
+        def get_frame():
+            data = self.screen_proxy.get_frame_from_stream()
+            frame = aircv.utils.string_2_img(data)
+            return frame
+
+        self.recorder = ScreenRecorder(
+            save_path, get_frame, mode=write_mode, fps=fps, 
+            snapshot_sleep=snapshot_sleep, orientation=orientation)
+        self.recorder.stop_time = max_time
+        self.recorder.start()
+        LOGGING.info("start recording screen to {}".format(save_path))
+        return save_path
+
+    def stop_recording(self, output=None, is_interrupted=None):
         """
         Stop recording the device display. Recoding file will be kept in the device.
 
-        Args:
-            output: default file is `screen.mp4`
-            is_interrupted: True or False. Stop only, no pulling recorded file from device.
-
-        Returns:
-            None
-
         """
-        return self.recorder.stop_recording(output=output, is_interrupted=is_interrupted)
+        if self.yosemite_recorder.recording_proc != None:
+            if output is None:
+                output = self.recorder_save_path
+            return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
+
+        if self.recorder is None:
+            LOGGING.warning("start_recording first")
+            return False
+        
+        LOGGING.info("stopping recording")
+        self.recorder.stop()
+        self.recorder = None
+
+        if output and not is_interrupted:
+            shutil.move(self.recorder_save_path, output)
+            LOGGING.info("save video to {}".format(output))
+        return True
 
     def _register_rotation_watcher(self):
         """

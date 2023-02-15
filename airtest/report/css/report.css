@@ -20,7 +20,7 @@ body{
   padding-left: 100px;
   margin-bottom: 220px;
   min-width: 960px;
-  min-height: calc(100% - 222px);
+  min-height: calc(100%);
   position: relative;
 }
 #back_multi .back {
@@ -193,6 +193,7 @@ h2.empty-report{
 }
 
 .gallery{
+  min-height: 18vh;
   margin-bottom: 30px;
 }
 .gallery .info-title{
@@ -204,6 +205,10 @@ h2.empty-report{
   white-space: nowrap;
   background: #121c34;
   padding-top: 20px;
+  z-index: 3;
+}
+.gallery .placeholder {
+  background-color: #121c34;
 }
 .gallery .thumbnail {
   display: inline-block;
@@ -568,6 +573,7 @@ pre.trace {
   position: fixed;
   bottom: 0;
   right: 0;
+  z-index: 4;
 }
 .row.gif-wrap .menu{
   display: block;
@@ -637,7 +643,7 @@ pre.trace {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.2);
-  z-index: 2;
+  z-index: 4;
   display: none;
 }
 .mask .content {
