@@ -278,7 +278,7 @@ class TestIos(unittest.TestCase):
         self.assertEqual(duration >= 10, True)
         
         #test other params
-        self.ios.start_recording(output="test_cv_10s.mp4", write_mode="cv2")
+        self.ios.start_recording(output="test_cv_10s.mp4", mode="cv2")
         time.sleep(10+4)
         self.ios.stop_recording()
         time.sleep(2)

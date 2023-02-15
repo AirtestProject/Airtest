@@ -784,7 +784,7 @@ class Android(Device):
             x, y, w, h = y, x, h, w
         return x, y, w, h
 
-    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="yosemite",
+    def start_recording(self, max_time=1800, output=None, fps=10, mode="yosemite",
                         snapshot_sleep=0.001, orientation=0, bit_rate_level=None, bit_rate=None):
         """
         Start recording the device display
@@ -792,7 +792,7 @@ class Android(Device):
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+            mode: the backend write video, choose in ["ffmpeg", "cv2"]
                 yosemite: yosemite backend, higher quality.
                 ffmpeg: ffmpeg-python backend, higher compression rate.
                 cv2: cv2.VideoWriter backend, more stable.
@@ -837,7 +837,7 @@ class Android(Device):
                 save_path = os.path.join(logdir, output)
         self.recorder_save_path = save_path
         
-        if write_mode == "yosemite":
+        if mode == "yosemite":
             if self.yosemite_recorder.recording_proc != None:
                 LOGGING.warning(
                     "recording is already running, please don't call again")
@@ -878,7 +878,7 @@ class Android(Device):
             return frame
 
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=write_mode, fps=fps, 
+            save_path, get_frame, mode=mode, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()
