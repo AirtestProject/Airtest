@@ -509,7 +509,7 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output=None, fps=10, write_mode="ffmpeg", 
+    def start_recording(self, max_time=1800, output=None, fps=10, mode="ffmpeg",
                         snapshot_sleep=0.001, orientation=0):
         """
         Start recording the device display
@@ -517,7 +517,7 @@ class Windows(Device):
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            write_mode: the backend write video, choose in ["ffmpeg", "cv2"]
+            mode: the backend write video, choose in ["ffmpeg", "cv2"]
                 ffmpeg: ffmpeg-python backend, higher compression rate.
                 cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
@@ -567,7 +567,7 @@ class Windows(Device):
                 save_path = os.path.join(logdir, output)
 
         self.recorder = ScreenRecorder(
-            save_path, self.snapshot, mode=write_mode, fps=fps, 
+            save_path, self.snapshot, mode=mode, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()

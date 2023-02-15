@@ -48,7 +48,7 @@ class TestWin(unittest.TestCase):
         self.assertEqual(duration >= 10, True)
 
         #test other params
-        self.windows.start_recording(output="test_cv_10s.mp4", write_mode="cv2")
+        self.windows.start_recording(output="test_cv_10s.mp4", mode="cv2")
         time.sleep(10+4)
         self.windows.stop_recording()
         time.sleep(2)
