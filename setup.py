@@ -1,6 +1,7 @@
 import os
 import sys
 import codecs
+import platform
 import pkg_resources
 from setuptools import setup, find_packages
 
@@ -36,6 +37,10 @@ def parse_requirements(filename):
         reqs.remove("facebook-wda>=1.3.3")
         reqs.remove("mss==6.1.0")
         reqs.append("mss==4.0.3")
+    # m1 mac, python>3.6
+    if platform.processor() == "arm":
+        reqs.remove("numpy<=1.19.5")
+        reqs.append("numpy")
     return reqs
 
 
