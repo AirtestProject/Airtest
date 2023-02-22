@@ -151,6 +151,10 @@ class IOS(Device):
         return self._udid or self.addr
 
     @property
+    def udid(self):
+        return self._udid
+
+    @property
     def using_ios_tagent(self):
         """
         当前基础版本：appium/WebDriverAgent 4.1.4
