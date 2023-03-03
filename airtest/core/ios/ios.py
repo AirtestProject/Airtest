@@ -424,8 +424,6 @@ class IOS(Device):
             >>> touch((0.5, 0.5), duration=1)
 
         """
-        # trans pos of click, pos can be percentage or real coordinate
-        # x, y = self._transform_xy(pos)
         x, y = pos
         if not (x < 1 and y < 1):
             x, y = int(x * self.touch_factor), int(y * self.touch_factor)
@@ -447,18 +445,24 @@ class IOS(Device):
         """
         x, y = self.driver._percent2pos(x, y)
         data = {'x': x, 'y': y, 'duration': duration}
-        return self.driver._session_http.post('/wda/tap', data=data)
-
+        # 为了兼容改动直接覆盖原生接口的自制版wda
+        try:
+            return self.driver._session_http.post('/wda/tap', data=data)
+        except wda.WDARequestError as e:
+            if e.status == 110:
+                self.driver.click(x, y, duration)
+                
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=None, delay=0.1, *args, **kwargs):
+    def swipe(self, fpos, tpos, duration=0, delay=None, *args, **kwargs):
         """
         Args:
             fpos: start point
             tpos: end point
             duration (float): start coordinate press duration (seconds), default is None
+            delay (float): start coordinate to end coordinate duration (seconds)
 
         Returns:
             None
@@ -474,10 +478,8 @@ class IOS(Device):
             fx, fy = int(fx * self.touch_factor), int(fy * self.touch_factor)
         if not (tx < 1 and ty < 1):
             tx, ty = int(tx * self.touch_factor), int(ty * self.touch_factor)
-        # 如果用户想长按就调用wda的dragfromtoforduration接口 否则根据wda安装版本判断是否调用快速滑动接口
-        if duration:
-            self.driver.swipe(fx, fy, tx, ty, duration)
-        else:
+        # 如果是通过ide来滑动 且安装的是自制版的wda就调用快速滑动接口 其他时候不关心滑动速度就使用原生接口保证滑动精确性
+        if delay:
             if self.using_ios_tagent:
                 # 调用自定义的wda swipe接口需要进行坐标转换
                 fx, fy = self._transform_xy(fpos)
@@ -485,6 +487,8 @@ class IOS(Device):
                 self._quick_swipe(fx, fy, tx, ty, delay)
             else:
                 self.driver.swipe(fx, fy, tx, ty)
+        else:
+            self.driver.swipe(fx, fy, tx, ty, duration)
 
     def _quick_swipe(self, x1, y1, x2, y2, delay):
         """
@@ -501,7 +505,12 @@ class IOS(Device):
             x2, y2 = self.driver._percent2pos(x2, y2, size)
 
         data = dict(fromX=x1, fromY=y1, toX=x2, toY=y2, delay=delay)
-        return self.driver._session_http.post('/wda/swipe', data=data)
+        # 为了兼容改动直接覆盖原生接口的自制版wda
+        try:
+            return self.driver._session_http.post('/wda/swipe', data=data)
+        except wda.WDARequestError as e:
+            if e.status == 110:
+                self.driver.swipe(x1, y1, x2, y2)
 
     def keyevent(self, keyname, **kwargs):
         """
@@ -630,7 +639,6 @@ class IOS(Device):
             raise if no IP address has been found, otherwise return the IP address
 
         """
-        # return self.driver.status()['ios']['ip']
         # 修改过的wda先尝试获取wifiIP
         ios_status = self.driver.status()['ios']
         return ios_status.get('wifiIP', ios_status['ip'])
