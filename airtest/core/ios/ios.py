@@ -409,7 +409,6 @@ class IOS(Device):
 
     def touch(self, pos, duration=0.01):
         """
-
         Args:
             pos: coordinates (x, y), can be float(percent) or int
             duration (optional): tap_hold duration
@@ -422,20 +421,40 @@ class IOS(Device):
 
         """
         # trans pos of click, pos can be percentage or real coordinate
-        x, y = self._transform_xy(pos)
-        self.driver.click(x, y, duration)
+        # x, y = self._transform_xy(pos)
+        x, y = pos
+        if not (x < 1 and y < 1):
+            x, y = int(x * self.touch_factor), int(y * self.touch_factor)
+        # 根据用户安装的wda版本判断是否调用快速点击接口
+        if self.using_ios_tagent:
+            x, y = self._transform_xy(pos)
+            self._quick_click(x, y, duration)
+        else:
+            self.driver.click(x, y, duration)
+
+    def _quick_click(self, x, y, duration):
+        """
+        The method extended from the facebook-wda third-party library
+        Use modified appium wda to perform quick click
+        
+        Args:
+            x, y (int, float): float(percent), int(coordicate)
+            duration (optional): tap_hold duration
+        """
+        x, y = self.driver._percent2pos(x, y)
+        data = {'x': x, 'y': y, 'duration': duration}
+        return self.driver._session_http.post('/wda/tap', data=data)
 
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
 
-    def swipe(self, fpos, tpos, duration=0, *args, **kwargs):
+    def swipe(self, fpos, tpos, duration=None, delay=0.1, *args, **kwargs):
         """
-
         Args:
             fpos: start point
             tpos: end point
-            duration (float): start coordinate press duration (seconds), default is 0
+            duration (float): start coordinate press duration (seconds), default is None
 
         Returns:
             None
@@ -445,9 +464,40 @@ class IOS(Device):
             >>> swipe((0.2, 0.5), (0.8, 0.5))
 
         """
-        fx, fy = self._transform_xy(fpos)
-        tx, ty = self._transform_xy(tpos)
-        self.driver.swipe(fx, fy, tx, ty, duration)
+        fx, fy = fpos
+        tx, ty = tpos
+        if not (fx < 1 and fy < 1):
+            fx, fy = int(fx * self.touch_factor), int(fy * self.touch_factor)
+        if not (tx < 1 and ty < 1):
+            tx, ty = int(tx * self.touch_factor), int(ty * self.touch_factor)
+        # 如果用户想长按就调用wda的dragfromtoforduration接口 否则根据wda安装版本判断是否调用快速滑动接口
+        if duration:
+            self.driver.swipe(fx, fy, tx, ty, duration)
+        else:
+            if self.using_ios_tagent:
+                # 调用自定义的wda swipe接口需要进行坐标转换
+                fx, fy = self._transform_xy(fpos)
+                tx, ty = self._transform_xy(tpos)
+                self._quick_swipe(fx, fy, tx, ty, delay)
+            else:
+                self.driver.swipe(fx, fy, tx, ty)
+
+    def _quick_swipe(self, x1, y1, x2, y2, delay):
+        """
+        The method extended from the facebook-wda third-party library
+        Use modified appium wda to perform quick swipe
+        
+        Args:
+            x1, y1, x2, y2 (int, float): float(percent), int(coordicate)
+            delay (float): start coordinate to end coordinate duration (seconds)
+        """
+        if any(isinstance(v, float) for v in [x1, y1, x2, y2]):
+            size = self.window_size()
+            x1, y1 = self.driver._percent2pos(x1, y1, size)
+            x2, y2 = self.driver._percent2pos(x2, y2, size)
+
+        data = dict(fromX=x1, fromY=y1, toX=x2, toY=y2, delay=delay)
+        return self.driver._session_http.post('/wda/swipe', data=data)
 
     def keyevent(self, keyname, **kwargs):
         """
@@ -474,6 +524,7 @@ class IOS(Device):
     def text(self, text, enter=True):
         """
         Input text on the device
+
         Args:
             text:  text to input
             enter: True if you need to enter a newline at the end
@@ -575,7 +626,10 @@ class IOS(Device):
             raise if no IP address has been found, otherwise return the IP address
 
         """
-        return self.driver.status()['ios']['ip']
+        # return self.driver.status()['ios']['ip']
+        # 修改过的wda先尝试获取wifiIP
+        ios_status = self.driver.status()['ios']
+        return ios_status.get('wifiIP', ios_status['ip'])
 
     def device_status(self):
         """
