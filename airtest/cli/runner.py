@@ -38,6 +38,8 @@ class AirtestCase(unittest.TestCase):
                     dev.start_recording()
                 except:
                     traceback.print_exc()
+        # support for if __name__ == '__main__'
+        self.scope['__name__'] = '__main__'
 
     def tearDown(self):
         if self.args.log and self.args.recording:
