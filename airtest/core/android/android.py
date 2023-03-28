@@ -792,10 +792,9 @@ class Android(Device):
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            mode: the backend write video, choose in ["ffmpeg", "cv2"]
+            mode: the backend write video, choose in ["ffmpeg", "yosemite"]
                 yosemite: yosemite backend, higher quality.
                 ffmpeg: ffmpeg-python backend, higher compression rate.
-                cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
