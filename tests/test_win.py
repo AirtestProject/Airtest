@@ -78,20 +78,6 @@ class TestWin(unittest.TestCase):
             frame_num = cap.get(7)
             duration = frame_num/rate
         self.assertEqual(duration >= 10, True)
-        
-        #test other params
-        self.windows.start_recording(output="test_cv_10s.mp4", mode="cv2")
-        time.sleep(10+4)
-        self.windows.stop_recording()
-        time.sleep(2)
-        self.assertEqual(os.path.exists("test_cv_10s.mp4"), True)
-        duration = 0
-        cap = cv2.VideoCapture("test_cv_10s.mp4")
-        if cap.isOpened():
-            rate = cap.get(5)
-            frame_num = cap.get(7)
-            duration = frame_num/rate
-        self.assertEqual(duration >= 10, True)
 
     @classmethod
     def tearDownClass(cls):

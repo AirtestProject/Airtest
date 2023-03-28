@@ -61,10 +61,6 @@ class VidWriter:
                 .run_async(pipe_stdin=True)
             )
             self.writer = self.process.stdin
-        elif self.mode == "cv2":
-            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            self.writer = cv2.VideoWriter(
-                outfile, fourcc, self.fps, (width, height))
 
     def process_frame(self, frame):
         assert len(frame.shape) == 3
@@ -90,8 +86,6 @@ class VidWriter:
             self.writer.close()
             self.process.wait()
             self.process.terminate()
-        elif self.mode == "cv2":
-            self.writer.release()
 
 
 class ScreenRecorder:
