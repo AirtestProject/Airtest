@@ -17,6 +17,12 @@ RECORDER_ORI = {
     "ROTATION": 0,  # The screen is centered in a square
 }
 
+def resize_by_max(img, max_size=800):
+    max_len = max(img.shape[0], img.shape[1])
+    if max_len > max_size:
+        scale = max_size / max_len
+        img = cv2.resize(img, (int(img.shape[1] * scale), int(img.shape[0] * scale)))
+    return img
 
 class FfmpegVidWriter:
     """
