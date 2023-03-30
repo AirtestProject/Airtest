@@ -1,7 +1,7 @@
 Jinja2>=2.8
 Pillow>=3.4.0
 requests>=2.11.1
-six
+six>=1.9.0,<=1.16.0
 mss==6.1.0
 numpy<=1.19.5
 opencv-contrib-python>=4.4.0.46, <=4.6.0.66
