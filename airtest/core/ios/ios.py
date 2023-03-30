@@ -849,16 +849,14 @@ class IOS(Device):
         if self.rotation_watcher:
             self.rotation_watcher.teardown()
     
-    def start_recording(self, max_time=1800, output=None, fps=10, mode="ffmpeg",
-                        snapshot_sleep=0.001, orientation=0):
+    def start_recording(self, max_time=1800, output=None, fps=10,
+                        snapshot_sleep=0.001, orientation=0, *args, **kwargs):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            mode: the backend write video, choose in ["ffmpeg"]
-                ffmpeg: ffmpeg-python backend, higher compression rate.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
@@ -914,7 +912,7 @@ class IOS(Device):
             return frame
 
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=mode, fps=fps,
+            save_path, get_frame, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()

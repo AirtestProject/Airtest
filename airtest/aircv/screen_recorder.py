@@ -18,9 +18,11 @@ RECORDER_ORI = {
 }
 
 
-class VidWriter:
-    def __init__(self, outfile, width, height, mode='ffmpeg', fps=10, orientation=0):
-        self.mode = mode
+class FfmpegVidWriter:
+    """
+    Generate a video using FFMPEG.
+    """
+    def __init__(self, outfile, width, height, fps=10, orientation=0):
         self.fps = fps
 
         # 三种横竖屏录屏模式 1 竖屏 2 横屏 0 方形居中
@@ -39,33 +41,31 @@ class VidWriter:
         self.width = width = self.width - (self.width % 32) + 32
         self.cache_frame = np.zeros((height, width, 3), dtype=np.uint8)
 
-        if self.mode == "ffmpeg":
+        try:
+            subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
+        except FileNotFoundError:
+            from airtest.utils.ffmpeg import ffmpeg_setter
             try:
-                subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
-            except FileNotFoundError:
-                from airtest.utils.ffmpeg import ffmpeg_setter
-                try:
-                    ffmpeg_setter.add_paths()
-                except Exception as e:
-                    print("Error: setting ffmpeg path failed, please download it at https://ffmpeg.org/download.html then add ffmpeg path to PATH")
-                    raise
+                ffmpeg_setter.add_paths()
+            except Exception as e:
+                print("Error: setting ffmpeg path failed, please download it at https://ffmpeg.org/download.html then add ffmpeg path to PATH")
+                raise
 
-            self.process = (
-                ffmpeg
-                .input('pipe:', format='rawvideo', pix_fmt='rgb24',
-                    s='{}x{}'.format(width, height), framerate=self.fps)
-                .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25,
-                        preset="veryfast", framerate=self.fps)
-                .global_args("-loglevel", "error")
-                .overwrite_output()
-                .run_async(pipe_stdin=True)
-            )
-            self.writer = self.process.stdin
+        self.process = (
+            ffmpeg
+            .input('pipe:', format='rawvideo', pix_fmt='rgb24',
+                s='{}x{}'.format(width, height), framerate=self.fps)
+            .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25,
+                    preset="veryfast", framerate=self.fps)
+            .global_args("-loglevel", "error")
+            .overwrite_output()
+            .run_async(pipe_stdin=True)
+        )
+        self.writer = self.process.stdin
 
     def process_frame(self, frame):
         assert len(frame.shape) == 3
-        if self.mode == "ffmpeg":
-            frame = frame[..., ::-1]
+        frame = frame[..., ::-1]
         if self.orientation == 1 and frame.shape[1] > frame.shape[0]:
             frame = cv2.resize(frame, (self.width, int(self.width*self.width/self.height)))
         elif self.orientation == 2 and frame.shape[1] < frame.shape[0]:
@@ -82,21 +82,19 @@ class VidWriter:
         self.writer.write(frame.astype(np.uint8))
 
     def close(self):
-        if self.mode == "ffmpeg":
-            self.writer.close()
-            self.process.wait()
-            self.process.terminate()
+        self.writer.close()
+        self.process.wait()
+        self.process.terminate()
 
 
 class ScreenRecorder:
-    def __init__(self, outfile, get_frame_func, mode='ffmpeg', fps=10,
-                 snapshot_sleep=0.001, orientation=0):
+    def __init__(self, outfile, get_frame_func, fps=10, snapshot_sleep=0.001, orientation=0):
         self.get_frame_func = get_frame_func
         self.tmp_frame = self.get_frame_func()
         self.snapshot_sleep = snapshot_sleep
 
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
-        self.writer = VidWriter(outfile, width, height, mode, fps, orientation)
+        self.writer = FfmpegVidWriter(outfile, width, height, fps, orientation)
         self.tmp_frame = self.writer.process_frame(self.tmp_frame)
 
         self._is_running = False
