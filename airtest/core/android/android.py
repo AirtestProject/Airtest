@@ -877,7 +877,7 @@ class Android(Device):
             return frame
 
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=mode, fps=fps,
+            save_path, get_frame, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()

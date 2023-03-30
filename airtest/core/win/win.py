@@ -509,8 +509,8 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output=None, fps=10, mode="ffmpeg",
-                        snapshot_sleep=0.001, orientation=0):
+    def start_recording(self, max_time=1800, output=None, fps=10,
+                        snapshot_sleep=0.001, orientation=0, *args, **kwargs):
         """
         Start recording the device display
 
@@ -566,7 +566,7 @@ class Windows(Device):
                 save_path = os.path.join(logdir, output)
 
         self.recorder = ScreenRecorder(
-            save_path, self.snapshot, mode=mode, fps=fps,
+            save_path, self.snapshot, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()
