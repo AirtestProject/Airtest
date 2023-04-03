@@ -68,7 +68,7 @@ def get_platform_http_zip():
     """Return the download link for the current platform"""
     check_system()
     try:
-        MAIN_SIT = "https://github.com1/zackees/ffmpeg_bins"
+        MAIN_SIT = "https://github.com/zackees/ffmpeg_bins"
         r = requests.get(MAIN_SIT, timeout=10)
         r.raise_for_status()
         return MAIN_SIT + PLATFORM_ZIP_FILES[sys.platform]
