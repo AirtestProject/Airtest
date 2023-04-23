@@ -3,6 +3,7 @@ import os
 import time
 import unittest
 import numpy
+from airtest.core.api import *
 from airtest.core.ios.ios import IOS, wda, CAP_METHOD
 from airtest import aircv
 from .testconf import try_remove
@@ -13,24 +14,23 @@ warnings.simplefilter("always")
 text_flag = True # 控制是否运行text接口用例
 skip_alert_flag = False  # 控制是否测试alert相关接口用例
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
-PKG_SAFARI = 'com.apple.mobilesafari'
-
-
+PKG_SAFARI = "com.apple.mobilesafari"
+TEST_IPA_FILE_OR_URL = "" # IPA包体的路径或者url链接，测试安装
+TEST_IPA_BUNDLE_ID = "" # IPA安装后app的bundleID，测试卸载
+ 
 class TestIos(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
+        # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
+        cls.ios = IOS()
+        connect_device("iOS:///http+usbmux://00008101-001945CE0081401E")
 
     @classmethod
     def tearDownClass(cls):
         try_remove('screen.png')
         try_remove('test_10s.mp4')
         try_remove('test_cv_10s.mp4')
-
-    def test_session(self):
-        print("test_session")
-        self.assertIsNotNone(self.ios.session)
 
     def test_wda(self):
         print("test_wda")
@@ -157,15 +157,22 @@ class TestIos(unittest.TestCase):
         print("test_startapp")
         self.ios.start_app(PKG_SAFARI)
 
+    def test_general_api(self):
+        print("test_general_api")
+        start_app(PKG_SAFARI)
+        stop_app(PKG_SAFARI)
+
     def test_stopapp(self):
         print("test_stopapp")
         self.ios.stop_app(PKG_SAFARI)
+        stop_app(PKG_SAFARI)
 
     def test_app_state(self):
         print("test_app_state")
         self.ios.start_app(PKG_SAFARI)
         print(self.ios.app_state(PKG_SAFARI))
         self.assertEqual(self.ios.app_state(PKG_SAFARI)["value"], 4)
+        time.sleep(1)
         self.ios.home()
         time.sleep(1)
         print(self.ios.app_state(PKG_SAFARI))
@@ -277,7 +284,20 @@ class TestIos(unittest.TestCase):
             duration = frame_num/rate
         self.assertEqual(duration >= 10, True)
         
+    # Test some functions about tidevice.
+    def test_list_app(self):
+        print("test_list_app")
+        app_list = self.ios.list_app(type="all")
+        self.assertIsInstance(app_list, list)
+        print(app_list)
 
+    def test_install_app(self):
+        print("test_install_app")
+        self.ios.install_app(TEST_IPA_FILE_OR_URL)
+    
+    def test_uninstall_app(self):
+        print("test_uninstall_app")
+        self.ios.uninstall_app(TEST_IPA_BUNDLE_ID)
 
 if __name__ == '__main__':
     # unittest.main()

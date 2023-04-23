@@ -25,7 +25,7 @@ from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
 from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 from airtest.core.settings import Settings as ST
-from airtest.aircv.screen_recorder import ScreenRecorder
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -785,7 +785,8 @@ class Android(Device):
         return x, y, w, h
 
     def start_recording(self, max_time=1800, output=None, fps=10, mode="yosemite",
-                        snapshot_sleep=0.001, orientation=0, bit_rate_level=None, bit_rate=None):
+                        snapshot_sleep=0.001, orientation=0, bit_rate_level=None, 
+                        bit_rate=None, max_size=None):
         """
         Start recording the device display
 
@@ -800,13 +801,14 @@ class Android(Device):
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
             bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
             bit_rate: the higher the bitrate, the clearer the video
+            max_size: max size of the video frame, e.g.800, default is None. Smaller sizes lead to lower system load.
 
         Returns:
             save_path: path of video file
 
         Examples:
 
-            Record 30 seconds of video and export to the current directory test.mp4::
+            Record 30 seconds of video and export to the current directory test.mp4:
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Android:///")
@@ -822,6 +824,10 @@ class Android(Device):
 
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
+
+            In yosemite mode, you can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", mode="ffmpeg", max_size=800)
 
         """
         logdir = "./"
@@ -874,6 +880,9 @@ class Android(Device):
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
+            
+            if max_size is not None:
+                frame = resize_by_max(frame, max_size)
             return frame
 
         self.recorder = ScreenRecorder(
