@@ -1,14 +1,18 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import re
 import time
 import base64
 import traceback
-import wda
 import inspect
-import os
+import wda
+import shutil
+import subprocess
 from functools import wraps
+from tidevice._usbmux import Usbmux
+from tidevice._device import BaseDevice as TIDevice
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
@@ -23,7 +27,6 @@ from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max
 LOGGING = get_logger(__name__)
 
 DEFAULT_ADDR = "http://localhost:8100/"
-
 
 def decorator_retry_session(func):
     """
@@ -49,7 +52,6 @@ def decorator_retry_session(func):
 
     return wrapper
 
-
 def decorator_retry_for_class(cls):
     """
     Add decorators to all methods in the class
@@ -65,10 +67,9 @@ def decorator_retry_for_class(cls):
         setattr(cls, name, decorator_retry_session(method))
     return cls
 
-
 @decorator_retry_for_class
 class IOS(Device):
-    """ios client
+    """IOS client.
 
         - before this you have to run `WebDriverAgent <https://github.com/AirtestProject/iOS-Tagent>`_
 
@@ -77,67 +78,202 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None, serialno=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None, serialno=None, wda_bundle_id=None):
         super(IOS, self).__init__()
 
         # if none or empty, use default addr
         self.addr = addr or DEFAULT_ADDR
 
-        # fit wda format, make url start with http://
-        # eg. http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
+        # Fit wda format, make url start with http://,
+        # e.g., http://localhost:8100/ or http+usbmux://00008020-001270842E88002E
         # with mjpeg_port: http://localhost:8100/?mjpeg_port=9100
-        # with udid(udid/uuid/serialno are all ok): http://localhost:8100/?mjpeg_port=9100&&udid=00008020-001270842E88002E
+        # with udid(udid/uuid/serialno are all ok): http://localhost:8100/?mjpeg_port=9100&&udid=00008020-001270842E88002E.
         if not self.addr.startswith("http"):
             self.addr = "http://" + addr
 
-        """here now use these supported cap touch and ime method"""
+        # Here now use these supported cap touch and ime method.
         self.cap_method = cap_method
         self.touch_method = TOUCH_METHOD.WDATOUCH
         self.ime_method = IME_METHOD.WDAIME
 
-        # wda driver, use to home, start app
-        # init wda session, updata when start app
-        # use to click/swipe/close app/get wda size
+        # Wda driver, use to home, start app, click/swipe/close app/get wda size.
+        # Init wda session, updata when start app.
         wda.DEBUG = False
-        self.driver = wda.Client(self.addr)
+        if self.addr != DEFAULT_ADDR:
+            # Connect remote device via url.
+            self.driver = wda.Client(self.addr)
+        else:   
+            # Use tidevice to get WDA bundle ID and udid.
+            if not udid:
+                udid = self._get_default_device()
+            self.udid = udid
+            if not wda_bundle_id:
+                self.wda_bundle_id = self._get_default_wda_bundle_id()
+            self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
 
-        # record device's width
+        # Record device's width and height.
         self._size = {'width': None, 'height': None}
         self._current_orientation = None
         self._touch_factor = None
         self._last_orientation = None
         self._is_pad = None
         self._using_ios_tagent = None
-        self._device_info = {}
-
-        info = self.device_info
-        self.instruct_helper = InstructHelper(info['uuid'])
+        self.instruct_helper = InstructHelper(self.device_info['uuid'])
         self.mjpegcap = MJpegcap(self.instruct_helper, ori_function=lambda: self.display_info,
                                  ip=self.ip, port=mjpeg_port)
-        # start up RotationWatcher with default session
+        # Start up RotationWatcher with default session.
         self.rotation_watcher = RotationWatcher(self)
         self._register_rotation_watcher()
 
         self.alert_watch_and_click = self.driver.alert.watch_and_click
 
-        # recorder
+        # Recorder.
         self.recorder = None
 
-        # Since uuid and udid are very similar, both names are allowed
+        # Since uuid and udid are very similar, both names are allowed.
         self._udid = udid or uuid or serialno
+
+    # Below staticmethods are provided by Tidevice.
+    @staticmethod
+    def _devices():
+        # Get all available devices connect by usb, reutrn list of udid.
+        return Usbmux().device_udid_list()
+    
+    @staticmethod
+    def _list_app(udid, type="user"):
+        app_type = {
+            "user": "User",
+            "system": "System",
+            "all": None,
+        }[type]
+        app_list = []
+        for info in TIDevice(udid, Usbmux()).installation.iter_installed(app_type=app_type):
+            bundle_id = info['CFBundleIdentifier']
+            try:
+                display_name = info['CFBundleDisplayName']
+                version = info.get('CFBundleShortVersionString', '')
+                app_list.append((bundle_id, display_name, version))
+            except BrokenPipeError:
+                break
+        return app_list
+    
+    @staticmethod
+    def _list_wda(udid):
+        """Get all WDA on device that meet certain naming rules.
+
+        Returns:
+            List of WDA bundleID.
+        """
+        app_list = IOS._list_app(udid, type="user")
+        wda_list = []
+        for app in app_list:
+            bundle_id, display_name, _ = app
+            if ".xctrunner" in bundle_id or display_name == "WebDriverAgentRunner-Runner":
+                wda_list.append(bundle_id)
+        return wda_list
+    
+    @staticmethod
+    def _device_info(udid):
+        device_info = TIDevice(udid, Usbmux()).device_info()
+        tmp_dict = {}
+        # chose some useful device info from tidevice
+        """
+        'DeviceName', 'ProductVersion', 'ProductType',
+        'ModelNumber', 'SerialNumber', 'PhoneNumber',
+        'CPUArchitecture', 'ProductName', 'ProtocolVersion',
+        'RegionInfo', 'TimeIntervalSince1970', 'TimeZone',
+        'UniqueDeviceID', 'WiFiAddress', 'BluetoothAddress',
+        'BasebandVersion'
+        """
+        for attr in ('ProductVersion', 'ProductType',
+            'ModelNumber', 'SerialNumber', 'PhoneNumber', 
+            'TimeZone', 'UniqueDeviceID'):
+            key = attr[0].lower() + attr[1:]
+            if attr in device_info:
+                tmp_dict[key] = device_info[attr]
+        return tmp_dict
+    
+    @staticmethod
+    def _install_app(udid, file_or_url):
+        TIDevice(udid, Usbmux()).app_install(file_or_url)
+
+    @staticmethod
+    def _uninstall_app(udid, bundle_id):
+        TIDevice(udid, Usbmux()).app_uninstall(bundle_id=bundle_id)
+
+    @staticmethod
+    def _start_app(udid, bundle_id):
+        TIDevice(udid, Usbmux()).app_start(bundle_id=bundle_id)
+
+    @staticmethod
+    def _stop_app(udid, bundle_id):
+        # Note: seems not work.
+        TIDevice(udid, Usbmux()).app_stop(pid_or_name=bundle_id)
+
+    @staticmethod
+    def _ps(udid):
+        with TIDevice(udid, Usbmux()).connect_instruments() as ts:
+            app_infos = list(TIDevice(udid, Usbmux()).installation.iter_installed(app_type=None))
+            ps = list(ts.app_process_list(app_infos))
+        ps_list = []
+        keys = ['pid', 'name', 'bundle_id', 'display_name']
+        for p in ps:
+            if not p['isApplication']:
+                continue
+            ps_list.append({key: p[key] for key in keys})
+        return ps_list
+    
+    @staticmethod
+    def _start_wda_xctest(udid, wda_bundle_id=None):
+        xctool_path = shutil.which("tins2") or shutil.which("tidevice")
+        if not xctool_path:
+            return False
+        args = []
+        if udid:
+            args.extend(['-u', udid])
+        args.append('xctest')
+        if wda_bundle_id:
+            args.extend(['-B', wda_bundle_id])
+        p = subprocess.Popen([xctool_path] + args)
+        time.sleep(3)
+        if p.poll() is not None:
+            return False
+        return p
+
+    def _get_default_device(self):
+        """Get local default device when no udid.
+
+        Returns:
+            Local device udid.
+        """
+        device_udid_list = self._devices()
+        if device_udid_list:
+            return device_udid_list[0]
+        raise IndexError("IOS devices not found, please connect device first.")
+    
+    def _get_default_wda_bundle_id(self):
+        """Get local default device's WDA bundleID when no wda bundleID.
+
+        Returns:
+            Local device's WDA bundleID.
+        """ 
+        try:
+            wda_list = self._list_wda(self.udid)
+            return wda_list[0]
+        except IndexError:
+            raise IndexError("WDA bundleID not found, please install WDA on device.")
 
     @property
     def ip(self):
-        """
-        Returns the IP address of the host connected to the iOS phone
-        It is not the IP address of the iOS phone.
-        If you want to get the IP address of the phone, you can access the interface `get_ip_address`
+        """Returns the IP address of the host connected to the iOS phone.
 
-        For example: when the device is connected via http://localhost:8100, return localhost
-        If it is a remote device http://192.168.xx.xx:8100, it returns the IP address of 192.168.xx.xx
+        It is not the IP address of the iOS phone.
+        If you want to get the IP address of the phone, you can access the interface `get_ip_address`.
+        For example: when the device is connected via http://localhost:8100, return localhost.
+        If it is a remote device http://192.168.xx.xx:8100, it returns the IP address of 192.168.xx.xx.
 
         Returns:
-
+            IP
         """
         match = re.search(IP_PATTERN, self.addr)
         if match:
@@ -153,6 +289,10 @@ class IOS(Device):
     @property
     def udid(self):
         return self._udid
+    
+    @udid.setter
+    def udid(self, udid):
+        self._udid = udid
 
     @property
     def using_ios_tagent(self):
@@ -162,8 +302,9 @@ class IOS(Device):
         该版本基于Appium版的WDA做了一些改动，可以更快地进行点击和滑动，并优化了部分UI树的获取逻辑
         但是所有的坐标都为竖屏坐标，需要airtest自行根据方向做转换
         同时，大于4.1.4版本的appium/WebDriverAgent不再需要针对ipad进行特殊的横屏坐标处理了
-        Returns:
 
+        Returns:
+            True if using ios-tagent, else False.
         """
         if self._using_ios_tagent is None:
             status = self.driver.status()
@@ -174,10 +315,7 @@ class IOS(Device):
         return self._using_ios_tagent
 
     def _fetch_new_session(self):
-        """
-        Re-acquire a new session
-        重新获取新的session
-        :return:
+        """Re-acquire a new session.n
         """
         # 根据facebook-wda的逻辑，直接设为None就会自动获取一个新的默认session
         self.driver.session_id = None
@@ -186,11 +324,12 @@ class IOS(Device):
     def is_pad(self):
         """
         Determine whether it is an ipad(or 6P/7P/8P), if it is, in the case of horizontal screen + desktop,
-        the coordinates need to be switched to vertical screen coordinates to click correctly (WDA bug)
+        the coordinates need to be switched to vertical screen coordinates to click correctly (WDA bug).
 
         判断是否是ipad(或 6P/7P/8P)，如果是，在横屏+桌面的情况下，坐标需要切换成竖屏坐标才能正确点击（WDA的bug）
-        Returns:
 
+        Returns:
+            True if it is an ipad, else False.
         """
         if self._is_pad is None:
             info = self.device_info
@@ -204,15 +343,14 @@ class IOS(Device):
 
     @property
     def device_info(self):
-        """
-        get the device info.
+        """ Get the device info.
 
-        .. note::
-            Might not work on all devices
+        Notes:
+            Might not work on all devices.
 
         Returns:
-            dict for device info,
-            eg. AttrDict({
+            Dict for device info,
+            e.g. AttrDict({
                 'timeZone': 'GMT+0800',
                 'currentLocale': 'zh_CN',
                 'model': 'iPhone',
@@ -222,27 +360,25 @@ class IOS(Device):
                 'name': 'iPhone',
                 'isSimulator': False})
         """
-        if not self._device_info:
-            self._device_info = self.driver.info
-        return self._device_info
+        device_info = self.driver.info
+        try:
+            # Add some device info.
+            tmp_dict = self._device_info(self.udid)
+            device_info.update(tmp_dict)
+        finally:
+            return device_info
 
     def _register_rotation_watcher(self):
         """
-        Register callbacks for Android and minicap when rotation of screen has changed
-
-        callback is called in another thread, so be careful about thread-safety
-
-        Returns:
-            None
-
+        Register callbacks for Android and minicap when rotation of screen has changed,
+        callback is called in another thread, so be careful about thread-safety.
         """
         self.rotation_watcher.reg_callback(lambda x: setattr(self, "_current_orientation", x))
 
     def window_size(self):
         """
-            return window size
-            namedtuple:
-                Size(width , height)
+        Returns: 
+            Window size (width, height).
         """
         try:
             return self.driver.window_size()
@@ -254,8 +390,8 @@ class IOS(Device):
     @property
     def orientation(self):
         """
-            return device oritantation status
-            in  LANDSACPE POR
+        Returns:
+            Device oritantation status in LANDSACPE POR.
         """
         if not self._current_orientation:
             self._current_orientation = self.get_orientation()
@@ -264,13 +400,9 @@ class IOS(Device):
     @orientation.setter
     def orientation(self, value):
         """
-
         Args:
             value(string): LANDSCAPE | PORTRAIT | UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT |
                     UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN
-
-        Returns:
-
         """
         # 可以对屏幕进行旋转，但是可能会导致问题
         self.driver.orientation = value
@@ -323,8 +455,8 @@ class IOS(Device):
     @touch_factor.setter
     def touch_factor(self, factor):
         """
-        touch_factor is used to convert click coordinates: mobile phone real coordinates = touch_factor * screen coordinates
-        In general, no manual settings are required
+        Func touch_factor is used to convert click coordinates: mobile phone real coordinates = touch_factor * screen coordinates.
+        In general, no manual settings are required.
 
         touch_factor用于换算点击坐标：手机真实坐标 = touch_factor * 屏幕坐标
         默认计算方式是： self.display_info['window_height'] / self.display_info['height']
@@ -338,21 +470,17 @@ class IOS(Device):
             0.333333
             >>> device.touch_factor = 1 / 3.3  # default is 1/3
             >>> device.touch((100, 100))
+
         Args:
             factor: real_pos / pixel_pos, e.g: 1/self.driver.scale
-
-        Returns:
-
         """
         self._touch_factor = float(factor)
 
     def get_render_resolution(self):
-        """
-        Return render resolution after rotation
+        """Return render resolution after rotation.
 
         Returns:
             offset_x, offset_y, offset_width and offset_height of the display
-
         """
         w, h = self.get_current_resolution()
         return 0, 0, w, h
@@ -369,16 +497,15 @@ class IOS(Device):
 
     def _neo_wda_screenshot(self):
         """
-            this is almost same as wda implementation, but without png header check,
-            as response data is now jpg format in mid quality
+        This is almost same as wda implementation, but without png header check,
+        as response data is now jpg format in mid quality.
         """
         value = self.driver.http.get('screenshot').value
         raw_value = base64.b64decode(value)
         return raw_value
 
     def snapshot(self, filename=None, quality=10, max_size=None):
-        """
-        take snapshot
+        """Take snapshot.
 
         Args:
             filename: save screenshot to filename
@@ -386,7 +513,7 @@ class IOS(Device):
             max_size: the maximum size of the picture, e.g 1200
 
         Returns:
-
+            Screen snapshot's cv2 object.
         """
         data = self._neo_wda_screenshot()
         # output cv2 object
@@ -470,7 +597,6 @@ class IOS(Device):
         Examples:
             >>> swipe((1050, 1900), (150, 1900))
             >>> swipe((0.2, 0.5), (0.8, 0.5))
-
         """
         fx, fy = fpos
         tx, ty = tpos
@@ -513,15 +639,11 @@ class IOS(Device):
                 self.driver.swipe(x1, y1, x2, y2)
 
     def keyevent(self, keyname, **kwargs):
-        """
-        Perform keyevent on the device
+        """Perform keyevent on the device.
 
         Args:
             keyname: home/volumeUp/volumeDown
             **kwargs:
-
-        Returns:
-
         """
         try:
             keyname = KEY_EVENTS[keyname.lower()]
@@ -531,19 +653,16 @@ class IOS(Device):
             self.press(keyname)
 
     def press(self, keys):
-        """some keys in ["home", "volumeUp", "volumeDown"] can be pressed"""
+        """Some keys in ["home", "volumeUp", "volumeDown"] can be pressed.
+        """
         self.driver.press(keys)
 
     def text(self, text, enter=True):
-        """
-        Input text on the device
+        """Input text on the device.
 
         Args:
             text:  text to input
             enter: True if you need to enter a newline at the end
-
-        Returns:
-            None
 
         Examples:
             >>> text("test")
@@ -553,46 +672,66 @@ class IOS(Device):
             text += '\n'
         self.driver.send_keys(text)
 
-    def install_app(self, uri, package):
+    def install_app(self, file_or_url):
         """
         curl -X POST $JSON_HEADER \
         -d "{\"desiredCapabilities\":{\"bundleId\":\"com.apple.mobilesafari\", \"app\":\"[host_path]/magicapp.app\"}}" \
         $DEVICE_URL/session
         https://github.com/facebook/WebDriverAgent/wiki/Queries
-        """
-        raise NotImplementedError
 
-    def start_app(self, package, *args):
-        """
+        Install app from the device.
 
         Args:
-            package: the app bundle id, e.g ``com.apple.mobilesafari``
+            file_or_url: file or url to install
 
         Returns:
-            None
+            bundle ID        
+        """
+        return self._install_app(self.udid, file_or_url)
+    
+    def uninstall_app(self, bundle_id):
+        """Uninstall app from the device.
+
+        Notes: 
+            It seems always return True.
+
+        Args:
+            bundle_id: the app bundle id, e.g ``com.apple.mobilesafari``
+        """
+        return self._uninstall_app(self.udid, bundle_id)
+
+    def start_app(self, bundle_id):
+        """
+        Args:
+            bundle_id: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Returns:
+            Process ID.
 
         Examples:
             >>> start_app('com.apple.mobilesafari')
-
         """
-        self.driver.app_launch(bundle_id=package)
+        return self._start_app(self.udid, bundle_id)
+    
+    def stop_app(self, bundle_id):
+        self.driver.app_stop(bundle_id=bundle_id)
 
-    def stop_app(self, package):
+    def list_app(self, type="user"):
+        """List app in device.
+        
+        Args:
+            type: user/system/all filter app types
+
+        Retruns:
+            list of app
         """
+        return self._list_app(self.udid, type=type)
+
+    def app_state(self, bundle_id):
+        """ Get app state and ruturn.
 
         Args:
-            package: the app bundle id, e.g ``com.apple.mobilesafari``
-
-        Returns:
-
-        """
-        self.driver.app_stop(bundle_id=package)
-
-    def app_state(self, package):
-        """
-
-        Args:
-            package:
+            bundle_id: Bundle ID of app.
 
         Returns:
             {
@@ -600,66 +739,53 @@ class IOS(Device):
                 "sessionId": "0363BDC5-4335-47ED-A54E-F7CCB65C6A65"
             }
 
-            value 1(not running) 2(running in background) 3(running in foreground)? 4(running)
-
-        Examples:
-            >>> dev = device()
-            >>> start_app('com.apple.mobilesafari')
-            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 4
-            >>> home()
-            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 3
-            >>> stop_app('com.apple.mobilesafari')
-            >>> print(dev.app_state('com.apple.mobilesafari')["value"])  # --> output is 1
+            Value 1(not running) 2(running in background) 3(running in foreground)? 4(running).
         """
-        # output {"value": 4, "sessionId": "xxxxxx"}
-        # different value means 1: die, 2: background, 4: running
-        return self.driver.app_state(bundle_id=package)
+        return self.driver.app_state(bundle_id=bundle_id)
 
     def app_current(self):
-        """
-        get the app current 
+        """Get the app current.
 
         Notes:
-            Might not work on all devices
+            Might not work on all devices.
 
         Returns:
-            current app state dict, eg:
+            Current app state dict, eg:
             {"pid": 1281,
              "name": "",
              "bundleId": "com.netease.cloudmusic"}
-
         """
         return self.driver.app_current()
 
     def get_ip_address(self):
-        """
-        get ip address from webDriverAgent
+        """Get ip address from WDA.
 
         Returns:
-            raise if no IP address has been found, otherwise return the IP address
-
+            If no IP address has been found, otherwise return the IP address.
         """
-        # 修改过的wda先尝试获取wifiIP
         ios_status = self.driver.status()['ios']
+        # If use modified WDA, try to get real wifi IP first.
         return ios_status.get('wifiIP', ios_status['ip'])
 
     def device_status(self):
-        """
-        show status return by webDriverAgent
-        Return dicts of infos
+        """Show status return by WDA.
+
+        Returns:
+            Dicts of infos.
         """
         return self.driver.status()
 
     def _touch_point_by_orientation(self, tuple_xy):
         """
+        
         Convert image coordinates to physical display coordinates, the arbitrary point (origin) is upper left corner
-        of the device physical display
+        of the device physical display.
 
         Args:
             tuple_xy: image coordinates (x, y)
 
         Returns:
-
+            physical coordinates (x, y)
         """
         x, y = tuple_xy
 
@@ -684,7 +810,7 @@ class IOS(Device):
     def _transform_xy(self, pos):
         x, y = self._touch_point_by_orientation(pos)
 
-        # scale touch postion
+        # Scale touch postion.
         if not (x < 1 and y < 1):
             x, y = int(x * self.touch_factor), int(y * self.touch_factor)
 
@@ -695,14 +821,13 @@ class IOS(Device):
 
     def is_locked(self):
         """
-        Return True or False whether the device is locked or not
+        Return True or False whether the device is locked or not.
 
         Notes:
-            Might not work on some devices
+            Might not work on some devices.
 
         Returns:
-            True or False
-
+            True or False.
         """
         return self.driver.locked()
 
@@ -939,18 +1064,41 @@ class IOS(Device):
 
 
 if __name__ == "__main__":
-    start = time.time()
-    ios = IOS("http://10.251.100.86:20003")
+    # start = time.time()
+    # ios = IOS("http://10.251.100.86:20003")
 
-    ios.snapshot()
-    # ios.touch((242 * 2 + 10, 484 * 2 + 20))
+    # ios.snapshot()
+    # # ios.touch((242 * 2 + 10, 484 * 2 + 20))
 
-    # ios.start_app("com.tencent.xin")
-    ios.home()
-    ios.start_app('com.apple.mobilesafari')
-    ios.touch((88, 88))
-    ios.stop_app('com.apple.mobilesafari')
-    ios.swipe((100, 100), (800, 100))
+    # # ios.start_app("com.tencent.xin")
+    # ios.home()
+    # ios.start_app('com.apple.mobilesafari')
+    # ios.touch((88, 88))
+    # ios.stop_app('com.apple.mobilesafari')
+    # ios.swipe((100, 100), (800, 100))
 
-    print(ios.device_status())
-    print(ios.get_ip_address())
+    # print(ios.device_status())
+    # print(ios.get_ip_address())
+
+    d = IOS()
+    # print(d.udid)
+    # print(d.device_info)
+    # time.sleep(2)
+    # print(d.list_app(type="all"))
+    # time.sleep(2)
+    # print(d.start_app("com.apple.measure"))
+    # time.sleep(2)
+    # print(d.stop_app("com.apple.measure"))
+    # time.sleep(2)
+    # print(d.start_app("com.apple.mobilesafari"))
+    # time.sleep(2)
+    print(d.stop_app("com.ios-tagent.xctrunner"))
+    time.sleep(2)
+    # print(d.install_app(r"C:\Users\baoxin02\Desktop\QQ.ipa"))
+    # time.sleep(2)
+    # print(d.uninstall_app("com.tencent.mqq"))
+
+
+
+
+
