@@ -394,11 +394,17 @@ class Minicap(BaseCap):
         # 卡住的进程状态
         TASK_INTERRUPTIBLE = "__skb_wait_for_more_packets"
 
-        shell_output = self.adb.shell("ps -A| grep minicap")
-        for line in shell_output.split("\r\n"):
-            if TASK_INTERRUPTIBLE in line:
-                pid = line.split()[1]
-                self.adb.shell("kill %s" % pid)
+        try:
+            shell_output = self.adb.shell("ps -A| grep minicap")
+        except:
+            pass
+        else:
+            if len(shell_output) == 0:
+                return
+            for line in shell_output.split("\r\n"):
+                if TASK_INTERRUPTIBLE in line:
+                    pid = line.split()[1]
+                    self.adb.shell("kill %s" % pid)
 
     def _cleanup(self):
         """
