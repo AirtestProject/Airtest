@@ -569,6 +569,14 @@ class Windows(Device):
                 save_path = output
             else:
                 save_path = os.path.join(logdir, output)
+        
+        def get_frame():
+            frame = self.snapshot()
+            
+            if max_size is not None:
+                frame = resize_by_max(frame, max_size)
+            return frame
+            
 
         max_size = get_max_size(max_size)
         def get_frame():

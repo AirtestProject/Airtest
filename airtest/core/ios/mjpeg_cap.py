@@ -61,12 +61,8 @@ class MJpegcap(object):
     @ready_method
     def setup_stream_server(self):
         if self.port_forwarding:
-            LOGGING.debug("self.port_forwarding")
             self.port, _ = self.instruct_helper.setup_proxy(9100)
-            LOGGING.debug("self.port_forwarding finish")
-        LOGGING.debug("self.init_sock")
         self.init_sock()
-        LOGGING.debug("self.init_sock finish")
         reg_cleanup(self.teardown_stream)
 
     def init_sock(self):
