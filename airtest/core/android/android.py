@@ -825,6 +825,10 @@ class Android(Device):
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
+            In yosemite mode, you can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", mode="ffmpeg", max_size=800)
+
         """
         logdir = "./"
         if ST.LOG_DIR is not None:
