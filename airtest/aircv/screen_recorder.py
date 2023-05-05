@@ -18,11 +18,25 @@ RECORDER_ORI = {
 }
 
 def resize_by_max(img, max_size=800):
+    if img is None:
+        return np.zeros((max_size, max_size, 3), dtype=np.uint8)
     max_len = max(img.shape[0], img.shape[1])
     if max_len > max_size:
         scale = max_size / max_len
         img = cv2.resize(img, (int(img.shape[1] * scale), int(img.shape[0] * scale)))
     return img
+
+
+def get_max_size(max_size):
+    try:
+        max_size = int(max_size)
+    except:
+        max_size = None
+    else:
+        if max_size <= 0:
+            max_size = None
+    return max_size
+
 
 class FfmpegVidWriter:
     """

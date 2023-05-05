@@ -25,7 +25,7 @@ from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
 from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 from airtest.core.settings import Settings as ST
-from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -876,7 +876,8 @@ class Android(Device):
         if self.recorder and self.recorder.is_running():
             LOGGING.warning("recording is already running, please don't call again")
             return None
-        
+
+        max_size = get_max_size(max_size)
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
