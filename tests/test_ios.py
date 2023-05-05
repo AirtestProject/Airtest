@@ -13,9 +13,10 @@ warnings.simplefilter("always")
 text_flag = True # 控制是否运行text接口用例
 skip_alert_flag = False  # 控制是否测试alert相关接口用例
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
-PKG_SAFARI = 'com.apple.mobilesafari'
-
-
+PKG_SAFARI = "com.apple.mobilesafari"
+TEST_IPA_FILE_OR_URL = "" # IPA包体的路径或者url链接，测试安装
+TEST_IPA_BUNDLE_ID = "" # IPA安装后app的bundleID，测试卸载
+ 
 class TestIos(unittest.TestCase):
 
     @classmethod
@@ -284,14 +285,11 @@ class TestIos(unittest.TestCase):
 
     def test_install_app(self):
         print("test_install_app")
-        # 网易大神安装包
-        url = "https://hba2-airlab.s3.nie.netease.com/airlab/%E7%BD%91%E6%98%93%E5%A4%A7%E7%A5%9E_3.39.0%E6%AD%A3%E7%89%88.ipa"
-        self.ios.install_app(url)
+        self.ios.install_app(TEST_IPA_FILE_OR_URL)
 
     def test_uninstall_app(self):
         print("test_uninstall_app")
-        # 卸载网易大神
-        self.ios.uninstall_app("com.netease.godlike")
+        self.ios.uninstall_app(TEST_IPA_BUNDLE_ID)
 
 if __name__ == '__main__':
     # unittest.main()
