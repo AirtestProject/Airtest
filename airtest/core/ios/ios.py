@@ -26,6 +26,7 @@ LOGGING = get_logger(__name__)
 
 DEFAULT_ADDR = "http://localhost:8100/"
 
+
 def decorator_retry_session(func):
     """
     When the operation fails due to session failure, try to re-acquire the session,
@@ -48,6 +49,7 @@ def decorator_retry_session(func):
             raise
     return wrapper
 
+
 def decorator_tidevice_function(func):
     """
     Tidevice can only use on local device now, when remote device use raise an error.
@@ -61,6 +63,7 @@ def decorator_tidevice_function(func):
         else:
             raise RuntimeError("Can't use this method on remote device now, only on local device.")
     return wrapper
+
 
 def decorator_for_class(cls):
     """
@@ -79,6 +82,7 @@ def decorator_for_class(cls):
         else:
             setattr(cls, name, decorator_retry_session(method))
     return cls
+
 
 @decorator_for_class
 class TIDevice:
@@ -184,6 +188,7 @@ class TIDevice:
                 continue
             ps_list.append({key: p[key] for key in keys})
         return ps_list
+   
     
 @decorator_for_class
 class IOS(Device):
