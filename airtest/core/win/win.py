@@ -17,7 +17,7 @@ from pywinauto.win32structures import RECT
 from airtest.core.win.ctypesinput import key_press, key_release
 
 from airtest import aircv
-from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.core.device import Device
 from airtest.core.settings import Settings as ST
 from airtest.utils.logger import get_logger
@@ -571,14 +571,14 @@ class Windows(Device):
                 save_path = output
             else:
                 save_path = os.path.join(logdir, output)
-        
+
+        max_size = get_max_size(max_size)
         def get_frame():
             frame = self.snapshot()
             
             if max_size is not None:
                 frame = resize_by_max(frame, max_size)
             return frame
-            
 
         self.recorder = ScreenRecorder(
             save_path, get_frame, fps=fps,

@@ -18,7 +18,7 @@ from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
 from airtest.core.ios.mjpeg_cap import MJpegcap
 from airtest.core.settings import Settings as ST
-from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 
 LOGGING = get_logger(__name__)
 
@@ -911,6 +911,7 @@ class IOS(Device):
             else:
                 save_path = os.path.join(logdir, output)
 
+        max_size = get_max_size(max_size)
         def get_frame():
             data = self.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
