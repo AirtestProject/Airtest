@@ -884,6 +884,10 @@ class IOS(Device):
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
+            You can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", max_size=800)
+
         """
         if fps > 10 or fps < 1:
             LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")

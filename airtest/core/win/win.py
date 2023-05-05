@@ -538,6 +538,10 @@ class Windows(Device):
             >>> dev.stop_recording()
             >>> print(save_path)
 
+            You can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", max_size=800)
+
         Note:
             1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
             2 If recording still working after app crash, it will continuing write last frame before the crash. 
