@@ -20,17 +20,14 @@ class TestIos(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
+        # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
+        cls.ios = IOS()
 
     @classmethod
     def tearDownClass(cls):
         try_remove('screen.png')
         try_remove('test_10s.mp4')
         try_remove('test_cv_10s.mp4')
-
-    def test_session(self):
-        print("test_session")
-        self.assertIsNotNone(self.ios.session)
 
     def test_wda(self):
         print("test_wda")
@@ -166,6 +163,7 @@ class TestIos(unittest.TestCase):
         self.ios.start_app(PKG_SAFARI)
         print(self.ios.app_state(PKG_SAFARI))
         self.assertEqual(self.ios.app_state(PKG_SAFARI)["value"], 4)
+        time.sleep(1)
         self.ios.home()
         time.sleep(1)
         print(self.ios.app_state(PKG_SAFARI))
@@ -277,7 +275,23 @@ class TestIos(unittest.TestCase):
             duration = frame_num/rate
         self.assertEqual(duration >= 10, True)
         
+    # Test some functions about tidevice.
+    def test_list_app(self):
+        print("test_list_app")
+        app_list = self.ios.list_app(type="all")
+        self.assertIsInstance(app_list, list)
+        print(app_list)
 
+    def test_install_app(self):
+        print("test_install_app")
+        # 网易大神安装包
+        url = "https://hba2-airlab.s3.nie.netease.com/airlab/%E7%BD%91%E6%98%93%E5%A4%A7%E7%A5%9E_3.39.0%E6%AD%A3%E7%89%88.ipa"
+        self.ios.install_app(url)
+
+    def test_uninstall_app(self):
+        print("test_uninstall_app")
+        # 卸载网易大神
+        self.ios.uninstall_app("com.netease.godlike")
 
 if __name__ == '__main__':
     # unittest.main()

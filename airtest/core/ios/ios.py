@@ -188,8 +188,8 @@ class TIDevice:
                 continue
             ps_list.append({key: p[key] for key in keys})
         return ps_list
-   
-    
+
+
 @decorator_for_class
 class IOS(Device):
     """IOS client.
@@ -222,6 +222,7 @@ class IOS(Device):
         # Wda driver, use to home, start app, click/swipe/close app/get wda size.
         # Init wda session, updata when start app.
         wda.DEBUG = False
+        self.udid = None
         if self.addr != DEFAULT_ADDR:
             # Connect remote device via url.
             self.tidevice = TIDevice(is_local_device=False)
@@ -306,14 +307,6 @@ class IOS(Device):
         return self._udid or self.addr
 
     @property
-    def udid(self):
-        return self._udid
-    
-    @udid.setter
-    def udid(self, udid):
-        self._udid = udid
-
-    @property
     def using_ios_tagent(self):
         """
         当前基础版本：appium/WebDriverAgent 4.1.4
@@ -387,7 +380,7 @@ class IOS(Device):
                 device_info.update(tmp_dict)
             finally:
                 self._device_info = device_info
-                return self._device_info
+        return self._device_info
 
     def _register_rotation_watcher(self):
         """
@@ -1062,18 +1055,18 @@ if __name__ == "__main__":
     # print(ios.device_status())
     # print(ios.get_ip_address())
 
-    # d = IOS("http://10.227.70.250:20006")
-    d = IOS()
-    print(d.using_ios_tagent)
-    print(d.udid)
-    print(d.device_info)
-    time.sleep(2)
+    d = IOS("http://10.227.70.214:20020")
+    # d = IOS()
+    # print(d.using_ios_tagent)
+    # print(d.udid)
+    # print(f"d.device_info:{d.device_info}")
+    # time.sleep(2)
     print(d.list_app(type="all"))
-    time.sleep(2)
-    print(d.start_app("com.apple.measure"))
-    time.sleep(2)
-    print(d.stop_app("com.apple.measure"))
-    time.sleep(2)
+    # time.sleep(2)
+    # print(d.start_app("com.apple.measure"))
+    # time.sleep(2)
+    # print(d.stop_app("com.apple.measure"))
+    # time.sleep(2)
     # print(d.start_app("com.apple.mobilesafari"))
     # time.sleep(2)
     # print(d.stop_app("com.ios-tagent.xctrunner"))
