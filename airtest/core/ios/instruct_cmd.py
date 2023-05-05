@@ -122,8 +122,10 @@ class InstructHelper(object):
         proxy_process = self.builtin_iproxy_path() or shutil.which("tidevice")
         if proxy_process:
             cmds = [proxy_process, "-u", self._udid, str(port), str(device_port)]
+            LOGGING.debug(f"cmds:{cmds}")
         else:
             # Port forwarding using python
+            print("self.do_proxy_usbmux(port, device_port)")
             self.do_proxy_usbmux(port, device_port)
             return
 
