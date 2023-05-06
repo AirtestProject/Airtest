@@ -786,7 +786,7 @@ class Android(Device):
 
     def start_recording(self, max_time=1800, output=None, fps=10, mode="yosemite",
                         snapshot_sleep=0.001, orientation=0, bit_rate_level=None, 
-                        bit_rate=None, max_size=None):
+                        bit_rate=None, max_size=None, *args, **kwargs):
         """
         Start recording the device display
 
@@ -825,7 +825,7 @@ class Android(Device):
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
-            In yosemite mode, you can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+            In ffmpeg mode, you can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
 
             >>> dev.start_recording(output="test.mp4", mode="ffmpeg", max_size=800)
 
@@ -836,12 +836,9 @@ class Android(Device):
         if output is None:
             save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
-            if os.path.isabs(output):
-                save_path = output
-            else:
-                save_path = os.path.join(logdir, output)
+            save_path = output if os.path.isabs(output) else os.path.join(logdir, output)
         self.recorder_save_path = save_path
-        
+
         if mode == "yosemite":
             if self.yosemite_recorder.recording_proc != None:
                 LOGGING.warning(
@@ -853,7 +850,7 @@ class Android(Device):
                 if bit_rate_level > 5:
                     bit_rate_level = 5
                 bit_rate = self.display_info['width'] * \
-                    self.display_info['height'] * bit_rate_level
+                        self.display_info['height'] * bit_rate_level
 
             if orientation == 1:
                 bool_is_vertical = "true"
@@ -881,7 +878,7 @@ class Android(Device):
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
-            
+
             if max_size is not None:
                 frame = resize_by_max(frame, max_size)
             return frame
