@@ -83,9 +83,7 @@ class TestAndroidFfmpegRecorder(unittest.TestCase):
     """Test Android ffmpeg screen recording function"""
     @classmethod
     def setUpClass(cls):
-        from airtest.core.api import connect_device
-        cls.android = connect_device("android://10.227.71.87:5039/0715f753568a0634")
-        # cls.android = Android()
+        cls.android = Android()
 
     def tearDown(self):
         try_remove("screen.mp4")

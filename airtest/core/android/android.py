@@ -794,14 +794,15 @@ class Android(Device):
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
             mode: the backend write video, choose in ["ffmpeg", "yosemite"]
-                yosemite: yosemite backend, higher quality.
-                ffmpeg: ffmpeg-python backend, higher compression rate.
+                yosemite: (default method) High clarity but large file size and limited phone compatibility.
+                ffmpeg: Lower image quality but smaller files and better compatibility.
             fps: frames per second will record
-            snapshot_sleep: sleep time for each snapshot.
+            snapshot_sleep: (mode="ffmpeg" only) sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
-            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
-            bit_rate: the higher the bitrate, the clearer the video
-            max_size: max size of the video frame, e.g.800, default is None. Smaller sizes lead to lower system load.
+            bit_rate_level: (mode="yosemite" only) bit_rate=resolution*level, 0 < level <= 5, default is 1
+            bit_rate: (mode="yosemite" only) the higher the bitrate, the clearer the video
+            max_size: (mode="ffmpeg" only) max size of the video frame, e.g.800, default is None.
+                      Smaller sizes lead to lower system load.
 
         Returns:
             save_path: path of video file
