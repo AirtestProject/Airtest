@@ -286,7 +286,7 @@ class TestIos(unittest.TestCase):
     def test_install_app(self):
         print("test_install_app")
         self.ios.install_app(TEST_IPA_FILE_OR_URL)
-
+    
     def test_uninstall_app(self):
         print("test_uninstall_app")
         self.ios.uninstall_app(TEST_IPA_BUNDLE_ID)

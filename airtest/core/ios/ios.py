@@ -3,14 +3,16 @@
 
 import os
 import re
-import time
-import base64
-import traceback
-import inspect
 import wda
+import time
+from urllib.parse import urlparse
+import base64
+import inspect
+import traceback
 from functools import wraps
 from tidevice._usbmux import Usbmux
 from tidevice._device import BaseDevice
+
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
@@ -50,21 +52,6 @@ def decorator_retry_session(func):
     return wrapper
 
 
-def decorator_tidevice_function(func):
-    """
-    Tidevice can only use on local device now, when remote device use raise an error.
-
-    目前只支持本地设备调用tidevice方法，当远程设备使用tidevice时，抛出异常。
-    """
-    @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        if self.is_local_device:
-            return func(*args, **kwargs)
-        else:
-            raise RuntimeError("Can't use this method on remote device now, only on local device.")
-    return wrapper
-
-
 def decorator_for_class(cls):
     """
     Add decorators to all methods in the class.
@@ -77,28 +64,20 @@ def decorator_for_class(cls):
         if (not inspect.ismethod(method) and not inspect.isfunction(method)) \
                 or inspect.isbuiltin(method) or name.startswith("_"):
             continue
-        if name.startswith("ti_"):
-            setattr(cls, name, decorator_tidevice_function(method))
-        else:
-            setattr(cls, name, decorator_retry_session(method))
+        setattr(cls, name, decorator_retry_session(method))
     return cls
 
-
-@decorator_for_class
 class TIDevice:
     """Below staticmethods are provided by Tidevice.
     """
 
-    def __init__(self, is_local_device):
-        self.is_local_device = is_local_device
-
     @staticmethod
-    def ti_devices():
+    def devices():
         # Get all available devices connect by usb, reutrn list of udid.
         return Usbmux().device_udid_list()
     
     @staticmethod
-    def ti_list_app(udid, type="user"):
+    def list_app(udid, type="user"):
         app_type = {
             "user": "User",
             "system": "System",
@@ -116,21 +95,13 @@ class TIDevice:
         return app_list
 
     @staticmethod
-    def ti_list_wda(udid):
+    def list_wda(udid):
         """Get all WDA on device that meet certain naming rules.
 
         Returns:
             List of WDA bundleID.
         """
-        app_list = []
-        for info in BaseDevice(udid, Usbmux()).installation.iter_installed(app_type="User"):
-            bundle_id = info['CFBundleIdentifier']
-            try:
-                display_name = info['CFBundleDisplayName']
-                version = info.get('CFBundleShortVersionString', '')
-                app_list.append((bundle_id, display_name, version))
-            except BrokenPipeError:
-                break
+        app_list = TIDevice.list_app(udid)
         wda_list = []
         for app in app_list:
             bundle_id, display_name, _ = app
@@ -139,7 +110,7 @@ class TIDevice:
         return wda_list
     
     @staticmethod
-    def ti_device_info(udid):
+    def device_info(udid):
         device_info = BaseDevice(udid, Usbmux()).device_info()
         tmp_dict = {}
         # chose some useful device info from tidevice
@@ -160,24 +131,24 @@ class TIDevice:
         return tmp_dict
     
     @staticmethod
-    def ti_install_app(udid, file_or_url):
+    def install_app(udid, file_or_url):
         BaseDevice(udid, Usbmux()).app_install(file_or_url)
 
     @staticmethod
-    def ti_uninstall_app(udid, bundle_id):
+    def uninstall_app(udid, bundle_id):
         BaseDevice(udid, Usbmux()).app_uninstall(bundle_id=bundle_id)
 
     @staticmethod
-    def ti_start_app(udid, bundle_id):
+    def start_app(udid, bundle_id):
         BaseDevice(udid, Usbmux()).app_start(bundle_id=bundle_id)
 
     @staticmethod
-    def ti_stop_app(udid, bundle_id):
+    def stop_app(udid, bundle_id):
         # Note: seems not work.
         BaseDevice(udid, Usbmux()).app_stop(pid_or_name=bundle_id)
 
     @staticmethod
-    def ti_ps(udid):
+    def ps(udid):
         with BaseDevice(udid, Usbmux()).connect_instruments() as ts:
             app_infos = list(BaseDevice(udid, Usbmux()).installation.iter_installed(app_type=None))
             ps = list(ts.app_process_list(app_infos))
@@ -222,21 +193,27 @@ class IOS(Device):
         # Wda driver, use to home, start app, click/swipe/close app/get wda size.
         # Init wda session, updata when start app.
         wda.DEBUG = False
-        self.udid = None
-        if self.addr != DEFAULT_ADDR:
+        # The three connection modes are determined by the addr.
+        # e.g., connect remote device http://10.227.70.247:20042
+        # e.g., connect local device http://127.0.0.1:8100 or http://localhost:8100 or http+usbmux://00008020-001270842E88002E
+        self.udid = udid
+        parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(self.addr).netloc
+        if self.addr != DEFAULT_ADDR and "." in parsed:
             # Connect remote device via url.
-            self.tidevice = TIDevice(is_local_device=False)
+            self.is_local_device = False
             self.driver = wda.Client(self.addr) 
         else:   
-            # Use tidevice to get WDA bundle ID and udid.
-            self.tidevice = TIDevice(is_local_device=True)
-            if not udid:
-                udid = self._get_default_device()
-            self.udid = udid
+            # Connect local device via url.
+            self.is_local_device = True
+            if parsed in ["localhost", "127.0.0.1"]:
+                if not udid:
+                    udid = self._get_default_device()
+                self.udid = udid
+            else:
+                self.udid = parsed
             if not wda_bundle_id:
                 self.wda_bundle_id = self._get_default_wda_bundle_id()
             self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
-
         # Record device's width and height.
         self._size = {'width': None, 'height': None}
         self._current_orientation = None
@@ -266,7 +243,7 @@ class IOS(Device):
         Returns:
             Local device udid.
         """
-        device_udid_list = self.tidevice.ti_devices()
+        device_udid_list = TIDevice.devices()
         if device_udid_list:
             return device_udid_list[0]
         raise IndexError("iOS devices not found, please connect device first.")
@@ -278,11 +255,11 @@ class IOS(Device):
             Local device's WDA bundleID.
         """ 
         try:
-            wda_list = self.tidevice.ti_list_wda(self.udid)
+            wda_list = TIDevice.list_wda(self.udid)
             return wda_list[0]
         except IndexError:
             raise IndexError("WDA bundleID not found, please install WDA on device.")
-
+        
     @property
     def ip(self):
         """Returns the IP address of the host connected to the iOS phone.
@@ -376,8 +353,12 @@ class IOS(Device):
             device_info = self.driver.info
             try:
                 # Add some device info.
-                tmp_dict = self.tidevice.ti_device_info(self.udid)
+                if not self.is_local_device:
+                    raise RuntimeError("Can noly use this method in local device now, not remote device.")
+                tmp_dict = TIDevice.device_info(self.udid)
                 device_info.update(tmp_dict)
+            except:
+                pass
             finally:
                 self._device_info = device_info
         return self._device_info
@@ -701,7 +682,9 @@ class IOS(Device):
         Returns:
             bundle ID        
         """
-        return self.tidevice.ti_install_app(self.udid, file_or_url)
+        if not self.is_local_device:
+            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+        return TIDevice.install_app(self.udid, file_or_url)
     
     def uninstall_app(self, bundle_id):
         """Uninstall app from the device.
@@ -712,7 +695,9 @@ class IOS(Device):
         Args:
             bundle_id: the app bundle id, e.g ``com.apple.mobilesafari``
         """
-        return self.tidevice.ti_uninstall_app(self.udid, bundle_id)
+        if not self.is_local_device:
+            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+        return TIDevice.uninstall_app(self.udid, bundle_id)
 
     def start_app(self, bundle_id):
         """
@@ -725,11 +710,19 @@ class IOS(Device):
         Examples:
             >>> start_app('com.apple.mobilesafari')
         """
-        return self.tidevice.ti_start_app(self.udid, bundle_id)
+        try:
+            if not self.is_local_device:
+                raise RuntimeError("Can noly use this method in local device now, not remote device.")
+            return TIDevice.start_app(self.udid, bundle_id)
+        except:
+            # Note: If the bundle_id does not exist, it may get stuck.
+            self.driver.app_launch(bundle_id)
     
     def stop_app(self, bundle_id):
         try:
-            self.tidevice.ti_stop_app(self.udid, bundle_id)
+            if not self.is_local_device:
+                raise RuntimeError("Can noly use this method in local device now, not remote device.")
+            TIDevice.stop_app(self.udid, bundle_id)
         finally:
             self.driver.app_stop(bundle_id=bundle_id)
 
@@ -742,7 +735,9 @@ class IOS(Device):
         Retruns:
             list of app
         """
-        return self.tidevice.ti_list_app(self.udid, type=type)
+        if not self.is_local_device:
+            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+        return TIDevice.list_app(self.udid, type=type)
 
     def app_state(self, bundle_id):
         """ Get app state and ruturn.
@@ -1055,11 +1050,11 @@ if __name__ == "__main__":
     # print(ios.device_status())
     # print(ios.get_ip_address())
 
-    d = IOS("http://10.227.70.214:20020")
+    d = IOS()
     # d = IOS()
     # print(d.using_ios_tagent)
     # print(d.udid)
-    # print(f"d.device_info:{d.device_info}")
+    print(f"d.device_info:{d.device_info}")
     # time.sleep(2)
     print(d.list_app(type="all"))
     # time.sleep(2)
@@ -1074,7 +1069,6 @@ if __name__ == "__main__":
     # print(d.install_app(r"C:\Users\baoxin02\Desktop\QQ.ipa"))
     # time.sleep(2)
     # print(d.uninstall_app("com.tencent.mqq"))
-
 
 
 
