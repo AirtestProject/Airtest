@@ -18,7 +18,7 @@ from pywinauto.win32functions import SetForegroundWindow
 from airtest.core.win.ctypesinput import key_press, key_release
 
 from airtest import aircv
-from airtest.aircv.screen_recorder import ScreenRecorder
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.core.device import Device
 from airtest.core.settings import Settings as ST
 from airtest.utils.logger import get_logger
@@ -509,27 +509,27 @@ class Windows(Device):
         hostname = socket.getfqdn()
         return socket.gethostbyname_ex(hostname)[2][0]
 
-    def start_recording(self, max_time=1800, output=None, fps=10, mode="ffmpeg",
-                        snapshot_sleep=0.001, orientation=0):
+    def start_recording(self, max_time=1800, output=None, fps=10,
+                        snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            mode: the backend write video, choose in ["ffmpeg", "cv2"]
+            mode: the backend write video, choose in ["ffmpeg"]
                 ffmpeg: ffmpeg-python backend, higher compression rate.
-                cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation.
+            max_size: max size of the video frame, e.g.800, default is None. Smaller sizes lead to lower system load.
 
         Returns:
             save_path: path of video file
 
         Examples:
 
-            Record 30 seconds of video and export to the current directory test.mp4::
+            Record 30 seconds of video and export to the current directory test.mp4:
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Windows:///")
@@ -537,6 +537,10 @@ class Windows(Device):
             >>> sleep(30)
             >>> dev.stop_recording()
             >>> print(save_path)
+
+            You can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", max_size=800)
 
         Note:
             1 Don't resize the app window duraing recording, the recording region will be limited by first frame.
@@ -566,8 +570,16 @@ class Windows(Device):
             else:
                 save_path = os.path.join(logdir, output)
 
+        max_size = get_max_size(max_size)
+        def get_frame():
+            frame = self.snapshot()
+            
+            if max_size is not None:
+                frame = resize_by_max(frame, max_size)
+            return frame
+
         self.recorder = ScreenRecorder(
-            save_path, self.snapshot, mode=mode, fps=fps,
+            save_path, get_frame, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()

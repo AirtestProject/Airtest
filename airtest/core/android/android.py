@@ -25,7 +25,7 @@ from airtest.core.android.touch_methods.minitouch import Minitouch  # noqa
 from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 from airtest.core.settings import Settings as ST
-from airtest.aircv.screen_recorder import ScreenRecorder
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -785,29 +785,31 @@ class Android(Device):
         return x, y, w, h
 
     def start_recording(self, max_time=1800, output=None, fps=10, mode="yosemite",
-                        snapshot_sleep=0.001, orientation=0, bit_rate_level=None, bit_rate=None):
+                        snapshot_sleep=0.001, orientation=0, bit_rate_level=None, 
+                        bit_rate=None, max_size=None, *args, **kwargs):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            mode: the backend write video, choose in ["ffmpeg", "cv2"]
-                yosemite: yosemite backend, higher quality.
-                ffmpeg: ffmpeg-python backend, higher compression rate.
-                cv2: cv2.VideoWriter backend, more stable.
+            mode: the backend write video, choose in ["ffmpeg", "yosemite"]
+                yosemite: (default method) High clarity but large file size and limited phone compatibility.
+                ffmpeg: Lower image quality but smaller files and better compatibility.
             fps: frames per second will record
-            snapshot_sleep: sleep time for each snapshot.
+            snapshot_sleep: (mode="ffmpeg" only) sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
-            bit_rate_level: bit_rate=resolution*level, 0 < level <= 5, default is 1
-            bit_rate: the higher the bitrate, the clearer the video
+            bit_rate_level: (mode="yosemite" only) bit_rate=resolution*level, 0 < level <= 5, default is 1
+            bit_rate: (mode="yosemite" only) the higher the bitrate, the clearer the video
+            max_size: (mode="ffmpeg" only) max size of the video frame, e.g.800, default is None.
+                      Smaller sizes lead to lower system load.
 
         Returns:
             save_path: path of video file
 
         Examples:
 
-            Record 30 seconds of video and export to the current directory test.mp4::
+            Record 30 seconds of video and export to the current directory test.mp4:
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("Android:///")
@@ -824,6 +826,10 @@ class Android(Device):
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
 
+            In ffmpeg mode, you can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", mode="ffmpeg", max_size=800)
+
         """
         logdir = "./"
         if ST.LOG_DIR is not None:
@@ -831,12 +837,9 @@ class Android(Device):
         if output is None:
             save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
-            if os.path.isabs(output):
-                save_path = output
-            else:
-                save_path = os.path.join(logdir, output)
+            save_path = output if os.path.isabs(output) else os.path.join(logdir, output)
         self.recorder_save_path = save_path
-        
+
         if mode == "yosemite":
             if self.yosemite_recorder.recording_proc != None:
                 LOGGING.warning(
@@ -848,7 +851,7 @@ class Android(Device):
                 if bit_rate_level > 5:
                     bit_rate_level = 5
                 bit_rate = self.display_info['width'] * \
-                    self.display_info['height'] * bit_rate_level
+                        self.display_info['height'] * bit_rate_level
 
             if orientation == 1:
                 bool_is_vertical = "true"
@@ -871,14 +874,18 @@ class Android(Device):
         if self.recorder and self.recorder.is_running():
             LOGGING.warning("recording is already running, please don't call again")
             return None
-        
+
+        max_size = get_max_size(max_size)
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
+
+            if max_size is not None:
+                frame = resize_by_max(frame, max_size)
             return frame
 
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=mode, fps=fps,
+            save_path, get_frame, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()

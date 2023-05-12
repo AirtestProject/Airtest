@@ -68,7 +68,7 @@ def get_platform_http_zip():
     """Return the download link for the current platform"""
     check_system()
     try:
-        MAIN_SIT = "https://github.com1/zackees/ffmpeg_bins"
+        MAIN_SIT = "https://github.com/zackees/ffmpeg_bins"
         r = requests.get(MAIN_SIT, timeout=10)
         r.raise_for_status()
         return MAIN_SIT + PLATFORM_ZIP_FILES[sys.platform]
@@ -86,7 +86,7 @@ def get_platform_dir():
 def download_file(url, local_path):
     """Downloads a file to the give path."""
     # NOTE the stream=True parameter below
-    print("Downloading %s -> %s"%(url, local_path))
+    print("Downloading and save to %s" % local_path)
     with requests.get(url, stream=True) as req:
         req.raise_for_status()
         with open(local_path, "wb") as file_d:
@@ -96,7 +96,7 @@ def download_file(url, local_path):
                 # if chunk:
                 # sys.stdout.write(".")
                 file_d.write(chunk)
-        print("Download of %s -> %s completed."%(url, local_path))
+        print("Download completed.")
     return local_path
 
 

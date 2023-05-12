@@ -1114,6 +1114,12 @@ class ADB(object):
         if m:
             return int(m.group(1))
 
+        displayFramesRE = re.compile(r"DisplayFrames.*r=(\d+)")
+        output = self.shell('dumpsys window displays')
+        m = displayFramesRE.search(output)
+        if m:
+            return int(m.group(1))
+
         # We couldn't obtain the orientation
         warnings.warn("Could not obtain the orientation, return 0")
         return 0

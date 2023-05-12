@@ -78,3 +78,54 @@ class TestAndroidRecorder(unittest.TestCase):
         self.android.recorder.pull_last_recording_file()
         self.assertTrue(os.path.exists(self.filepath))
 
+
+class TestAndroidFfmpegRecorder(unittest.TestCase):
+    """Test Android ffmpeg screen recording function"""
+    @classmethod
+    def setUpClass(cls):
+        cls.android = Android()
+
+    def tearDown(self):
+        try_remove("screen.mp4")
+
+    def test_recording(self):
+        save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", max_time=10)
+        time.sleep(10)
+        self.android.stop_recording()
+        self.assertTrue(os.path.exists(save_path))
+
+    def test_maxsize(self):
+        save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", max_time=10, max_size=720)
+        time.sleep(10)
+        self.android.stop_recording()
+        self.assertTrue(os.path.exists(save_path))
+
+    def test_maxsize_error(self):
+        for maxsize in [0, "test", "800*600"]:
+            save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", max_time=10, max_size=maxsize)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists(save_path))
+            try_remove(save_path)
+
+    def test_ori(self):
+        for ori in ["portrait", 1, "landscape", 2, 0]:
+            save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", orientation=ori)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists(save_path))
+
+    def test_ori_error(self):
+        # 当orientation不合法时，会自动使用0，即方形录制
+        for ori in ["p", "1"]:
+            save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", orientation=ori)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists(save_path))
+
+    def test_fps(self):
+        for fps in [1, 10, 30, 60]:
+            save_path = self.android.start_recording(mode='ffmpeg', output="screen.mp4", fps=fps)
+            time.sleep(10)
+            self.android.stop_recording()
+            self.assertTrue(os.path.exists(save_path))

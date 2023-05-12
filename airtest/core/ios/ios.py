@@ -18,7 +18,7 @@ from airtest.core.ios.instruct_cmd import InstructHelper
 from airtest.utils.logger import get_logger
 from airtest.core.ios.mjpeg_cap import MJpegcap
 from airtest.core.settings import Settings as ST
-from airtest.aircv.screen_recorder import ScreenRecorder
+from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 
 LOGGING = get_logger(__name__)
 
@@ -849,27 +849,25 @@ class IOS(Device):
         if self.rotation_watcher:
             self.rotation_watcher.teardown()
     
-    def start_recording(self, max_time=1800, output=None, fps=10, mode="ffmpeg",
-                        snapshot_sleep=0.001, orientation=0):
+    def start_recording(self, max_time=1800, output=None, fps=10,
+                        snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
         """
         Start recording the device display
 
         Args:
             max_time: maximum screen recording time, default is 1800
             output: ouput file path
-            mode: the backend write video, choose in ["ffmpeg", "cv2"]
-                ffmpeg: ffmpeg-python backend, higher compression rate.
-                cv2: cv2.VideoWriter backend, more stable.
             fps: frames per second will record
             snapshot_sleep: sleep time for each snapshot.
             orientation: 1: portrait, 2: landscape, 0: rotation, default is 0
+            max_size: max size of the video frame, e.g.800, default is None. Smaller sizes lead to lower system load.
 
         Returns:
             save_path: path of video file
 
         Examples:
 
-            Record 30 seconds of video and export to the current directory test.mp4::
+            Record 30 seconds of video and export to the current directory test.mp4:
 
             >>> from airtest.core.api import connect_device, sleep
             >>> dev = connect_device("IOS:///")
@@ -885,6 +883,10 @@ class IOS(Device):
 
             >>> # the screen is landscape
             >>> landscape_mp4 = dev.start_recording(output="landscape.mp4", orientation=2)  # or orientation="landscape"
+
+            You can specify max_size to limit the video's maximum width/length. Smaller video sizes result in lower CPU load.
+
+            >>> dev.start_recording(output="test.mp4", max_size=800)
 
         """
         if fps > 10 or fps < 1:
@@ -909,13 +911,17 @@ class IOS(Device):
             else:
                 save_path = os.path.join(logdir, output)
 
+        max_size = get_max_size(max_size)
         def get_frame():
             data = self.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
+            
+            if max_size is not None:
+                frame = resize_by_max(frame, max_size)
             return frame
 
         self.recorder = ScreenRecorder(
-            save_path, get_frame, mode=mode, fps=fps,
+            save_path, get_frame, fps=fps,
             snapshot_sleep=snapshot_sleep, orientation=orientation)
         self.recorder.stop_time = max_time
         self.recorder.start()
