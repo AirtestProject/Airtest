@@ -659,6 +659,23 @@ def find_all(v):
     return v.match_all_in(screen)
 
 
+@logwrap
+def get_clipboard(*args, **kwargs):
+    """
+    Get the content from the clipboard.
+
+    :return: str
+    """
+    return G.DEVICE.get_clipboard(*args, **kwargs)
+
+
+@logwrap
+def set_clipboard(content, *args, **kwargs):
+    """
+    Set the content from the clipboard.
+    """
+    G.DEVICE.set_clipboard(content, *args, **kwargs)
+
 """
 Assertions: see airtest/core/assertions.py
 """

@@ -23,8 +23,8 @@ class TestIos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
-        cls.ios = IOS()
-        connect_device("iOS:///http+usbmux://00008101-001945CE0081401E")
+        # cls.ios = IOS()
+        connect_device("iOS:///http+usbmux://10da21b9091f799891557004e4105ebab3416cb9")
 
     @classmethod
     def tearDownClass(cls):
@@ -161,6 +161,10 @@ class TestIos(unittest.TestCase):
         print("test_general_api")
         start_app(PKG_SAFARI)
         stop_app(PKG_SAFARI)
+        start_app("com.apple.mobilenotes")
+        set_clipboard("Legends never die.")
+        cliboard_text = get_clipboard()
+        self.assertEqual(cliboard_text, "Legends never die.")
 
     def test_stopapp(self):
         print("test_stopapp")
@@ -284,7 +288,6 @@ class TestIos(unittest.TestCase):
             duration = frame_num/rate
         self.assertEqual(duration >= 10, True)
         
-    # Test some functions about tidevice.
     def test_list_app(self):
         print("test_list_app")
         app_list = self.ios.list_app(type="all")
@@ -298,6 +301,15 @@ class TestIos(unittest.TestCase):
     def test_uninstall_app(self):
         print("test_uninstall_app")
         self.ios.uninstall_app(TEST_IPA_BUNDLE_ID)
+
+    def test_get_clipboard(self):
+        print("test_get_clipboard")
+        print(self.ios.get_clipboard())
+
+    def test_set_clipboard(self):
+        print("test_get_clipboard")
+        print(self.ios.set_clipboard("test"))      
+    
 
 if __name__ == '__main__':
     # unittest.main()

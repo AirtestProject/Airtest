@@ -163,6 +163,26 @@ class TIDevice:
         return ps_list
     
     @staticmethod
+    def ps_wda(udid):
+        """Get all running WDA on device that meet certain naming rules.
+
+        Returns:
+            List of running WDA bundleID.
+        """
+        with BaseDevice(udid, Usbmux()).connect_instruments() as ts:
+            app_infos = list(BaseDevice(udid, Usbmux()).installation.iter_installed(app_type=None))
+            ps = list(ts.app_process_list(app_infos))
+        ps_wda_list = []
+        for p in ps:
+            if not p['isApplication']:
+                continue
+            if ".xctrunner" in p['bundle_id'] or p['display_name'] == "WebDriverAgentRunner-Runner":
+                ps_wda_list.append(p['bundle_id'])
+            else:
+                continue
+        return ps_wda_list
+    
+    @staticmethod
     def xctest(udid, wda_bundle_id):
         return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
 
@@ -203,6 +223,7 @@ class IOS(Device):
         # e.g., connect remote device http://10.227.70.247:20042
         # e.g., connect local device http://127.0.0.1:8100 or http://localhost:8100 or http+usbmux://00008020-001270842E88002E
         self.udid = udid
+        self.wda_bundle_id = wda_bundle_id
         parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(self.addr).netloc
         if parsed not in ["localhost", "127.0.0.1"] and "." in parsed:
             # Connect remote device via url.
@@ -265,6 +286,18 @@ class IOS(Device):
             return wda_list[0]
         except IndexError:
             raise IndexError("WDA bundleID not found, please install WDA on device.")
+        
+    def _get_default_running_wda_bundle_id(self):
+        """Get the bundleID of the WDA that is currently running on local device.
+
+        Returns:
+            Local device's running WDA bundleID.
+        """ 
+        try:
+            running_wda_list = TIDevice.ps_wda(self.udid)
+            return running_wda_list[0]
+        except IndexError:
+            raise IndexError("Running WDA bundleID not found, please makesure WDA was started.")
         
     @property
     def ip(self):
@@ -672,7 +705,7 @@ class IOS(Device):
         if enter:
             text += '\n'
         self.driver.send_keys(text)
-
+        
     def install_app(self, file_or_url):
         """
         curl -X POST $JSON_HEADER \
@@ -717,10 +750,10 @@ class IOS(Device):
             >>> start_app('com.apple.mobilesafari')
         """
         if not self.is_local_device:
-            return TIDevice.start_app(self.udid, bundle_id)
-        else:
             # Note: If the bundle_id does not exist, it may get stuck.
             return self.driver.app_launch(bundle_id)
+        else:
+            return TIDevice.start_app(self.udid, bundle_id)
     
     def stop_app(self, bundle_id):
         """
@@ -778,6 +811,69 @@ class IOS(Device):
              "bundleId": "com.netease.cloudmusic"}
         """
         return self.driver.app_current()
+    
+    def get_clipboard(self, wda_bundle_id=None, *args, **kwargs):
+        """Get clipboard text.
+
+        Before calling the WDA interface, you need to ensure that WDA was foreground.  
+        If there are multiple WDA on your device, please specify the active WDA by parameter wda_bundle_id.
+        
+        Args:
+            wda_bundle_id: The bundle id of the running WDA, if None, will use default WDA bundle id.
+
+        Returns:
+            Clipboard text.
+
+        Notes:
+            If you want to use this function, you have to set WDA foreground which would switch the 
+            current screen of the phone. Then we will try to switch back to the screen before.
+        """
+        if wda_bundle_id is None:
+            if not self.is_local_device:
+                raise RuntimeError("Remote device need to set running wda bundle id parameter, \
+                                    e.g. get_clipboard('wda_bundle_id').")
+            wda_bundle_id = self._get_default_running_wda_bundle_id()
+        # Set wda foreground, it's necessary.
+        try:
+            current_app_bundle_id = self.app_current().get("bundleId", None)
+        except:
+            current_app_bundle_id = None
+        try:
+            self.driver.app_launch(wda_bundle_id)
+        except:
+            pass
+        clipboard_text = self.driver._session_http.post("/wda/getPasteboard").value
+        decoded_text = base64.b64decode(clipboard_text).decode('utf-8')
+        # Switch back to the screen before.
+        if current_app_bundle_id:
+            self.driver.app_launch(current_app_bundle_id)
+        else:
+            LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
+        return decoded_text
+    
+    def set_clipboard(self, content, wda_bundle_id=None, *args, **kwargs):
+        """Set clipboard text.
+        """
+        if wda_bundle_id is None:
+            if not self.is_local_device:
+                raise RuntimeError("Remote device need to set running wda bundle id parameter, \
+                                    e.g. set_clipboard('content', 'wda_bundle_id').")
+            wda_bundle_id = self._get_default_running_wda_bundle_id()
+        # Set wda foreground, it's necessary.
+        try:
+            current_app_bundle_id = self.app_current().get("bundleId", None)
+        except:
+            current_app_bundle_id = None
+        try:
+            self.driver.app_launch(wda_bundle_id)
+        except:
+            pass
+        self.driver.set_clipboard(content)
+        # Switch back to the screen before.
+        if current_app_bundle_id:
+            self.driver.app_launch(current_app_bundle_id)
+        else:
+            LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
 
     def get_ip_address(self):
         """Get ip address from WDA.
