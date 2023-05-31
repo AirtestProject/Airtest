@@ -14,6 +14,7 @@ from functools import wraps
 from urllib.parse import urlparse
 from tidevice._usbmux import Usbmux
 from tidevice._device import BaseDevice
+from tidevice._proto import MODELS
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -130,6 +131,10 @@ class TIDevice:
             key = attr[0].lower() + attr[1:]
             if attr in device_info:
                 tmp_dict[key] = device_info[attr]
+        try:
+            tmp_dict["marketName"] = MODELS.get(device_info['ProductType'])
+        except:
+            pass
         return tmp_dict
     
     @staticmethod
