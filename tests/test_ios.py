@@ -23,8 +23,8 @@ class TestIos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
-        # cls.ios = IOS()
-        connect_device("iOS:///http+usbmux://10da21b9091f799891557004e4105ebab3416cb9")
+        cls.ios = IOS()
+        # connect_device("iOS:///http+usbmux://10da21b9091f799891557004e4105ebab3416cb9")
 
     @classmethod
     def tearDownClass(cls):
@@ -307,8 +307,8 @@ class TestIos(unittest.TestCase):
         print(self.ios.get_clipboard())
 
     def test_set_clipboard(self):
-        print("test_get_clipboard")
-        print(self.ios.set_clipboard("test"))      
+        print("test_set_clipboard")
+        print(self.ios.set_clipboard("test"))    
     
 
 if __name__ == '__main__':
