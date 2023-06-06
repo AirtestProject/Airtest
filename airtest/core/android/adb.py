@@ -1220,6 +1220,7 @@ class ADB(object):
                 return m.group(1) == 'SCREEN_STATE_ON'
         raise AirtestError("Couldn't determine screen ON state")
 
+    @retries(max_tries=3)
     def is_locked(self):
         """
         Perform `adb shell dumpsys window policy` command and search for information if screen is locked or not
