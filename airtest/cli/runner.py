@@ -156,4 +156,6 @@ def run_script(parsed_args, testcase_cls=AirtestCase):
     suite.addTest(testcase_cls())
     result = unittest.TextTestRunner(verbosity=0).run(suite)
     if not result.wasSuccessful():
+        if result.failures and "AssertionError" in repr(result.failures):
+            sys.exit(20)
         sys.exit(-1)
