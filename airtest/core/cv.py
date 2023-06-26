@@ -84,6 +84,7 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
 
 
 @logwrap
+@ensure_device
 def try_log_screen(screen=None, quality=None, max_size=None):
     """
     Save screenshot to file
