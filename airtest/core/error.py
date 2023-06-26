@@ -70,6 +70,9 @@ class DeviceConnectionError(BaseError):
     DEVICE_CONNECTION_ERROR = r"error:\s*((device \'\S+\' not found)|(cannot connect to daemon at [\w\:\s\.]+ Connection timed out))"
     pass
 
+class NoDeviceError(BaseError):
+    pass
+
 
 class ICmdError(Exception):
     """
