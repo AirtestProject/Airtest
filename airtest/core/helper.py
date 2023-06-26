@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
-import time
-import sys
+import functools
 import os
 import six
+import sys
+import time
 import traceback
 from airtest.core.settings import Settings as ST
-from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.utils.logger import get_logger
+from airtest.utils.logwraper import Logwrap, AirtestLogger
 
+def ensure_device(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if G.DEVICE is None:
+            raise NoDeviceError("No devices added.")
+        return func(*args, **kwargs)
+    return wrapper
 
 class G(object):
     """Represent the globals variables"""
