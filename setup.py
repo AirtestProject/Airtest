@@ -37,6 +37,9 @@ def parse_requirements(filename):
         reqs.remove("facebook-wda>=1.3.3")
         reqs.remove("mss==6.1.0")
         reqs.append("mss==4.0.3")
+    # if py<=3.6 add dataclasses
+    if sys.version_info.major == 3 and sys.version_info.minor <= 6:
+        reqs.append("dataclasses")
     return reqs
 
 
