@@ -509,7 +509,15 @@ class Windows(Device):
              :py:obj:`str`: ip address
         """
         hostname = socket.getfqdn()
-        return socket.gethostbyname_ex(hostname)[2][0]
+        try:
+            return socket.gethostbyname_ex(hostname)[2][0]
+        except socket.gaierror:
+            import psutil
+            for _, addrs in psutil.net_if_addrs().items():
+                for addr in addrs:
+                    if addr.family == socket.AF_INET and not addr.address.startswith('169.254'):
+                        return addr.address
+
 
     def start_recording(self, max_time=1800, output=None, fps=10,
                         snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
