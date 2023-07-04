@@ -71,6 +71,9 @@ class DeviceConnectionError(BaseError):
     pass
 
 class NoDeviceError(BaseError):
+    """
+        When no device is connected
+    """
     pass
 
 
