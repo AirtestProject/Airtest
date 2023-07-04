@@ -8,22 +8,30 @@ import traceback
 from airtest.core.settings import Settings as ST
 from airtest.utils.logger import get_logger
 from airtest.utils.logwraper import Logwrap, AirtestLogger
+from airtest.core.error import NoDeviceError
 
-def ensure_device(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if G.DEVICE is None:
+
+class DeviceMetaProperty(type):
+
+    @property
+    def DEVICE(cls):
+        if G._DEVICE is None:
             raise NoDeviceError("No devices added.")
-        return func(*args, **kwargs)
-    return wrapper
+        return G._DEVICE
 
-class G(object):
+    @DEVICE.setter
+    def DEVICE(self, dev):
+        self._DEVICE = dev
+        self.LOGGING.debug("Set current device to: %s" % dev)
+
+
+class G(object, metaclass=DeviceMetaProperty):
     """Represent the globals variables"""
     BASEDIR = []
     LOGGER = AirtestLogger(None)
     LOGGING = get_logger("airtest.core.api")
     SCREEN = None
-    DEVICE = None
+    _DEVICE = None
     DEVICE_LIST = []
     RECENT_CAPTURE = None
     RECENT_CAPTURE_PATH = None

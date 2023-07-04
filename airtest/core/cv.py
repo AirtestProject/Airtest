@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from airtest import aircv
 from airtest.aircv import cv2
-from airtest.core.helper import G, logwrap, ensure_device
+from airtest.core.helper import G, logwrap
 from airtest.core.settings import Settings as ST  # noqa
 from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
@@ -37,7 +37,6 @@ MATCHING_METHODS = {
 
 
 @logwrap
-@ensure_device
 def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, intervalfunc=None):
     """
     Search for image template in the screen until timeout
@@ -84,7 +83,6 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
 
 
 @logwrap
-@ensure_device
 def try_log_screen(screen=None, quality=None, max_size=None):
     """
     Save screenshot to file
