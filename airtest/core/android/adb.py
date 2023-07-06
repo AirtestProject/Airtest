@@ -1589,7 +1589,7 @@ class ADB(object):
         res = self.shell("cat /proc/cpuinfo").strip()
         cpuNum = res.count("processor")
         pat = re.compile(r'Hardware\s+:\s+(\w+.*)')
-        m = pat.match(res)
+        m = pat.search(res)
         if not m:
             pat = re.compile(r'Processor\s+:\s+(\w+.*)')
             m = pat.match(res)
