@@ -6,6 +6,16 @@ airtest.core.api module
     :undoc-members:
     :show-inheritance:
 
+Some useful functions
+=====================
+
+.. autofunction:: airtest.core.helper.using
+
+.. autofunction:: airtest.core.helper.log
+
+.. autofunction:: airtest.core.helper.logwrap
+
+
 Assertions in airtest
 ======================
 
