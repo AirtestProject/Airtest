@@ -21,9 +21,8 @@ class DeviceMetaProperty(type):
         return G._DEVICE
 
     @DEVICE.setter
-    def DEVICE(self, dev):
-        self._DEVICE = dev
-        self.LOGGING.debug("Set current device to: %s" % dev)
+    def DEVICE(cls, dev):
+        cls._DEVICE = dev
 
 
 class G(object, metaclass=DeviceMetaProperty):
