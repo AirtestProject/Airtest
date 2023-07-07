@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-import time
-import sys
 import os
 import six
+import sys
+import time
 import inspect
 import traceback
 from airtest.core.settings import Settings as ST
-from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.utils.logger import get_logger
+from airtest.utils.logwraper import Logwrap, AirtestLogger
 from airtest.core.error import NoDeviceError
 
 

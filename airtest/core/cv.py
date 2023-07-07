@@ -14,7 +14,7 @@ from airtest import aircv
 from airtest.aircv import cv2
 from airtest.core.helper import G, logwrap
 from airtest.core.settings import Settings as ST  # noqa
-from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError, NoDeviceError
+from airtest.core.error import TargetNotFoundError, InvalidMatchingMethodError
 from airtest.utils.transform import TargetPos
 
 from airtest.aircv.template_matching import TemplateMatching
@@ -56,10 +56,6 @@ def loop_find(query, timeout=ST.FIND_TIMEOUT, threshold=None, interval=0.5, inte
         been found in screenshot
 
     """
-
-    if G.DEVICE is None:
-        raise NoDeviceError("No devices added / connected.")
-
     G.LOGGING.info("Try finding: %s", query)
     start_time = time.time()
     while True:

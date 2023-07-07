@@ -14,9 +14,8 @@ from airtest.utils.safesocket import SafeSocket
 from airtest.utils.snippet import reg_cleanup, on_method_ready, ready_method, kill_proc
 from airtest.utils.threadsafe import threadsafe_generator
 from airtest.core.android.cap_methods.base_cap import BaseCap
-from airtest.core.error import ScreenError
 from airtest import aircv
-
+from airtest.core.error import ScreenError
 
 LOGGING = get_logger(__name__)
 
