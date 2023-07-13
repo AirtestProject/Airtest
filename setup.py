@@ -1,8 +1,6 @@
 import os
 import sys
 import codecs
-import platform
-import pkg_resources
 from setuptools import setup, find_packages
 
 
@@ -28,15 +26,6 @@ def parse_requirements(filename):
     reqs = [line for line in lineiter if line and not line.startswith("#")]
     if sys.platform == "win32":
         reqs.append('pywin32')
-    if sys.version_info.major == 2:
-        if "opencv-contrib-python" not in [d.project_name for d in pkg_resources.working_set]:
-            # If py<=2 and opencv-contrib-python has not been installed, install version==3.2.0.7
-            reqs.remove("opencv-contrib-python>=4.4.0.46")
-            reqs.append("opencv-contrib-python==3.2.0.7")
-        # facebook-wda only supports py3
-        reqs.remove("facebook-wda>=1.3.3")
-        reqs.remove("mss==6.1.0")
-        reqs.append("mss==4.0.3")
     # if py<=3.6 add dataclasses
     if sys.version_info.major == 3 and sys.version_info.minor <= 6:
         reqs.append("dataclasses")
@@ -47,7 +36,7 @@ setup(
     name='airtest',
     version=get_version("airtest/utils/version.py"),
     author='Netease Games',
-    author_email='gzliuxin@corp.netease.com',
+    author_email='rockywhisper@163.com',
     description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows/Linux',
     long_description='UI Test Automation Framework for Games and Apps on Android/iOS/Windows, present by NetEase Games',
     url='https://github.com/AirtestProject/Airtest',
@@ -76,7 +65,6 @@ setup(
     airtest = airtest.cli.__main__:main
     """,
     classifiers=[
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',

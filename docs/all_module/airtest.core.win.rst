@@ -13,7 +13,5 @@ Submodules
 
 .. toctree::
 
-   airtest.core.win.ctypesinput
-   airtest.core.win.screen
    airtest.core.win.win
-
+   airtest.core.win.ctypesinput
