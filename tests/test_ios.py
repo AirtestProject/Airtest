@@ -23,8 +23,7 @@ class TestIos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
-        cls.ios = IOS()
-        # connect_device("iOS:///http+usbmux://10da21b9091f799891557004e4105ebab3416cb9")
+        cls.ios = connect_device("iOS:///http+usbmux://")
 
     @classmethod
     def tearDownClass(cls):

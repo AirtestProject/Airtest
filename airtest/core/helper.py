@@ -181,9 +181,9 @@ def using(path):
     Import a function from another .air script, the ``using`` interface will find the image path from the imported function.
 
     Args:
-        path: relative or absolute. This function transforms a given relative path, searching in the project root,
-        current working directory, or the current script's directory, into an absolute path
-        and adds it to the sys.path and G.BASEDIR.
+        path: relative or absolute. This function transforms a given relative path, searching in the project root, \
+        current working directory, or the current script's directory, into an absolute path \
+         and adds it to the sys.path and G.BASEDIR.
 
     Returns:
 
