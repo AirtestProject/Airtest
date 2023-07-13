@@ -3,6 +3,7 @@
 
 import os
 import re
+import sys
 import wda
 import time
 import base64
@@ -15,6 +16,7 @@ from urllib.parse import urlparse
 from tidevice._usbmux import Usbmux
 from tidevice._device import BaseDevice
 from tidevice._proto import MODELS
+from tidevice.exceptions import MuxError
 
 from airtest import aircv
 from airtest.core.device import Device
@@ -55,21 +57,46 @@ def decorator_retry_session(func):
     return wrapper
 
 
-def decorator_for_class(cls):
+def decorator_pairing_dialog(func):
     """
-    Add decorators to all methods in the class.
-
-    为class里的所有method添加装饰器。
+    When the device is not paired, trigger the trust dialogue and try again.
     """
-    for name, method in inspect.getmembers(cls):
-        # Ignore built-in methods and private methods named _xxx.
-        # 忽略内置方法和下划线开头命名的私有方法 _xxx。
-        if (not inspect.ismethod(method) and not inspect.isfunction(method)) \
-                or inspect.isbuiltin(method) or name.startswith("_"):
-            continue
-        setattr(cls, name, decorator_retry_session(method))
-    return cls
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except MuxError:
+            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + \
+                          "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
+            raise
+    return wrapper
 
+
+def add_decorator_to_methods(decorator):
+    """
+    This function takes a decorator as input and returns a decorator wrapper function. \
+    The decorator wrapper function takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
+
+    Parameters:
+        - decorator: A decorator function that will be applied to the methods of the input class.
+
+    Returns:
+        - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class \
+        by applying the input decorator to each method.
+    """
+    def decorator_wrapper(cls):
+        # 获取要装饰的类的所有方法
+        methods = [attr for attr in dir(cls) if callable(getattr(cls, attr)) and not attr.startswith("_")]
+
+        # 为每个方法添加装饰器
+        for method in methods:
+            setattr(cls, method, decorator(getattr(cls, method)))
+
+        return cls
+    return decorator_wrapper
+
+
+@add_decorator_to_methods(decorator_pairing_dialog)
 class TIDevice:
     """Below staticmethods are provided by Tidevice.
     """
@@ -80,12 +107,25 @@ class TIDevice:
         return Usbmux().device_udid_list()
     
     @staticmethod
-    def list_app(udid, type="user"):
+    def list_app(udid, app_type="user"):
+        """
+        Returns a list of installed applications on the device.
+
+        Args:
+            udid (str): The unique identifier of the device.
+            app_type (str, optional): The type of applications to list. Defaults to "user".
+                Possible values are "user", "system", or "all".
+
+        Returns:
+            list: A list of tuples containing the bundle ID, display name,
+                and version of the installed applications.
+            e.g. [('com.apple.mobilesafari', 'Safari', '8.0'), ...]
+        """
         app_type = {
             "user": "User",
             "system": "System",
             "all": None,
-        }[type]
+        }.get(app_type.lower(), None)
         app_list = []
         for info in BaseDevice(udid, Usbmux()).installation.iter_installed(app_type=app_type):
             bundle_id = info['CFBundleIdentifier']
@@ -114,6 +154,24 @@ class TIDevice:
     
     @staticmethod
     def device_info(udid):
+        """
+        Retrieves device information based on the provided UDID.
+
+        Args:
+            udid (str): The unique device identifier.
+
+        Returns:
+            dict: A dictionary containing selected device information. The keys include:
+                - productVersion (str): The version of the product.
+                - productType (str): The type of the product.
+                - modelNumber (str): The model number of the device.
+                - serialNumber (str): The serial number of the device.
+                - phoneNumber (str): The phone number associated with the device.
+                - timeZone (str): The time zone of the device.
+                - uniqueDeviceID (str): The unique identifier of the device.
+                - marketName (str): The market name of the device.
+
+        """
         device_info = BaseDevice(udid, Usbmux()).device_info()
         tmp_dict = {}
         # chose some useful device info from tidevice
@@ -134,7 +192,7 @@ class TIDevice:
         try:
             tmp_dict["marketName"] = MODELS.get(device_info['ProductType'])
         except:
-            pass
+            tmp_dict["marketName"] = ""
         return tmp_dict
     
     @staticmethod
@@ -192,7 +250,7 @@ class TIDevice:
         return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
 
 
-@decorator_for_class
+@add_decorator_to_methods(decorator_retry_session)
 class IOS(Device):
     """IOS client.
 
@@ -775,13 +833,17 @@ class IOS(Device):
             self.driver.app_stop(bundle_id=bundle_id)
 
     def list_app(self, type="user"):
-        """List app in device.
-        
-        Args:
-            type: user/system/all filter app types
+        """
+        Returns a list of installed applications on the device.
 
-        Retruns:
-            list of app
+        Args:
+            type (str, optional): The type of applications to list. Defaults to "user".
+                Possible values are "user", "system", or "all".
+
+        Returns:
+            list: A list of tuples containing the bundle ID, display name,
+                and version of the installed applications.
+            e.g. [('com.apple.mobilesafari', 'Safari', '8.0'), ...]
         """
         if not self.is_local_device:
             raise RuntimeError("Can noly use this method in local device now, not remote device.")
@@ -857,7 +919,18 @@ class IOS(Device):
         return decoded_text
     
     def set_clipboard(self, content, wda_bundle_id=None, *args, **kwargs):
-        """Set clipboard text.
+        """
+        Set the clipboard content on the device.
+
+        Args:
+            content (str): The content to be set on the clipboard.
+            wda_bundle_id (str, optional): The bundle ID of the WDA app. Defaults to None.
+
+        Raises:
+            RuntimeError: If the device is remote and the wda_bundle_id parameter is not provided.
+
+        Returns:
+            None
         """
         if wda_bundle_id is None:
             if not self.is_local_device:
