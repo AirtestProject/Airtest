@@ -20,6 +20,7 @@ from airtest.utils.compat import decode_path, raisefrom, proc_communicate_timeou
 from airtest.utils.logger import get_logger
 from airtest.utils.nbsp import NonBlockingStreamReader
 from airtest.utils.retry import retries
+from airtest.utils.apkparser import APK
 from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd, make_file_executable
 
 LOGGING = get_logger(__name__)
@@ -620,7 +621,21 @@ class ADB(object):
         if replace:
             install_options.append("-r")
         cmds = ["install", ] + install_options + [filepath, ]
-        out = self.cmd(cmds)
+        try:
+            out = self.cmd(cmds)
+        except AdbError as e:
+            out = repr(e.stderr) + repr(e.stdout)
+            # If the signatures are inconsistent, uninstall the old version first
+            if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in out and replace:
+                try:
+                    package_name = re.search(r"package (.*?) .*", out).group(1)
+                except:
+                    # get package name
+                    package_name = APK(filepath).get_package()
+                self.uninstall_app(package_name)
+                out = self.cmd(cmds)
+            else:
+                raise
 
         if re.search(r"Failure \[.*?\]", out):
             raise AdbShellError("Installation Failure", repr(out))
@@ -716,8 +731,19 @@ class ADB(object):
         try:
             cmds = ["pm", "install", ] + install_options + [device_path]
             self.shell(cmds)
-        except:
-            raise
+        except AdbError as e:
+            out = repr(e.stderr) + repr(e.stdout)
+            # If the signatures are inconsistent, uninstall the old version first
+            if re.search(r"INSTALL_FAILED_UPDATE_INCOMPATIBLE", out):
+                try:
+                    package_name = re.search(r"package (.*?) .*", out).group(1)
+                except:
+                    # get package name
+                    package_name = APK(filepath).get_package()
+                self.uninstall_app(package_name)
+                out = self.shell(cmds)
+            else:
+                raise
         finally:
             # delete apk file
             self.cmd(["shell", "rm", device_path], timeout=30)
