@@ -21,12 +21,12 @@ Submodules
 
 .. toctree::
 
-   airtest.core.android.adb
    airtest.core.android.android
+   airtest.core.android.adb
    airtest.core.android.constant
    airtest.core.android.ime
-   airtest.core.android.javacap
-   airtest.core.android.minicap
+   airtest.core.android.cap_methods.javacap
+   airtest.core.android.cap_methods.minicap
    airtest.core.android.recorder
    airtest.core.android.rotation
    airtest.core.android.yosemite

@@ -4,6 +4,7 @@ import os
 import six
 import sys
 import time
+import inspect
 import traceback
 from airtest.core.settings import Settings as ST
 from airtest.utils.logger import get_logger
@@ -20,9 +21,8 @@ class DeviceMetaProperty(type):
         return G._DEVICE
 
     @DEVICE.setter
-    def DEVICE(self, dev):
-        self._DEVICE = dev
-        self.LOGGING.debug("Set current device to: %s" % dev)
+    def DEVICE(cls, dev):
+        cls._DEVICE = dev
 
 
 class G(object, metaclass=DeviceMetaProperty):
@@ -148,6 +148,25 @@ def log(arg, timestamp=None, desc="", snapshot=False):
 
 
 def logwrap(f):
+    """
+    A decorator used to add the current function to the airtest log,
+    which can be seen on the report html page
+
+    Args:
+        f: The function being decorated
+
+    Returns:
+        The decorated function
+
+    Examples:
+
+        Add foo() to the airtest report html page::
+
+            @logwrap
+            def foo():
+                pass
+
+    """
     return Logwrap(f, G.LOGGER)
 
 
@@ -158,10 +177,60 @@ def device_platform(device=None):
 
 
 def using(path):
+    """
+    Import a function from another .air script, the ``using`` interface will find the image path from the imported function.
+
+    Args:
+        path: relative or absolute. This function transforms a given relative path, searching in the project root, \
+        current working directory, or the current script's directory, into an absolute path \
+         and adds it to the sys.path and G.BASEDIR.
+
+    Returns:
+
+    Examples:
+
+        Suppose our project structure is as follows::
+
+            demo/
+                foo/
+                    bar.air
+                baz.air
+                main.py
+
+        If we want to reference foo/bar.air and baz.air in main.py, we can write::
+
+            # main.py
+            from airtest.core.api import *
+            ST.PROJECT_ROOT = r"D:\demo"  # This line can be ignored if it is the current working directory
+            using("foo/bar.air")
+            using("baz.air")
+
+        If we want to reference baz.air in foo/bar.air, we can write::
+
+            # foo/bar.air
+            from airtest.core.api import *
+            using("../baz.air")
+
+    """
     if not os.path.isabs(path):
-        abspath = os.path.join(ST.PROJECT_ROOT, path)
-        if os.path.exists(abspath):
-            path = abspath
+        # if path is relative, try to find it in project root
+        # e.g. path: PROJECT_ROOT/foo/bar.air, using("foo/bar.air")
+        if os.path.exists(os.path.join(ST.PROJECT_ROOT, path)):
+            path = os.path.join(ST.PROJECT_ROOT, path)
+        # try to find it in current working directory
+        # e.g. path: CWD/foo/bar.air, using("foo/bar.air")
+        elif os.path.exists(os.path.join(os.getcwd(), path)):
+            path = os.path.abspath(os.path.join(os.getcwd(), path))
+        else:
+            # try to find it relative to the current script
+            # e.g. path: foo/bar1.air, foo/bar2.air, in bar1.air: using("../bar2.air")
+            script_path = os.path.abspath(inspect.stack()[1].filename)
+            script_dir = os.path.dirname(script_path)
+            if os.path.exists(os.path.join(script_dir, path)):
+                path = os.path.abspath(os.path.join(script_dir, path))
+            elif os.path.exists(os.path.join(script_path, path)):
+                path = os.path.abspath(os.path.join(script_path, path))
+
     G.LOGGING.debug("using path: %s", path)
     if path not in sys.path:
         sys.path.append(path)

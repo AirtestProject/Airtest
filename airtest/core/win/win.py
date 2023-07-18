@@ -13,7 +13,6 @@ import os
 from pywinauto.application import Application
 from pywinauto import mouse, keyboard
 from pywinauto.win32structures import RECT
-from pywinauto.win32functions import SetForegroundWindow
 
 from airtest.core.win.ctypesinput import key_press, key_release
 
@@ -276,7 +275,7 @@ class Windows(Device):
         coords = self._action_pos(pos)
         self.mouse.double_click(coords=coords)
 
-    def swipe(self, p1, p2, duration=0.8, steps=5):
+    def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
         """
         Perform swipe (mouse press and mouse release)
 
@@ -285,6 +284,7 @@ class Windows(Device):
             p2: end point
             duration: time interval to perform the swipe action
             steps: size of the swipe step
+            button: mouse button to press, 'left', 'right' or 'middle', default is 'left'
 
         Returns:
             None
@@ -298,7 +298,7 @@ class Windows(Device):
         to_x, to_y = self._action_pos(p2)
 
         interval = float(duration) / (steps + 1)
-        self.mouse.press(coords=(from_x, from_y))
+        self.mouse.press(coords=(from_x, from_y), button=button)
         time.sleep(interval)
         for i in range(1, steps):
             self.mouse.move(coords=(
@@ -309,7 +309,7 @@ class Windows(Device):
         for i in range(10):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
-        self.mouse.release(coords=(to_x, to_y))
+        self.mouse.release(coords=(to_x, to_y), button=button)
 
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
@@ -394,7 +394,9 @@ class Windows(Device):
             None
 
         """
-        SetForegroundWindow(self._top_window)
+        self._top_window.set_focus()
+
+    set_focus = set_foreground
 
     def get_rect(self):
         """
@@ -507,7 +509,15 @@ class Windows(Device):
              :py:obj:`str`: ip address
         """
         hostname = socket.getfqdn()
-        return socket.gethostbyname_ex(hostname)[2][0]
+        try:
+            return socket.gethostbyname_ex(hostname)[2][0]
+        except socket.gaierror:
+            import psutil
+            for _, addrs in psutil.net_if_addrs().items():
+                for addr in addrs:
+                    if addr.family == socket.AF_INET and not addr.address.startswith('169.254'):
+                        return addr.address
+
 
     def start_recording(self, max_time=1800, output=None, fps=10,
                         snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):

@@ -230,11 +230,15 @@ def install(filepath, **kwargs):
     :param filepath: the path to file to be installed on target device
     :param kwargs: platform specific `kwargs`, please refer to corresponding docs
     :return: None
-    :platforms: Android
+    :platforms: Android, iOS
     :Example:
-        >>> install(r"D:\\demo\\test.apk")
+        >>> install(r"D:\\demo\\test.apk")  # install Android apk
         >>> # adb install -r -t D:\\demo\\test.apk
         >>> install(r"D:\\demo\\test.apk", install_options=["-r", "-t"])
+
+        >>> install(r"D:\\demo\\test.ipa") # install iOS ipa
+        >>> install("http://www.example.com/test.ipa") # install iOS ipa from url
+
     """
     return G.DEVICE.install_app(filepath, **kwargs)
 
@@ -246,7 +250,7 @@ def uninstall(package):
 
     :param package: name of the package, see also `start_app`
     :return: None
-    :platforms: Android
+    :platforms: Android, iOS
     :Example:
         >>> uninstall("com.netease.cloudmusic")
     """
@@ -658,6 +662,37 @@ def find_all(v):
     screen = G.DEVICE.snapshot(quality=ST.SNAPSHOT_QUALITY)
     return v.match_all_in(screen)
 
+
+@logwrap
+def get_clipboard(*args, **kwargs):
+    """
+    Get the content from the clipboard.
+
+    :return: str
+    :platforms: iOS
+    :Example:
+
+        >>> text = get_clipboard(wda_bundle_id="com.WebDriverAgentRunner.xctrunner")  # iOS
+        >>> print(text)
+
+    """
+    return G.DEVICE.get_clipboard(*args, **kwargs)
+
+
+@logwrap
+def set_clipboard(content, *args, **kwargs):
+    """
+    Set the content from the clipboard.
+
+    :param content: str
+    :return: None
+    :platforms: iOS
+    :Example:
+
+        >>> set_clipboard("content", wda_bundle_id="com.WebDriverAgentRunner.xctrunner")  # iOS
+
+    """
+    G.DEVICE.set_clipboard(content, *args, **kwargs)
 
 """
 Assertions: see airtest/core/assertions.py
