@@ -584,9 +584,11 @@ class ADB(object):
         try:
             self.cmd(cmds)
         except AdbError as e:
-            # ignore if already removed
-            if "not found" in e.stdout:
+            # ignore if already removed or disconnected
+            if "not found" in (repr(e.stdout) + repr(e.stderr)):
                 pass
+        except DeviceConnectionError:
+            pass
         # unregister for cleanup
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
