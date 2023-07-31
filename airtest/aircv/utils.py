@@ -100,7 +100,7 @@ def compress_image(pil_img, path, quality, max_size=None):
     """
     if max_size:
         # The picture will be saved in a size <= max_size*max_size
-        pil_img.thumbnail((max_size, max_size), Image.ANTIALIAS)
+        pil_img.thumbnail((max_size, max_size), Image.LANCZOS)
     quality = int(round(quality))
     if quality <= 0 or quality >= 100:
         raise Exception("SNAPSHOT_QUALITY (" + str(quality) + ") should be an integer in the range [1,99]")
