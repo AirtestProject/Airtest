@@ -25,12 +25,15 @@ class TIDeviceTests(unittest.TestCase):
         if len(app_list) > 0:
             self.assertEqual(len(app_list[0]), 3)
 
-    def test_list_app_system(self):
+    def test_list_app_type(self):
         app_list = TIDevice.list_app(self.udid, app_type='system')
         print(app_list)
         self.assertIsInstance(app_list, list)
         if len(app_list) > 0:
             self.assertEqual(len(app_list[0]), 3)
+
+        app_list_all = TIDevice.list_app(self.udid, app_type='all')
+        self.assertGreater(len(app_list_all), len(app_list))
 
     def test_list_wda(self):
         wda_list = TIDevice.list_wda(self.udid)
@@ -47,6 +50,11 @@ class TIDeviceTests(unittest.TestCase):
 
     def test_stop_app(self):
         TIDevice.stop_app(self.udid, "com.apple.mobilesafari")
+
+    def test_ps(self):
+        ps = TIDevice.ps(self.udid)
+        print(ps)
+        self.assertIsInstance(ps, list)
 
     def test_ps_wda(self):
         ps_wda = TIDevice.ps_wda(self.udid)

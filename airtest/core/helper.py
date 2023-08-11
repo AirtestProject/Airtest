@@ -197,7 +197,8 @@ def using(path):
                 baz.air
                 main.py
 
-        If we want to reference foo/bar.air and baz.air in main.py, we can write::
+        If we want to reference `foo/bar.air` and `baz.air` in main.py, we can set the project root path to ``ST.PROJECT_ROOT``, \
+        or make sure the project root path is the `current working directory`. We can write::
 
             # main.py
             from airtest.core.api import *
@@ -205,7 +206,7 @@ def using(path):
             using("foo/bar.air")
             using("baz.air")
 
-        If we want to reference baz.air in foo/bar.air, we can write::
+        If we want to reference `baz.air` in `foo/bar.air`, we can write::
 
             # foo/bar.air
             from airtest.core.api import *

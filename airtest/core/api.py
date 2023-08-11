@@ -232,11 +232,11 @@ def install(filepath, **kwargs):
     :return: None
     :platforms: Android, iOS
     :Example:
-        >>> install(r"D:\\demo\\test.apk")  # install Android apk
+        >>> install(r"D:\demo\test.apk")  # install Android apk
         >>> # adb install -r -t D:\\demo\\test.apk
-        >>> install(r"D:\\demo\\test.apk", install_options=["-r", "-t"])
+        >>> install(r"D:\demo\test.apk", install_options=["-r", "-t"])
 
-        >>> install(r"D:\\demo\\test.ipa") # install iOS ipa
+        >>> install(r"D:\demo\test.ipa") # install iOS ipa
         >>> install("http://www.example.com/test.ipa") # install iOS ipa from url
 
     """
@@ -672,7 +672,11 @@ def get_clipboard(*args, **kwargs):
     :platforms: iOS
     :Example:
 
-        >>> text = get_clipboard(wda_bundle_id="com.WebDriverAgentRunner.xctrunner")  # iOS
+        >>> text = get_clipboard()  # local iOS
+        >>> print(text)
+
+        >>> # When the iOS device is a remote device, or more than one wda is installed on the device, you need to specify the wda_bundle_id
+        >>> text = get_clipboard(wda_bundle_id="com.WebDriverAgentRunner.xctrunner")
         >>> print(text)
 
     """
@@ -689,7 +693,10 @@ def set_clipboard(content, *args, **kwargs):
     :platforms: iOS
     :Example:
 
-        >>> set_clipboard("content", wda_bundle_id="com.WebDriverAgentRunner.xctrunner")  # iOS
+        >>> set_clipboard("content")  # local iOS
+
+        >>> # When the iOS device is a remote device, or more than one wda is installed on the device, you need to specify the wda_bundle_id
+        >>> set_clipboard("content", wda_bundle_id="com.WebDriverAgentRunner.xctrunner")
 
     """
     G.DEVICE.set_clipboard(content, *args, **kwargs)
