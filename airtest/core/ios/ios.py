@@ -66,23 +66,20 @@ def decorator_pairing_dialog(func):
         try:
             return func(*args, **kwargs)
         except MuxError:
-            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + \
-                          "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
+            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
             raise
     return wrapper
 
 
 def add_decorator_to_methods(decorator):
     """
-    This function takes a decorator as input and returns a decorator wrapper function. \
-    The decorator wrapper function takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
+    This function takes a decorator as input and returns a decorator wrapper function. The decorator wrapper function takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
 
     Parameters:
         - decorator: A decorator function that will be applied to the methods of the input class.
 
     Returns:
-        - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class \
-        by applying the input decorator to each method.
+        - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
     """
     def decorator_wrapper(cls):
         # 获取要装饰的类的所有方法
@@ -103,7 +100,13 @@ class TIDevice:
 
     @staticmethod
     def devices():
-        # Get all available devices connect by usb, reutrn list of udid.
+        """
+        Get all available devices connected by USB, return a list of UDIDs.
+
+        Returns:
+            list: A list of UDIDs. 
+            e.g. ['539c5fffb18f2be0bf7f771d68f7c327fb68d2d9']
+        """
         return Usbmux().device_udid_list()
     
     @staticmethod
@@ -214,6 +217,21 @@ class TIDevice:
 
     @staticmethod
     def ps(udid):
+        """
+        Retrieves the process list of the specified device.
+
+        Parameters:
+            udid (str): The unique device identifier.
+
+        Returns:
+            list: A list of dictionaries containing information about each process. Each dictionary contains the following keys:
+                - pid (int): The process ID.
+                - name (str): The name of the process.
+                - bundle_id (str): The bundle identifier of the process.
+                - display_name (str): The display name of the process.
+            e.g. [{'pid': 1, 'name': 'MobileSafari', 'bundle_id': 'com.apple.mobilesafari', 'display_name': 'Safari'}, ...]
+
+        """
         with BaseDevice(udid, Usbmux()).connect_instruments() as ts:
             app_infos = list(BaseDevice(udid, Usbmux()).installation.iter_installed(app_type=None))
             ps = list(ts.app_process_list(app_infos))
@@ -847,7 +865,7 @@ class IOS(Device):
         """
         if not self.is_local_device:
             raise RuntimeError("Can noly use this method in local device now, not remote device.")
-        return TIDevice.list_app(self.udid, type=type)
+        return TIDevice.list_app(self.udid, app_type=type)
 
     def app_state(self, bundle_id):
         """ Get app state and ruturn.
