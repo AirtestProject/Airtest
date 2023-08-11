@@ -388,14 +388,15 @@ class Minicap(BaseCap):
 
     def _cleanup_minicap(self):
         """
-        Clean up the minicap process whose status is __skb_wait_for_more_packets
-        清理状态为__skb_wait_for_more_packets的minicap进程
+        Clean up the minicap process whose status is __skb_wait_for_more_packets or futex_wait_queue_me
+        清理状态为__skb_wait_for_more_packets, futex_wait_queue_me的minicap进程
 
         Returns:
 
         """
         # 卡住的进程状态
-        TASK_INTERRUPTIBLE = "__skb_wait_for_more_packets"
+        TASK_INTERRUPTIBLE1 = "__skb_wait_for_more_packets"
+        TASK_INTERRUPTIBLE2 = "futex_wait_queue_me"
 
         try:
             shell_output = self.adb.shell("ps -A| grep minicap")
@@ -405,9 +406,12 @@ class Minicap(BaseCap):
             if len(shell_output) == 0:
                 return
             for line in shell_output.split("\r\n"):
-                if TASK_INTERRUPTIBLE in line:
+                if TASK_INTERRUPTIBLE1 in line or TASK_INTERRUPTIBLE2 in line:
                     pid = line.split()[1]
-                    self.adb.shell("kill %s" % pid)
+                    try:
+                        self.adb.shell("kill %s" % pid)
+                    except:
+                        pass
 
     def _cleanup(self):
         """
