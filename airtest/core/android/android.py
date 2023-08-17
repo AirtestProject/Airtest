@@ -36,6 +36,7 @@ class Android(Device):
 
     def __init__(self, serialno=None, host=None,
                  cap_method=CAP_METHOD.MINICAP,
+                 adb_path=None,
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
@@ -50,7 +51,7 @@ class Android(Device):
         self.display_id = display_id
         self.input_event = input_event
         # init adb
-        self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
+        self.adb = ADB(self.serialno, adb_path=adb_path, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
