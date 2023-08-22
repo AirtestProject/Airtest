@@ -474,7 +474,7 @@ class IOS(Device):
             try:
                 # Add some device info.
                 if not self.is_local_device:
-                    raise RuntimeError("Can noly use this method in local device now, not remote device.")
+                    raise RuntimeError("Can only use this method in local device now, not remote device.")
                 tmp_dict = TIDevice.device_info(self.udid)
                 device_info.update(tmp_dict)
             except:
@@ -803,7 +803,7 @@ class IOS(Device):
             bundle ID        
         """
         if not self.is_local_device:
-            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+            raise RuntimeError("Can only use this method in local device now, not remote device.")
         return TIDevice.install_app(self.udid, file_or_url)
     
     def uninstall_app(self, bundle_id):
@@ -816,7 +816,7 @@ class IOS(Device):
             bundle_id: the app bundle id, e.g ``com.apple.mobilesafari``
         """
         if not self.is_local_device:
-            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+            raise RuntimeError("Can only use this method in local device now, not remote device.")
         return TIDevice.uninstall_app(self.udid, bundle_id)
 
     def start_app(self, bundle_id, *args, **kwargs):
@@ -843,7 +843,7 @@ class IOS(Device):
         """
         try:
             if not self.is_local_device:
-                raise RuntimeError("Can noly use this method in local device now, not remote device.")
+                raise RuntimeError("Can only use this method in local device now, not remote device.")
             TIDevice.stop_app(self.udid, bundle_id)
         except:
             pass
@@ -864,7 +864,7 @@ class IOS(Device):
             e.g. [('com.apple.mobilesafari', 'Safari', '8.0'), ...]
         """
         if not self.is_local_device:
-            raise RuntimeError("Can noly use this method in local device now, not remote device.")
+            raise RuntimeError("Can only use this method in local device now, not remote device.")
         return TIDevice.list_app(self.udid, app_type=type)
 
     def app_state(self, bundle_id):
