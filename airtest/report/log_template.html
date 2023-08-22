@@ -102,9 +102,20 @@
                     <div class="info-execute">
                       <div class="circle-img"></div>
                       <div class="info-file" title="{{info.path}}">{{info.name}}
-                        <img id="copy_path" path="{{info.path}}" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" />
+                        <img id="copy_path" class="copy-img" data-value="{{info.path}}" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" />
                       </div>
                     </div>
+
+                    {% if info.devices %}
+                    <div class="info-execute">
+                      <div class="circle-img"></div>
+                      {% set devices_str=info.devices.values() | join(',') %}
+                      <div class="info-file" title="{{ devices_str }}">{{info.devices.keys() | join(',') }}
+                        <img class="copy-img" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" data-value="{{ devices_str }}"/>
+                      </div>
+                    </div>
+                    {% endif %}
+
                   </div>
                 </div>
               </div>

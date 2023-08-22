@@ -906,8 +906,8 @@ $(function(){
   }
 
   // 复制脚本地址到粘贴版
-  $('#copy_path').click(function(){
-    copyToClipboard(this.getAttribute('path'))
+  $('.copy-img').click(function(){
+    copyToClipboard(this.getAttribute('data-value'))
   })
 
   // 从地址search部分加载设备信息等

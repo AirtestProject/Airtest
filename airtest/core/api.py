@@ -46,6 +46,7 @@ def init_device(platform="Android", uuid=None, **kwargs):
     return dev
 
 
+@logwrap
 def connect_device(uri):
     """
     Initialize device with uri, and set as current device.
@@ -138,12 +139,12 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None, compr
             basedir = os.path.dirname(basedir)
         if basedir not in G.BASEDIR:
             G.BASEDIR.append(basedir)
-    if devices:
-        for dev in devices:
-            connect_device(dev)
     if logdir:
         logdir = script_log_dir(basedir, logdir)
         set_logdir(logdir)
+    if devices:
+        for dev in devices:
+            connect_device(dev)
     if project_root:
         ST.PROJECT_ROOT = project_root
     if compress:

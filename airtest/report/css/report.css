@@ -139,7 +139,7 @@ h2.empty-report{
   cursor: context-menu;
   position: relative;
 }
-.summary .info-execute #copy_path{
+.summary .info-execute .copy-img{
   display: inline-block;
   margin-left: 10px;
   width: 20px;
@@ -147,7 +147,7 @@ h2.empty-report{
   cursor: context-menu;
   opacity: 0.6;
 }
-.summary .info-execute #copy_path:hover{
+.summary .info-execute .copy-img:hover{
   opacity: 1;
 }
 .summary .circle-img{
