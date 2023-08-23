@@ -40,9 +40,11 @@ class Android(Device):
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
                  display_id=None,
-                 input_event=None):
+                 input_event=None,
+                 name=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
+        self._uuid = name or self.serialno
         self._cap_method = cap_method.upper()
         self._touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
@@ -256,7 +258,7 @@ class Android(Device):
 
         :return:
         """
-        ult = [self.serialno]
+        ult = [self._uuid]
         if self.display_id:
             ult.append(self.display_id)
         if self.input_event:

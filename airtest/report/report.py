@@ -25,6 +25,7 @@ from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from airtest.utils.logger import get_logger
+from airtest.utils.snippet import parse_device_uri
 from six import PY3
 
 LOGGING = get_logger(__name__)
@@ -216,8 +217,9 @@ class LogToHtml(object):
     def _translate_device(self, step):
         if step["tag"] == "function" and step["data"]["name"] == "connect_device":
             uri = step["data"]["call_args"]["uri"]
-            d = urlparse(uri)
-            uuid = d.path.lstrip("/")
+            platform, uuid, params = parse_device_uri(uri)
+            if "name" in params:
+                uuid = params["name"]
             if uuid not in self.devices:
                 self.devices[uuid] = uri
             return uuid

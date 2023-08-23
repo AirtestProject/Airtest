@@ -5,12 +5,11 @@ This module contains the Airtest Core APIs.
 import os
 import time
 
-from six.moves.urllib.parse import parse_qsl, urlparse
-
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.utils.compat import script_log_dir
+from airtest.utils.snippet import parse_device_uri
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
 # Assertions
@@ -60,6 +59,7 @@ def connect_device(uri):
         >>> connect_device("Android:///SJE5T17B17?cap_method=javacap&touch_method=adb")
         >>> # remote device using custom params Android://adbhost:adbport/serialno
         >>> connect_device("Android://127.0.0.1:5037/10.254.60.1:5555")
+        >>> connect_device("Android://127.0.0.1:5037/10.234.60.1:5555?name=serialnumber")  # add serialno to params
         >>> connect_device("Windows:///")  # connect to the desktop
         >>> connect_device("Windows:///123456")  # Connect to the window with handle 123456
         >>> connect_device("windows:///?title_re='.*explorer.*'")  # Connect to the window that name include "explorer"
@@ -70,13 +70,7 @@ def connect_device(uri):
         >>> connect_device("iOS:///http://localhost:8100/?mjpeg_port=9100&&uuid=00008020-001270842E88002E")  # udid/uuid/serialno are all ok
 
     """
-    d = urlparse(uri)
-    platform = d.scheme
-    host = d.netloc
-    uuid = d.path.lstrip("/")
-    params = dict(parse_qsl(d.query))
-    if host:
-        params["host"] = host.split(":")
+    platform, uuid, params = parse_device_uri(uri)
     dev = init_device(platform, uuid, **params)
     return dev
 
