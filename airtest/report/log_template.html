@@ -110,7 +110,7 @@
                     <div class="info-execute">
                       <div class="circle-img"></div>
                       {% set devices_str=info.devices.values() | join(',') %}
-                      <div class="info-file" title="{{ devices_str }}">{{info.devices.keys() | join(',') }}
+                      <div class="info-file" title="{{ devices_str }}"><span lang="en">Device: </span> {{info.devices.keys() | join(',') }}
                         <img class="copy-img" title="copy file path to clipboard" src="{{static_root}}image/copy.svg" data-value="{{ devices_str }}"/>
                       </div>
                     </div>

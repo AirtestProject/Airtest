@@ -123,7 +123,7 @@ class YosemiteIme(CustomIme):
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
-        self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
+        self.adb.shell(u'am broadcast -a ADB_INPUT_TEXT --es msg "{}"'.format(value))
 
     def code(self, code):
         """

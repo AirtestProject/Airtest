@@ -279,7 +279,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None, serialno=None, wda_bundle_id=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None, serialno=None, wda_bundle_id=None):
         super(IOS, self).__init__()
 
         # If none or empty, use default addr.
@@ -343,7 +343,7 @@ class IOS(Device):
         self.recorder = None
 
         # Since uuid and udid are very similar, both names are allowed.
-        self._udid = udid or uuid or serialno
+        self._udid = udid or name or serialno
 
     def _get_default_device(self):
         """Get local default device when no udid.
@@ -506,7 +506,7 @@ class IOS(Device):
     def orientation(self):
         """
         Returns:
-            Device oritantation status in LANDSACPE POR.
+            Device orientation status in LANDSACPE POR.
         """
         if not self._current_orientation:
             self._current_orientation = self.get_orientation()
@@ -1141,7 +1141,7 @@ class IOS(Device):
         return False
 
     def disconnect(self):
-        """Discconect mjpeg and rotation_watcher.
+        """Disconnected mjpeg and rotation_watcher.
         """
         if self.cap_method == CAP_METHOD.MJPEG:
             self.mjpegcap.teardown_stream()
