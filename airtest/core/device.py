@@ -19,7 +19,11 @@ class Device(with_metaclass(MetaDevice, object)):
         super(Device, self).__init__()
 
     def to_json(self):
-        return f"<{self.__class__.__name__} {self.uuid}>"
+        try:
+            uuid = repr(self.uuid)
+        except:
+            uuid = None
+        return f"<{self.__class__.__name__} {uuid}>"
 
     @property
     def uuid(self):
