@@ -36,7 +36,10 @@ class AirtestLogger(object):
     @staticmethod
     def _dumper(obj):
         if hasattr(obj, "to_json"):
-            return obj.to_json()
+            try:
+                return obj.to_json()
+            except:
+                repr(obj)
         try:
             d = copy(obj.__dict__)
             try:
@@ -75,7 +78,11 @@ class AirtestLogger(object):
         while self.running_stack:
             # 先取最后一个，记了log之后再pop，避免depth错误
             log_stacked = self.running_stack[-1]
-            self.log("function", log_stacked)
+            try:
+                self.log("function", log_stacked)
+            except Exception as e:
+                LOGGING.error("log_stacked error: %s" % e)
+                LOGGING.error(traceback.format_exc())
             self.running_stack.pop()
 
 

@@ -18,6 +18,9 @@ class Device(with_metaclass(MetaDevice, object)):
     def __init__(self):
         super(Device, self).__init__()
 
+    def to_json(self):
+        return f"<{self.__class__.__name__} {self.uuid}>"
+
     @property
     def uuid(self):
         self._raise_not_implemented_error()
