@@ -71,7 +71,7 @@ class AirtestCase(unittest.TestCase):
         try:
             exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
         except Exception as err:
-            log(err, desc="Final Error", snapshot=True)
+            log(err, desc="Final Error", snapshot=True if G.DEVICE_LIST else False)
             six.reraise(*sys.exc_info())
 
     @classmethod
