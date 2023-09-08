@@ -1421,7 +1421,10 @@ class ADB(object):
 
         """
         if not activity:
-            ret = self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+            try:
+                ret = self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+            except AdbShellError as e:
+                raise AirtestError("Starting App: %s Failed! No activities found to run." % package)
             if "No activities found to run" in ret:
                 raise AirtestError("Starting App: %s Failed! No activities found to run." % package)
         else:
