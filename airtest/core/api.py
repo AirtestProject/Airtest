@@ -664,10 +664,10 @@ def get_clipboard(*args, **kwargs):
     Get the content from the clipboard.
 
     :return: str
-    :platforms: iOS
+    :platforms: Android, iOS
     :Example:
 
-        >>> text = get_clipboard()  # local iOS
+        >>> text = get_clipboard()  # Android or local iOS
         >>> print(text)
 
         >>> # When the iOS device is a remote device, or more than one wda is installed on the device, you need to specify the wda_bundle_id
@@ -685,10 +685,11 @@ def set_clipboard(content, *args, **kwargs):
 
     :param content: str
     :return: None
-    :platforms: iOS
+    :platforms: Android, iOS
     :Example:
 
-        >>> set_clipboard("content")  # local iOS
+        >>> set_clipboard("content")  # Android or local iOS
+        >>> print(get_clipboard())
 
         >>> # When the iOS device is a remote device, or more than one wda is installed on the device, you need to specify the wda_bundle_id
         >>> set_clipboard("content", wda_bundle_id="com.WebDriverAgentRunner.xctrunner")
