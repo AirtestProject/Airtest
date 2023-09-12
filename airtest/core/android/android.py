@@ -8,6 +8,7 @@ from copy import copy
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
+from airtest.core.android.yosemite_ext import YosemiteExt
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
     SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
@@ -63,6 +64,7 @@ class Android(Device):
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.yosemite_recorder = Recorder(self.adb)
+        self.yosemite_ext = YosemiteExt(self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
@@ -916,6 +918,29 @@ class Android(Device):
             shutil.move(self.recorder_save_path, output)
             LOGGING.info("save video to {}".format(output))
         return True
+
+    def get_clipboard(self):
+        """
+        Get the clipboard content
+
+        Returns:
+            clipboard content
+
+        """
+        return self.yosemite_ext.get_clipboard()
+
+    def set_clipboard(self, text):
+        """
+        Set the clipboard content
+
+        Args:
+            text: text to set
+
+        Returns:
+            None
+
+        """
+        self.yosemite_ext.set_clipboard(text)
 
     def _register_rotation_watcher(self):
         """
