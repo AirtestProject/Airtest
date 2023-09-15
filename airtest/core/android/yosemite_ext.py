@@ -55,6 +55,20 @@ class YosemiteExt(Yosemite):
             None
 
         """
-        ret = self.device_op("clipboard", f"--TEXT {text}")
+        ret = self.device_op("clipboard", f'--TEXT "{text}"')
         if ret and "Exception" in ret:
             raise AirtestError("set clipboard failed: %s" % ret)
+
+    def change_lang(self, lang):
+        """
+        Change language
+
+        Args:
+            lang: language to be set
+
+        Returns:
+            None
+
+        """
+        lang_list = ['zh', 'en', 'fr', 'de', 'it', 'ja', 'ko', ]
+        self.device_op("changeLanguge", f"--LANGUAGE_OP {lang}")
