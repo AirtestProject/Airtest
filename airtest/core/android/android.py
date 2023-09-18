@@ -488,7 +488,7 @@ class Android(Device):
         Input text on the device
 
         Args:
-            text: text to input
+            text: text to input, will automatically replace single quotes with double quotes
             enter: True or False whether to press `Enter` key
             search: True or False whether to press `Search` key on IME after input
 

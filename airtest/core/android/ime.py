@@ -113,7 +113,7 @@ class YosemiteIme(CustomIme):
         Input text with Yosemite input method
 
         Args:
-            value: text to be inputted
+            value: text to be inputted, will automatically replace single quotes with double quotes
 
         Returns:
             output form `adb shell` command
@@ -124,9 +124,9 @@ class YosemiteIme(CustomIme):
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         if '\'' in value:
-            self.adb.shell(f'am broadcast -a ADB_INPUT_TEXT --es msg "{value}"')
-        else:
-            self.adb.shell(f"am broadcast -a ADB_INPUT_TEXT --es msg '{value}'")
+            # 如果value中有特殊符号，必须用单引号包裹内容，因此将单引号替换为双引号
+            value = value.replace('\'', '"')
+        self.adb.shell(f"am broadcast -a ADB_INPUT_TEXT --es msg '{value}'")
 
     def code(self, code):
         """
