@@ -1,6 +1,7 @@
 from .constant import YOSEMITE_APK, YOSEMITE_PACKAGE
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.error import AirtestError
+from airtest.utils.snippet import on_method_ready
 from airtest.utils.logger import get_logger
 LOGGING = get_logger(__name__)
 
@@ -17,6 +18,7 @@ class YosemiteExt(Yosemite):
             self._path = self.adb.path_app(YOSEMITE_PACKAGE)
         return self._path
 
+    @on_method_ready('install_or_upgrade')
     def device_op(self, op_name, op_args=""):
         """
         Perform device operations
@@ -46,7 +48,7 @@ class YosemiteExt(Yosemite):
 
     def set_clipboard(self, text):
         """
-        Set clipboard content
+        Set clipboard content, will automatically replace single quotes with double quotes
 
         Args:
             text: text to be set
@@ -55,7 +57,9 @@ class YosemiteExt(Yosemite):
             None
 
         """
-        ret = self.device_op("clipboard", f'--TEXT "{text}"')
+        if "\'" in text:
+            text = text.replace("\'", "\"")
+        ret = self.device_op("clipboard", f"--TEXT '{text}'")
         if ret and "Exception" in ret:
             raise AirtestError("set clipboard failed: %s" % ret)
 
