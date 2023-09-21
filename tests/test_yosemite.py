@@ -52,6 +52,10 @@ class TestIme(unittest.TestCase):
         self.ime.text("nimei")
         self.ime.text("你妹")
 
+    def test_escape_text(self):
+        self.ime.text("$call org/org->create_org($id,'test123')")
+        self.ime.text("#@$%^&&*)_+!")
+
     def test_code(self):
         self.ime.text("test code")
         self.ime.code("2")

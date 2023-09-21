@@ -2,6 +2,7 @@
 import re
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.error import AdbError
+from airtest.utils.snippet import escape_special_char
 from .constant import YOSEMITE_IME_SERVICE
 from six import text_type
 
@@ -113,7 +114,7 @@ class YosemiteIme(CustomIme):
         Input text with Yosemite input method
 
         Args:
-            value: text to be inputted, will automatically replace single quotes with double quotes
+            value: text to be inputted
 
         Returns:
             output form `adb shell` command
@@ -123,10 +124,8 @@ class YosemiteIme(CustomIme):
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
-        if '\'' in value:
-            # 如果value中有特殊符号，必须用单引号包裹内容，因此将单引号替换为双引号
-            value = value.replace('\'', '"')
-        self.adb.shell(f"am broadcast -a ADB_INPUT_TEXT --es msg '{value}'")
+        value = escape_special_char(value)
+        self.adb.shell(f"am broadcast -a ADB_INPUT_TEXT --es msg {value}")
 
     def code(self, code):
         """

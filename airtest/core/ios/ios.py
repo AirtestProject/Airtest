@@ -971,6 +971,21 @@ class IOS(Device):
         else:
             LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
 
+    def paste(self, wda_bundle_id=None, *args, **kwargs):
+        """
+        Paste the current clipboard content on the device.
+
+        Args:
+            wda_bundle_id (str, optional): The bundle ID of the WDA app. Defaults to None.
+
+        Raises:
+            RuntimeError: If the device is remote and the wda_bundle_id parameter is not provided.
+
+        Returns:
+            None
+        """
+        self.text(self.get_clipboard(wda_bundle_id=wda_bundle_id))
+
     def get_ip_address(self):
         """Get ip address from WDA.
 
