@@ -697,6 +697,23 @@ def set_clipboard(content, *args, **kwargs):
     """
     G.DEVICE.set_clipboard(content, *args, **kwargs)
 
+
+@logwrap
+def paste(*args, **kwargs):
+    """
+    Paste the content from the clipboard.
+
+    :platforms: Android, iOS
+    :return: None
+    :Example:
+
+        >>> set_clipboard("content")
+        >>> paste()  # will paste "content" to the device
+
+    """
+    G.DEVICE.paste(*args, **kwargs)
+
+
 """
 Assertions: see airtest/core/assertions.py
 """

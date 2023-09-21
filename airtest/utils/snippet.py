@@ -1,5 +1,6 @@
 # _*_ coding:UTF-8 _*_
 import os
+import re
 import sys
 import stat
 import threading
@@ -172,3 +173,16 @@ def parse_device_uri(uri):
     if host:
         params["host"] = host.split(":")
     return platform, uuid, params
+
+
+def escape_special_char(string):
+    """
+    Escape special characters in a string.
+
+    Args:
+        string (str): The input string, e.g. 'testing !@#$%^&*()_+'
+
+    Returns:
+        str: The string with special characters escaped.  e.g. 'testing \!\@\#\$\%\^\&\*\(\)_\+'
+    """
+    return re.sub(r'([!@#\$%\^&\*\(\)_\+\\|;:"\'<>\?\{\}\[\]#\~\^ ])', r'\\\1', string)

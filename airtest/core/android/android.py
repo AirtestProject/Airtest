@@ -942,6 +942,14 @@ class Android(Device):
         """
         self.yosemite_ext.set_clipboard(text)
 
+    def paste(self):
+        """
+        Paste the clipboard content
+        Returns:
+
+        """
+        self.text(self.get_clipboard())
+
     def _register_rotation_watcher(self):
         """
         Register callbacks for Android and minicap when rotation of screen has changed
