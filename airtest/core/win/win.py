@@ -5,6 +5,7 @@ import socket
 import subprocess
 import numpy
 import mss
+import psutil
 from functools import wraps
 import win32api
 import pywintypes  # noqa
@@ -508,15 +509,23 @@ class Windows(Device):
         Returns:
              :py:obj:`str`: ip address
         """
-        hostname = socket.getfqdn()
-        try:
-            return socket.gethostbyname_ex(hostname)[2][0]
-        except socket.gaierror:
-            import psutil
-            for _, addrs in psutil.net_if_addrs().items():
-                for addr in addrs:
-                    if addr.family == socket.AF_INET and not addr.address.startswith('169.254'):
-                        return addr.address
+        ifaces = psutil.net_if_addrs()
+        # 常见的虚拟网卡名称关键词
+        virtual_iface_keywords = ['vEthernet', 'VirtualBox', 'VMware', 'Hyper-V', 'Wireless', 'VPN', 'Loopback']
+
+        for interface_name, iface_addresses in ifaces.items():
+            if any(keyword in interface_name for keyword in virtual_iface_keywords):
+                continue
+
+            for iface_address in iface_addresses:
+                # 检查IPV4地址
+                if iface_address.family == socket.AF_INET:
+                    # 检查是否为自动获取的APIPA地址
+                    if not iface_address.address.startswith('169.254'):
+                        # 返回第一个非APIPA的IPV4地址
+                        return iface_address.address
+
+        return None
 
 
     def start_recording(self, max_time=1800, output=None, fps=10,
