@@ -140,6 +140,19 @@ class TestAndroid(unittest.TestCase):
         self.android.ime_method = IME_METHOD.YOSEMITEIME
         self.android.text(u'你好')
 
+    def test_clipboard(self):
+        text1 = "test clipboard"
+        self.android.set_clipboard(text1)
+        self.assertEqual(self.android.get_clipboard(), text1)
+
+        self.android.paste()
+
+        # test escape special char
+        text2 = "test clipboard with $pecial char #@!#%$#^&*()'"
+        self.android.set_clipboard(text2)
+        self.assertEqual(self.android.get_clipboard(), text2)
+        self.android.paste()
+
     def test_touch(self):
         for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i

@@ -2,6 +2,7 @@
 import re
 from airtest.core.android.yosemite import Yosemite
 from airtest.core.error import AdbError
+from airtest.utils.snippet import escape_special_char
 from .constant import YOSEMITE_IME_SERVICE
 from six import text_type
 
@@ -123,7 +124,8 @@ class YosemiteIme(CustomIme):
             self.start()
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
-        self.adb.shell(u"am broadcast -a ADB_INPUT_TEXT --es msg '{}'".format(value))
+        value = escape_special_char(value)
+        self.adb.shell(f"am broadcast -a ADB_INPUT_TEXT --es msg {value}")
 
     def code(self, code):
         """

@@ -13,6 +13,7 @@ import traceback
 from copy import deepcopy
 from datetime import datetime
 from markupsafe import Markup, escape
+from six.moves.urllib.parse import parse_qsl, urlparse
 try:
     from jinja2 import evalcontextfilter as pass_eval_context  # jinja2<3.1
 except:
@@ -24,6 +25,7 @@ from airtest.aircv.utils import compress_image
 from airtest.utils.compat import decode_path, script_dir_name
 from airtest.cli.info import get_script_info
 from airtest.utils.logger import get_logger
+from airtest.utils.snippet import parse_device_uri
 from six import PY3
 
 LOGGING = get_logger(__name__)
@@ -61,6 +63,7 @@ class LogToHtml(object):
 
     def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=None, lang="en", plugins=None):
         self.log = []
+        self.devices = {}
         self.script_root = script_root
         self.script_name = script_name
         if not self.script_name or os.path.isfile(self.script_root):
@@ -132,6 +135,7 @@ class LogToHtml(object):
         screen = self._translate_screen(step, code)
         info = self._translate_info(step)
         assertion = self._translate_assertion(step)
+        self._translate_device(step)
 
         translated = {
             "title": title,
@@ -209,6 +213,17 @@ class LogToHtml(object):
         if display_pos:
             screen["pos"].append(display_pos)
         return screen
+
+    def _translate_device(self, step):
+        if step["tag"] == "function" and step["data"]["name"] == "connect_device":
+            uri = step["data"]["call_args"]["uri"]
+            platform, uuid, params = parse_device_uri(uri)
+            if "name" in params:
+                uuid = params["name"]
+            if uuid not in self.devices:
+                self.devices[uuid] = uri
+            return uuid
+        return None
 
     @classmethod
     def get_thumbnail(cls, path):
@@ -310,6 +325,7 @@ class LogToHtml(object):
             "sleep": lambda: u"Wait for %s seconds" % args.get('secs'),
             "assert_exists": u"Assert target image exists",
             "assert_not_exists": u"Assert target image does not exists",
+            "connect_device": lambda : u"Connect device: %s" % args.get("uri"),
         }
 
         # todo: 最好用js里的多语言实现
@@ -324,6 +340,7 @@ class LogToHtml(object):
             "sleep": lambda: u"等待%s秒" % args.get('secs'),
             "assert_exists": u"断言目标图片存在",
             "assert_not_exists": u"断言目标图片不存在",
+            "connect_device": lambda : u"连接设备： %s" % args.get("uri"),
         }
 
         if self.lang == "zh":
@@ -348,6 +365,7 @@ class LogToHtml(object):
             "snapshot": u"Snapshot",
             "assert_equal": u"Assert equal",
             "assert_not_equal": u"Assert not equal",
+            "connect_device": u"Connect device",
         }
 
         return title.get(name, name)
@@ -462,6 +480,7 @@ class LogToHtml(object):
 
         script_path = os.path.join(self.script_root, self.script_name)
         info = json.loads(get_script_info(script_path))
+        info['devices'] = self.devices
 
         if record_list:
             records = [os.path.join(DEFAULT_LOG_DIR, f) if self.export_dir

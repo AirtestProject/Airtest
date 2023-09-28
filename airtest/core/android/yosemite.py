@@ -41,7 +41,7 @@ class Yosemite(object):
             LOGGING.info(
                 "local version code is {}, installed version code is {}".format(apk_version, installed_version))
             try:
-                self.adb.install_app(apk_path, replace=True, install_options=["-t", "-g"])
+                self.adb.pm_install(apk_path, replace=True, install_options=["-t"])
             except:
                 if installed_version is None:
                     raise

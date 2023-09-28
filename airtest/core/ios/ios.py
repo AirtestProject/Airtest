@@ -66,23 +66,20 @@ def decorator_pairing_dialog(func):
         try:
             return func(*args, **kwargs)
         except MuxError:
-            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + \
-                          "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
+            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
             raise
     return wrapper
 
 
 def add_decorator_to_methods(decorator):
     """
-    This function takes a decorator as input and returns a decorator wrapper function. \
-    The decorator wrapper function takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
+    This function takes a decorator as input and returns a decorator wrapper function. The decorator wrapper function takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
 
     Parameters:
         - decorator: A decorator function that will be applied to the methods of the input class.
 
     Returns:
-        - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class \
-        by applying the input decorator to each method.
+        - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
     """
     def decorator_wrapper(cls):
         # 获取要装饰的类的所有方法
@@ -103,7 +100,13 @@ class TIDevice:
 
     @staticmethod
     def devices():
-        # Get all available devices connect by usb, reutrn list of udid.
+        """
+        Get all available devices connected by USB, return a list of UDIDs.
+
+        Returns:
+            list: A list of UDIDs. 
+            e.g. ['539c5fffb18f2be0bf7f771d68f7c327fb68d2d9']
+        """
         return Usbmux().device_udid_list()
     
     @staticmethod
@@ -214,6 +217,21 @@ class TIDevice:
 
     @staticmethod
     def ps(udid):
+        """
+        Retrieves the process list of the specified device.
+
+        Parameters:
+            udid (str): The unique device identifier.
+
+        Returns:
+            list: A list of dictionaries containing information about each process. Each dictionary contains the following keys:
+                - pid (int): The process ID.
+                - name (str): The name of the process.
+                - bundle_id (str): The bundle identifier of the process.
+                - display_name (str): The display name of the process.
+            e.g. [{'pid': 1, 'name': 'MobileSafari', 'bundle_id': 'com.apple.mobilesafari', 'display_name': 'Safari'}, ...]
+
+        """
         with BaseDevice(udid, Usbmux()).connect_instruments() as ts:
             app_infos = list(BaseDevice(udid, Usbmux()).installation.iter_installed(app_type=None))
             ps = list(ts.app_process_list(app_infos))
@@ -261,7 +279,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, uuid=None, serialno=None, wda_bundle_id=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None, serialno=None, wda_bundle_id=None):
         super(IOS, self).__init__()
 
         # If none or empty, use default addr.
@@ -325,7 +343,7 @@ class IOS(Device):
         self.recorder = None
 
         # Since uuid and udid are very similar, both names are allowed.
-        self._udid = udid or uuid or serialno
+        self._udid = udid or name or serialno
 
     def _get_default_device(self):
         """Get local default device when no udid.
@@ -488,7 +506,7 @@ class IOS(Device):
     def orientation(self):
         """
         Returns:
-            Device oritantation status in LANDSACPE POR.
+            Device orientation status in LANDSACPE POR.
         """
         if not self._current_orientation:
             self._current_orientation = self.get_orientation()
@@ -847,7 +865,7 @@ class IOS(Device):
         """
         if not self.is_local_device:
             raise RuntimeError("Can only use this method in local device now, not remote device.")
-        return TIDevice.list_app(self.udid, type=type)
+        return TIDevice.list_app(self.udid, app_type=type)
 
     def app_state(self, bundle_id):
         """ Get app state and ruturn.
@@ -952,6 +970,21 @@ class IOS(Device):
             self.driver.app_launch(current_app_bundle_id)
         else:
             LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
+
+    def paste(self, wda_bundle_id=None, *args, **kwargs):
+        """
+        Paste the current clipboard content on the device.
+
+        Args:
+            wda_bundle_id (str, optional): The bundle ID of the WDA app. Defaults to None.
+
+        Raises:
+            RuntimeError: If the device is remote and the wda_bundle_id parameter is not provided.
+
+        Returns:
+            None
+        """
+        self.text(self.get_clipboard(wda_bundle_id=wda_bundle_id))
 
     def get_ip_address(self):
         """Get ip address from WDA.
@@ -1123,7 +1156,7 @@ class IOS(Device):
         return False
 
     def disconnect(self):
-        """Discconect mjpeg and rotation_watcher.
+        """Disconnected mjpeg and rotation_watcher.
         """
         if self.cap_method == CAP_METHOD.MJPEG:
             self.mjpegcap.teardown_stream()

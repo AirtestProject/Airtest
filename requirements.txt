@@ -10,3 +10,4 @@ pywinauto==0.6.3
 filelock
 ffmpeg-python
 tidevice
+psutil

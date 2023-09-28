@@ -8,6 +8,7 @@ from copy import copy
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
+from airtest.core.android.yosemite_ext import YosemiteExt
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
     SDK_VERISON_ANDROID10
 from airtest.core.android.adb import ADB
@@ -40,9 +41,12 @@ class Android(Device):
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
                  display_id=None,
-                 input_event=None):
+                 input_event=None,
+                 adb_path=None,
+                 name=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
+        self._uuid = name or self.serialno
         self._cap_method = cap_method.upper()
         self._touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
@@ -50,7 +54,7 @@ class Android(Device):
         self.display_id = display_id
         self.input_event = input_event
         # init adb
-        self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
+        self.adb = ADB(self.serialno, adb_path=adb_path, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
@@ -61,6 +65,7 @@ class Android(Device):
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.yosemite_recorder = Recorder(self.adb)
+        self.yosemite_ext = YosemiteExt(self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
@@ -237,7 +242,7 @@ class Android(Device):
                       DeprecationWarning)
         return getattr(self, new_name)
 
-    def get_default_device(self):
+    def get_default_device(self, adb_path=None):
         """
         Get local default device when no serialno
 
@@ -245,9 +250,9 @@ class Android(Device):
             local device serialno
 
         """
-        if not ADB().devices(state="device"):
+        if not ADB(adb_path=adb_path).devices(state="device"):
             raise IndexError("ADB devices not found")
-        return ADB().devices(state="device")[0][0]
+        return ADB(adb_path=adb_path).devices(state="device")[0][0]
 
     @property
     def uuid(self):
@@ -256,7 +261,7 @@ class Android(Device):
 
         :return:
         """
-        ult = [self.serialno]
+        ult = [self._uuid]
         if self.display_id:
             ult.append(self.display_id)
         if self.input_event:
@@ -484,7 +489,7 @@ class Android(Device):
         Input text on the device
 
         Args:
-            text: text to input
+            text: text to input, will automatically replace single quotes with double quotes
             enter: True or False whether to press `Enter` key
             search: True or False whether to press `Search` key on IME after input
 
@@ -914,6 +919,37 @@ class Android(Device):
             shutil.move(self.recorder_save_path, output)
             LOGGING.info("save video to {}".format(output))
         return True
+
+    def get_clipboard(self):
+        """
+        Get the clipboard content
+
+        Returns:
+            clipboard content
+
+        """
+        return self.yosemite_ext.get_clipboard()
+
+    def set_clipboard(self, text):
+        """
+        Set the clipboard content
+
+        Args:
+            text: text to set
+
+        Returns:
+            None
+
+        """
+        self.yosemite_ext.set_clipboard(text)
+
+    def paste(self):
+        """
+        Paste the clipboard content
+        Returns:
+
+        """
+        self.text(self.get_clipboard())
 
     def _register_rotation_watcher(self):
         """

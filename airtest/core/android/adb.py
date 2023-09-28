@@ -5,6 +5,7 @@ import sys
 import time
 import random
 import platform
+import psutil
 import warnings
 import subprocess
 import threading
@@ -36,7 +37,7 @@ class ADB(object):
 
     def __init__(self, serialno=None, adb_path=None, server_addr=None, display_id=None, input_event=None):
         self.serialno = serialno
-        self.adb_path = adb_path or self.builtin_adb_path()
+        self.adb_path = adb_path or self.get_adb_path()
         self.display_id = display_id
         self.input_event = input_event
         self._set_cmd_options(server_addr)
@@ -47,6 +48,42 @@ class ADB(object):
         self._display_info_lock = threading.Lock()
         self._forward_local_using = []
         self.__class__._instances.append(self)
+
+    @staticmethod
+    def get_adb_path():
+        """
+        Returns the path to the adb executable.
+
+        Checks if adb process is running, returns the running process path.
+
+        If adb process is not running, checks if ANDROID_HOME environment variable is set.
+        Constructs the adb path using ANDROID_HOME and returns it if set.
+
+        If adb process is not running and ANDROID_HOME is not set, uses built-in adb path.
+
+        Returns:
+            str: The path to the adb executable.
+        """
+        if platform.system() == "Windows":
+            ADB_NAME = "adb.exe"
+        else:
+            ADB_NAME = "adb"
+
+        # Check if adb process is already running
+        for process in psutil.process_iter(['name', 'exe']):
+            if process.info['name'] == ADB_NAME:
+                return process.info['exe']
+
+        # Check if ANDROID_HOME environment variable exists
+        android_home = os.environ.get('ANDROID_HOME')
+        if android_home:
+            adb_path = os.path.join(android_home, 'platform-tools', ADB_NAME)
+            if os.path.exists(adb_path):
+                return adb_path
+
+        # Use airtest builtin adb path
+        builtin_adb_path = ADB.builtin_adb_path()
+        return builtin_adb_path
 
     @staticmethod
     def builtin_adb_path():
@@ -65,9 +102,6 @@ class ADB(object):
         if not adb_path:
             raise RuntimeError("No adb executable supports this platform({}-{}).".format(system, machine))
 
-        # overwrite uiautomator adb
-        if "ANDROID_HOME" in os.environ:
-            del os.environ["ANDROID_HOME"]
         if system != "Windows":
             # chmod +x adb
             make_file_executable(adb_path)
@@ -584,9 +618,11 @@ class ADB(object):
         try:
             self.cmd(cmds)
         except AdbError as e:
-            # ignore if already removed
-            if "not found" in e.stdout:
+            # ignore if already removed or disconnected
+            if "not found" in (repr(e.stdout) + repr(e.stderr)):
                 pass
+        except DeviceConnectionError:
+            pass
         # unregister for cleanup
         if local in self._forward_local_using:
             self._forward_local_using.remove(local)
@@ -1385,7 +1421,12 @@ class ADB(object):
 
         """
         if not activity:
-            self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+            try:
+                ret = self.shell(['monkey', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
+            except AdbShellError as e:
+                raise AirtestError("Starting App: %s Failed! No activities found to run." % package)
+            if "No activities found to run" in ret:
+                raise AirtestError("Starting App: %s Failed! No activities found to run." % package)
         else:
             self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
 

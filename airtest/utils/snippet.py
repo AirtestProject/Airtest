@@ -1,11 +1,13 @@
 # _*_ coding:UTF-8 _*_
 import os
+import re
 import sys
 import stat
 import threading
 from functools import wraps
 from six import string_types
 from six.moves import queue
+from six.moves.urllib.parse import parse_qsl, urlparse
 
 
 def split_cmd(cmds):
@@ -151,3 +153,36 @@ def make_file_executable(file_path):
             os.chmod(file_path, mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         return True
     return False
+
+
+def parse_device_uri(uri):
+    """
+    Parse device uri to get platform, host, uuid and other params
+
+    Args:
+        uri: e.g. Android:///SJE5T17B17?cap_method=javacap&touch_method=adb
+
+    Returns:
+
+    """
+    d = urlparse(uri)
+    platform = d.scheme
+    host = d.netloc
+    uuid = d.path.lstrip("/")
+    params = dict(parse_qsl(d.query))
+    if host:
+        params["host"] = host.split(":")
+    return platform, uuid, params
+
+
+def escape_special_char(string):
+    """
+    Escape special characters in a string.
+
+    Args:
+        string (str): The input string, e.g. 'testing !@#$%^&*()_+'
+
+    Returns:
+        str: The string with special characters escaped.  e.g. 'testing \!\@\#\$\%\^\&\*\(\)_\+'
+    """
+    return re.sub(r'([!@#\$%\^&\*\(\)_\+\\|;:"\'<>\?\{\}\[\]#\~\^ ])', r'\\\1', string)
