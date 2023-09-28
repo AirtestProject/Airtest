@@ -42,6 +42,7 @@ class Android(Device):
                  ori_method=ORI_METHOD.MINICAP,
                  display_id=None,
                  input_event=None,
+                 adb_path=None,
                  name=None):
         super(Android, self).__init__()
         self.serialno = serialno or self.get_default_device()
@@ -53,7 +54,7 @@ class Android(Device):
         self.display_id = display_id
         self.input_event = input_event
         # init adb
-        self.adb = ADB(self.serialno, server_addr=host, display_id=self.display_id, input_event=self.input_event)
+        self.adb = ADB(self.serialno, adb_path=adb_path, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
         if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
@@ -241,7 +242,7 @@ class Android(Device):
                       DeprecationWarning)
         return getattr(self, new_name)
 
-    def get_default_device(self):
+    def get_default_device(self, adb_path=None):
         """
         Get local default device when no serialno
 
@@ -249,9 +250,9 @@ class Android(Device):
             local device serialno
 
         """
-        if not ADB().devices(state="device"):
+        if not ADB(adb_path=adb_path).devices(state="device"):
             raise IndexError("ADB devices not found")
-        return ADB().devices(state="device")[0][0]
+        return ADB(adb_path=adb_path).devices(state="device")[0][0]
 
     @property
     def uuid(self):
