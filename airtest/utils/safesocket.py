@@ -1,5 +1,6 @@
 # _*_ coding:UTF-8 _*_
 import socket
+import errno
 
 
 class SafeSocket(object):
@@ -74,7 +75,11 @@ class SafeSocket(object):
 
     def close(self):
         if hasattr(self.sock, "_closed") and not self.sock._closed:
-            self.sock.shutdown(socket.SHUT_RDWR)
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except OSError as e:
+                if e.errno != errno.ENOTCONN:  # 'Socket is not connected'
+                    raise
             self.sock.close()
         else:
             self.sock.close()
