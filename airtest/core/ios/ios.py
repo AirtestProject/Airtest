@@ -153,7 +153,7 @@ class TIDevice:
         wda_list = []
         for app in app_list:
             bundle_id, display_name, _ = app
-            if ".xctrunner" in bundle_id or display_name == "WebDriverAgentRunner-Runner":
+            if (bundle_id.startswith('com.') and bundle_id.endswith(".xctrunner")) or display_name == "WebDriverAgentRunner-Runner":
                 wda_list.append(bundle_id)
         return wda_list
     
