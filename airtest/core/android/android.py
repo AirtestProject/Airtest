@@ -909,14 +909,10 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
-        if self.yosemite_recorder.recording_proc != None:
+        if self.yosemite_recorder.recording_proc is not None or self.recorder is None:
             if output is None:
                 output = self.recorder_save_path
             return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
-
-        if self.recorder is None:
-            LOGGING.warning("start_recording first")
-            return False
         
         LOGGING.info("stopping recording")
         self.recorder.stop()
