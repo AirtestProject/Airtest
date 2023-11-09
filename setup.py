@@ -20,6 +20,13 @@ def get_version(rel_path):
         raise RuntimeError("Unable to find version string.")
 
 
+def is_docker():
+    if os.path.exists('/proc/self/cgroup'):
+        with open('/proc/self/cgroup', 'rt') as ifh:
+            return 'docker' in ifh.read()
+    return False
+
+
 def parse_requirements(filename):
     """ load requirements from a pip requirements file. (replacing from pip.req import parse_requirements)"""
     lineiter = (line.strip() for line in open(filename))
@@ -29,6 +36,9 @@ def parse_requirements(filename):
     # if py<=3.6 add dataclasses
     if sys.version_info.major == 3 and sys.version_info.minor <= 6:
         reqs.append("dataclasses")
+    if is_docker():
+        reqs.remove("opencv-contrib-python>=4.4.0.46, <=4.6.0.66")
+        reqs.append("opencv-contrib-python-headless>=4.4.0.46, <=4.6.0.66")
     return reqs
 
 
