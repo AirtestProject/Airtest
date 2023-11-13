@@ -38,7 +38,7 @@ def parse_requirements(filename):
         reqs.append("dataclasses")
     if is_docker():
         reqs.remove("opencv-contrib-python>=4.4.0.46, <=4.6.0.66")
-        reqs.append("opencv-contrib-python-headless>=4.4.0.46, <=4.6.0.66")
+        reqs.append("opencv-contrib-python-headless==4.5.5.64")
     return reqs
 
 
