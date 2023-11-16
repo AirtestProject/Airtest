@@ -10,7 +10,7 @@ import threading
 import wda
 from copy import copy
 from functools import partial
-from airtest.core.error import AirtestError
+from airtest.core.error import AirtestError, LocalDeviceError
 from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding, kill_proc
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
@@ -100,6 +100,8 @@ class InstructHelper(object):
         Returns:
 
         """
+        if not self.usb_device:
+            raise LocalDeviceError("Currently only supports port forwarding for locally connected iOS devices")
         local_port = random.randint(11111, 20000)
         self.do_proxy(local_port, device_port)
         return local_port, device_port
@@ -118,7 +120,7 @@ class InstructHelper(object):
 
         """
         if not self.usb_device:
-            raise AirtestError("Currently only supports port forwarding for locally connected iOS devices")
+            raise LocalDeviceError("Currently only supports port forwarding for locally connected iOS devices")
         proxy_process = self.builtin_iproxy_path() or shutil.which("tidevice")
         if proxy_process:
             cmds = [proxy_process, "-u", self._udid, str(port), str(device_port)]

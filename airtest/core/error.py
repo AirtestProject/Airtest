@@ -115,3 +115,11 @@ class MinitouchError(BaseError):
 
 class PerformanceError(BaseError):
     pass
+
+
+class LocalDeviceError(BaseError):
+    """
+    Custom exception for calling a method on a non-local iOS device.
+    """
+    def __init__(self, value="Can only use this method on a local device."):
+        super().__init__(value)
