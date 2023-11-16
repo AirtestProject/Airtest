@@ -1,5 +1,6 @@
 # _*_ coding:UTF-8 _*_
 import time
+import functools
 
 
 def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
@@ -33,17 +34,19 @@ def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
         wrapper
 
     """
+
     def dec(func):
+        @functools.wraps(func)
         def f2(*args, **kwargs):
             mydelay = delay
             tries = range(max_tries)
             # support Python conver range obj to list obj
             tries = list(tries)
-            
+
             tries.reverse()
             for tries_remaining in tries:
                 try:
-                   return func(*args, **kwargs)
+                    return func(*args, **kwargs)
                 except exceptions as e:
                     if tries_remaining > 0:
                         if hook is not None:
@@ -54,5 +57,7 @@ def retries(max_tries, delay=1, backoff=2, exceptions=(Exception,), hook=None):
                         raise
                 else:
                     break
+
         return f2
+
     return dec
