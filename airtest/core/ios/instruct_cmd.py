@@ -65,7 +65,13 @@ class InstructHelper(object):
         """
         if not self._device:
             # wda无法直接获取iOS的udid，因此先检查usb连接的手机udid列表
-            for dev in wda.usbmux.Usbmux().device_list():
+            try:
+                device_list = wda.usbmux.Usbmux().device_list()
+            except ConnectionRefusedError:
+                # windows上必须要先启动iTunes才能获取到iOS设备列表
+                LOGGING.warning("If you are using iOS device in windows, please check if iTunes is launched")
+                return None
+            for dev in device_list:
                 udid = dev.get('SerialNumber')
                 usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
                 # 对比wda.info获取到的uuid是否一致
