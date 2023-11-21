@@ -349,6 +349,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.stop_app(package)
 
     def clear_app(self, package):
@@ -362,6 +363,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.clear_app(package)
 
     def install_app(self, filepath, replace=False, install_options=None):
