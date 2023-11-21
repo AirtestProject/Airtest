@@ -292,6 +292,7 @@ class Android(Device):
             the full path to the package
 
         """
+        assert package, "package name should not be empty"
         return self.adb.path_app(package)
 
     def check_app(self, package):
@@ -308,6 +309,7 @@ class Android(Device):
              AirtestError: raised if package is not found
 
         """
+        assert package, "package name should not be empty"
         return self.adb.check_app(package)
 
     def start_app(self, package, activity=None):
@@ -322,6 +324,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app(package, activity)
 
     def start_app_timing(self, package, activity):
@@ -336,6 +339,7 @@ class Android(Device):
             app launch time
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app_timing(package, activity)
 
     def stop_app(self, package):
@@ -406,6 +410,7 @@ class Android(Device):
             output from the uninstallation process
 
         """
+        assert package, "package name should not be empty"
         return self.adb.uninstall_app(package)
 
     def snapshot(self, filename=None, ensure_orientation=True, quality=10, max_size=None):
