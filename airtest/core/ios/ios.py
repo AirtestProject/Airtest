@@ -28,6 +28,8 @@ from airtest.utils.logger import get_logger
 from airtest.core.ios.mjpeg_cap import MJpegcap
 from airtest.core.settings import Settings as ST
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
+from airtest.core.error import LocalDeviceError
+
 
 LOGGING = get_logger(__name__)
 
@@ -151,7 +153,7 @@ class TIDevice:
         wda_list = []
         for app in app_list:
             bundle_id, display_name, _ = app
-            if ".xctrunner" in bundle_id or display_name == "WebDriverAgentRunner-Runner":
+            if (bundle_id.startswith('com.') and bundle_id.endswith(".xctrunner")) or display_name == "WebDriverAgentRunner-Runner":
                 wda_list.append(bundle_id)
         return wda_list
     
@@ -280,7 +282,7 @@ class IOS(Device):
     """
 
     def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None, serialno=None, wda_bundle_id=None):
-        super(IOS, self).__init__()
+        super().__init__()
 
         # If none or empty, use default addr.
         self.addr = addr or DEFAULT_ADDR
@@ -303,7 +305,7 @@ class IOS(Device):
         # The three connection modes are determined by the addr.
         # e.g., connect remote device http://10.227.70.247:20042
         # e.g., connect local device http://127.0.0.1:8100 or http://localhost:8100 or http+usbmux://00008020-001270842E88002E
-        self.udid = udid
+        self.udid = udid or name or serialno
         self.wda_bundle_id = wda_bundle_id
         parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(self.addr).netloc
         if parsed not in ["localhost", "127.0.0.1"] and "." in parsed:
@@ -474,7 +476,7 @@ class IOS(Device):
             try:
                 # Add some device info.
                 if not self.is_local_device:
-                    raise RuntimeError("Can only use this method in local device now, not remote device.")
+                    raise LocalDeviceError()
                 tmp_dict = TIDevice.device_info(self.udid)
                 device_info.update(tmp_dict)
             except:
@@ -787,7 +789,7 @@ class IOS(Device):
             text += '\n'
         self.driver.send_keys(text)
         
-    def install_app(self, file_or_url):
+    def install_app(self, file_or_url, **kwargs):
         """
         curl -X POST $JSON_HEADER \
         -d "{\"desiredCapabilities\":{\"bundleId\":\"com.apple.mobilesafari\", \"app\":\"[host_path]/magicapp.app\"}}" \
@@ -800,10 +802,13 @@ class IOS(Device):
             file_or_url: file or url to install
 
         Returns:
-            bundle ID        
+            bundle ID
+
+        Raises:
+            LocalDeviceError: If the device is remote.
         """
         if not self.is_local_device:
-            raise RuntimeError("Can only use this method in local device now, not remote device.")
+            raise LocalDeviceError()
         return TIDevice.install_app(self.udid, file_or_url)
     
     def uninstall_app(self, bundle_id):
@@ -814,9 +819,12 @@ class IOS(Device):
 
         Args:
             bundle_id: the app bundle id, e.g ``com.apple.mobilesafari``
+
+        Raises:
+            LocalDeviceError: If the device is remote.
         """
         if not self.is_local_device:
-            raise RuntimeError("Can only use this method in local device now, not remote device.")
+            raise LocalDeviceError()
         return TIDevice.uninstall_app(self.udid, bundle_id)
 
     def start_app(self, bundle_id, *args, **kwargs):
@@ -843,7 +851,7 @@ class IOS(Device):
         """
         try:
             if not self.is_local_device:
-                raise RuntimeError("Can only use this method in local device now, not remote device.")
+                raise LocalDeviceError()
             TIDevice.stop_app(self.udid, bundle_id)
         except:
             pass
@@ -862,9 +870,12 @@ class IOS(Device):
             list: A list of tuples containing the bundle ID, display name,
                 and version of the installed applications.
             e.g. [('com.apple.mobilesafari', 'Safari', '8.0'), ...]
+
+        Raises:
+            LocalDeviceError: If the device is remote.
         """
         if not self.is_local_device:
-            raise RuntimeError("Can only use this method in local device now, not remote device.")
+            raise LocalDeviceError()
         return TIDevice.list_app(self.udid, app_type=type)
 
     def app_state(self, bundle_id):
@@ -909,14 +920,17 @@ class IOS(Device):
         Returns:
             Clipboard text.
 
+        Raises:
+            LocalDeviceError: If the device is remote and the wda_bundle_id parameter is not provided.
+
         Notes:
             If you want to use this function, you have to set WDA foreground which would switch the 
             current screen of the phone. Then we will try to switch back to the screen before.
         """
         if wda_bundle_id is None:
             if not self.is_local_device:
-                raise RuntimeError("Remote device need to set running wda bundle id parameter, \
-                                    e.g. get_clipboard('wda_bundle_id').")
+                raise LocalDeviceError("Remote device need to set running wda bundle id parameter, \
+                                       e.g. get_clipboard('wda_bundle_id').")
             wda_bundle_id = self._get_default_running_wda_bundle_id()
         # Set wda foreground, it's necessary.
         try:
@@ -933,7 +947,7 @@ class IOS(Device):
         if current_app_bundle_id:
             self.driver.app_launch(current_app_bundle_id)
         else:
-            LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
+            LOGGING.warning("we can't switch back to the app before, because can't get bundle id.")
         return decoded_text
     
     def set_clipboard(self, content, wda_bundle_id=None, *args, **kwargs):
@@ -945,15 +959,15 @@ class IOS(Device):
             wda_bundle_id (str, optional): The bundle ID of the WDA app. Defaults to None.
 
         Raises:
-            RuntimeError: If the device is remote and the wda_bundle_id parameter is not provided.
+            LocalDeviceError: If the device is remote and the wda_bundle_id parameter is not provided.
 
         Returns:
             None
         """
         if wda_bundle_id is None:
             if not self.is_local_device:
-                raise RuntimeError("Remote device need to set running wda bundle id parameter, \
-                                    e.g. set_clipboard('content', 'wda_bundle_id').")
+                raise LocalDeviceError("Remote device need to set running wda bundle id parameter, \
+                                        e.g. set_clipboard('content', 'wda_bundle_id').")
             wda_bundle_id = self._get_default_running_wda_bundle_id()
         # Set wda foreground, it's necessary.
         try:
@@ -979,7 +993,7 @@ class IOS(Device):
             wda_bundle_id (str, optional): The bundle ID of the WDA app. Defaults to None.
 
         Raises:
-            RuntimeError: If the device is remote and the wda_bundle_id parameter is not provided.
+            LocalDeviceError: If the device is remote and the wda_bundle_id parameter is not provided.
 
         Returns:
             None
@@ -1074,6 +1088,21 @@ class IOS(Device):
             Might not work on all devices.
         """
         return self.driver.lock()
+
+    def setup_forward(self, port):
+        """
+        Setup port forwarding from device to host.
+        Args:
+            port: device port
+
+        Returns:
+            host port, device port
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+
+        """
+        return self.instruct_helper.setup_proxy(int(port))
 
     def alert_accept(self):
         """ Alert accept-Actually do click first alert button.

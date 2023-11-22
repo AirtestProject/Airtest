@@ -145,5 +145,9 @@ def Logwrap(f, logger):
                     # if G.DEVICE is None
                     pass
             logger.log('function', fndata, depth=depth)
-            logger.running_stack.pop()
+            try:
+                logger.running_stack.pop()
+            except IndexError:
+                # logger.running_stack is empty
+                pass
     return wrapper

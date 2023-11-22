@@ -292,6 +292,7 @@ class Android(Device):
             the full path to the package
 
         """
+        assert package, "package name should not be empty"
         return self.adb.path_app(package)
 
     def check_app(self, package):
@@ -308,6 +309,7 @@ class Android(Device):
              AirtestError: raised if package is not found
 
         """
+        assert package, "package name should not be empty"
         return self.adb.check_app(package)
 
     def start_app(self, package, activity=None):
@@ -322,6 +324,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app(package, activity)
 
     def start_app_timing(self, package, activity):
@@ -336,6 +339,7 @@ class Android(Device):
             app launch time
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app_timing(package, activity)
 
     def stop_app(self, package):
@@ -349,6 +353,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.stop_app(package)
 
     def clear_app(self, package):
@@ -362,6 +367,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.clear_app(package)
 
     def install_app(self, filepath, replace=False, install_options=None):
@@ -404,6 +410,7 @@ class Android(Device):
             output from the uninstallation process
 
         """
+        assert package, "package name should not be empty"
         return self.adb.uninstall_app(package)
 
     def snapshot(self, filename=None, ensure_orientation=True, quality=10, max_size=None):
@@ -902,14 +909,10 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
-        if self.yosemite_recorder.recording_proc != None:
+        if self.yosemite_recorder.recording_proc is not None or self.recorder is None:
             if output is None:
                 output = self.recorder_save_path
             return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
-
-        if self.recorder is None:
-            LOGGING.warning("start_recording first")
-            return False
         
         LOGGING.info("stopping recording")
         self.recorder.stop()
