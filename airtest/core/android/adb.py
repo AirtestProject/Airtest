@@ -71,7 +71,7 @@ class ADB(object):
 
         # Check if adb process is already running
         for process in psutil.process_iter(['name', 'exe']):
-            if process.info['name'] == ADB_NAME:
+            if process.info['name'] == ADB_NAME and process.info['exe'] and os.path.exists(process.info['exe']):
                 return process.info['exe']
 
         # Check if ANDROID_HOME environment variable exists
