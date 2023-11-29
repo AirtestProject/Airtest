@@ -45,7 +45,7 @@ class Android(Device):
                  adb_path=None,
                  name=None):
         super(Android, self).__init__()
-        self.serialno = serialno or self.get_default_device()
+        self.serialno = serialno or self.get_default_device(adb_path=adb_path)
         self._uuid = name or self.serialno
         self._cap_method = cap_method.upper()
         self._touch_method = touch_method.upper()
