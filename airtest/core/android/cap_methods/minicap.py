@@ -398,20 +398,24 @@ class Minicap(BaseCap):
         TASK_INTERRUPTIBLE1 = "__skb_wait_for_more_packets"
         TASK_INTERRUPTIBLE2 = "futex_wait_queue_me"
 
+        shell_output = ""
         try:
             shell_output = self.adb.shell("ps -A| grep minicap")
         except:
-            pass
-        else:
-            if len(shell_output) == 0:
-                return
-            for line in shell_output.split("\r\n"):
-                if TASK_INTERRUPTIBLE1 in line or TASK_INTERRUPTIBLE2 in line:
-                    pid = line.split()[1]
-                    try:
-                        self.adb.shell("kill %s" % pid)
-                    except:
-                        pass
+            try:
+                shell_output = self.adb.shell("ps| grep minicap")
+            except:
+                pass
+
+        if len(shell_output) == 0:
+            return
+        for line in shell_output.split("\r\n"):
+            if TASK_INTERRUPTIBLE1 in line or TASK_INTERRUPTIBLE2 in line:
+                pid = line.split()[1]
+                try:
+                    self.adb.shell("kill %s" % pid)
+                except:
+                    pass
 
     def _cleanup(self):
         """
