@@ -4,6 +4,8 @@
 import os
 import re
 import sys
+
+import requests.exceptions
 import wda
 import time
 import base64
@@ -28,7 +30,7 @@ from airtest.utils.logger import get_logger
 from airtest.core.ios.mjpeg_cap import MJpegcap
 from airtest.core.settings import Settings as ST
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
-from airtest.core.error import LocalDeviceError
+from airtest.core.error import LocalDeviceError, AirtestError
 
 
 LOGGING = get_logger(__name__)
@@ -840,7 +842,10 @@ class IOS(Device):
         """
         if not self.is_local_device:
             # Note: If the bundle_id does not exist, it may get stuck.
-            return self.driver.app_launch(bundle_id)
+            try:
+                return self.driver.app_launch(bundle_id)
+            except requests.exceptions.ReadTimeout:
+                raise AirtestError(f"App launch timeout, please check if the app is installed: {bundle_id}")
         else:
             return TIDevice.start_app(self.udid, bundle_id)
     
@@ -1103,6 +1108,16 @@ class IOS(Device):
 
         """
         return self.instruct_helper.setup_proxy(int(port))
+
+    def ps(self):
+        """Get the process list of the device.
+
+        Returns:
+            Process list of the device.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        return TIDevice.ps(self.udid)
 
     def alert_accept(self):
         """ Alert accept-Actually do click first alert button.
