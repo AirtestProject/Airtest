@@ -153,10 +153,10 @@ class MJpegcap(object):
         return img_string
 
     def teardown_stream(self):
-        if self.port_forwarding:
-            self.instruct_helper.remove_proxy(self.port)
         if self.buf:
             self.buf.close()
+        if self.port_forwarding:
+            self.instruct_helper.remove_proxy(self.port)
         self.port = None
 
 

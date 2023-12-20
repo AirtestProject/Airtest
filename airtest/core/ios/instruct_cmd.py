@@ -10,7 +10,7 @@ import threading
 import wda
 from copy import copy
 from functools import partial
-from airtest.core.error import AirtestError
+from airtest.core.error import AirtestError, LocalDeviceError
 from airtest.utils.snippet import reg_cleanup, make_file_executable, get_std_encoding, kill_proc
 from airtest.utils.logger import get_logger
 from airtest.utils.retry import retries
@@ -65,7 +65,17 @@ class InstructHelper(object):
         """
         if not self._device:
             # wda无法直接获取iOS的udid，因此先检查usb连接的手机udid列表
-            for dev in wda.usbmux.Usbmux().device_list():
+            try:
+                device_list = wda.usbmux.Usbmux().device_list()
+            except ConnectionRefusedError:
+                # windows上必须要先启动iTunes才能获取到iOS设备列表
+                LOGGING.warning("If you are using iOS device in windows, please check if iTunes is launched")
+                return None
+            except Exception as e:
+                # 其他异常，例如 socket unix:/var/run/usbmuxd unable to connect
+                print(e)
+                return None
+            for dev in device_list:
                 udid = dev.get('SerialNumber')
                 usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
                 # 对比wda.info获取到的uuid是否一致
@@ -100,6 +110,8 @@ class InstructHelper(object):
         Returns:
 
         """
+        if not self.usb_device:
+            raise LocalDeviceError("Currently only supports port forwarding for locally connected iOS devices")
         local_port = random.randint(11111, 20000)
         self.do_proxy(local_port, device_port)
         return local_port, device_port
@@ -118,7 +130,7 @@ class InstructHelper(object):
 
         """
         if not self.usb_device:
-            raise AirtestError("Currently only supports port forwarding for locally connected iOS devices")
+            raise LocalDeviceError("Currently only supports port forwarding for locally connected iOS devices")
         proxy_process = self.builtin_iproxy_path() or shutil.which("tidevice")
         if proxy_process:
             cmds = [proxy_process, "-u", self._udid, str(port), str(device_port)]
