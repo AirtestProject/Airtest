@@ -724,16 +724,27 @@ class IOS(Device):
         if not (tx < 1 and ty < 1):
             tx, ty = int(tx * self.touch_factor), int(ty * self.touch_factor)
         # 如果是通过ide来滑动，且安装的是自制版的wda就调用快速滑动接口，其他时候不关心滑动速度就使用原生接口保证滑动精确性。
+        def ios_tagent_swipe(fpos, tpos, delay=None):
+            # 调用自定义的wda swipe接口需要进行坐标转换。
+            fx, fy = self._transform_xy(fpos)
+            tx, ty = self._transform_xy(tpos)
+            self._quick_swipe(fx, fy, tx, ty, delay or 0.2)
+
         if delay:
             if self.using_ios_tagent:
-                # 调用自定义的wda swipe接口需要进行坐标转换。
-                fx, fy = self._transform_xy(fpos)
-                tx, ty = self._transform_xy(tpos)
-                self._quick_swipe(fx, fy, tx, ty, delay)
+                ios_tagent_swipe(fpos, tpos, delay)
             else:
                 self.driver.swipe(fx, fy, tx, ty)
         else:
-            self.driver.swipe(fx, fy, tx, ty, duration)
+            try:
+                self.driver.swipe(fx, fy, tx, ty, duration)
+            except wda.WDARequestError as e:
+                if e.status == 110:
+                    # 部分低版本iOS在滑动时，可能会有报错，调用一次ios-Tagent的快速滑动接口来尝试解决
+                    if self.using_ios_tagent:
+                        ios_tagent_swipe(fpos, tpos, delay)
+                    else:
+                        raise
 
     def _quick_swipe(self, x1, y1, x2, y2, delay):
         """
