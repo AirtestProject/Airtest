@@ -158,6 +158,13 @@ class TestAndroid(unittest.TestCase):
             self.android.touch_method = i
             self.android.touch((100, 100))
 
+    def test_touch_percentage(self):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.touch((0.5, 0.5))
+            time.sleep(2)
+            self.android.keyevent("BACK")
+
     def test_swipe(self):
         for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
@@ -169,6 +176,16 @@ class TestAndroid(unittest.TestCase):
         self.android.touch_method = TOUCH_METHOD.MINITOUCH
         with self.assertRaises(Exception):
             self.android.swipe((100, 100), (300, 300), fingers=3)
+
+    def test_swipe_percentage(self):
+        for i in (TOUCH_METHOD.ADBTOUCH, TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.swipe((0.6, 0.5), (0.4, 0.5))
+            self.android.swipe((0.3, 0.5), (0.6, 0.5), fingers=1)
+            self.android.swipe((0.1, 0.1), (0.3, 0.3), fingers=2)
+
+        with self.assertRaises(Exception):
+            self.android.swipe((0.1, 0.1), (0.3, 0.3), fingers=3)
 
     def test_get_top_activity(self):
         self._install_test_app()
@@ -206,6 +223,16 @@ class TestAndroid(unittest.TestCase):
         with self.assertRaises(Exception):
             self.android.swipe_along(coordinates_list)
 
+    def test_swipe_along_percentage(self):
+        coordinates_list = [(0.1, 0.3), (0.7, 0.3), (0.1, 0.7), (0.8, 0.8)]
+        for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.swipe_along(coordinates_list)
+            self.android.swipe_along(coordinates_list, duration=3, steps=10)
+        self.android.touch_method = TOUCH_METHOD.ADBTOUCH
+        with self.assertRaises(Exception):
+            self.android.swipe_along(coordinates_list)
+
     def test_two_finger_swipe(self):
         for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
             self.android.touch_method = i
@@ -216,6 +243,17 @@ class TestAndroid(unittest.TestCase):
         self.android.touch_method = TOUCH_METHOD.ADBTOUCH
         with self.assertRaises(Exception):
             self.android.two_finger_swipe((100, 100), (200, 200))
+
+    def test_two_findger_swipe_percentage(self):
+        for i in (TOUCH_METHOD.MINITOUCH, TOUCH_METHOD.MAXTOUCH):
+            self.android.touch_method = i
+            self.android.two_finger_swipe((0.1, 0.1), (0.2, 0.2))
+            self.android.two_finger_swipe((0.1, 0.1), (0.2, 0.2), duration=3, steps=10)
+            self.android.two_finger_swipe((0.1, 0.1), (0.2, 0.2), offset=(-0.02, 0.1))
+            self.android.two_finger_swipe((0.1, 0.1), (0.2, 0.2), offset=(-0.2, 0.1))
+        self.android.touch_method = TOUCH_METHOD.ADBTOUCH
+        with self.assertRaises(Exception):
+            self.android.two_finger_swipe((0.1, 0.1), (0.2, 0.2))
 
     def test_disconnect(self):
         self.android.snapshot()
