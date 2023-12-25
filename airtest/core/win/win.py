@@ -21,6 +21,7 @@ from airtest import aircv
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.core.device import Device
 from airtest.core.settings import Settings as ST
+from airtest.utils.snippet import get_absolute_coordinate
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -461,6 +462,7 @@ class Windows(Device):
         self.app.kill()
 
     def _action_pos(self, pos):
+        pos = get_absolute_coordinate(pos, self)
         if self.app:
             pos = self._windowpos_to_screenpos(pos)
         pos = (int(pos[0]), int(pos[1]))

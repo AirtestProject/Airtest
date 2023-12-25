@@ -1,5 +1,5 @@
 # encoding=utf-8
-from airtest.core.android.android import ADB, Javacap, YosemiteIme
+from airtest.core.android.android import ADB, Javacap, YosemiteIme, YosemiteExt
 from airtest.aircv.utils import string_2_img
 from numpy import ndarray
 import unittest
@@ -66,6 +66,33 @@ class TestIme(unittest.TestCase):
 
     def test_end(cls):
         cls.ime.end()
+
+
+class TestYosemiteExt(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.adb = ADB()
+        devices = cls.adb.devices()
+        if not devices:
+            raise RuntimeError("At lease one adb device required")
+        cls.adb.serialno = devices[0][0]
+        cls.yosemite = YosemiteExt(cls.adb)
+
+    def test_change_lang(self):
+        self.yosemite.change_lang("ja")
+        self.yosemite.change_lang("zh")
+
+    def test_clipboard(self):
+        text1 = "test clipboard"
+        self.yosemite.set_clipboard(text1)
+        self.assertEqual(self.yosemite.get_clipboard(), text1)
+
+        # test escape special char
+        text2 = "test clipboard with $pecial char #@!#%$#^&*()'"
+        self.yosemite.set_clipboard(text2)
+        self.assertEqual(self.yosemite.get_clipboard(), text2)
+
 
 
 if __name__ == '__main__':

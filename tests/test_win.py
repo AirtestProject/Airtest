@@ -3,7 +3,7 @@ from airtest.core.win import Windows
 import unittest
 import numpy
 import win32api
-from testconf import try_remove
+from .testconf import try_remove
 
 import time
 import os
@@ -36,7 +36,8 @@ class TestWin(unittest.TestCase):
         self.windows.text("abc")
 
     def test_touch(self):
-        self.windows.touch((11, 11))
+        self.windows.touch((100, 100))
+        # self.windows.touch((0.5, 0.5))
 
     def test_swipe(self):
         self.windows.swipe((11, 11), (100, 100))

@@ -9,7 +9,7 @@ from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
 from airtest.core.settings import Settings as ST
 from airtest.utils.compat import script_log_dir
-from airtest.utils.snippet import parse_device_uri, get_absolute_coordinate
+from airtest.utils.snippet import parse_device_uri
 from airtest.core.helper import (G, delay_after_operation, import_device_cls,
                                  logwrap, set_logdir, using, log)
 # Assertions
@@ -361,8 +361,8 @@ def touch(v, times=1, **kwargs):
     if isinstance(v, Template):
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:
-        pos = get_absolute_coordinate(v, G.DEVICE)
         try_log_screen()
+        pos = v
     for _ in range(times):
         G.DEVICE.touch(pos, **kwargs)
         time.sleep(0.05)
@@ -387,8 +387,8 @@ def double_click(v):
     if isinstance(v, Template):
         pos = loop_find(v, timeout=ST.FIND_TIMEOUT)
     else:
-        pos = get_absolute_coordinate(v, G.DEVICE)
         try_log_screen()
+        pos = v
     G.DEVICE.double_click(pos)
     delay_after_operation()
     return pos
@@ -435,13 +435,13 @@ def swipe(v1, v2=None, vector=None, **kwargs):
             raise
     else:
         try_log_screen()
-        pos1 = get_absolute_coordinate(v1, G.DEVICE)
+        pos1 = v1
 
     if v2:
         if isinstance(v2, Template):
             pos2 = loop_find(v2, timeout=ST.FIND_TIMEOUT_TMP)
         else:
-            pos2 = get_absolute_coordinate(v2, G.DEVICE)
+            pos2 = v2
     elif vector:
         if vector[0] <= 1 and vector[1] <= 1:
             w, h = G.DEVICE.get_current_resolution()
