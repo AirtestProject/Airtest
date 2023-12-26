@@ -589,6 +589,11 @@ class Android(Device):
             pos: coordinates (x, y)
             duration: how long to touch the screen
 
+        Examples:
+            >>> dev = Android()  # or dev = device()
+            >>> dev.touch((100, 100))  # absolute coordinates
+            >>> dev.touch((0.5, 0.5))  # relative coordinates
+
         Returns:
             None
 
@@ -612,6 +617,11 @@ class Android(Device):
             duration: how long to swipe the screen, default 0.5
             steps: how big is the swipe step, default 5
             fingers: the number of fingers. 1 or 2.
+
+        Examples:
+            >>> dev = Android()  # or dev = device()
+            >>> dev.swipe((100, 100), (200, 200))  # absolute coordinates
+            >>> dev.swipe((0.1, 0.1), (0.2, 0.2))  # relative coordinates
 
         Returns:
             None
