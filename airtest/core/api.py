@@ -345,6 +345,10 @@ def touch(v, times=1, **kwargs):
 
         >>> touch(Template(r"tpl1606730579419.png", target_pos=5))
 
+        Click on relative coordinates, for example, click on the center of the screen::
+
+        >>> touch((0.5, 0.5))
+
         Click 2 times::
 
         >>> touch((100, 100), times=2)
@@ -423,6 +427,10 @@ def swipe(v1, v2=None, vector=None, **kwargs):
 
         >>> # swiping lasts for 1 second, divided into 6 steps
         >>> swipe((100, 100), (200, 200), duration=1, steps=6)
+
+        Use relative coordinates to swipe, such as swiping from the center right to the left of the screen::
+
+        >>> swipe((0.7, 0.5), (0.2, 0.5))
 
     """
     if isinstance(v1, Template):

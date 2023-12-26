@@ -234,6 +234,12 @@ class Windows(Device):
             pos: coordinates where to click
             **kwargs: optional arguments
 
+        Examples:
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.touch((100, 100))  # absolute coordinates
+            >>> dev.touch((0.5, 0.5))  # relative coordinates
+
         Returns:
             None
 
@@ -288,14 +294,17 @@ class Windows(Device):
             steps: size of the swipe step
             button: mouse button to press, 'left', 'right' or 'middle', default is 'left'
 
+        Examples:
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.swipe((100, 100), (200, 200), duration=0.5)
+            >>> dev.swipe((0.1, 0.1), (0.2, 0.2), duration=0.5)
+
         Returns:
             None
 
         """
         # 设置坐标时相对于整个屏幕的坐标:
-        x1, y1 = self._fix_op_pos(p1)
-        x2, y2 = self._fix_op_pos(p2)
-
         from_x, from_y = self._action_pos(p1)
         to_x, to_y = self._action_pos(p2)
 
