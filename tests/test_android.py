@@ -141,9 +141,11 @@ class TestAndroid(unittest.TestCase):
         self.android.text(u'你好')
 
     def test_clipboard(self):
-        text1 = "test clipboard"
-        self.android.set_clipboard(text1)
-        self.assertEqual(self.android.get_clipboard(), text1)
+        for i in range(10):
+            text1 = "test clipboard" + str(i)
+            self.android.set_clipboard(text1)
+            self.assertEqual(self.android.get_clipboard(), text1)
+            self.android.paste()
 
         self.android.paste()
 
