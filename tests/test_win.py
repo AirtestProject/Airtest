@@ -81,6 +81,17 @@ class TestWin(unittest.TestCase):
             duration = frame_num/rate
         self.assertEqual(duration >= 10, True)
 
+    def test_clipboard(self):
+        self.windows.set_clipboard("test")
+        self.assertEqual(self.windows.get_clipboard(), "test")
+
+        for i in range(10):
+            text = "test clipboard with中文 $pecial char #@!#%$#^&*()'" + str(i)
+            self.windows.set_clipboard(text)
+            self.assertEqual(self.windows.get_clipboard(), text)
+            time.sleep(0.5)
+
+
     @classmethod
     def tearDownClass(cls):
         try_remove('test_10s.mp4')
