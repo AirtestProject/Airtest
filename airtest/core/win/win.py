@@ -8,6 +8,7 @@ import mss
 import psutil
 from functools import wraps
 import win32api
+import win32clipboard
 import pywintypes  # noqa
 import os
 
@@ -469,6 +470,63 @@ class Windows(Device):
 
         """
         self.app.kill()
+
+    def set_clipboard(self, text):
+        """
+        Set clipboard content
+
+        Args:
+            text: text to be set to clipboard
+
+        Examples:
+
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.set_clipboard("hello world")
+            >>> print(dev.get_clipboard())
+            'hello world'
+            >>> dev.paste()  # paste the clipboard content
+
+        Returns:
+            None
+
+        """
+        try:
+            win32clipboard.OpenClipboard()
+        except pywintypes.error as e:
+            # pywintypes.error: (5, 'OpenClipboard', '拒绝访问。')
+            # sometimes clipboard is locked by other process, retry after 0.1s
+            time.sleep(0.1)
+            win32clipboard.OpenClipboard()
+        try:
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT, text)
+        finally:
+            win32clipboard.CloseClipboard()
+
+    def get_clipboard(self):
+        """
+        Get clipboard content
+
+        Returns:
+            clipboard content
+
+        """
+        try:
+            win32clipboard.OpenClipboard()
+            return win32clipboard.GetClipboardData()
+        finally:
+            win32clipboard.CloseClipboard()
+
+    def paste(self):
+        """
+        Perform paste action
+
+        Returns:
+            None
+
+        """
+        self.keyevent("^v")
 
     def _action_pos(self, pos):
         pos = get_absolute_coordinate(pos, self)

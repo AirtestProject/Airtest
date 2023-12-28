@@ -672,7 +672,7 @@ def get_clipboard(*args, **kwargs):
     Get the content from the clipboard.
 
     :return: str
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :Example:
 
         >>> text = get_clipboard()  # Android or local iOS
@@ -693,7 +693,7 @@ def set_clipboard(content, *args, **kwargs):
 
     :param content: str
     :return: None
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :Example:
 
         >>> set_clipboard("content")  # Android or local iOS
@@ -711,7 +711,7 @@ def paste(*args, **kwargs):
     """
     Paste the content from the clipboard.
 
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :return: None
     :Example:
 
