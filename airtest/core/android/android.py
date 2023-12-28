@@ -1004,6 +1004,13 @@ class Android(Device):
         Returns:
             clipboard content
 
+        Examples:
+            >>> dev = Android()
+            >>> dev.set_clipboard("hello world")
+            >>> dev.get_clipboard()
+            'hello world'
+            >>> dev.paste()  # paste the clipboard content
+
         """
         return self.yosemite_ext.get_clipboard()
 
@@ -1019,14 +1026,6 @@ class Android(Device):
 
         """
         self.yosemite_ext.set_clipboard(text)
-
-    def paste(self):
-        """
-        Paste the clipboard content
-        Returns:
-
-        """
-        self.text(self.get_clipboard())
 
     def _register_rotation_watcher(self):
         """

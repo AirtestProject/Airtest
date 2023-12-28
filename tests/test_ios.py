@@ -306,9 +306,17 @@ class TestIos(unittest.TestCase):
         print(self.ios.get_clipboard())
 
     def test_set_clipboard(self):
-        print("test_set_clipboard")
-        print(self.ios.set_clipboard("test"))    
-    
+        for i in range(10):
+            text = "test_set_clipboard"+str(i)
+            self.ios.set_clipboard(text)
+            self.assertEqual(self.ios.get_clipboard(), text)
+            self.ios.paste()
+
+        text = "test clipboard with中文 $pecial char #@!#%$#^&*()'"
+        self.ios.set_clipboard(text)
+        self.assertEqual(self.ios.get_clipboard(), text)
+        self.ios.paste()
+
 
 if __name__ == '__main__':
     # unittest.main()

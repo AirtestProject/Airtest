@@ -308,7 +308,7 @@ class IOS(Device):
         # e.g., connect remote device http://10.227.70.247:20042
         # e.g., connect local device http://127.0.0.1:8100 or http://localhost:8100 or http+usbmux://00008020-001270842E88002E
         self.udid = udid or name or serialno
-        self.wda_bundle_id = wda_bundle_id
+        self._wda_bundle_id = wda_bundle_id
         parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(self.addr).netloc
         if parsed not in ["localhost", "127.0.0.1"] and "." in parsed:
             # Connect remote device via url.
@@ -323,8 +323,6 @@ class IOS(Device):
                 self.udid = udid
             else:
                 self.udid = parsed
-            if not wda_bundle_id:
-                self.wda_bundle_id = self._get_default_wda_bundle_id()
             self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
         # Record device's width and height.
         self._size = {'width': None, 'height': None}
@@ -383,6 +381,12 @@ class IOS(Device):
             return running_wda_list[0]
         except IndexError:
             raise IndexError("Running WDA bundleID not found, please makesure WDA was started.")
+
+    @property
+    def wda_bundle_id(self):
+        if not self._wda_bundle_id and self.is_local_device:
+            self._wda_bundle_id = self._get_default_wda_bundle_id()
+        return self._wda_bundle_id
         
     @property
     def ip(self):
@@ -947,7 +951,7 @@ class IOS(Device):
             if not self.is_local_device:
                 raise LocalDeviceError("Remote device need to set running wda bundle id parameter, \
                                        e.g. get_clipboard('wda_bundle_id').")
-            wda_bundle_id = self._get_default_running_wda_bundle_id()
+            wda_bundle_id = self.wda_bundle_id
         # Set wda foreground, it's necessary.
         try:
             current_app_bundle_id = self.app_current().get("bundleId", None)
@@ -957,8 +961,12 @@ class IOS(Device):
             self.driver.app_launch(wda_bundle_id)
         except:
             pass
+        # 某些机型版本下，有一定概率获取失败，尝试重试一次
         clipboard_text = self.driver._session_http.post("/wda/getPasteboard").value
+        if not clipboard_text:
+            clipboard_text = self.driver._session_http.post("/wda/getPasteboard").value
         decoded_text = base64.b64decode(clipboard_text).decode('utf-8')
+
         # Switch back to the screen before.
         if current_app_bundle_id:
             self.driver.app_launch(current_app_bundle_id)
@@ -984,7 +992,7 @@ class IOS(Device):
             if not self.is_local_device:
                 raise LocalDeviceError("Remote device need to set running wda bundle id parameter, \
                                         e.g. set_clipboard('content', 'wda_bundle_id').")
-            wda_bundle_id = self._get_default_running_wda_bundle_id()
+            wda_bundle_id = self.wda_bundle_id
         # Set wda foreground, it's necessary.
         try:
             current_app_bundle_id = self.app_current().get("bundleId", None)
@@ -995,11 +1003,16 @@ class IOS(Device):
         except:
             pass
         self.driver.set_clipboard(content)
+        clipboard_text = self.driver._session_http.post("/wda/getPasteboard").value
+        decoded_text = base64.b64decode(clipboard_text).decode('utf-8')
+        if decoded_text != content:
+            # 部分机型偶现设置剪切板失败，重试一次
+            self.driver.set_clipboard(content)
         # Switch back to the screen before.
         if current_app_bundle_id:
             self.driver.app_launch(current_app_bundle_id)
         else:
-            LOGGING.warning("we can't switch back to the app before, becasue can't get bundle id.")
+            LOGGING.warning("we can't switch back to the app before, because can't get bundle id.")
 
     def paste(self, wda_bundle_id=None, *args, **kwargs):
         """
