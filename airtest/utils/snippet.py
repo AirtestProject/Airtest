@@ -190,7 +190,7 @@ def escape_special_char(string):
 
 def get_absolute_coordinate(coord, dev):
     assert isinstance(coord, (tuple, list)) and len(coord) == 2, "Coordinates must be a tuple or list of length 2"
-    assert all(isinstance(i, (int, float)) for i in coord), "Coordinates must contain only numbers (int or float)"
+    assert all(isinstance(i, (int, float)) for i in coord), f"Coordinates must contain only numbers (int or float), but got {coord}"
 
     if coord[0] <= 1 and coord[1] <= 1:
         w, h = dev.get_current_resolution()
