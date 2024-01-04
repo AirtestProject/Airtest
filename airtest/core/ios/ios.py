@@ -667,7 +667,7 @@ class IOS(Device):
             pos: coordinates (x, y), can be float(percent) or int
             duration (optional): tap_hold duration
 
-        Returns: None
+        Returns: None(iOS may all use vertical screen coordinates, so coordinates will not be returned.)
 
         Examples:
             >>> touch((100, 100))

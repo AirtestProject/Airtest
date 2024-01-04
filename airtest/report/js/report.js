@@ -493,14 +493,20 @@ function StepPannel(data, root){
   this.convertPos = function(domList, screen,  withSize){
     for(var i=0; i<domList.length; i++){
       var rect = JSON.parse(domList[i].getAttribute('rect'))
-      x = rect.left * this.scale
-      y = rect.top * this.scale
-      if(withSize){
-        x -= domList[i].offsetWidth/2
-        y -= domList[i].offsetHeight/2
+      // 如果是相对坐标，不需要转换
+      if (rect.left < 1 && rect.top < 1) {
+        domList[i].style.left = rect.left * 100 + '%'
+        domList[i].style.top = rect.top * 100 + '%'
+      } else {
+          x = rect.left * this.scale
+          y = rect.top * this.scale
+          if(withSize){
+            x -= domList[i].offsetWidth/2
+            y -= domList[i].offsetHeight/2
+          }
+          domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
+          domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
       }
-      domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
-      domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
     }
   }
 

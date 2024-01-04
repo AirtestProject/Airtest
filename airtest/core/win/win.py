@@ -278,11 +278,13 @@ class Windows(Device):
         self.mouse.press(button=button, coords=(end_x, end_y))
         time.sleep(duration)
         self.mouse.release(button=button, coords=(end_x, end_y))
+        return (end_x, end_y)
 
     def double_click(self, pos):
         pos = self._fix_op_pos(pos)
         coords = self._action_pos(pos)
         self.mouse.double_click(coords=coords)
+        return pos
 
     def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
         """
@@ -322,6 +324,7 @@ class Windows(Device):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y), button=button)
+        return (from_x, from_y), (to_x, to_y)
 
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.

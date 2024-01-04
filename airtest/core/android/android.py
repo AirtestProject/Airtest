@@ -595,17 +595,19 @@ class Android(Device):
             >>> dev.touch((0.5, 0.5))  # relative coordinates
 
         Returns:
-            None
+            (x, y)  # The coordinate position of the actual click
 
         """
         pos = get_absolute_coordinate(pos, self)
         self.touch_proxy.touch(pos, duration)
+        return pos
 
     def double_click(self, pos):
         pos = get_absolute_coordinate(pos, self)
         self.touch(pos)
         time.sleep(0.05)
         self.touch(pos)
+        return pos
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
@@ -624,12 +626,13 @@ class Android(Device):
             >>> dev.swipe((0.1, 0.1), (0.2, 0.2))  # relative coordinates
 
         Returns:
-            None
+            (pos1, pos2)
 
         """
         p1 = get_absolute_coordinate(p1, self)
         p2 = get_absolute_coordinate(p2, self)
         self.touch_proxy.swipe(p1, p2, duration=duration, steps=steps, fingers=fingers)
+        return p1, p2
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
