@@ -368,7 +368,9 @@ def touch(v, times=1, **kwargs):
         try_log_screen()
         pos = v
     for _ in range(times):
-        G.DEVICE.touch(pos, **kwargs)
+        # If pos is a relative coordinate, return the converted click coordinates.
+        # iOS may all use vertical screen coordinates, so coordinates will not be returned.
+        pos = G.DEVICE.touch(pos, **kwargs) or pos
         time.sleep(0.05)
     delay_after_operation()
     return pos
@@ -393,7 +395,7 @@ def double_click(v):
     else:
         try_log_screen()
         pos = v
-    G.DEVICE.double_click(pos)
+    pos = G.DEVICE.double_click(pos) or pos
     delay_after_operation()
     return pos
 
@@ -458,7 +460,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     else:
         raise Exception("no enough params for swipe")
 
-    G.DEVICE.swipe(pos1, pos2, **kwargs)
+    pos1, pos2 = G.DEVICE.swipe(pos1, pos2, **kwargs) or (pos1, pos2)
     delay_after_operation()
     return pos1, pos2
 
