@@ -494,20 +494,21 @@ function StepPannel(data, root){
     for(var i=0; i<domList.length; i++){
       var rect = JSON.parse(domList[i].getAttribute('rect'))
       // 如果是相对坐标，不需要转换
-      if (rect.left < 1 && rect.top < 1) {
-        domList[i].style.left = rect.left * 100 + '%'
-        domList[i].style.top = rect.top * 100 + '%'
+      if (Math.abs(rect.left) < 1 && Math.abs(rect.top) < 1) {
+        x = rect.left * screen.width()
+        y = rect.top * screen.height()
       } else {
           x = rect.left * this.scale
           y = rect.top * this.scale
-          if(withSize){
-            x -= domList[i].offsetWidth/2
-            y -= domList[i].offsetHeight/2
-          }
-          domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
-          domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
       }
+      if(withSize){
+        x -= domList[i].offsetWidth/2
+        y -= domList[i].offsetHeight/2
+      }
+      domList[i].style.left = this.convertPosPersentage(x, screen , 'horizontal')
+      domList[i].style.top = this.convertPosPersentage(y, screen, 'vertical')
     }
+
   }
 
   this.convertSize = function(domList, minWidth, minHeight) {
@@ -530,8 +531,13 @@ function StepPannel(data, root){
     var start = this.original_steps[this.currentStep].screen.pos[0]
     var vector = this.original_steps[this.currentStep].screen.vector[0]
     if(vector && start){
-      var vt_x = vector[0] * this.scale;
-      var vt_y = - vector[1] * this.scale;
+      if (Math.abs(vector[0]) < 1 && Math.abs(vector[1]) < 1) {
+        var vt_x = vector[0] * screen.width()
+        var vt_y = vector[1] * screen.height()
+      } else {
+        var vt_x = vector[0] * this.scale;
+        var vt_y = - vector[1] * this.scale;
+      }
       var vt_width = Math.sqrt(vt_x * vt_x + vt_y * vt_y)
       var rotation = 360*Math.atan2(vt_y, vt_x)/(2*Math.PI)
       var rt =  'rotate(' + -rotation + 'deg)';
@@ -543,9 +549,16 @@ function StepPannel(data, root){
         'transform-origin': '6px 15px',
       };
       dom.css(rotate_css);
+      if (Math.abs(start[0]) < 1 && Math.abs(start[1]) < 1) {
+        var top = start[1] * 100 + '%'
+        var left = start[0] * 100 + '%'
+      } else {
+        var top = this.convertPosPersentage(start[1]* this.scale, screen, 'vertical')
+        var left = this.convertPosPersentage(start[0]*this.scale, screen, 'horizontal')
+      }
       dom.css({
-        'top': this.convertPosPersentage(start[1]* this.scale, screen, 'vertical'),
-        'left': this.convertPosPersentage(start[0]*this.scale, screen, 'horizontal'),
+        'top': top,
+        'left': left,
         'width': vt_width
       });
     }
