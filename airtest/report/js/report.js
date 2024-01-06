@@ -533,7 +533,7 @@ function StepPannel(data, root){
     if(vector && start){
       if (Math.abs(vector[0]) < 1 && Math.abs(vector[1]) < 1) {
         var vt_x = vector[0] * screen.width()
-        var vt_y = vector[1] * screen.height()
+        var vt_y = - vector[1] * screen.height()
       } else {
         var vt_x = vector[0] * this.scale;
         var vt_y = - vector[1] * this.scale;

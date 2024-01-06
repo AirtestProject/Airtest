@@ -39,8 +39,11 @@ class TestWin(unittest.TestCase):
         self.windows.touch((100, 100))
         self.windows.touch((0.5, 0.5))
 
+    def test_double_click(self):
+        self.windows.double_click((100, 100))
+
     def test_swipe(self):
-        self.windows.swipe((11, 11), (100, 100))
+        self.windows.swipe((100, 100), (500, 500))
         self.windows.swipe((0.1, 0.1), (0.5, 0.5))
 
     def test_key_press_and_key_release(self):

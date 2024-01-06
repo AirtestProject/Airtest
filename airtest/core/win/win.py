@@ -252,7 +252,8 @@ class Windows(Device):
         offset = kwargs.get("offset", 0)
 
         start = self._action_pos(win32api.GetCursorPos())
-        end = self._action_pos(pos)
+        ori_end = get_absolute_coordinate(pos, self)
+        end = self._action_pos(ori_end)
         start_x, start_y = self._fix_op_pos(start)
         end_x, end_y = self._fix_op_pos(end)
 
@@ -278,13 +279,13 @@ class Windows(Device):
         self.mouse.press(button=button, coords=(end_x, end_y))
         time.sleep(duration)
         self.mouse.release(button=button, coords=(end_x, end_y))
-        return (end_x, end_y)
+        return ori_end
 
     def double_click(self, pos):
-        pos = self._fix_op_pos(pos)
-        coords = self._action_pos(pos)
+        ori_pos = get_absolute_coordinate(pos, self)
+        coords = self._fix_op_pos(self._action_pos(ori_pos))
         self.mouse.double_click(coords=coords)
-        return pos
+        return ori_pos
 
     def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
         """
@@ -308,8 +309,10 @@ class Windows(Device):
 
         """
         # 设置坐标时相对于整个屏幕的坐标:
-        from_x, from_y = self._action_pos(p1)
-        to_x, to_y = self._action_pos(p2)
+        ori_from = get_absolute_coordinate(p1, self)
+        ori_to = get_absolute_coordinate(p2, self)
+        from_x, from_y = self._fix_op_pos(self._action_pos(ori_from))
+        to_x, to_y = self._fix_op_pos(self._action_pos(ori_to))
 
         interval = float(duration) / (steps + 1)
         self.mouse.press(coords=(from_x, from_y), button=button)
@@ -324,7 +327,7 @@ class Windows(Device):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y), button=button)
-        return (from_x, from_y), (to_x, to_y)
+        return ori_from, ori_to
 
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
@@ -532,7 +535,6 @@ class Windows(Device):
         self.keyevent("^v")
 
     def _action_pos(self, pos):
-        pos = get_absolute_coordinate(pos, self)
         if self.app:
             pos = self._windowpos_to_screenpos(pos)
         pos = (int(pos[0]), int(pos[1]))
