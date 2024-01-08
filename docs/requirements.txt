@@ -1,5 +1,5 @@
 sphinx
 recommonmark
-sphinx-markdown-tables
+sphinx-markdown-tables==0.0.15
 mock
 sphinx_rtd_theme
