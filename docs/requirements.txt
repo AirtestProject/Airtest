@@ -1,1 +1,5 @@
+sphinx
+recommonmark
 sphinx-markdown-tables
+mock
+sphinx_rtd_theme
