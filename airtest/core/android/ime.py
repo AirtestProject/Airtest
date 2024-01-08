@@ -1,10 +1,13 @@
 # coding=utf-8
 import re
 from airtest.core.android.yosemite import Yosemite
+from .constant import YOSEMITE_PACKAGE
 from airtest.core.error import AdbError
 from airtest.utils.snippet import escape_special_char
 from .constant import YOSEMITE_IME_SERVICE
 from six import text_type
+import requests
+import time
 
 
 def ensure_unicode(value):
@@ -122,6 +125,27 @@ class YosemiteIme(CustomIme):
         """
         if not self.started:
             self.start()
+            installed_version = self.adb.get_package_version(YOSEMITE_PACKAGE)
+            if installed_version is not None and int(installed_version) >= int(430):
+                local_port = self.adb.get_available_forward_local()
+                self.adb.forward(local=f'tcp:{local_port}', remote="tcp:8181", no_rebind=False)
+                for i in range(15):
+                    try:
+                        url = f'http://{self.adb.host}:{local_port}/ime_onStartInput'
+                        ret = requests.get(url, timeout=3)
+                    except Exception as e:
+                        time.sleep(1)
+                        if i % 3 == 0:  # 超时未启动，再尝试启动
+                            print(f"Trying to initialize input method again.")
+                            self.start()
+                    else:
+                        if 'ime_onStartInput=ok' in ret.text:
+                            self.adb.remove_forward(local=f'tcp:{local_port}')
+                            break
+                else:
+                    self.adb.remove_forward(local=f'tcp:{local_port}')
+                    raise AdbError("IME Error", "IME initialization timed out.")
+
         # 更多的输入用法请见 https://github.com/macacajs/android-unicode#use-in-adb-shell
         value = ensure_unicode(value)
         value = escape_special_char(value)
