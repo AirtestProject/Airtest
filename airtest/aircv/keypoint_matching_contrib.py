@@ -54,11 +54,6 @@ class BRIEFMatching(KeypointMatching):
         keypoints, descriptors = self.brief_extractor.compute(image, kp)
         return keypoints, descriptors
 
-    def match_keypoints(self, des_sch, des_src):
-        """Match descriptors (特征值匹配)."""
-        # 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:
-        return self.matcher.knnMatch(des_sch, des_src, k=2)
-
 
 class SIFTMatching(KeypointMatching):
     """SIFT Matching."""
@@ -91,11 +86,6 @@ class SIFTMatching(KeypointMatching):
         """获取图像特征点和描述符."""
         keypoints, descriptors = self.detector.detectAndCompute(image, None)
         return keypoints, descriptors
-
-    def match_keypoints(self, des_sch, des_src):
-        """Match descriptors (特征值匹配)."""
-        # 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:
-        return self.matcher.knnMatch(des_sch, des_src, k=2)
 
 
 class SURFMatching(KeypointMatching):
@@ -131,7 +121,3 @@ class SURFMatching(KeypointMatching):
         keypoints, descriptors = self.detector.detectAndCompute(image, None)
         return keypoints, descriptors
 
-    def match_keypoints(self, des_sch, des_src):
-        """Match descriptors (特征值匹配)."""
-        # 匹配两个图片中的特征点集，k=2表示每个特征点取出2个最匹配的对应点:
-        return self.matcher.knnMatch(des_sch, des_src, k=2)
