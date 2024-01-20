@@ -1,3 +1,4 @@
+six
 sphinx
 recommonmark
 sphinx-markdown-tables==0.0.15
