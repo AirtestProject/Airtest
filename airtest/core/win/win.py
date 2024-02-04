@@ -8,6 +8,7 @@ import mss
 import psutil
 from functools import wraps
 import win32api
+import win32clipboard
 import pywintypes  # noqa
 import os
 
@@ -21,6 +22,7 @@ from airtest import aircv
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.core.device import Device
 from airtest.core.settings import Settings as ST
+from airtest.utils.snippet import get_absolute_coordinate
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -233,6 +235,12 @@ class Windows(Device):
             pos: coordinates where to click
             **kwargs: optional arguments
 
+        Examples:
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.touch((100, 100))  # absolute coordinates
+            >>> dev.touch((0.5, 0.5))  # relative coordinates
+
         Returns:
             None
 
@@ -244,7 +252,8 @@ class Windows(Device):
         offset = kwargs.get("offset", 0)
 
         start = self._action_pos(win32api.GetCursorPos())
-        end = self._action_pos(pos)
+        ori_end = get_absolute_coordinate(pos, self)
+        end = self._action_pos(ori_end)
         start_x, start_y = self._fix_op_pos(start)
         end_x, end_y = self._fix_op_pos(end)
 
@@ -270,11 +279,13 @@ class Windows(Device):
         self.mouse.press(button=button, coords=(end_x, end_y))
         time.sleep(duration)
         self.mouse.release(button=button, coords=(end_x, end_y))
+        return ori_end
 
     def double_click(self, pos):
-        pos = self._fix_op_pos(pos)
-        coords = self._action_pos(pos)
+        ori_pos = get_absolute_coordinate(pos, self)
+        coords = self._fix_op_pos(self._action_pos(ori_pos))
         self.mouse.double_click(coords=coords)
+        return ori_pos
 
     def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
         """
@@ -287,16 +298,21 @@ class Windows(Device):
             steps: size of the swipe step
             button: mouse button to press, 'left', 'right' or 'middle', default is 'left'
 
+        Examples:
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.swipe((100, 100), (200, 200), duration=0.5)
+            >>> dev.swipe((0.1, 0.1), (0.2, 0.2), duration=0.5)
+
         Returns:
             None
 
         """
         # 设置坐标时相对于整个屏幕的坐标:
-        x1, y1 = self._fix_op_pos(p1)
-        x2, y2 = self._fix_op_pos(p2)
-
-        from_x, from_y = self._action_pos(p1)
-        to_x, to_y = self._action_pos(p2)
+        ori_from = get_absolute_coordinate(p1, self)
+        ori_to = get_absolute_coordinate(p2, self)
+        from_x, from_y = self._fix_op_pos(self._action_pos(ori_from))
+        to_x, to_y = self._fix_op_pos(self._action_pos(ori_to))
 
         interval = float(duration) / (steps + 1)
         self.mouse.press(coords=(from_x, from_y), button=button)
@@ -311,6 +327,7 @@ class Windows(Device):
             self.mouse.move(coords=(to_x, to_y))
         time.sleep(interval)
         self.mouse.release(coords=(to_x, to_y), button=button)
+        return ori_from, ori_to
 
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
@@ -459,6 +476,63 @@ class Windows(Device):
 
         """
         self.app.kill()
+
+    def set_clipboard(self, text):
+        """
+        Set clipboard content
+
+        Args:
+            text: text to be set to clipboard
+
+        Examples:
+
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.set_clipboard("hello world")
+            >>> print(dev.get_clipboard())
+            'hello world'
+            >>> dev.paste()  # paste the clipboard content
+
+        Returns:
+            None
+
+        """
+        try:
+            win32clipboard.OpenClipboard()
+        except pywintypes.error as e:
+            # pywintypes.error: (5, 'OpenClipboard', '拒绝访问。')
+            # sometimes clipboard is locked by other process, retry after 0.1s
+            time.sleep(0.1)
+            win32clipboard.OpenClipboard()
+        try:
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT, text)
+        finally:
+            win32clipboard.CloseClipboard()
+
+    def get_clipboard(self):
+        """
+        Get clipboard content
+
+        Returns:
+            clipboard content
+
+        """
+        try:
+            win32clipboard.OpenClipboard()
+            return win32clipboard.GetClipboardData()
+        finally:
+            win32clipboard.CloseClipboard()
+
+    def paste(self):
+        """
+        Perform paste action
+
+        Returns:
+            None
+
+        """
+        self.keyevent("^v")
 
     def _action_pos(self, pos):
         if self.app:

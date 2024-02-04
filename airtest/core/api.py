@@ -345,6 +345,10 @@ def touch(v, times=1, **kwargs):
 
         >>> touch(Template(r"tpl1606730579419.png", target_pos=5))
 
+        Click on relative coordinates, for example, click on the center of the screen::
+
+        >>> touch((0.5, 0.5))
+
         Click 2 times::
 
         >>> touch((100, 100), times=2)
@@ -364,7 +368,9 @@ def touch(v, times=1, **kwargs):
         try_log_screen()
         pos = v
     for _ in range(times):
-        G.DEVICE.touch(pos, **kwargs)
+        # If pos is a relative coordinate, return the converted click coordinates.
+        # iOS may all use vertical screen coordinates, so coordinates will not be returned.
+        pos = G.DEVICE.touch(pos, **kwargs) or pos
         time.sleep(0.05)
     delay_after_operation()
     return pos
@@ -389,7 +395,7 @@ def double_click(v):
     else:
         try_log_screen()
         pos = v
-    G.DEVICE.double_click(pos)
+    pos = G.DEVICE.double_click(pos) or pos
     delay_after_operation()
     return pos
 
@@ -424,6 +430,10 @@ def swipe(v1, v2=None, vector=None, **kwargs):
         >>> # swiping lasts for 1 second, divided into 6 steps
         >>> swipe((100, 100), (200, 200), duration=1, steps=6)
 
+        Use relative coordinates to swipe, such as swiping from the center right to the left of the screen::
+
+        >>> swipe((0.7, 0.5), (0.2, 0.5))
+
     """
     if isinstance(v1, Template):
         try:
@@ -450,7 +460,7 @@ def swipe(v1, v2=None, vector=None, **kwargs):
     else:
         raise Exception("no enough params for swipe")
 
-    G.DEVICE.swipe(pos1, pos2, **kwargs)
+    pos1, pos2 = G.DEVICE.swipe(pos1, pos2, **kwargs) or (pos1, pos2)
     delay_after_operation()
     return pos1, pos2
 
@@ -664,7 +674,7 @@ def get_clipboard(*args, **kwargs):
     Get the content from the clipboard.
 
     :return: str
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :Example:
 
         >>> text = get_clipboard()  # Android or local iOS
@@ -685,7 +695,7 @@ def set_clipboard(content, *args, **kwargs):
 
     :param content: str
     :return: None
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :Example:
 
         >>> set_clipboard("content")  # Android or local iOS
@@ -703,7 +713,7 @@ def paste(*args, **kwargs):
     """
     Paste the content from the clipboard.
 
-    :platforms: Android, iOS
+    :platforms: Android, iOS, Windows
     :return: None
     :Example:
 

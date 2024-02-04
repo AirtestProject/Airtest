@@ -27,6 +27,7 @@ from airtest.core.android.touch_methods.maxtouch import Maxtouch  # noqa
 
 from airtest.core.settings import Settings as ST
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
+from airtest.utils.snippet import get_absolute_coordinate
 from airtest.utils.logger import get_logger
 
 LOGGING = get_logger(__name__)
@@ -45,7 +46,7 @@ class Android(Device):
                  adb_path=None,
                  name=None):
         super(Android, self).__init__()
-        self.serialno = serialno or self.get_default_device()
+        self.serialno = serialno or self.get_default_device(adb_path=adb_path)
         self._uuid = name or self.serialno
         self._cap_method = cap_method.upper()
         self._touch_method = touch_method.upper()
@@ -99,6 +100,39 @@ class Android(Device):
                                                   input_event=self.input_event)
         return self._touch_proxy
 
+    @touch_proxy.setter
+    def touch_proxy(self, touch_method):
+        """
+        Specify a touch method, if the method fails to initialize, try to use other methods instead
+
+        指定一个触摸方案，如果该方法初始化失败，则尝试使用其他方法代替
+
+        Args:
+            touch_method: "MINITOUCH" or Minitouch() object
+
+        Returns:
+            TouchProxy object
+
+        Raises:
+            TouchMethodNotSupportedError when the connection fails
+
+        Examples:
+            >>> dev = Android()
+            >>> dev.touch_proxy = "MINITOUCH"
+
+            >>> from airtest.core.android.touch_methods.minitouch import Minitouch
+            >>> minitouch = Minitouch(dev.adb)
+            >>> dev.touch_proxy = minitouch
+
+        """
+        if self._screen_proxy:
+            self._screen_proxy.teardown()
+        self._touch_proxy = TouchProxy.auto_setup(self.adb,
+                                                  default_method=touch_method,
+                                                  ori_transformer=self._touch_point_by_orientation,
+                                                  size_info=self.display_info,
+                                                  input_event=self.input_event)
+
     @property
     def touch_method(self):
         """
@@ -115,6 +149,29 @@ class Android(Device):
 
         """
         return self.touch_proxy.method_name
+
+    @touch_method.setter
+    def touch_method(self, name):
+        """
+        Specify the touch method for the device, but this is not recommended
+        为设备指定触摸方案，但不建议这样做
+
+        Just to be compatible with some old codes
+        仅为了兼容一些旧的代码
+
+        Args:
+            name: "MINITOUCH" or Minitouch() object
+
+        Returns:
+            None
+
+        Examples:
+            >>> dev = Android()
+            >>> dev.touch_method = "MINITOUCH"
+
+        """
+        warnings.warn("No need to manually specify touch_method, airtest will automatically specify a suitable touch method, when airtest>=1.1.2")
+        self.touch_proxy = name
 
     @property
     def cap_method(self):
@@ -292,6 +349,7 @@ class Android(Device):
             the full path to the package
 
         """
+        assert package, "package name should not be empty"
         return self.adb.path_app(package)
 
     def check_app(self, package):
@@ -308,6 +366,7 @@ class Android(Device):
              AirtestError: raised if package is not found
 
         """
+        assert package, "package name should not be empty"
         return self.adb.check_app(package)
 
     def start_app(self, package, activity=None):
@@ -322,6 +381,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app(package, activity)
 
     def start_app_timing(self, package, activity):
@@ -336,6 +396,7 @@ class Android(Device):
             app launch time
 
         """
+        assert package, "package name should not be empty"
         return self.adb.start_app_timing(package, activity)
 
     def stop_app(self, package):
@@ -349,6 +410,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.stop_app(package)
 
     def clear_app(self, package):
@@ -362,6 +424,7 @@ class Android(Device):
             None
 
         """
+        assert package, "package name should not be empty"
         return self.adb.clear_app(package)
 
     def install_app(self, filepath, replace=False, install_options=None):
@@ -404,6 +467,7 @@ class Android(Device):
             output from the uninstallation process
 
         """
+        assert package, "package name should not be empty"
         return self.adb.uninstall_app(package)
 
     def snapshot(self, filename=None, ensure_orientation=True, quality=10, max_size=None):
@@ -525,16 +589,25 @@ class Android(Device):
             pos: coordinates (x, y)
             duration: how long to touch the screen
 
+        Examples:
+            >>> dev = Android()  # or dev = device()
+            >>> dev.touch((100, 100))  # absolute coordinates
+            >>> dev.touch((0.5, 0.5))  # relative coordinates
+
         Returns:
-            None
+            (x, y)  # The coordinate position of the actual click
 
         """
+        pos = get_absolute_coordinate(pos, self)
         self.touch_proxy.touch(pos, duration)
+        return pos
 
     def double_click(self, pos):
+        pos = get_absolute_coordinate(pos, self)
         self.touch(pos)
         time.sleep(0.05)
         self.touch(pos)
+        return pos
 
     def swipe(self, p1, p2, duration=0.5, steps=5, fingers=1):
         """
@@ -547,11 +620,19 @@ class Android(Device):
             steps: how big is the swipe step, default 5
             fingers: the number of fingers. 1 or 2.
 
+        Examples:
+            >>> dev = Android()  # or dev = device()
+            >>> dev.swipe((100, 100), (200, 200))  # absolute coordinates
+            >>> dev.swipe((0.1, 0.1), (0.2, 0.2))  # relative coordinates
+
         Returns:
-            None
+            (pos1, pos2)
 
         """
+        p1 = get_absolute_coordinate(p1, self)
+        p2 = get_absolute_coordinate(p2, self)
         self.touch_proxy.swipe(p1, p2, duration=duration, steps=steps, fingers=fingers)
+        return p1, p2
 
     def pinch(self, center=None, percent=0.5, duration=0.5, steps=5, in_or_out='in'):
         """
@@ -586,6 +667,7 @@ class Android(Device):
             None
 
         """
+        coordinates_list = [get_absolute_coordinate(pos, self) for pos in coordinates_list]
         self.touch_proxy.swipe_along(coordinates_list, duration=duration, steps=steps)
 
     def two_finger_swipe(self, tuple_from_xy, tuple_to_xy, duration=0.8, steps=5, offset=(0, 50)):
@@ -602,6 +684,8 @@ class Android(Device):
         Returns:
             None
         """
+        tuple_from_xy = get_absolute_coordinate(tuple_from_xy, self)
+        tuple_to_xy = get_absolute_coordinate(tuple_to_xy, self)
         self.touch_proxy.two_finger_swipe(tuple_from_xy, tuple_to_xy, duration=duration, steps=steps, offset=offset)
 
     def logcat(self, *args, **kwargs):
@@ -902,14 +986,10 @@ class Android(Device):
         Stop recording the device display. Recoding file will be kept in the device.
 
         """
-        if self.yosemite_recorder.recording_proc != None:
+        if self.yosemite_recorder.recording_proc is not None or self.recorder is None:
             if output is None:
                 output = self.recorder_save_path
             return self.yosemite_recorder.stop_recording(output=output, is_interrupted=is_interrupted)
-
-        if self.recorder is None:
-            LOGGING.warning("start_recording first")
-            return False
         
         LOGGING.info("stopping recording")
         self.recorder.stop()
@@ -927,6 +1007,13 @@ class Android(Device):
         Returns:
             clipboard content
 
+        Examples:
+            >>> dev = Android()
+            >>> dev.set_clipboard("hello world")
+            >>> dev.get_clipboard()
+            'hello world'
+            >>> dev.paste()  # paste the clipboard content
+
         """
         return self.yosemite_ext.get_clipboard()
 
@@ -942,14 +1029,6 @@ class Android(Device):
 
         """
         self.yosemite_ext.set_clipboard(text)
-
-    def paste(self):
-        """
-        Paste the clipboard content
-        Returns:
-
-        """
-        self.text(self.get_clipboard())
 
     def _register_rotation_watcher(self):
         """
