@@ -90,7 +90,12 @@ class Windows(Device):
             self.app = self._app.connect(**kwargs)
             self._top_window = self.app.top_window().wrapper_object()
         if kwargs.get("foreground", True) in (True, "True", "true"):
-            self.set_foreground()
+            try:
+                self.set_foreground()
+            except pywintypes.error as e:
+                # pywintypes.error: (0, 'SetForegroundWindow', 'No error message is available')
+                # If you are not running with administrator privileges, it may fail, but this error can be ignored.
+                pass
 
     def shell(self, cmd):
         """
