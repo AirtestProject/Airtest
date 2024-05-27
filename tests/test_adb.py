@@ -124,7 +124,7 @@ class TestADBWithDevice(unittest.TestCase):
             print(des_file)
             self.assertIsNotNone(des_file)
             self.assertTrue(self.adb.exists_file(des_file))
-            self.adb.shell("rm " + des_file)
+            self.adb.shell("rm -r \"" + des_file + "\"")
 
         tmpdir = "/data/local/tmp"
         test_push_file(IMG, tmpdir)
@@ -132,6 +132,7 @@ class TestADBWithDevice(unittest.TestCase):
         imgname = os.path.basename(IMG)
         tmpimgpath = tmpdir + "/" + imgname
         test_push_file(IMG, tmpimgpath)
+        test_push_file(IMG, tmpdir)
 
         # 测试空格+特殊字符+中文
         test_space_img = os.path.join(os.path.dirname(IMG), "space " + imgname)
@@ -145,6 +146,25 @@ class TestADBWithDevice(unittest.TestCase):
         test_push_file(test_img, tmpdir)
         test_push_file(test_img, tmpdir + "/" + os.path.basename(test_img))
         try_remove(test_img)
+
+        # 测试非临时目录（部分高版本手机有权限问题，不允许直接push）
+        dst_path = "/sdcard/Android/data/com.netease.nie.yosemite/files"
+        test_push_file(IMG, dst_path)
+        test_img = os.path.join(os.path.dirname(IMG), imgname + "中文 (1)")
+        shutil.copy(IMG, test_img)
+        test_push_file(test_img, dst_path)
+
+        # 推送文件夹 /test push 到 目标路径
+        os.makedirs("test push", exist_ok=True)
+        shutil.copy(IMG, "test push/" + imgname)
+        test_push_file("test push", dst_path)
+        shutil.rmtree("test push")
+
+        # 推送文件夹 /test push 到 目标路径/test push
+        os.makedirs("test push", exist_ok=True)
+        shutil.copy(IMG, "test push/" + imgname)
+        test_push_file("test push", dst_path + "/test")
+        shutil.rmtree("test push")
 
     def test_pull(self):
         tmpdir = "/data/local/tmp"
