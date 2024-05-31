@@ -158,6 +158,7 @@ class TestADBWithDevice(unittest.TestCase):
         os.makedirs("test push", exist_ok=True)
         shutil.copy(IMG, "test push/" + imgname)
         test_push_file("test push", dst_path)
+        test_push_file("test push", tmpdir)
         shutil.rmtree("test push")
 
         # 推送文件夹 /test push 到 目标路径/test push

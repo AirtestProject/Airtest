@@ -964,7 +964,7 @@ class ADB(object):
         """
         try:
             out = self.shell("ls \"%s\"" % filepath)
-        except AdbShellError:
+        except (AdbShellError, AdbError):
             return False
         else:
             return not ("No such file or directory" in out)
