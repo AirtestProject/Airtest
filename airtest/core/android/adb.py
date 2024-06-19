@@ -548,7 +548,7 @@ class ADB(object):
                     pass
         return dst_path
 
-    def pull(self, remote, local):
+    def pull(self, remote, local=""):
         """
         Perform `adb pull` command
 
@@ -563,6 +563,8 @@ class ADB(object):
         Returns:
             None
         """
+        if not local:
+            local = os.path.basename(remote)
         local = decode_path(local)  # py2
         if PY3:
             # If python3, use Path to force / convert to \

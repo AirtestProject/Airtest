@@ -724,6 +724,41 @@ def paste(*args, **kwargs):
     G.DEVICE.paste(*args, **kwargs)
 
 
+@logwrap
+def push(local, remote, *args, **kwargs):
+    """
+    Push file from local to remote
+
+    :param local: local file path
+    :param remote: remote file path
+    :return: filename of the pushed file
+    :platforms: Android, iOS
+    :Example:
+
+        >>> connect_device("android:///")
+        >>> push(r"D:\demo\test.text", "/data/local/tmp/test.text")
+
+    """
+    return G.DEVICE.push(local, remote, *args, **kwargs)
+
+
+@logwrap
+def pull(remote, local, *args, **kwargs):
+    """
+    Pull file from remote to local
+
+    :param remote: remote file path
+    :param local: local file path
+    :return: filename of the pulled file
+    :platforms: Android, iOS
+    :Example:
+
+        >>> connect_device("android:///")
+        >>> pull("/data/local/tmp/test.text", r"D:\demo\test.text")
+
+    """
+    return G.DEVICE.pull(remote, local, *args, **kwargs)
+
 """
 Assertions: see airtest/core/assertions.py
 """
