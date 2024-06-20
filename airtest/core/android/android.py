@@ -1030,6 +1030,41 @@ class Android(Device):
         """
         self.yosemite_ext.set_clipboard(text)
 
+    def push(self, local, remote):
+        """
+        Push file to the device
+
+        Args:
+            local: local file or folder to be copied to the device
+            remote: destination on the device where the file will be copied
+
+        Returns:
+            The file path saved in the phone may be enclosed in quotation marks, eg. '"test\ file.txt"'
+
+        Examples:
+            >>> dev = connect_device("android:///")
+            >>> dev.push("test.txt", "/sdcard/test.txt")
+
+        """
+        return self.adb.push(local, remote)
+
+    def pull(self, remote, local=""):
+        """
+        Pull file from the device
+
+        Args:
+            remote: remote file to be downloaded from the device
+            local: local destination where the file will be downloaded from the device, if not specified, the current directory is used
+
+        Returns:
+            None
+
+        Examples:
+            >>> dev = connect_device("android:///")
+            >>> dev.pull("/sdcard/test.txt", "rename.txt")
+        """
+        return self.adb.pull(remote, local=local)
+
     def _register_rotation_watcher(self):
         """
         Register callbacks for Android and minicap when rotation of screen has changed

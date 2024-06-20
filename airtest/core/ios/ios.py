@@ -11,6 +11,7 @@ import time
 import base64
 import inspect
 import logging
+import pathlib
 import traceback
 from logzero import setup_logger
 from functools import wraps
@@ -31,7 +32,7 @@ from airtest.core.ios.mjpeg_cap import MJpegcap
 from airtest.core.settings import Settings as ST
 from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max_size
 from airtest.core.error import LocalDeviceError, AirtestError
-
+from airtest.core.helper import logwrap
 
 LOGGING = get_logger(__name__)
 
@@ -57,7 +58,7 @@ def decorator_retry_session(func):
                 except:
                     time.sleep(0.5)
                     continue
-            raise
+            raise AirtestError("Failed to re-acquire session.")
     return wrapper
 
 
@@ -96,6 +97,18 @@ def add_decorator_to_methods(decorator):
         return cls
     return decorator_wrapper
 
+def format_file_list(file_list):
+    formatted_list = []
+    for file in file_list:
+        file_info = {
+            'type': 'Directory' if file[0] == 'd' else 'File',
+            'size': file[1],
+            'last_modified': file[2].strftime('%Y-%m-%d %H:%M:%S'),
+            'name': file[3]
+        }
+        formatted_list.append(file_info)
+    
+    return formatted_list
 
 @add_decorator_to_methods(decorator_pairing_dialog)
 class TIDevice:
@@ -270,7 +283,187 @@ class TIDevice:
     @staticmethod
     def xctest(udid, wda_bundle_id):
         return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
+    
+    @staticmethod
+    def push(udid, local_path, device_path, bundle_id=None, timeout=None):
+        """
+        Pushes a file or a directory from the local machine to the iOS device.
 
+        Args:
+            udid (str): The UDID of the iOS device.
+            device_path (str): The directory path on the iOS device where the file or directory will be pushed.
+            local_path (str): The local path of the file or directory to be pushed.
+            bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be pushed to the app's sandbox container. Defaults to None.
+            timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
+            
+        """
+        try:
+            if bundle_id:
+                sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+            else:
+                sync = BaseDevice(udid, Usbmux()).sync
+
+            if os.path.isfile(local_path):
+                file_name = os.path.basename(local_path)
+                device_path = os.path.join(device_path, file_name)
+                device_path = device_path.replace("\\", "/")
+                with open(local_path, "rb") as f:
+                    content = f.read()
+                    sync.push_content(device_path, content)
+            elif os.path.isdir(local_path):
+                device_path = os.path.join(device_path, os.path.basename(local_path))
+                device_path = device_path.replace("\\", "/")
+                sync.mkdir(device_path)
+                for root, dirs, files in os.walk(local_path):
+                    for directory in dirs:
+                        dir_path = os.path.join(root, directory)
+                        relative_dir_path = os.path.relpath(dir_path, local_path)
+                        device_dir_path = os.path.join(device_path, relative_dir_path)
+                        device_dir_path = device_dir_path.replace("\\", "/")
+                        sync.mkdir(device_dir_path)
+                    for file_name in files:
+                        file_path = os.path.join(root, file_name)
+                        relative_path = os.path.relpath(file_path, local_path)
+                        device_file_path = os.path.join(device_path, relative_path)
+                        device_file_path = device_file_path.replace("\\", "/")
+                        with open(file_path, "rb") as f:
+                            content = f.read()
+                            sync.push_content(device_file_path, content)
+            print(f"pushed {local_path} to {device_path}")
+        except Exception as e:
+            raise AirtestError(f"Failed to push {local_path} to {device_path}.")
+
+    @staticmethod
+    def pull(udid, device_path, local_path, bundle_id=None, timeout=None):
+        """
+        Pulls a file or directory from the iOS device to the local machine.
+
+        Args:
+            udid (str): The UDID of the iOS device.
+            device_path (str): The path of the file or directory on the iOS device.
+                               Remote devices can only be file paths. 
+            local_path (str): The destination path on the local machine.
+                              Remote devices can only be file paths. 
+            bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be pulled from the app's sandbox. Defaults to None.
+            timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
+
+        """
+        def _is_dir(remote_path):
+            remote_path = remote_path.rstrip("\\/")
+            remote_path_dir, remote_path_base = os.path.split(remote_path)
+            ret = TIDevice.ls(udid, remote_path_dir, bundle_id)
+
+            for i in ret:
+                if i['name'].rstrip('/') == remote_path_base:
+                    return i['type'].lower() == 'directory'
+            return False
+        
+        try:
+            if bundle_id:
+                sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+            else:
+                sync = BaseDevice(udid, Usbmux()).sync
+
+            if _is_dir(device_path):
+                os.makedirs(local_path, exist_ok=True)
+                
+            src = pathlib.Path(device_path)
+            dst = pathlib.Path(local_path)
+            if dst.is_dir() and src.name and sync.stat(src).is_dir():
+                dst = dst.joinpath(src.name)
+
+            sync.pull(src, dst)
+            print("pulled", src, "->", dst)
+        except Exception as e:
+            raise AirtestError(f"Failed to pull {device_path} to {local_path}.")
+
+    @staticmethod
+    def rm(udid, remote_path, bundle_id=None, is_dir=False):
+        """
+        Removes a file or directory from the iOS device.
+
+        Args:
+            udid (str): The UDID of the iOS device.
+            remote_path (str): The path of the file or directory on the iOS device.
+            bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be removed from the app's sandbox. Defaults to None.
+            is_dir (bool, optional): Indicates whether the path is a directory. Defaults to False.
+        """
+        def _remove_folder(udid, folder_path, bundle_id):
+            folder_path = folder_path.replace("\\", "/")
+            for file_info in TIDevice.ls(udid, folder_path, bundle_id):
+                if file_info['type'] == 'Directory':
+                    _remove_folder(udid, os.path.join(folder_path, file_info['name']), bundle_id)
+                else:
+                    sync.remove(os.path.join(folder_path, file_info['name']))
+            sync.remove(folder_path)
+        
+        if bundle_id:
+            sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+        else:
+            sync = BaseDevice(udid, Usbmux()).sync
+        
+        if is_dir:
+            if not remote_path.endswith("/"):
+                remote_path += "/"
+            _remove_folder(udid, remote_path, bundle_id)
+        else:
+            sync.remove(remote_path)
+        status = sync.remove(remote_path)
+        if status == 0:
+            print("removed", remote_path)
+        else:
+            raise AirtestError(f"<{status.name} {status.value}> Failed to remove {remote_path}")
+
+    @staticmethod
+    def ls(udid, remote_path, bundle_id=None):
+        """
+        List files and directories in the specified path on the iOS device.
+
+        Args:
+            udid (str): The UDID of the iOS device.
+            remote_path (str): The path on the iOS device.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+
+        Returns:
+            list: A list of files and directories in the specified path.
+        """
+        try:
+            file_list = []
+            if bundle_id:
+                sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+            else:
+                sync = BaseDevice(udid, Usbmux()).sync
+
+            for file_info in sync.listdir_info(remote_path):
+                filename = file_info.st_name
+                if file_info.is_dir():
+                    filename = filename + "/"
+                file_list.append(['d' if file_info.is_dir() else '-', file_info.st_size, file_info.st_mtime, filename])
+            file_list = format_file_list(file_list)
+            return file_list
+        except Exception as e:
+            raise AirtestError(f"Failed to list files and directories in {remote_path}.")
+
+    @staticmethod
+    def mkdir(udid, remote_path, bundle_id=None):
+        """
+        Create a directory on the iOS device.
+
+        Args:
+            udid (str): The UDID of the iOS device.
+            remote_path (str): The path of the directory to be created on the iOS device.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+        """
+        if bundle_id:
+            sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+        else:
+            sync = BaseDevice(udid, Usbmux()).sync
+
+        status = sync.mkdir(remote_path)
+        if int(status) == 0:
+            print("created", remote_path)
+        else:
+            raise AirtestError(f"<{status.name} {status.value}> Failed to create directory {remote_path}")
 
 @add_decorator_to_methods(decorator_retry_session)
 class IOS(Device):
@@ -696,12 +889,17 @@ class IOS(Device):
         x, y = self.driver._percent2pos(x, y)
         data = {'x': x, 'y': y, 'duration': duration}
         # 为了兼容改动直接覆盖原生接口的自制版wda。
+        
         try:
-            return self.driver._session_http.post('/wda/tap', data=data)
+            self.driver._session_http.post('/wda/deviceTap', data=data)
+        #如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
         except wda.WDARequestError as e:
-            if e.status == 110:
-                self.driver.click(x, y, duration)
-                
+            try:
+                return self.driver._session_http.post('/wda/tap', data=data)
+            except wda.WDARequestError as e:
+                if e.status == 110:
+                    self.driver.click(x, y, duration)
+            
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
@@ -767,7 +965,12 @@ class IOS(Device):
         data = dict(fromX=x1, fromY=y1, toX=x2, toY=y2, delay=delay)
         # 为了兼容改动直接覆盖原生接口的自制版wda。
         try:
-            return self.driver._session_http.post('/wda/swipe', data=data)
+            if self.using_ios_tagent:
+                try:
+                    self.driver._session_http.post('/wda/deviceSwipe', data=data)
+                #如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
+                except wda.WDARequestError as e:
+                    return self.driver._session_http.post('/wda/swipe', data=data)
         except wda.WDARequestError as e:
             if e.status == 110:
                 self.driver.swipe(x1, y1, x2, y2)
@@ -1315,3 +1518,99 @@ class IOS(Device):
         LOGGING.info("stopping recording")
         self.recorder.stop()
         return None
+    
+    def push(self, local_path, remote_path, bundle_id=None, timeout=None):
+        """
+        Pushes a file from the local machine to the iOS device.
+
+        Args:
+            remote_path (str): The path on the iOS device where the file will be saved.
+            local_path (str): The path of the file on the local machine.
+            bundle_id (str, optional): The bundle identifier of the app. Defaults to None.
+            timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        TIDevice.push(self.udid, local_path, remote_path, bundle_id=bundle_id)
+
+    def pull(self, remote_path, local_path, bundle_id=None, timeout=None):
+        """
+        Pulls a file or directory from the iOS device to the local machine.
+
+        Args:
+            remote_path (str): The path of the file or directory on the iOS device.
+            local_path (str): The path where the file or directory will be saved on the local machine.
+            bundle_id (str, optional): The bundle identifier of the app. Defaults to None. Required for remote devices.
+            timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        TIDevice.pull(self.udid, remote_path, local_path, bundle_id=bundle_id, timeout=timeout)
+
+    @logwrap
+    def ls(self, remote_path, bundle_id=None):
+        """
+        List files and directories in the specified remote path on the iOS device.
+
+        Args:
+            remote_path (str): The remote path to list.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None. Required for remote devices.
+
+        Returns:
+            list: A list of files and directories in the remote path. Each item in the list is a dictionary with the following keys:
+                - 'type': The type of the item. This can be 'Directory' or 'File'.
+                - 'size': The size of the item in bytes.
+                - 'last_modified': The last modification time of the item, in the format 'YYYY-MM-DD HH:MM:SS'.
+                - 'name': The name of the item, including the path relative to `remote_path`.
+
+        Example:
+            [
+                {'type': 'Directory', 'size': 1024, 'last_modified': 'YYYY-MM-DD HH:MM:SS', 'name': 'example_directory/'},
+                {'type': 'File', 'size': 2048, 'last_modified': 'YYYY-MM-DD HH:MM:SS', 'name': 'example_file.txt'}
+            ]
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        return TIDevice.ls(self.udid, remote_path, bundle_id=bundle_id)
+    
+    @logwrap
+    def rm(self, remote_path, bundle_id=None, is_dir=False):
+        """
+        Remove a file or directory from the iOS device.
+
+        Args:
+            remote_path (str): The remote path to remove.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+            is_dir (bool, optional): True if the remote path is a directory. Defaults to False.
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        TIDevice.rm(self.udid, remote_path, bundle_id=bundle_id, is_dir=is_dir)
+
+    @logwrap
+    def mkdir(self, remote_path, bundle_id=None):
+        """
+        Create a directory on the iOS device.
+
+        Args:
+            remote_path (str): The remote path to create.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+
+        Raises:
+            LocalDeviceError: If the device is remote.
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        TIDevice.mkdir(self.udid, remote_path, bundle_id=bundle_id)

@@ -25,6 +25,7 @@ from airtest.utils.apkparser import APK
 from airtest.utils.snippet import get_std_encoding, reg_cleanup, split_cmd, make_file_executable
 
 LOGGING = get_logger(__name__)
+TMP_PATH = "/data/local/tmp"  # Android's temporary file directory
 
 
 class ADB(object):
@@ -470,16 +471,10 @@ class ADB(object):
 
     def push(self, local, remote):
         """
-        Perform `adb push` command
-
-        Note:
-            If there is a space (or special symbol) in the file name, it will be forced to add escape characters,
-            and the new file name will be added with quotation marks and returned as the return value
-
-            注意：文件名中如果带有空格（或特殊符号），将会被强制增加转义符，并将新的文件名添加引号，作为返回值返回
+        Push file or folder to the specified directory to the device
 
         Args:
-            local: local file to be copied to the device
+            local: local file or folder to be copied to the device
             remote: destination on the device where the file will be copied
 
         Returns:
@@ -495,18 +490,65 @@ class ADB(object):
             "/data/local/tmp/test\ space.txt"
             >>> adb.shell("rm " + new_name)
 
-        """
-        local = decode_path(local)  # py2
-        if os.path.isfile(local) and os.path.splitext(local)[-1] != os.path.splitext(remote)[-1]:
-            # If remote is a folder, add the filename and escape
-            filename = os.path.basename(local)
-            # Add escape characters for spaces, parentheses, etc. in filenames
-            filename = re.sub(r"[ \(\)\&]", lambda m: "\\" + m.group(0), filename)
-            remote = '%s/%s' % (remote, filename)
-        self.cmd(["push", local, remote], ensure_unicode=False)
-        return '\"%s\"' % remote
+            >>> adb.push("test_dir", "/sdcard/Android/data/com.test.package/files")
+            >>> adb.push("test_dir", "/sdcard/Android/data/com.test.package/files/test_dir")
 
-    def pull(self, remote, local):
+        """
+        _, ext = os.path.splitext(remote)
+        if ext:
+            # The target path is a file
+            dst_parent = os.path.dirname(remote)
+        else:
+            dst_parent = remote
+
+        # If the target file already exists, delete it first to avoid overwrite failure
+        src_filename = os.path.basename(local)
+        _, src_ext = os.path.splitext(local)
+        if src_ext:
+            dst_path = f"{dst_parent}/{src_filename}"
+        else:
+            if src_filename == os.path.basename(remote):
+                dst_path = remote
+            else:
+                dst_path = f"{dst_parent}/{src_filename}"
+        try:
+            self.shell(f"rm -r {dst_path}")
+        except:
+            pass
+
+        # If the target folder has multiple levels that have never been created, try to create them
+        try:
+            self.shell(f"mkdir -p {dst_parent}")
+        except:
+            pass
+
+        # Push the file to the tmp directory to avoid permission issues
+        tmp_path = f"{TMP_PATH}/{src_filename}"
+        try:
+            self.cmd(["push", local, tmp_path])
+        except:
+            self.cmd(["push", local, dst_parent])
+        else:
+            try:
+                if src_ext:
+                    try:
+                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                    except:
+                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                else:
+                    try:
+                        self.shell(f'cp -frp "{tmp_path}/*" "{remote}"')
+                    except:
+                        self.shell(f'mv "{tmp_path}" "{remote}"')
+            finally:
+                try:
+                    if TMP_PATH != dst_parent:
+                        self.shell(f'rm -r "{tmp_path}"')
+                except:
+                    pass
+        return dst_path
+
+    def pull(self, remote, local=""):
         """
         Perform `adb pull` command
 
@@ -521,6 +563,8 @@ class ADB(object):
         Returns:
             None
         """
+        if not local:
+            local = os.path.basename(remote)
         local = decode_path(local)  # py2
         if PY3:
             # If python3, use Path to force / convert to \
@@ -921,8 +965,8 @@ class ADB(object):
 
         """
         try:
-            out = self.shell(["ls", filepath])
-        except AdbShellError:
+            out = self.shell("ls \"%s\"" % filepath)
+        except (AdbShellError, AdbError):
             return False
         else:
             return not ("No such file or directory" in out)

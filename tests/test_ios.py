@@ -1,5 +1,6 @@
 # encoding=utf-8
 import os
+import shutil
 import time
 import unittest
 import numpy
@@ -9,6 +10,7 @@ from airtest import aircv
 from .testconf import try_remove
 import cv2
 import warnings
+import tempfile
 warnings.simplefilter("always")
 
 text_flag = True # 控制是否运行text接口用例
@@ -17,13 +19,17 @@ DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
 PKG_SAFARI = "com.apple.mobilesafari"
 TEST_IPA_FILE_OR_URL = "" # IPA包体的路径或者url链接，测试安装
 TEST_IPA_BUNDLE_ID = "" # IPA安装后app的bundleID，测试卸载
- 
-class TestIos(unittest.TestCase):
 
+class TestIos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
         cls.ios = connect_device("iOS:///http+usbmux://")
+        cls.TEST_FSYNC_APP = "" # 测试文件推送、同步的app的bundleID
+        # 获取一个可以用于文件操作的app
+        app_list = cls.ios.list_app(type="all")
+        if len(app_list) > 0:
+            cls.TEST_FSYNC_APP = app_list[0][0]
 
     @classmethod
     def tearDownClass(cls):
@@ -317,6 +323,101 @@ class TestIos(unittest.TestCase):
         self.assertEqual(self.ios.get_clipboard(), text)
         self.ios.paste()
 
+    def test_ls(self):
+        print("test ls")
+        print(self.ios.ls("/Documents/", self.TEST_FSYNC_APP))
+        
+    def test_push(self):
+        def _test_file(file_name):
+            print(f"test push file {file_name}")
+            with open(file_name, 'w') as f:
+                f.write('Test data')
+            self.ios.push(file_name, "/Documents/", self.TEST_FSYNC_APP, timeout=60)
+            try_remove(file_name)
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            self.assertTrue(file_name in [item['name'] for item in file_list])
+
+        def _test_dir(dir_name):
+            print(f"test push directory {dir_name}")
+            os.mkdir(dir_name)
+            with open(f'{dir_name}/test_data', 'w') as f:
+                f.write('Test data')
+            self.ios.push(dir_name, "/Documents/", self.TEST_FSYNC_APP, timeout=60)
+            try_remove(dir_name)
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            self.assertTrue(f"{dir_name}/" in [item['name'] for item in file_list])
+
+        _test_file("test_data.txt")
+        _test_file("测试文件.txt")
+        _test_dir('test_dir')
+        _test_dir('测试文件夹')
+        
+    def test_pull(self):
+        def _test_file(file_name):
+            print(f"test pull file {file_name}")
+            self.ios.pull(f"/Documents/{file_name}", ".", self.TEST_FSYNC_APP, timeout=60)
+            self.assertTrue(os.path.exists(file_name))
+            try_remove(file_name)
+
+        def _test_dir(dir_name):
+            print(f"test pull directory {dir_name}")
+            os.mkdir(dir_name)
+            self.ios.pull(f"/Documents/{dir_name}", dir_name, self.TEST_FSYNC_APP, timeout=60)
+            self.assertTrue(os.path.exists(f"{dir_name}/{dir_name}"))
+            try_remove(dir_name)
+        
+        _test_file("test_data.txt")
+        _test_file("测试文件.txt")
+        _test_dir('test_dir')
+        _test_dir('测试文件夹')
+
+    def test_rm(self):
+        def _test_file(file_name):
+            print(f"test rm file {file_name}")
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            find_flag = False
+            for item in file_list:
+                if item['name'] == file_name:
+                    print(f"find file {file_name}")
+                    find_flag = True
+                    break
+            if not find_flag:
+                print(f"not find file {file_name}")
+                return
+            self.ios.rm(f"/Documents/{file_name}", self.TEST_FSYNC_APP)
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            self.assertTrue(file_name not in [item['name'] for item in file_list])
+        
+        def _test_dir(dir_name):
+            print(f"test rm directory {dir_name}")
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            find_flag = False
+            for item in file_list:
+                if item['name'] == f"{dir_name}/":
+                    print(f"find dir {dir_name}")
+                    find_flag = True
+                    break
+            if not find_flag:
+                print(f"not find dir {dir_name}")
+                return
+            self.ios.rm(f"/Documents/{dir_name}", self.TEST_FSYNC_APP, is_dir=True)
+            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            self.assertTrue(f"{dir_name}/" not in [item['name'] for item in file_list])
+
+        _test_file("test_data.txt")
+        _test_file("测试文件.txt")
+        _test_dir('test_dir')
+        _test_dir('测试文件夹')
+    
+    def test_mkdir(self):
+        print("test mkdir")
+        dir_name = "/Documents/test_dir"
+        self.ios.mkdir(dir_name, self.TEST_FSYNC_APP)
+        
+        dirs = self.ios.ls("/Documents", self.TEST_FSYNC_APP)
+        self.assertTrue(any(d['name'] == 'test_dir/' for d in dirs))
+        self.ios.rm(dir_name, self.TEST_FSYNC_APP, is_dir=True)
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -339,6 +440,11 @@ if __name__ == '__main__':
     suite.addTest(TestIos("test_touch"))
     suite.addTest(TestIos("test_swipe"))
     suite.addTest(TestIos("test_double_click"))
+    suite.addTest(TestIos("test_ls"))
+    suite.addTest(TestIos("test_push"))
+    suite.addTest(TestIos("test_pull"))
+    suite.addTest(TestIos("test_mkdir"))
+    suite.addTest(TestIos("test_rm"))
     # 联合接口，顺序测试：解锁屏、应用启动关闭
     suite.addTest(TestIos("test_is_locked"))
     suite.addTest(TestIos("test_lock"))

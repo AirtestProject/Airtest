@@ -9,6 +9,7 @@ import traceback
 from copy import copy
 from .logger import get_logger
 from .snippet import reg_cleanup
+from airtest.core.error import LocalDeviceError
 LOGGING = get_logger(__name__)
 
 
@@ -125,10 +126,15 @@ def Logwrap(f, logger):
         # The snapshot parameter is popped from the function parameter,
         # so the function cannot use the parameter name snapshot later
         snapshot = m.pop('snapshot', False)
+        m.pop('self', None)  # remove self from the call_args
+        m.pop('cls', None)  # remove cls from the call_args
         fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
         logger.running_stack.append(fndata)
         try:
             res = f(*args, **kwargs)
+        except LocalDeviceError:
+            # 为了进入airtools中的远程方法，同时不让LocalDeviceError在报告中显示为失败步骤
+            raise LocalDeviceError
         except Exception as e:
             data = {"traceback": traceback.format_exc(), "end_time": time.time()}
             fndata.update(data)
