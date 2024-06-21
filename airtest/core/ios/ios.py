@@ -298,6 +298,9 @@ class TIDevice:
             
         """
         try:
+            if not os.path.exists(local_path):
+                raise AirtestError(f"Local path {local_path} does not exist.")
+            
             if bundle_id:
                 sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
             else:
@@ -348,23 +351,13 @@ class TIDevice:
             timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
 
         """
-        def _is_dir(remote_path):
-            remote_path = remote_path.rstrip("\\/")
-            remote_path_dir, remote_path_base = os.path.split(remote_path)
-            ret = TIDevice.ls(udid, remote_path_dir, bundle_id)
-
-            for i in ret:
-                if i['name'].rstrip('/') == remote_path_base:
-                    return i['type'].lower() == 'directory'
-            return False
-        
         try:
             if bundle_id:
                 sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
             else:
                 sync = BaseDevice(udid, Usbmux()).sync
 
-            if _is_dir(device_path):
+            if TIDevice.is_dir(device_path, udid, bundle_id):
                 os.makedirs(local_path, exist_ok=True)
                 
             src = pathlib.Path(device_path)
@@ -378,7 +371,7 @@ class TIDevice:
             raise AirtestError(f"Failed to pull {device_path} to {local_path}.")
 
     @staticmethod
-    def rm(udid, remote_path, bundle_id=None, is_dir=False):
+    def rm(udid, remote_path, bundle_id=None):
         """
         Removes a file or directory from the iOS device.
 
@@ -386,33 +379,37 @@ class TIDevice:
             udid (str): The UDID of the iOS device.
             remote_path (str): The path of the file or directory on the iOS device.
             bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be removed from the app's sandbox. Defaults to None.
-            is_dir (bool, optional): Indicates whether the path is a directory. Defaults to False.
+
         """
+        def _check_status(status):
+            if status == 0:
+                print("removed", remote_path)
+            else:
+                raise AirtestError(f"<{status.name} {status.value}> Failed to remove {remote_path}")
+        
         def _remove_folder(udid, folder_path, bundle_id):
             folder_path = folder_path.replace("\\", "/")
             for file_info in TIDevice.ls(udid, folder_path, bundle_id):
                 if file_info['type'] == 'Directory':
                     _remove_folder(udid, os.path.join(folder_path, file_info['name']), bundle_id)
                 else:
-                    sync.remove(os.path.join(folder_path, file_info['name']))
-            sync.remove(folder_path)
+                    status = sync.remove(os.path.join(folder_path, file_info['name']))
+                    _check_status(status)
+            status = sync.remove(folder_path)
+            _check_status(status)
         
         if bundle_id:
             sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
         else:
             sync = BaseDevice(udid, Usbmux()).sync
         
-        if is_dir:
+        if TIDevice.is_dir(remote_path, udid, bundle_id):
             if not remote_path.endswith("/"):
                 remote_path += "/"
             _remove_folder(udid, remote_path, bundle_id)
         else:
-            sync.remove(remote_path)
-        status = sync.remove(remote_path)
-        if status == 0:
-            print("removed", remote_path)
-        else:
-            raise AirtestError(f"<{status.name} {status.value}> Failed to remove {remote_path}")
+            status = sync.remove(remote_path)
+            _check_status(status)
 
     @staticmethod
     def ls(udid, remote_path, bundle_id=None):
@@ -465,6 +462,22 @@ class TIDevice:
         else:
             raise AirtestError(f"<{status.name} {status.value}> Failed to create directory {remote_path}")
 
+    @staticmethod
+    def is_dir(remote_path, udid, bundle_id):
+        try:
+            remote_path = remote_path.rstrip("\\/")
+            remote_path_dir, remote_path_base = os.path.split(remote_path)
+            if bundle_id:
+                sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
+            else:
+                sync = BaseDevice(udid, Usbmux()).sync
+            
+            for file_info in sync.listdir_info(remote_path_dir):
+                if file_info.st_name == remote_path_base:
+                    return file_info.is_dir()
+        except Exception as e:
+            raise AirtestError(f"Failed to check if {remote_path} is a directory.")     
+    
 @add_decorator_to_methods(decorator_retry_session)
 class IOS(Device):
     """IOS client.
@@ -1583,21 +1596,20 @@ class IOS(Device):
         return TIDevice.ls(self.udid, remote_path, bundle_id=bundle_id)
     
     @logwrap
-    def rm(self, remote_path, bundle_id=None, is_dir=False):
+    def rm(self, remote_path, bundle_id=None):
         """
         Remove a file or directory from the iOS device.
 
         Args:
             remote_path (str): The remote path to remove.
             bundle_id (str, optional): The bundle ID of the app. Defaults to None.
-            is_dir (bool, optional): True if the remote path is a directory. Defaults to False.
 
         Raises:
             LocalDeviceError: If the device is remote.
         """
         if not self.is_local_device:
             raise LocalDeviceError()
-        TIDevice.rm(self.udid, remote_path, bundle_id=bundle_id, is_dir=is_dir)
+        TIDevice.rm(self.udid, remote_path, bundle_id=bundle_id)
 
     @logwrap
     def mkdir(self, remote_path, bundle_id=None):

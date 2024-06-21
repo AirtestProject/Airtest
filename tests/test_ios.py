@@ -400,7 +400,7 @@ class TestIos(unittest.TestCase):
             if not find_flag:
                 print(f"not find dir {dir_name}")
                 return
-            self.ios.rm(f"/Documents/{dir_name}", self.TEST_FSYNC_APP, is_dir=True)
+            self.ios.rm(f"/Documents/{dir_name}", self.TEST_FSYNC_APP)
             file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
             self.assertTrue(f"{dir_name}/" not in [item['name'] for item in file_list])
 
@@ -416,7 +416,7 @@ class TestIos(unittest.TestCase):
         
         dirs = self.ios.ls("/Documents", self.TEST_FSYNC_APP)
         self.assertTrue(any(d['name'] == 'test_dir/' for d in dirs))
-        self.ios.rm(dir_name, self.TEST_FSYNC_APP, is_dir=True)
+        self.ios.rm(dir_name, self.TEST_FSYNC_APP)
 
 
 if __name__ == '__main__':
