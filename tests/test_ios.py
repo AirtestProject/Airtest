@@ -12,21 +12,22 @@ from .testconf import try_remove
 import cv2
 import warnings
 import tempfile
+
 warnings.simplefilter("always")
 
-text_flag = True # 控制是否运行text接口用例
+text_flag = True  # 控制是否运行text接口用例
 skip_alert_flag = False  # 控制是否测试alert相关接口用例
 DEFAULT_ADDR = "http://localhost:8100/"  # iOS设备连接参数
 PKG_SAFARI = "com.apple.mobilesafari"
-TEST_IPA_FILE_OR_URL = "" # IPA包体的路径或者url链接，测试安装
-TEST_IPA_BUNDLE_ID = "" # IPA安装后app的bundleID，测试卸载
+TEST_IPA_FILE_OR_URL = ""  # IPA包体的路径或者url链接，测试安装
+TEST_IPA_BUNDLE_ID = ""  # IPA安装后app的bundleID，测试卸载
+
 
 class TestIos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
-        cls.ios = connect_device("iOS:///http+usbmux://")
-        cls.TEST_FSYNC_APP = "" # 测试文件推送、同步的app的bundleID
+        cls.ios = IOS(addr=DEFAULT_ADDR, cap_method=CAP_METHOD.WDACAP)
+        cls.TEST_FSYNC_APP = ""  # 测试文件推送、同步的app的bundleID
         # 获取一个可以用于文件操作的app
         cls.TEST_FSYNC_APP = "com.apple.Keynote"
         # cls.TEST_FSYNC_APP = "rn.notes.best"
@@ -71,7 +72,7 @@ class TestIos(unittest.TestCase):
         filename = "./screen.png"
         if os.path.exists(filename):
             os.remove(filename)
-        
+
         screen = self.ios.snapshot(filename=filename)
         self.assertIsInstance(screen, numpy.ndarray)
         self.assertTrue(os.path.exists(filename))
@@ -87,11 +88,11 @@ class TestIos(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.ios.keyevent("home1")
-    
+
     def test_keyevent_volume_up(self):
         print("test_keyevent_volume_up")
         self.ios.keyevent("voluMeup")
-    
+
     def test_keyevent_volume_down(self):
         print("test_keyevent_volume_down")
         self.ios.keyevent("voluMeDown")
@@ -197,7 +198,7 @@ class TestIos(unittest.TestCase):
         time.sleep(2)
         self.assertEqual(self.ios.app_current()["bundleId"], PKG_SAFARI)
         self.ios.stop_app(PKG_SAFARI)
-    
+
     def test_get_ip_address(self):
         print("test_get_ip_address")
         print(self.ios.get_ip_address())
@@ -269,7 +270,7 @@ class TestIos(unittest.TestCase):
         print("display_info:", self.ios.display_info)
         print("default touch_factor:", self.ios.touch_factor)
         self.ios.touch((500, 500))
-        self.ios.touch_factor = 1/3.3
+        self.ios.touch_factor = 1 / 3.3
         self.ios.touch((500, 500))
 
     def test_disconnect(self):
@@ -278,10 +279,10 @@ class TestIos(unittest.TestCase):
         self.ios.get_frame_from_stream()
         self.ios.disconnect()
         self.assertEqual(len(self.ios.instruct_helper._port_using_func.keys()), 0)
-    
+
     def test_record(self):
         self.ios.start_recording(output="test_10s.mp4")
-        time.sleep(10+4)
+        time.sleep(10 + 4)
         self.ios.stop_recording()
         time.sleep(2)
         self.assertEqual(os.path.exists("test_10s.mp4"), True)
@@ -290,9 +291,9 @@ class TestIos(unittest.TestCase):
         if cap.isOpened():
             rate = cap.get(5)
             frame_num = cap.get(7)
-            duration = frame_num/rate
+            duration = frame_num / rate
         self.assertEqual(duration >= 10, True)
-        
+
     def test_list_app(self):
         print("test_list_app")
         app_list = self.ios.list_app(type="all")
@@ -302,7 +303,7 @@ class TestIos(unittest.TestCase):
     def test_install_app(self):
         print("test_install_app")
         self.ios.install_app(TEST_IPA_FILE_OR_URL)
-    
+
     def test_uninstall_app(self):
         print("test_uninstall_app")
         self.ios.uninstall_app(TEST_IPA_BUNDLE_ID)
@@ -313,7 +314,7 @@ class TestIos(unittest.TestCase):
 
     def test_set_clipboard(self):
         for i in range(10):
-            text = "test_set_clipboard"+str(i)
+            text = "test_set_clipboard" + str(i)
             self.ios.set_clipboard(text)
             self.assertEqual(self.ios.get_clipboard(), text)
             self.ios.paste()
@@ -341,7 +342,7 @@ class TestIos(unittest.TestCase):
         self.assertTrue(isinstance(file_list[0], dict))
         self._try_remove_ios("/Documents/test_ls_file.txt", self.TEST_FSYNC_APP)
         try_remove("test_ls_file.txt")
-        
+
     def _try_remove_ios(self, file_name, bundle_id=None):
         try:
             self.ios.rm(file_name, bundle_id)
@@ -437,7 +438,7 @@ class TestIos(unittest.TestCase):
         _test_dir('测试文件夹', "/Documents/")
         _test_dir('测试文件夹_1', "/Documents")
         _test_dir('测 试 文 件 夹', "/Documents")
-        
+
     def test_pull(self):
         def _get_file_md5(file_path):
             hasher = hashlib.md5()
@@ -453,7 +454,7 @@ class TestIos(unittest.TestCase):
                     file_path = os.path.join(root, file)
                     file_md5 = _get_file_md5(file_path)
                     md5_list.append(file_md5)
-            
+
             combined_md5 = hashlib.md5("".join(md5_list).encode()).hexdigest()
             return combined_md5
 
@@ -528,7 +529,6 @@ class TestIos(unittest.TestCase):
         _test_file("data")
         _test_file("data.png", bundle_id=None, folder="/DCIM")
 
-
         _test_dir('test_dir')
         _test_dir('t e s t _ d i r')
         _test_dir('测试文件夹')
@@ -540,7 +540,7 @@ class TestIos(unittest.TestCase):
     def test_rm(self):
         def _test_file(file_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
             target = f"{folder}/{file_name}"
-            
+
             # 删除手机和本地存在的文件，创建文件
             self._try_remove_ios(target, bundle_id)
             with open(file_name, 'w') as f:
@@ -560,10 +560,10 @@ class TestIos(unittest.TestCase):
             for item in file_list:
                 if item['name'] == file_name:
                     raise Exception(f"remove {file_name} failed")
-            
+
         def _test_dir(dir_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
             target = f"{folder}/{dir_name}"
-            
+
             # 删除手机和本地存在的文件夹，创建文件夹和文件
             self._try_remove_ios(target, bundle_id)
             os.mkdir(dir_name)
@@ -582,7 +582,7 @@ class TestIos(unittest.TestCase):
                     break
             else:
                 raise Exception(f"directory {dir_name} not exist")
-            
+
             # 删除文件夹
             self.ios.rm(target, bundle_id)
             file_list = self.ios.ls(folder, bundle_id)
@@ -605,25 +605,25 @@ class TestIos(unittest.TestCase):
         _test_dir('测 试 文 件 夹')
         _test_dir("(){}[]~'-_@!#$%&+,;=^")
         _test_dir('test_dir_no_bundle', bundle_id=None, folder="/DCIM")
-    
+
     def test_mkdir(self):
         def _test(dir_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
             target = f"{folder}/{dir_name}"
-            
+
             # 删除目标目录
             self._try_remove_ios(target, bundle_id)
-            
+
             print("test mkdir")
-            
+
             # 创建目录
             self.ios.mkdir(target, bundle_id)
-            
+
             # 获取目标文件夹下的目录列表
             dirs = self.ios.ls(folder, bundle_id)
-            
+
             # 检查新建的目录是否存在
             self.assertTrue(any(d['name'] == f"{dir_name}/" for d in dirs))
-            
+
             # 删除目标目录
             self._try_remove_ios(target, bundle_id)
 
@@ -639,31 +639,31 @@ class TestIos(unittest.TestCase):
 
     def test_is_dir(self):
         print("test is_dir")
-        
+
         def create_and_push_file(local_name, remote_name, bundle_id):
             with open(local_name, 'w') as f:
                 f.write('Test data')
             self.ios.push(local_name, remote_name, bundle_id)
             try_remove(local_name)
-        
+
         def create_and_push_dir(local_name, remote_name, bundle_id):
             os.makedirs(local_name)
             self.ios.push(local_name, remote_name, bundle_id)
             try_remove(local_name)
-        
+
         # 测试文件
         file_path = "/Documents/test_data.txt"
         self._try_remove_ios(file_path, self.TEST_FSYNC_APP)
         create_and_push_file("test_data.txt", "/Documents/", self.TEST_FSYNC_APP)
         self.assertFalse(self.ios.is_dir(file_path, self.TEST_FSYNC_APP))
         self._try_remove_ios(file_path, self.TEST_FSYNC_APP)
-        
+
         # 测试文件夹
         dir_path = "/Documents/test_dir"
         create_and_push_dir("test_dir", "/Documents/", self.TEST_FSYNC_APP)
         self.assertTrue(self.ios.is_dir(dir_path, self.TEST_FSYNC_APP))
         self._try_remove_ios(dir_path, self.TEST_FSYNC_APP)
-        
+
         # 测试另外一个文件夹
         file_path_dcim = "/DCIM/test.png"
         self._try_remove_ios(file_path_dcim, None)
@@ -673,10 +673,9 @@ class TestIos(unittest.TestCase):
         self._try_remove_ios(file_path_dcim, None)
 
 
-
 if __name__ == '__main__':
     # unittest.main()
-    #构造测试集
+    # 构造测试集
     suite = unittest.TestSuite()
     # 初始化相关信息
     suite.addTest(TestIos("test_session"))
@@ -726,6 +725,6 @@ if __name__ == '__main__':
     suite.addTest(TestIos("get_alert_accept"))
     suite.addTest(TestIos("get_alert_click"))
 
-    #执行测试
+    # 执行测试
     runner = unittest.TextTestRunner()
     runner.run(suite)

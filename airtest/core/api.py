@@ -735,8 +735,17 @@ def push(local, remote, *args, **kwargs):
     :platforms: Android, iOS
     :Example:
 
-        >>> connect_device("android:///")
-        >>> push(r"D:\demo\test.text", "/data/local/tmp/test.text")
+        Android::
+
+            >>> connect_device("android:///")
+            >>> push(r"D:\demo\test.text", "/data/local/tmp/test.text")
+
+
+        iOS::
+
+            >>> connect_device("iOS:///http+usbmux://udid")
+            >>> push("test.png", "/DCIM/")  # push to the DCIM directory
+            >>> push(r"D:\demo\test.text", "/Documents", bundle_id="com.apple.Keynote")  # push to the Documents directory of the Keynote app
 
     """
     return G.DEVICE.push(local, remote, *args, **kwargs)
@@ -753,8 +762,16 @@ def pull(remote, local, *args, **kwargs):
     :platforms: Android, iOS
     :Example:
 
-        >>> connect_device("android:///")
-        >>> pull("/data/local/tmp/test.text", r"D:\demo\test.text")
+        Android::
+
+            >>> connect_device("android:///")
+            >>> pull("/data/local/tmp/test.txt", r"D:\demo\test.txt")
+
+        iOS::
+
+            >>> connect_device("iOS:///http+usbmux://udid")
+            >>> pull("/DCIM/test.png", r"D:\demo\test.png")
+            >>> pull("/Documents/test.key", r"D:\demo\test.key", bundle_id="com.apple.Keynote")
 
     """
     return G.DEVICE.pull(remote, local, *args, **kwargs)

@@ -46,6 +46,7 @@ def decorator_retry_session(func):
 
     当因为session失效而操作失败时，尝试重新获取session，最多重试3次。
     """
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
@@ -59,6 +60,7 @@ def decorator_retry_session(func):
                     time.sleep(0.5)
                     continue
             raise AirtestError("Failed to re-acquire session.")
+
     return wrapper
 
 
@@ -66,6 +68,7 @@ def decorator_pairing_dialog(func):
     """
     When the device is not paired, trigger the trust dialogue and try again.
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -77,6 +80,7 @@ def decorator_pairing_dialog(func):
                 error_msg = "Device is not yet paired. Triggered the trust dialogue. Please accept and try again."
             LOGGING.error(error_msg)
             raise
+
     return wrapper
 
 
@@ -90,6 +94,7 @@ def add_decorator_to_methods(decorator):
     Returns:
         - decorator_wrapper: A function that takes a class as input and decorates all the methods of the class by applying the input decorator to each method.
     """
+
     def decorator_wrapper(cls):
         # 获取要装饰的类的所有方法
         methods = [attr for attr in dir(cls) if callable(getattr(cls, attr)) and not attr.startswith("_")]
@@ -99,7 +104,9 @@ def add_decorator_to_methods(decorator):
             setattr(cls, method, decorator(getattr(cls, method)))
 
         return cls
+
     return decorator_wrapper
+
 
 def format_file_list(file_list):
     formatted_list = []
@@ -111,8 +118,9 @@ def format_file_list(file_list):
             'name': file[3]
         }
         formatted_list.append(file_info)
-    
+
     return formatted_list
+
 
 @add_decorator_to_methods(decorator_pairing_dialog)
 class TIDevice:
@@ -125,11 +133,11 @@ class TIDevice:
         Get all available devices connected by USB, return a list of UDIDs.
 
         Returns:
-            list: A list of UDIDs. 
+            list: A list of UDIDs.
             e.g. ['539c5fffb18f2be0bf7f771d68f7c327fb68d2d9']
         """
         return Usbmux().device_udid_list()
-    
+
     @staticmethod
     def list_app(udid, app_type="user"):
         """
@@ -175,7 +183,7 @@ class TIDevice:
             if (bundle_id.startswith('com.') and bundle_id.endswith(".xctrunner")) or display_name == "WebDriverAgentRunner-Runner":
                 wda_list.append(bundle_id)
         return wda_list
-    
+
     @staticmethod
     def device_info(udid):
         """
@@ -208,8 +216,8 @@ class TIDevice:
         'BasebandVersion'
         """
         for attr in ('ProductVersion', 'ProductType',
-            'ModelNumber', 'SerialNumber', 'PhoneNumber', 
-            'TimeZone', 'UniqueDeviceID'):
+                     'ModelNumber', 'SerialNumber', 'PhoneNumber',
+                     'TimeZone', 'UniqueDeviceID'):
             key = attr[0].lower() + attr[1:]
             if attr in device_info:
                 tmp_dict[key] = device_info[attr]
@@ -218,7 +226,7 @@ class TIDevice:
         except:
             tmp_dict["marketName"] = ""
         return tmp_dict
-    
+
     @staticmethod
     def install_app(udid, file_or_url):
         BaseDevice(udid, Usbmux()).app_install(file_or_url)
@@ -263,7 +271,7 @@ class TIDevice:
                 continue
             ps_list.append({key: p[key] for key in keys})
         return ps_list
-    
+
     @staticmethod
     def ps_wda(udid):
         """Get all running WDA on device that meet certain naming rules.
@@ -283,20 +291,22 @@ class TIDevice:
             else:
                 continue
         return ps_wda_list
-    
+
     @staticmethod
     def xctest(udid, wda_bundle_id):
         try:
-            return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
+            return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id,
+                                                     logger=setup_logger(level=logging.INFO))
         except Exception as e:
-            print(f"Failed to run tidevice xctest function for {wda_bundle_id}.Try to run tidevice runwda function for {wda_bundle_id}.")
+            print(
+                f"Failed to run tidevice xctest function for {wda_bundle_id}.Try to run tidevice runwda function for {wda_bundle_id}.")
             try:
                 return BaseDevice(udid, Usbmux()).runwda(fuzzy_bundle_id=wda_bundle_id)
             except Exception as e:
                 print(f"Failed to run tidevice runwda function for {wda_bundle_id}.")
                 # 先不抛出异常，ios17的兼容未合并进来，ios17设备一定会报错
                 # raise AirtestError(f"Failed to start XCTest for {wda_bundle_id}.")
-    
+
     @staticmethod
     def push(udid, local_path, device_path, bundle_id=None, timeout=None):
         """
@@ -320,12 +330,11 @@ class TIDevice:
 
                     >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/test.key", "/Documents", "com.apple.Keynote")
                     >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/test.key", "/Documents/test.key", "com.apple.Keynote")
-
         """
         try:
             if not os.path.exists(local_path):
                 raise AirtestError(f"Local path {local_path} does not exist.")
-            
+
             if bundle_id:
                 sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
             else:
@@ -370,7 +379,8 @@ class TIDevice:
                             sync.push_content(device_file_path, content)
             print(f"pushed {local_path} to {device_path}")
         except Exception as e:
-            raise AirtestError(f"Failed to push {local_path} to {device_path}. If push a FILE, please check if there is a DIRECTORY with the same name already exists. If push a DIRECTORY, please check if there is a FILE with the same name already exists, and try again.")
+            raise AirtestError(
+                f"Failed to push {local_path} to {device_path}. If push a FILE, please check if there is a DIRECTORY with the same name already exists. If push a DIRECTORY, please check if there is a FILE with the same name already exists, and try again.")
 
     @staticmethod
     def pull(udid, device_path, local_path, bundle_id=None, timeout=None):
@@ -380,21 +390,21 @@ class TIDevice:
         Args:
             udid (str): The UDID of the iOS device.
             device_path (str): The path of the file or directory on the iOS device.
-                               Remote devices can only be file paths. 
+                               Remote devices can only be file paths.
             local_path (str): The destination path on the local machine.
-                              Remote devices can only be file paths. 
+                              Remote devices can only be file paths.
             bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be pulled from the app's sandbox. Defaults to None.
             timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
 
             Examples:
-                
+
                     Pull a file from the DCIM directory::
-    
+
                         >>> TIDevice.pull("00008020-001270842E88002E", "/DCIM/photo.jpg", "C:/Users/username/Pictures/photo.jpg")
                         >>> TIDevice.pull("00008020-001270842E88002E", "/DCIM/photo.jpg", "C:/Users/username/Pictures")
-    
+
                     Pull a directory from the Documents directory of the Keynote app::
-    
+
                         >>> TIDevice.pull("00008020-001270842E88002E", "/Documents", "C:/Users/username/Documents", "com.apple.Keynote")
                         >>> TIDevice.pull("00008020-001270842E88002E", "/Documents", "C:/Users/username/Documents", "com.apple.Keynote")
 
@@ -407,7 +417,7 @@ class TIDevice:
 
             if TIDevice.is_dir(udid, device_path, bundle_id):
                 os.makedirs(local_path, exist_ok=True)
-                
+
             src = pathlib.Path(device_path)
             dst = pathlib.Path(local_path)
             if dst.is_dir() and src.name and sync.stat(src).is_dir():
@@ -438,12 +448,13 @@ class TIDevice:
 
                 >>> TIDevice.rm("00008020-001270842E88002E", "/Documents", "com.apple.Keynote")
         """
+
         def _check_status(status, path):
             if status == 0:
                 print("removed", path)
             else:
                 raise AirtestError(f"<{status.name} {status.value}> Failed to remove {path}")
-        
+
         def _remove_folder(udid, folder_path, bundle_id):
             folder_path = folder_path.replace("\\", "/")
             for file_info in TIDevice.ls(udid, folder_path, bundle_id):
@@ -455,12 +466,12 @@ class TIDevice:
             # remove the folder itself
             status = sync.remove(folder_path)
             _check_status(status, folder_path)
-        
+
         if bundle_id:
             sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
         else:
             sync = BaseDevice(udid, Usbmux()).sync
-        
+
         if TIDevice.is_dir(udid, remote_path, bundle_id):
             if not remote_path.endswith("/"):
                 remote_path += "/"
@@ -481,6 +492,18 @@ class TIDevice:
 
         Returns:
             list: A list of files and directories in the specified path.
+
+        Examples:
+
+            List files and directories in the DCIM directory::
+
+                >>> print(TIDevice.ls("00008020-001270842E88002E", "/DCIM"))
+                [{'type': 'Directory', 'size': 96, 'last_modified': '2021-12-01 15:30:13', 'name': '100APPLE/'}, {'type': 'Directory', 'size': 96, 'last_modified': '2021-07-20 17:29:01', 'name': '.MISC/'}]
+
+            List files and directories in the Documents directory of the Keynote app::
+
+                >>> print(TIDevice.ls("00008020-001270842E88002E", "/Documents", "com.apple.Keynote"))
+                [{'type': 'File', 'size': 302626, 'last_modified': '2024-06-25 11:25:25', 'name': '演示文稿.key'}]
         """
         try:
             file_list = []
@@ -509,7 +532,7 @@ class TIDevice:
             udid (str): The UDID of the iOS device.
             remote_path (str): The path of the directory to be created on the iOS device.
             bundle_id (str, optional): The bundle ID of the app. Defaults to None.
-        
+
         Examples:
             Create a directory in the DCIM directory::
 
@@ -540,10 +563,10 @@ class TIDevice:
             udid (str): The UDID of the iOS device.
             remote_path (str): The path on the iOS device.
             bundle_id (str): The bundle ID of the app.
-        
+
         Returns:
             bool: True if the path is a directory, False otherwise.
-        
+
         Examples:
             Check if the DCIM directory is a directory::
 
@@ -568,8 +591,10 @@ class TIDevice:
                 if info['name'] == f"{remote_path_base}":
                     return info['type'] == 'Directory'
         except Exception as e:
-            raise AirtestError(f"Failed to check if {remote_path} is a directory. Please check the path exist and try again.")     
-    
+            raise AirtestError(
+                f"Failed to check if {remote_path} is a directory. Please check the path exist and try again.")
+
+
 @add_decorator_to_methods(decorator_retry_session)
 class IOS(Device):
     """IOS client.
@@ -581,7 +606,8 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None, serialno=None, wda_bundle_id=None):
+    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None,
+                 serialno=None, wda_bundle_id=None):
         super().__init__()
 
         # If none or empty, use default addr.
@@ -607,12 +633,13 @@ class IOS(Device):
         # e.g., connect local device http://127.0.0.1:8100 or http://localhost:8100 or http+usbmux://00008020-001270842E88002E
         self.udid = udid or name or serialno
         self._wda_bundle_id = wda_bundle_id
-        parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(self.addr).netloc
+        parsed = urlparse(self.addr).netloc.split(":")[0] if ":" in urlparse(self.addr).netloc else urlparse(
+            self.addr).netloc
         if parsed not in ["localhost", "127.0.0.1"] and "." in parsed:
             # Connect remote device via url.
             self.is_local_device = False
-            self.driver = wda.Client(self.addr) 
-        else:   
+            self.driver = wda.Client(self.addr)
+        else:
             # Connect local device via url.
             self.is_local_device = True
             if parsed in ["localhost", "127.0.0.1"]:
@@ -655,25 +682,25 @@ class IOS(Device):
         if device_udid_list:
             return device_udid_list[0]
         raise IndexError("iOS devices not found, please connect device first.")
-    
+
     def _get_default_wda_bundle_id(self):
         """Get local default device's WDA bundleID when no WDA bundleID.
 
         Returns:
             Local device's WDA bundleID.
-        """ 
+        """
         try:
             wda_list = TIDevice.list_wda(self.udid)
             return wda_list[0]
         except IndexError:
             raise IndexError("WDA bundleID not found, please install WDA on device.")
-        
+
     def _get_default_running_wda_bundle_id(self):
         """Get the bundleID of the WDA that is currently running on local device.
 
         Returns:
             Local device's running WDA bundleID.
-        """ 
+        """
         try:
             running_wda_list = TIDevice.ps_wda(self.udid)
             return running_wda_list[0]
@@ -685,7 +712,7 @@ class IOS(Device):
         if not self._wda_bundle_id and self.is_local_device:
             self._wda_bundle_id = self._get_default_wda_bundle_id()
         return self._wda_bundle_id
-        
+
     @property
     def ip(self):
         """Returns the IP address of the host connected to the iOS phone.
@@ -798,7 +825,7 @@ class IOS(Device):
 
     def window_size(self):
         """
-        Returns: 
+        Returns:
             Window size (width, height).
         """
         try:
@@ -986,7 +1013,7 @@ class IOS(Device):
         """
         The method extended from the facebook-wda third-party library.
         Use modified appium wda to perform quick click.
-        
+
         Args:
             x, y (int, float): float(percent), int(coordicate)
             duration (optional): tap_hold duration
@@ -994,17 +1021,17 @@ class IOS(Device):
         x, y = self.driver._percent2pos(x, y)
         data = {'x': x, 'y': y, 'duration': duration}
         # 为了兼容改动直接覆盖原生接口的自制版wda。
-        
+
         try:
             self.driver._session_http.post('/wda/deviceTap', data=data)
-        #如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
+        # 如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
         except wda.WDARequestError as e:
             try:
                 return self.driver._session_http.post('/wda/tap', data=data)
             except wda.WDARequestError as e:
                 if e.status == 110:
                     self.driver.click(x, y, duration)
-            
+
     def double_click(self, pos):
         x, y = self._transform_xy(pos)
         self.driver.double_tap(x, y)
@@ -1030,6 +1057,7 @@ class IOS(Device):
             fx, fy = int(fx * self.touch_factor), int(fy * self.touch_factor)
         if not (tx < 1 and ty < 1):
             tx, ty = int(tx * self.touch_factor), int(ty * self.touch_factor)
+
         # 如果是通过ide来滑动，且安装的是自制版的wda就调用快速滑动接口，其他时候不关心滑动速度就使用原生接口保证滑动精确性。
         def ios_tagent_swipe(fpos, tpos, delay=None):
             # 调用自定义的wda swipe接口需要进行坐标转换。
@@ -1057,7 +1085,7 @@ class IOS(Device):
         """
         The method extended from the facebook-wda third-party library.
         Use modified appium wda to perform quick swipe.
-        
+
         Args:
             x1, y1, x2, y2 (int, float): float(percent), int(coordicate)
             delay (float): start coordinate to end coordinate duration (seconds)
@@ -1073,7 +1101,7 @@ class IOS(Device):
             if self.using_ios_tagent:
                 try:
                     self.driver._session_http.post('/wda/deviceSwipe', data=data)
-                #如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
+                # 如果找不到接口说明是低版本的wda，低于1.3版本没有此接口
                 except wda.WDARequestError as e:
                     return self.driver._session_http.post('/wda/swipe', data=data)
         except wda.WDARequestError as e:
@@ -1113,7 +1141,7 @@ class IOS(Device):
         if enter:
             text += '\n'
         self.driver.send_keys(text)
-        
+
     def install_app(self, file_or_url, **kwargs):
         """
         curl -X POST $JSON_HEADER \
@@ -1135,11 +1163,11 @@ class IOS(Device):
         if not self.is_local_device:
             raise LocalDeviceError()
         return TIDevice.install_app(self.udid, file_or_url)
-    
+
     def uninstall_app(self, bundle_id):
         """Uninstall app from the device.
 
-        Notes: 
+        Notes:
             It seems always return True.
 
         Args:
@@ -1171,10 +1199,10 @@ class IOS(Device):
                 raise AirtestError(f"App launch timeout, please check if the app is installed: {bundle_id}")
         else:
             return TIDevice.start_app(self.udid, bundle_id)
-    
+
     def stop_app(self, bundle_id):
         """
-        Note: Both ways of killing the app may fail, nothing responds or just closes the 
+        Note: Both ways of killing the app may fail, nothing responds or just closes the
         app to the background instead of actually killing it and no error will be reported.
         """
         try:
@@ -1235,13 +1263,13 @@ class IOS(Device):
              "bundleId": "com.netease.cloudmusic"}
         """
         return self.driver.app_current()
-    
+
     def get_clipboard(self, wda_bundle_id=None, *args, **kwargs):
         """Get clipboard text.
 
-        Before calling the WDA interface, you need to ensure that WDA was foreground.  
+        Before calling the WDA interface, you need to ensure that WDA was foreground.
         If there are multiple WDA on your device, please specify the active WDA by parameter wda_bundle_id.
-        
+
         Args:
             wda_bundle_id: The bundle id of the running WDA, if None, will use default WDA bundle id.
 
@@ -1252,7 +1280,7 @@ class IOS(Device):
             LocalDeviceError: If the device is remote and the wda_bundle_id parameter is not provided.
 
         Notes:
-            If you want to use this function, you have to set WDA foreground which would switch the 
+            If you want to use this function, you have to set WDA foreground which would switch the
             current screen of the phone. Then we will try to switch back to the screen before.
         """
         if wda_bundle_id is None:
@@ -1281,7 +1309,7 @@ class IOS(Device):
         else:
             LOGGING.warning("we can't switch back to the app before, because can't get bundle id.")
         return decoded_text
-    
+
     def set_clipboard(self, content, wda_bundle_id=None, *args, **kwargs):
         """
         Set the clipboard content on the device.
@@ -1476,7 +1504,7 @@ class IOS(Device):
         return self.driver.alert.wait(time_counter)
 
     def alert_buttons(self):
-        """Get alert buttons text. 
+        """Get alert buttons text.
 
         Notes:
             Might not work on all devices.
@@ -1509,7 +1537,7 @@ class IOS(Device):
         return self.driver.alert.click(buttons)
 
     def home_interface(self):
-        """Get True for the device status is on home interface. 
+        """Get True for the device status is on home interface.
 
         Reason:
             Some devices can Horizontal screen on the home interface.
@@ -1538,7 +1566,7 @@ class IOS(Device):
             self.mjpegcap.teardown_stream()
         if self.rotation_watcher:
             self.rotation_watcher.teardown()
-    
+
     def start_recording(self, max_time=1800, output=None, fps=10,
                         snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
         """Start recording the device display.
@@ -1588,7 +1616,7 @@ class IOS(Device):
         if self.recorder and self.recorder.is_running():
             LOGGING.warning("recording is already running, please don't call again")
             return None
-        
+
         logdir = "./"
         if ST.LOG_DIR is not None:
             logdir = ST.LOG_DIR
@@ -1601,10 +1629,11 @@ class IOS(Device):
                 save_path = os.path.join(logdir, output)
 
         max_size = get_max_size(max_size)
+
         def get_frame():
             data = self.get_frame_from_stream()
             frame = aircv.utils.string_2_img(data)
-            
+
             if max_size is not None:
                 frame = resize_by_max(frame, max_size)
             return frame
@@ -1617,13 +1646,13 @@ class IOS(Device):
         LOGGING.info("start recording screen to {}".format(save_path))
         return save_path
 
-    def stop_recording(self,):
+    def stop_recording(self, ):
         """ Stop recording the device display. Recoding file will be kept in the device.
         """
         LOGGING.info("stopping recording")
         self.recorder.stop()
         return None
-    
+
     def push(self, local_path, remote_path, bundle_id=None, timeout=None):
         """
         Pushes a file from the local machine to the iOS device.
@@ -1695,8 +1724,7 @@ class IOS(Device):
                 - 'size': The size of the item in bytes.
                 - 'last_modified': The last modification time of the item, in the format 'YYYY-MM-DD HH:MM:SS'.
                 - 'name': The name of the item, including the path relative to `remote_path`.
-
-        Example:
+            e.g.
             [
                 {'type': 'Directory', 'size': 1024, 'last_modified': 'YYYY-MM-DD HH:MM:SS', 'name': 'example_directory/'},
                 {'type': 'File', 'size': 2048, 'last_modified': 'YYYY-MM-DD HH:MM:SS', 'name': 'example_file.txt'}
@@ -1704,11 +1732,25 @@ class IOS(Device):
 
         Raises:
             LocalDeviceError: If the device is remote.
+
+        Examples:
+
+            List files and directories in the DCIM directory::
+
+                >>> dev = connect_device("iOS:///http+usbmux://udid")
+                >>> print(dev.ls("/DCIM/"))
+                [{'type': 'Directory', 'size': 96, 'last_modified': '2021-12-01 15:30:13', 'name': '100APPLE/'}, {'type': 'Directory', 'size': 96, 'last_modified': '2021-07-20 17:29:01', 'name': '.MISC/'}]
+
+            List files and directories in the Documents directory of the Keynote app::
+
+                >>> print(dev.ls("/Documents", "com.apple.Keynote"))
+                [{'type': 'File', 'size': 302626, 'last_modified': '2024-06-25 11:25:25', 'name': 'test.key'}]
+
         """
         if not self.is_local_device:
             raise LocalDeviceError()
         return TIDevice.ls(self.udid, remote_path, bundle_id=bundle_id)
-    
+
     @logwrap
     def rm(self, remote_path, bundle_id=None):
         """
@@ -1742,9 +1784,9 @@ class IOS(Device):
             remote_path (str): The remote path to create.
             bundle_id (str, optional): The bundle ID of the app. Defaults to None.
 
-        
+
         Examples:
-            
+
                 >>> dev = connect_device("iOS:///http+usbmux://udid")
                 >>> dev.mkdir("/Documents/test_dir", "com.apple.Keynote")
 
@@ -1763,7 +1805,7 @@ class IOS(Device):
 
         Returns:
             bool: True if the path is a directory, False otherwise.
-        
+
         Exapmles:
 
             >>> dev = connect_device("iOS:///http+usbmux://udid")
