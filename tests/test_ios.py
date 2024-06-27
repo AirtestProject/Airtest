@@ -328,29 +328,99 @@ class TestIos(unittest.TestCase):
         print(self.ios.ls("/Documents/", self.TEST_FSYNC_APP))
         
     def test_push(self):
-        def _test_file(file_name):
-            print(f"test push file {file_name}")
+        def _try_remove_ios(file_name, bundle_id=None):
+            try:
+                self.ios.rm(file_name, bundle_id)
+                file_list = self.ios.ls(os.path.dirname(file_name), bundle_id)
+                for file in file_list:
+                    if file['name'] == file_name:
+                        raise Exception(f"remove file {file_name} failed")
+                print(f"file {file_name} not exist now.")
+            except:
+                pass
+
+        def _test_file(file_name, dst="/Documents/", bundle_id=self.TEST_FSYNC_APP, target=None):
+            try_remove(file_name)
             with open(file_name, 'w') as f:
                 f.write('Test data')
-            self.ios.push(file_name, "/Documents/", self.TEST_FSYNC_APP, timeout=60)
-            try_remove(file_name)
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
-            self.assertTrue(file_name in [item['name'] for item in file_list])
 
-        def _test_dir(dir_name):
+            # 用来ls和rm的路径，没有将文件改名则默认为file_name
+            if not target:
+                tmp_dst = os.path.normpath(dst)
+                if os.path.basename(tmp_dst) != file_name:
+                    tmp_dst = os.path.join(tmp_dst, file_name)
+                target = tmp_dst.replace('\\', '/')
+
+            # 清理手机里的文件
+            _try_remove_ios(target, bundle_id)
+            self.ios.push(file_name, dst, bundle_id, timeout=60)
+            time.sleep(1)
+            file_list = self.ios.ls(target, bundle_id)
+            # 验证结果
+            self.assertEqual(len(file_list), 1)
+            self.assertEqual(file_list[0]['name'], os.path.basename(target))
+            self.assertEqual(file_list[0]['type'], 'File')
+            self.ios.rm(target, bundle_id)
+            time.sleep(1)
+
+            # 清理
+            try_remove(file_name)
+
+        def _test_dir(dir_name, dst="/Documents/"):
             print(f"test push directory {dir_name}")
+            # 用来ls和rm的路径
+            tmp_dst = os.path.normpath(dst)
+            if os.path.basename(tmp_dst) != dir_name:
+                tmp_dst = os.path.join(tmp_dst, dir_name)
+            target = tmp_dst.replace('\\', '/')
+
+            # 创建文件夹和文件
+            try_remove(dir_name)
+            _try_remove_ios(target, self.TEST_FSYNC_APP)
             os.mkdir(dir_name)
             with open(f'{dir_name}/test_data', 'w') as f:
                 f.write('Test data')
-            self.ios.push(dir_name, "/Documents/", self.TEST_FSYNC_APP, timeout=60)
-            try_remove(dir_name)
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
-            self.assertTrue(f"{dir_name}/" in [item['name'] for item in file_list])
 
-        _test_file("test_data.txt")
-        _test_file("测试文件.txt")
-        _test_dir('test_dir')
-        _test_dir('测试文件夹')
+            self.ios.push(dir_name, dst, self.TEST_FSYNC_APP, timeout=60)
+            time.sleep(1)
+
+            dir_list = self.ios.ls(os.path.dirname(target), self.TEST_FSYNC_APP)
+            print(dir_list)
+            self.assertTrue(f"{dir_name}/" in [item['name'] for item in dir_list])
+            file_list = self.ios.ls(f"{target}/test_data", self.TEST_FSYNC_APP)
+            self.assertTrue("test_data" in [item['name'] for item in file_list])
+            self.ios.rm(target, self.TEST_FSYNC_APP)
+            time.sleep(1)
+
+            try_remove(dir_name)
+
+        # 执行得太快会报错,可能和wda的处理速度有关
+        # 如果报错尝试单独执行那些用例
+        _test_file("test_data_1.txt", "/Documents/")
+        _test_file("test_data_2.txt", "/Documents/test_data_2.txt")
+        _test_file("test_data_3.txt", "/Documents/test_data_3.txt/")
+        #重命名文件
+        _test_file("test_data_4.txt", "/Documents/test_data.txt/", target="/Documents/test_data.txt")
+        _test_file("test_data.txt", "/Documents")
+        _test_file("test_1.png", "/DCIM", None)
+        _test_file("test_2.png", "/DCIM/", None)
+        _test_file("test_3.png", "/DCIM/test_3.png", None)
+        _test_file("test_4.png", "/DCIM/test_4.png/", None)
+        _test_file("test_5.png", "/DCIM/test.png/", None, target="/DCIM/test.png")
+        _test_file("test.png", "/DCIM/", None)
+        _test_file("t e s t  d a t a.txt", "/Documents")
+        _test_file("测试文件.txt", "/Documents")
+        _test_file("测 试 文 件.txt", "/Documents")
+        _test_file("(){}[]~'-_@!#$%&+,;=^.txt", "/Documents")
+        _test_file("data", "/Documents")
+
+        _test_dir('test_dir', "/Documents/")
+        _test_dir('test_dir_1', "/Documents")
+        _test_dir('t e s t  d i r', "/Documents")
+        _test_dir("(){}[]~'-_@!#$%&+,;=^", "/Documents")
+        _test_dir('测试文件夹', "/Documents/")
+        _test_dir('测试文件夹_1', "/Documents")
+        _test_dir('测 试 文 件 夹', "/Documents")
         
     def test_pull(self):
         def _test_file(file_name):

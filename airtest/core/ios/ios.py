@@ -295,7 +295,19 @@ class TIDevice:
             local_path (str): The local path of the file or directory to be pushed.
             bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be pushed to the app's sandbox container. Defaults to None.
             timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
-            
+
+        Examples:
+
+                Push a file to the DCIM directory::
+
+                    >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/Pictures/photo.jpg", "/DCIM")
+                    >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/Pictures/photo.jpg", "/DCIM/photo.jpg")
+
+                Push a directory to the Documents directory of the Keynote app::
+
+                    >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/test.key", "/Documents", "com.apple.Keynote")
+                    >>> TIDevice.push("00008020-001270842E88002E", "C:/Users/username/test.key", "/Documents/test.key", "com.apple.Keynote")
+
         """
         try:
             if not os.path.exists(local_path):
@@ -306,10 +318,19 @@ class TIDevice:
             else:
                 sync = BaseDevice(udid, Usbmux()).sync
 
+            if device_path.endswith("/") or device_path.endswith("\\"):
+                device_path = device_path[:-1]
+
             if os.path.isfile(local_path):
                 file_name = os.path.basename(local_path)
-                device_path = os.path.join(device_path, file_name)
+                # 如果device_path有后缀则认为是文件，和本地文件名不一样视为需要重命名
+                if not os.path.splitext(device_path)[1]:
+                    if os.path.basename(device_path) != file_name:
+                        device_path = os.path.join(device_path, file_name)
                 device_path = device_path.replace("\\", "/")
+                # Create the directory if it does not exist
+                sync.mkdir(os.path.dirname(device_path))
+
                 with open(local_path, "rb") as f:
                     content = f.read()
                     sync.push_content(device_path, content)
@@ -318,12 +339,14 @@ class TIDevice:
                 device_path = device_path.replace("\\", "/")
                 sync.mkdir(device_path)
                 for root, dirs, files in os.walk(local_path):
+                    # 创建文件夹
                     for directory in dirs:
                         dir_path = os.path.join(root, directory)
                         relative_dir_path = os.path.relpath(dir_path, local_path)
                         device_dir_path = os.path.join(device_path, relative_dir_path)
                         device_dir_path = device_dir_path.replace("\\", "/")
                         sync.mkdir(device_dir_path)
+                    # 上传文件
                     for file_name in files:
                         file_path = os.path.join(root, file_name)
                         relative_path = os.path.relpath(file_path, local_path)
@@ -334,7 +357,7 @@ class TIDevice:
                             sync.push_content(device_file_path, content)
             print(f"pushed {local_path} to {device_path}")
         except Exception as e:
-            raise AirtestError(f"Failed to push {local_path} to {device_path}.")
+            raise AirtestError(f"Failed to push {local_path} to {device_path}. If push a FILE, please check if there is a DIRECTORY with the same name already exists. If push a DIRECTORY, please check if there is a FILE with the same name already exists, and try again.")
 
     @staticmethod
     def pull(udid, device_path, local_path, bundle_id=None, timeout=None):
@@ -357,7 +380,7 @@ class TIDevice:
             else:
                 sync = BaseDevice(udid, Usbmux()).sync
 
-            if TIDevice.is_dir(device_path, udid, bundle_id):
+            if TIDevice.is_dir(udid, device_path, bundle_id):
                 os.makedirs(local_path, exist_ok=True)
                 
             src = pathlib.Path(device_path)
@@ -395,15 +418,13 @@ class TIDevice:
                 else:
                     status = sync.remove(os.path.join(folder_path, file_info['name']))
                     _check_status(status)
-            status = sync.remove(folder_path)
-            _check_status(status)
         
         if bundle_id:
             sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
         else:
             sync = BaseDevice(udid, Usbmux()).sync
         
-        if TIDevice.is_dir(remote_path, udid, bundle_id):
+        if TIDevice.is_dir(udid, remote_path, bundle_id):
             if not remote_path.endswith("/"):
                 remote_path += "/"
             _remove_folder(udid, remote_path, bundle_id)
@@ -430,7 +451,8 @@ class TIDevice:
                 sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
             else:
                 sync = BaseDevice(udid, Usbmux()).sync
-
+            if remote_path.endswith("/") or remote_path.endswith("\\"):
+                remote_path = remote_path[:-1]
             for file_info in sync.listdir_info(remote_path):
                 filename = file_info.st_name
                 if file_info.is_dir():
@@ -463,20 +485,19 @@ class TIDevice:
             raise AirtestError(f"<{status.name} {status.value}> Failed to create directory {remote_path}")
 
     @staticmethod
-    def is_dir(remote_path, udid, bundle_id):
+    def is_dir(udid, remote_path, bundle_id):
         try:
             remote_path = remote_path.rstrip("\\/")
             remote_path_dir, remote_path_base = os.path.split(remote_path)
-            if bundle_id:
-                sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
-            else:
-                sync = BaseDevice(udid, Usbmux()).sync
-            
-            for file_info in sync.listdir_info(remote_path_dir):
-                if file_info.st_name == remote_path_base:
-                    return file_info.is_dir()
+            file_info = TIDevice.ls(udid, remote_path_dir, bundle_id)
+            for info in file_info:
+                # Remove the trailing slash.
+                if info['name'].endswith("/"):
+                    info['name'] = info['name'][:-1]
+                if info['name'] == f"{remote_path_base}":
+                    return info['type'] == 'Directory'
         except Exception as e:
-            raise AirtestError(f"Failed to check if {remote_path} is a directory.")     
+            raise AirtestError(f"Failed to check if {remote_path} is a directory. Please check the path exist and try again.")     
     
 @add_decorator_to_methods(decorator_retry_session)
 class IOS(Device):
@@ -1544,6 +1565,16 @@ class IOS(Device):
 
         Raises:
             LocalDeviceError: If the device is remote.
+
+        Examples:
+
+            >>> dev = connect_device("iOS:///http+usbmux://udid")
+            >>> dev.push("test.png", "/DCIM/")
+            >>> dev.push("test.png", "/DCIM/test.png")
+            >>> dev.push("test.png", "/DCIM/test_rename.png")
+            >>> dev.push("test.key", "/Documents/", "com.apple.Keynote")  # Push to the Documents directory of the Keynote app
+            >>> dev.push("test.key", "/Documents/test.key", "com.apple.Keynote")  
+
         """
         if not self.is_local_device:
             raise LocalDeviceError()
@@ -1626,3 +1657,27 @@ class IOS(Device):
         if not self.is_local_device:
             raise LocalDeviceError()
         TIDevice.mkdir(self.udid, remote_path, bundle_id=bundle_id)
+
+    def is_dir(self, remote_path, bundle_id=None):
+        """
+        Check if the specified path on the iOS device is a directory.
+
+        Args:
+            remote_path (str): The remote path to check.
+            bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+
+        Returns:
+            bool: True if the path is a directory, False otherwise.
+        
+        Exapmles:
+
+            >>> dev = connect_device("iOS:///http+usbmux://udid")
+            >>> print(dev.is_dir("/DCIM/"))
+            True
+            >>> print(dev.is_dir("/Documents/test.key", "com.apple.Keynote"))
+            False
+
+        """
+        if not self.is_local_device:
+            raise LocalDeviceError()
+        return TIDevice.is_dir(self.udid, remote_path, bundle_id=bundle_id)
