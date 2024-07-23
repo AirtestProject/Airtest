@@ -36,6 +36,7 @@ def parse_requirements(filename):
     # if py<=3.6 add dataclasses
     if sys.version_info.major == 3 and sys.version_info.minor <= 6:
         reqs.append("dataclasses")
+    if sys.version_info.major == 3 and sys.version_info.minor <= 7:
         reqs.remove("facebook-wda>=1.3.3")
         reqs.append("facebook-wda<1.4.9")
     if is_docker():
