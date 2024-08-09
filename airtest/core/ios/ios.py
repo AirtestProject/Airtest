@@ -71,7 +71,11 @@ def decorator_pairing_dialog(func):
         try:
             return func(*args, **kwargs)
         except MuxError:
-            LOGGING.error("Device is not yet paired. Triggered the trust dialogue. Please accept and try again." + "(iTunes is required on Windows.) " if sys.platform.startswith("win") else "")
+            if sys.platform.startswith("win"):
+                error_msg = "Device is not yet paired. Triggered the trust dialogue. Please accept and try again. (iTunes is required on Windows.) "
+            else:
+                error_msg = "Device is not yet paired. Triggered the trust dialogue. Please accept and try again."
+            LOGGING.error(error_msg)
             raise
     return wrapper
 
@@ -282,7 +286,16 @@ class TIDevice:
     
     @staticmethod
     def xctest(udid, wda_bundle_id):
-        return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
+        try:
+            return BaseDevice(udid, Usbmux()).xctest(fuzzy_bundle_id=wda_bundle_id, logger=setup_logger(level=logging.INFO))
+        except Exception as e:
+            print(f"Failed to run tidevice xctest function for {wda_bundle_id}.Try to run tidevice runwda function for {wda_bundle_id}.")
+            try:
+                return BaseDevice(udid, Usbmux()).runwda(fuzzy_bundle_id=wda_bundle_id)
+            except Exception as e:
+                print(f"Failed to run tidevice runwda function for {wda_bundle_id}.")
+                # 先不抛出异常，ios17的兼容未合并进来，ios17设备一定会报错
+                # raise AirtestError(f"Failed to start XCTest for {wda_bundle_id}.")
     
     @staticmethod
     def push(udid, local_path, device_path, bundle_id=None, timeout=None):
@@ -373,6 +386,18 @@ class TIDevice:
             bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be pulled from the app's sandbox. Defaults to None.
             timeout (int, optional): The timeout in seconds for the remote device operation. Defaults to None.
 
+            Examples:
+                
+                    Pull a file from the DCIM directory::
+    
+                        >>> TIDevice.pull("00008020-001270842E88002E", "/DCIM/photo.jpg", "C:/Users/username/Pictures/photo.jpg")
+                        >>> TIDevice.pull("00008020-001270842E88002E", "/DCIM/photo.jpg", "C:/Users/username/Pictures")
+    
+                    Pull a directory from the Documents directory of the Keynote app::
+    
+                        >>> TIDevice.pull("00008020-001270842E88002E", "/Documents", "C:/Users/username/Documents", "com.apple.Keynote")
+                        >>> TIDevice.pull("00008020-001270842E88002E", "/Documents", "C:/Users/username/Documents", "com.apple.Keynote")
+
         """
         try:
             if bundle_id:
@@ -403,12 +428,21 @@ class TIDevice:
             remote_path (str): The path of the file or directory on the iOS device.
             bundle_id (str, optional): The bundle ID of the app. If provided, the file or directory will be removed from the app's sandbox. Defaults to None.
 
+        Examples:
+            Remove a file from the DCIM directory::
+
+                >>> TIDevice.rm("00008020-001270842E88002E", "/DCIM/photo.jpg")
+                >>> TIDevice.rm("00008020-001270842E88002E", "/DCIM/photo.jpg", "com.apple.Photos")
+
+            Remove a directory from the Documents directory of the Keynote app::
+
+                >>> TIDevice.rm("00008020-001270842E88002E", "/Documents", "com.apple.Keynote")
         """
-        def _check_status(status):
+        def _check_status(status, path):
             if status == 0:
-                print("removed", remote_path)
+                print("removed", path)
             else:
-                raise AirtestError(f"<{status.name} {status.value}> Failed to remove {remote_path}")
+                raise AirtestError(f"<{status.name} {status.value}> Failed to remove {path}")
         
         def _remove_folder(udid, folder_path, bundle_id):
             folder_path = folder_path.replace("\\", "/")
@@ -417,7 +451,10 @@ class TIDevice:
                     _remove_folder(udid, os.path.join(folder_path, file_info['name']), bundle_id)
                 else:
                     status = sync.remove(os.path.join(folder_path, file_info['name']))
-                    _check_status(status)
+                    _check_status(status, os.path.join(folder_path, file_info['name']))
+            # remove the folder itself
+            status = sync.remove(folder_path)
+            _check_status(status, folder_path)
         
         if bundle_id:
             sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
@@ -430,7 +467,7 @@ class TIDevice:
             _remove_folder(udid, remote_path, bundle_id)
         else:
             status = sync.remove(remote_path)
-            _check_status(status)
+            _check_status(status, remote_path)
 
     @staticmethod
     def ls(udid, remote_path, bundle_id=None):
@@ -472,6 +509,16 @@ class TIDevice:
             udid (str): The UDID of the iOS device.
             remote_path (str): The path of the directory to be created on the iOS device.
             bundle_id (str, optional): The bundle ID of the app. Defaults to None.
+        
+        Examples:
+            Create a directory in the DCIM directory::
+
+                >>> TIDevice.mkdir("00008020-001270842E88002E", "/DCIM/test")
+
+            Create a directory in the Documents directory of the Keynote app::
+
+                >>> TIDevice.mkdir("00008020-001270842E88002E", "/Documents/test", "com.apple.Keynote")
+
         """
         if bundle_id:
             sync = BaseDevice(udid, Usbmux()).app_sync(bundle_id)
@@ -486,6 +533,30 @@ class TIDevice:
 
     @staticmethod
     def is_dir(udid, remote_path, bundle_id):
+        """
+        Check if the specified path on the iOS device is a directory.
+
+        Args:
+            udid (str): The UDID of the iOS device.
+            remote_path (str): The path on the iOS device.
+            bundle_id (str): The bundle ID of the app.
+        
+        Returns:
+            bool: True if the path is a directory, False otherwise.
+        
+        Examples:
+            Check if the DCIM directory is a directory::
+
+                >>> TIDevice.is_dir("00008020-001270842E88002E", "/DCIM")
+                True
+
+            Check if the Documents directory of the Keynote app is a directory::
+
+                >>> TIDevice.is_dir("00008020-001270842E88002E", "/Documents", "com.apple.Keynote")
+                True
+                >>> TIDevice.is_dir("00008020-001270842E88002E", "/Documents/test.key", "com.apple.Keynote")
+                False
+        """
         try:
             remote_path = remote_path.rstrip("\\/")
             remote_path_dir, remote_path_base = os.path.split(remote_path)
@@ -1569,11 +1640,14 @@ class IOS(Device):
         Examples:
 
             >>> dev = connect_device("iOS:///http+usbmux://udid")
-            >>> dev.push("test.png", "/DCIM/")
             >>> dev.push("test.png", "/DCIM/test.png")
             >>> dev.push("test.png", "/DCIM/test_rename.png")
             >>> dev.push("test.key", "/Documents/", "com.apple.Keynote")  # Push to the Documents directory of the Keynote app
-            >>> dev.push("test.key", "/Documents/test.key", "com.apple.Keynote")  
+            >>> dev.push("test.key", "/Documents/test.key", "com.apple.Keynote")
+
+            Push file without suffix cannot be renamed, so the following code will push file to the path considered as a directory
+            >>> dev.push("test", "/Documents/test", "com.apple.Keynote")  # The pushed file will be /Documents/test
+            >>> dev.push("test", "/Documents/test_rename", "com.apple.Keynote")  # The pushed file will be /Documents/test_rename/test
 
         """
         if not self.is_local_device:
@@ -1592,6 +1666,15 @@ class IOS(Device):
 
         Raises:
             LocalDeviceError: If the device is remote.
+
+        Examples:
+
+            >>> dev = connect_device("iOS:///http+usbmux://udid")
+            >>> dev.pull("/DCIM/test.png", "test.png")
+            >>> dev.pull("/Documents/test.key", "test.key", "com.apple.Keynote")
+            >>> dev.pull("/Documents/test.key", "dir/test.key", "com.apple.Keynote")
+            >>> dev.pull("/Documents/test.key", "test_rename.key", "com.apple.Keynote")
+
         """
         if not self.is_local_device:
             raise LocalDeviceError()
@@ -1637,6 +1720,14 @@ class IOS(Device):
 
         Raises:
             LocalDeviceError: If the device is remote.
+            AirtestError: If the file or directory does not exist.
+
+        Examples:
+
+            >>> dev = connect_device("iOS:///http+usbmux://udid")
+            >>> dev.rm("/Documents/test.key", "com.apple.Keynote")
+            >>> dev.rm("/Documents/test_dir", "com.apple.Keynote")
+
         """
         if not self.is_local_device:
             raise LocalDeviceError()
@@ -1651,8 +1742,12 @@ class IOS(Device):
             remote_path (str): The remote path to create.
             bundle_id (str, optional): The bundle ID of the app. Defaults to None.
 
-        Raises:
-            LocalDeviceError: If the device is remote.
+        
+        Examples:
+            
+                >>> dev = connect_device("iOS:///http+usbmux://udid")
+                >>> dev.mkdir("/Documents/test_dir", "com.apple.Keynote")
+
         """
         if not self.is_local_device:
             raise LocalDeviceError()

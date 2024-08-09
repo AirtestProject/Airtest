@@ -1,4 +1,5 @@
 # encoding=utf-8
+import hashlib
 import os
 import shutil
 import time
@@ -27,9 +28,8 @@ class TestIos(unittest.TestCase):
         cls.ios = connect_device("iOS:///http+usbmux://")
         cls.TEST_FSYNC_APP = "" # 测试文件推送、同步的app的bundleID
         # 获取一个可以用于文件操作的app
-        app_list = cls.ios.list_app(type="all")
-        if len(app_list) > 0:
-            cls.TEST_FSYNC_APP = app_list[0][0]
+        cls.TEST_FSYNC_APP = "com.apple.Keynote"
+        # cls.TEST_FSYNC_APP = "rn.notes.best"
 
     @classmethod
     def tearDownClass(cls):
@@ -325,20 +325,36 @@ class TestIos(unittest.TestCase):
 
     def test_ls(self):
         print("test ls")
-        print(self.ios.ls("/Documents/", self.TEST_FSYNC_APP))
-        
-    def test_push(self):
-        def _try_remove_ios(file_name, bundle_id=None):
-            try:
-                self.ios.rm(file_name, bundle_id)
-                file_list = self.ios.ls(os.path.dirname(file_name), bundle_id)
-                for file in file_list:
-                    if file['name'] == file_name:
-                        raise Exception(f"remove file {file_name} failed")
-                print(f"file {file_name} not exist now.")
-            except:
-                pass
+        # ls /DCIM/
+        dcim = self.ios.ls("/DCIM/")
+        print(dcim)
+        self.assertTrue(isinstance(dcim, list) and len(dcim) > 0)
+        self.assertTrue(isinstance(dcim[0], dict))
 
+        # ls app /Documents/
+        with open("test_ls_file.txt", 'w') as f:
+            f.write('Test data')
+        self.ios.push("test_ls_file.txt", "/Documents/", self.TEST_FSYNC_APP)
+        file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+        self.assertTrue(isinstance(file_list, list))
+        self.assertTrue(len(file_list) > 0)
+        self.assertTrue(isinstance(file_list[0], dict))
+        self._try_remove_ios("/Documents/test_ls_file.txt", self.TEST_FSYNC_APP)
+        try_remove("test_ls_file.txt")
+        
+    def _try_remove_ios(self, file_name, bundle_id=None):
+        try:
+            self.ios.rm(file_name, bundle_id)
+            file_list = self.ios.ls(os.path.dirname(file_name), bundle_id)
+            for file in file_list:
+                if file['name'] == file_name:
+                    raise Exception(f"remove file {file_name} failed")
+            print(f"file {file_name} not exist now.")
+        except:
+            print(f"not find {file_name}")
+            pass
+
+    def test_push(self):
         def _test_file(file_name, dst="/Documents/", bundle_id=self.TEST_FSYNC_APP, target=None):
             try_remove(file_name)
             with open(file_name, 'w') as f:
@@ -352,7 +368,7 @@ class TestIos(unittest.TestCase):
                 target = tmp_dst.replace('\\', '/')
 
             # 清理手机里的文件
-            _try_remove_ios(target, bundle_id)
+            self._try_remove_ios(target, bundle_id)
             self.ios.push(file_name, dst, bundle_id, timeout=60)
             time.sleep(1)
             file_list = self.ios.ls(target, bundle_id)
@@ -360,7 +376,7 @@ class TestIos(unittest.TestCase):
             self.assertEqual(len(file_list), 1)
             self.assertEqual(file_list[0]['name'], os.path.basename(target))
             self.assertEqual(file_list[0]['type'], 'File')
-            self.ios.rm(target, bundle_id)
+            self._try_remove_ios(target, bundle_id)
             time.sleep(1)
 
             # 清理
@@ -376,7 +392,7 @@ class TestIos(unittest.TestCase):
 
             # 创建文件夹和文件
             try_remove(dir_name)
-            _try_remove_ios(target, self.TEST_FSYNC_APP)
+            self._try_remove_ios(target, self.TEST_FSYNC_APP)
             os.mkdir(dir_name)
             with open(f'{dir_name}/test_data', 'w') as f:
                 f.write('Test data')
@@ -389,7 +405,7 @@ class TestIos(unittest.TestCase):
             self.assertTrue(f"{dir_name}/" in [item['name'] for item in dir_list])
             file_list = self.ios.ls(f"{target}/test_data", self.TEST_FSYNC_APP)
             self.assertTrue("test_data" in [item['name'] for item in file_list])
-            self.ios.rm(target, self.TEST_FSYNC_APP)
+            self._try_remove_ios(target, self.TEST_FSYNC_APP)
             time.sleep(1)
 
             try_remove(dir_name)
@@ -399,7 +415,7 @@ class TestIos(unittest.TestCase):
         _test_file("test_data_1.txt", "/Documents/")
         _test_file("test_data_2.txt", "/Documents/test_data_2.txt")
         _test_file("test_data_3.txt", "/Documents/test_data_3.txt/")
-        #重命名文件
+        # 重命名文件
         _test_file("test_data_4.txt", "/Documents/test_data.txt/", target="/Documents/test_data.txt")
         _test_file("test_data.txt", "/Documents")
         _test_file("test_1.png", "/DCIM", None)
@@ -423,70 +439,239 @@ class TestIos(unittest.TestCase):
         _test_dir('测 试 文 件 夹', "/Documents")
         
     def test_pull(self):
-        def _test_file(file_name):
-            print(f"test pull file {file_name}")
-            self.ios.pull(f"/Documents/{file_name}", ".", self.TEST_FSYNC_APP, timeout=60)
-            self.assertTrue(os.path.exists(file_name))
+        def _get_file_md5(file_path):
+            hasher = hashlib.md5()
+            with open(file_path, 'rb') as f:
+                while chunk := f.read(8192):
+                    hasher.update(chunk)
+            return hasher.hexdigest()
+
+        def _get_folder_md5(folder_path):
+            md5_list = []
+            for root, _, files in os.walk(folder_path):
+                for file in sorted(files):  # Sort to maintain order
+                    file_path = os.path.join(root, file)
+                    file_md5 = _get_file_md5(file_path)
+                    md5_list.append(file_md5)
+            
+            combined_md5 = hashlib.md5("".join(md5_list).encode()).hexdigest()
+            return combined_md5
+
+        def _test_file(file_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
+            target = f"{folder}/{file_name}"
+            # 删除手机和本地存在的文件，
+            try_remove(file_name)
+            self._try_remove_ios(target, bundle_id=bundle_id)
+
+            # 创建文件，推送文件
+            with open(file_name, 'w') as f:
+                f.write('Test data')
+            md5 = _get_file_md5(file_name)
+            self.ios.push(file_name, f"{folder}/", bundle_id=bundle_id, timeout=60)
             try_remove(file_name)
 
-        def _test_dir(dir_name):
+            # 下载文件
+            print(f"test pull file {file_name}")
+            self.ios.pull(target, ".", bundle_id=bundle_id, timeout=60)
+            self.assertTrue(os.path.exists(file_name))
+            self.assertEqual(md5, _get_file_md5(file_name))
+
+            # 下载、重命名文件
+            self.ios.pull(target, "rename_file.txt", bundle_id=bundle_id, timeout=60)
+            self.assertTrue(os.path.exists("rename_file.txt"))
+            self.assertEqual(md5, _get_file_md5("rename_file.txt"))
+
+            # 带文件夹路径
+            os.mkdir("test_dir")
+            self.ios.pull(target, "test_dir", bundle_id=bundle_id, timeout=60)
+            self.assertTrue(os.path.exists(f"test_dir/{file_name}"))
+            self.assertEqual(md5, _get_file_md5(f"test_dir/{file_name}"))
+
+            # 清理
+            self._try_remove_ios(target, bundle_id)
+            try_remove(file_name)
+            try_remove("rename_file.txt")
+            try_remove("test_dir")
+
+        def _test_dir(dir_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
+            target = f"{folder}/{dir_name}"
+            # 删除手机和本地存在的文件夹，创建文件夹和文件
+            try_remove(dir_name)
+            self._try_remove_ios(target, bundle_id=bundle_id)
+            os.mkdir(dir_name)
+            with open(f'{dir_name}/test_data', 'w') as f:
+                f.write('Test data')
+            md5 = _get_folder_md5(dir_name)
+            self.ios.push(dir_name, f"{folder}/", bundle_id=bundle_id, timeout=60)
+            time.sleep(1)
+            try_remove(dir_name)
+
+            # 推送文件夹
             print(f"test pull directory {dir_name}")
             os.mkdir(dir_name)
-            self.ios.pull(f"/Documents/{dir_name}", dir_name, self.TEST_FSYNC_APP, timeout=60)
+            self.ios.pull(target, dir_name, bundle_id=bundle_id, timeout=60)
             self.assertTrue(os.path.exists(f"{dir_name}/{dir_name}"))
+            self.assertEqual(md5, _get_folder_md5(f"{dir_name}/{dir_name}"))
+
+            # 清理
+            self._try_remove_ios(target, bundle_id=bundle_id)
+            time.sleep(1)
             try_remove(dir_name)
-        
+
+        # 执行得太快会报错,可能和wda的处理速度有关
+        # 如果报错尝试单独执行那些用例
         _test_file("test_data.txt")
+        _test_file("t e s t _ d a t a.txt")
         _test_file("测试文件.txt")
+        _test_file("测 试 文 件.txt")
+        _test_file("(){}[]~'-_@!#$%&+,;=^.txt")
+        _test_file("data")
+        _test_file("data.png", bundle_id=None, folder="/DCIM")
+
+
         _test_dir('test_dir')
+        _test_dir('t e s t _ d i r')
         _test_dir('测试文件夹')
+        _test_dir('测试文件夹.txt')
+        _test_dir('测 试 文 件 夹')
+        _test_dir("(){}[]~'-_@!#$%&+,;=^")
+        _test_dir('test_dir_no_bundle', bundle_id=None, folder="/DCIM")
 
     def test_rm(self):
-        def _test_file(file_name):
+        def _test_file(file_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
+            target = f"{folder}/{file_name}"
+            
+            # 删除手机和本地存在的文件，创建文件
+            self._try_remove_ios(target, bundle_id)
+            with open(file_name, 'w') as f:
+                f.write('Test data')
+
+            # 推送文件
+            self.ios.push(file_name, f"{folder}/", bundle_id, timeout=60)
+            time.sleep(1)
+            try_remove(file_name)
+            file_list = self.ios.ls(target, bundle_id)
+            self.assertEqual(len(file_list), 1)
+
+            # 删除文件
             print(f"test rm file {file_name}")
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
-            find_flag = False
+            self.ios.rm(target, bundle_id)
+            file_list = self.ios.ls(folder, bundle_id)
             for item in file_list:
                 if item['name'] == file_name:
-                    print(f"find file {file_name}")
-                    find_flag = True
-                    break
-            if not find_flag:
-                print(f"not find file {file_name}")
-                return
-            self.ios.rm(f"/Documents/{file_name}", self.TEST_FSYNC_APP)
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
-            self.assertTrue(file_name not in [item['name'] for item in file_list])
-        
-        def _test_dir(dir_name):
+                    raise Exception(f"remove {file_name} failed")
+            
+        def _test_dir(dir_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
+            target = f"{folder}/{dir_name}"
+            
+            # 删除手机和本地存在的文件夹，创建文件夹和文件
+            self._try_remove_ios(target, bundle_id)
+            os.mkdir(dir_name)
+            with open(f'{dir_name}/test_data', 'w') as f:
+                f.write('Test data')
+
+            # 推送文件夹
+            self.ios.push(dir_name, f"{folder}/", bundle_id, timeout=60)
+            time.sleep(1)
+            try_remove(dir_name)
+
             print(f"test rm directory {dir_name}")
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
-            find_flag = False
+            file_list = self.ios.ls(folder, bundle_id)
             for item in file_list:
                 if item['name'] == f"{dir_name}/":
-                    print(f"find dir {dir_name}")
-                    find_flag = True
                     break
-            if not find_flag:
-                print(f"not find dir {dir_name}")
-                return
-            self.ios.rm(f"/Documents/{dir_name}", self.TEST_FSYNC_APP)
-            file_list = self.ios.ls("/Documents/", self.TEST_FSYNC_APP)
+            else:
+                raise Exception(f"directory {dir_name} not exist")
+            
+            # 删除文件夹
+            self.ios.rm(target, bundle_id)
+            file_list = self.ios.ls(folder, bundle_id)
             self.assertTrue(f"{dir_name}/" not in [item['name'] for item in file_list])
 
+        # 执行得太快会报错,可能和wda的处理速度有关
+        # 如果报错尝试单独执行那些用例
         _test_file("test_data.txt")
+        _test_file("t e s t _ d a t a.txt")
         _test_file("测试文件.txt")
+        _test_file("测 试 文 件.txt")
+        _test_file("(){}[]~'-_@!#$%&+,;=^.txt")
+        _test_file("data")
+        _test_file("data.png", bundle_id=None, folder="/DCIM")
+
         _test_dir('test_dir')
+        _test_dir('t e s t _ d i r')
         _test_dir('测试文件夹')
+        _test_dir('测试文件夹.txt')
+        _test_dir('测 试 文 件 夹')
+        _test_dir("(){}[]~'-_@!#$%&+,;=^")
+        _test_dir('test_dir_no_bundle', bundle_id=None, folder="/DCIM")
     
     def test_mkdir(self):
-        print("test mkdir")
-        dir_name = "/Documents/test_dir"
-        self.ios.mkdir(dir_name, self.TEST_FSYNC_APP)
+        def _test(dir_name, bundle_id=self.TEST_FSYNC_APP, folder="/Documents"):
+            target = f"{folder}/{dir_name}"
+            
+            # 删除目标目录
+            self._try_remove_ios(target, bundle_id)
+            
+            print("test mkdir")
+            
+            # 创建目录
+            self.ios.mkdir(target, bundle_id)
+            
+            # 获取目标文件夹下的目录列表
+            dirs = self.ios.ls(folder, bundle_id)
+            
+            # 检查新建的目录是否存在
+            self.assertTrue(any(d['name'] == f"{dir_name}/" for d in dirs))
+            
+            # 删除目标目录
+            self._try_remove_ios(target, bundle_id)
+
+        # 执行得太快会报错,可能和wda的处理速度有关
+        # 如果报错尝试单独执行那些用例
+        _test('test_dir')
+        _test('t e s t _ d i r')
+        _test('测试文件夹')
+        _test('测试文件夹.txt')
+        _test('测 试 文 件 夹')
+        _test("(){}[]~'-_@!#$%&+,;=^")
+        _test('test_dir_no_bundle', bundle_id=None, folder="/DCIM")
+
+    def test_is_dir(self):
+        print("test is_dir")
         
-        dirs = self.ios.ls("/Documents", self.TEST_FSYNC_APP)
-        self.assertTrue(any(d['name'] == 'test_dir/' for d in dirs))
-        self.ios.rm(dir_name, self.TEST_FSYNC_APP)
+        def create_and_push_file(local_name, remote_name, bundle_id):
+            with open(local_name, 'w') as f:
+                f.write('Test data')
+            self.ios.push(local_name, remote_name, bundle_id)
+            try_remove(local_name)
+        
+        def create_and_push_dir(local_name, remote_name, bundle_id):
+            os.makedirs(local_name)
+            self.ios.push(local_name, remote_name, bundle_id)
+            try_remove(local_name)
+        
+        # 测试文件
+        file_path = "/Documents/test_data.txt"
+        self._try_remove_ios(file_path, self.TEST_FSYNC_APP)
+        create_and_push_file("test_data.txt", "/Documents/", self.TEST_FSYNC_APP)
+        self.assertFalse(self.ios.is_dir(file_path, self.TEST_FSYNC_APP))
+        self._try_remove_ios(file_path, self.TEST_FSYNC_APP)
+        
+        # 测试文件夹
+        dir_path = "/Documents/test_dir"
+        create_and_push_dir("test_dir", "/Documents/", self.TEST_FSYNC_APP)
+        self.assertTrue(self.ios.is_dir(dir_path, self.TEST_FSYNC_APP))
+        self._try_remove_ios(dir_path, self.TEST_FSYNC_APP)
+        
+        # 测试另外一个文件夹
+        file_path_dcim = "/DCIM/test.png"
+        self._try_remove_ios(file_path_dcim, None)
+        create_and_push_file("test_data.txt", "/DCIM/test.png", None)
+        self.assertTrue(self.ios.is_dir("/DCIM", None))
+        self.assertFalse(self.ios.is_dir(file_path_dcim, None))
+        self._try_remove_ios(file_path_dcim, None)
+
 
 
 if __name__ == '__main__':
@@ -515,6 +700,7 @@ if __name__ == '__main__':
     suite.addTest(TestIos("test_pull"))
     suite.addTest(TestIos("test_mkdir"))
     suite.addTest(TestIos("test_rm"))
+    suite.addTest(TestIos("test_is_dir"))
     # 联合接口，顺序测试：解锁屏、应用启动关闭
     suite.addTest(TestIos("test_is_locked"))
     suite.addTest(TestIos("test_lock"))
