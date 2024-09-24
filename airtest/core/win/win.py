@@ -28,12 +28,14 @@ from airtest.core.win.screen import screenshot
 
 LOGGING = get_logger(__name__)
 
+
 def require_app(func):
     @wraps(func)
     def wrapper(inst, *args, **kwargs):
         if not inst.app:
             raise RuntimeError("Connect to an application first to use %s" % func.__name__)
         return func(inst, *args, **kwargs)
+
     return wrapper
 
 
@@ -170,7 +172,7 @@ class Windows(Device):
         try:
             with mss.mss() as sct:
                 sct_img = sct.grab(monitor)
-                screen = numpy.array(sct_img, dtype=numpy.uint8)[...,:3]
+                screen = numpy.array(sct_img, dtype=numpy.uint8)[..., :3]
                 if filename:
                     aircv.imwrite(filename, screen, quality, max_size=max_size)
                 return screen
@@ -305,19 +307,19 @@ class Windows(Device):
         time.sleep(interval)
 
         for i in range(1, steps):
-            x = int(start_x + (end_x-start_x) * i / steps)
-            y = int(start_y + (end_y-start_y) * i / steps)
+            x = int(start_x + (end_x - start_x) * i / steps)
+            y = int(start_y + (end_y - start_y) * i / steps)
             self.mouse.move(coords=(x, y))
             time.sleep(interval)
 
         self.mouse.move(coords=(end_x, end_y))
 
-        for i in range(1, offset+1):
-            self.mouse.move(coords=(end_x+i, end_y+i))
+        for i in range(1, offset + 1):
+            self.mouse.move(coords=(end_x + i, end_y + i))
             time.sleep(0.01)
 
         for i in range(offset):
-            self.mouse.move(coords=(end_x+offset-i, end_y+offset-i))
+            self.mouse.move(coords=(end_x + offset - i, end_y + offset - i))
             time.sleep(0.01)
 
         self.mouse.press(button=button, coords=(end_x, end_y))
@@ -645,7 +647,6 @@ class Windows(Device):
 
         return None
 
-
     def start_recording(self, max_time=1800, output=None, fps=10,
                         snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
         """
@@ -695,12 +696,12 @@ class Windows(Device):
             if self.recorder.is_running():
                 LOGGING.warning("recording is already running, please don't call again")
                 return None
-        
+
         logdir = "./"
         if not ST.LOG_DIR is None:
             logdir = ST.LOG_DIR
         if output is None:
-            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
             if os.path.isabs(output):
                 save_path = output
@@ -708,9 +709,14 @@ class Windows(Device):
                 save_path = os.path.join(logdir, output)
 
         max_size = get_max_size(max_size)
+
         def get_frame():
-            frame = self.snapshot()
-            
+            try:
+                frame = self.snapshot()
+            except numpy.core._exceptions._ArrayMemoryError:
+                self.stop_recording()
+                raise Exception("memory error!!!!")
+
             if max_size is not None:
                 frame = resize_by_max(frame, max_size)
             return frame
@@ -723,7 +729,7 @@ class Windows(Device):
         LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
         return save_path
 
-    def stop_recording(self,):
+    def stop_recording(self):
         """
         Stop recording the device display. Recoding file will be kept in the device.
 
