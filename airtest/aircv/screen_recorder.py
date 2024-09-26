@@ -9,6 +9,7 @@ import threading
 import time
 import numpy as np
 import subprocess
+import traceback
 
 
 RECORDER_ORI = {
@@ -102,9 +103,16 @@ class FfmpegVidWriter:
         self.writer.write(frame.astype(np.uint8))
 
     def close(self):
-        self.writer.close()
-        self.process.wait()
-        self.process.terminate()
+        try:
+            self.writer.close()
+            self.process.wait(timeout=5)
+        except Exception as e:
+            print(f"Error closing ffmpeg process: {e}")
+        finally:
+            try:
+                self.process.terminate()
+            except Exception as e:
+                print(f"Error terminating ffmpeg process: {e}")
 
 
 class ScreenRecorder:
@@ -160,6 +168,7 @@ class ScreenRecorder:
         self._stop_flag = True
         self.t_write.join()
         self.t_stream.join()
+        self.writer.close()  # Ensure writer is closed
 
     def get_frame_loop(self):
         # 单独一个线程持续截图
@@ -177,7 +186,6 @@ class ScreenRecorder:
             raise
 
     def write_frame_loop(self):
-        # 按帧率间隔获取图像写入视频
         try:
             duration = 1.0/self.writer.fps
             last_time = time.time()
@@ -185,7 +193,11 @@ class ScreenRecorder:
             while True:
                 if time.time()-last_time >= duration:
                     last_time += duration
-                    self.writer.write(self.tmp_frame)
+                    try:
+                        self.writer.write(self.tmp_frame)
+                    except Exception as e:
+                        print(f"Error writing frame: {e}")
+                        break
                 if self.is_stop():
                     break
                 time.sleep(0.0001)
@@ -194,4 +206,5 @@ class ScreenRecorder:
         except Exception as e:
             print("write thread error", e)
             self._stop_flag = True
+            self.writer.close()  # Ensure the writer is closed on error
             raise

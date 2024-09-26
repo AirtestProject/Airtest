@@ -724,6 +724,58 @@ def paste(*args, **kwargs):
     G.DEVICE.paste(*args, **kwargs)
 
 
+@logwrap
+def push(local, remote, *args, **kwargs):
+    """
+    Push file from local to remote
+
+    :param local: local file path
+    :param remote: remote file path
+    :return: filename of the pushed file
+    :platforms: Android, iOS
+    :Example:
+
+        Android::
+
+            >>> connect_device("android:///")
+            >>> push(r"D:\demo\test.text", "/data/local/tmp/test.text")
+
+
+        iOS::
+
+            >>> connect_device("iOS:///http+usbmux://udid")
+            >>> push("test.png", "/DCIM/")  # push to the DCIM directory
+            >>> push(r"D:\demo\test.text", "/Documents", bundle_id="com.apple.Keynote")  # push to the Documents directory of the Keynote app
+
+    """
+    return G.DEVICE.push(local, remote, *args, **kwargs)
+
+
+@logwrap
+def pull(remote, local, *args, **kwargs):
+    """
+    Pull file from remote to local
+
+    :param remote: remote file path
+    :param local: local file path
+    :return: filename of the pulled file
+    :platforms: Android, iOS
+    :Example:
+
+        Android::
+
+            >>> connect_device("android:///")
+            >>> pull("/data/local/tmp/test.txt", r"D:\demo\test.txt")
+
+        iOS::
+
+            >>> connect_device("iOS:///http+usbmux://udid")
+            >>> pull("/DCIM/test.png", r"D:\demo\test.png")
+            >>> pull("/Documents/test.key", r"D:\demo\test.key", bundle_id="com.apple.Keynote")
+
+    """
+    return G.DEVICE.pull(remote, local, *args, **kwargs)
+
 """
 Assertions: see airtest/core/assertions.py
 """
