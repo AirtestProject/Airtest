@@ -11,3 +11,4 @@ filelock
 ffmpeg-python
 tidevice
 psutil
+packaging
