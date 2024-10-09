@@ -83,8 +83,9 @@ class InstructHelper(object):
                     if usb_dev.info['uuid'] == self.uuid:
                         self._device = wda.usbmux.Device(udid)
                         self._udid = udid
+                        break
                 except:
-                    return None
+                    continue
         return self._device
 
     def tear_down(self):
