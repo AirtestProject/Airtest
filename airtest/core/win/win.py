@@ -24,8 +24,10 @@ from airtest.core.device import Device
 from airtest.core.settings import Settings as ST
 from airtest.utils.snippet import get_absolute_coordinate
 from airtest.utils.logger import get_logger
+from airtest.core.win.screen import screenshot
 
 LOGGING = get_logger(__name__)
+
 
 def require_app(func):
     @wraps(func)
@@ -33,6 +35,7 @@ def require_app(func):
         if not inst.app:
             raise RuntimeError("Connect to an application first to use %s" % func.__name__)
         return func(inst, *args, **kwargs)
+
     return wrapper
 
 
@@ -89,7 +92,12 @@ class Windows(Device):
             self.app = self._app.connect(**kwargs)
             self._top_window = self.app.top_window().wrapper_object()
         if kwargs.get("foreground", True) in (True, "True", "true"):
-            self.set_foreground()
+            try:
+                self.set_foreground()
+            except pywintypes.error as e:
+                # pywintypes.error: (0, 'SetForegroundWindow', 'No error message is available')
+                # If you are not running with administrator privileges, it may fail, but this error can be ignored.
+                pass
 
     def shell(self, cmd):
         """
@@ -106,6 +114,40 @@ class Windows(Device):
 
         """
         return subprocess.check_output(cmd, shell=True)
+
+    def snapshot_old(self, filename=None, quality=10, max_size=None):
+        """
+        Take a screenshot and save it in ST.LOG_DIR folder
+
+        Args:
+            filename: name of the file to give to the screenshot, {time}.jpg by default
+            quality: The image quality, integer in range [1, 99]
+            max_size: the maximum size of the picture, e.g 1200
+
+        Returns:
+            display the screenshot
+
+        """
+        if self.handle:
+            screen = screenshot(filename, self.handle)
+        else:
+            screen = screenshot(filename)
+            if self.app:
+                rect = self.get_rect()
+                rect = self._fix_image_rect(rect)
+                screen = aircv.crop_image(screen, [rect.left, rect.top, rect.right, rect.bottom])
+        if not screen.any():
+            if self.app:
+                rect = self.get_rect()
+                rect = self._fix_image_rect(rect)
+                screen = aircv.crop_image(screenshot(filename), [rect.left, rect.top, rect.right, rect.bottom])
+        if self._focus_rect != (0, 0, 0, 0):
+            height, width = screen.shape[:2]
+            rect = (self._focus_rect[0], self._focus_rect[1], width + self._focus_rect[2], height + self._focus_rect[3])
+            screen = aircv.crop_image(screen, rect)
+        if filename:
+            aircv.imwrite(filename, screen, quality, max_size=max_size)
+        return screen
 
     def snapshot(self, filename=None, quality=10, max_size=None):
         """
@@ -127,12 +169,16 @@ class Windows(Device):
                        "height": rect.bottom - rect.top, "monitor": 1}
         else:
             monitor = self.screen.monitors[0]
-        with mss.mss() as sct:
-            sct_img = sct.grab(monitor)
-            screen = numpy.array(sct_img, dtype=numpy.uint8)[...,:3]
-            if filename:
-                aircv.imwrite(filename, screen, quality, max_size=max_size)
-            return screen
+        try:
+            with mss.mss() as sct:
+                sct_img = sct.grab(monitor)
+                screen = numpy.array(sct_img, dtype=numpy.uint8)[..., :3]
+                if filename:
+                    aircv.imwrite(filename, screen, quality, max_size=max_size)
+                return screen
+        except:
+            # if mss.exception.ScreenShotError: gdi32.GetDIBits() failed.
+            return self.snapshot_old(filename, quality, max_size)
 
     def _fix_image_rect(self, rect):
         """Fix rect in image."""
@@ -261,19 +307,19 @@ class Windows(Device):
         time.sleep(interval)
 
         for i in range(1, steps):
-            x = int(start_x + (end_x-start_x) * i / steps)
-            y = int(start_y + (end_y-start_y) * i / steps)
+            x = int(start_x + (end_x - start_x) * i / steps)
+            y = int(start_y + (end_y - start_y) * i / steps)
             self.mouse.move(coords=(x, y))
             time.sleep(interval)
 
         self.mouse.move(coords=(end_x, end_y))
 
-        for i in range(1, offset+1):
-            self.mouse.move(coords=(end_x+i, end_y+i))
+        for i in range(1, offset + 1):
+            self.mouse.move(coords=(end_x + i, end_y + i))
             time.sleep(0.01)
 
         for i in range(offset):
-            self.mouse.move(coords=(end_x+offset-i, end_y+offset-i))
+            self.mouse.move(coords=(end_x + offset - i, end_y + offset - i))
             time.sleep(0.01)
 
         self.mouse.press(button=button, coords=(end_x, end_y))
@@ -601,7 +647,6 @@ class Windows(Device):
 
         return None
 
-
     def start_recording(self, max_time=1800, output=None, fps=10,
                         snapshot_sleep=0.001, orientation=0, max_size=None, *args, **kwargs):
         """
@@ -651,12 +696,12 @@ class Windows(Device):
             if self.recorder.is_running():
                 LOGGING.warning("recording is already running, please don't call again")
                 return None
-        
+
         logdir = "./"
         if not ST.LOG_DIR is None:
             logdir = ST.LOG_DIR
         if output is None:
-            save_path = os.path.join(logdir, "screen_%s.mp4"%(time.strftime("%Y%m%d%H%M%S", time.localtime())))
+            save_path = os.path.join(logdir, "screen_%s.mp4" % (time.strftime("%Y%m%d%H%M%S", time.localtime())))
         else:
             if os.path.isabs(output):
                 save_path = output
@@ -664,9 +709,14 @@ class Windows(Device):
                 save_path = os.path.join(logdir, output)
 
         max_size = get_max_size(max_size)
+
         def get_frame():
-            frame = self.snapshot()
-            
+            try:
+                frame = self.snapshot()
+            except numpy.core._exceptions._ArrayMemoryError:
+                self.stop_recording()
+                raise Exception("memory error!!!!")
+
             if max_size is not None:
                 frame = resize_by_max(frame, max_size)
             return frame
@@ -679,7 +729,7 @@ class Windows(Device):
         LOGGING.info("start recording screen to {}, don't close or resize the app window".format(save_path))
         return save_path
 
-    def stop_recording(self,):
+    def stop_recording(self):
         """
         Stop recording the device display. Recoding file will be kept in the device.
 
