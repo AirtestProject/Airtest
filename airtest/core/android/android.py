@@ -1044,6 +1044,7 @@ class Android(Device):
         Examples:
             >>> dev = connect_device("android:///")
             >>> dev.push("test.txt", "/sdcard/test.txt")
+            >>> dev.push(r"D:/test", "/data/local/tmp")
 
         """
         return self.adb.push(local, remote)

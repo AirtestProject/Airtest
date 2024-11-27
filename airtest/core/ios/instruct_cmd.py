@@ -66,14 +66,19 @@ class InstructHelper(object):
         if not self._device:
             # wda无法直接获取iOS的udid，因此先检查usb连接的手机udid列表
             try:
-                device_list = wda.usbmux.Usbmux().device_list()
+                try:
+                    from wda.usbmux import Usbmux
+                    device_list = wda.usbmux.Usbmux().device_list()
+                except ImportError:
+                    from wda.usbmux import pyusbmux
+                    wda.usbmux.pyusbmux.list_devices()
             except ConnectionRefusedError:
                 # windows上必须要先启动iTunes才能获取到iOS设备列表
                 LOGGING.warning("If you are using iOS device in windows, please check if iTunes is launched")
                 return None
             except Exception as e:
                 # 其他异常，例如 socket unix:/var/run/usbmuxd unable to connect
-                print(e)
+                print("usbmuxd error:", e)
                 return None
             for dev in device_list:
                 udid = dev.get('SerialNumber')
