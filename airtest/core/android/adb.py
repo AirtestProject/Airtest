@@ -494,17 +494,15 @@ class ADB(object):
             >>> adb.push("test_dir", "/sdcard/Android/data/com.test.package/files/test_dir")
 
         """
-        _, ext = os.path.splitext(remote)
-        if ext:
-            # The target path is a file
+        if os.path.isfile(local):
+            # The local path is a file
             dst_parent = os.path.dirname(remote)
         else:
             dst_parent = remote
 
         # If the target file already exists, delete it first to avoid overwrite failure
         src_filename = os.path.basename(local)
-        _, src_ext = os.path.splitext(local)
-        if src_ext:
+        if os.path.isfile(local):
             dst_path = f"{dst_parent}/{src_filename}"
         else:
             if src_filename == os.path.basename(remote):
@@ -512,7 +510,7 @@ class ADB(object):
             else:
                 dst_path = f"{dst_parent}/{src_filename}"
         try:
-            self.shell(f"rm -r {dst_path}")
+            self.shell(f"rm -r {remote}")
         except:
             pass
 
@@ -530,14 +528,11 @@ class ADB(object):
             self.cmd(["push", local, dst_parent])
         else:
             try:
-                if src_ext:
-                    try:
-                        self.shell(f'mv "{tmp_path}" "{remote}"')
-                    except:
-                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                if os.path.isfile(local):
+                    self.shell(f'mv "{tmp_path}" "{remote}"')
                 else:
                     try:
-                        self.shell(f'cp -frp "{tmp_path}/*" "{remote}"')
+                        self.shell(f'cp -frp {tmp_path}/* {remote}')
                     except:
                         self.shell(f'mv "{tmp_path}" "{remote}"')
             finally:
