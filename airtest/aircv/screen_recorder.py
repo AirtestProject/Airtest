@@ -43,7 +43,7 @@ class FfmpegVidWriter:
     """
     Generate a video using FFMPEG.
     """
-    def __init__(self, outfile, width, height, fps=10, orientation=0):
+    def __init__(self, outfile, width, height, fps=10, orientation=0, timetag=True):
         self.fps = fps
 
         # 三种横竖屏录屏模式 1 竖屏 2 横屏 0 方形居中
@@ -61,6 +61,9 @@ class FfmpegVidWriter:
         self.height = height = self.height - (self.height % 32) + 32
         self.width = width = self.width - (self.width % 32) + 32
         self.cache_frame = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # 添加时间戳
+        self.timetag = timetag
 
         try:
             subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
@@ -97,6 +100,13 @@ class FfmpegVidWriter:
         w_ed = min(w_st+frame.shape[1], self.cache_frame.shape[1])
         self.cache_frame[:] = 0
         self.cache_frame[h_st:h_ed, w_st:w_ed, :] = frame[:(h_ed-h_st), :(w_ed-w_st)]
+        if self.timetag:
+            scale = self.height*0.001
+            scale = max(0.5, min(scale, 1.5))
+            thickness = int(self.height*0.0015)
+            thickness = max(1, min(thickness, 4))
+            pos = (0, int(self.height*0.035))
+            cv2.putText(self.cache_frame, time.strftime("%Y-%m-%d %H:%M:%S"), pos, cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 255, 0), thickness)
         return self.cache_frame.copy()
 
     def write(self, frame):
@@ -116,13 +126,13 @@ class FfmpegVidWriter:
 
 
 class ScreenRecorder:
-    def __init__(self, outfile, get_frame_func, fps=10, snapshot_sleep=0.001, orientation=0):
+    def __init__(self, outfile, get_frame_func, fps=10, snapshot_sleep=0.001, orientation=0, timetag=True):
         self.get_frame_func = get_frame_func
         self.tmp_frame = self.get_frame_func()
         self.snapshot_sleep = snapshot_sleep
 
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
-        self.writer = FfmpegVidWriter(outfile, width, height, fps, orientation)
+        self.writer = FfmpegVidWriter(outfile, width, height, fps, orientation, timetag)
         self.tmp_frame = self.writer.process_frame(self.tmp_frame)
 
         self._is_running = False
