@@ -51,9 +51,9 @@ class AirtestCase(unittest.TestCase):
                 try:
                     if isinstance(self.args.recording, six.string_types) and self.args.recording.endswith(".mp4"):
                         basename = os.path.basename(self.args.recording)
-                        output_name = dev.serialno + "_" + basename if len(G.DEVICE_LIST) > 1 else basename
+                        output_name = dev.uuid + "_" + basename if len(G.DEVICE_LIST) > 1 else basename
                     else:
-                        output_name = "recording_{serialno}.mp4".format(serialno=dev.serialno)
+                        output_name = f"recording_{dev.uuid}.mp4"
                     output = os.path.join(self.args.log, output_name)
                     dev.stop_recording(output)
                 except:
