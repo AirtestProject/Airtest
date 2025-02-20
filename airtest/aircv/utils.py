@@ -68,7 +68,12 @@ def img_2_string(img):
 
 def string_2_img(pngstr):
     nparr = np.frombuffer(pngstr, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    try:
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    except cv2.error:
+        # cv2.error: OpenCV(4.6.0) D:\a\opencv-python\opencv-python\opencv\modules\imgcodecs\src\loadsave.cpp:816: error: (-215:Assertion failed) !buf.empty() in function 'cv::imdecode_
+        # If the image is empty, return None
+        img = None
     return img
 
 

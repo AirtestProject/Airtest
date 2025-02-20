@@ -5,11 +5,14 @@ from __future__ import absolute_import
 
 import cv2
 import ffmpeg
+from collections import deque
 import threading
 import time
 import numpy as np
 import subprocess
 import traceback
+from airtest.utils.logger import get_logger
+LOGGING = get_logger(__name__)
 
 
 RECORDER_ORI = {
@@ -64,6 +67,18 @@ class FfmpegVidWriter:
         
         # 添加时间戳
         self.timetag = timetag
+        if self.timetag:
+            scale = self.height*0.001
+            self.tag_scale = max(0.5, min(scale, 1.5))
+            thickness = int(self.height*0.002)
+            # 指定时间戳的位置和粗细
+            self.tag_thickness = max(1, min(thickness+1, 4))
+            self.tag_pos = (0, int(self.height*0.035))
+
+            # 生成时区信息(UTC+08:00)
+            timezone_offset = time.timezone / 3600
+            timezone_offset_hours = int(abs(timezone_offset))
+            self.timezone_str = f"(UTC{'+' if timezone_offset <= 0 else '-'}{timezone_offset_hours:02d}:00)"
 
         try:
             subprocess.Popen("ffmpeg", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).wait()
@@ -72,14 +87,14 @@ class FfmpegVidWriter:
             try:
                 ffmpeg_setter.add_paths()
             except Exception as e:
-                print("Error: setting ffmpeg path failed, please download it at https://ffmpeg.org/download.html then add ffmpeg path to PATH")
+                LOGGING.error("Error: setting ffmpeg path failed, please download it at https://ffmpeg.org/download.html then add ffmpeg path to PATH")
                 raise
 
         self.process = (
             ffmpeg
             .input('pipe:', format='rawvideo', pix_fmt='rgb24',
                 s='{}x{}'.format(width, height), framerate=self.fps)
-            .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25,
+            .output(outfile, pix_fmt='yuv420p', vcodec='libx264', crf=25, threads=1,
                     preset="veryfast", framerate=self.fps)
             .global_args("-loglevel", "error")
             .overwrite_output()
@@ -101,12 +116,9 @@ class FfmpegVidWriter:
         self.cache_frame[:] = 0
         self.cache_frame[h_st:h_ed, w_st:w_ed, :] = frame[:(h_ed-h_st), :(w_ed-w_st)]
         if self.timetag:
-            scale = self.height*0.001
-            scale = max(0.5, min(scale, 1.5))
-            thickness = int(self.height*0.0015)
-            thickness = max(1, min(thickness, 4))
-            pos = (0, int(self.height*0.035))
-            cv2.putText(self.cache_frame, time.strftime("%Y-%m-%d %H:%M:%S"), pos, cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 255, 0), thickness)
+            cv2.putText(self.cache_frame, time.strftime("%Y-%m-%d %H:%M:%S" + self.timezone_str),
+                        self.tag_pos, cv2.FONT_HERSHEY_SIMPLEX, self.tag_scale,
+                        (0, 255, 0), self.tag_thickness)
         return self.cache_frame.copy()
 
     def write(self, frame):
@@ -117,12 +129,12 @@ class FfmpegVidWriter:
             self.writer.close()
             self.process.wait(timeout=5)
         except Exception as e:
-            print(f"Error closing ffmpeg process: {e}")
+            LOGGING.error(f"Error closing ffmpeg process: {e}", exc_info=True)
         finally:
             try:
                 self.process.terminate()
             except Exception as e:
-                print(f"Error terminating ffmpeg process: {e}")
+                LOGGING.error(f"Error terminating ffmpeg process: {e}", exc_info=True)
 
 
 class ScreenRecorder:
@@ -134,6 +146,7 @@ class ScreenRecorder:
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
         self.writer = FfmpegVidWriter(outfile, width, height, fps, orientation, timetag)
         self.tmp_frame = self.writer.process_frame(self.tmp_frame)
+        self.frame_queue = [(time.time(), self.tmp_frame)]
 
         self._is_running = False
         self._stop_flag = False
@@ -151,7 +164,7 @@ class ScreenRecorder:
         if isinstance(max_time, int) and max_time > 0:
             self._stop_time = time.time() + max_time
         else:
-            print("failed to set stop time")
+            LOGGING.error("failed to set stop time")
 
     def is_stop(self):
         if self._stop_flag:
@@ -162,7 +175,7 @@ class ScreenRecorder:
 
     def start(self):
         if self._is_running:
-            print("recording is already running, please don't call again")
+            LOGGING.warning("recording is already running, please don't call again")
             return False
         self._is_running = True
         self.t_stream = threading.Thread(target=self.get_frame_loop)
@@ -184,37 +197,60 @@ class ScreenRecorder:
         # 单独一个线程持续截图
         try:
             while True:
-                tmp_frame = self.get_frame_func()
+                try:
+                    tmp_frame = self.get_frame_func()
+                except Exception as e:
+                    LOGGING.error(f"Error getting frame: {e}", exc_info=True)
+                    tmp_frame = None
+                
+                if tmp_frame is None:
+                    # 获取帧失败，生成一张包含错误信息的空白图片
+                    LOGGING.warning("get frame error, use blank frame")
+                    tmp_frame = np.zeros_like(self.tmp_frame)
+                    cv2.putText(tmp_frame, '[warning] get frame error', 
+                            (int(self.writer.width*0.1), int(self.writer.height*0.5)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                    time.sleep(1)
+
                 self.tmp_frame = self.writer.process_frame(tmp_frame)
-                time.sleep(self.snapshot_sleep)
+                self.frame_queue.append((time.time(), self.tmp_frame))
+                time.sleep(0.5/self.writer.fps)
                 if self.is_stop():
                     break
             self._stop_flag = True
         except Exception as e:
-            print("record thread error", e)
+            LOGGING.error("record thread error", exc_info=True)
             self._stop_flag = True
             raise
 
     def write_frame_loop(self):
         try:
             duration = 1.0/self.writer.fps
-            last_time = time.time()
+            step = 0
+            start_time = None
+            last_frame = None
             self._stop_flag = False
             while True:
-                if time.time()-last_time >= duration:
-                    last_time += duration
-                    try:
-                        self.writer.write(self.tmp_frame)
-                    except Exception as e:
-                        print(f"Error writing frame: {e}")
+                if len(self.frame_queue) > 0:
+                    t, frame = self.frame_queue.pop(0)
+                    if last_frame is None:
+                        self.writer.write(frame)
+                        last_frame = frame
+                        start_time = t
+                    else:
+                        while start_time + step * duration < t:
+                            step += 1
+                            self.writer.write(last_frame)
+                        last_frame = frame
+                else:
+                    time.sleep(0.1)
+                    # 如果没有新的帧，且已经停止，则退出
+                    if self.is_stop():
                         break
-                if self.is_stop():
-                    break
-                time.sleep(0.0001)
             self.writer.close()
             self._stop_flag = True
         except Exception as e:
-            print("write thread error", e)
+            LOGGING.error("write thread error", exc_info=True)
             self._stop_flag = True
             self.writer.close()  # Ensure the writer is closed on error
             raise
