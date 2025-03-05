@@ -36,8 +36,10 @@ def imwrite(filename, img, quality=10, max_size=None):
 
 def show(img, title="show_img", test_flag=False):
     """在可缩放窗口里显示图片."""
+    height, width, _ = img.shape
     cv2.namedWindow(title, cv2.WINDOW_NORMAL)
     cv2.imshow(title, img)
+    cv2.resizeWindow(title, width, height)
     if not test_flag:
         cv2.waitKey(0)
     cv2.destroyAllWindows()
