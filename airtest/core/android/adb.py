@@ -495,7 +495,7 @@ class ADB(object):
 
         """
         _, ext = os.path.splitext(remote)
-        if ext:
+        if ext or os.path.isfile(local):
             # The target path is a file
             dst_parent = os.path.dirname(remote)
         else:
