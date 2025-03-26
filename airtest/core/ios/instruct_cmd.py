@@ -81,13 +81,13 @@ class InstructHelper(object):
                 print("usbmuxd error:", e)
                 return None
             for dev in device_list:
-                if dev.__class__.__name__ == 'UsbClient':
+                if dev.__class__.__name__ == 'MuxDevice':
+                    udid = dev.serial
+                    # TODO 端口号
+                    usb_dev = wda.USBClient(udid, port=8100)
+                else:
                     udid = dev.get('SerialNumber')
                     usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
-                elif dev.__class__.__name__ == 'MuxDevice':
-                    udid = dev.serial
-                    usb_dev = wda.USBClient(udid, port=8100)
-                    # TODO
                 # 对比wda.info获取到的uuid是否一致
                 try:
                     if usb_dev.info['uuid'] == self.uuid or not self.uuid:
