@@ -71,7 +71,7 @@ class InstructHelper(object):
                     device_list = wda.usbmux.Usbmux().device_list()
                 except ImportError:
                     from wda.usbmux import pyusbmux
-                    wda.usbmux.pyusbmux.list_devices()
+                    device_list = wda.usbmux.pyusbmux.list_devices()
             except ConnectionRefusedError:
                 # windows上必须要先启动iTunes才能获取到iOS设备列表
                 LOGGING.warning("If you are using iOS device in windows, please check if iTunes is launched")
@@ -81,12 +81,20 @@ class InstructHelper(object):
                 print("usbmuxd error:", e)
                 return None
             for dev in device_list:
-                udid = dev.get('SerialNumber')
-                usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
+                if dev.__class__.__name__ == 'UsbClient':
+                    udid = dev.get('SerialNumber')
+                    usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
+                elif dev.__class__.__name__ == 'MuxDevice':
+                    udid = dev.serial
+                    usb_dev = wda.USBClient(udid, port=8100)
+                    # TODO
                 # 对比wda.info获取到的uuid是否一致
                 try:
-                    if usb_dev.info['uuid'] == self.uuid:
-                        self._device = wda.usbmux.Device(udid)
+                    if usb_dev.info['uuid'] == self.uuid or not self.uuid:
+                        if usb_dev.__class__.__name__ == 'USBClient':
+                            self._device = usb_dev
+                        else:
+                            self._device = wda.usbmux.Device(udid)
                         self._udid = udid
                         break
                 except:
@@ -190,4 +198,5 @@ class InstructHelper(object):
 
 if __name__ == '__main__':
     ins = InstructHelper()
-    ins.do_proxy_usbmux(5001, 5001)
+    print(ins.usb_device)
+    ins.do_proxy_usbmux(9100, 9100)
