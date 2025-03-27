@@ -10,7 +10,6 @@ from copy import copy
 from .logger import get_logger
 from .snippet import reg_cleanup
 from airtest.core.error import LocalDeviceError
-from airtest.core.helper import G
 LOGGING = get_logger(__name__)
 
 
@@ -56,6 +55,7 @@ class AirtestLogger(object):
 
     def log(self, tag, data, depth=None, timestamp=None):
         ''' Not thread safe '''
+        from airtest.core.helper import G
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
