@@ -189,9 +189,12 @@ class ScreenRecorder:
     def stop(self):
         self._is_running = False
         self._stop_flag = True
-        self.t_write.join()
-        self.t_stream.join()
-        self.writer.close()  # Ensure writer is closed
+        if hasattr(self, 't_write') and self.t_write.is_alive():
+            self.t_write.join()
+        if hasattr(self, 't_stream') and self.t_stream.is_alive():
+            self.t_stream.join()
+        if self.writer:
+            self.writer.close()  # Ensure writer is closed
 
     def get_frame_loop(self):
         # 单独一个线程持续截图
@@ -231,16 +234,27 @@ class ScreenRecorder:
             last_frame = None
             self._stop_flag = False
             while True:
+                if self.writer.process.poll() is not None:  # 检查 FFmpeg 进程状态
+                    LOGGING.error("FFmpeg process has terminated unexpectedly. Exiting write loop.")
+                    break
                 if len(self.frame_queue) > 0:
                     t, frame = self.frame_queue.pop(0)
                     if last_frame is None:
-                        self.writer.write(frame)
+                        try:
+                            self.writer.write(frame)
+                        except BrokenPipeError:
+                            LOGGING.error("Broken pipe error while writing frame. Terminating write loop.")
+                            break
                         last_frame = frame
                         start_time = t
                     else:
                         while start_time + step * duration < t:
                             step += 1
-                            self.writer.write(last_frame)
+                            try:
+                                self.writer.write(last_frame)
+                            except BrokenPipeError:
+                                LOGGING.error("Broken pipe error while writing frame. Terminating write loop.")
+                                break
                         last_frame = frame
                 else:
                     time.sleep(0.1)
