@@ -122,7 +122,9 @@ class FfmpegVidWriter:
         return self.cache_frame.copy()
 
     def write(self, frame):
-        self.writer.write(frame.astype(np.uint8))
+        if frame.dtype != np.uint8:
+            frame = frame.astype(np.uint8)
+        self.writer.write(frame)
 
     def close(self):
         try:
@@ -146,7 +148,8 @@ class ScreenRecorder:
         width, height = self.tmp_frame.shape[1], self.tmp_frame.shape[0]
         self.writer = FfmpegVidWriter(outfile, width, height, fps, orientation, timetag)
         self.tmp_frame = self.writer.process_frame(self.tmp_frame)
-        self.frame_queue = [(time.time(), self.tmp_frame)]
+        self.frame_queue = deque(maxlen=100)
+        self.frame_queue.append((time.time(), self.tmp_frame))
 
         self._is_running = False
         self._stop_flag = False
@@ -238,7 +241,7 @@ class ScreenRecorder:
                     LOGGING.error("FFmpeg process has terminated unexpectedly. Exiting write loop.")
                     break
                 if len(self.frame_queue) > 0:
-                    t, frame = self.frame_queue.pop(0)
+                    t, frame = self.frame_queue.popleft()
                     if last_frame is None:
                         try:
                             self.writer.write(frame)
