@@ -264,6 +264,10 @@ class ScreenRecorder:
                     if t >= next_frame_time:
                         try:
                             self.writer.write(frame)
+                            # 如果帧获取速度慢，重复写入上一帧
+                            while next_frame_time < t + duration:
+                                self.writer.write(frame)
+                                next_frame_time += duration
                         except BrokenPipeError:
                             LOGGING.error("Broken pipe error while writing frame. Terminating write loop.")
                             break
