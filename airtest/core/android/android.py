@@ -967,6 +967,9 @@ class Android(Device):
         max_size = get_max_size(max_size)
         def get_frame():
             data = self.screen_proxy.get_frame_from_stream()
+            if data is None:
+                LOGGING.warning("get_frame_from_stream failed")
+                return None
             frame = aircv.utils.string_2_img(data)
 
             if max_size is not None:
