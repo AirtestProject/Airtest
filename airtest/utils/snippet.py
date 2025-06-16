@@ -170,12 +170,13 @@ def parse_device_uri(uri):
     host = d.netloc
     stripped_path = d.path.lstrip("/")
     params = dict(parse_qsl(d.query))
-    if "ios" in platform.lower():
+    if "ios" in platform.lower() and "mjpeg" in stripped_path and not "usbmux" in stripped_path:
         params["addr"] = stripped_path.split("/")[0]
         uuid_match = re.search(r'uuid=([a-fA-F0-9\-]+)', d.path)
         uuid = uuid_match.group(1)
         mjpeg_match = re.search(r'mjpeg_port=([a-fA-F0-9\-]+)', d.path)
-        params["mjpeg_port"] = int(mjpeg_match.group(1))
+        if mjpeg_match:
+            params["mjpeg_port"] = int(mjpeg_match.group(1))
     else:
         uuid = stripped_path
 
