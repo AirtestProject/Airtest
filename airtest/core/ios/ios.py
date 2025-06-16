@@ -606,7 +606,7 @@ class IOS(Device):
         - ``iproxy $port 8100 $udid``
     """
 
-    def __init__(self, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, udid=None, name=None,
+    def __init__(self, udid=None, addr=DEFAULT_ADDR, cap_method=CAP_METHOD.MJPEG, mjpeg_port=None, name=None,
                  serialno=None, wda_bundle_id=None):
         super().__init__()
 
