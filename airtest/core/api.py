@@ -7,6 +7,7 @@ import time
 
 from airtest.core.cv import Template, loop_find, try_log_screen
 from airtest.core.error import TargetNotFoundError
+from airtest.core.ios import IOS
 from airtest.core.settings import Settings as ST
 from airtest.utils.compat import script_log_dir
 from airtest.utils.snippet import parse_device_uri
