@@ -200,42 +200,29 @@ class ScreenRecorder:
             self.writer.close()  # Ensure writer is closed
 
     def get_frame_loop(self):
+        # 单独一个线程持续截图
         try:
-            frame_interval = 1.0 / self.writer.fps  # 每帧的时间间隔
-            next_frame_time = time.time()  # 下一帧的目标时间
-
             while True:
                 try:
                     tmp_frame = self.get_frame_func()
                 except Exception as e:
                     LOGGING.error(f"Error getting frame: {e}", exc_info=True)
                     tmp_frame = None
-
+                
                 if tmp_frame is None:
                     # 获取帧失败，生成一张包含错误信息的空白图片
                     LOGGING.warning("get frame error, use blank frame")
                     tmp_frame = np.zeros_like(self.tmp_frame)
                     cv2.putText(tmp_frame, '[warning] get frame error', 
-                                (int(self.writer.width * 0.1), int(self.writer.height * 0.5)),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            (int(self.writer.width*0.1), int(self.writer.height*0.5)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
                     time.sleep(1)
 
                 self.tmp_frame = self.writer.process_frame(tmp_frame)
-
-                # 等待到下一帧的目标时间
-                current_time = time.time()
-                if current_time < next_frame_time:
-                    time.sleep(next_frame_time - current_time)
-
-                # 将帧和时间戳添加到队列
-                self.frame_queue.append((next_frame_time, self.tmp_frame))
-
-                # 更新下一帧的目标时间
-                next_frame_time += frame_interval
-
+                self.frame_queue.append((time.time(), self.tmp_frame))
+                time.sleep(0.5/self.writer.fps)
                 if self.is_stop():
                     break
-
             self._stop_flag = True
         except Exception as e:
             LOGGING.error("record thread error", exc_info=True)
@@ -244,42 +231,39 @@ class ScreenRecorder:
 
     def write_frame_loop(self):
         try:
-            duration = 1.0 / self.writer.fps  # 每帧的时间间隔
-            next_frame_time = None  # 下一帧的目标时间
+            duration = 1.0/self.writer.fps
+            step = 0
+            start_time = None
+            last_frame = None
             self._stop_flag = False
-
             while True:
                 if self.writer.process.poll() is not None:  # 检查 FFmpeg 进程状态
                     LOGGING.error("FFmpeg process has terminated unexpectedly. Exiting write loop.")
                     break
-
                 if len(self.frame_queue) > 0:
                     t, frame = self.frame_queue.popleft()
-
-                    # 初始化下一帧的目标时间
-                    if next_frame_time is None:
-                        next_frame_time = t
-
-                    # 如果当前帧的时间戳大于等于目标时间，写入帧
-                    if t >= next_frame_time:
+                    if last_frame is None:
                         try:
                             self.writer.write(frame)
-                            # 如果帧获取速度慢，重复写入上一帧
-                            while next_frame_time < t + duration:
-                                self.writer.write(frame)
-                                next_frame_time += duration
                         except BrokenPipeError:
                             LOGGING.error("Broken pipe error while writing frame. Terminating write loop.")
                             break
-
-                        # 更新下一帧的目标时间
-                        next_frame_time += duration
+                        last_frame = frame
+                        start_time = t
+                    else:
+                        while start_time + step * duration < t:
+                            step += 1
+                            try:
+                                self.writer.write(last_frame)
+                            except BrokenPipeError:
+                                LOGGING.error("Broken pipe error while writing frame. Terminating write loop.")
+                                break
+                        last_frame = frame
                 else:
                     time.sleep(0.1)
                     # 如果没有新的帧，且已经停止，则退出
                     if self.is_stop():
                         break
-
             self.writer.close()
             self._stop_flag = True
         except Exception as e:
