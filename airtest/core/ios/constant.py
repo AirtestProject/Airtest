@@ -10,6 +10,10 @@ DEFAULT_IPROXY_PATH = {
     "Windows": os.path.join(THISPATH, "iproxy", "windows", "iproxy.exe"),
     "Darwin": os.path.join(THISPATH, "iproxy", "mac", "iproxy"),
 }
+DEFAULT_GOIOS_PATH = {
+    "Windows": os.path.join(THISPATH, "goios", "windows", "ios-win.exe"),
+    "Darwin": os.path.join(THISPATH, "goios", "mac", "ios-darwin"),
+}
 DEBUG = True
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
 

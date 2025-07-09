@@ -123,3 +123,24 @@ class LocalDeviceError(BaseError):
     """
     def __init__(self, value="Can only use this method on a local device."):
         super().__init__(value)
+
+
+class WDAError(BaseError):
+    """
+    Exceptions raised by facebook-wda.
+    """
+    pass
+
+
+class TIDeviceError(BaseError):
+    """
+    Exceptions raised by tidevice.
+    """
+    pass
+
+
+class GOIOSError(BaseError):
+    """
+    Exceptions raised by go-ios.
+    """
+    pass
