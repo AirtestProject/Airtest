@@ -19,7 +19,6 @@ def runcommand(cmds, silent=False):
             output = output.strip().decode('utf-8', "replace")
         except Exception:
             LOGGING.error("CMD excute failed: {}".format(cmds))
-            LOGGING.error(traceback.format_exc())
     return output
 
 
