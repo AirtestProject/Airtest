@@ -200,7 +200,7 @@ function StepPannel(data, root){
 
   this.setSteps = function(step){
     // 重设步骤页面内容
-    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    step = step || (this.steps.length > 0 ? this.steps[this.steps.length - 1].index : 0)
     this.setPagenation()
     this.setStepRight(step)
   }
