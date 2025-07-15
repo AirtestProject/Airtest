@@ -578,7 +578,8 @@ def main(args):
     devices_info = args.devices_info
 
     # gen html report
-    rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
+    rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins,
+                    devices_info=devices_info)
     rpt.report(HTML_TPL, output_file=args.outfile, record_list=record_list)
 
 
