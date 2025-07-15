@@ -321,7 +321,7 @@ class LogToHtml(object):
             if params and isinstance(params, dict):
                 clicked_object = params.get("clicked_on_object", None)
                 if clicked_object:
-                    return u"Touch %s coordinates %s" % clicked_object
+                    return u"Touch UI object '%s'" % clicked_object
 
             return u"Touch %s" % (
                 "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v'])
