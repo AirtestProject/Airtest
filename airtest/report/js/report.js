@@ -248,7 +248,7 @@ function StepPannel(data, root){
 
   this.jumpToCurrStep = function(step) {
     // 跳至指定步骤
-    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    step = step || (this.steps.length > 0 ? this.steps[this.steps.length - 1].index : 0)
     this.steps = [].concat(this.original_steps)
     this.currentPage = Math.floor(step / this.pagesize) +1
     this.setPagenation()
