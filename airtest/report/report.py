@@ -328,7 +328,7 @@ class LogToHtml(object):
 
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
-            "touch": lambda: __translate_touch,
+            "touch": lambda: __translate_touch(),
             "swipe": u"Swipe on screen",
             "wait": u"Wait for target image to appear",
             "exists": lambda: u"Image %s exists" % ("" if res else "not"),
