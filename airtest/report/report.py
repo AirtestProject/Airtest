@@ -64,6 +64,7 @@ class LogToHtml(object):
     def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=None, lang="en", plugins=None):
         self.log = []
         self.devices = {}
+        self.devices_info = {}
         self.script_root = script_root
         self.script_name = script_name
         if not self.script_name or os.path.isfile(self.script_root):
@@ -481,6 +482,7 @@ class LogToHtml(object):
         script_path = os.path.join(self.script_root, self.script_name)
         info = json.loads(get_script_info(script_path))
         info['devices'] = self.devices
+        info['devices_info'] = self.devices_info
 
         if record_list:
             records = [os.path.join(DEFAULT_LOG_DIR, f) if self.export_dir
