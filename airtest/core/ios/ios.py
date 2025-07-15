@@ -986,7 +986,7 @@ class IOS(Device):
                 self.cap_method = CAP_METHOD.WDACAP
         return self._neo_wda_screenshot()
 
-    def touch(self, pos, duration=0.01):
+    def touch(self, pos, duration=0.01, **kwargs):
         """
         Args:
             pos: coordinates (x, y), can be float(percent) or int
