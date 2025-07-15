@@ -34,7 +34,7 @@ function StepPannel(data, root){
     var steps = this.filterSteps()
     if(steps.length >0){
       this.steps = steps
-      this.filterSteps($('.filter#all'))
+      this.filterSteps($('.filter#all'), this.currentStep)
     } else{
       this.setSteps()
     }
@@ -191,11 +191,11 @@ function StepPannel(data, root){
     }
   }
 
-  this.filterSteps = function(dom){
+  this.filterSteps = function(dom, currentStep){
     $('.steps .filter').removeClass('active')
     $(dom).addClass('active')
     this.currentPage = 1
-    this.setSteps()
+    this.setSteps(currentStep)
   }
 
   this.setSteps = function(step){
