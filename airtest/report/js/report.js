@@ -34,7 +34,7 @@ function StepPannel(data, root){
     var steps = this.filterAssertSteps()
     if(steps.length >0){
       this.steps = steps
-      this.filterSteps($('.filter#assert'))
+      this.filterSteps($('.filter#all'))
     } else{
       this.setSteps()
     }
