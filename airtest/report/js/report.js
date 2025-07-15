@@ -16,6 +16,7 @@ function StepPannel(data, root){
   this.pagesize = 1000
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
+  this.stepLeftContainer = $('#step-left')
   this.stepRight = $('#step-right')
   this.magnifyContainer = $('#magnify .content')
   this.magnifyPic = $('#magnify')
@@ -38,6 +39,7 @@ function StepPannel(data, root){
     } else{
       this.setSteps()
     }
+    this.scrollToLastStep()
     this.init_video()
     if ($('#console pre.trace').length > 0) {
       setTimeout(function(){
@@ -196,6 +198,11 @@ function StepPannel(data, root){
     $(dom).addClass('active')
     this.currentPage = 1
     this.setSteps(currentStep)
+  }
+
+  this.scrollToLastStep = function() {
+    // Scroll to bottom:
+    this.stepLeftContainer.scrollTop(this.stepLeftContainer[0].scrollHeight);
   }
 
   this.setSteps = function(step){
