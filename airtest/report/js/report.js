@@ -31,7 +31,7 @@ function StepPannel(data, root){
     this.bindEvents()
     this.init_gallery()
     this.init_pagenation()
-    var steps = this.filterAssertSteps()
+    var steps = this.filterSteps()
     if(steps.length >0){
       this.steps = steps
       this.filterSteps($('.filter#all'))
