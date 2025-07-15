@@ -316,10 +316,19 @@ class LogToHtml(object):
         res = step['data'].get('ret')
         args = {i["key"]: i["value"] for i in code["args"]}
 
+        def __translate_touch():
+            params = args.get('kwargs', None)
+            if params and isinstance(params, dict):
+                clicked_object = params.get("clicked_on_object", None)
+                if clicked_object:
+                    return clicked_object
+
+            return u"Touch %s" % (
+                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v'])
+
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
-            "touch": lambda: u"Touch %s" % (
-                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
+            "touch": lambda: __translate_touch,
             "swipe": u"Swipe on screen",
             "wait": u"Wait for target image to appear",
             "exists": lambda: u"Image %s exists" % ("" if res else "not"),
