@@ -224,7 +224,7 @@ class TIDevice:
         cmds = ["tidevice", "-u", udid, "xctest", "-B", wda_bundle_id]
         proc = run_background(cmds)
         time.sleep(3)
-        if proc.poll() is not None:
+        if proc.poll() is None:
             return proc
     
     @staticmethod

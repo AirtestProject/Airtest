@@ -310,5 +310,5 @@ class GOIOSHelper:
         cmds = [GOIOS_PATH, f"--udid={udid}", "runwda", f"--bundleid={wda_bundle_id}", f"--testrunnerbundleid={wda_bundle_id}", f"--xctestconfig={xctestname}"]
         proc = run_background(cmds)
         time.sleep(3)
-        if proc.poll() is not None:
+        if proc.poll() is None:
             return proc
