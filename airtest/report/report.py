@@ -14,6 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from markupsafe import Markup, escape
 from six.moves.urllib.parse import parse_qsl, urlparse
+
 try:
     from jinja2 import evalcontextfilter as pass_eval_context  # jinja2<3.1
 except:
@@ -34,7 +35,6 @@ DEFAULT_LOG_FILE = "log.txt"
 HTML_TPL = "log_template.html"
 HTML_FILE = "log.html"
 STATIC_DIR = os.path.dirname(__file__)
-
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -61,10 +61,11 @@ class LogToHtml(object):
     """Convert log to html display """
     scale = 0.5
 
-    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=None, lang="en", plugins=None):
+    def __init__(self, script_root, log_root="", static_root="", export_dir=None, script_name="", logfile=None,
+                 lang="en", plugins=None, devices_info=None):
         self.log = []
         self.devices = {}
-        self.devices_info = {}
+        self.devices_info = devices_info
         self.script_root = script_root
         self.script_name = script_name
         if not self.script_name or os.path.isfile(self.script_root):
@@ -317,7 +318,8 @@ class LogToHtml(object):
 
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
-            "touch": lambda: u"Touch %s" % ("target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
+            "touch": lambda: u"Touch %s" % (
+                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v']),
             "swipe": u"Swipe on screen",
             "wait": u"Wait for target image to appear",
             "exists": lambda: u"Image %s exists" % ("" if res else "not"),
@@ -326,7 +328,7 @@ class LogToHtml(object):
             "sleep": lambda: u"Wait for %s seconds" % args.get('secs'),
             "assert_exists": u"Assert target image exists",
             "assert_not_exists": u"Assert target image does not exists",
-            "connect_device": lambda : u"Connect device: %s" % args.get("uri"),
+            "connect_device": lambda: u"Connect device: %s" % args.get("uri"),
         }
 
         # todo: 最好用js里的多语言实现
@@ -341,7 +343,7 @@ class LogToHtml(object):
             "sleep": lambda: u"等待%s秒" % args.get('secs'),
             "assert_exists": u"断言目标图片存在",
             "assert_not_exists": u"断言目标图片不存在",
-            "connect_device": lambda : u"连接设备： %s" % args.get("uri"),
+            "connect_device": lambda: u"连接设备： %s" % args.get("uri"),
         }
 
         if self.lang == "zh":
@@ -415,6 +417,7 @@ class LogToHtml(object):
             if os.path.commonprefix([dirpath, dirname]) == dirpath:
                 return filenames
             return []
+
         self.copy_tree(self.script_root, dirpath, ignore=ignore_export_dir)
         # copy log
         logpath = os.path.join(dirpath, DEFAULT_LOG_DIR)
@@ -572,6 +575,7 @@ def main(args):
     export = decode_path(args.export) if args.export else None
     lang = args.lang if args.lang in ['zh', 'en'] else 'en'
     plugins = args.plugins
+    devices_info = args.devices_info
 
     # gen html report
     rpt = LogToHtml(path, log_root, static_root, export_dir=export, script_name=name, lang=lang, plugins=plugins)
@@ -580,6 +584,7 @@ def main(args):
 
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     args = get_parger(ap).parse_args()
     main(args)
