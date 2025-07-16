@@ -317,14 +317,28 @@ class LogToHtml(object):
         args = {i["key"]: i["value"] for i in code["args"]}
 
         def __translate_touch():
-            params = args.get('kwargs', None)
-            if params and isinstance(params, dict):
-                clicked_object = params.get("clicked_on_object", None)
-                if clicked_object:
-                    return u"Touch UI object '%s'" % clicked_object
+            key_word = "clicked_on_object"
 
-            return u"Touch %s" % (
-                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v'])
+            # try fetch the name passed from poco element
+            params = args.get('kwargs')
+            clicked_object = None
+
+            if isinstance(params, dict):
+                clicked_object = params.get(key_word)
+
+            # try fetch the name from native iOS poco
+            if not clicked_object:
+                clicked_object = args.get(key_word)
+
+            if clicked_object:
+                return f"Touch UI object '{clicked_object}'"
+
+            # object clicked on wasn't found, log coordinates or img instead
+            touch_target = args.get('v')
+            if isinstance(touch_target, dict):
+                return "Touch target image"
+            else:
+                return f"Touch coordinates {touch_target}"
 
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
