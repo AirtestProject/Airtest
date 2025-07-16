@@ -26,4 +26,3 @@ class Settings(object):
     # Image compression size, e.g. 1200, means that the size of the screenshot does not exceed 1200*1200
     IMAGE_MAXSIZE = os.environ.get("IMAGE_MAXSIZE", None)
     SAVE_IMAGE = True
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", None)

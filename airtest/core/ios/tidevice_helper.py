@@ -152,6 +152,15 @@ class TIDevice:
         return tmp_dict
     
     @staticmethod
+    def get_major_version(udid):
+        """
+        Retrieves the major version of the iOS device.
+        """
+        device_info = BaseDevice(udid, Usbmux()).device_info()
+        product_version = device_info.get('ProductVersion', '')
+        return int(product_version.split('.')[0]) if product_version else 0
+    
+    @staticmethod
     def install_app(udid, file_or_url):
         BaseDevice(udid, Usbmux()).app_install(file_or_url)
 

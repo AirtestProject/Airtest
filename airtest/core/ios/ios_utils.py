@@ -20,6 +20,13 @@ def ios_get_device_info(udid):
         raise TIDeviceError(e)
 
 
+def ios_get_major_version(udid):
+    try:
+        return TIDevice.get_major_version(udid)
+    except Exception as e:
+        raise TIDeviceError(e)
+
+
 def ios_list_app(udid, app_type="user"):
     try:
         return TIDevice.list_app(udid, app_type)

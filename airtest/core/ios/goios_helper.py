@@ -5,7 +5,6 @@ import os
 import time
 import sys
 from functools import wraps
-from airtest.core.settings import Settings as ST
 from airtest.core.ios.constant import DEFAULT_GOIOS_PATH
 from airtest.utils.logger import get_logger
 from airtest.utils.runcommand import run_background_with_pipe, runcommand, run_background, runcommand_with_json_output
@@ -65,7 +64,7 @@ def start_tunnel_service():
     if platform_system == "Windows":
         hinstance = ctypes.windll.shell32.ShellExecuteW(None, "runas", GOIOS_PATH, "tunnel start", os.path.dirname(GOIOS_PATH), 0)
     elif platform_system == "Darwin":
-        password = ST.ADMIN_PASSWORD
+        password = os.environ.get("ADMIN_PASSWORD")
         if password:
             proc = run_background_with_pipe(["echo", password], ["sudo", "-S", GOIOS_PATH, "tunnel", "start"])
         else:
