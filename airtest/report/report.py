@@ -324,7 +324,7 @@ class LogToHtml(object):
                     return u"Touch UI object '%s'" % clicked_object
 
             return u"Touch %s" % (
-                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v'])()
+                "target image" if isinstance(args['v'], dict) else "coordinates %s" % args['v'])
 
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
