@@ -331,7 +331,7 @@ class LogToHtml(object):
                 clicked_object = args.get(key_word)
 
             if clicked_object:
-                return f"Touch UI object '{clicked_object}'"
+                return f"Touch Native UI object '{clicked_object}'"
 
             # object clicked on wasn't found, log coordinates or img instead
             touch_target = args.get('v')
