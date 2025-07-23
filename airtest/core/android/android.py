@@ -581,7 +581,7 @@ class Android(Device):
         if enter:
             self.adb.shell(["input", "keyevent", "ENTER"])
 
-    def touch(self, pos, duration=0.01):
+    def touch(self, pos, duration=0.01, **kwargs):
         """
         Perform touch event on the device
 

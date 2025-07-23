@@ -11,11 +11,12 @@ function StepPannel(data, root){
   this.original_steps = data.steps
   this.steps = [].concat(data.steps)
   this.static = data.static_root
-  this.currentStep = 0
+  this.currentStep = -1
   this.currentWrong = -1
-  this.pagesize = 20
+  this.pagesize = 1000
   this.currentPage = 1
   this.stepLeft = $('#step-left .step-list')
+  this.stepLeftContainer = $('#step-left')
   this.stepRight = $('#step-right')
   this.magnifyContainer = $('#magnify .content')
   this.magnifyPic = $('#magnify')
@@ -31,13 +32,14 @@ function StepPannel(data, root){
     this.bindEvents()
     this.init_gallery()
     this.init_pagenation()
-    var steps = this.filterAssertSteps()
+    var steps = this.filterSteps()
     if(steps.length >0){
       this.steps = steps
-      this.filterSteps($('.filter#assert'))
+      this.filterSteps($('.filter#all'), this.currentStep)
     } else{
       this.setSteps()
     }
+    this.scrollToLastStep()
     this.init_video()
     if ($('#console pre.trace').length > 0) {
       setTimeout(function(){
@@ -191,16 +193,21 @@ function StepPannel(data, root){
     }
   }
 
-  this.filterSteps = function(dom){
+  this.filterSteps = function(dom, currentStep){
     $('.steps .filter').removeClass('active')
     $(dom).addClass('active')
     this.currentPage = 1
-    this.setSteps()
+    this.setSteps(currentStep)
+  }
+
+  this.scrollToLastStep = function() {
+    // Scroll to bottom:
+    this.stepLeftContainer.scrollTop(this.stepLeftContainer[0].scrollHeight);
   }
 
   this.setSteps = function(step){
     // 重设步骤页面内容
-    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    step = step || (this.steps.length > 0 ? this.steps[this.steps.length - 1].index : 0)
     this.setPagenation()
     this.setStepRight(step)
   }
@@ -248,7 +255,7 @@ function StepPannel(data, root){
 
   this.jumpToCurrStep = function(step) {
     // 跳至指定步骤
-    step = step || (this.steps.length > 0 ? this.steps[0].index : 0)
+    step = step || (this.steps.length > 0 ? this.steps[this.steps.length - 1].index : 0)
     this.steps = [].concat(this.original_steps)
     this.currentPage = Math.floor(step / this.pagesize) +1
     this.setPagenation()
