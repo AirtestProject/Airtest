@@ -324,22 +324,20 @@ class LogToHtml(object):
             clicked_object = params.get(key_word)
 
             if isinstance(params, dict) and clicked_object:
-                if clicked_object:
-                    return f"Touch UI object '{clicked_object}'"
+                return f"Touch UI object '{clicked_object}'"
 
             # try fetch the name from native iOS poco from args
-            elif not clicked_object:
+            if not clicked_object:
                 clicked_object = args.get(key_word)
                 if clicked_object:
                     return f"Touch Native UI object '{clicked_object}'"
 
             # object clicked on wasn't found, log coordinates or img instead
+            touch_target = args.get('v')
+            if isinstance(touch_target, dict):
+                return "Touch target image"
             else:
-                touch_target = args.get('v')
-                if isinstance(touch_target, dict):
-                    return "Touch target image"
-                else:
-                    return f"Touch coordinates {touch_target}"
+                return f"Touch coordinates {touch_target}"
 
         desc = {
             "snapshot": lambda: u"Screenshot description: %s" % args.get("msg"),
