@@ -319,19 +319,18 @@ class LogToHtml(object):
         def __translate_touch():
             key_word = "clicked_on_object"
 
-            # try fetch the name passed from poco element
+            # try fetch the name passed from poco element as a kwarg
             params = args.get('kwargs')
-            clicked_object = None
+            clicked_object = params.get(key_word)
 
-            if isinstance(params, dict):
-                clicked_object = params.get(key_word)
+            if isinstance(params, dict) and clicked_object:
+                return f"Touch UI object '{clicked_object}'"
 
-            # try fetch the name from native iOS poco
+            # try fetch the name from native iOS poco from args
             if not clicked_object:
                 clicked_object = args.get(key_word)
-
-            if clicked_object:
-                return f"Touch Native UI object '{clicked_object}'"
+                if clicked_object:
+                    return f"Touch Native UI object '{clicked_object}'"
 
             # object clicked on wasn't found, log coordinates or img instead
             touch_target = args.get('v')
