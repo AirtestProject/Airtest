@@ -11,7 +11,7 @@ function StepPannel(data, root){
   this.original_steps = data.steps
   this.steps = [].concat(data.steps)
   this.static = data.static_root
-  this.currentStep = -1
+  this.currentStep = 0
   this.currentWrong = -1
   this.pagesize = 1000
   this.currentPage = 1
