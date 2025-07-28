@@ -30,7 +30,7 @@ from airtest.aircv.screen_recorder import ScreenRecorder, resize_by_max, get_max
 from airtest.core.error import LocalDeviceError, AirtestError
 from airtest.core.helper import logwrap
 from airtest.core.ios.ios_utils import (
-    ios_run_xctest, ios_list_devices, ios_list_wda, ios_get_device_info, 
+    ios_launch_wda, ios_list_devices, ios_list_wda, ios_get_device_info, 
     ios_install_app, ios_uninstall_app, ios_list_app,
     ios_start_app, ios_stop_app, ios_list_processes, ios_list_processes_wda,
     ios_push, ios_pull, ios_rm, ios_ls, ios_mkdir, ios_is_dir
@@ -120,7 +120,7 @@ class IOS(Device):
                 self.udid = udid
             else:
                 self.udid = parsed
-            ret = ios_run_xctest(self.udid, self.wda_bundle_id)
+            ret = ios_launch_wda(self.udid, self.wda_bundle_id)
             if not ret:
                 print(f"Failed to start WDA xctest for {self.wda_bundle_id}.")
             self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
@@ -458,6 +458,7 @@ class IOS(Device):
             try:
                 return self.mjpegcap.get_frame_from_stream()
             except ConnectionRefusedError:
+                print("ConnectionRefusedError")
                 self.cap_method = CAP_METHOD.WDACAP
         return self._neo_wda_screenshot()
 

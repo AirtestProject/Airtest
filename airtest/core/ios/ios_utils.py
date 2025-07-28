@@ -1,3 +1,4 @@
+import time
 import wda
 import wda.exceptions
 import tidevice
@@ -126,12 +127,7 @@ def ios_is_dir(udid, remote_path, bundle_id=None):
         raise TIDeviceError(e)
     
 
-def ios_run_xctest(udid, wda_bundle_id, force_start=False):
-    if not force_start:
-        wda_client = wda.BaseClient(f"http+usbmux://{udid}:8100")
-        if wda_client.is_ready():
-            return True
-        
+def ios_run_xctest(udid, wda_bundle_id):
     major_version = GOIOSHelper.get_major_version(udid)
     # 对于ios17以下的WDA，使用goios启动有时候会有问题，保留tidevice启动方式
     if major_version < 17:
@@ -144,3 +140,28 @@ def ios_run_xctest(udid, wda_bundle_id, force_start=False):
             return GOIOSHelper.xctest(udid, wda_bundle_id)
         except Exception as e:
             raise GOIOSError(e)
+        
+
+def ios_launch_wda(udid, wda_bundle_id, force_start=False):
+    def _check_wda_ready(udid):
+        wda_client = wda.BaseClient(f"http+usbmux://{udid}:8100")
+        if wda_client.is_ready():
+            return True
+
+    if not force_start:
+        wda_status = _check_wda_ready(udid)
+        if wda_status:
+            return True
+
+    try:
+        GOIOSHelper.start_app(udid, wda_bundle_id)  # 先尝试用直接拉起wda的方式运行，如果不行再使用xctest方式
+        time.sleep(2)
+        wda_status = _check_wda_ready(udid)
+        if wda_status:
+            return True
+    except Exception as e:
+        pass
+
+    ios_run_xctest(udid, wda_bundle_id)
+    time.sleep(2)
+    return _check_wda_ready(udid)
