@@ -494,9 +494,8 @@ class ADB(object):
             >>> adb.push("test_dir", "/sdcard/Android/data/com.test.package/files/test_dir")
 
         """
-        _, ext = os.path.splitext(remote)
-        if ext:
-            # The target path is a file
+        if os.path.isfile(local):
+            # The local path is a file
             dst_parent = os.path.dirname(remote)
         else:
             dst_parent = remote
