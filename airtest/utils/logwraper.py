@@ -55,9 +55,14 @@ class AirtestLogger(object):
 
     def log(self, tag, data, depth=None, timestamp=None):
         ''' Not thread safe '''
+        from airtest.core.helper import G
         # LOGGING.debug("%s: %s" % (tag, data))
         if depth is None:
             depth = len(self.running_stack)
+        if depth == 1 and len(G.DEVICE_LIST) > 0 and G.DEVICE and data.get('call_args'):
+            # 如果是第一层log，且有call_args，并且当前已连设备，就加上device信息
+            if 'device' not in data['call_args']:
+                data['call_args']['device'] = G.DEVICE.uuid
         if self.logfd:
             # 如果timestamp为None，或不是float，就设为默认值time.time()
             try:

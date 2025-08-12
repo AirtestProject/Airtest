@@ -17,6 +17,11 @@ class Device(with_metaclass(MetaDevice, object)):
 
     def __init__(self):
         super(Device, self).__init__()
+    
+    @property
+    def platform(self):
+        """platform name for the device"""
+        return self.__class__.__name__.lower()
 
     def to_json(self):
         try:

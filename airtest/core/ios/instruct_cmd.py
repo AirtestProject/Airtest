@@ -66,25 +66,39 @@ class InstructHelper(object):
         if not self._device:
             # wda无法直接获取iOS的udid，因此先检查usb连接的手机udid列表
             try:
-                device_list = wda.usbmux.Usbmux().device_list()
+                try:
+                    from wda.usbmux import Usbmux
+                    device_list = wda.usbmux.Usbmux().device_list()
+                except ImportError:
+                    from wda.usbmux import pyusbmux
+                    device_list = wda.usbmux.pyusbmux.list_devices()
             except ConnectionRefusedError:
                 # windows上必须要先启动iTunes才能获取到iOS设备列表
                 LOGGING.warning("If you are using iOS device in windows, please check if iTunes is launched")
                 return None
             except Exception as e:
                 # 其他异常，例如 socket unix:/var/run/usbmuxd unable to connect
-                print(e)
+                print("usbmuxd error:", e)
                 return None
             for dev in device_list:
-                udid = dev.get('SerialNumber')
-                usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
+                if dev.__class__.__name__ == 'MuxDevice':
+                    udid = dev.serial
+                    # TODO 端口号
+                    usb_dev = wda.USBClient(udid, port=8100)
+                else:
+                    udid = dev.get('SerialNumber')
+                    usb_dev = wda.Client(url=wda.requests_usbmux.DEFAULT_SCHEME + udid)
                 # 对比wda.info获取到的uuid是否一致
                 try:
-                    if usb_dev.info['uuid'] == self.uuid:
-                        self._device = wda.usbmux.Device(udid)
+                    if usb_dev.info['uuid'] == self.uuid or not self.uuid:
+                        if usb_dev.__class__.__name__ == 'USBClient':
+                            self._device = usb_dev
+                        else:
+                            self._device = wda.usbmux.Device(udid)
                         self._udid = udid
+                        break
                 except:
-                    return None
+                    continue
         return self._device
 
     def tear_down(self):
@@ -184,4 +198,5 @@ class InstructHelper(object):
 
 if __name__ == '__main__':
     ins = InstructHelper()
-    ins.do_proxy_usbmux(5001, 5001)
+    print(ins.usb_device)
+    ins.do_proxy_usbmux(9100, 9100)

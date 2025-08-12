@@ -121,10 +121,10 @@ class TestIos(unittest.TestCase):
         # 位置参数可为：相对于设备的百分比坐标或者实际的逻辑位置坐标
         print("test_touch")
         self.ios.touch((480, 350), duration=0.1)
-        time.sleep(2)
-        self.ios.home()
-        time.sleep(2)
-        self.ios.touch((0.3, 0.3))
+        # time.sleep(2)
+        # self.ios.home()
+        # time.sleep(2)
+        # self.ios.touch((0.3, 0.3))
 
     def test_swipe(self):
         print("test_swipe")
@@ -443,7 +443,10 @@ class TestIos(unittest.TestCase):
         def _get_file_md5(file_path):
             hasher = hashlib.md5()
             with open(file_path, 'rb') as f:
-                while chunk := f.read(8192):
+                while True:
+                    chunk = f.read(8192)
+                    if not chunk:
+                        break
                     hasher.update(chunk)
             return hasher.hexdigest()
 

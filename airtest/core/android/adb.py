@@ -495,7 +495,7 @@ class ADB(object):
 
         """
         _, ext = os.path.splitext(remote)
-        if ext:
+        if ext or os.path.isfile(remote):
             # The target path is a file
             dst_parent = os.path.dirname(remote)
         else:
@@ -618,15 +618,15 @@ class ADB(object):
     @classmethod
     def get_available_forward_local(cls):
         """
-        Generate a pseudo random number between 11111 and 20000 that will be used as local forward port
+        Generate a pseudo random number between 11111 and 50000 that will be used as local forward port
 
         Returns:
-            integer between 11111 and 20000
+            integer between 11111 and 50000
 
         Note:
             use `forward --no-rebind` to check if port is available
         """
-        return random.randint(11111, 20000)
+        return random.randint(11111, 50000)
 
     @retries(3)
     def setup_forward(self, device_port, no_rebind=True):
