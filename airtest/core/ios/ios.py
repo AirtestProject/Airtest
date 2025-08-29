@@ -1107,7 +1107,7 @@ class IOS(Device):
         max_size = get_max_size(max_size)
 
         def get_frame():
-            data = self.get_frame_from_stream()
+            data = self._neo_wda_screenshot()
             frame = aircv.utils.string_2_img(data)
 
             if max_size is not None:
