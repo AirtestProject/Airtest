@@ -59,7 +59,7 @@ setup(
     package_data={
         'android_deps': ["*.apk", "airtest/core/android/static"],
         'html_statics': ["airtest/report"],
-        'ios_deps': ["airtest/core/ios/iproxy"],
+        'ios_deps': ["airtest/core/ios/iproxy", "airtest/core/ios/goios"],
     },
     include_package_data=True,
     install_requires=parse_requirements('requirements.txt'),
