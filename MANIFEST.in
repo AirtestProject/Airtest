@@ -5,6 +5,7 @@ include airtest/core/android/static/*/*
 include airtest/core/android/static/stf_libs/minicap-shared/aosp/libs/*/*/*.*
 
 include airtest/core/ios/iproxy/*/*
+include airtest/core/ios/goios/*/*
 
 include airtest/report/*.html
 include airtest/report/*/*.*
