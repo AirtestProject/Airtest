@@ -648,7 +648,13 @@ class IOS(Device):
                 self.udid = udid
             else:
                 self.udid = parsed
-            self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
+            try:
+                self.driver = wda.USBClient(udid=self.udid, port=8100, wda_bundle_id=self.wda_bundle_id)
+            except Exception as e:
+                # windows connect ios devices fail:USBClient.__init__() got an unexpected keyword argument 'wda_bundle_id'
+                LOGGING.warning("USBClient.__init__()  error: {msg}".format(msg=e))
+                self.driver = wda.USBClient(udid=self.udid, port=8100)
+                
         # Record device's width and height.
         self._size = {'width': None, 'height': None}
         self._current_orientation = None
