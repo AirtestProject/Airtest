@@ -16,7 +16,7 @@ import traceback
 from logzero import setup_logger
 from functools import wraps
 from urllib.parse import urlparse
-
+from collections import namedtuple
 from airtest import aircv
 from airtest.core.device import Device
 from airtest.core.ios.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ROTATION_MODE, KEY_EVENTS, \
@@ -310,6 +310,29 @@ class IOS(Device):
             print("iOS连接失败，请尝试按home键回到桌面后再重试")
             raise
 
+    def screen_size(self):
+        """
+        Returns:
+            Screen size (width, height).
+
+        25.11.28
+        使用window_size返回屏幕尺寸可能出现如下问题：手机保持在桌面时返回的是正确尺寸，打开某个APP后，返回的尺寸不正确。
+        其原因是window_size的底层实现是获取当前上层应用的渲染尺寸，如果应用开发者做了一些设置，可能该数据就不对应于屏幕尺寸。
+        新版WDA中，增加了/wda/screen接口，可以获取屏幕尺寸，其原理是通过系统应用获取渲染尺寸，则不会有问题。
+        增加此接口，同时兼容旧版WDA。
+        """
+        try:
+            screen_info = self.driver._session_http.get('/wda/screen').value
+            if "screenSize" in screen_info:
+                w = int(screen_info["screenSize"]["width"])
+                h = int(screen_info["screenSize"]["height"])
+                return namedtuple('Size', ['width', 'height'])(w, h)
+            else:
+                return self.window_size()
+        except:
+            return self.window_size()
+        
+
     @property
     def orientation(self):
         """
@@ -348,7 +371,7 @@ class IOS(Device):
 
     def _display_info(self):
         # Function window_size() return UIKit size, while screenshot() image size is Native Resolution.
-        window_size = self.window_size()
+        window_size = self.screen_size()
         # When use screenshot, the image size is pixels size. e.g.(1080 x 1920)
         snapshot = self.snapshot()
         if self.orientation in [wda.LANDSCAPE, wda.LANDSCAPE_RIGHT]:
@@ -567,7 +590,7 @@ class IOS(Device):
             delay (float): start coordinate to end coordinate duration (seconds)
         """
         if any(isinstance(v, float) for v in [x1, y1, x2, y2]):
-            size = self.window_size()
+            size = self.screen_size()
             x1, y1 = self.driver._percent2pos(x1, y1, size)
             x2, y2 = self.driver._percent2pos(x2, y2, size)
 
