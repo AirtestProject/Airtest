@@ -5,7 +5,7 @@ import sys
 import subprocess
 from airtest.utils.compat import decode_path
 
-THISPATH = decode_path(os.path.dirname(os.path.realpath(__file__)))
+THISPATH = os.path.abspath("../assets")
 STATICPATH = os.path.join(THISPATH, "static")
 DEFAULT_ADB_PATH = {
     "Windows": os.path.join(STATICPATH, "adb", "windows", "adb.exe"),

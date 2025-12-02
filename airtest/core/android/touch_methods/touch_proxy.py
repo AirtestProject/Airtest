@@ -109,7 +109,7 @@ class AdbTouchImplementation(object):
         self.base_touch.swipe(p1, p2, duration=duration)
 
     def teardown(self):
-        pass
+        self.base_touch.teardown()
 
 
 @register_touch

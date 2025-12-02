@@ -97,7 +97,7 @@ class Minitouch(BaseTouch):
             line = line.decode(get_std_encoding(sys.stdout))
 
             # 识别出setup成功的log，并匹配出max_x, max_y
-            m = re.search("Type \w touch device .+ \((\d+)x(\d+) with \d+ contacts\) detected on .+ \(.+\)", line)
+            m = re.search(r"Type \w touch device .+ \((\d+)x(\d+) with \d+ contacts\) detected on .+ \(.+\)", line)
             if m:
                 self.max_x, self.max_y = int(m.group(1)), int(m.group(2))
                 break
