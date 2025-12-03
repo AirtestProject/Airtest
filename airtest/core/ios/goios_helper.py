@@ -70,7 +70,7 @@ def start_tunnel_service():
         else:
             raise Exception("Please set ADMIN_PASSWORD in os.environ.")
 
-    time.sleep(2)
+    time.sleep(5)
     if check_tunnel():
         return True
     else:
@@ -103,7 +103,6 @@ def decorator_checking_tunnel(func):
             while cnt < 3:
                 tunnel = get_tunnel_by_udid(udid)
                 if tunnel:
-                    time.sleep(2)  # 有时候tunnel刚启动，但是连接会报错。这里稍微等待一下。
                     break
                 cnt += 1
                 time.sleep(1)
