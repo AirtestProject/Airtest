@@ -5,7 +5,7 @@ six>=1.9.0,<=1.16.0
 mss==6.1.0
 numpy<2.0
 opencv-contrib-python>=4.4.0.46, <=4.6.0.66
-facebook-wda>=1.3.3
+facebook-wda==1.5.0
 pywinauto==0.6.3
 filelock
 ffmpeg-python

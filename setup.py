@@ -37,8 +37,8 @@ def parse_requirements(filename):
     if sys.version_info.major == 3 and sys.version_info.minor <= 6:
         reqs.append("dataclasses")
     if sys.version_info.major == 3 and sys.version_info.minor <= 7:
-        reqs.remove("facebook-wda>=1.3.3")
-        reqs.append("facebook-wda<1.4.8")
+        reqs.remove("facebook-wda==1.5.0")
+        reqs.append("facebook-wda==1.4.6")
     if is_docker():
         reqs.remove("opencv-contrib-python>=4.4.0.46, <=4.6.0.66")
         reqs.append("opencv-contrib-python-headless==4.5.5.64")
