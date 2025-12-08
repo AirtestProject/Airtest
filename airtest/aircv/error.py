@@ -51,3 +51,7 @@ class NoMatchPointError(BaseError):
 
 class MatchResultCheckError(BaseError):
     """Exception raised for errors 0 keypoint found in the input images."""
+
+
+class PerspectiveTransformError(BaseError):
+    """ An error occurred while perspectiveTransform """
