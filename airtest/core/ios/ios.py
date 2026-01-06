@@ -1058,6 +1058,27 @@ class IOS(Device):
                 return True
         return False
 
+    def get_mjpeg_fps(self):
+        try:
+            settings = self.driver._session_http.get("/appium/settings")
+            fps = settings.value.get("mjpegServerFramerate")
+            return fps
+        except:
+            return None
+
+    def set_mjpeg_fps(self, fps):
+        data = {
+            "settings": {
+                "mjpegServerFramerate": fps
+            }
+        }
+        try:
+            self.driver._session_http.post("/appium/settings", data=data)
+            return True
+        except Exception as e:
+            LOGGING.error(f"set mjpeg fps to {fps} failed: {e}")
+            return False
+
     def disconnect(self):
         """Disconnected mjpeg and rotation_watcher.
         """
@@ -1105,12 +1126,17 @@ class IOS(Device):
             >>> dev.start_recording(output="test.mp4", max_size=800)
 
         """
-        if fps > 10 or fps < 1:
-            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
-            if fps > 10:
-                fps = 10
+        if fps > 24 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 24, becuase of the recording effiency")
+            if fps > 24:
+                fps = 24
             if fps < 1:
                 fps = 1
+
+        origin_fps = self.get_mjpeg_fps()
+        if origin_fps != fps:
+            ret = self.set_mjpeg_fps(fps)
+            LOGGING.info(f"set mjpeg fps to {fps}. result: {ret}")
 
         if self.recorder and self.recorder.is_running():
             LOGGING.warning("recording is already running, please don't call again")

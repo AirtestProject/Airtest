@@ -953,10 +953,10 @@ class Android(Device):
                 max_time=max_time, bit_rate=bit_rate, bool_is_vertical=bool_is_vertical)
             return save_path
 
-        if fps > 10 or fps < 1:
-            LOGGING.warning("fps should be between 1 and 10, becuase of the recording effiency")
-            if fps > 10:
-                fps = 10
+        if fps > 24 or fps < 1:
+            LOGGING.warning("fps should be between 1 and 24, becuase of the recording effiency")
+            if fps > 24:
+                fps = 24
             if fps < 1:
                 fps = 1
 
