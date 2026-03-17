@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import ctypes
 import time
 import socket
 import subprocess
@@ -164,9 +165,9 @@ class Windows(Device):
         """
         if self.app:
             rect = self.get_rect()
-            rect = self._fix_image_rect(rect)
-            monitor = {"top": rect.top, "left": rect.left, "width": rect.right - rect.left - abs(self.monitor["left"]),
-                       "height": rect.bottom - rect.top, "monitor": 1}
+            monitor = {"top": rect.top, "left": rect.left,
+                       "width": rect.right - rect.left,
+                       "height": rect.bottom - rect.top}
         else:
             monitor = self.screen.monitors[0]
         try:
@@ -222,12 +223,62 @@ class Windows(Device):
     def _fix_op_pos(self, pos):
         """Fix operation position."""
         # 如果是全屏的话，就进行双屏修正，否则就正常即可
-        if not self.handle:
+        if not self.app:
             pos = list(pos)
             pos[0] = pos[0] + self.monitor["left"]
             pos[1] = pos[1] + self.monitor["top"]
 
         return pos
+
+    @staticmethod
+    def _safe_move(coords):
+        """Move mouse cursor using SetCursorPos (virtual screen coordinates, multi-monitor safe)."""
+        win32api.SetCursorPos((int(coords[0]), int(coords[1])))
+
+    @staticmethod
+    def _safe_mouse_event(coords, button="left", button_down=True, button_up=True):
+        """Send mouse button events at coords using SendInput (multi-monitor safe).
+
+        Uses SetCursorPos for positioning and SendInput for button events,
+        avoiding pywinauto's mouse_event which incorrectly normalizes coordinates
+        with SM_CXSCREEN instead of SM_CXVIRTUALSCREEN on multi-monitor setups.
+        """
+        win32api.SetCursorPos((int(coords[0]), int(coords[1])))
+
+        MOUSEEVENTF_LEFTDOWN = 0x0002
+        MOUSEEVENTF_LEFTUP = 0x0004
+        MOUSEEVENTF_RIGHTDOWN = 0x0008
+        MOUSEEVENTF_RIGHTUP = 0x0010
+        MOUSEEVENTF_MIDDLEDOWN = 0x0020
+        MOUSEEVENTF_MIDDLEUP = 0x0040
+
+        button_map = {
+            "left": (MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP),
+            "right": (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP),
+            "middle": (MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP),
+        }
+        down_flag, up_flag = button_map.get(button, button_map["left"])
+
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", ctypes.c_long), ("dy", ctypes.c_long),
+                        ("mouseData", ctypes.c_ulong), ("dwFlags", ctypes.c_ulong),
+                        ("time", ctypes.c_ulong), ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong))]
+
+        class INPUT(ctypes.Structure):
+            class _INPUT(ctypes.Union):
+                _fields_ = [("mi", MOUSEINPUT)]
+            _fields_ = [("type", ctypes.c_ulong), ("ii", _INPUT)]
+
+        def _send_mouse_input(flags):
+            mi = MOUSEINPUT(0, 0, 0, flags, 0, None)
+            inp = INPUT(type=0)  # INPUT_MOUSE = 0
+            inp.ii.mi = mi
+            ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+        if button_down:
+            _send_mouse_input(down_flag)
+        if button_up:
+            _send_mouse_input(up_flag)
 
     def key_press(self, key):
         """Simulates a key press event.
@@ -309,28 +360,30 @@ class Windows(Device):
         for i in range(1, steps):
             x = int(start_x + (end_x - start_x) * i / steps)
             y = int(start_y + (end_y - start_y) * i / steps)
-            self.mouse.move(coords=(x, y))
+            self._safe_move((x, y))
             time.sleep(interval)
 
-        self.mouse.move(coords=(end_x, end_y))
+        self._safe_move((end_x, end_y))
 
         for i in range(1, offset + 1):
-            self.mouse.move(coords=(end_x + i, end_y + i))
+            self._safe_move((end_x + i, end_y + i))
             time.sleep(0.01)
 
         for i in range(offset):
-            self.mouse.move(coords=(end_x + offset - i, end_y + offset - i))
+            self._safe_move((end_x + offset - i, end_y + offset - i))
             time.sleep(0.01)
 
-        self.mouse.press(button=button, coords=(end_x, end_y))
+        self._safe_mouse_event((end_x, end_y), button=button, button_down=True, button_up=False)
         time.sleep(duration)
-        self.mouse.release(button=button, coords=(end_x, end_y))
+        self._safe_mouse_event((end_x, end_y), button=button, button_down=False, button_up=True)
         return ori_end
 
     def double_click(self, pos):
         ori_pos = get_absolute_coordinate(pos, self)
         coords = self._fix_op_pos(self._action_pos(ori_pos))
-        self.mouse.double_click(coords=coords)
+        self._safe_mouse_event(coords, button="left", button_down=True, button_up=True)
+        time.sleep(0.05)
+        self._safe_mouse_event(coords, button="left", button_down=True, button_up=True)
         return ori_pos
 
     def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
@@ -361,27 +414,22 @@ class Windows(Device):
         to_x, to_y = self._fix_op_pos(self._action_pos(ori_to))
 
         interval = float(duration) / (steps + 1)
-        self.mouse.press(coords=(from_x, from_y), button=button)
+        self._safe_mouse_event((from_x, from_y), button=button, button_down=True, button_up=False)
         time.sleep(interval)
         for i in range(1, steps):
-            self.mouse.move(coords=(
+            self._safe_move((
                 int(from_x + (to_x - from_x) * i / steps),
                 int(from_y + (to_y - from_y) * i / steps),
             ))
             time.sleep(interval)
         for i in range(10):
-            self.mouse.move(coords=(to_x, to_y))
+            self._safe_move((to_x, to_y))
         time.sleep(interval)
-        self.mouse.release(coords=(to_x, to_y), button=button)
+        self._safe_mouse_event((to_x, to_y), button=button, button_down=False, button_up=True)
         return ori_from, ori_to
 
     def mouse_move(self, pos):
         """Simulates a `mousemove` event.
-
-        Known bug:
-            Due to a bug in the pywinauto module, users might experience \
-            off-by-one errors when it comes to the exact coordinates of \
-            the position on screen.
 
         :param pos: A tuple (x, y), where x and y are x and y coordinates of
                     the screen to move the mouse to, respectively.
@@ -389,7 +437,7 @@ class Windows(Device):
         if not isinstance(pos, tuple) or len(pos) != 2:  # pos is not a 2-tuple
             raise ValueError('invalid literal for mouse_move: {}'.format(pos))
         try:
-            self.mouse.move(coords=self._action_pos(pos))
+            self._safe_move(self._action_pos(pos))
         except ValueError:  # in case where x, y are not numbers
             raise ValueError('invalid literal for mouse_move: {}'.format(pos))
 
@@ -405,7 +453,7 @@ class Windows(Device):
             raise ValueError('invalid literal for mouse_down(): {}'.format(button))
         else:
             coords = self._action_pos(win32api.GetCursorPos())
-            self.mouse.press(button=button, coords=coords)
+            self._safe_mouse_event(coords, button=button, button_down=True, button_up=False)
 
     def mouse_up(self, button='left'):
         """Simulates a `mouseup` event.
@@ -420,7 +468,7 @@ class Windows(Device):
             raise ValueError('invalid literal for mouse_up(): {}'.format(button))
         else:
             coords = self._action_pos(win32api.GetCursorPos())
-            self.mouse.release(button=button, coords=coords)
+            self._safe_mouse_event(coords, button=button, button_down=False, button_up=True)
 
     def start_app(self, path, *args, **kwargs):
         """
