@@ -386,6 +386,52 @@ class Windows(Device):
         self._safe_mouse_event(coords, button="left", button_down=True, button_up=True)
         return ori_pos
 
+    def scroll(self, pos, direction="down", clicks=None, percent=None):
+        """
+        Perform mouse wheel scroll at given position
+
+        Two ways to specify scroll amount (mutually exclusive):
+        - clicks: exact number of wheel clicks (Windows-native, precise)
+        - percent: scroll amount as a fraction of screen height (cross-platform compatible)
+
+        If neither is specified, defaults to percent=0.3.
+
+        Args:
+            pos: coordinates where to scroll, supports absolute (pixels) or relative ([0,1]) coordinates
+            direction: scroll direction, 'up' or 'down', default is 'down'
+            clicks: number of scroll wheel clicks, e.g. 3 means 3 wheel notches
+            percent: scroll amount as screen height fraction, e.g. 0.3 means 30% of screen height
+
+        Examples:
+            >>> from airtest.core.api import connect_device
+            >>> dev = connect_device("Windows:///")
+            >>> dev.scroll((500, 300), direction="down", clicks=3)
+            >>> dev.scroll((0.5, 0.5), direction="up", percent=0.5)
+
+        Returns:
+            None
+
+        """
+        if clicks is not None and percent is not None:
+            raise ValueError("Cannot specify both 'clicks' and 'percent', use one or the other")
+
+        if clicks is not None:
+            wheel_clicks = abs(int(clicks))
+        elif percent is not None:
+            # 将 percent 转换为滚轮格数: 屏幕高度 * percent / 120 (Windows 默认每格 120 像素)
+            _, screen_h = self.get_current_resolution()
+            wheel_clicks = max(1, round(abs(percent) * screen_h / 120))
+        else:
+            # 默认 percent=0.3
+            _, screen_h = self.get_current_resolution()
+            wheel_clicks = max(1, round(0.3 * screen_h / 120))
+
+        ori_pos = get_absolute_coordinate(pos, self)
+        coords = self._fix_op_pos(self._action_pos(ori_pos))
+        wheel_dist = wheel_clicks if direction == "up" else -wheel_clicks
+        self.mouse.scroll(coords=(int(coords[0]), int(coords[1])), wheel_dist=wheel_dist)
+        return ori_pos
+
     def swipe(self, p1, p2, duration=0.8, steps=5, button="left"):
         """
         Perform swipe (mouse press and mouse release)
