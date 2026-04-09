@@ -66,9 +66,10 @@ class ScreenProxy(object):
     def auto_setup(cls, adb, default_method=None, *args, **kwargs):
         """
         In order of priority, try to initialize all registered screenshot methods,
-        select an available method to return
+        select an available method to return.
 
-        按优先顺序，尝试初始化注册过的所有屏幕截图方法，选择一个可用方法返回
+        按优先顺序，尝试初始化注册过的所有屏幕截图方法，选择一个可用方法返回。
+        如果明确指定了截图方法，则只初始化该方法；失败直接报错，不再自动回退到其它方案。
 
         Custom method 自定义方法 > MINICAP > JAVACAP > ADBCAP
 
@@ -91,8 +92,11 @@ class ScreenProxy(object):
                 screen = cls.SCREEN_METHODS[default_method.upper()](adb, *args, **kwargs)
             elif isinstance(default_method, BaseCap):
                 screen = default_method
-            if screen and cls.check_frame(screen):
+            if screen is None:
+                raise ScreenError("Unknown screen capture method found: %s" % default_method)
+            if cls.check_frame(screen):
                 return ScreenProxy(screen)
+            raise ScreenError("%s setup failed without fallback" % screen.__class__.__name__)
         # 从self.SCREEN_METHODS中，逆序取出可用的方法
         for name, screen_class in reversed(cls.SCREEN_METHODS.items()):
             if name == default_method:
