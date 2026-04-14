@@ -6,11 +6,11 @@ import shutil
 import warnings
 from copy import copy
 from airtest import aircv
+from airtest.core.android.clipboard import CLIPBOARD_MAP, ClipperClipboard
 from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
-from airtest.core.android.yosemite_ext import YosemiteExt
-from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
-    SDK_VERSION_ANDROID10
+from airtest.core.android.constant import CAP_METHOD, CLIPBOARD_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
+   SDK_VERSION_ANDROID10 
 from airtest.core.android.adb import ADB
 
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
@@ -41,6 +41,7 @@ class Android(Device):
                  touch_method=TOUCH_METHOD.MINITOUCH,
                  ime_method=IME_METHOD.YOSEMITEIME,
                  ori_method=ORI_METHOD.MINICAP,
+                 clipboard_method=CLIPBOARD_METHOD.YOSEMITE,
                  display_id=None,
                  input_event=None,
                  adb_path=None,
@@ -52,6 +53,7 @@ class Android(Device):
         self._touch_method = touch_method.upper()
         self.ime_method = ime_method.upper()
         self.ori_method = ori_method.upper()
+        self.clipboard_method = clipboard_method.upper()
         self.display_id = display_id
         self.input_event = input_event
         # init adb
@@ -66,7 +68,7 @@ class Android(Device):
         self.rotation_watcher = RotationWatcher(self.adb, self.ori_method)
         self.yosemite_ime = YosemiteIme(self.adb)
         self.yosemite_recorder = Recorder(self.adb)
-        self.yosemite_ext = YosemiteExt(self.adb)
+        self.clipboard = CLIPBOARD_MAP[self.clipboard_method](self.adb)
         self._register_rotation_watcher()
 
         self._touch_proxy = None
@@ -1018,7 +1020,7 @@ class Android(Device):
             >>> dev.paste()  # paste the clipboard content
 
         """
-        return self.yosemite_ext.get_clipboard()
+        return self.clipboard.get_clipboard()
 
     def set_clipboard(self, text):
         """
@@ -1031,7 +1033,7 @@ class Android(Device):
             None
 
         """
-        self.yosemite_ext.set_clipboard(text)
+        self.clipboard.set_clipboard(text)
 
     def push(self, local, remote):
         """

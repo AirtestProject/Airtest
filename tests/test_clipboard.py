@@ -12,7 +12,7 @@ class TestClipboard(unittest.TestCase):
         if not devices:
             raise RuntimeError("At lease one adb device required")
         cls.adb.serialno = devices[0][0]
-        cls.yosemite_Clipboard = YosemiteClipboard(cls.adb)
+        cls.yosemite_clipboard = YosemiteClipboard(cls.adb)
         cls.clipper_clipboard = ClipperClipboard(cls.adb)
 
     def test_clipboard(self):
@@ -29,11 +29,11 @@ class TestClipboard(unittest.TestCase):
         self.assertEqual(value, text2)
 
         
-        # test yosemite clipboardtest_clipboard
-        self.yosemite_Clipboard.set_clipboard(text1)
-        value = self.yosemite_Clipboard.get_clipboard()
+        # test yosemite clipboard
+        self.yosemite_clipboard.set_clipboard(text1)
+        value = self.yosemite_clipboard.get_clipboard()
         self.assertEqual(value, text1)
 
-        self.yosemite_Clipboard.set_clipboard(text2)
-        value = self.yosemite_Clipboard.get_clipboard()
+        self.yosemite_clipboard.set_clipboard(text2)
+        value = self.yosemite_clipboard.get_clipboard()
         self.assertEqual(value, text2)
