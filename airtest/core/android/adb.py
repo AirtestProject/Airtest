@@ -831,6 +831,18 @@ class ADB(object):
         finally:
             # delete apk file
             self.cmd(["shell", "rm", device_path], timeout=30)
+            
+    def pm_update_app(self, filepath, package):
+        apk_version = int(APK(filepath).androidversion_code)
+        installed_version = self.get_package_version(package)
+        if installed_version is None or apk_version > int(installed_version):
+            LOGGING.info(
+                "local version code is {}, installed version code is {}".format(apk_version, installed_version))
+            try:
+                self.pm_install(filepath, replace=True, install_options=["-t"])
+            except Exception as e:
+                LOGGING.error(f"Failed to install {package}: {e}")
+
 
     def uninstall_app(self, package):
         """

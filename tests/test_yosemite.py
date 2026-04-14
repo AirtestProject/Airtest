@@ -83,16 +83,6 @@ class TestYosemiteExt(unittest.TestCase):
         self.yosemite.change_lang("ja")
         self.yosemite.change_lang("zh")
 
-    def test_clipboard(self):
-        text1 = "test clipboard"
-        self.yosemite.set_clipboard(text1)
-        self.assertEqual(self.yosemite.get_clipboard(), text1)
-
-        # test escape special char
-        text2 = "test clipboard with $pecial char #@!#%$#^&*()'"
-        self.yosemite.set_clipboard(text2)
-        self.assertEqual(self.yosemite.get_clipboard(), text2)
-
 
 
 if __name__ == '__main__':

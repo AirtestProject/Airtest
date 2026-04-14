@@ -25,6 +25,8 @@ ROTATIONWATCHER_PACKAGE = "jp.co.cyberagent.stf.rotationwatcher"
 YOSEMITE_APK = os.path.join(STATICPATH, "apks", "Yosemite.apk")
 YOSEMITE_PACKAGE = 'com.netease.nie.yosemite'
 YOSEMITE_IME_SERVICE = 'com.netease.nie.yosemite/.ime.ImeService'
+CLIPPER_APK = os.path.join(STATICPATH, "apks", "Clipper.apk")
+CLIPPER_PACKAGE = "ca.zgrs.clipper"
 MAXTOUCH_JAR = os.path.join(STATICPATH, "apks", "maxpresent.jar")
 ROTATIONWATCHER_JAR = os.path.join(STATICPATH, "apks", "rotationwatcher.jar")
 IP_PATTERN = re.compile(r'(\d+\.){3}\d+')
@@ -50,3 +52,7 @@ class IME_METHOD(object):
 class ORI_METHOD(object):
     ADB = "ADBORI"
     MINICAP = "MINICAPORI"
+
+class CLIPBOARD_METHOD(object):
+    CLIPPER = "CLIPPER"
+    YOSEMITE = "YOSEMITE"
