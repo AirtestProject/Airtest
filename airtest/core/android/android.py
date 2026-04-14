@@ -10,7 +10,7 @@ from airtest.core.device import Device
 from airtest.core.android.ime import YosemiteIme
 from airtest.core.android.yosemite_ext import YosemiteExt
 from airtest.core.android.constant import CAP_METHOD, TOUCH_METHOD, IME_METHOD, ORI_METHOD, \
-    SDK_VERISON_ANDROID10
+    SDK_VERSION_ANDROID10
 from airtest.core.android.adb import ADB
 
 from airtest.core.android.rotation import RotationWatcher, XYTransformer
@@ -58,7 +58,7 @@ class Android(Device):
         self.adb = ADB(self.serialno, adb_path=adb_path, server_addr=host, display_id=self.display_id, input_event=self.input_event)
         self.adb.wait_for_device()
         self.sdk_version = self.adb.sdk_version
-        if self.sdk_version >= SDK_VERISON_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
+        if self.sdk_version >= SDK_VERSION_ANDROID10 and self._touch_method == TOUCH_METHOD.MINITOUCH:
             self._touch_method = TOUCH_METHOD.MAXTOUCH
         self._display_info = {}
         self._current_orientation = None
