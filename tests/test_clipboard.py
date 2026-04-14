@@ -16,12 +16,24 @@ class TestClipboard(unittest.TestCase):
         cls.clipper_clipboard = ClipperClipboard(cls.adb)
 
     def test_clipboard(self):
+        text1 = "test clipboard"
+        text2 = "test clipboard with $pecial char #@!#%$#^&*()'"
+
         # test clipper clipboard
-        self.clipper_clipboard.set_clipboard("test clipper_clipboard")
+        self.clipper_clipboard.set_clipboard(text1)
         value = self.clipper_clipboard.get_clipboard()
-        self.assertEqual(value, "test clipper_clipboard")
+        self.assertEqual(value, text1)
+
+        self.clipper_clipboard.set_clipboard(text2)
+        value = self.clipper_clipboard.get_clipboard()
+        self.assertEqual(value, text2)
+
         
-        # test yosemite clipboard
-        self.yosemite_Clipboard.set_clipboard("test yosemite_clipboard")
+        # test yosemite clipboardtest_clipboard
+        self.yosemite_Clipboard.set_clipboard(text1)
         value = self.yosemite_Clipboard.get_clipboard()
-        self.assertEqual(value, "test yosemite_clipboard")
+        self.assertEqual(value, text1)
+
+        self.yosemite_Clipboard.set_clipboard(text2)
+        value = self.yosemite_Clipboard.get_clipboard()
+        self.assertEqual(value, text2)

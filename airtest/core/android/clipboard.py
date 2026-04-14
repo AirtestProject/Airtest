@@ -1,5 +1,6 @@
 import re
 from time import sleep
+from airtest.core.error import AirtestError
 from airtest.utils.snippet import escape_special_char
 from airtest.core.android.constant import CLIPPER_APK, CLIPPER_PACKAGE, YOSEMITE_APK, YOSEMITE_PACKAGE,SDK_VERSION_ANDROID10, CLIPBOARD_METHOD
 from airtest.utils.logger import get_logger
@@ -29,21 +30,21 @@ class ClipperClipboard(Clipboard):
         self.adb.pm_update_app(CLIPPER_APK, CLIPPER_PACKAGE)
 
         # background execution is sufficient for Android 9 and below.
-        if self.is_supported_background() == True:
+        if self.is_supported_background():
             self.shell("am start -n ca.zgrs.clipper/.Main")
-            sleep(0.25)
+            sleep(0.5)
             self.close_clipper()
 
     def get_clipboard(self):
-        if self.is_supported_background() == False:
+        if not self.is_supported_background():
             # clipboard access requires foreground app 
             self.shell("am start -n ca.zgrs.clipper/.Main")
-            sleep(0.25)
+            sleep(0.5)
         
         #text type : str 
         #text example: Broadcasting: Intent { act=clipper.get flg=0x400000 cmp=ca.zgrs.clipper/.ClipperReceiver }Broadcast completed: result=-1, data="hello"
         clipboard_data = self.shell(f"am broadcast -a clipper.get -n ca.zgrs.clipper/.ClipperReceiver") 
-        if self.is_supported_background() == False:
+        if not self.is_supported_background():
             self.close_clipper()
 
         text = re.search(r'data="(.*?)"',clipboard_data)
@@ -84,7 +85,13 @@ class YosemiteClipboard(Clipboard):
     
     def set_clipboard(self, text):
         text = escape_special_char(text)
-        self.adb.shell(f"app_process -Djava.class.path={self.adb.path_app(YOSEMITE_PACKAGE)} / com.netease.nie.yosemite.control.Control --DEVICE_OP clipboard --TEXT \"{text}\"")
+        try:
+            ret = self.adb.shell(f"app_process -Djava.class.path={self.adb.path_app(YOSEMITE_PACKAGE)} / com.netease.nie.yosemite.control.Control --DEVICE_OP clipboard --TEXT \"{text}\"")
+        except Exception as e:
+            raise AirtestError("set clipboard failed, %s" % repr(e))
+        else:
+            if ret and "Exception" in ret:
+                raise AirtestError("set clipboard failed: %s" % ret)
 
 
 # maps ime_method to clipboard implementation
