@@ -495,7 +495,7 @@ class ADB(object):
 
         """
         _, ext = os.path.splitext(remote)
-        if ext or os.path.isfile(remote):
+        if ext or os.path.isfile(local):
             # The target path is a file
             dst_parent = os.path.dirname(remote)
         else:
@@ -872,7 +872,7 @@ class ADB(object):
         if self.display_id:
             raw = self.cmd('shell screencap -d {0} -p'.format(self.display_id), ensure_unicode=False)
         else:
-            raw = self.cmd('shell screencap -p', ensure_unicode=False)
+            raw = self.cmd('shell screencap -p 2> /dev/null', ensure_unicode=False)
         return raw.replace(self.line_breaker, b"\n")
 
     # PEP 3113 -- Removal of Tuple Parameter Unpacking
