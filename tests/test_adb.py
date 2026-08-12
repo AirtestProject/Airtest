@@ -40,6 +40,14 @@ class TestADBWithoutDevice(unittest.TestCase):
             ["push", "com.test.app", "/data/local/tmp/com.test.app"]
         )
 
+    def test_push_extensionless_file_to_remote_directory_with_trailing_slash(self):
+        with patch("os.path.isfile", return_value=True), \
+                patch.object(self.adb, "shell"), patch.object(self.adb, "cmd") as cmd:
+            result = self.adb.push("minicap", "/data/local/tmp/")
+
+        self.assertEqual(result, "/data/local/tmp/minicap")
+        cmd.assert_called_once_with(["push", "minicap", "/data/local/tmp/minicap"])
+
     def test_start_server(self):
         self.adb.start_server()
 

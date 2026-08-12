@@ -497,30 +497,29 @@ class ADB(object):
         src_is_file = os.path.isfile(local)
 
         if src_is_file:
-            # A remote path without an extension is still a file when the
-            # local source is a file and the caller supplied a new name.
             src_ext = os.path.splitext(local)[-1]
             dst_ext = os.path.splitext(remote)[-1]
-            if dst_ext == "" and src_ext != "":
-                dst_path = f"{remote}/{os.path.basename(local)}"
+            remote_is_dir = remote.endswith("/") or (dst_ext == "" and src_ext != "")
+            if remote_is_dir:
+                dst_path = f"{remote.rstrip('/')}/{os.path.basename(local)}"
             else:
                 dst_path = remote
         else:
             if os.path.basename(local) != os.path.basename(remote):
-                dst_path = f"{remote}/{os.path.basename(local)}"
+                dst_path = f"{remote.rstrip('/')}/{os.path.basename(local)}"
             else:
                 dst_path = remote
 
         # If the target file already exists, delete it first to avoid overwrite failure
         try:
-            self.shell(f"rm -r {dst_path}")
+            self.shell(["rm", "-r", dst_path])
         except:
             pass
 
         # If the target folder has multiple levels that have never been created, try to create them
         dst_parent = os.path.dirname(dst_path)
         try:
-            self.shell(f"mkdir -p {dst_parent}")
+            self.shell(["mkdir", "-p", dst_parent])
         except:
             pass
 
@@ -534,18 +533,18 @@ class ADB(object):
             try:
                 if src_is_file:
                     try:
-                        self.shell(f'mv "{tmp_path}" "{dst_parent}"')
+                        self.shell(["mv", tmp_path, dst_parent])
                     except:
-                        self.shell(f'mv "{tmp_path}" "{dst_parent}"')
+                        self.shell(["mv", tmp_path, dst_parent])
                 else:
                     try:
-                        self.shell(f'cp -frp "{tmp_path}" "{dst_parent}"')
+                        self.shell(["cp", "-frp", tmp_path, dst_parent])
                     except:
-                        self.shell(f'mv "{tmp_path}" "{dst_parent}"')
+                        self.shell(["mv", tmp_path, dst_parent])
             finally:
                 try:
                     if TMP_PATH != dst_parent:
-                        self.shell(f'rm -r "{tmp_path}"')
+                        self.shell(["rm", "-r", tmp_path])
                 except:
                     pass
         return dst_path
