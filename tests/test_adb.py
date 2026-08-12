@@ -8,6 +8,7 @@ import unittest
 import subprocess
 from six import text_type
 import warnings
+from unittest.mock import patch
 warnings.simplefilter("always")
 
 
@@ -19,6 +20,25 @@ class TestADBWithoutDevice(unittest.TestCase):
 
     def test_adb_path(self):
         self.assertTrue(os.path.exists(self.adb.builtin_adb_path()))
+
+    def test_push_extensionless_file_to_renamed_remote_path(self):
+        with self.subTest("destination path is preserved"):
+            with patch("os.path.isfile", return_value=True), \
+                    patch.object(self.adb, "shell"), patch.object(self.adb, "cmd") as cmd:
+                result = self.adb.push("minicap", "/data/local/tmp/minicap-new")
+
+        self.assertEqual(result, "/data/local/tmp/minicap-new")
+        cmd.assert_called_once_with(["push", "minicap", "/data/local/tmp/minicap-new"])
+
+    def test_push_directory_to_remote_path_containing_dot(self):
+        with patch("os.path.isfile", return_value=False), \
+                patch.object(self.adb, "shell"), patch.object(self.adb, "cmd") as cmd:
+            result = self.adb.push("com.test.app", "/sdcard/Android/data/com.test.app/files")
+
+        self.assertEqual(result, "/sdcard/Android/data/com.test.app/files/com.test.app")
+        cmd.assert_called_once_with(
+            ["push", "com.test.app", "/data/local/tmp/com.test.app"]
+        )
 
     def test_start_server(self):
         self.adb.start_server()
