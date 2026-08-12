@@ -494,56 +494,57 @@ class ADB(object):
             >>> adb.push("test_dir", "/sdcard/Android/data/com.test.package/files/test_dir")
 
         """
-        _, ext = os.path.splitext(remote)
-        if ext or os.path.isfile(remote):
-            # The target path is a file
-            dst_parent = os.path.dirname(remote)
+        src_is_file = os.path.isfile(local)
+
+        if src_is_file:
+            src_ext = os.path.splitext(local)[-1]
+            dst_ext = os.path.splitext(remote)[-1]
+            remote_is_dir = remote.endswith("/") or (dst_ext == "" and src_ext != "")
+            if remote_is_dir:
+                dst_path = f"{remote.rstrip('/')}/{os.path.basename(local)}"
+            else:
+                dst_path = remote
         else:
-            dst_parent = remote
+            if os.path.basename(local) != os.path.basename(remote):
+                dst_path = f"{remote.rstrip('/')}/{os.path.basename(local)}"
+            else:
+                dst_path = remote
 
         # If the target file already exists, delete it first to avoid overwrite failure
-        src_filename = os.path.basename(local)
-        _, src_ext = os.path.splitext(local)
-        if src_ext:
-            dst_path = f"{dst_parent}/{src_filename}"
-        else:
-            if src_filename == os.path.basename(remote):
-                dst_path = remote
-            else:
-                dst_path = f"{dst_parent}/{src_filename}"
         try:
-            self.shell(f"rm -r {dst_path}")
+            self.shell(["rm", "-r", dst_path])
         except:
             pass
 
         # If the target folder has multiple levels that have never been created, try to create them
+        dst_parent = os.path.dirname(dst_path)
         try:
-            self.shell(f"mkdir -p {dst_parent}")
+            self.shell(["mkdir", "-p", dst_parent])
         except:
             pass
 
         # Push the file to the tmp directory to avoid permission issues
-        tmp_path = f"{TMP_PATH}/{src_filename}"
+        tmp_path = f"{TMP_PATH}/{os.path.basename(dst_path)}"
         try:
             self.cmd(["push", local, tmp_path])
         except:
-            self.cmd(["push", local, dst_parent])
+            self.cmd(["push", local, dst_path])
         else:
             try:
-                if src_ext:
+                if src_is_file:
                     try:
-                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                        self.shell(["mv", tmp_path, dst_parent])
                     except:
-                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                        self.shell(["mv", tmp_path, dst_parent])
                 else:
                     try:
-                        self.shell(f'cp -frp "{tmp_path}/*" "{remote}"')
+                        self.shell(["cp", "-frp", tmp_path, dst_parent])
                     except:
-                        self.shell(f'mv "{tmp_path}" "{remote}"')
+                        self.shell(["mv", tmp_path, dst_parent])
             finally:
                 try:
                     if TMP_PATH != dst_parent:
-                        self.shell(f'rm -r "{tmp_path}"')
+                        self.shell(["rm", "-r", tmp_path])
                 except:
                     pass
         return dst_path
