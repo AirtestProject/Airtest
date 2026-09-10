@@ -40,8 +40,8 @@ def parse_requirements(filename):
         reqs.remove("facebook-wda==1.5.0")
         reqs.append("facebook-wda==1.4.6")
     if is_docker():
-        reqs.remove("opencv-contrib-python>=4.4.0.46, <=4.6.0.66")
-        reqs.append("opencv-contrib-python-headless==4.5.5.64")
+        reqs.remove("opencv-contrib-python>=4.10.0.84, <5.0.0")
+        reqs.append("opencv-contrib-python-headless>=4.10.0.84, <5.0.0")
     return reqs
 
 
