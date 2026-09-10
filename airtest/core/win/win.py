@@ -4,6 +4,11 @@ import time
 import socket
 import subprocess
 import numpy
+try:
+    # NumPy 2 renamed the private ``numpy.core`` namespace to ``numpy._core``.
+    _ArrayMemoryError = numpy._core._exceptions._ArrayMemoryError
+except AttributeError:  # NumPy 1.x
+    _ArrayMemoryError = numpy.core._exceptions._ArrayMemoryError
 import mss
 import psutil
 from functools import wraps
@@ -713,7 +718,7 @@ class Windows(Device):
         def get_frame():
             try:
                 frame = self.snapshot()
-            except numpy.core._exceptions._ArrayMemoryError:
+            except _ArrayMemoryError:
                 self.stop_recording()
                 raise Exception("memory error!!!!")
 

@@ -3,8 +3,8 @@ Pillow>=3.4.0
 requests>=2.11.1
 six>=1.9.0,<=1.16.0
 mss==6.1.0
-numpy<2.0
-opencv-contrib-python>=4.4.0.46, <=4.6.0.66
+numpy<3.0
+opencv-contrib-python>=4.10.0.84, <5.0.0
 facebook-wda==1.5.0
 pywinauto==0.6.3
 filelock
