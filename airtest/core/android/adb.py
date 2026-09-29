@@ -1799,8 +1799,8 @@ class ADB(object):
         if package:
             for w in windows:
                 if "package=%s" % package in w:
-                    # Try Android 11+ format first: "Frames: ... display=[x,y][w,h] frame=..."
-                    arr = re.findall(r'display=\[(\d+\.?\d*),(\d+\.?\d*)\]\[(\d+\.?\d*),(\d+\.?\d*)\]', w)
+                    # Try Android 11+ format first: "Frames: ... frame=[x,y][w,h]"
+                    arr = re.findall(r' frame=\[(\d+\.?\d*),(\d+\.?\d*)\]\[(\d+\.?\d*),(\d+\.?\d*)\]', w)
                     if not arr:
                         # Fall back to Android 10 format: "Frames: containing=[x,y][w,h]"
                         arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
