@@ -1799,12 +1799,17 @@ class ADB(object):
         if package:
             for w in windows:
                 if "package=%s" % package in w:
-                    arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
+                    # Try Android 11+ format first: "Frames: ... display=[x,y][w,h] frame=..."
+                    arr = re.findall(r'display=\[(\d+\.?\d*),(\d+\.?\d*)\]\[(\d+\.?\d*),(\d+\.?\d*)\]', w)
+                    if not arr:
+                        # Fall back to Android 10 format: "Frames: containing=[x,y][w,h]"
+                        arr = re.findall(r'Frames: containing=\[(\d+\.?\d*),(\d+\.?\d*)]\[(\d+\.?\d*),(\d+\.?\d*)]', w)
                     if len(arr) >= 1 and len(arr[0]) == 4:
                         offsetx, offsety, width, height = float(arr[0][0]), float(arr[0][1]), float(arr[0][2]), float(arr[0][3])
                         if info["orientation"] in [1, 3]:
                             offsetx, offsety, width, height = offsety, offsetx, height, width
                         width, height = width - offsetx, height - offsety
+                        break
         return {
             "offset_x": offsetx,
             "offset_y": offsety,
